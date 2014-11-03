@@ -1,0 +1,1 @@
+full-build is a build system to help building full build from sources or to build a given project against a full build

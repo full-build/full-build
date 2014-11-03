@@ -1,0 +1,17 @@
+
+Anthology Update:
+ - mise a jour des description des projects
+ - identification des dependances binaires
+ - identification des dependances nuget
+ 
+Pkg Update:
+ - telechargement des packages
+ - determination si un package est en fait un projet --> suppression dependances binaires + ajout dependances nuget
+ 
+Fix:
+ - reset dependances hors System
+ - dependances projects
+ - dependances packages
+ - warning sur dependances binaires
+ 
+ 

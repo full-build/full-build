@@ -1,0 +1,25 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/CodeStyle/FileHeader/FileHeaderText/@EntryValue">Copyright (c) 2014, Pierre Chalamet&#xD;
+All rights reserved.&#xD;
+&#xD;
+Redistribution and use in source and binary forms, with or without&#xD;
+modification, are permitted provided that the following conditions are met:&#xD;
+    * Redistributions of source code must retain the above copyright&#xD;
+      notice, this list of conditions and the following disclaimer.&#xD;
+    * Redistributions in binary form must reproduce the above copyright&#xD;
+      notice, this list of conditions and the following disclaimer in the&#xD;
+      documentation and/or other materials provided with the distribution.&#xD;
+    * Neither the name of Pierre Chalamet nor the&#xD;
+      names of its contributors may be used to endorse or promote products&#xD;
+      derived from this software without specific prior written permission.&#xD;
+&#xD;
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND&#xD;
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED&#xD;
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE&#xD;
+DISCLAIMED. IN NO EVENT SHALL PIERRE CHALAMET BE LIABLE FOR ANY&#xD;
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES&#xD;
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;&#xD;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND&#xD;
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT&#xD;
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS&#xD;
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</s:String></wpf:ResourceDictionary>
