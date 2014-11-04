@@ -23,7 +23,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 using FullBuildInterface.Config;
 using FullBuildInterface.Model;
@@ -35,7 +39,7 @@ namespace FullBuildInterface.Actions
 {
     internal class AnthologyUpdateHandler : Handler<AnthologyUpdateOptions>
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         protected override void ExecuteWithOptions(AnthologyUpdateOptions initAnthologyUpdateOptions)
         {
@@ -43,10 +47,9 @@ namespace FullBuildInterface.Actions
             var config = ConfigManager.GetConfig(workspace);
 
             // get all csproj in all repos only
-            var projectGraph = CreateProjectGraph(config, workspace);
-
-            // sanity check
-            var anthology = projectGraph.ToAnthology();
+            var anthology = LoadOrCreateAnthology();
+            anthology = UpdateAnthologyFromSource(config, workspace, anthology);
+            Dump(anthology);
 
             // first merge with existing one
             anthology = MergeNewAnthologyWithExisting(anthology);
@@ -82,15 +85,14 @@ namespace FullBuildInterface.Actions
                                                                   new XAttribute("Condition", binCondition),
                                                                   new XElement(XmlHelpers.NsMsBuild + "HintPath", binFile))));
 
-                var targetFileName = Path.GetFileNameWithoutExtension(project.ProjectFile) + ".targets";
+                var targetFileName = project.Guid + ".targets";
                 var prjImport = targetDir.GetFile(targetFileName);
                 xdoc.Save(prjImport.FullName);
             }
         }
 
-        private static ProjectGraph CreateProjectGraph(FullBuildConfig config, DirectoryInfo workspace)
+        private static Anthology UpdateAnthologyFromSource(FullBuildConfig config, DirectoryInfo workspace, Anthology anthology)
         {
-            var projectGraph = new ProjectGraph();
             foreach(var repo in config.SourceRepos)
             {
                 var repoDir = workspace.GetDirectory(repo.Name);
@@ -101,10 +103,27 @@ namespace FullBuildInterface.Actions
 
                 // process all projects
                 var csprojs = repoDir.EnumerateFiles("*.csproj", SearchOption.AllDirectories);
-                csprojs.ForEach(x => projectGraph.Parse(workspace, x));
+
+                anthology = csprojs.Aggregate(anthology, (a, p) => ParseAndAddProject(workspace, p, anthology));
             }
 
-            return projectGraph;
+            return anthology;
+        }
+
+        private static Anthology LoadOrCreateAnthology()
+        {
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var anthologyFile = admDir.GetFile(Anthology.AnthologyFileName);
+            if (anthologyFile.Exists)
+            {
+                var oldJson = File.ReadAllText(anthologyFile.FullName);
+                var prevAnthology = JsonConvert.DeserializeObject<Anthology>(oldJson);
+                var oldJ = JObject.FromObject(prevAnthology);
+                var anthology = oldJ.ToObject<Anthology>();
+                return anthology;
+            }
+
+            return new Anthology();
         }
 
         private static Anthology MergeNewAnthologyWithExisting(Anthology anthology)
@@ -127,6 +146,92 @@ namespace FullBuildInterface.Actions
             var json = JsonConvert.SerializeObject(anthology, Formatting.Indented);
             File.WriteAllText(anthologyFile.FullName, json);
 
+            return anthology;
+        }
+
+        private static IEnumerable<Package> GetNugetPackages(DirectoryInfo projectDir)
+        {
+            var packageFile = projectDir.GetFile("packages.config");
+            if (!packageFile.Exists)
+            {
+                return Enumerable.Empty<Package>();
+            }
+
+            var docPackage = XDocument.Load(packageFile.FullName);
+            var packages = from element in docPackage.Descendants("package")
+                           let name = (string) element.Attribute("id")
+                           let version = (string) element.Attribute("version")
+                           select new Package(name, version);
+
+            return packages;
+        }
+
+        private static void Dump(Anthology anthology)
+        {
+            foreach(var project in anthology.Projects)
+            {
+                _logger.Debug("Consistency for project {0}", project.GetName());
+
+                foreach(var projectDependency in project.ProjectReferences)
+                {
+                    var target = anthology.Projects.Single(x => x.Guid == projectDependency);
+                    _logger.Debug(" --> {0}", target.GetName());
+                }
+
+                foreach(var binaryDependency in project.BinaryReferences)
+                {
+                    _logger.Debug(" ++ {0}", binaryDependency);
+                }
+            }
+        }
+
+        private static Anthology ParseAndAddProject(DirectoryInfo workspace, FileInfo projectFile, Anthology anthology)
+        {
+            var xdoc = XDocument.Load(projectFile.FullName);
+
+            var projectFileName = projectFile.FullName.Substring(workspace.FullName.Length + 1);
+
+            var projectGuid = Guid.ParseExact((string) xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single(), "B");
+            var assemblyName = (string) xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyName").Single();
+            var fxTarget = (string) xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").Single();
+
+            var extension = ((string) xdoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single()).InvariantEquals("Library") ? ".dll" : ".exe";
+
+            var projectReferences = from prjRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference").Descendants(XmlHelpers.NsMsBuild + "Project")
+                                    select Guid.ParseExact(prjRef.Value, "B");
+            var fbProjectReferences = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
+                                      let importProject = (string) import.Attribute("Project")
+                                      where importProject.InvariantStartsWith(WellKnownFolders.MsBuildProjectDir)
+                                      let importProjectName = Path.GetFileNameWithoutExtension(importProject)
+                                      select Guid.Parse(importProjectName);
+            var allProjectReferences = projectReferences.Concat(fbProjectReferences);
+
+            // extract binary references - both nuget and direct reference to assemblies (broken project reference)
+            var binaries = from binRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "Reference")
+                           let assName = new AssemblyName((string) binRef.Attribute("Include")).Name
+                           let maybeHintPath = binRef.Descendants(XmlHelpers.NsMsBuild + "HintPath").SingleOrDefault()
+                           select new Binary(assName, null != maybeHintPath ? maybeHintPath.Value.ToUnixSeparator() : null);
+
+            // report spurious binaries reference (System* are mostly OK)
+            binaries.Where(x => x.HintPath == null && !x.AssemblyName.InvariantStartsWith("System"))
+                    .ForEach(x => _logger.Warn("Spurious assembly reference {0} in project {1}", x.AssemblyName, projectFileName));
+
+            var binaryReferences = binaries.Select(x => x.AssemblyName);
+
+            var nugetPackages = GetNugetPackages(projectFile.Directory);
+            var fbPackages = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
+                             let importProject = (string) import.Attribute("Project")
+                             where importProject.InvariantStartsWith(WellKnownFolders.MsBuildPackagesDir)
+                             let importProjectName = Path.GetFileNameWithoutExtension(importProject)
+                             select new Package(importProjectName, "0.0.0");
+            var packages = nugetPackages.Concat(fbPackages);
+            var packageNames = packages.Select(x => x.Name);
+
+            var project = new Project(projectGuid, projectFileName, assemblyName, extension, fxTarget, allProjectReferences, binaryReferences, packageNames);
+            anthology = anthology.AddOrUpdateProject(project);
+
+            anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
+            anthology = packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
             return anthology;
         }
     }

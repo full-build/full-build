@@ -65,7 +65,7 @@ namespace FullBuildInterface.Actions
 
             foreach(var projectDef in anthology.Projects)
             {
-                var projectFile = new FileInfo(Path.Combine(wsDir.FullName, projectDef.ProjectFile));
+                var projectFile = wsDir.GetFile(projectDef.ProjectFile);
                 var xdoc = XDocument.Load(projectFile.FullName);
 
                 _logger.Debug("Fixing project {0}", projectDef.GetName());
@@ -104,7 +104,7 @@ namespace FullBuildInterface.Actions
                 foreach(var refGuid in projectDef.ProjectReferences)
                 {
                     var refProject = FindProjectFromGuid(anthology, refGuid);
-                    var targetFileName = Path.GetFileNameWithoutExtension(refProject.ProjectFile) + ".targets";
+                    var targetFileName = refProject.Guid + ".targets";
                     var import = Path.Combine(WellKnownFolders.MsBuildProjectDir, targetFileName);
                     var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import));
                     firstItemGroup.AddAfterSelf(newProjectRef);
@@ -122,6 +122,14 @@ namespace FullBuildInterface.Actions
                 }
 
                 xdoc.Save(projectFile.FullName);
+
+                // remove nuget packages file
+                var projectDir = projectFile.Directory;
+                var packagesConfig = projectDir.GetFile("packages.config");
+                if (packagesConfig.Exists)
+                {
+                    packagesConfig.Delete();
+                }
             }
         }
     }

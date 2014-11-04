@@ -64,7 +64,8 @@ namespace FullBuildInterface.Actions
                                              where pkgAssembly.InvariantEquals(binAssembly.AssemblyName)
                                              select binAssembly).ToList();
 
-                binAssembliesToRemove.ForEach(x => anthology.Binaries.Remove(x));
+                anthology = binAssembliesToRemove.Aggregate(anthology, (a, b) => a.RemoveBinary(b));
+
                 binAssembliesToRemove.ForEach(x => anthology.Projects.ForEach(y => y.BinaryReferences.Remove(x.AssemblyName)));
 
                 // remove packages identified as project
@@ -98,9 +99,8 @@ namespace FullBuildInterface.Actions
                 GenerateTargetsForProject(pkg);
             }
 
-            packageToRemove.ForEach(x => _logger.Debug("Removing package {0}", x.Name));
-
-            packageToRemove.ForEach(x => anthology.Packages.Remove(x));
+            // remove unused packages
+            anthology = packageToRemove.Aggregate(anthology, (a, p) => a.RemovePackage(p));
 
             var newJson = JsonConvert.SerializeObject(anthology, Formatting.Indented);
             File.WriteAllText(anthologyFile.FullName, newJson);

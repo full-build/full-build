@@ -53,6 +53,9 @@
       <HintPath>$(SolutionDir)\packages\NLog.3.1.0.0\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>..\packages\Microsoft.Bcl.Immutable.1.0.34\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+    </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
@@ -97,11 +100,9 @@
     <Compile Include="Model\Package.cs" />
     <Compile Include="Model\Project.cs" />
     <Compile Include="Model\ProjectExtensions.cs" />
-    <Compile Include="Model\ProjectUpdater.cs" />
     <Compile Include="Nuget.cs" />
     <Compile Include="Nuspec.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Model\ProjectGraph.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SectionHandler.cs" />
     <Compile Include="SemVersion.cs" />

@@ -23,8 +23,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace FullBuildInterface.Model
 {
@@ -32,17 +35,122 @@ namespace FullBuildInterface.Model
     {
         public const string AnthologyFileName = "anthology.json";
 
-        public Anthology(IEnumerable<Project> projects, IEnumerable<Binary> binaries, IEnumerable<Package> packages)
+        [JsonProperty("binaries")]
+        private readonly IImmutableList<Binary> _binaries;
+
+        [JsonProperty("packages")]
+        private readonly IImmutableList<Package> _packages;
+
+        [JsonProperty("projects")]
+        private readonly IImmutableList<Project> _projects;
+
+        public Anthology()
+            : this(ImmutableList.Create<Project>(), ImmutableList.Create<Binary>(), ImmutableList.Create<Package>())
         {
-            Projects = projects.OrderBy(x => x.AssemblyName).ToList();
-            Binaries = binaries.OrderBy(x => x.AssemblyName).ToList();
-            Packages = packages.OrderBy(x => x.Name).ToList();
         }
 
-        public IList<Binary> Binaries { get; private set; }
+        private Anthology(IImmutableList<Project> projects, IImmutableList<Binary> binaries, IImmutableList<Package> packages)
+        {
+            _projects = projects;
+            _binaries = binaries;
+            _packages = packages;
+        }
 
-        public IList<Package> Packages { get; private set; }
+        [JsonIgnore]
+        public IEnumerable<Binary> Binaries
+        {
+            get { return _binaries; }
+        }
 
-        public IList<Project> Projects { get; private set; }
+        [JsonIgnore]
+        public IEnumerable<Package> Packages
+        {
+            get { return _packages; }
+        }
+
+        [JsonIgnore]
+        public IEnumerable<Project> Projects
+        {
+            get { return _projects; }
+        }
+
+        private static IImmutableList<T> AddOrUpdate<T>(T obj, IImmutableList<T> list, Func<T, bool> equals) where T : class
+        {
+            list = Remove(list, equals).Add(obj);
+            return list;
+        }
+
+        public Anthology AddOrUpdateProject(Project project)
+        {
+            return new Anthology(AddOrUpdate(project, _projects, x => x.AssemblyName.InvariantEquals(project.AssemblyName)),
+                                 _binaries,
+                                 _packages);
+        }
+
+        public Anthology AddOrUpdateBinary(Binary binary)
+        {
+            return new Anthology(_projects,
+                                 AddOrUpdate(binary, _binaries, x => x.AssemblyName.InvariantEquals(binary.AssemblyName)),
+                                 _packages);
+        }
+
+        public Anthology AddOrUpdatePackages(Package package)
+        {
+            var existing = Packages.FirstOrDefault(x => x.Name.InvariantEquals(package.Name));
+            var newPackages = _packages;
+            if (null != existing)
+            {
+                var version = SemVersion.Parse(package.Version);
+                var higherVersion = Comparer<SemVersion>.Default.Compare(existing.Version, version) < 0;
+                if (higherVersion)
+                {
+                    newPackages = newPackages.Replace(existing, package);
+                }
+                else
+                {
+                    return this;
+                }
+            }
+            else
+            {
+                newPackages = newPackages.Add(package);
+            }
+            
+            return new Anthology(_projects,
+                                 _binaries,
+                                 newPackages);
+        }
+
+        private static IImmutableList<T> Remove<T>(IImmutableList<T> list, Func<T, bool> equals) where T : class
+        {
+            var existing = list.FirstOrDefault(@equals);
+            if (null != existing)
+            {
+                list = list.Remove(existing);
+            }
+
+            return list;
+        }
+
+        public Anthology RemoveProject(Project project)
+        {
+            return new Anthology(Remove(_projects, x => x.AssemblyName.InvariantEquals(project.AssemblyName)),
+                                 _binaries,
+                                 _packages);
+        }
+
+        public Anthology RemoveBinary(Binary binary)
+        {
+            return new Anthology(_projects,
+                                 Remove(_binaries, x => x.AssemblyName.InvariantEquals(binary.AssemblyName)),
+                                 _packages);
+        }
+
+        public Anthology RemovePackage(Package package)
+        {
+            return new Anthology(_projects,
+                                 _binaries,
+                                 Remove(_packages, x => x.Name.InvariantEquals(package.Name)));
+        }
     }
 }
