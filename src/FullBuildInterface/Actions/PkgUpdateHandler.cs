@@ -33,11 +33,11 @@ using NLog;
 
 namespace FullBuildInterface.Actions
 {
-    internal class PkgUpdateHandler : Handler<PkgUpdateOptions>
+    internal class PkgUpdateHandler
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        protected override void ExecuteWithOptions(PkgUpdateOptions initAnthologyUpdateOptions)
+        public void Execute()
         {
             // read anthology.json
             var admDir = WellKnownFolders.GetAdminDirectory();

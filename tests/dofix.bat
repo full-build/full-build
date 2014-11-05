@@ -3,16 +3,16 @@
 @taskkill /im tgitcache.exe
 @pushd toto
 @echo ************************************************************************************
-..\..\src\bin\Debug\FullBuildInterface /A:AnthologyUpdate || goto :ko
+..\..\src\bin\Debug\FullBuildInterface update workspace || goto :ko
 
 @echo ************************************************************************************
-..\..\src\bin\Debug\FullBuildInterface /A:PkgUpdate || goto :ko
+..\..\src\bin\Debug\FullBuildInterface update package || goto :ko
 
 @echo ************************************************************************************
-..\..\src\bin\Debug\FullBuildInterface /A:Fix || goto :ko
+..\..\src\bin\Debug\FullBuildInterface fix source || goto :ko
 
 @echo ************************************************************************************
-..\..\src\bin\Debug\FullBuildInterface /A:GenSln /V:cs /R:cassandra-sharp /R:cassandra-sharp-contrib || goto :ko
+..\..\src\bin\Debug\FullBuildInterface init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko
 
 msbuild cs.sln || goto :ko
 

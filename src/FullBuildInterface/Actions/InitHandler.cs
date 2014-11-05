@@ -26,15 +26,17 @@
 using System;
 using System.IO;
 using System.Text;
+using FullBuildInterface.Model;
 using FullBuildInterface.SourceControl;
+using Newtonsoft.Json;
 
 namespace FullBuildInterface.Actions
 {
-    internal class InitHandler : Handler<InitOptions>
+    internal class InitHandler
     {
-        protected override void ExecuteWithOptions(InitOptions initAnthologyUpdateOptions)
+        public void Execute(string path)
         {
-            var wsDir = new DirectoryInfo(initAnthologyUpdateOptions.WorkspacePath);
+            var wsDir = new DirectoryInfo(path);
             wsDir.Create();
 
             var admDir = wsDir.GetDirectory(".full-build");
@@ -49,9 +51,9 @@ namespace FullBuildInterface.Actions
             sourceControl.Clone("full-build", config.AdminRepo, admDir);
 
             // force a .gitignore
-            var gitIgnoreFile = admDir.GetFile(".gitignore");
-            var gitIgnore = new StringBuilder().AppendLine("cache").AppendLine("projects").AppendLine("views").ToString();
-            File.WriteAllText(gitIgnoreFile.FullName, gitIgnore);
+            //var gitIgnoreFile = admDir.GetFile(".gitignore");
+            //var gitIgnore = new StringBuilder().AppendLine("cache").AppendLine("projects").AppendLine("views").ToString();
+            //File.WriteAllText(gitIgnoreFile.FullName, gitIgnore);
 
             config = ConfigManager.GetConfig(wsDir);
             foreach(var repo in config.SourceRepos)

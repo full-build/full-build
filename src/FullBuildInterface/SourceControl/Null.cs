@@ -44,5 +44,10 @@ namespace FullBuildInterface.SourceControl
         {
             Console.WriteLine("Null.Pull {0}", name);
         }
+
+        public void Add(DirectoryInfo repoDir, FileInfo file)
+        {
+            Console.WriteLine("Null.Add {0} {1}", repoDir.FullName, file.FullName);
+        }
     }
 }

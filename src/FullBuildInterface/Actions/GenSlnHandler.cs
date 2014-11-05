@@ -33,29 +33,29 @@ using Newtonsoft.Json;
 
 namespace FullBuildInterface.Actions
 {
-    internal class GenSlnHandler : Handler<GenSlnOptions>
+    internal class GenSlnHandler
     {
-        private void GenerateView(GenSlnOptions options)
+        private void GenerateView(string viewName, string[] repos)
         {
             var config = ConfigManager.GetConfig(WellKnownFolders.GetWorkspaceDirectory());
 
             var sb = new StringBuilder();
-            foreach(var repo in options.Repo)
+            foreach(var repo in repos)
             {
                 var repoConf = config.SourceRepos.Single(x => x.Name.InvariantEquals(repo));
                 sb.AppendLine(repoConf.Name);
             }
 
             var viewDir = WellKnownFolders.GetViewDirectory();
-            var viewFile = viewDir.GetFile(options.View + ".view");
+            var viewFile = viewDir.GetFile(viewName + ".view");
             File.WriteAllText(viewFile.FullName, sb.ToString());
         }
 
-        protected override void ExecuteWithOptions(GenSlnOptions genSlnOptions)
+        public void Execute(string viewName, string[] repos)
         {
-            if (null != genSlnOptions.Repo)
+            if (0 < repos.Length)
             {
-                GenerateView(genSlnOptions);
+                GenerateView(viewName, repos);
             }
 
             // read anthology.json
@@ -68,7 +68,7 @@ namespace FullBuildInterface.Actions
             var viewDir = WellKnownFolders.GetViewDirectory();
             viewDir.Create();
 
-            var viewFileName = viewDir.GetFile(genSlnOptions.View + ".view");
+            var viewFileName = viewDir.GetFile(viewName + ".view");
             if (! viewFileName.Exists)
             {
                 throw new ArgumentException("Initialize first solution with a list of repositories to include.");
@@ -119,7 +119,7 @@ namespace FullBuildInterface.Actions
             sb.AppendLine("EndGlobal");
 
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var slnFileName = genSlnOptions.View + ".sln";
+            var slnFileName = viewName + ".sln";
             var slnFile = wsDir.GetFile(slnFileName);
             File.WriteAllText(slnFile.FullName, sb.ToString());
 
@@ -129,7 +129,8 @@ namespace FullBuildInterface.Actions
                                                  new XElement(XmlHelpers.NsMsBuild + "BinSrcConfig", "Y"),
                                                  from prj in projects
                                                  select new XElement(XmlHelpers.NsMsBuild + prj.AssemblyName.Replace('.', '_') + "_Src", "Y")));
-            var targetFile = Path.Combine(viewDir.FullName, genSlnOptions.View) + ".targets";
+            var targetFileName = viewName + ".targets";
+            var targetFile = Path.Combine(viewDir.FullName, targetFileName);
             xdoc.Save(targetFile);
         }
     }

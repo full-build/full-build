@@ -29,7 +29,7 @@ using LibGit2Sharp;
 
 namespace FullBuildInterface.SourceControl
 {
-    public class Git : ISourceControl
+    class Git : ISourceControl
     {
         public void Clone(string name, string url, DirectoryInfo target)
         {
@@ -43,6 +43,14 @@ namespace FullBuildInterface.SourceControl
 
         public void Pull(string name, string url)
         {
+        }
+
+        public void Add(DirectoryInfo repoDir, FileInfo file)
+        {
+            using(var repo = new Repository(repoDir.FullName))
+            {
+                repo.Index.Stage(file.FullName);
+            }
         }
     }
 }

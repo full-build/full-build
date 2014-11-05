@@ -37,11 +37,11 @@ using NLog;
 
 namespace FullBuildInterface.Actions
 {
-    internal class AnthologyUpdateHandler : Handler<AnthologyUpdateOptions>
+    internal class AnthologyUpdateHandler
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        protected override void ExecuteWithOptions(AnthologyUpdateOptions initAnthologyUpdateOptions)
+        public void Execute()
         {
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.GetConfig(workspace);

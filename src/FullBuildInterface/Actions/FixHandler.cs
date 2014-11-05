@@ -33,7 +33,7 @@ using NLog;
 
 namespace FullBuildInterface.Actions
 {
-    internal class FixHandler : Handler<FixOptions>
+    internal class FixHandler
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -55,7 +55,7 @@ namespace FullBuildInterface.Actions
             return bin;
         }
 
-        protected override void ExecuteWithOptions(FixOptions initAnthologyUpdateOptions)
+        public void Execute()
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var admDir = WellKnownFolders.GetAdminDirectory();

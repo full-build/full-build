@@ -26,30 +26,90 @@
 using System;
 using System.Linq;
 using CommandLine;
+using FullBuildInterface.Actions;
+using FullBuildInterface.NatLangParser;
+using Parser = FullBuildInterface.NatLangParser.Parser;
 
 namespace FullBuildInterface
 {
     internal class Program
     {
+        private static void InitWorkspace(string path)
+        {
+            var handler = new InitHandler();
+            handler.Execute(path);
+        }
+
+        private static void UpdateWorkspace()
+        {
+            var handler = new AnthologyUpdateHandler();
+            handler.Execute();
+        }
+
+        private static void UpdatePackage()
+        {
+            var handler = new PkgUpdateHandler();
+            handler.Execute();
+        }
+
+        private static void UpdateSource()
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void FixSource()
+        {
+            var handler = new FixHandler();
+            handler.Execute();
+        }
+
+        private static void InitView(string viewName, string[] repos)
+        {
+            var handler = new GenSlnHandler();
+            handler.Execute(viewName, repos);
+        }
+
         private static int Main(string[] args)
         {
-            var mainArgs = args.Take(1).ToArray();
-            var mainOptions = new MainOptions();
-            if (! Parser.ParseArgumentsWithUsage(mainArgs, mainOptions))
+            var parser = new Parser
+                         {
+                             MatchBuilder.Text("init").Text("workspace").Match<string>("path")
+                                         .Do((string path) => InitWorkspace(path)),
+                             MatchBuilder.Text("update").Text("workspace")
+                                         .Do(UpdateWorkspace),
+                             MatchBuilder.Text("update").Text("package")
+                                         .Do(UpdatePackage),
+                             MatchBuilder.Text("update").Text("source")
+                                         .Do(UpdateSource),
+                             MatchBuilder.Text("fix").Text("source")
+                                         .Do(FixSource),
+                             MatchBuilder.Text("init").Text("view").Match<string>("viewname").Text("with").MatchAggregate<string>("repos")
+                                         .Do((string viewname, string[] repos) => InitView(viewname, repos))
+                         };
+
+            if (! parser.Parse(args))
             {
+                Console.WriteLine("Invalid usage:\n{0}", parser.Usage());
                 return 5;
             }
 
-            var actionArgs = args.Skip(1).ToArray();
-            var handlerTypeName = string.Format("FullBuildInterface.Actions.{0}Handler, FullBuildInterface", mainOptions.Action);
-            var handlerType = Type.GetType(handlerTypeName);
-            if (null == handlerType)
-            {
-                throw new ArgumentException("Unknow action " + mainOptions.Action);
-            }
+            //var mainArgs = args.Take(1).ToArray();
+            //var mainOptions = new MainOptions();
+            //if (! CommandLine.Parser.ParseArgumentsWithUsage(mainArgs, mainOptions))
+            //{
+            //    return 5;
+            //}
 
-            var handler = (IHandler) Activator.CreateInstance(handlerType);
-            handler.Execute(actionArgs);
+            //var actionArgs = args.Skip(1).ToArray();
+            //var handlerTypeName = string.Format("FullBuildInterface.Actions.{0}Handler, FullBuildInterface", mainOptions.Action);
+            //var handlerType = Type.GetType(handlerTypeName);
+            //if (null == handlerType)
+            //{
+            //    throw new ArgumentException("Unknow action " + mainOptions.Action);
+            //}
+
+            //var handler = (IHandler) Activator.CreateInstance(handlerType);
+            //handler.Execute(actionArgs);
 
             return 0;
         }

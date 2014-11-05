@@ -34,5 +34,7 @@ namespace FullBuildInterface
         void Checkout(string name, string url);
 
         void Pull(string name, string url);
+
+        void Add(DirectoryInfo repoDir, FileInfo file);
     }
 }
