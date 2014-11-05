@@ -1,3 +1,3 @@
 pushd toto
-..\..\src\bin\Debug\FullBuildInterface /A:Fix
+..\..\src\bin\Debug\FullBuild fix source
 popd

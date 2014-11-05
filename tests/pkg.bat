@@ -1,3 +1,3 @@
 pushd toto
-..\..\src\bin\Debug\FullBuildInterface /A:PkgUpdate
+..\..\src\bin\Debug\FullBuild update package
 popd
