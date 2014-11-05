@@ -7,8 +7,8 @@
     <ProjectGuid>{3AF55CC8-9998-4039-BC31-54ECBFC91396}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FullBuildInterface</RootNamespace>
-    <AssemblyName>FullBuildInterface</AssemblyName>
+    <RootNamespace>FullBuild</RootNamespace>
+    <AssemblyName>FullBuild</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>

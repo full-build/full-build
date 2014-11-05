@@ -96,24 +96,6 @@ namespace FullBuildInterface
                 return 5;
             }
 
-            //var mainArgs = args.Take(1).ToArray();
-            //var mainOptions = new MainOptions();
-            //if (! CommandLine.Parser.ParseArgumentsWithUsage(mainArgs, mainOptions))
-            //{
-            //    return 5;
-            //}
-
-            //var actionArgs = args.Skip(1).ToArray();
-            //var handlerTypeName = string.Format("FullBuildInterface.Actions.{0}Handler, FullBuildInterface", mainOptions.Action);
-            //var handlerType = Type.GetType(handlerTypeName);
-            //if (null == handlerType)
-            //{
-            //    throw new ArgumentException("Unknow action " + mainOptions.Action);
-            //}
-
-            //var handler = (IHandler) Activator.CreateInstance(handlerType);
-            //handler.Execute(actionArgs);
-
             return 0;
         }
     }

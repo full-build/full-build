@@ -9,8 +9,8 @@
 //------------------------------------------------------------------------------
 
 // Original file name:
-// Generation date: 11/2/2014 21:58:24
-namespace FullBuildInterface.NugetService
+// Generation date: 11/5/2014 20:29:28
+namespace FullBuild.NugetService
 {
     
     /// <summary>
@@ -38,7 +38,7 @@ namespace FullBuildInterface.NugetService
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Services.Design", "1.0.0")]
         protected global::System.Type ResolveTypeFromName(string typeName)
         {
-            global::System.Type resolvedType = this.DefaultResolveType(typeName, "NuGetGallery", "FullBuildInterface.NugetService");
+            global::System.Type resolvedType = this.DefaultResolveType(typeName, "NuGetGallery", "FullBuild.NugetService");
             if ((resolvedType != null))
             {
                 return resolvedType;
@@ -53,7 +53,7 @@ namespace FullBuildInterface.NugetService
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Services.Design", "1.0.0")]
         protected string ResolveNameFromType(global::System.Type clientType)
         {
-            if (clientType.Namespace.Equals("FullBuildInterface.NugetService", global::System.StringComparison.Ordinal))
+            if (clientType.Namespace.Equals("FullBuild.NugetService", global::System.StringComparison.Ordinal))
             {
                 return string.Concat("NuGetGallery.", clientType.Name);
             }
