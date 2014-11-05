@@ -25,10 +25,10 @@
 
 using System.IO;
 using System.Net;
-using FullBuildInterface.Model;
+using FullBuild.Model;
 using NLog;
 
-namespace FullBuildInterface
+namespace FullBuild
 {
     internal static class Nuget
     {

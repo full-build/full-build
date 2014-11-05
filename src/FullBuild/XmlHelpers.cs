@@ -25,7 +25,7 @@
 
 using System.Xml.Linq;
 
-namespace FullBuildInterface
+namespace FullBuild
 {
     internal static class XmlHelpers
     {

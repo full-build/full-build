@@ -26,7 +26,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace FullBuildInterface.SourceControl
+namespace FullBuild.SourceControl
 {
     internal sealed class Factory : IServiceDescriptor
     {

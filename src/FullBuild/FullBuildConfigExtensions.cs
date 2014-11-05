@@ -25,9 +25,9 @@
 
 using System;
 using System.IO;
-using FullBuildInterface.Config;
+using FullBuild.Config;
 
-namespace FullBuildInterface
+namespace FullBuild
 {
     internal static class FullBuildConfigExtensions
     {

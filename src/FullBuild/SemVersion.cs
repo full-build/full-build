@@ -29,7 +29,7 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Text.RegularExpressions;
 
-namespace FullBuildInterface
+namespace FullBuild
 {
     /// <summary>
     /// A semantic version implementation.

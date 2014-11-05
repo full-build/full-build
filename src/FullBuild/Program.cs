@@ -24,13 +24,10 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.Linq;
-using CommandLine;
-using FullBuildInterface.Actions;
-using FullBuildInterface.NatLangParser;
-using Parser = FullBuildInterface.NatLangParser.Parser;
+using FullBuild.Actions;
+using FullBuild.NatLangParser;
 
-namespace FullBuildInterface
+namespace FullBuild
 {
     internal class Program
     {
@@ -71,7 +68,7 @@ namespace FullBuildInterface
 
         private static int Main(string[] args)
         {
-            var parser = new Parser
+            var parser = new NatLangParser.Parser
                          {
                              MatchBuilder.Describe("initialize workspace.").Text("init").Text("workspace").Match<string>("path")
                                          .Do((string path) => InitWorkspace(path)),

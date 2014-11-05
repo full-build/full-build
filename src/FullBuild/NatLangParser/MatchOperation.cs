@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FullBuildInterface.NatLangParser
+namespace FullBuild.NatLangParser
 {
     public class MatchOperation<T> : IMatchOperation
     {

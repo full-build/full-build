@@ -25,7 +25,7 @@
 
 using System.Xml.Serialization;
 
-namespace FullBuildInterface.Config
+namespace FullBuild.Config
 {
     public class RepoConfig
     {

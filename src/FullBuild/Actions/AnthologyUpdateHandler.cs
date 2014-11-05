@@ -29,13 +29,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
-using FullBuildInterface.Config;
-using FullBuildInterface.Model;
+using FullBuild.Config;
+using FullBuild.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
 
-namespace FullBuildInterface.Actions
+namespace FullBuild.Actions
 {
     internal class AnthologyUpdateHandler
     {

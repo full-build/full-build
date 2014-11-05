@@ -25,7 +25,7 @@
 
 using System.IO;
 
-namespace FullBuildInterface
+namespace FullBuild
 {
     internal static class DirectoryInfoExtensions
     {

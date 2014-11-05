@@ -26,9 +26,9 @@
 using System.Configuration;
 using System.IO;
 using System.Xml.Serialization;
-using FullBuildInterface.Config;
+using FullBuild.Config;
 
-namespace FullBuildInterface
+namespace FullBuild
 {
     internal static class ConfigManager
     {

@@ -26,7 +26,7 @@
 using System;
 using System.IO;
 
-namespace FullBuildInterface.SourceControl
+namespace FullBuild.SourceControl
 {
     public class Null : ISourceControl
     {

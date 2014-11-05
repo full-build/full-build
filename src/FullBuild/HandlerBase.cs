@@ -24,9 +24,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using CommandLine;
 
-namespace FullBuildInterface
+namespace FullBuild
 {
     internal abstract class Handler<TOptions> : IHandler where TOptions : new()
     {

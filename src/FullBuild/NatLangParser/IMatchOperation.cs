@@ -1,4 +1,4 @@
-namespace FullBuildInterface.NatLangParser
+namespace FullBuild.NatLangParser
 {
     public interface IMatchOperation
     {

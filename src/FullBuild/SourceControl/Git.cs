@@ -27,7 +27,7 @@ using System;
 using System.IO;
 using LibGit2Sharp;
 
-namespace FullBuildInterface.SourceControl
+namespace FullBuild.SourceControl
 {
     class Git : ISourceControl
     {

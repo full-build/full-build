@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FullBuildInterface.NatLangParser
+namespace FullBuild.NatLangParser
 {
     public class Matcher
     {

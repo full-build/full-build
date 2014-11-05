@@ -25,7 +25,7 @@
 
 using System.IO;
 
-namespace FullBuildInterface.Model
+namespace FullBuild.Model
 {
     internal static class ProjectExtensions
     {

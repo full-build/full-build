@@ -27,11 +27,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using FullBuildInterface.Model;
+using FullBuild.Model;
 using Newtonsoft.Json;
 using NLog;
 
-namespace FullBuildInterface.Actions
+namespace FullBuild.Actions
 {
     internal class PkgUpdateHandler
     {

@@ -28,10 +28,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using FullBuildInterface.Model;
+using FullBuild.Model;
 using Newtonsoft.Json;
 
-namespace FullBuildInterface.Actions
+namespace FullBuild.Actions
 {
     internal class GenSlnHandler
     {

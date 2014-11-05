@@ -27,7 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FullBuildInterface
+namespace FullBuild
 {
     internal interface IServiceDescriptor
     {

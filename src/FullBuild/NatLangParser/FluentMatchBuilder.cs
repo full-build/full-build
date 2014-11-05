@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FullBuildInterface.NatLangParser
+namespace FullBuild.NatLangParser
 {
     public class FluentMatchBuilder
     {

@@ -25,12 +25,9 @@
 
 using System;
 using System.IO;
-using System.Text;
-using FullBuildInterface.Model;
-using FullBuildInterface.SourceControl;
-using Newtonsoft.Json;
+using FullBuild.SourceControl;
 
-namespace FullBuildInterface.Actions
+namespace FullBuild.Actions
 {
     internal class InitHandler
     {

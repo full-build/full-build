@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace FullBuildInterface
+namespace FullBuild
 {
     internal class Nuspec
     {

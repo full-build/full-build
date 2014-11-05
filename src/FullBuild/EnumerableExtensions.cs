@@ -26,7 +26,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace FullBuildInterface
+namespace FullBuild
 {
     internal static class EnumerableExtensions
     {

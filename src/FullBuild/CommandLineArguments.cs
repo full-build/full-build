@@ -31,7 +31,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace CommandLine
+namespace FullBuild
 {
     /// <summary>
     /// Used to control parsing of command line arguments.

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace FullBuildInterface.NatLangParser
+namespace FullBuild.NatLangParser
 {
     public class MatchOperationAggregate<T> : IMatchOperation
     {

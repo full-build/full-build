@@ -29,7 +29,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace FullBuildInterface.Model
+namespace FullBuild.Model
 {
     internal class Anthology
     {

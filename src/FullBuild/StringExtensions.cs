@@ -25,7 +25,7 @@
 
 using System;
 
-namespace FullBuildInterface
+namespace FullBuild
 {
     public static class StringExtensions
     {
