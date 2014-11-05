@@ -63,25 +63,56 @@ namespace FullBuild
         private static void InitView(string viewName, string[] repos)
         {
             var handler = new View();
-            handler.Execute(viewName, repos);
+            handler.InitView(viewName, repos);
+        }
+
+        private static void UpdateView(string viewName)
+        {
+            var handler = new View();
+            handler.UpdateView(viewName);
         }
 
         private static int Main(string[] args)
         {
-            var parser = new NatLangParser.Parser
+            var path = Parameter<string>.Create("path");
+            var viewname = Parameter<string>.Create("viewname");
+            var repos = Parameter<string[]>.Create("repos");
+
+            var parser = new Parser
                          {
-                             MatchBuilder.Describe("initialize workspace.").Text("init").Text("workspace").Match<string>("path")
-                                         .Do((string path) => InitWorkspace(path)),
-                             MatchBuilder.Describe("update workspace with projects or packages changes.").Text("update").Text("workspace")
-                                         .Do(UpdateWorkspace),
-                             MatchBuilder.Describe("update packages.").Text("update").Text("package")
-                                         .Do(UpdatePackage),
-                             MatchBuilder.Describe("update sources from source control").Text("update").Text("source")
-                                         .Do(UpdateSource),
-                             MatchBuilder.Describe("fix sources to ensure compatibility with full-build.").Text("fix").Text("source")
-                                         .Do(FixSource),
-                             MatchBuilder.Describe("create solution file with provided repositories.").Text("init").Text("view").Match<string>("viewname").Text("with").MatchAggregate<string>("repos")
-                                         .Do((string viewname, string[] repos) => InitView(viewname, repos))
+                             MatchBuilder.Describe("initialize workspace in folder <path>.")
+                                         .Command("init")
+                                         .Command("workspace")
+                                         .Param(path)
+                                         .Do(ctx => InitWorkspace(ctx.Get(path))),
+                             MatchBuilder.Describe("update workspace with projects or packages changes.")
+                                         .Command("update")
+                                         .Command("workspace")
+                                         .Do(ctx => UpdateWorkspace()),
+                             MatchBuilder.Describe("update packages.")
+                                         .Command("update")
+                                         .Command("package")
+                                         .Do(ctx => UpdatePackage()),
+                             MatchBuilder.Describe("update sources from source control.")
+                                         .Command("update")
+                                         .Command("source")
+                                         .Do(ctx => UpdateSource()),
+                             MatchBuilder.Describe("update view <viewname>.")
+                                         .Command("update")
+                                         .Command("view")
+                                         .Param(viewname)
+                                         .Do(ctx => UpdateView(ctx.Get(viewname))),
+                             MatchBuilder.Describe("fix sources to ensure compatibility with full-build.")
+                                         .Command("fix")
+                                         .Command("source")
+                                         .Do(ctx => FixSource()),
+                             MatchBuilder.Describe("create solution file <viewname> with provided repositories (<repos>).")
+                                         .Command("init")
+                                         .Command("view")
+                                         .Param(viewname)
+                                         .Command("with")
+                                         .Params<string>("repos")
+                                         .Do(ctx => InitView(ctx.Get(viewname), ctx.Get(repos)))
                          };
 
             if (! parser.Parse(args))

@@ -32,13 +32,13 @@ namespace FullBuild.NatLangParser
 {
     public class Matcher
     {
-        private readonly Action<object[]> _action;
+        private readonly Action<Context> _action;
 
         private readonly string _description;
 
         private readonly KeyValuePair<string, IMatchOperation>[] _operations;
 
-        public Matcher(string description, IEnumerable<KeyValuePair<string, IMatchOperation>> operations, Action<object[]> action)
+        public Matcher(string description, IEnumerable<KeyValuePair<string, IMatchOperation>> operations, Action<Context> action)
         {
             _operations = operations.ToArray();
             _description = description;
@@ -47,25 +47,27 @@ namespace FullBuild.NatLangParser
 
         public bool ParseAndInvoke(string[] args)
         {
-            var accumulator = new List<object>();
+            var context = new Context();
 
             var isMatch = true;
             var argIndex = 0;
             var opIndex = 0;
             var acc = false;
             IMatchOperation op = null;
+            string key = null;
             while (isMatch && argIndex < args.Length && opIndex < _operations.Length)
             {
                 var arg = args[argIndex];
+                key = _operations[opIndex].Key;
                 op = _operations[opIndex].Value;
                 isMatch = op.TryParse(arg);
 
                 if (! op.IsAccumulator)
                 {
                     ++opIndex;
-                    if (isMatch && op.HasValue)
+                    if (isMatch && null != key)
                     {
-                        accumulator.Add(op.Value);
+                        context = context.Add(key, op.Value);
                     }
                 }
 
@@ -74,7 +76,7 @@ namespace FullBuild.NatLangParser
 
             if (null != op && op.IsAccumulator)
             {
-                accumulator.Add(op.Value);
+                context = context.Add(key, op.Value);
                 ++opIndex;
             }
 
@@ -83,7 +85,7 @@ namespace FullBuild.NatLangParser
                 return false;
             }
 
-            _action(accumulator.ToArray());
+            _action(context);
             return true;
         }
 

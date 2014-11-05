@@ -27,8 +27,6 @@ namespace FullBuild.NatLangParser
 {
     public interface IMatchOperation
     {
-        bool HasValue { get; }
-
         object Value { get; }
 
         string Describe { get; }

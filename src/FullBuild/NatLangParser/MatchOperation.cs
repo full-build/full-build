@@ -45,11 +45,6 @@ namespace FullBuild.NatLangParser
             return true;
         }
 
-        public bool HasValue
-        {
-            get { return true; }
-        }
-
         public object Value
         {
             get { return _value; }

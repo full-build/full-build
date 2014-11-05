@@ -23,24 +23,40 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.IO;
+using System.Collections.Immutable;
 
-namespace FullBuild
+namespace FullBuild.NatLangParser
 {
-    internal static class DirectoryInfoExtensions
+    public class Context
     {
-        public static DirectoryInfo GetDirectory(this DirectoryInfo @this, string path)
+        private readonly ImmutableDictionary<string, object> _parameters;
+
+        public Context()
         {
-            var newPath = Path.Combine(@this.FullName, path);
-            return new DirectoryInfo(newPath);
+            _parameters = ImmutableDictionary<string, object>.Empty;
         }
 
-        public static FileInfo GetFile(this DirectoryInfo @this, string fileFormat, params object[] args)
+        private Context(ImmutableDictionary<string, object> parameters)
         {
-            var fileName = string.Format(fileFormat, args);
-            var filePath = Path.Combine(@this.FullName, fileName);
-            var file = new FileInfo(filePath);
-            return file;
+            _parameters = parameters;
+        }
+
+        public Context Add(string key, object value)
+        {
+            var newParameters = _parameters.Add(key, value);
+            return new Context(newParameters);
+        }
+
+        public T Get<T>(Parameter<T> parameter)
+        {
+            var obj = (T) _parameters[parameter.Name];
+            var value = (T) obj;
+            return value;
+        }
+
+        public T Get<T>(string name)
+        {
+            return (T) _parameters[name];
         }
     }
 }

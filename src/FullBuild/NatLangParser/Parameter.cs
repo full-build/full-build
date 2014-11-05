@@ -23,24 +23,20 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
-
-namespace FullBuild
+namespace FullBuild.NatLangParser
 {
-    internal abstract class Handler<TOptions> : IHandler where TOptions : new()
+    public class Parameter<T>
     {
-        public void Execute(string[] args)
+        private Parameter(string name)
         {
-            var options = new TOptions();
-            if (! Parser.ParseArguments(args, options))
-            {
-                var argMessage = Parser.ArgumentsUsage(typeof(TOptions));
-                throw new ArgumentException(argMessage);
-            }
-
-            ExecuteWithOptions(options);
+            Name = name;
         }
 
-        protected abstract void ExecuteWithOptions(TOptions initAnthologyUpdateOptions);
+        public string Name { get; protected set; }
+
+        public static Parameter<T> Create(string name)
+        {
+            return new Parameter<T>(name);
+        }
     }
 }

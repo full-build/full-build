@@ -46,15 +46,15 @@ namespace FullBuild.NatLangParser
             _operations.Add(kvp);
         }
 
-        public FluentMatchBuilder Match<T>(string name)
+        public FluentMatchBuilder Param<T>(Parameter<T> parameter)
         {
             var operation = new MatchOperation<T>();
-            AddOperation(name, operation);
+            AddOperation(parameter.Name, operation);
 
             return this;
         }
 
-        public FluentMatchBuilder MatchAggregate<T>(string name)
+        public FluentMatchBuilder Params<T>(string name)
         {
             var operation = new MatchOperationAggregate<T>();
             AddOperation(name, operation);
@@ -62,7 +62,7 @@ namespace FullBuild.NatLangParser
             return this;
         }
 
-        public FluentMatchBuilder Text(string text)
+        public FluentMatchBuilder Command(string text)
         {
             var operation = new MatchOperationText(text);
             AddOperation(null, operation);
@@ -70,19 +70,9 @@ namespace FullBuild.NatLangParser
             return this;
         }
 
-        public Matcher Do(Action action)
+        public Matcher Do(Action<Context> action)
         {
-            return new Matcher(_description, _operations.AsEnumerable(), prms => action.DynamicInvoke(prms));
-        }
-
-        public Matcher Do<T0>(Action<T0> action)
-        {
-            return new Matcher(_description, _operations.AsEnumerable(), prms => action.DynamicInvoke(prms));
-        }
-
-        public Matcher Do<T0, T1>(Action<T0, T1> action)
-        {
-            return new Matcher(_description, _operations.AsEnumerable(), prms => action.DynamicInvoke(prms));
+            return new Matcher(_description, _operations.AsEnumerable(), action);
         }
     }
 }

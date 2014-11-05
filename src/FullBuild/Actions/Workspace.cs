@@ -30,6 +30,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using FullBuild.Config;
+using FullBuild.Helpers;
 using FullBuild.Model;
 using FullBuild.SourceControl;
 using Newtonsoft.Json;
@@ -81,13 +82,12 @@ namespace FullBuild.Actions
             //File.WriteAllText(gitIgnoreFile.FullName, gitIgnore);
 
             config = ConfigManager.GetConfig(wsDir);
-            foreach (var repo in config.SourceRepos)
+            foreach(var repo in config.SourceRepos)
             {
                 var repoDir = wsDir.GetDirectory(repo.Name);
                 sourceControl.Clone(repo.Name, repo.Url, repoDir);
             }
         }
-
 
         private void GenerateImports(Anthology anthology)
         {
@@ -124,8 +124,10 @@ namespace FullBuild.Actions
 
         private static Anthology UpdateAnthologyFromSource(FullBuildConfig config, DirectoryInfo workspace, Anthology anthology)
         {
+            _logger.Info("Anthology contains {0} projects", anthology.Projects.Count());
             foreach(var repo in config.SourceRepos)
             {
+                _logger.Info("Processing repo {0}", repo.Name);
                 var repoDir = workspace.GetDirectory(repo.Name);
 
                 // delete all solution files
@@ -134,8 +136,11 @@ namespace FullBuild.Actions
 
                 // process all projects
                 var csprojs = repoDir.EnumerateFiles("*.csproj", SearchOption.AllDirectories);
+                _logger.Info("Found {0} projects", csprojs.Count());
 
-                anthology = csprojs.Aggregate(anthology, (a, p) => ParseAndAddProject(workspace, p, anthology));
+                anthology = csprojs.Aggregate(anthology, (a, p) => ParseAndAddProject(workspace, p, a));
+
+                _logger.Info("Project count {0}", anthology.Projects.Count());
             }
 
             return anthology;

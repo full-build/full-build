@@ -28,6 +28,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using FullBuild.Helpers;
 using FullBuild.Model;
 using Newtonsoft.Json;
 
@@ -35,7 +36,7 @@ namespace FullBuild.Actions
 {
     internal class View
     {
-        private void InitView(string viewName, string[] repos)
+        public void InitView(string viewName, string[] repos)
         {
             var config = ConfigManager.GetConfig(WellKnownFolders.GetWorkspaceDirectory());
 
@@ -51,13 +52,8 @@ namespace FullBuild.Actions
             File.WriteAllText(viewFile.FullName, sb.ToString());
         }
 
-        public void Execute(string viewName, string[] repos)
+        public void UpdateView(string viewName)
         {
-            if (0 < repos.Length)
-            {
-                InitView(viewName, repos);
-            }
-
             // read anthology.json
             var admDir = WellKnownFolders.GetAdminDirectory();
             var anthologyFile = admDir.GetFile(Anthology.AnthologyFileName);

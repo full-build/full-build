@@ -15,6 +15,7 @@
 
 @echo ************************************************************************************
 ..\..\src\bin\Debug\FullBuild init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko
+..\..\src\bin\Debug\FullBuild update view cs || goto :ko
 
 msbuild cs.sln || goto :ko
 

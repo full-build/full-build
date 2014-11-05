@@ -25,6 +25,7 @@
 
 using System.IO;
 using System.Net;
+using FullBuild.Helpers;
 using FullBuild.Model;
 using NLog;
 

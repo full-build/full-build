@@ -23,6 +23,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
+using FullBuild.Helpers;
+
 namespace FullBuild.NatLangParser
 {
     public class MatchOperationText : IMatchOperation
@@ -40,14 +43,9 @@ namespace FullBuild.NatLangParser
             return res;
         }
 
-        public bool HasValue
-        {
-            get { return false; }
-        }
-
         public object Value
         {
-            get { return _text; }
+            get { throw new InvalidOperationException("Value is not available for command operation"); }
         }
 
         public string Describe
