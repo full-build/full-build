@@ -32,13 +32,16 @@ namespace FullBuildInterface.NatLangParser
 {
     public class Matcher
     {
+        private readonly string _description;
+
         private readonly Action<object[]> _action;
 
         private readonly KeyValuePair<string, IMatchOperation>[] _operations;
 
-        public Matcher(IEnumerable<KeyValuePair<string, IMatchOperation>> operations, Action<object[]> action)
+        public Matcher(string description, IEnumerable<KeyValuePair<string, IMatchOperation>> operations, Action<object[]> action)
         {
             _operations = operations.ToArray();
+            _description = description;
             _action = action;
         }
 
@@ -99,6 +102,8 @@ namespace FullBuildInterface.NatLangParser
 
                 return sb.Append(" ");
             });
+
+            res.AppendFormat(": {0}", _description);
 
             return res.ToString();
         }

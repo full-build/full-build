@@ -73,23 +73,26 @@ namespace FullBuildInterface
         {
             var parser = new Parser
                          {
-                             MatchBuilder.Text("init").Text("workspace").Match<string>("path")
+                             MatchBuilder.Describe("initialize workspace.").Text("init").Text("workspace").Match<string>("path")
                                          .Do((string path) => InitWorkspace(path)),
-                             MatchBuilder.Text("update").Text("workspace")
+                             MatchBuilder.Describe("update workspace with projects or packages changes.").Text("update").Text("workspace")
                                          .Do(UpdateWorkspace),
-                             MatchBuilder.Text("update").Text("package")
+                             MatchBuilder.Describe("update packages.").Text("update").Text("package")
                                          .Do(UpdatePackage),
-                             MatchBuilder.Text("update").Text("source")
+                             MatchBuilder.Describe("update sources from source control").Text("update").Text("source")
                                          .Do(UpdateSource),
-                             MatchBuilder.Text("fix").Text("source")
+                             MatchBuilder.Describe("fix sources to ensure compatibility with full-build.").Text("fix").Text("source")
                                          .Do(FixSource),
-                             MatchBuilder.Text("init").Text("view").Match<string>("viewname").Text("with").MatchAggregate<string>("repos")
+                             MatchBuilder.Describe("create solution file with provided repositories.").Text("init").Text("view").Match<string>("viewname").Text("with").MatchAggregate<string>("repos")
                                          .Do((string viewname, string[] repos) => InitView(viewname, repos))
                          };
 
             if (! parser.Parse(args))
             {
-                Console.WriteLine("Invalid usage:\n{0}", parser.Usage());
+                Console.WriteLine("Invalid arguments");
+                Console.WriteLine();
+                Console.WriteLine("Usage:");
+                Console.WriteLine(parser.Usage());
                 return 5;
             }
 

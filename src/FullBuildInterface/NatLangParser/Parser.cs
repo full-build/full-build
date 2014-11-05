@@ -14,7 +14,7 @@ namespace FullBuildInterface.NatLangParser
 
         public string Usage()
         {
-            var res = this.Aggregate(new StringBuilder(), (sb, m) => sb.AppendLine(m.Usage()));
+            var res = this.Aggregate(new StringBuilder().Append("\t"), (sb, m) => sb.AppendLine(m.Usage()).Append("\t"));
             return res.ToString();
         }
     }

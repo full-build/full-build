@@ -34,7 +34,7 @@ namespace FullBuildInterface.NatLangParser
 
         public string Describe
         {
-            get { return string.Format("<{0}> ...", typeof(T).Name); }
+            get { return string.Format("{0} ...", typeof(T).Name); }
         }
 
         public bool IsAccumulator

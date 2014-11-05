@@ -6,7 +6,14 @@ namespace FullBuildInterface.NatLangParser
 {
     public class FluentMatchBuilder
     {
+        private readonly string _description;
+
         private readonly List<KeyValuePair<string, IMatchOperation>> _operations = new List<KeyValuePair<string, IMatchOperation>>();
+
+        public FluentMatchBuilder(string description)
+        {
+            _description = description;
+        }
 
         private void AddOperation(string name, IMatchOperation operation)
         {
@@ -40,18 +47,18 @@ namespace FullBuildInterface.NatLangParser
 
         public Matcher Do(Action action)
         {
-            return new Matcher(_operations.AsEnumerable(), prms => action.DynamicInvoke(prms));
+            return new Matcher(_description, _operations.AsEnumerable(), prms => action.DynamicInvoke(prms));
         }
 
         public Matcher Do<T0>(Action<T0> action)
         {
 
-            return new Matcher(_operations.AsEnumerable(), prms => action.DynamicInvoke(prms));
+            return new Matcher(_description, _operations.AsEnumerable(), prms => action.DynamicInvoke(prms));
         }
 
         public Matcher Do<T0, T1>(Action<T0, T1> action)
         {
-            return new Matcher(_operations.AsEnumerable(), prms => action.DynamicInvoke(prms));
+            return new Matcher(_description, _operations.AsEnumerable(), prms => action.DynamicInvoke(prms));
         }
     }
 }
