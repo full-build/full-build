@@ -29,7 +29,7 @@ using LibGit2Sharp;
 
 namespace FullBuild.SourceControl
 {
-    class Git : ISourceControl
+    internal class Git : ISourceControl
     {
         public void Clone(string name, string url, DirectoryInfo target)
         {

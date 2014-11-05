@@ -32,9 +32,9 @@ namespace FullBuild.NatLangParser
 {
     public class Matcher
     {
-        private readonly string _description;
-
         private readonly Action<object[]> _action;
+
+        private readonly string _description;
 
         private readonly KeyValuePair<string, IMatchOperation>[] _operations;
 

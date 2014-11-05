@@ -115,7 +115,7 @@ namespace FullBuild.Model
             {
                 newPackages = newPackages.Add(package);
             }
-            
+
             return new Anthology(_projects,
                                  _binaries,
                                  newPackages);
