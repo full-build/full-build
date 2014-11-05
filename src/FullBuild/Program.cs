@@ -33,20 +33,20 @@ namespace FullBuild
     {
         private static void InitWorkspace(string path)
         {
-            var handler = new InitHandler();
-            handler.Execute(path);
+            var handler = new Workspace();
+            handler.Init(path);
         }
 
         private static void UpdateWorkspace()
         {
-            var handler = new AnthologyUpdateHandler();
-            handler.Execute();
+            var handler = new Workspace();
+            handler.Update();
         }
 
         private static void UpdatePackage()
         {
-            var handler = new PkgUpdateHandler();
-            handler.Execute();
+            var handler = new Package();
+            handler.Update();
         }
 
         private static void UpdateSource()
@@ -56,13 +56,13 @@ namespace FullBuild
 
         private static void FixSource()
         {
-            var handler = new FixHandler();
-            handler.Execute();
+            var handler = new Source();
+            handler.Fix();
         }
 
         private static void InitView(string viewName, string[] repos)
         {
-            var handler = new GenSlnHandler();
+            var handler = new View();
             handler.Execute(viewName, repos);
         }
 

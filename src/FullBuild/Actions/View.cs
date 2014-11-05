@@ -33,9 +33,9 @@ using Newtonsoft.Json;
 
 namespace FullBuild.Actions
 {
-    internal class GenSlnHandler
+    internal class View
     {
-        private void GenerateView(string viewName, string[] repos)
+        private void InitView(string viewName, string[] repos)
         {
             var config = ConfigManager.GetConfig(WellKnownFolders.GetWorkspaceDirectory());
 
@@ -55,7 +55,7 @@ namespace FullBuild.Actions
         {
             if (0 < repos.Length)
             {
-                GenerateView(viewName, repos);
+                InitView(viewName, repos);
             }
 
             // read anthology.json

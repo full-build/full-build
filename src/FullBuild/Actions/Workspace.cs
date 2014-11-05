@@ -31,17 +31,18 @@ using System.Reflection;
 using System.Xml.Linq;
 using FullBuild.Config;
 using FullBuild.Model;
+using FullBuild.SourceControl;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
 
 namespace FullBuild.Actions
 {
-    internal class AnthologyUpdateHandler
+    internal class Workspace
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public void Execute()
+        public void Update()
         {
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.GetConfig(workspace);
@@ -57,6 +58,36 @@ namespace FullBuild.Actions
             // Generate import files
             GenerateImports(anthology);
         }
+
+        public void Init(string path)
+        {
+            var wsDir = new DirectoryInfo(path);
+            wsDir.Create();
+
+            var admDir = wsDir.GetDirectory(".full-build");
+            if (admDir.Exists)
+            {
+                throw new ArgumentException("Workspace is already initialized");
+            }
+
+            var config = ConfigManager.GetConfig(wsDir);
+
+            var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.SourceControl);
+            sourceControl.Clone("full-build", config.AdminRepo, admDir);
+
+            // force a .gitignore
+            //var gitIgnoreFile = admDir.GetFile(".gitignore");
+            //var gitIgnore = new StringBuilder().AppendLine("cache").AppendLine("projects").AppendLine("views").ToString();
+            //File.WriteAllText(gitIgnoreFile.FullName, gitIgnore);
+
+            config = ConfigManager.GetConfig(wsDir);
+            foreach (var repo in config.SourceRepos)
+            {
+                var repoDir = wsDir.GetDirectory(repo.Name);
+                sourceControl.Clone(repo.Name, repo.Url, repoDir);
+            }
+        }
+
 
         private void GenerateImports(Anthology anthology)
         {
@@ -149,19 +180,19 @@ namespace FullBuild.Actions
             return anthology;
         }
 
-        private static IEnumerable<Package> GetNugetPackages(DirectoryInfo projectDir)
+        private static IEnumerable<Model.Package> GetNugetPackages(DirectoryInfo projectDir)
         {
             var packageFile = projectDir.GetFile("packages.config");
             if (!packageFile.Exists)
             {
-                return Enumerable.Empty<Package>();
+                return Enumerable.Empty<Model.Package>();
             }
 
             var docPackage = XDocument.Load(packageFile.FullName);
             var packages = from element in docPackage.Descendants("package")
                            let name = (string) element.Attribute("id")
                            let version = (string) element.Attribute("version")
-                           select new Package(name, version);
+                           select new Model.Package(name, version);
 
             return packages;
         }
@@ -223,7 +254,7 @@ namespace FullBuild.Actions
                              let importProject = (string) import.Attribute("Project")
                              where importProject.InvariantStartsWith(WellKnownFolders.MsBuildPackagesDir)
                              let importProjectName = Path.GetFileNameWithoutExtension(importProject)
-                             select new Package(importProjectName, "0.0.0");
+                             select new Model.Package(importProjectName, "0.0.0");
             var packages = nugetPackages.Concat(fbPackages);
             var packageNames = packages.Select(x => x.Name);
 

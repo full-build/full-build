@@ -33,11 +33,11 @@ using NLog;
 
 namespace FullBuild.Actions
 {
-    internal class PkgUpdateHandler
+    internal class Package
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public void Execute()
+        public void Update()
         {
             // read anthology.json
             var admDir = WellKnownFolders.GetAdminDirectory();
@@ -51,7 +51,7 @@ namespace FullBuild.Actions
             }
 
             var pkgsDir = WellKnownFolders.GetPackageDirectory();
-            var packageToRemove = new List<Package>();
+            var packageToRemove = new List<Model.Package>();
             foreach(var pkg in anthology.Packages)
             {
                 var pkgDir = pkgsDir.GetDirectory(pkg.Name);
@@ -124,7 +124,7 @@ namespace FullBuild.Actions
             return null;
         }
 
-        private void GenerateTargetsForProject(Package package)
+        private void GenerateTargetsForProject(Model.Package package)
         {
             var pkgsDir = WellKnownFolders.GetPackageDirectory();
             var pkgDir = pkgsDir.GetDirectory(package.Name);

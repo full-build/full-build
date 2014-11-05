@@ -33,7 +33,7 @@ using NLog;
 
 namespace FullBuild.Actions
 {
-    internal class FixHandler
+    internal class Source
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -43,7 +43,7 @@ namespace FullBuild.Actions
             return project;
         }
 
-        private static Package FindPackageFromAssemblyName(Anthology anthology, string pkgName)
+        private static Model.Package FindPackageFromAssemblyName(Anthology anthology, string pkgName)
         {
             var pkg = anthology.Packages.SingleOrDefault(x => x.Name.InvariantEquals(pkgName));
             return pkg;
@@ -55,7 +55,7 @@ namespace FullBuild.Actions
             return bin;
         }
 
-        public void Execute()
+        public void Fix()
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var admDir = WellKnownFolders.GetAdminDirectory();

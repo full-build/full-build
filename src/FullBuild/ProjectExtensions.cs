@@ -24,8 +24,9 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System.IO;
+using FullBuild.Model;
 
-namespace FullBuild.Model
+namespace FullBuild
 {
     internal static class ProjectExtensions
     {

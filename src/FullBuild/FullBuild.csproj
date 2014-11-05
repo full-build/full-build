@@ -61,10 +61,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actions\FixHandler.cs" />
+    <Compile Include="Actions\Source.cs" />
     <Compile Include="FrameworkVersion.cs" />
-    <Compile Include="Actions\GenSlnHandler.cs" />
-    <Compile Include="Actions\PkgUpdateHandler.cs" />
+    <Compile Include="Actions\View.cs" />
+    <Compile Include="Actions\Package.cs" />
     <Compile Include="CommandLineArguments.cs" />
     <Compile Include="ConfigManager.cs" />
     <Compile Include="Config\ActionType.cs" />
@@ -72,18 +72,17 @@
     <Compile Include="Config\RepoConfig.cs" />
     <Compile Include="Config\SourceControlType.cs" />
     <Compile Include="DirectoryInfoExtensions.cs" />
-    <Compile Include="Actions\AnthologyUpdateHandler.cs" />
+    <Compile Include="Actions\Workspace.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="FullBuildConfigExtensions.cs" />
     <Compile Include="HandlerBase.cs" />
     <Compile Include="IHandler.cs" />
-    <Compile Include="Actions\InitHandler.cs" />
     <Compile Include="MainOptions.cs" />
     <Compile Include="Model\Anthology.cs" />
     <Compile Include="Model\Binary.cs" />
     <Compile Include="Model\Package.cs" />
     <Compile Include="Model\Project.cs" />
-    <Compile Include="Model\ProjectExtensions.cs" />
+    <Compile Include="ProjectExtensions.cs" />
     <Compile Include="NatLangParser\FluentMatchBuilder.cs" />
     <Compile Include="NatLangParser\IMatchOperation.cs" />
     <Compile Include="NatLangParser\MatchBuilder.cs" />
