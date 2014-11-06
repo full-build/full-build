@@ -24,7 +24,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using FullBuild.Helpers;
 
@@ -32,17 +32,17 @@ namespace FullBuild.Model
 {
     internal class Project
     {
-        public Project(Guid guid, string projectFile, string assemblyName, string extension, string fxTarget, IEnumerable<Guid> projectReferences,
-                       IEnumerable<string> binaryReferences, IEnumerable<string> packageReferences)
+        public Project(Guid guid, string projectFile, string assemblyName, string extension, string fxTarget, ImmutableList<Guid> projectReferences,
+                       ImmutableList<string> binaryReferences, ImmutableList<string> packageReferences)
         {
             AssemblyName = assemblyName;
             Extension = extension;
             Guid = guid;
             ProjectFile = projectFile.ToUnixSeparator();
             FxTarget = fxTarget;
-            BinaryReferences = binaryReferences.ToList();
-            ProjectReferences = projectReferences.ToList();
-            PackageReferences = packageReferences.ToList();
+            BinaryReferences = binaryReferences;
+            ProjectReferences = projectReferences;
+            PackageReferences = packageReferences;
         }
 
         public string AssemblyName { get; private set; }
@@ -55,10 +55,28 @@ namespace FullBuild.Model
 
         public string FxTarget { get; set; }
 
-        public IList<Guid> ProjectReferences { get; private set; }
+        public ImmutableList<Guid> ProjectReferences { get; private set; }
 
-        public IList<string> BinaryReferences { get; private set; }
+        public ImmutableList<string> BinaryReferences { get; private set; }
 
-        public IList<string> PackageReferences { get; private set; }
+        public ImmutableList<string> PackageReferences { get; private set; }
+
+        public Project AddProjectReference(Guid project)
+        {
+            var newProjects = ProjectReferences.Add(project).Distinct().ToImmutableList();
+            return new Project(Guid, ProjectFile, AssemblyName, Extension, FxTarget, newProjects, BinaryReferences, PackageReferences);
+        }
+
+        public Project RemoveBinaryReference(string binary)
+        {
+            var newBinaries = BinaryReferences.Remove(binary, StringComparer.InvariantCultureIgnoreCase);
+            return new Project(Guid, ProjectFile, AssemblyName, Extension, FxTarget, ProjectReferences, newBinaries, PackageReferences);
+        }
+
+        public Project RemovePackageReference(string package)
+        {
+            var newPackages = PackageReferences.Remove(package, StringComparer.InvariantCultureIgnoreCase);
+            return new Project(Guid, ProjectFile, AssemblyName, Extension, FxTarget, ProjectReferences, BinaryReferences, newPackages);
+        }
     }
 }

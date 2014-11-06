@@ -52,7 +52,6 @@ namespace FullBuild.NatLangParser
             var isMatch = true;
             var argIndex = 0;
             var opIndex = 0;
-            var acc = false;
             IMatchOperation op = null;
             string key = null;
             while (isMatch && argIndex < args.Length && opIndex < _operations.Length)

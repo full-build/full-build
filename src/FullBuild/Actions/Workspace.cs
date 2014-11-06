@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -53,11 +54,92 @@ namespace FullBuild.Actions
             anthology = UpdateAnthologyFromSource(config, workspace, anthology);
             Dump(anthology);
 
-            // first merge with existing one
+            // Promotion
+            anthology = PromoteToProject(anthology);
+
+            // merge with existing
             anthology = MergeNewAnthologyWithExisting(anthology);
 
             // Generate import files
             GenerateImports(anthology);
+        }
+
+        private Anthology PromoteToProject(Anthology anthology)
+        {
+            var pkgsDir = WellKnownFolders.GetPackageDirectory();
+
+            // 1. remove binary reference imported from packages
+            foreach(var project in anthology.Projects)
+            {
+                // gather all assemblies from packages in this project
+                var importedAssemblies = (from pkgRef in project.PackageReferences
+                                          let pkgdir = pkgsDir.GetDirectory(pkgRef)
+                                          where pkgdir.Exists
+                                          select Nuspec.Assemblies(pkgdir)).SelectMany(x => x).Distinct(StringComparer.InvariantCultureIgnoreCase);
+
+                // remove imported assemblies
+                var newProject = importedAssemblies.Aggregate(project, (p, a) => p.RemoveBinaryReference(a));
+                anthology = anthology.AddOrUpdateProject(newProject);
+            }
+
+            // 2. promote package to project
+            var pkg2prj = from package in anthology.Packages
+                          let pkgdir = pkgsDir.GetDirectory(package.Name)
+                          where pkgdir.Exists
+                          let assemblies = Nuspec.Assemblies(pkgdir)
+                          from project in anthology.Projects
+                          where assemblies.Contains(project.AssemblyName, StringComparer.InvariantCultureIgnoreCase)
+                          select new {Pkg = package, Prj = project};
+
+            foreach(var p2p in pkg2prj)
+            {
+                _logger.Info("Migrating package {0} to project {1}", p2p.Pkg.Name, p2p.Prj.ProjectFile);
+                foreach(var project in anthology.Projects)
+                {
+                    if (project.PackageReferences.Contains(p2p.Pkg.Name, StringComparer.InvariantCultureIgnoreCase))
+                    {
+                        var newProject = project.RemovePackageReference(p2p.Pkg.Name);
+                        newProject = newProject.AddProjectReference(p2p.Prj.Guid);
+                        anthology = anthology.AddOrUpdateProject(newProject);
+                    }
+                }
+            }
+
+            // 3. remove empty package
+            var emptyPackages = from package in anthology.Packages
+                                let pkgdir = pkgsDir.GetDirectory(package.Name)
+                                where pkgdir.Exists
+                                let assemblies = Nuspec.Assemblies(pkgdir)
+                                where !assemblies.Any()
+                                select package;
+
+            foreach(var project in anthology.Projects)
+            {
+                var newProject = emptyPackages.Aggregate(project, (p, pa) => p.RemovePackageReference(pa.Name));
+                anthology = anthology.AddOrUpdateProject(newProject);
+            }
+
+            anthology = emptyPackages.Aggregate(anthology, (a, p) => a.RemovePackage(p));
+
+            // 4. remove unused package
+            var usedPackages = anthology.Projects.SelectMany(x => x.PackageReferences).Distinct();
+
+            var packagesToRemove = from package in anthology.Packages
+                                   where !usedPackages.Contains(package.Name, StringComparer.InvariantCultureIgnoreCase)
+                                   select package;
+
+            anthology = packagesToRemove.Aggregate(anthology, (a, p) => a.RemovePackage(p));
+
+            // 5. remove unused binary
+            var usedBinaries = anthology.Projects.SelectMany(x => x.BinaryReferences).Distinct();
+
+            var binariesToRemove = from binary in anthology.Binaries
+                                   where !usedBinaries.Contains(binary.AssemblyName, StringComparer.InvariantCultureIgnoreCase)
+                                   select binary;
+
+            anthology = binariesToRemove.Aggregate(anthology, (a, b) => a.RemoveBinary(b));
+
+            return anthology;
         }
 
         public void Init(string path)
@@ -240,7 +322,7 @@ namespace FullBuild.Actions
                                       where importProject.InvariantStartsWith(WellKnownFolders.MsBuildProjectDir)
                                       let importProjectName = Path.GetFileNameWithoutExtension(importProject)
                                       select Guid.Parse(importProjectName);
-            var allProjectReferences = projectReferences.Concat(fbProjectReferences);
+            var allProjectReferences = projectReferences.Concat(fbProjectReferences).ToImmutableList();
 
             // extract binary references - both nuget and direct reference to assemblies (broken project reference)
             var binaries = from binRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "Reference")
@@ -252,7 +334,7 @@ namespace FullBuild.Actions
             binaries.Where(x => x.HintPath == null && !x.AssemblyName.InvariantStartsWith("System"))
                     .ForEach(x => _logger.Warn("Spurious assembly reference {0} in project {1}", x.AssemblyName, projectFileName));
 
-            var binaryReferences = binaries.Select(x => x.AssemblyName);
+            var binaryReferences = binaries.Select(x => x.AssemblyName).ToImmutableList();
 
             var nugetPackages = GetNugetPackages(projectFile.Directory);
             var fbPackages = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
@@ -261,7 +343,7 @@ namespace FullBuild.Actions
                              let importProjectName = Path.GetFileNameWithoutExtension(importProject)
                              select new Model.Package(importProjectName, "0.0.0");
             var packages = nugetPackages.Concat(fbPackages);
-            var packageNames = packages.Select(x => x.Name);
+            var packageNames = packages.Select(x => x.Name).ToImmutableList();
 
             var project = new Project(projectGuid, projectFileName, assemblyName, extension, fxTarget, allProjectReferences, binaryReferences, packageNames);
             anthology = anthology.AddOrUpdateProject(project);

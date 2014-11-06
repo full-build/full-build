@@ -93,6 +93,10 @@ namespace FullBuild.Actions
                 foreach(var refBin in projectDef.BinaryReferences)
                 {
                     var bin = FindBinaryFromAssemblyName(anthology, refBin);
+                    if (null == bin)
+                    {
+                        Console.WriteLine("Failed to find binary from assembly name {0}", refBin);
+                    }
 
                     var hintPath = null != bin.HintPath ? new XElement(XmlHelpers.NsMsBuild + "HintPath", bin.HintPath) : null;
                     var binReference = new XElement(XmlHelpers.NsMsBuild + "Reference",

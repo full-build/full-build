@@ -80,32 +80,45 @@ namespace FullBuild
 
             var parser = new Parser
                          {
+                             // init workspace
                              MatchBuilder.Describe("initialize workspace in folder <path>.")
                                          .Command("init")
                                          .Command("workspace")
                                          .Param(path)
                                          .Do(ctx => InitWorkspace(ctx.Get(path))),
+
+                             // update workspace
                              MatchBuilder.Describe("update workspace with projects or packages changes.")
                                          .Command("update")
                                          .Command("workspace")
                                          .Do(ctx => UpdateWorkspace()),
+
+                             // update package
                              MatchBuilder.Describe("update packages.")
                                          .Command("update")
                                          .Command("package")
                                          .Do(ctx => UpdatePackage()),
+
+                             // update source
                              MatchBuilder.Describe("update sources from source control.")
                                          .Command("update")
                                          .Command("source")
                                          .Do(ctx => UpdateSource()),
+
+                             // update view <viewname>
                              MatchBuilder.Describe("update view <viewname>.")
                                          .Command("update")
                                          .Command("view")
                                          .Param(viewname)
                                          .Do(ctx => UpdateView(ctx.Get(viewname))),
+
+                             // fix source
                              MatchBuilder.Describe("fix sources to ensure compatibility with full-build.")
                                          .Command("fix")
                                          .Command("source")
                                          .Do(ctx => FixSource()),
+
+                             // init view <viewname> with <repos> ...
                              MatchBuilder.Describe("create solution file <viewname> with provided repositories (<repos>).")
                                          .Command("init")
                                          .Command("view")

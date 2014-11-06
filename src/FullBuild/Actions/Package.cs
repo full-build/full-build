@@ -30,14 +30,11 @@ using System.Xml.Linq;
 using FullBuild.Helpers;
 using FullBuild.Model;
 using Newtonsoft.Json;
-using NLog;
 
 namespace FullBuild.Actions
 {
     internal class Package
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
         public void Update()
         {
             // read anthology.json
@@ -49,62 +46,8 @@ namespace FullBuild.Actions
             foreach(var pkg in anthology.Packages)
             {
                 Nuget.InstallPackage(pkg);
-            }
-
-            var pkgsDir = WellKnownFolders.GetPackageDirectory();
-            var packageToRemove = new List<Model.Package>();
-            foreach(var pkg in anthology.Packages)
-            {
-                var pkgDir = pkgsDir.GetDirectory(pkg.Name);
-                var pkgAssemblies = Nuspec.Assemblies(pkgDir);
-                var forceRemove = ! pkgAssemblies.Any();
-
-                // remove binaries declared in packages
-                var binAssembliesToRemove = (from pkgAssembly in pkgAssemblies
-                                             from binAssembly in anthology.Binaries
-                                             where pkgAssembly.InvariantEquals(binAssembly.AssemblyName)
-                                             select binAssembly).ToList();
-
-                anthology = binAssembliesToRemove.Aggregate(anthology, (a, b) => a.RemoveBinary(b));
-
-                binAssembliesToRemove.ForEach(x => anthology.Projects.ForEach(y => y.BinaryReferences.Remove(x.AssemblyName)));
-
-                // remove packages identified as project
-                var projectForPackage = (from pkgAssembly in pkgAssemblies
-                                         from project in anthology.Projects
-                                         where pkgAssembly.InvariantEquals(project.AssemblyName)
-                                         select project);
-                var distinctProjectName = (from p in projectForPackage
-                                           select p.AssemblyName).Distinct();
-
-                if (forceRemove)
-                {
-                    packageToRemove.Add(pkg);
-                    anthology.Projects.ForEach(x => x.PackageReferences.Remove(pkg.Name));
-                }
-
-                // several projects with same output can contribute to the package
-                if (1 == distinctProjectName.Count() && 1 < projectForPackage.Count())
-                {
-                    projectForPackage.ForEach(x => _logger.Warn("Nugets generated probably using more than one project {0}", x.ProjectFile));
-                }
-
-                // single project found ==> we can safely migrate the package to project
-                if (1 == projectForPackage.Count())
-                {
-                    packageToRemove.Add(pkg);
-                    anthology.Projects.Where(x => x.PackageReferences.Contains(pkg.Name)).ForEach(x => x.ProjectReferences.Add(projectForPackage.Single().Guid));
-                    anthology.Projects.ForEach(x => x.PackageReferences.Remove(pkg.Name));
-                }
-
                 GenerateTargetsForProject(pkg);
             }
-
-            // remove unused packages
-            anthology = packageToRemove.Aggregate(anthology, (a, p) => a.RemovePackage(p));
-
-            var newJson = JsonConvert.SerializeObject(anthology, Formatting.Indented);
-            File.WriteAllText(anthologyFile.FullName, newJson);
         }
 
         private static XElement Generatewhen(IEnumerable<string> foldersToTry, string fxVersion, DirectoryInfo libDir)
