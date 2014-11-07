@@ -24,7 +24,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using FullBuild.Actions;
+using FullBuild.Commands;
 using FullBuild.NatLangParser;
 
 namespace FullBuild
@@ -56,7 +56,7 @@ namespace FullBuild
 
         private static void ConvertSources()
         {
-            var handler = new Source();
+            var handler = new Project();
             handler.Convert();
         }
 
@@ -115,7 +115,7 @@ namespace FullBuild
                              // fix source
                              MatchBuilder.Describe("convert projects to ensure compatibility with full-build.")
                                          .Command("convert")
-                                         .Command("sources")
+                                         .Command("projects")
                                          .Do(ctx => ConvertSources()),
 
                              // init view <viewname> with <repos> ...
