@@ -25,7 +25,7 @@
 
 using System.IO;
 
-namespace FullBuild
+namespace FullBuild.SourceControl
 {
     internal interface ISourceControl
     {

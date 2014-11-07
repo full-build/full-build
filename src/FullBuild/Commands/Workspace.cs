@@ -128,7 +128,7 @@ namespace FullBuild.Commands
         {
             var pkgsDir = WellKnownFolders.GetPackageDirectory();
 
-             var pkg2prj = from package in anthology.Packages
+            var pkg2prj = from package in anthology.Packages
                           let pkgdir = pkgsDir.GetDirectory(package.Name)
                           where pkgdir.Exists
                           let assemblies = Nuspec.Assemblies(pkgdir)
@@ -190,6 +190,7 @@ namespace FullBuild.Commands
                 throw new ArgumentException("Workspace is already initialized");
             }
 
+            // get bootstrap config
             var config = ConfigManager.GetConfig(wsDir);
 
             var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.SourceControl);
@@ -198,6 +199,7 @@ namespace FullBuild.Commands
             // force a .gitignore
             sourceControl.AddIgnore(admDir);
 
+            // reload config now
             config = ConfigManager.GetConfig(wsDir);
             foreach(var repo in config.SourceRepos)
             {
