@@ -138,11 +138,11 @@ namespace FullBuild.Commands
 
             foreach(var p2p in pkg2prj)
             {
-                var nbProjects = pkg2prj.Count(x => x.Pkg == p2p.Pkg);
-                if (1 < nbProjects)
+                var targetProjects = pkg2prj.Where(x => x.Pkg == p2p.Pkg);
+                if (1 < targetProjects.Count())
                 {
-                    Console.WriteLine("WARNING: Can't promote package to project. Candidate projects found:");
-                    pkg2prj.ForEach(x => Console.WriteLine("  {0}", Path.GetFileName(x.Prj.ProjectFile)));
+                    Console.WriteLine("WARNING: Too many candidate projects to promote package {0} to project:", p2p.Pkg.Name);
+                    targetProjects.ForEach(x => Console.WriteLine("  {0}", Path.GetFileName(x.Prj.ProjectFile)));
                 }
                 else
                 {
@@ -243,12 +243,9 @@ namespace FullBuild.Commands
 
         private static Anthology UpdateAnthologyFromSource(FullBuildConfig config, DirectoryInfo workspace, Anthology anthology)
         {
-            _logger.Debug("Anthology contains {0} projects", anthology.Projects.Count());
             foreach(var repo in config.SourceRepos)
             {
-                Console.WriteLine("Processing repo {0}", repo.Name);
-
-                _logger.Debug("Processing repo {0}", repo.Name);
+                Console.WriteLine("Processing repo {0}:", repo.Name);
                 var repoDir = workspace.GetDirectory(repo.Name);
 
                 // delete all solution files
@@ -257,11 +254,7 @@ namespace FullBuild.Commands
 
                 // process all projects
                 var csprojs = repoDir.EnumerateFiles("*.csproj", SearchOption.AllDirectories);
-                _logger.Debug("Found {0} projects", csprojs.Count());
-
                 anthology = csprojs.Aggregate(anthology, (a, p) => ParseAndAddProject(workspace, p, a));
-
-                _logger.Debug("Project count {0}", anthology.Projects.Count());
             }
 
             return anthology;
