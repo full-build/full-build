@@ -6,7 +6,7 @@
 ..\..\src\bin\Debug\FullBuild update workspace || goto :ko
 
 @echo ************************************************************************************
-..\..\src\bin\Debug\FullBuild convert sources || goto :ko
+..\..\src\bin\Debug\FullBuild convert projects || goto :ko
 
 @echo ************************************************************************************
 ..\..\src\bin\Debug\FullBuild update packages || goto :ko

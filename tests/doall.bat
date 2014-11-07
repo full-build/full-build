@@ -8,7 +8,7 @@
 ..\..\src\bin\Debug\FullBuild update workspace || goto :ko
 
 @echo ************************************************************************************
-..\..\src\bin\Debug\FullBuild convert sources || goto :ko
+..\..\src\bin\Debug\FullBuild convert projects || goto :ko
 
 @echo ************************************************************************************
 ..\..\src\bin\Debug\FullBuild init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko
