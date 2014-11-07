@@ -44,9 +44,10 @@ namespace FullBuild.Commands
             var json = File.ReadAllText(anthologyFile.FullName);
             var anthology = JsonConvert.DeserializeObject<Anthology>(json);
 
+            Console.WriteLine("Installing packages:");
             foreach(var pkg in anthology.Packages)
             {
-                Console.WriteLine("Installing package {0} {1}", pkg.Name, pkg.Version);
+                Console.WriteLine("  {0} {1}", pkg.Name, pkg.Version);
                 Nuget.InstallPackage(pkg);
                 GenerateTargetsForProject(pkg);
             }
