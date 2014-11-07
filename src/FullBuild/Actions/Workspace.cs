@@ -61,7 +61,7 @@ namespace FullBuild.Actions
             handler.Update();
 
             // Promotion
-            anthology = PromoteToProject(anthology);
+            anthology = OptimizeAnthology(anthology);
 
             // merge with existing
             anthology = MergeNewAnthologyWithExisting(anthology);
@@ -70,26 +70,65 @@ namespace FullBuild.Actions
             GenerateImports(anthology);
         }
 
-        private Anthology PromoteToProject(Anthology anthology)
+        private static Anthology OptimizeAnthology(Anthology anthology)
+        {
+            anthology = RemoveBinariesFromPackages(anthology);
+            anthology = PromotePackageToProject(anthology);
+            anthology = RemoveUnusedStuff(anthology);
+            return anthology;
+        }
+
+        private static Anthology RemoveUnusedStuff(Anthology anthology)
+        {
+            // remove empty packages (no assembly)
+            anthology = RemoveEmptyPackages(anthology);
+
+            // remove unused package
+            var usedPackages = anthology.Projects.SelectMany(x => x.PackageReferences).Distinct();
+
+            var packagesToRemove = from package in anthology.Packages
+                                   where !usedPackages.Contains(package.Name, StringComparer.InvariantCultureIgnoreCase)
+                                   select package;
+
+            anthology = packagesToRemove.Aggregate(anthology, (a, p) => a.RemovePackage(p));
+
+            // remove unused binary
+            var usedBinaries = anthology.Projects.SelectMany(x => x.BinaryReferences).Distinct();
+
+            var binariesToRemove = from binary in anthology.Binaries
+                                   where !usedBinaries.Contains(binary.AssemblyName, StringComparer.InvariantCultureIgnoreCase)
+                                   select binary;
+
+            anthology = binariesToRemove.Aggregate(anthology, (a, b) => a.RemoveBinary(b));
+            return anthology;
+        }
+
+        private static Anthology RemoveEmptyPackages(Anthology anthology)
         {
             var pkgsDir = WellKnownFolders.GetPackageDirectory();
 
-            // 1. remove binary reference imported from packages
+            var emptyPackages = from package in anthology.Packages
+                                let pkgdir = pkgsDir.GetDirectory(package.Name)
+                                where pkgdir.Exists
+                                let assemblies = Nuspec.Assemblies(pkgdir)
+                                where !assemblies.Any()
+                                select package;
+
             foreach(var project in anthology.Projects)
             {
-                // gather all assemblies from packages in this project
-                var importedAssemblies = (from pkgRef in project.PackageReferences
-                                          let pkgdir = pkgsDir.GetDirectory(pkgRef)
-                                          where pkgdir.Exists
-                                          select Nuspec.Assemblies(pkgdir)).SelectMany(x => x).Distinct(StringComparer.InvariantCultureIgnoreCase);
-
-                // remove imported assemblies
-                var newProject = importedAssemblies.Aggregate(project, (p, a) => p.RemoveBinaryReference(a));
+                var newProject = emptyPackages.Aggregate(project, (p, pa) => p.RemovePackageReference(pa.Name));
                 anthology = anthology.AddOrUpdateProject(newProject);
             }
 
-            // 2. promote package to project
-            var pkg2prj = from package in anthology.Packages
+            anthology = emptyPackages.Aggregate(anthology, (a, p) => a.RemovePackage(p));
+            return anthology;
+        }
+
+        private static Anthology PromotePackageToProject(Anthology anthology)
+        {
+            var pkgsDir = WellKnownFolders.GetPackageDirectory();
+
+             var pkg2prj = from package in anthology.Packages
                           let pkgdir = pkgsDir.GetDirectory(package.Name)
                           where pkgdir.Exists
                           let assemblies = Nuspec.Assemblies(pkgdir)
@@ -118,41 +157,24 @@ namespace FullBuild.Actions
                     }
                 }
             }
+            return anthology;
+        }
 
-            // 3. remove empty package
-            var emptyPackages = from package in anthology.Packages
-                                let pkgdir = pkgsDir.GetDirectory(package.Name)
-                                where pkgdir.Exists
-                                let assemblies = Nuspec.Assemblies(pkgdir)
-                                where !assemblies.Any()
-                                select package;
-
+        private static Anthology RemoveBinariesFromPackages(Anthology anthology)
+        {
+            var pkgsDir = WellKnownFolders.GetPackageDirectory();
             foreach(var project in anthology.Projects)
             {
-                var newProject = emptyPackages.Aggregate(project, (p, pa) => p.RemovePackageReference(pa.Name));
+                // gather all assemblies from packages in this project
+                var importedAssemblies = (from pkgRef in project.PackageReferences
+                                          let pkgdir = pkgsDir.GetDirectory(pkgRef)
+                                          where pkgdir.Exists
+                                          select Nuspec.Assemblies(pkgdir)).SelectMany(x => x).Distinct(StringComparer.InvariantCultureIgnoreCase);
+
+                // remove imported assemblies
+                var newProject = importedAssemblies.Aggregate(project, (p, a) => p.RemoveBinaryReference(a));
                 anthology = anthology.AddOrUpdateProject(newProject);
             }
-
-            anthology = emptyPackages.Aggregate(anthology, (a, p) => a.RemovePackage(p));
-
-            // 4. remove unused package
-            var usedPackages = anthology.Projects.SelectMany(x => x.PackageReferences).Distinct();
-
-            var packagesToRemove = from package in anthology.Packages
-                                   where !usedPackages.Contains(package.Name, StringComparer.InvariantCultureIgnoreCase)
-                                   select package;
-
-            anthology = packagesToRemove.Aggregate(anthology, (a, p) => a.RemovePackage(p));
-
-            // 5. remove unused binary
-            var usedBinaries = anthology.Projects.SelectMany(x => x.BinaryReferences).Distinct();
-
-            var binariesToRemove = from binary in anthology.Binaries
-                                   where !usedBinaries.Contains(binary.AssemblyName, StringComparer.InvariantCultureIgnoreCase)
-                                   select binary;
-
-            anthology = binariesToRemove.Aggregate(anthology, (a, b) => a.RemoveBinary(b));
-
             return anthology;
         }
 
@@ -170,18 +192,16 @@ namespace FullBuild.Actions
             var config = ConfigManager.GetConfig(wsDir);
 
             var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.SourceControl);
-            sourceControl.Clone("full-build", config.AdminRepo, admDir);
+            sourceControl.Clone(admDir, "full-build", config.AdminRepo);
 
             // force a .gitignore
-            //var gitIgnoreFile = admDir.GetFile(".gitignore");
-            //var gitIgnore = new StringBuilder().AppendLine("cache").AppendLine("projects").AppendLine("views").ToString();
-            //File.WriteAllText(gitIgnoreFile.FullName, gitIgnore);
+            sourceControl.AddIgnore(admDir);
 
             config = ConfigManager.GetConfig(wsDir);
             foreach(var repo in config.SourceRepos)
             {
                 var repoDir = wsDir.GetDirectory(repo.Name);
-                sourceControl.Clone(repo.Name, repo.Url, repoDir);
+                sourceControl.Clone(repoDir, repo.Name, repo.Url);
             }
         }
 
@@ -223,6 +243,8 @@ namespace FullBuild.Actions
             _logger.Debug("Anthology contains {0} projects", anthology.Projects.Count());
             foreach(var repo in config.SourceRepos)
             {
+                Console.WriteLine("Processing repo {0}", repo.Name);
+
                 _logger.Debug("Processing repo {0}", repo.Name);
                 var repoDir = workspace.GetDirectory(repo.Name);
 
@@ -298,27 +320,10 @@ namespace FullBuild.Actions
             return packages;
         }
 
-        private static void Dump(Anthology anthology)
-        {
-            foreach(var project in anthology.Projects)
-            {
-                _logger.Debug("Consistency for project {0}", project.GetName());
-
-                foreach(var projectDependency in project.ProjectReferences)
-                {
-                    var target = anthology.Projects.Single(x => x.Guid == projectDependency);
-                    _logger.Debug(" --> {0}", target.GetName());
-                }
-
-                foreach(var binaryDependency in project.BinaryReferences)
-                {
-                    _logger.Debug(" ++ {0}", binaryDependency);
-                }
-            }
-        }
-
         private static Anthology ParseAndAddProject(DirectoryInfo workspace, FileInfo projectFile, Anthology anthology)
         {
+            Console.WriteLine("  Found project {0}/{1}", projectFile.Directory.Name, projectFile.Name);
+
             var xdoc = XDocument.Load(projectFile.FullName);
 
             var projectFileName = projectFile.FullName.Substring(workspace.FullName.Length + 1);

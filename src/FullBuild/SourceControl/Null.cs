@@ -30,9 +30,9 @@ namespace FullBuild.SourceControl
 {
     public class Null : ISourceControl
     {
-        public void Clone(string name, string url, DirectoryInfo target)
+        public void Clone(DirectoryInfo target, string name, string url)
         {
-            Console.WriteLine("Null.Clone {0} {1} {1}", name, url, target);
+            Console.WriteLine("Null.Clone {0} {1} {2}", name, url, target);
         }
 
         public void Checkout(string name, string url)
@@ -43,6 +43,11 @@ namespace FullBuild.SourceControl
         public void Pull(string name, string url)
         {
             Console.WriteLine("Null.Pull {0}", name);
+        }
+
+        public void AddIgnore(DirectoryInfo rootInfo)
+        {
+            Console.WriteLine("Null.AddIgnore {0}", rootInfo);
         }
 
         public void Add(DirectoryInfo repoDir, FileInfo file)
