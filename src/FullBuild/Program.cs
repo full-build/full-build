@@ -57,7 +57,7 @@ namespace FullBuild
         private static void ConvertSources()
         {
             var handler = new Source();
-            handler.Fix();
+            handler.Convert();
         }
 
         private static void InitView(string viewName, string[] repos)
