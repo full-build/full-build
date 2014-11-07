@@ -6,10 +6,10 @@
 ..\..\src\bin\Debug\FullBuild update workspace || goto :ko
 
 @echo ************************************************************************************
-..\..\src\bin\Debug\FullBuild update package || goto :ko
+..\..\src\bin\Debug\FullBuild convert sources || goto :ko
 
 @echo ************************************************************************************
-..\..\src\bin\Debug\FullBuild fix source || goto :ko
+..\..\src\bin\Debug\FullBuild update packages || goto :ko
 
 @echo ************************************************************************************
 ..\..\src\bin\Debug\FullBuild init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko

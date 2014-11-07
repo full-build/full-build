@@ -52,7 +52,13 @@ namespace FullBuild.Actions
             // get all csproj in all repos only
             var anthology = LoadOrCreateAnthology();
             anthology = UpdateAnthologyFromSource(config, workspace, anthology);
-            Dump(anthology);
+
+            // merge with existing
+            anthology = MergeNewAnthologyWithExisting(anthology);
+
+            // get packages
+            var handler = new Package();
+            handler.Update();
 
             // Promotion
             anthology = PromoteToProject(anthology);

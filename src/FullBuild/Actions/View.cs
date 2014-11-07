@@ -50,6 +50,8 @@ namespace FullBuild.Actions
             var viewDir = WellKnownFolders.GetViewDirectory();
             var viewFile = viewDir.GetFile(viewName + ".view");
             File.WriteAllText(viewFile.FullName, sb.ToString());
+
+            UpdateView(viewName);
         }
 
         public void UpdateView(string viewName)
