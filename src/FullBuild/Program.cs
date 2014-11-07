@@ -43,7 +43,7 @@ namespace FullBuild
             handler.Update();
         }
 
-        private static void UpdatePackage()
+        private static void UpdatePackages()
         {
             var handler = new Package();
             handler.Update();
@@ -54,7 +54,7 @@ namespace FullBuild
             throw new NotImplementedException();
         }
 
-        private static void FixSource()
+        private static void ConvertSources()
         {
             var handler = new Source();
             handler.Fix();
@@ -96,13 +96,13 @@ namespace FullBuild
                              // update package
                              MatchBuilder.Describe("update packages.")
                                          .Command("update")
-                                         .Command("package")
-                                         .Do(ctx => UpdatePackage()),
+                                         .Command("packages")
+                                         .Do(ctx => UpdatePackages()),
 
                              // update source
                              MatchBuilder.Describe("update sources from source control.")
                                          .Command("update")
-                                         .Command("source")
+                                         .Command("sources")
                                          .Do(ctx => UpdateSource()),
 
                              // update view <viewname>
@@ -113,10 +113,10 @@ namespace FullBuild
                                          .Do(ctx => UpdateView(ctx.Get(viewname))),
 
                              // fix source
-                             MatchBuilder.Describe("fix sources to ensure compatibility with full-build.")
-                                         .Command("fix")
-                                         .Command("source")
-                                         .Do(ctx => FixSource()),
+                             MatchBuilder.Describe("convert projects to ensure compatibility with full-build.")
+                                         .Command("convert")
+                                         .Command("sources")
+                                         .Do(ctx => ConvertSources()),
 
                              // init view <viewname> with <repos> ...
                              MatchBuilder.Describe("create solution file <viewname> with provided repositories (<repos>).")
