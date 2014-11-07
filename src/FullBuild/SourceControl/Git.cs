@@ -33,10 +33,18 @@ namespace FullBuild.SourceControl
 {
     internal class Git : ISourceControl
     {
-        public void Clone(DirectoryInfo target, string name, string url)
+        public void Clone(DirectoryInfo rootDir, string name, string url)
         {
             Console.WriteLine("Cloning {0} to {1}", url, name);
-            Repository.Clone(url, target.FullName);
+            Repository.Clone(url, rootDir.FullName);
+        }
+
+        public void Commit(DirectoryInfo rootDir, string msg)
+        {
+            using (var repo = new Repository(rootDir.FullName))
+            {
+                repo.Commit(msg);
+            }
         }
 
         public void Checkout(string name, string url)
@@ -47,16 +55,26 @@ namespace FullBuild.SourceControl
         {
         }
 
-        public void AddIgnore(DirectoryInfo rootInfo)
+        public void AddIgnore(DirectoryInfo rootDir)
         {
-            var gitIgnoreFile = rootInfo.GetFile(".gitignore");
+            var gitIgnoreFile = rootDir.GetFile(".gitignore");
             var gitIgnore = new StringBuilder().AppendLine("cache").AppendLine("projects").AppendLine("views").ToString();
             File.WriteAllText(gitIgnoreFile.FullName, gitIgnore);
+
+            Add(rootDir, gitIgnoreFile);
         }
 
-        public void Add(DirectoryInfo repoDir, FileInfo file)
+        public string Tip(DirectoryInfo rootDir)
         {
-            using(var repo = new Repository(repoDir.FullName))
+            using (var repo = new Repository(rootDir.FullName))
+            {
+                return repo.Head.Tip.Sha;
+            }
+        }
+
+        public void Add(DirectoryInfo rootDir, FileInfo file)
+        {
+            using(var repo = new Repository(rootDir.FullName))
             {
                 repo.Index.Stage(file.FullName);
             }

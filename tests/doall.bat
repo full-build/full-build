@@ -13,7 +13,8 @@ copy ..\Template.csproj .full-build
 ..\..\src\bin\Debug\FullBuild convert projects || goto :ko
 
 @echo ************************************************************************************
-..\..\src\bin\Debug\FullBuild init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko
+..\..\src\bin\Debug\FullBuild init view cs with cassandra-sharp-contrib || goto :ko
+rem ..\..\src\bin\Debug\FullBuild init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko
 ..\..\src\bin\Debug\FullBuild update view cs || goto :ko
 
 msbuild cs.sln || goto :ko

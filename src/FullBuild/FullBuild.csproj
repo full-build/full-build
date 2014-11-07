@@ -100,7 +100,6 @@
     <Compile Include="SourceControl\Factory.cs" />
     <Compile Include="SourceControl\Git.cs" />
     <Compile Include="SourceControl\ISourceControl.cs" />
-    <Compile Include="SourceControl\Null.cs" />
     <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Commands\WellKnownFolders.cs" />
     <Compile Include="Helpers\XmlHelpers.cs" />

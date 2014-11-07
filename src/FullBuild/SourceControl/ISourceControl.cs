@@ -29,12 +29,17 @@ namespace FullBuild.SourceControl
 {
     internal interface ISourceControl
     {
-        void Clone(DirectoryInfo target, string name, string url);
+        void Clone(DirectoryInfo rootDir, string name, string url);
+
+        void AddIgnore(DirectoryInfo rootDir);
+
+        string Tip(DirectoryInfo rootDir);
+
+        void Commit(DirectoryInfo rootDir, string msg);
 
         void Checkout(string name, string url);
 
         void Pull(string name, string url);
 
-        void AddIgnore(DirectoryInfo rootInfo);
     }
 }
