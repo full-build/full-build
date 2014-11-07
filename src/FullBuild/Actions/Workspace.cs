@@ -102,11 +102,11 @@ namespace FullBuild.Actions
                 var nbProjects = pkg2prj.Count(x => x.Pkg == p2p.Pkg);
                 if (1 != nbProjects)
                 {
-                    _logger.Warn("Can't promote package to project - {0} projects found", nbProjects);
+                    Console.WriteLine("WARNING: Can't promote package to project - {0} projects found", nbProjects);
                 }
                 else
                 {
-                    _logger.Info("Migrating package {0} to project {1}", p2p.Pkg.Name, p2p.Prj.ProjectFile);
+                    _logger.Debug("Converting package {0} to project {1}", p2p.Pkg.Name, p2p.Prj.ProjectFile);
                     foreach(var project in anthology.Projects)
                     {
                         if (project.PackageReferences.Contains(p2p.Pkg.Name, StringComparer.InvariantCultureIgnoreCase))
@@ -343,10 +343,6 @@ namespace FullBuild.Actions
                            let assName = new AssemblyName((string) binRef.Attribute("Include")).Name
                            let maybeHintPath = binRef.Descendants(XmlHelpers.NsMsBuild + "HintPath").SingleOrDefault()
                            select new Binary(assName, null != maybeHintPath ? maybeHintPath.Value.ToUnixSeparator() : null);
-
-            // report spurious binaries reference (System* are mostly OK)
-            binaries.Where(x => x.HintPath == null && !x.AssemblyName.InvariantStartsWith("System"))
-                    .ForEach(x => _logger.Warn("Spurious assembly reference {0} in project {1}", x.AssemblyName, projectFileName));
 
             var binaryReferences = binaries.Select(x => x.AssemblyName).ToImmutableList();
 
