@@ -7,6 +7,8 @@
 @echo ************************************************************************************
 ..\..\src\bin\Debug\FullBuild update workspace || goto :ko
 
+copy ..\Template.csproj .full-build
+
 @echo ************************************************************************************
 ..\..\src\bin\Debug\FullBuild convert projects || goto :ko
 
