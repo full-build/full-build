@@ -139,9 +139,10 @@ namespace FullBuild.Commands
             foreach(var p2p in pkg2prj)
             {
                 var nbProjects = pkg2prj.Count(x => x.Pkg == p2p.Pkg);
-                if (1 != nbProjects)
+                if (1 < nbProjects)
                 {
-                    Console.WriteLine("WARNING: Can't promote package to project - {0} projects found", nbProjects);
+                    Console.WriteLine("WARNING: Can't promote package to project. Candidate projects found:");
+                    pkg2prj.ForEach(x => Console.WriteLine("  {0}", Path.GetFileName(x.Prj.ProjectFile)));
                 }
                 else
                 {
