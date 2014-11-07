@@ -38,24 +38,6 @@ namespace FullBuild.Actions
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        private static Project FindProjectFromGuid(Anthology anthology, Guid guid)
-        {
-            var project = anthology.Projects.SingleOrDefault(x => x.Guid == guid);
-            return project;
-        }
-
-        private static Model.Package FindPackageFromAssemblyName(Anthology anthology, string pkgName)
-        {
-            var pkg = anthology.Packages.SingleOrDefault(x => x.Name.InvariantEquals(pkgName));
-            return pkg;
-        }
-
-        private static Binary FindBinaryFromAssemblyName(Anthology anthology, string assName)
-        {
-            var bin = anthology.Binaries.SingleOrDefault(x => x.AssemblyName.InvariantEquals(assName));
-            return bin;
-        }
-
         public void Convert()
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
@@ -97,12 +79,7 @@ namespace FullBuild.Actions
 
                 foreach(var refBin in projectDef.BinaryReferences)
                 {
-                    var bin = FindBinaryFromAssemblyName(anthology, refBin);
-                    if (null == bin)
-                    {
-                        Console.WriteLine("Failed to find binary from assembly name {0}", refBin);
-                    }
-
+                    var bin = anthology.Binaries.SingleOrDefault(x => x.AssemblyName.InvariantEquals(refBin));
                     var hintPath = null != bin.HintPath ? new XElement(XmlHelpers.NsMsBuild + "HintPath", bin.HintPath) : null;
                     var binReference = new XElement(XmlHelpers.NsMsBuild + "Reference",
                                                     new XAttribute("Include", bin.AssemblyName),
@@ -113,7 +90,8 @@ namespace FullBuild.Actions
                 // add imports to project reference
                 foreach(var refGuid in projectDef.ProjectReferences)
                 {
-                    var refProject = FindProjectFromGuid(anthology, refGuid);
+                    var project = anthology.Projects.SingleOrDefault(x => x.Guid == refGuid);
+                    var refProject = project;
                     var targetFileName = refProject.Guid + ".targets";
                     var import = Path.Combine(WellKnownFolders.MsBuildProjectDir, targetFileName);
                     var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import));
@@ -123,7 +101,8 @@ namespace FullBuild.Actions
                 // add packages
                 foreach(var refPkg in projectDef.PackageReferences)
                 {
-                    var refPackage = FindPackageFromAssemblyName(anthology, refPkg);
+                    var pkg = anthology.Packages.SingleOrDefault(x => x.Name.InvariantEquals(refPkg));
+                    var refPackage = pkg;
                     var packageFileName = refPackage.Name + ".targets";
                     var import = Path.Combine(WellKnownFolders.MsBuildPackagesDir, packageFileName);
                     var condition = string.Format("'$({0}_Pkg)' == ''", refPackage.Name.Replace('-', '_'));
