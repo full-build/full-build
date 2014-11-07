@@ -23,6 +23,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -45,6 +46,7 @@ namespace FullBuild.Actions
 
             foreach(var pkg in anthology.Packages)
             {
+                Console.WriteLine("Installing package {0} {1}", pkg.Name, pkg.Version);
                 Nuget.InstallPackage(pkg);
                 GenerateTargetsForProject(pkg);
             }

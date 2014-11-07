@@ -25,13 +25,15 @@
 
 using System;
 using System.IO;
+using System.Text;
+using FullBuild.Helpers;
 using LibGit2Sharp;
 
 namespace FullBuild.SourceControl
 {
     internal class Git : ISourceControl
     {
-        public void Clone(string name, string url, DirectoryInfo target)
+        public void Clone(DirectoryInfo target, string name, string url)
         {
             Console.WriteLine("Cloning {0} to {1}", url, name);
             Repository.Clone(url, target.FullName);
@@ -43,6 +45,13 @@ namespace FullBuild.SourceControl
 
         public void Pull(string name, string url)
         {
+        }
+
+        public void AddIgnore(DirectoryInfo rootInfo)
+        {
+            var gitIgnoreFile = rootInfo.GetFile(".gitignore");
+            var gitIgnore = new StringBuilder().AppendLine("cache").AppendLine("projects").AppendLine("views").ToString();
+            File.WriteAllText(gitIgnoreFile.FullName, gitIgnore);
         }
 
         public void Add(DirectoryInfo repoDir, FileInfo file)
