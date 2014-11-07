@@ -50,12 +50,12 @@ namespace FullBuild
             return ReadConfig(xmlDoc);
         }
 
-        private static FullBuildBoostrapConfig ReadConfig(XmlDocument xmlDoc)
+        private static BoostrapConfig ReadConfig(XmlDocument xmlDoc)
         {
-            var xmlSer = new XmlSerializer(typeof(FullBuildBoostrapConfig));
+            var xmlSer = new XmlSerializer(typeof(BoostrapConfig));
             using(XmlReader xmlReader = new XmlNodeReader(xmlDoc))
             {
-                return (FullBuildBoostrapConfig) xmlSer.Deserialize(xmlReader);
+                return (BoostrapConfig) xmlSer.Deserialize(xmlReader);
             }
         }
     }

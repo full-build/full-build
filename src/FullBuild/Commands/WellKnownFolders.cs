@@ -27,7 +27,7 @@ using System;
 using System.IO;
 using FullBuild.Helpers;
 
-namespace FullBuild
+namespace FullBuild.Commands
 {
     internal class WellKnownFolders
     {

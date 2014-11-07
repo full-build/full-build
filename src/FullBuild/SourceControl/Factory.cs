@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using FullBuild.Helpers;
 
 namespace FullBuild.SourceControl
 {

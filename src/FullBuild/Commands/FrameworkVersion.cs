@@ -25,7 +25,7 @@
 
 using System.Collections.Generic;
 
-namespace FullBuild
+namespace FullBuild.Commands
 {
     internal static class FrameworkVersion
     {
