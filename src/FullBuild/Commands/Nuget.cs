@@ -23,30 +23,37 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
 using System.IO;
 using System.Net;
 using FullBuild.Helpers;
-using FullBuild.Model;
 using NLog;
 
-namespace FullBuild
+namespace FullBuild.Commands
 {
     internal static class Nuget
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public static void InstallPackage(Package pkg)
+        public static void InstallPackage(Model.Package pkg)
         {
+            var config = ConfigManager.GetConfig(WellKnownFolders.GetWorkspaceDirectory());
+
             var cacheDir = WellKnownFolders.GetCacheDirectory();
+            if (null != config.PackageGlobalCache)
+            {
+                cacheDir = new DirectoryInfo(config.PackageGlobalCache);
+                cacheDir.Create();
+            }
 
             // avoid downloading again the package (they are immutable)
             var pkgFile = new FileInfo(Path.Combine(cacheDir.FullName, string.Format("{0}.{1}.zip", pkg.Name, pkg.Version)));
             if (!pkgFile.Exists)
             {
-                DownloadNugetPackage(pkg, pkgFile);
+                DownloadNugetPackage(pkg, pkgFile, config.Nugets);
             }
 
-            var pkgsDir = WellKnownFolders.GetPackageDirectory();
+            DirectoryInfo pkgsDir = WellKnownFolders.GetPackageDirectory();
             var pkgDir = pkgsDir.GetDirectory(pkg.Name);
             if (pkgDir.Exists)
             {
@@ -59,9 +66,34 @@ namespace FullBuild
             System.IO.Compression.ZipFile.ExtractToDirectory(pkgFile.FullName, pkgDir.FullName);
         }
 
-        private static void DownloadNugetPackage(Package pkg, FileInfo pkgFile)
+        private static void DownloadNugetPackage(Model.Package pkg, FileInfo pkgFile, string[] nugets)
         {
-            var packageUrl = string.Format("https://www.nuget.org/api/v2/package/{0}/{1}", pkg.Name, pkg.Version);
+            if (null == nugets || 0 == nugets.Length)
+            {
+                nugets = new[] {"https://www.nuget.org/api/v2/package"};
+            }
+
+            foreach(var nuget in nugets)
+            {
+                try
+                {
+                    DownloadNugetPackage(pkg, pkgFile, nuget);
+                    return;
+                }
+                catch(Exception ex)
+                {
+                    _logger.Debug("Download error", ex);
+                    _logger.Debug("Failed to download package {0} {1} from {2}", pkg.Name, pkg.Version, nuget);
+                }
+            }
+
+            string msg = string.Format("Failed to download package {0} {1} from provided locations", pkg.Name, pkg.Version);
+            throw new ArgumentException(msg);
+        }
+
+        private static void DownloadNugetPackage(Model.Package pkg, FileInfo pkgFile, string nuget)
+        {
+            var packageUrl = string.Format("{0}/{1}/{2}", nuget, pkg.Name, pkg.Version);
             _logger.Debug("Downloading package {0}:{1} from {2}", pkg.Name, pkg.Version, packageUrl);
             var webClient = new WebClient();
             webClient.DownloadFile(packageUrl, pkgFile.FullName);

@@ -65,6 +65,8 @@
     <Compile Include="Commands\FrameworkVersion.cs" />
     <Compile Include="Commands\View.cs" />
     <Compile Include="Commands\Package.cs" />
+    <Compile Include="Config\AdminConfig.cs" />
+    <Compile Include="Config\BoostrapConfig.cs" />
     <Compile Include="Helpers\ConfigManager.cs" />
     <Compile Include="Config\ActionType.cs" />
     <Compile Include="Config\FullBuildConfig.cs" />
@@ -106,9 +108,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
