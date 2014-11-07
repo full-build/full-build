@@ -33,7 +33,6 @@ namespace FullBuild.SourceControl
     {
         private static readonly Dictionary<string, Type> _def = new Dictionary<string, Type>
                                                                 {
-                                                                    {"Default", typeof(Null)},
                                                                     {"Git", typeof(Git)},
                                                                 };
 

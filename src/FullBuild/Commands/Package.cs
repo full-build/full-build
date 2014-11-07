@@ -151,7 +151,8 @@ namespace FullBuild.Commands
                           let hintPath = Path.Combine(WellKnownFolders.MsBuildSolutionDir, relativePath)
                           select new XElement(XmlHelpers.NsMsBuild + "Reference",
                                               new XAttribute("Include", assemblyName),
-                                              new XElement(XmlHelpers.NsMsBuild + "HintPath", hintPath));
+                                              new XElement(XmlHelpers.NsMsBuild + "HintPath", hintPath),
+                                              new XElement(XmlHelpers.NsMsBuild + "Private", "true"));
 
             return new XElement(XmlHelpers.NsMsBuild + "ItemGroup", imports);
         }
