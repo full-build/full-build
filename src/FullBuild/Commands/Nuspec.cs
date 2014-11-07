@@ -28,7 +28,7 @@ using System.IO;
 using System.Linq;
 using FullBuild.Helpers;
 
-namespace FullBuild
+namespace FullBuild.Commands
 {
     internal class Nuspec
     {

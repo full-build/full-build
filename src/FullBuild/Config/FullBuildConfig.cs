@@ -23,38 +23,30 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.Xml.Serialization;
-
 namespace FullBuild.Config
 {
-    [XmlRoot("FullBuildConfig")]
-    public class FullBuildAdministrativeConfig
-    {
-        [XmlElement("BinRepo")]
-        public string BinRepo { get; set; }
-
-        [XmlElement("SourceRepo")]
-        public RepoConfig[] SourceRepos { get; set; }
-    }
-
-    [XmlRoot("FullBuildConfig")]
-    public class FullBuildBoostrapConfig
-    {
-        [XmlElement("SourceControl")]
-        public string SourceControl { get; set; }
-
-        [XmlElement("AdminRepo")]
-        public string AdminRepo { get; set; }
-    }
-
     public class FullBuildConfig
     {
-        public string SourceControl { get; set; }
+        public FullBuildConfig(BoostrapConfig boostrapConfig, AdminConfig adminConfig)
+        {
+            SourceControl = boostrapConfig.SourceControl;
+            AdminRepo = boostrapConfig.AdminRepo;
+            BinRepo = adminConfig.BinRepo;
+            SourceRepos = adminConfig.SourceRepos;
+            Nugets = adminConfig.Nugets;
+            PackageGlobalCache = boostrapConfig.PackageGlobalCache;
+        }
 
-        public string AdminRepo { get; set; }
+        public string SourceControl { get; private set; }
 
-        public string BinRepo { get; set; }
+        public string AdminRepo { get; private set; }
 
-        public RepoConfig[] SourceRepos { get; set; }
+        public string BinRepo { get; private set; }
+
+        public string[] Nugets { get; private set; }
+
+        public string PackageGlobalCache { get; private set; }
+
+        public RepoConfig[] SourceRepos { get; private set; }
     }
 }

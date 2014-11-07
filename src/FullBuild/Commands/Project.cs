@@ -71,7 +71,7 @@ namespace FullBuild.Commands
                 if (spuriousReferences.Any())
                 {
                     Console.WriteLine("WARNING: Project has spurious binary reference");
-                    foreach (var spuriousRef in spuriousReferences)
+                    foreach(var spuriousRef in spuriousReferences)
                     {
                         Console.WriteLine("\t{0}", spuriousRef);
                     }

@@ -23,43 +23,20 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.Configuration;
-using System.IO;
 using System.Xml.Serialization;
-using FullBuild.Commands;
-using FullBuild.Config;
 
-namespace FullBuild.Helpers
+namespace FullBuild.Config
 {
-    internal static class ConfigManager
+    [XmlRoot("FullBuildConfig")]
+    public class BoostrapConfig
     {
-        public static FullBuildConfig GetConfig(DirectoryInfo workspace)
-        {
-            var bootstrapConfig = (BoostrapConfig) ConfigurationManager.GetSection("FullBuildConfig");
-            bootstrapConfig.SourceControl = bootstrapConfig.SourceControl ?? "Git";
+        [XmlElement("SourceControl")]
+        public string SourceControl { get; set; }
 
-            var fbDir = workspace.GetDirectory(".full-build");
-            var adminConfig = LoadBootstrapConfig(fbDir);
-            var config = new FullBuildConfig(bootstrapConfig, adminConfig);
-            return config;
-        }
+        [XmlElement("PackageGlobalCache")]
+        public string PackageGlobalCache { get; set; }
 
-        private static AdminConfig LoadBootstrapConfig(DirectoryInfo fbDir)
-        {
-            var file = new FileInfo(Path.Combine(fbDir.FullName, "full-build.config"));
-            if (file.Exists)
-            {
-                var xmlSer = new XmlSerializer(typeof(AdminConfig));
-                using(var reader = new StreamReader(file.FullName))
-                {
-                    var bootstrapConfig = (AdminConfig) xmlSer.Deserialize(reader);
-                    bootstrapConfig.SourceRepos = bootstrapConfig.SourceRepos ?? new RepoConfig[0];
-
-                    return bootstrapConfig;
-                }
-            }
-
-            return new AdminConfig {SourceRepos = new RepoConfig[0]};
-        }
+        [XmlElement("AdminRepo")]
+        public string AdminRepo { get; set; }
     }
 }
