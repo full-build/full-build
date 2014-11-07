@@ -196,9 +196,6 @@ namespace FullBuild.Commands
             var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.SourceControl);
             sourceControl.Clone(admDir, "full-build", config.AdminRepo);
 
-            // force a .gitignore
-            sourceControl.AddIgnore(admDir);
-
             // reload config now
             config = ConfigManager.GetConfig(wsDir);
             foreach(var repo in config.SourceRepos)
@@ -208,7 +205,23 @@ namespace FullBuild.Commands
             }
 
             // copy all files from binary repo
-
+            var tip = sourceControl.Tip(admDir);
+            Console.WriteLine("Tip is {0}", tip);
+            var binDir = new DirectoryInfo(config.BinRepo);
+            var binVersionDir = binDir.GetDirectory(tip);
+            Console.WriteLine("BinDir source {0}", binVersionDir);
+            if (binVersionDir.Exists)
+            {
+                Console.WriteLine("Copying build output version {0}", tip);
+                var targetBinDir = wsDir.GetDirectory("bin");
+                targetBinDir.Create();
+                foreach (var binFile in binVersionDir.EnumerateFiles())
+                {
+                    Console.WriteLine("  {0}", binFile.Name);
+                    var targetFile = targetBinDir.GetFile(binFile.Name);
+                    binFile.CopyTo(targetFile.FullName, true);
+                }
+            }
         }
 
         private void GenerateImports(Anthology anthology)
@@ -236,7 +249,8 @@ namespace FullBuild.Commands
                                                      new XElement(XmlHelpers.NsMsBuild + "Reference",
                                                                   new XAttribute("Include", project.AssemblyName),
                                                                   new XAttribute("Condition", binCondition),
-                                                                  new XElement(XmlHelpers.NsMsBuild + "HintPath", binFile))));
+                                                                  new XElement(XmlHelpers.NsMsBuild + "HintPath", binFile),
+                                                                  new XElement(XmlHelpers.NsMsBuild + "Private", "true"))));
 
                 var targetFileName = project.Guid + ".targets";
                 var prjImport = targetDir.GetFile(targetFileName);
