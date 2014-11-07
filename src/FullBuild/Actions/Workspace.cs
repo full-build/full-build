@@ -93,14 +93,22 @@ namespace FullBuild.Actions
 
             foreach(var p2p in pkg2prj)
             {
-                _logger.Info("Migrating package {0} to project {1}", p2p.Pkg.Name, p2p.Prj.ProjectFile);
-                foreach(var project in anthology.Projects)
+                var nbProjects = pkg2prj.Count(x => x.Pkg == p2p.Pkg);
+                if (1 != nbProjects)
                 {
-                    if (project.PackageReferences.Contains(p2p.Pkg.Name, StringComparer.InvariantCultureIgnoreCase))
+                    _logger.Warn("Can't promote package to project - {0} projects found", nbProjects);
+                }
+                else
+                {
+                    _logger.Info("Migrating package {0} to project {1}", p2p.Pkg.Name, p2p.Prj.ProjectFile);
+                    foreach(var project in anthology.Projects)
                     {
-                        var newProject = project.RemovePackageReference(p2p.Pkg.Name);
-                        newProject = newProject.AddProjectReference(p2p.Prj.Guid);
-                        anthology = anthology.AddOrUpdateProject(newProject);
+                        if (project.PackageReferences.Contains(p2p.Pkg.Name, StringComparer.InvariantCultureIgnoreCase))
+                        {
+                            var newProject = project.RemovePackageReference(p2p.Pkg.Name);
+                            newProject = newProject.AddProjectReference(p2p.Prj.Guid);
+                            anthology = anthology.AddOrUpdateProject(newProject);
+                        }
                     }
                 }
             }
@@ -206,10 +214,10 @@ namespace FullBuild.Actions
 
         private static Anthology UpdateAnthologyFromSource(FullBuildConfig config, DirectoryInfo workspace, Anthology anthology)
         {
-            _logger.Info("Anthology contains {0} projects", anthology.Projects.Count());
+            _logger.Debug("Anthology contains {0} projects", anthology.Projects.Count());
             foreach(var repo in config.SourceRepos)
             {
-                _logger.Info("Processing repo {0}", repo.Name);
+                _logger.Debug("Processing repo {0}", repo.Name);
                 var repoDir = workspace.GetDirectory(repo.Name);
 
                 // delete all solution files
@@ -218,11 +226,11 @@ namespace FullBuild.Actions
 
                 // process all projects
                 var csprojs = repoDir.EnumerateFiles("*.csproj", SearchOption.AllDirectories);
-                _logger.Info("Found {0} projects", csprojs.Count());
+                _logger.Debug("Found {0} projects", csprojs.Count());
 
                 anthology = csprojs.Aggregate(anthology, (a, p) => ParseAndAddProject(workspace, p, a));
 
-                _logger.Info("Project count {0}", anthology.Projects.Count());
+                _logger.Debug("Project count {0}", anthology.Projects.Count());
             }
 
             return anthology;

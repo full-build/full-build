@@ -84,7 +84,7 @@ namespace FullBuild.Model
 
         public Anthology AddOrUpdateProject(Project project)
         {
-            return new Anthology(AddOrUpdate(project, _projects, x => x.AssemblyName.InvariantEquals(project.AssemblyName)),
+            return new Anthology(AddOrUpdate(project, _projects, x => x.Guid == project.Guid),
                                  _binaries,
                                  _packages);
         }
@@ -156,7 +156,7 @@ namespace FullBuild.Model
 
         public Anthology RemoveProject(Project project)
         {
-            return new Anthology(Remove(_projects, x => x.AssemblyName.InvariantEquals(project.AssemblyName)),
+            return new Anthology(Remove(_projects, x => x.Guid == project.Guid),
                                  _binaries,
                                  _packages);
         }
