@@ -206,6 +206,9 @@ namespace FullBuild.Commands
                 var repoDir = wsDir.GetDirectory(repo.Name);
                 sourceControl.Clone(repoDir, repo.Name, repo.Url);
             }
+
+            // copy all files from binary repo
+
         }
 
         private void GenerateImports(Anthology anthology)

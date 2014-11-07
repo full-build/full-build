@@ -45,14 +45,26 @@ namespace FullBuild.Commands
             var anthologyFile = admDir.GetFile(Anthology.AnthologyFileName);
             var oldJson = File.ReadAllText(anthologyFile.FullName);
             var anthology = JsonConvert.DeserializeObject<Anthology>(oldJson);
-
+            var templateFile = admDir.GetFile("Template.csproj");
             foreach(var projectDef in anthology.Projects)
             {
-                var projectFile = wsDir.GetFile(projectDef.ProjectFile);
-                var xdoc = XDocument.Load(projectFile.FullName);
-
                 _logger.Debug("Fixing project {0}", projectDef.GetName());
+                
+                FileInfo projectFile = wsDir.GetFile(projectDef.ProjectFile);
+                var realProjectDoc = XDocument.Load(projectFile.FullName);
 
+                // extract info from real project
+                var rootNamespace = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "RootNamespace").Single().Value;
+                var outputType = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single().Value;
+                var noneFiles = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "None").Where(x => ! ((string)x.Attribute("Include")).InvariantEquals("packages.config"));
+                var signAssembly = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "SignAssembly").SingleOrDefault();
+                var originatorKeyFile = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyOriginatorKeyFile").SingleOrDefault();
+                var targetFramework = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").Single().Value;
+
+                // prepare project structure either from template or original project file
+                var templateForProjectFile = templateFile.Exists ? templateFile : projectFile;
+                var xdoc = XDocument.Load(templateForProjectFile.FullName);
+                
                 // remove all import from .full-build and project reference
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference").Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantContains(WellKnownFolders.RelativeAdminDirectory)).Remove();
@@ -64,7 +76,20 @@ namespace FullBuild.Commands
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "RestorePackages").Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "ItemGroup").Where(x => !x.DescendantNodes().Any()).Remove();
 
+                // setup project guid
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single().Value = projectDef.Guid.ToString("B");
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single().Value = outputType;
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "RootNamespace").Single().Value = rootNamespace;
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyName").Single().Value = projectDef.AssemblyName;
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").Single().Value = targetFramework;
+                if (null != signAssembly)
+                {
+                    xdoc.Descendants(XmlHelpers.NsMsBuild + "SignAssembly").Single().Value = signAssembly.Value;
+                    xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyOriginatorKeyFile").Single().Value = originatorKeyFile.Value;
+                }
+
                 var firstItemGroup = xdoc.Descendants(XmlHelpers.NsMsBuild + "ItemGroup").First();
+                firstItemGroup.Add(noneFiles);
 
                 // generate binary references
                 var spuriousReferences = projectDef.BinaryReferences.Where(x => ! x.InvariantStartsWith("System"));
