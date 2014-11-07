@@ -56,7 +56,7 @@ namespace FullBuild.Actions
             return bin;
         }
 
-        public void Fix()
+        public void Convert()
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var admDir = WellKnownFolders.GetAdminDirectory();
@@ -85,9 +85,14 @@ namespace FullBuild.Actions
                 var firstItemGroup = xdoc.Descendants(XmlHelpers.NsMsBuild + "ItemGroup").First();
 
                 // generate binary references
-                if (projectDef.BinaryReferences.Any(x => ! x.InvariantStartsWith("System")))
+                var spuriousReferences = projectDef.BinaryReferences.Where(x => ! x.InvariantStartsWith("System"));
+                if (spuriousReferences.Any())
                 {
-                    _logger.Warn("Project has spurious binary reference");
+                    Console.WriteLine("WARNING: Project has spurious binary reference");
+                    foreach (var spuriousRef in spuriousReferences)
+                    {
+                        Console.WriteLine("\t{0}", spuriousRef);
+                    }
                 }
 
                 foreach(var refBin in projectDef.BinaryReferences)

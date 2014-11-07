@@ -23,6 +23,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
 using System.IO;
 using System.Net;
 using FullBuild.Helpers;
@@ -55,14 +56,14 @@ namespace FullBuild
 
             pkgDir.Create();
 
-            _logger.Info("Unzipping package {0}:{1}", pkg.Name, pkg.Version);
+            _logger.Debug("Unzipping package {0}:{1}", pkg.Name, pkg.Version);
             System.IO.Compression.ZipFile.ExtractToDirectory(pkgFile.FullName, pkgDir.FullName);
         }
 
         private static void DownloadNugetPackage(Package pkg, FileInfo pkgFile)
         {
             var packageUrl = string.Format("https://www.nuget.org/api/v2/package/{0}/{1}", pkg.Name, pkg.Version);
-            _logger.Info("Downloading package {0}:{1} from {2}", pkg.Name, pkg.Version, packageUrl);
+            _logger.Debug("Downloading package {0}:{1} from {2}", pkg.Name, pkg.Version, packageUrl);
             var webClient = new WebClient();
             webClient.DownloadFile(packageUrl, pkgFile.FullName);
         }
