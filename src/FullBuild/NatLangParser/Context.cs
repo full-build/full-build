@@ -53,10 +53,5 @@ namespace FullBuild.NatLangParser
             var value = (T) obj;
             return value;
         }
-
-        public T Get<T>(string name)
-        {
-            return (T) _parameters[name];
-        }
     }
 }

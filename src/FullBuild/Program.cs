@@ -43,20 +43,25 @@ namespace FullBuild
             handler.Update();
         }
 
-        private static void UpdatePackages()
+        private static void InstallPackages()
         {
-            var handler = new Package();
-            handler.Update();
+            var handler = new Packages();
+            handler.Install();
         }
 
-        private static void UpdateSource()
+        private static void RefreshSources()
+        {
+            Exec("echo ** running 'git pull --rebase' on %FULLBUILD_REPO% && git pull --rebase");
+        }
+
+        private static void RefreshWorkspace()
         {
             throw new NotImplementedException();
         }
 
-        private static void ConvertSources()
+        private static void ConvertProjects()
         {
-            var handler = new Project();
+            var handler = new Projects();
             handler.Convert();
         }
 
@@ -72,14 +77,34 @@ namespace FullBuild
             handler.UpdateView(viewName);
         }
 
+        private static void Exec(string command)
+        {
+            var handler = new Exec();
+            handler.ForEachRepo(command);
+        }
+
         private static int Main(string[] args)
         {
             var path = Parameter<string>.Create("path");
             var viewname = Parameter<string>.Create("viewname");
             var repos = Parameter<string[]>.Create("repos");
+            var command = Parameter<string>.Create("command");
 
             var parser = new Parser
                          {
+                             // ----------------------------------------------------------
+                             // porcelain commands
+                             // ----------------------------------------------------------
+
+                             // init view <viewname> with <repos> ...
+                             MatchBuilder.Describe("init view file <viewname> with provided repositories (<repos>).")
+                                         .Command("init")
+                                         .Command("view")
+                                         .Param(viewname)
+                                         .Command("with")
+                                         .Param(repos)
+                                         .Do(ctx => InitView(ctx.Get(viewname), ctx.Get(repos))),
+                                         
                              // init workspace
                              MatchBuilder.Describe("initialize workspace in folder <path>.")
                                          .Command("init")
@@ -87,45 +112,52 @@ namespace FullBuild
                                          .Param(path)
                                          .Do(ctx => InitWorkspace(ctx.Get(path))),
 
-                             // update workspace
-                             MatchBuilder.Describe("update workspace with projects or packages changes.")
-                                         .Command("update")
-                                         .Command("workspace")
-                                         .Do(ctx => UpdateWorkspace()),
-
-                             // update package
-                             MatchBuilder.Describe("update packages.")
-                                         .Command("update")
-                                         .Command("packages")
-                                         .Do(ctx => UpdatePackages()),
-
-                             // update source
-                             MatchBuilder.Describe("update sources from source control.")
-                                         .Command("update")
-                                         .Command("sources")
-                                         .Do(ctx => UpdateSource()),
-
                              // update view <viewname>
-                             MatchBuilder.Describe("update view <viewname>.")
+                             MatchBuilder.Describe("update solution <viewname>.")
                                          .Command("update")
                                          .Command("view")
                                          .Param(viewname)
                                          .Do(ctx => UpdateView(ctx.Get(viewname))),
+                                         
+                             // refresh workspace
+                             MatchBuilder.Describe("refresh workspace from remote.")
+                                         .Command("refresh")
+                                         .Command("workspace")
+                                         .Do(ctx => RefreshWorkspace()),
+
+                             // refresh source
+                             MatchBuilder.Describe("refresh sources from source control.")
+                                         .Command("refresh")
+                                         .Command("sources")
+                                         .Do(ctx => RefreshSources()),
+
+                            // exec
+                            MatchBuilder.Describe("exec command on each repo")
+                                        .Command("exec")
+                                        .Param(command)
+                                        .Do(ctx => Exec(ctx.Get(command))),
+
+                             // ----------------------------------------------------------
+                             // plumbing commands
+                             // ----------------------------------------------------------
+
+                             // update workspace
+                             MatchBuilder.Describe("update workspace with local changes.")
+                                         .Command("update")
+                                         .Command("workspace")
+                                         .Do(ctx => UpdateWorkspace()),
+
+                              // install package
+                             MatchBuilder.Describe("install packages.")
+                                         .Command("install")
+                                         .Command("packages")
+                                         .Do(ctx => InstallPackages()),
 
                              // fix source
                              MatchBuilder.Describe("convert projects to ensure compatibility with full-build.")
                                          .Command("convert")
                                          .Command("projects")
-                                         .Do(ctx => ConvertSources()),
-
-                             // init view <viewname> with <repos> ...
-                             MatchBuilder.Describe("create solution file <viewname> with provided repositories (<repos>).")
-                                         .Command("init")
-                                         .Command("view")
-                                         .Param(viewname)
-                                         .Command("with")
-                                         .Params<string>("repos")
-                                         .Do(ctx => InitView(ctx.Get(viewname), ctx.Get(repos)))
+                                         .Do(ctx => ConvertProjects()),
                          };
 
             if (! parser.Parse(args))
@@ -139,5 +171,6 @@ namespace FullBuild
 
             return 0;
         }
+
     }
 }
