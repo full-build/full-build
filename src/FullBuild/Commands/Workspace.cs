@@ -57,8 +57,8 @@ namespace FullBuild.Commands
             anthology = MergeNewAnthologyWithExisting(anthology);
 
             // get packages
-            var handler = new Package();
-            handler.Update();
+            var handler = new Packages();
+            handler.Install();
 
             // Promotion
             anthology = OptimizeAnthology(anthology);

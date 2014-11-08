@@ -34,9 +34,9 @@ using Newtonsoft.Json;
 
 namespace FullBuild.Commands
 {
-    internal class Package
+    internal class Packages
     {
-        public void Update()
+        public void Install()
         {
             // read anthology.json
             var admDir = WellKnownFolders.GetAdminDirectory();

@@ -34,7 +34,7 @@ using NLog;
 
 namespace FullBuild.Commands
 {
-    internal class Project
+    internal class Projects
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
