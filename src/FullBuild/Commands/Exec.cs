@@ -24,58 +24,42 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
+using FullBuild.Helpers;
 
-namespace FullBuild.NatLangParser
+namespace FullBuild.Commands
 {
-    public class FluentMatchBuilder
+    internal class Exec
     {
-        private readonly string _description;
-
-        private readonly List<KeyValuePair<string, IMatchOperation>> _operations = new List<KeyValuePair<string, IMatchOperation>>();
-
-        public FluentMatchBuilder(string description)
+        public void ForEachRepo(string command)
         {
-            _description = description;
-        }
+            var workspace = WellKnownFolders.GetWorkspaceDirectory();
+            var config = ConfigManager.GetConfig(workspace);
 
-        private void AddOperation(string name, IMatchOperation operation)
-        {
-            var kvp = new KeyValuePair<string, IMatchOperation>(name, operation);
-            _operations.Add(kvp);
-        }
-
-        public FluentMatchBuilder Param<T>(Parameter<T> parameter)
-        {
-            IMatchOperation operation;
-            if (typeof(T).IsArray)
+            const string filename = "cmd";
+            var arguments = string.Format("/c \"{0}\"", command);
+            foreach(var repo in config.SourceRepos)
             {
-                var matchOpAggType = typeof(MatchOperationAggregate<>);
-                var matchOpAggOfTtype = matchOpAggType.MakeGenericType(typeof(T).GetElementType());
-                operation = (IMatchOperation) Activator.CreateInstance(matchOpAggOfTtype);
+                var repoDir = workspace.GetDirectory(repo.Name);
+
+                Environment.CurrentDirectory = repoDir.FullName;
+
+                var psi = new ProcessStartInfo
+                          {
+                              FileName = filename,
+                              Arguments = arguments,
+                              UseShellExecute = false,
+                              WorkingDirectory = repoDir.FullName,
+                          };
+                psi.EnvironmentVariables.Add("FULLBUILD_REPO", repo.Name);
+                psi.EnvironmentVariables.Add("FULLBUILD_REPO_PATH", repoDir.FullName);
+                psi.EnvironmentVariables.Add("FULLBUILD_REPO_URL", repo.Url);
+
+                using(var process = Process.Start(psi))
+                {
+                    process.WaitForExit();
+                }
             }
-            else
-            {
-                operation = new MatchOperation<T>();
-            }
-            
-            AddOperation(parameter.Name, operation);
-
-            return this;
-        }
-
-        public FluentMatchBuilder Command(string text)
-        {
-            var operation = new MatchOperationText(text);
-            AddOperation(null, operation);
-
-            return this;
-        }
-
-        public Matcher Do(Action<Context> action)
-        {
-            return new Matcher(_description, _operations.AsEnumerable(), action);
         }
     }
 }
