@@ -194,12 +194,14 @@ namespace FullBuild.Commands
             var config = ConfigManager.GetConfig(wsDir);
 
             var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.SourceControl);
+            Console.WriteLine("Cloning administrative repo");
             sourceControl.Clone(admDir, "full-build", config.AdminRepo);
 
             // reload config now
             config = ConfigManager.GetConfig(wsDir);
             foreach(var repo in config.SourceRepos)
             {
+                Console.WriteLine("Cloning repo {0}", repo.Name);
                 var repoDir = wsDir.GetDirectory(repo.Name);
                 sourceControl.Clone(repoDir, repo.Name, repo.Url);
             }
