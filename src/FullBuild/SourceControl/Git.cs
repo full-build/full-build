@@ -25,8 +25,6 @@
 
 using System;
 using System.IO;
-using System.Text;
-using FullBuild.Helpers;
 using LibGit2Sharp;
 
 namespace FullBuild.SourceControl
@@ -39,45 +37,29 @@ namespace FullBuild.SourceControl
             Repository.Clone(url, rootDir.FullName);
         }
 
-        public void Commit(DirectoryInfo rootDir, string msg)
-        {
-            using (var repo = new Repository(rootDir.FullName))
-            {
-                repo.Commit(msg);
-            }
-        }
+        //public void AddIgnore(DirectoryInfo rootDir)
+        //{
+        //    var gitIgnoreFile = rootDir.GetFile(".gitignore");
+        //    var gitIgnore = new StringBuilder().AppendLine("cache").AppendLine("projects").AppendLine("views").ToString();
+        //    File.WriteAllText(gitIgnoreFile.FullName, gitIgnore);
 
-        public void Checkout(string name, string url)
-        {
-        }
-
-        public void Pull(string name, string url)
-        {
-        }
-
-        public void AddIgnore(DirectoryInfo rootDir)
-        {
-            var gitIgnoreFile = rootDir.GetFile(".gitignore");
-            var gitIgnore = new StringBuilder().AppendLine("cache").AppendLine("projects").AppendLine("views").ToString();
-            File.WriteAllText(gitIgnoreFile.FullName, gitIgnore);
-
-            Add(rootDir, gitIgnoreFile);
-        }
+        //    Add(rootDir, gitIgnoreFile);
+        //}
 
         public string Tip(DirectoryInfo rootDir)
         {
-            using (var repo = new Repository(rootDir.FullName))
+            using(var repo = new Repository(rootDir.FullName))
             {
                 return repo.Head.Tip.Sha;
             }
         }
 
-        public void Add(DirectoryInfo rootDir, FileInfo file)
-        {
-            using(var repo = new Repository(rootDir.FullName))
-            {
-                repo.Index.Stage(file.FullName);
-            }
-        }
+        //public void Add(DirectoryInfo rootDir, FileInfo file)
+        //{
+        //    using(var repo = new Repository(rootDir.FullName))
+        //    {
+        //        repo.Index.Stage(file.FullName);
+        //    }
+        //}
     }
 }

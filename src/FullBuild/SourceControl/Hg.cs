@@ -24,13 +24,23 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System.IO;
+using Mercurial;
 
 namespace FullBuild.SourceControl
 {
-    internal interface ISourceControl
+    internal class Hg : ISourceControl
     {
-        void Clone(DirectoryInfo rootDir, string name, string url);
+        public void Clone(DirectoryInfo rootDir, string name, string url)
+        {
+            var repo = new Repository(rootDir.FullName);
+            repo.Clone(url);
+        }
 
-        string Tip(DirectoryInfo rootDir);
+        public string Tip(DirectoryInfo rootDir)
+        {
+            var repo = new Repository(rootDir.FullName);
+            var tip = repo.Tip().Hash;
+            return tip;
+        }
     }
 }

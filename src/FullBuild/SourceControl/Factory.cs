@@ -34,6 +34,7 @@ namespace FullBuild.SourceControl
         private static readonly Dictionary<string, Type> _def = new Dictionary<string, Type>
                                                                 {
                                                                     {"Git", typeof(Git)},
+                                                                    {"Hg", typeof(Hg)},
                                                                 };
 
         public IDictionary<string, Type> Definition
