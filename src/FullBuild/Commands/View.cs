@@ -62,7 +62,7 @@ namespace FullBuild.Commands
                     var repoDir = wsDir.GetDirectory(repoConfig.Name);
                     if (! repoDir.Exists)
                     {
-                        Console.WriteLine("Cloning repo {0} (match {1})", repoConfig.Name, repo);
+                        Console.WriteLine("Cloning repo {0}", repoConfig.Name, repo);
                         sourceControl.Clone(repoDir, repoConfig.Name, repoConfig.Url);
                     }
 
