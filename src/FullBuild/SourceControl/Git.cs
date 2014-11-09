@@ -31,20 +31,28 @@ namespace FullBuild.SourceControl
 {
     internal class Git : ISourceControl
     {
-        public void Clone(DirectoryInfo rootDir, string name, string url)
+        private class Progress
         {
-            Console.WriteLine("Cloning {0} to {1}", url, name);
-            Repository.Clone(url, rootDir.FullName);
+            private static readonly char[] _indicator = {'-', '\\', '|', '/'};
+
+            private int _index = 0;
+
+            public bool OnTransferProgress(TransferProgress progress)
+            {
+                Console.Write("\r{0}", _indicator[_index]);
+                _index = (_index + 1) % _indicator.Length;
+                return true;
+            }
         }
 
-        //public void AddIgnore(DirectoryInfo rootDir)
-        //{
-        //    var gitIgnoreFile = rootDir.GetFile(".gitignore");
-        //    var gitIgnore = new StringBuilder().AppendLine("cache").AppendLine("projects").AppendLine("views").ToString();
-        //    File.WriteAllText(gitIgnoreFile.FullName, gitIgnore);
-
-        //    Add(rootDir, gitIgnoreFile);
-        //}
+        public void Clone(DirectoryInfo rootDir, string name, string url)
+        {
+            CloneOptions options = new CloneOptions();
+            var progress = new Progress();
+            options.OnTransferProgress += progress.OnTransferProgress;
+            Repository.Clone(url, rootDir.FullName, options);
+            Console.Write("\r");
+        }
 
         public string Tip(DirectoryInfo rootDir)
         {
@@ -53,13 +61,5 @@ namespace FullBuild.SourceControl
                 return repo.Head.Tip.Sha;
             }
         }
-
-        //public void Add(DirectoryInfo rootDir, FileInfo file)
-        //{
-        //    using(var repo = new Repository(rootDir.FullName))
-        //    {
-        //        repo.Index.Stage(file.FullName);
-        //    }
-        //}
     }
 }
