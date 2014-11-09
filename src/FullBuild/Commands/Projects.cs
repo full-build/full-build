@@ -114,7 +114,7 @@ namespace FullBuild.Commands
                 itemGroupPackage.AddAfterSelf(itemGroupFile);
                 
                 // generate binary references
-                var spuriousReferences = projectDef.BinaryReferences.Where(x => !x.InvariantStartsWith("System") && ! x.InvariantEquals("Microsoft.CSharp"));
+                var spuriousReferences = projectDef.BinaryReferences.Where(x => !x.InvariantStartsWith("System") && ! x.InvariantEquals("Microsoft."));
                 if (spuriousReferences.Any())
                 {
                     Console.WriteLine("WARNING: Project {0} has spurious binary references", projectDef.ProjectFile);
