@@ -44,6 +44,44 @@ namespace FullBuild.Commands
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+        public void Init(string path)
+        {
+            var wsDir = new DirectoryInfo(path);
+            wsDir.Create();
+
+            var admDir = wsDir.GetDirectory(".full-build");
+            if (admDir.Exists)
+            {
+                throw new ArgumentException("Workspace is already initialized");
+            }
+
+            // get bootstrap config
+            var config = ConfigManager.GetConfig(wsDir);
+
+            var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.SourceControl);
+            Console.WriteLine("Cloning administrative repo");
+            sourceControl.Clone(admDir, "full-build", config.AdminRepo);
+
+            // reload config now
+            config = ConfigManager.GetConfig(wsDir);
+            
+            // copy all files from binary repo
+            var tip = sourceControl.Tip(admDir);
+            var binDir = new DirectoryInfo(config.BinRepo);
+            var binVersionDir = binDir.GetDirectory(tip);
+            if (binVersionDir.Exists)
+            {
+                Console.WriteLine("Copying build output version {0}", tip);
+                var targetBinDir = wsDir.GetDirectory("bin");
+                targetBinDir.Create();
+                foreach (var binFile in binVersionDir.EnumerateFiles())
+                {
+                    var targetFile = targetBinDir.GetFile(binFile.Name);
+                    binFile.CopyTo(targetFile.FullName, true);
+                }
+            }
+        }
+
         public void Update()
         {
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
@@ -179,53 +217,6 @@ namespace FullBuild.Commands
             return anthology;
         }
 
-        public void Init(string path)
-        {
-            var wsDir = new DirectoryInfo(path);
-            wsDir.Create();
-
-            var admDir = wsDir.GetDirectory(".full-build");
-            if (admDir.Exists)
-            {
-                throw new ArgumentException("Workspace is already initialized");
-            }
-
-            // get bootstrap config
-            var config = ConfigManager.GetConfig(wsDir);
-
-            var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.SourceControl);
-            Console.WriteLine("Cloning administrative repo");
-            sourceControl.Clone(admDir, "full-build", config.AdminRepo);
-
-            // reload config now
-            config = ConfigManager.GetConfig(wsDir);
-            foreach(var repo in config.SourceRepos)
-            {
-                Console.WriteLine("Cloning repo {0}", repo.Name);
-                var repoDir = wsDir.GetDirectory(repo.Name);
-                sourceControl.Clone(repoDir, repo.Name, repo.Url);
-            }
-
-            // copy all files from binary repo
-            var tip = sourceControl.Tip(admDir);
-            Console.WriteLine("Tip is {0}", tip);
-            var binDir = new DirectoryInfo(config.BinRepo);
-            var binVersionDir = binDir.GetDirectory(tip);
-            Console.WriteLine("BinDir source {0}", binVersionDir);
-            if (binVersionDir.Exists)
-            {
-                Console.WriteLine("Copying build output version {0}", tip);
-                var targetBinDir = wsDir.GetDirectory("bin");
-                targetBinDir.Create();
-                foreach (var binFile in binVersionDir.EnumerateFiles())
-                {
-                    Console.WriteLine("  {0}", binFile.Name);
-                    var targetFile = targetBinDir.GetFile(binFile.Name);
-                    binFile.CopyTo(targetFile.FullName, true);
-                }
-            }
-        }
-
         private void GenerateImports(Anthology anthology)
         {
             var targetDir = WellKnownFolders.GetProjectDirectory();
@@ -266,6 +257,10 @@ namespace FullBuild.Commands
             {
                 Console.WriteLine("Processing repo {0}:", repo.Name);
                 var repoDir = workspace.GetDirectory(repo.Name);
+                if (! repoDir.Exists)
+                {
+                    continue;
+                }
 
                 // delete all solution files
                 var slns = repoDir.EnumerateFiles("*.sln", SearchOption.AllDirectories);
@@ -337,7 +332,7 @@ namespace FullBuild.Commands
 
         private static Anthology ParseAndAddProject(DirectoryInfo workspace, FileInfo projectFile, Anthology anthology)
         {
-            Console.WriteLine("  Found project {0}/{1}", projectFile.Directory.Name, projectFile.Name);
+            Console.WriteLine("  Found project {0}", projectFile.FullName);
 
             var xdoc = XDocument.Load(projectFile.FullName);
 
