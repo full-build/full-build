@@ -32,8 +32,9 @@ namespace FullBuild.SourceControl
     {
         public void Clone(DirectoryInfo rootDir, string name, string url)
         {
+            rootDir.Create();
             var repo = new Repository(rootDir.FullName);
-            repo.Clone(url);
+            repo.Clone(url, new CloneCommand().WithTimeout(10000000));
         }
 
         public string Tip(DirectoryInfo rootDir)
