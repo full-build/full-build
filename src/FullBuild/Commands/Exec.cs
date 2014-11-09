@@ -41,6 +41,10 @@ namespace FullBuild.Commands
             foreach(var repo in config.SourceRepos)
             {
                 var repoDir = workspace.GetDirectory(repo.Name);
+                if (! repoDir.Exists)
+                {
+                    continue;
+                }
 
                 Environment.CurrentDirectory = repoDir.FullName;
 
