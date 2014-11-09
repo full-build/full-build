@@ -39,6 +39,9 @@
     <Reference Include="LibGit2Sharp">
       <HintPath>$(SolutionDir)\packages\LibGit2Sharp.0.19.0.0\lib\net40\LibGit2Sharp.dll</HintPath>
     </Reference>
+    <Reference Include="Mercurial.Net">
+      <HintPath>..\packages\Mercurial.Net.1.1.1.607\lib\net35-Client\Mercurial.Net.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -100,6 +103,7 @@
     <Compile Include="Helpers\ServiceActivator.cs" />
     <Compile Include="SourceControl\Factory.cs" />
     <Compile Include="SourceControl\Git.cs" />
+    <Compile Include="SourceControl\Hg.cs" />
     <Compile Include="SourceControl\ISourceControl.cs" />
     <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Commands\WellKnownFolders.cs" />
