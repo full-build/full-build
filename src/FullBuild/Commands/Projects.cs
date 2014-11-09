@@ -51,6 +51,11 @@ namespace FullBuild.Commands
                 _logger.Debug("Fixing project {0}", projectDef.GetName());
                 
                 FileInfo projectFile = wsDir.GetFile(projectDef.ProjectFile);
+                if (! projectFile.Exists)
+                {
+                    continue;
+                }
+
                 var realProjectDoc = XDocument.Load(projectFile.FullName);
 
                 // extract info from real project

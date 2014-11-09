@@ -29,7 +29,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
 using FullBuild.SourceControl;
@@ -73,8 +72,6 @@ namespace FullBuild.Commands
             var viewDir = WellKnownFolders.GetViewDirectory();
             var viewFile = viewDir.GetFile(viewName + ".view");
             File.WriteAllText(viewFile.FullName, sb.ToString());
-
-            UpdateView(viewName);
         }
 
         public void UpdateView(string viewName)
