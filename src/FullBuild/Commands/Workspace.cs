@@ -198,30 +198,33 @@ namespace FullBuild.Commands
             var pkgsDir = WellKnownFolders.GetPackageDirectory();
 
             var pkg2prj = from package in anthology.Packages
-                          let pkgdir = pkgsDir.GetDirectory(package.Name)
-                          where pkgdir.Exists
-                          let assemblies = Nuspec.Assemblies(pkgdir)
-                          from project in anthology.Projects
-                          where assemblies.Contains(project.AssemblyName, StringComparer.InvariantCultureIgnoreCase)
-                          select new {Pkg = package, Prj = project};
+                let pkgdir = pkgsDir.GetDirectory(package.Name)
+                where pkgdir.Exists
+                let assemblies = Nuspec.Assemblies(pkgdir)
+                from project in anthology.Projects
+                where assemblies.Contains(project.AssemblyName, StringComparer.InvariantCultureIgnoreCase)
+                let newPkg2prj = new {Pkg = package, Prj = project}
+                group newPkg2prj by newPkg2prj.Pkg into g
+                select g;
 
             foreach(var p2p in pkg2prj)
             {
-                var targetProjects = pkg2prj.Where(x => x.Pkg == p2p.Pkg);
-                if (1 < targetProjects.Count())
+                var pkg = p2p.Key;
+                if (1 < p2p.Count())
                 {
-                    Console.WriteLine("WARNING: Too many candidate projects to promote package {0} to project:", p2p.Pkg.Name);
-                    targetProjects.ForEach(x => Console.WriteLine("  {0}", Path.GetFileName(x.Prj.ProjectFile)));
+                    Console.WriteLine("WARNING: Too many candidate projects to promote package {0} to project:", pkg.Name);
+                    p2p.ForEach(x => Console.WriteLine("  {0}", Path.GetFileName(x.Prj.ProjectFile)));
                 }
                 else
                 {
-                    _logger.Debug("Converting package {0} to project {1}", p2p.Pkg.Name, p2p.Prj.ProjectFile);
+                    var prj = p2p.Single().Prj;
+                    _logger.Debug("Converting package {0} to project {1}", p2p.Key.Name, prj.ProjectFile);
                     foreach(var project in anthology.Projects)
                     {
-                        if (project.PackageReferences.Contains(p2p.Pkg.Name, StringComparer.InvariantCultureIgnoreCase))
+                        if (project.PackageReferences.Contains(p2p.Key.Name, StringComparer.InvariantCultureIgnoreCase))
                         {
-                            var newProject = project.RemovePackageReference(p2p.Pkg.Name);
-                            newProject = newProject.AddProjectReference(p2p.Prj.Guid);
+                            var newProject = project.RemovePackageReference(pkg.Name);
+                            newProject = newProject.AddProjectReference(prj.Guid);
                             anthology = anthology.AddOrUpdateProject(newProject);
                         }
                     }
