@@ -23,42 +23,50 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.Configuration;
+using System;
 using System.IO;
-using System.Xml.Serialization;
-using FullBuild.Config;
+using FullBuild.Helpers;
+using FullBuild.SourceControl;
 
-namespace FullBuild.Helpers
+namespace FullBuild.Commands
 {
-    internal static class ConfigManager
+    internal partial class Workspace
     {
-        public static FullBuildConfig GetConfig(DirectoryInfo workspace)
+        public void Init(string path)
         {
-            var bootstrapConfig = (BoostrapConfig) ConfigurationManager.GetSection("FullBuildConfig");
-            bootstrapConfig.SourceControl = bootstrapConfig.SourceControl ?? "Git";
+            var wsDir = new DirectoryInfo(path);
+            wsDir.Create();
 
-            var fbDir = workspace.GetDirectory(".full-build");
-            var adminConfig = LoadBootstrapConfig(fbDir);
-            var config = new FullBuildConfig(bootstrapConfig, adminConfig);
-            return config;
-        }
-
-        private static AdminConfig LoadBootstrapConfig(DirectoryInfo fbDir)
-        {
-            var file = new FileInfo(Path.Combine(fbDir.FullName, "full-build.config"));
-            if (file.Exists)
+            var admDir = wsDir.GetDirectory(".full-build");
+            if (admDir.Exists)
             {
-                var xmlSer = new XmlSerializer(typeof(AdminConfig));
-                using(var reader = new StreamReader(file.FullName))
-                {
-                    var bootstrapConfig = (AdminConfig) xmlSer.Deserialize(reader);
-                    bootstrapConfig.SourceRepos = bootstrapConfig.SourceRepos ?? new RepoConfig[0];
-
-                    return bootstrapConfig;
-                }
+                throw new ArgumentException("Workspace is already initialized");
             }
 
-            return new AdminConfig {SourceRepos = new RepoConfig[0]};
+            // get bootstrap config
+            var config = ConfigManager.GetConfig(wsDir);
+
+            var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.SourceControl);
+            sourceControl.Clone(admDir, "administrative repo", config.AdminRepo);
+
+            // reload config now
+            config = ConfigManager.GetConfig(wsDir);
+
+            // copy all files from binary repo
+            var tip = sourceControl.Tip(admDir);
+            var binDir = new DirectoryInfo(config.BinRepo);
+            var binVersionDir = binDir.GetDirectory(tip);
+            if (binVersionDir.Exists)
+            {
+                Console.WriteLine("Copying build output version {0}", tip);
+                var targetBinDir = wsDir.GetDirectory("bin");
+                targetBinDir.Create();
+                foreach(var binFile in binVersionDir.EnumerateFiles())
+                {
+                    var targetFile = targetBinDir.GetFile(binFile.Name);
+                    binFile.CopyTo(targetFile.FullName, true);
+                }
+            }
         }
     }
 }

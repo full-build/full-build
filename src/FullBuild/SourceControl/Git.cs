@@ -34,9 +34,9 @@ namespace FullBuild.SourceControl
         public void Clone(DirectoryInfo rootDir, string name, string url)
         {
             var options = new CloneOptions();
-            options.OnTransferProgress += OnTransferProgress;
+            options.OnTransferProgress += tp => OnTransferProgress(tp, name);
             Repository.Clone(url, rootDir.FullName, options);
-            Console.Write("\r");
+            Console.WriteLine();
         }
 
         public string Tip(DirectoryInfo rootDir)
@@ -47,9 +47,9 @@ namespace FullBuild.SourceControl
             }
         }
 
-        private static bool OnTransferProgress(TransferProgress progress)
+        private static bool OnTransferProgress(TransferProgress progress, string name)
         {
-            Console.Write("\r{0}/{1}", progress.ReceivedObjects, progress.TotalObjects);
+            Console.Write("\rCloning {0}: {1}/{2}", name, progress.ReceivedObjects, progress.TotalObjects);
             return true;
         }
     }
