@@ -45,10 +45,9 @@ namespace FullBuild.Commands
             var anthologyFile = WellKnownFolders.GetAnthologyFile();
             var anthology = Anthology.Load(anthologyFile);
 
-            var templateFile = admDir.GetFile("Template.csproj");
             foreach(var projectDef in anthology.Projects)
             {
-                _logger.Debug("Fixing project {0}", projectDef.GetName());
+                _logger.Debug("Converting project {0}", projectDef.GetName());
 
                 var projectFile = wsDir.GetFile(projectDef.ProjectFile);
                 if (! projectFile.Exists)
@@ -56,9 +55,12 @@ namespace FullBuild.Commands
                     continue;
                 }
 
-                var realProjectDoc = XDocument.Load(projectFile.FullName);
-
+                // get template according to project type
+                string templateFileName = "Template" + projectFile.Extension;
+                var templateFile = admDir.GetFile(templateFileName);
+             
                 // extract info from real project
+                var realProjectDoc = XDocument.Load(projectFile.FullName);
                 var rootNamespace = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "RootNamespace").Single().Value;
                 var outputType = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single().Value;
                 var signAssembly = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "SignAssembly").SingleOrDefault();
@@ -104,14 +106,10 @@ namespace FullBuild.Commands
 
                 var propertyGroup = xdoc.Descendants(XmlHelpers.NsMsBuild + "PropertyGroup").Last();
                 var itemGroupReference = new XElement(XmlHelpers.NsMsBuild + "ItemGroup");
-                var itemGroupProject = new XElement(XmlHelpers.NsMsBuild + "ItemGroup");
-                var itemGroupPackage = new XElement(XmlHelpers.NsMsBuild + "ItemGroup");
                 var itemGroupFile = new XElement(XmlHelpers.NsMsBuild + "ItemGroup");
 
                 propertyGroup.AddAfterSelf(itemGroupReference);
-                itemGroupReference.AddAfterSelf(itemGroupProject);
-                itemGroupProject.AddAfterSelf(itemGroupPackage);
-                itemGroupPackage.AddAfterSelf(itemGroupFile);
+                itemGroupReference.AddAfterSelf(itemGroupFile);
 
                 // generate binary references
                 var spuriousReferences = projectDef.BinaryReferences.Where(x => !x.InvariantStartsWith("System") && ! x.InvariantStartsWith("Microsoft."));
@@ -142,7 +140,7 @@ namespace FullBuild.Commands
                     var targetFileName = refProject.Guid + ".targets";
                     var import = Path.Combine(WellKnownFolders.MsBuildProjectDir, targetFileName).ToUnixSeparator();
                     var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import));
-                    itemGroupProject.AddAfterSelf(newProjectRef);
+                    itemGroupFile.AddBeforeSelf(newProjectRef);
                 }
 
                 // add packages
@@ -154,7 +152,7 @@ namespace FullBuild.Commands
                     var import = Path.Combine(WellKnownFolders.MsBuildPackagesDir, packageFileName).ToUnixSeparator();
                     var condition = string.Format("'$(FullBuild_{0}_Pkg)' == ''", refPackage.Name.ToMsBuild());
                     var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import), new XAttribute("Condition", condition));
-                    itemGroupPackage.AddAfterSelf(newProjectRef);
+                    itemGroupFile.AddBeforeSelf(newProjectRef);
                 }
 
                 // add files
