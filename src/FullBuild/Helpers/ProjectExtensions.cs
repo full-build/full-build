@@ -34,5 +34,17 @@ namespace FullBuild.Helpers
         {
             return new FileInfo(@this.ProjectFile).Name;
         }
+
+        public static string GetProjectName(this Project @this)
+        {
+            var propName = string.Format("{0} ({1})", @this.AssemblyName, @this.FxTarget);
+            return propName;
+        }
+
+        public static string GetProjectPropertyGroupName(this Project @this)
+        {
+            var propName = string.Format("FullBuild_{0}_{1}", @this.AssemblyName, @this.FxTarget).ToMsBuild();
+            return propName;
+        }
     }
 }

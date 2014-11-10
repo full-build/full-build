@@ -66,11 +66,11 @@
   <ItemGroup>
     <Compile Include="Commands\AnthologyOptimizer.cs" />
     <Compile Include="Commands\Exec.cs" />
-    <Compile Include="Commands\Projects.cs" />
+    <Compile Include="Commands\Projects+Convert.cs" />
     <Compile Include="Commands\FrameworkVersion.cs" />
     <Compile Include="Commands\View+Init.cs" />
     <Compile Include="Commands\View+Generate.cs" />
-    <Compile Include="Commands\Packages.cs" />
+    <Compile Include="Commands\Packages+Install.cs" />
     <Compile Include="Commands\Workspace+Clone.cs" />
     <Compile Include="Commands\Workspace+Init.cs" />
     <Compile Include="Config\AdminConfig.cs" />
