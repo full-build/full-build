@@ -111,7 +111,7 @@ namespace FullBuild.Commands
             var imports = from dependency in dependencies
                           let dependencyPackageFileName = dependency + ".targets"
                           let dependencyTargets = Path.Combine(WellKnownFolders.MsBuildPackagesDir, dependencyPackageFileName)
-                          let condition = string.Format("'$({0}_Pkg)' == ''", dependency.Replace('-', '_'))
+                          let condition = string.Format("'$(FullBuild_{0}_Pkg)' == ''", dependency.ToMsBuild())
                           select new XElement(XmlHelpers.NsMsBuild + "Import",
                                               new XAttribute("Project", dependencyTargets),
                                               new XAttribute("Condition", condition));
@@ -120,7 +120,7 @@ namespace FullBuild.Commands
                 ? new XElement(XmlHelpers.NsMsBuild + "Choose", whens)
                 : GenerateItemGroup(libDir);
 
-            var defineName = string.Format("{0}_Pkg", package.Name.Replace('-', '_'));
+            var defineName = string.Format("FullBuild_{0}_Pkg", package.Name.ToMsBuild());
             var define = new XElement(XmlHelpers.NsMsBuild + "PropertyGroup",
                                       new XElement(XmlHelpers.NsMsBuild + defineName, "Y"));
 
