@@ -31,25 +31,10 @@ namespace FullBuild.SourceControl
 {
     internal class Git : ISourceControl
     {
-        private class Progress
-        {
-            private static readonly char[] _indicator = {'-', '\\', '|', '/'};
-
-            private int _index = 0;
-
-            public bool OnTransferProgress(TransferProgress progress)
-            {
-                Console.Write("\r{0}", _indicator[_index]);
-                _index = (_index + 1) % _indicator.Length;
-                return true;
-            }
-        }
-
         public void Clone(DirectoryInfo rootDir, string name, string url)
         {
-            CloneOptions options = new CloneOptions();
-            var progress = new Progress();
-            options.OnTransferProgress += progress.OnTransferProgress;
+            var options = new CloneOptions();
+            options.OnTransferProgress += OnTransferProgress;
             Repository.Clone(url, rootDir.FullName, options);
             Console.Write("\r");
         }
@@ -60,6 +45,12 @@ namespace FullBuild.SourceControl
             {
                 return repo.Head.Tip.Sha;
             }
+        }
+
+        private static bool OnTransferProgress(TransferProgress progress)
+        {
+            Console.Write("\r{0}/{1}", progress.ReceivedObjects, progress.TotalObjects);
+            return true;
         }
     }
 }
