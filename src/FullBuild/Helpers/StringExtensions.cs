@@ -48,5 +48,10 @@ namespace FullBuild.Helpers
         {
             return @this.Replace('\\', '/');
         }
+
+        public static string ToMsBuild(this string @this)
+        {
+            return @this.Replace("-", "_").Replace(".", "_");
+        }
     }
 }

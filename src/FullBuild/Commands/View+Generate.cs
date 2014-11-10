@@ -66,7 +66,7 @@ namespace FullBuild.Commands
             foreach(var prj in projects)
             {
                 sb.AppendFormat(@"Project(""{{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}}"") = ""{0}"", ""{1}"", ""{2:B}""",
-                                Path.GetFileNameWithoutExtension(prj.ProjectFile) + prj.FxTarget, prj.ProjectFile, prj.Guid).AppendLine();
+                                prj.GetProjectName(), prj.ProjectFile, prj.Guid).AppendLine();
                 sb.AppendFormat("\tProjectSection(ProjectDependencies) = postProject").AppendLine();
                 foreach(var dependency in prj.ProjectReferences)
                 {
@@ -105,7 +105,7 @@ namespace FullBuild.Commands
                                     new XElement(XmlHelpers.NsMsBuild + "PropertyGroup",
                                                  new XElement(XmlHelpers.NsMsBuild + "BinSrcConfig", "Y"),
                                                  from prj in projects
-                                                 let projectProperty = (prj.AssemblyName + prj.FxTarget).Replace('.', '_') + "_Src"
+                                                 let projectProperty = prj.GetProjectPropertyGroupName()
                                                  select new XElement(XmlHelpers.NsMsBuild + projectProperty, "Y")));
             var targetFileName = viewName + ".targets";
             var targetFile = Path.Combine(viewDir.FullName, targetFileName);

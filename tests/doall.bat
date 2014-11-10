@@ -7,7 +7,6 @@ set PATH=%PATH%;c:\dev\projects\full-build\src\bin\Debug
 @robocopy src\.nuget toto\.nuget /MIR
 @pushd toto
 
-FullBuild clone repo * || goto :ko
 FullBuild index workspace || goto :ko
 copy ..\Template.csproj .full-build
 FullBuild convert projects || goto :ko
