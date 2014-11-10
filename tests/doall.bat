@@ -7,21 +7,13 @@ set PATH=%PATH%;c:\dev\projects\full-build\src\bin\Debug
 @robocopy src\.nuget toto\.nuget /MIR
 @pushd toto
 
-@echo ************************************************************************************
-FullBuild init view cs with cassandra-sharp  cassandra-sharp-contrib || goto :ko
-
-@echo ************************************************************************************
-FullBuild update workspace || goto :ko
-
+FullBuild clone repo * || goto :ko
+FullBuild index workspace || goto :ko
 copy ..\Template.csproj .full-build
-
-@echo ************************************************************************************
 FullBuild convert projects || goto :ko
-
-FullBuild update view cs || goto :ko
-
-msbuild cs.sln || goto :ko
-
+FullBuild init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko
+FullBuild generate view cs || goto :ko
+FullBuild build view cs
 fullbuild exec "echo %%FULLBUILD_REPO%% & git log -n 1 | find ""commit"" && echo." || goto :ko
 
 popd
