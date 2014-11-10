@@ -103,7 +103,7 @@ namespace FullBuild.Commands
             // generate target for solution
             var xdoc = new XElement(XmlHelpers.NsMsBuild + "Project",
                                     new XElement(XmlHelpers.NsMsBuild + "PropertyGroup",
-                                                 new XElement(XmlHelpers.NsMsBuild + "BinSrcConfig", "Y"),
+                                                 new XElement(XmlHelpers.NsMsBuild + "FullBuild_Config", "Y"),
                                                  from prj in projects
                                                  let projectProperty = prj.GetProjectPropertyGroupName()
                                                  select new XElement(XmlHelpers.NsMsBuild + projectProperty, "Y")));
