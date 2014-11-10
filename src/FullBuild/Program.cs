@@ -25,6 +25,7 @@
 
 using System;
 using FullBuild.Commands;
+using FullBuild.Helpers;
 using FullBuild.NatLangParser;
 
 namespace FullBuild
@@ -40,7 +41,7 @@ namespace FullBuild
         private static void UpdateWorkspace()
         {
             var handler = new Workspace();
-            handler.Update();
+            handler.Index();
         }
 
         private static void InstallPackages()
@@ -74,7 +75,7 @@ namespace FullBuild
         private static void UpdateView(string viewName)
         {
             var handler = new View();
-            handler.GenerateView(viewName);
+            handler.Generate(viewName);
         }
 
         private static void Exec(string command)
@@ -86,13 +87,13 @@ namespace FullBuild
         private static void CloneRepo(string[] repos)
         {
             var handler = new Workspace();
-            handler.CloneRepo(repos);
+            handler.Clone(repos);
         }
 
         private static void BuildView(string viewname)
         {
             var handler = new Exec();
-            string cmd = string.Format("msbuild {0}.sln", viewname);
+            var cmd = string.Format("msbuild {0}.sln", viewname);
 
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             handler.ExecCommand(cmd, wsDir);
@@ -153,18 +154,18 @@ namespace FullBuild
                                          .Command("sources")
                                          .Do(ctx => RefreshSources()),
 
-                            // exec
-                            MatchBuilder.Describe("exec command on each repo")
-                                        .Command("exec")
-                                        .Param(command)
-                                        .Do(ctx => Exec(ctx.Get(command))),
+                             // exec
+                             MatchBuilder.Describe("exec command on each repo")
+                                         .Command("exec")
+                                         .Param(command)
+                                         .Do(ctx => Exec(ctx.Get(command))),
 
-                            // build view
-                            MatchBuilder.Describe("build view <viewname>")
-                                        .Command("build")
-                                        .Command("view")
-                                        .Param(viewname)
-                                        .Do(ctx => BuildView(ctx.Get(viewname))),
+                             // build view
+                             MatchBuilder.Describe("build view <viewname>")
+                                         .Command("build")
+                                         .Command("view")
+                                         .Param(viewname)
+                                         .Do(ctx => BuildView(ctx.Get(viewname))),
 
                              // ----------------------------------------------------------
                              // plumbing commands
@@ -176,7 +177,7 @@ namespace FullBuild
                                          .Command("workspace")
                                          .Do(ctx => UpdateWorkspace()),
 
-                              // install package
+                             // install package
                              MatchBuilder.Describe("install packages.")
                                          .Command("install")
                                          .Command("packages")
@@ -200,6 +201,5 @@ namespace FullBuild
 
             return 0;
         }
-
     }
 }

@@ -25,9 +25,8 @@
 
 using System;
 using System.IO;
-using FullBuild.Helpers;
 
-namespace FullBuild.Commands
+namespace FullBuild.Helpers
 {
     internal class WellKnownFolders
     {
@@ -43,17 +42,26 @@ namespace FullBuild.Commands
 
         public const string RelativePackageDirectory = "packages";
 
+        public const string AnthologyFileName = "anthology.json";
+
         public static readonly string MsBuildSolutionDir = "$(SolutionDir)";
 
-        public static readonly string MsBuildAdminDir = "$(SolutionDir)/" + RelativeAdminDirectory;
+        public static readonly string MsBuildAdminDir = Path.Combine("$(SolutionDir)", RelativeAdminDirectory);
 
-        public static readonly string MsBuildBinDir = "$(SolutionDir)/" + RelativeBinDirectory;
+        public static readonly string MsBuildBinDir = Path.Combine("$(SolutionDir)", RelativeBinDirectory);
 
-        public static readonly string MsBuildProjectDir = "$(SolutionDir)/" + RelativeProjectDirectory;
+        public static readonly string MsBuildProjectDir = Path.Combine("$(SolutionDir)", RelativeProjectDirectory);
 
-        public static readonly string MsBuildViewDir = "$(SolutionDir)/" + RelativeViewDirectory;
+        public static readonly string MsBuildViewDir = Path.Combine("$(SolutionDir)", RelativeViewDirectory);
 
-        public static readonly string MsBuildPackagesDir = "$(SolutionDir)/" + RelativePackageDirectory;
+        public static readonly string MsBuildPackagesDir = Path.Combine("$(SolutionDir)", RelativePackageDirectory);
+
+        public static FileInfo GetAnthologyFile()
+        {
+            var admDir = GetAdminDirectory();
+            var anthologyFile = admDir.GetFile(AnthologyFileName);
+            return anthologyFile;
+        }
 
         public static DirectoryInfo GetWorkspaceDirectory()
         {

@@ -23,9 +23,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
 using System.Diagnostics;
 using System.IO;
+using FullBuild.Config;
 using FullBuild.Helpers;
 
 namespace FullBuild.Commands
@@ -37,8 +37,6 @@ namespace FullBuild.Commands
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.GetConfig(workspace);
 
-            const string filename = "cmd";
-            var arguments = string.Format("/c \"{0}\"", command);
             foreach(var repo in config.SourceRepos)
             {
                 var repoDir = workspace.GetDirectory(repo.Name);
@@ -47,41 +45,37 @@ namespace FullBuild.Commands
                     continue;
                 }
 
-                var psi = new ProcessStartInfo
-                          {
-                              FileName = filename,
-                              Arguments = arguments,
-                              UseShellExecute = false,
-                              WorkingDirectory = repoDir.FullName,
-                          };
-                psi.EnvironmentVariables.Add("FULLBUILD_REPO", repo.Name);
-                psi.EnvironmentVariables.Add("FULLBUILD_REPO_PATH", repoDir.FullName);
-                psi.EnvironmentVariables.Add("FULLBUILD_REPO_URL", repo.Url);
-
-                using(var process = Process.Start(psi))
-                {
-                    process.WaitForExit();
-                }
+                ExecCommand(command, repoDir, repo);
             }
         }
 
-        public void ExecCommand(string command, DirectoryInfo dir)
+        public void ExecCommand(string command, DirectoryInfo dir, RepoConfig repoConfig = null)
         {
             const string filename = "cmd";
             var arguments = string.Format("/c \"{0}\"", command);
 
             var psi = new ProcessStartInfo
-            {
-                FileName = filename,
-                Arguments = arguments,
-                UseShellExecute = false,
-                WorkingDirectory = dir.FullName,
-            };
+                      {
+                          FileName = filename,
+                          Arguments = arguments,
+                          UseShellExecute = false,
+                          WorkingDirectory = dir.FullName,
+                      };
 
-            using (var process = Process.Start(psi))
+            if (null != repoConfig)
             {
-                process.WaitForExit();
-            }            
+                psi.EnvironmentVariables.Add("FULLBUILD_REPO", repoConfig.Name);
+                psi.EnvironmentVariables.Add("FULLBUILD_REPO_PATH", dir.FullName);
+                psi.EnvironmentVariables.Add("FULLBUILD_REPO_URL", repoConfig.Url);
+            }
+
+            using(var process = Process.Start(psi))
+            {
+                if (null != process)
+                {
+                    process.WaitForExit();
+                }
+            }
         }
     }
 }

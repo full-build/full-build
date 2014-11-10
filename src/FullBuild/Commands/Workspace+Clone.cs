@@ -23,42 +23,42 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.Configuration;
-using System.IO;
-using System.Xml.Serialization;
-using FullBuild.Config;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+using FullBuild.Helpers;
+using FullBuild.SourceControl;
 
-namespace FullBuild.Helpers
+namespace FullBuild.Commands
 {
-    internal static class ConfigManager
+    internal partial class Workspace
     {
-        public static FullBuildConfig GetConfig(DirectoryInfo workspace)
+        public void Clone(string[] repos)
         {
-            var bootstrapConfig = (BoostrapConfig) ConfigurationManager.GetSection("FullBuildConfig");
-            bootstrapConfig.SourceControl = bootstrapConfig.SourceControl ?? "Git";
+            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
+            var config = ConfigManager.GetConfig(wsDir);
 
-            var fbDir = workspace.GetDirectory(".full-build");
-            var adminConfig = LoadBootstrapConfig(fbDir);
-            var config = new FullBuildConfig(bootstrapConfig, adminConfig);
-            return config;
-        }
-
-        private static AdminConfig LoadBootstrapConfig(DirectoryInfo fbDir)
-        {
-            var file = new FileInfo(Path.Combine(fbDir.FullName, "full-build.config"));
-            if (file.Exists)
+            // validate first that repos are valid and clone them
+            var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.SourceControl);
+            foreach(var repo in repos)
             {
-                var xmlSer = new XmlSerializer(typeof(AdminConfig));
-                using(var reader = new StreamReader(file.FullName))
+                var match = "^" + repo + "$";
+                var regex = new Regex(match, RegexOptions.IgnoreCase);
+                var repoConfigs = config.SourceRepos.Where(x => regex.IsMatch(x.Name));
+                if (!repoConfigs.Any())
                 {
-                    var bootstrapConfig = (AdminConfig) xmlSer.Deserialize(reader);
-                    bootstrapConfig.SourceRepos = bootstrapConfig.SourceRepos ?? new RepoConfig[0];
+                    throw new ArgumentException("Invalid repo " + repo);
+                }
 
-                    return bootstrapConfig;
+                foreach(var repoConfig in repoConfigs)
+                {
+                    var repoDir = wsDir.GetDirectory(repoConfig.Name);
+                    if (!repoDir.Exists)
+                    {
+                        sourceControl.Clone(repoDir, repoConfig.Name, repoConfig.Url);
+                    }
                 }
             }
-
-            return new AdminConfig {SourceRepos = new RepoConfig[0]};
         }
     }
 }
