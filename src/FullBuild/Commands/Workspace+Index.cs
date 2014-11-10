@@ -81,7 +81,7 @@ namespace FullBuild.Commands
                 var xdoc = new XElement(XmlHelpers.NsMsBuild + "Project",
                                         new XElement(XmlHelpers.NsMsBuild + "Import",
                                                      new XAttribute("Project", Path.Combine(WellKnownFolders.MsBuildViewDir, "$(SolutionName).targets")),
-                                                     new XAttribute("Condition", "'$(BinSrcConfig)' == ''")),
+                                                     new XAttribute("Condition", "'$(FullBuild_Config)' == ''")),
                                         new XElement(XmlHelpers.NsMsBuild + "ItemGroup",
                                                      new XElement(XmlHelpers.NsMsBuild + "ProjectReference",
                                                                   new XAttribute("Include", projectFile),

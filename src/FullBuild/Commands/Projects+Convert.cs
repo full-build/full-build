@@ -152,7 +152,7 @@ namespace FullBuild.Commands
                     var refPackage = pkg;
                     var packageFileName = refPackage.Name + ".targets";
                     var import = Path.Combine(WellKnownFolders.MsBuildPackagesDir, packageFileName).ToUnixSeparator();
-                    var condition = string.Format("'$({0}_Pkg)' == ''", refPackage.Name.Replace('-', '_'));
+                    var condition = string.Format("'$(FullBuild_{0}_Pkg)' == ''", refPackage.Name.ToMsBuild());
                     var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import), new XAttribute("Condition", condition));
                     itemGroupPackage.AddAfterSelf(newProjectRef);
                 }
