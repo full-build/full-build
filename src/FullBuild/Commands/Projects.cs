@@ -29,7 +29,6 @@ using System.Linq;
 using System.Xml.Linq;
 using FullBuild.Helpers;
 using FullBuild.Model;
-using Newtonsoft.Json;
 using NLog;
 
 namespace FullBuild.Commands
@@ -42,15 +41,16 @@ namespace FullBuild.Commands
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthologyFile = admDir.GetFile(Anthology.AnthologyFileName);
-            var oldJson = File.ReadAllText(anthologyFile.FullName);
-            var anthology = JsonConvert.DeserializeObject<Anthology>(oldJson);
+
+            var anthologyFile = WellKnownFolders.GetAnthologyFile();
+            var anthology = Anthology.Load(anthologyFile);
+
             var templateFile = admDir.GetFile("Template.csproj");
             foreach(var projectDef in anthology.Projects)
             {
                 _logger.Debug("Fixing project {0}", projectDef.GetName());
-                
-                FileInfo projectFile = wsDir.GetFile(projectDef.ProjectFile);
+
+                var projectFile = wsDir.GetFile(projectDef.ProjectFile);
                 if (! projectFile.Exists)
                 {
                     continue;
@@ -65,7 +65,7 @@ namespace FullBuild.Commands
                 var originatorKeyFile = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyOriginatorKeyFile").SingleOrDefault();
                 var targetFramework = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").Single().Value;
                 var childrenOfItemGroup = from ig in realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "ItemGroup").Elements()
-                                          where ig.Name.LocalName != "Reference" 
+                                          where ig.Name.LocalName != "Reference"
                                                 && ig.Name.LocalName != "ProjectReference"
                                                 && ig.Name.LocalName != "BootstrapperPackage"
                                           select ig;
@@ -74,7 +74,7 @@ namespace FullBuild.Commands
                 // prepare project structure either from template or original project file
                 var templateForProjectFile = templateFile.Exists ? templateFile : projectFile;
                 var xdoc = XDocument.Load(templateForProjectFile.FullName);
-                
+
                 // remove all import from .full-build and project reference
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference").Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantContains(WellKnownFolders.RelativeAdminDirectory)).Remove();
@@ -107,24 +107,24 @@ namespace FullBuild.Commands
                 var itemGroupProject = new XElement(XmlHelpers.NsMsBuild + "ItemGroup");
                 var itemGroupPackage = new XElement(XmlHelpers.NsMsBuild + "ItemGroup");
                 var itemGroupFile = new XElement(XmlHelpers.NsMsBuild + "ItemGroup");
-                
+
                 propertyGroup.AddAfterSelf(itemGroupReference);
                 itemGroupReference.AddAfterSelf(itemGroupProject);
                 itemGroupProject.AddAfterSelf(itemGroupPackage);
                 itemGroupPackage.AddAfterSelf(itemGroupFile);
-                
+
                 // generate binary references
                 var spuriousReferences = projectDef.BinaryReferences.Where(x => !x.InvariantStartsWith("System") && ! x.InvariantStartsWith("Microsoft."));
                 if (spuriousReferences.Any())
                 {
                     Console.WriteLine("WARNING: Project {0} has spurious binary references", projectDef.ProjectFile);
-                    foreach (var spuriousRef in spuriousReferences)
+                    foreach(var spuriousRef in spuriousReferences)
                     {
                         Console.WriteLine("  {0}", spuriousRef);
                     }
                 }
 
-                foreach (var refBin in projectDef.BinaryReferences)
+                foreach(var refBin in projectDef.BinaryReferences)
                 {
                     var bin = anthology.Binaries.SingleOrDefault(x => x.AssemblyName.InvariantEquals(refBin));
                     var hintPath = null != bin.HintPath ? new XElement(XmlHelpers.NsMsBuild + "HintPath", bin.HintPath) : null;
@@ -135,7 +135,7 @@ namespace FullBuild.Commands
                 }
 
                 // add imports to project reference
-                foreach (var refGuid in projectDef.ProjectReferences)
+                foreach(var refGuid in projectDef.ProjectReferences)
                 {
                     var project = anthology.Projects.SingleOrDefault(x => x.Guid == refGuid);
                     var refProject = project;
@@ -146,7 +146,7 @@ namespace FullBuild.Commands
                 }
 
                 // add packages
-                foreach (var refPkg in projectDef.PackageReferences)
+                foreach(var refPkg in projectDef.PackageReferences)
                 {
                     var pkg = anthology.Packages.SingleOrDefault(x => x.Name.InvariantEquals(refPkg));
                     var refPackage = pkg;

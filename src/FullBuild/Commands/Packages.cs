@@ -71,7 +71,7 @@ namespace FullBuild.Commands
             return null;
         }
 
-        private void GenerateTargetsForProject(Model.Package package)
+        private static void GenerateTargetsForProject(Package package)
         {
             var pkgsDir = WellKnownFolders.GetPackageDirectory();
             var pkgDir = pkgsDir.GetDirectory(package.Name);
@@ -97,11 +97,7 @@ namespace FullBuild.Commands
                         }
                     }
 
-                    if (null == when)
-                    {
-                        when = Generatewhen(new[] {""}, fxVersion, libDir);
-                    }
-
+                    when = when ?? Generatewhen(new[] {""}, fxVersion, libDir);
                     whens.Add(when);
                 }
             }

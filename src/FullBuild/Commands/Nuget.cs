@@ -53,7 +53,7 @@ namespace FullBuild.Commands
                 DownloadNugetPackage(pkg, pkgFile, config.Nugets);
             }
 
-            DirectoryInfo pkgsDir = WellKnownFolders.GetPackageDirectory();
+            var pkgsDir = WellKnownFolders.GetPackageDirectory();
             var pkgDir = pkgsDir.GetDirectory(pkg.Name);
             if (pkgDir.Exists)
             {
@@ -87,7 +87,7 @@ namespace FullBuild.Commands
                 }
             }
 
-            string msg = string.Format("Failed to download package {0} {1} from provided locations", pkg.Name, pkg.Version);
+            var msg = string.Format("Failed to download package {0} {1} from provided locations", pkg.Name, pkg.Version);
             throw new ArgumentException(msg);
         }
 

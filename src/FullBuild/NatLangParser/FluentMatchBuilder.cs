@@ -59,7 +59,7 @@ namespace FullBuild.NatLangParser
             {
                 operation = new MatchOperation<T>();
             }
-            
+
             AddOperation(parameter.Name, operation);
 
             return this;
