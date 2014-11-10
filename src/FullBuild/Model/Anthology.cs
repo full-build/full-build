@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using FullBuild.Helpers;
 using Newtonsoft.Json;
@@ -173,6 +174,19 @@ namespace FullBuild.Model
             return new Anthology(_projects,
                                  _binaries,
                                  Remove(_packages, x => x.Name.InvariantEquals(package.Name)));
+        }
+
+        public static Anthology Load(FileInfo file)
+        {
+            var oldJson = File.ReadAllText(file.FullName);
+            var anthology = JsonConvert.DeserializeObject<Anthology>(oldJson);
+            return anthology;
+        }
+
+        public void Save(FileInfo file)
+        {
+            var json = JsonConvert.SerializeObject(this, Formatting.Indented);
+            File.WriteAllText(file.FullName, json);
         }
     }
 }
