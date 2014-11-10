@@ -74,9 +74,9 @@ namespace FullBuild.Commands
             {
                 var projectFile = Path.Combine(WellKnownFolders.MsBuildSolutionDir, project.ProjectFile);
                 var binFile = Path.Combine(WellKnownFolders.MsBuildBinDir, project.AssemblyName + project.Extension);
-                var projectProperty = ((project.AssemblyName + project.FxTarget).Replace('.', '_') + "_Src").Replace('.', '_');
-                var srcCondition = string.Format("'$({0}_Src)' != ''", projectProperty);
-                var binCondition = string.Format("'$({0}_Src)' == ''", projectProperty);
+                var projectProperty = project.GetProjectPropertyGroupName();
+                var srcCondition = string.Format("'$({0})' != ''", projectProperty);
+                var binCondition = string.Format("'$({0})' == ''", projectProperty);
 
                 var xdoc = new XElement(XmlHelpers.NsMsBuild + "Project",
                                         new XElement(XmlHelpers.NsMsBuild + "Import",
