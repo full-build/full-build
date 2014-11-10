@@ -2,19 +2,10 @@
 
 @taskkill /im tgitcache.exe
 @pushd toto
-@echo ************************************************************************************
-..\..\src\bin\Debug\FullBuild update workspace || goto :ko
 
-@echo ************************************************************************************
+..\..\src\bin\Debug\FullBuild index workspace || goto :ko
 ..\..\src\bin\Debug\FullBuild convert projects || goto :ko
-
-@echo ************************************************************************************
-..\..\src\bin\Debug\FullBuild update packages || goto :ko
-
-@echo ************************************************************************************
-..\..\src\bin\Debug\FullBuild init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko
-
-msbuild cs.sln || goto :ko
+..\..\src\bin\Debug\FullBuild build view cs || goto :ko
 
 popd
 
