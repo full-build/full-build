@@ -28,8 +28,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using FullBuild.Config;
@@ -141,7 +141,9 @@ namespace FullBuild.Commands
 
         private static Anthology OptimizeAnthology(Anthology anthology)
         {
+            Console.WriteLine("Optimizing anthology");
             anthology = RemoveBinariesFromPackages(anthology);
+            anthology = PromoteBinaryToProject(anthology);
             anthology = PromotePackageToProject(anthology);
             anthology = RemoveUnusedStuff(anthology);
             return anthology;
@@ -193,6 +195,43 @@ namespace FullBuild.Commands
             return anthology;
         }
 
+        private static Anthology PromoteBinaryToProject(Anthology anthology)
+        {
+            var bin2prj = from binary in anthology.Binaries
+                from project in anthology.Projects
+                where binary.AssemblyName.InvariantEquals(project.AssemblyName)
+                let newBin2Prj = new {Bin = binary, Prj = project}
+                group newBin2Prj by newBin2Prj.Bin
+                into g
+                select g;
+
+            foreach (var b2p in bin2prj)
+            {
+                var bin = b2p.Key;
+                if (1 < b2p.Count())
+                {
+                    Console.WriteLine("WARNING: Too many candidate projects to promote binary {0} to project:", bin.AssemblyName);
+                    b2p.ForEach(x => Console.WriteLine("  {0} {1}", Path.GetFileName(x.Prj.ProjectFile), x.Prj.Guid.ToString("B")));
+                }
+                else
+                {
+                    var prj = b2p.Single().Prj;
+                    _logger.Debug("Converting binary {0} to project {1}", bin.AssemblyName, prj.ProjectFile);
+                    foreach (var project in anthology.Projects)
+                    {
+                        if (project.BinaryReferences.Contains(bin.AssemblyName, StringComparer.InvariantCultureIgnoreCase))
+                        {
+                            var newProject = project.RemoveBinaryReference(bin.AssemblyName);
+                            newProject = newProject.AddProjectReference(prj.Guid);
+                            anthology = anthology.AddOrUpdateProject(newProject);
+                        }
+                    }
+                }
+            }
+
+            return anthology;
+        }
+
         private static Anthology PromotePackageToProject(Anthology anthology)
         {
             var pkgsDir = WellKnownFolders.GetPackageDirectory();
@@ -213,15 +252,15 @@ namespace FullBuild.Commands
                 if (1 < p2p.Count())
                 {
                     Console.WriteLine("WARNING: Too many candidate projects to promote package {0} to project:", pkg.Name);
-                    p2p.ForEach(x => Console.WriteLine("  {0}", Path.GetFileName(x.Prj.ProjectFile)));
+                    p2p.ForEach(x => Console.WriteLine("  {0} {1}", Path.GetFileName(x.Prj.ProjectFile), x.Prj.Guid.ToString("B")));
                 }
                 else
                 {
                     var prj = p2p.Single().Prj;
-                    _logger.Debug("Converting package {0} to project {1}", p2p.Key.Name, prj.ProjectFile);
+                    _logger.Debug("Converting package {0} to project {1}", pkg.Name, prj.ProjectFile);
                     foreach(var project in anthology.Projects)
                     {
-                        if (project.PackageReferences.Contains(p2p.Key.Name, StringComparer.InvariantCultureIgnoreCase))
+                        if (project.PackageReferences.Contains(pkg.Name, StringComparer.InvariantCultureIgnoreCase))
                         {
                             var newProject = project.RemovePackageReference(pkg.Name);
                             newProject = newProject.AddProjectReference(prj.Guid);
@@ -260,8 +299,9 @@ namespace FullBuild.Commands
             {
                 var projectFile = Path.Combine(WellKnownFolders.MsBuildSolutionDir, project.ProjectFile);
                 var binFile = Path.Combine(WellKnownFolders.MsBuildBinDir, project.AssemblyName + project.Extension);
-                var srcCondition = string.Format("'$({0}_Src)' != ''", project.AssemblyName.Replace('.', '_'));
-                var binCondition = string.Format("'$({0}_Src)' == ''", project.AssemblyName.Replace('.', '_'));
+                var projectProperty = ((project.AssemblyName + project.FxTarget).Replace('.', '_') + "_Src").Replace('.', '_');
+                var srcCondition = string.Format("'$({0}_Src)' != ''", projectProperty);
+                var binCondition = string.Format("'$({0}_Src)' == ''", projectProperty);
 
                 var xdoc = new XElement(XmlHelpers.NsMsBuild + "Project",
                                         new XElement(XmlHelpers.NsMsBuild + "Import",
@@ -372,7 +412,16 @@ namespace FullBuild.Commands
 
             // extract infos from project
             var projectFileName = projectFile.FullName.Substring(workspace.FullName.Length + 1);
-            var projectGuid = Guid.ParseExact((string) xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single(), "B");
+            Guid projectGuid;
+            try
+            {
+                projectGuid = Guid.ParseExact((string) xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single(), "B");
+            }
+            catch (Exception)
+            {
+                projectGuid = Guid.ParseExact((string)xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single(), "D");
+            }
+
             var assemblyName = (string) xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyName").Single();
             var fxTarget = (string) xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").SingleOrDefault() ?? "v4.5";
             var extension = ((string) xdoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single()).InvariantEquals("Library") ? ".dll" : ".exe";
