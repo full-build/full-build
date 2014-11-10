@@ -43,7 +43,7 @@ namespace FullBuild.Helpers
 
         public static string GetProjectPropertyGroupName(this Project @this)
         {
-            var propName = string.Format("FullBuild_{0}_{1}", @this.AssemblyName, @this.FxTarget).ToMsBuild();
+            var propName = string.Format("FullBuild_{0}_{1}_Prj", @this.AssemblyName, @this.FxTarget).ToMsBuild();
             return propName;
         }
     }
