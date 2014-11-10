@@ -24,14 +24,15 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
-using FullBuild.SourceControl;
 using Newtonsoft.Json;
 
 namespace FullBuild.Commands
@@ -40,76 +41,75 @@ namespace FullBuild.Commands
     {
         public void InitView(string viewName, string[] repos)
         {
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.GetConfig(wsDir);
-           
+            DirectoryInfo wsDir = WellKnownFolders.GetWorkspaceDirectory();
+            FullBuildConfig config = ConfigManager.GetConfig(wsDir);
+
             // validate first that repos are valid and clone them
             var sb = new StringBuilder();
-            var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.SourceControl);
-            foreach (var repo in repos)
+            foreach (string repo in repos)
             {
-                var match = "^" + repo + "$";
+                string match = "^" + repo + "$";
                 var regex = new Regex(match, RegexOptions.IgnoreCase);
-                var repoConfigs = config.SourceRepos.Where(x => regex.IsMatch(x.Name));
+                IEnumerable<RepoConfig> repoConfigs = config.SourceRepos.Where(x => regex.IsMatch(x.Name));
                 if (! repoConfigs.Any())
                 {
                     throw new ArgumentException("Invalid repo " + repo);
                 }
 
-                foreach(var repoConfig in repoConfigs)
+                foreach (RepoConfig repoConfig in repoConfigs)
                 {
-                    var repoDir = wsDir.GetDirectory(repoConfig.Name);
+                    DirectoryInfo repoDir = wsDir.GetDirectory(repoConfig.Name);
                     if (! repoDir.Exists)
                     {
-                        Console.WriteLine("Cloning repo {0}", repoConfig.Name, repo);
-                        sourceControl.Clone(repoDir, repoConfig.Name, repoConfig.Url);
+                        string msg = string.Format("Clone repository {0} before creating the view", repo);
+                        throw new ArgumentException(msg);
                     }
 
                     sb.AppendLine(repoConfig.Name);
                 }
             }
 
-            var viewDir = WellKnownFolders.GetViewDirectory();
-            var viewFile = viewDir.GetFile(viewName + ".view");
+            DirectoryInfo viewDir = WellKnownFolders.GetViewDirectory();
+            FileInfo viewFile = viewDir.GetFile(viewName + ".view");
             File.WriteAllText(viewFile.FullName, sb.ToString());
         }
 
-        public void UpdateView(string viewName)
+        public void GenerateView(string viewName)
         {
             // read anthology.json
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthologyFile = admDir.GetFile(Anthology.AnthologyFileName);
-            var json = File.ReadAllText(anthologyFile.FullName);
+            DirectoryInfo admDir = WellKnownFolders.GetAdminDirectory();
+            FileInfo anthologyFile = admDir.GetFile(Anthology.AnthologyFileName);
+            string json = File.ReadAllText(anthologyFile.FullName);
             var anthology = JsonConvert.DeserializeObject<Anthology>(json);
 
             // get current view
-            var viewDir = WellKnownFolders.GetViewDirectory();
+            DirectoryInfo viewDir = WellKnownFolders.GetViewDirectory();
             viewDir.Create();
 
-            var viewFileName = viewDir.GetFile(viewName + ".view");
+            FileInfo viewFileName = viewDir.GetFile(viewName + ".view");
             if (! viewFileName.Exists)
             {
                 throw new ArgumentException("Initialize first solution with a list of repositories to include.");
             }
 
-            var view = File.ReadAllLines(viewFileName.FullName);
+            string[] view = File.ReadAllLines(viewFileName.FullName);
 
             var sb = new StringBuilder();
             sb.AppendLine();
             sb.AppendLine("Microsoft Visual Studio Solution File, Format Version 12.00");
             sb.AppendLine("# Visual Studio 2013");
 
-            var projects = from repo in view
-                           from prj in anthology.Projects
-                           where prj.ProjectFile.InvariantStartsWith(repo + "/")
-                           select prj;
+            IEnumerable<Project> projects = from repo in view
+                from prj in anthology.Projects
+                where prj.ProjectFile.InvariantStartsWith(repo + "/")
+                select prj;
 
-            foreach(var prj in projects)
+            foreach (Project prj in projects)
             {
                 sb.AppendFormat(@"Project(""{{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}}"") = ""{0}"", ""{1}"", ""{2:B}""",
-                                Path.GetFileNameWithoutExtension(prj.ProjectFile), prj.ProjectFile, prj.Guid).AppendLine();
+                    Path.GetFileNameWithoutExtension(prj.ProjectFile), prj.ProjectFile, prj.Guid).AppendLine();
                 sb.AppendFormat("\tProjectSection(ProjectDependencies) = postProject").AppendLine();
-                foreach(var dependency in prj.ProjectReferences)
+                foreach (Guid dependency in prj.ProjectReferences)
                 {
                     sb.AppendFormat("\t\t{0:B} = {0:B}", dependency).AppendLine();
                 }
@@ -125,7 +125,7 @@ namespace FullBuild.Commands
             sb.AppendLine("\tEndGlobalSection");
             sb.AppendLine("\tGlobalSection(ProjectConfigurationPlatforms) = postSolution");
 
-            foreach(var prj in projects)
+            foreach (Project prj in projects)
             {
                 sb.AppendFormat("\t\t{0:B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU", prj.Guid).AppendLine();
                 sb.AppendFormat("\t\t{0:B}.Debug|Any CPU.Build.0 = Debug|Any CPU", prj.Guid).AppendLine();
@@ -136,19 +136,19 @@ namespace FullBuild.Commands
             sb.AppendLine("\tEndGlobalSection");
             sb.AppendLine("EndGlobal");
 
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var slnFileName = viewName + ".sln";
-            var slnFile = wsDir.GetFile(slnFileName);
+            DirectoryInfo wsDir = WellKnownFolders.GetWorkspaceDirectory();
+            string slnFileName = viewName + ".sln";
+            FileInfo slnFile = wsDir.GetFile(slnFileName);
             File.WriteAllText(slnFile.FullName, sb.ToString());
 
             // generate target for solution
             var xdoc = new XElement(XmlHelpers.NsMsBuild + "Project",
-                                    new XElement(XmlHelpers.NsMsBuild + "PropertyGroup",
-                                                 new XElement(XmlHelpers.NsMsBuild + "BinSrcConfig", "Y"),
-                                                 from prj in projects
-                                                 select new XElement(XmlHelpers.NsMsBuild + prj.AssemblyName.Replace('.', '_') + "_Src", "Y")));
-            var targetFileName = viewName + ".targets";
-            var targetFile = Path.Combine(viewDir.FullName, targetFileName);
+                new XElement(XmlHelpers.NsMsBuild + "PropertyGroup",
+                    new XElement(XmlHelpers.NsMsBuild + "BinSrcConfig", "Y"),
+                    from prj in projects
+                    select new XElement(XmlHelpers.NsMsBuild + prj.AssemblyName.Replace('.', '_') + "_Src", "Y")));
+            string targetFileName = viewName + ".targets";
+            string targetFile = Path.Combine(viewDir.FullName, targetFileName);
             xdoc.Save(targetFile);
         }
     }

@@ -74,13 +74,28 @@ namespace FullBuild
         private static void UpdateView(string viewName)
         {
             var handler = new View();
-            handler.UpdateView(viewName);
+            handler.GenerateView(viewName);
         }
 
         private static void Exec(string command)
         {
             var handler = new Exec();
             handler.ForEachRepo(command);
+        }
+
+        private static void CloneRepo(string[] repos)
+        {
+            var handler = new Workspace();
+            handler.CloneRepo(repos);
+        }
+
+        private static void BuildView(string viewname)
+        {
+            var handler = new Exec();
+            string cmd = string.Format("msbuild {0}.sln", viewname);
+
+            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
+            handler.ExecCommand(cmd, wsDir);
         }
 
         private static int Main(string[] args)
@@ -113,8 +128,8 @@ namespace FullBuild
                                          .Do(ctx => InitWorkspace(ctx.Get(path))),
 
                              // update view <viewname>
-                             MatchBuilder.Describe("update solution <viewname>.")
-                                         .Command("update")
+                             MatchBuilder.Describe("generate solution <viewname>.")
+                                         .Command("generate")
                                          .Command("view")
                                          .Param(viewname)
                                          .Do(ctx => UpdateView(ctx.Get(viewname))),
@@ -124,6 +139,13 @@ namespace FullBuild
                                          .Command("refresh")
                                          .Command("workspace")
                                          .Do(ctx => RefreshWorkspace()),
+
+                             // clone repo
+                             MatchBuilder.Describe("clone repo <repos> ...")
+                                         .Command("clone")
+                                         .Command("repo")
+                                         .Param(repos)
+                                         .Do(ctx => CloneRepo(ctx.Get(repos))),
 
                              // refresh source
                              MatchBuilder.Describe("refresh sources from source control.")
@@ -137,13 +159,20 @@ namespace FullBuild
                                         .Param(command)
                                         .Do(ctx => Exec(ctx.Get(command))),
 
+                            // build view
+                            MatchBuilder.Describe("build view <viewname>")
+                                        .Command("build")
+                                        .Command("view")
+                                        .Param(viewname)
+                                        .Do(ctx => BuildView(ctx.Get(viewname))),
+
                              // ----------------------------------------------------------
                              // plumbing commands
                              // ----------------------------------------------------------
 
                              // update workspace
-                             MatchBuilder.Describe("update workspace with local changes.")
-                                         .Command("update")
+                             MatchBuilder.Describe("index workspace with local changes.")
+                                         .Command("index")
                                          .Command("workspace")
                                          .Do(ctx => UpdateWorkspace()),
 

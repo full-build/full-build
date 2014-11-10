@@ -25,6 +25,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using FullBuild.Helpers;
 
 namespace FullBuild.Commands
@@ -46,8 +47,6 @@ namespace FullBuild.Commands
                     continue;
                 }
 
-                Environment.CurrentDirectory = repoDir.FullName;
-
                 var psi = new ProcessStartInfo
                           {
                               FileName = filename,
@@ -64,6 +63,25 @@ namespace FullBuild.Commands
                     process.WaitForExit();
                 }
             }
+        }
+
+        public void ExecCommand(string command, DirectoryInfo dir)
+        {
+            const string filename = "cmd";
+            var arguments = string.Format("/c \"{0}\"", command);
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = filename,
+                Arguments = arguments,
+                UseShellExecute = false,
+                WorkingDirectory = dir.FullName,
+            };
+
+            using (var process = Process.Start(psi))
+            {
+                process.WaitForExit();
+            }            
         }
     }
 }
