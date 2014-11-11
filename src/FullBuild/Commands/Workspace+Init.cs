@@ -25,6 +25,7 @@
 
 using System;
 using System.IO;
+using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.SourceControl;
 
@@ -44,13 +45,13 @@ namespace FullBuild.Commands
             }
 
             // get bootstrap config
-            var config = ConfigManager.GetConfig(wsDir);
+            var config = ConfigManager.LoadConfig(wsDir);
 
-            var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.SourceControl);
-            sourceControl.Clone(admDir, "administrative repo", config.AdminRepo);
+            var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.AdminRepo.Vcs.ToString());
+            sourceControl.Clone(admDir, "administrative repo", config.AdminRepo.Url);
 
             // reload config now
-            config = ConfigManager.GetConfig(wsDir);
+            config = ConfigManager.LoadConfig(wsDir);
 
             // copy all files from binary repo
             var tip = sourceControl.Tip(admDir);
