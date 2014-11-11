@@ -42,8 +42,7 @@ namespace FullBuild.Commands
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var admDir = WellKnownFolders.GetAdminDirectory();
 
-            var anthologyFile = WellKnownFolders.GetAnthologyFile();
-            var anthology = Anthology.Load(anthologyFile);
+            var anthology = Anthology.Load(admDir);
 
             foreach(var projectDef in anthology.Projects)
             {

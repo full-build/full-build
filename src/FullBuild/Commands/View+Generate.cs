@@ -38,8 +38,8 @@ namespace FullBuild.Commands
         public void Generate(string viewName)
         {
             // read anthology.json
-            var anthologyFile = WellKnownFolders.GetAnthologyFile();
-            var anthology = Anthology.Load(anthologyFile);
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var anthology = Anthology.Load(admDir);
 
             // get current view
             var viewDir = WellKnownFolders.GetViewDirectory();

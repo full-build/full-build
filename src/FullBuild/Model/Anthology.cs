@@ -36,7 +36,7 @@ namespace FullBuild.Model
 {
     internal class Anthology
     {
-        public const string AnthologyFileName = "anthology.json";
+        private const string AnthologyFileName = "anthology.json";
 
         [JsonProperty("binaries")]
         private readonly IImmutableList<Binary> _binaries;
@@ -176,15 +176,26 @@ namespace FullBuild.Model
                                  Remove(_packages, x => x.Name.InvariantEquals(package.Name)));
         }
 
-        public static Anthology Load(FileInfo file)
+        public static Anthology Load(DirectoryInfo dir)
         {
+            dir.Create();
+
+            var file = dir.GetFile(AnthologyFileName);
+            if (! file.Exists)
+            {
+                return new Anthology();
+            }
+
             var oldJson = File.ReadAllText(file.FullName);
             var anthology = JsonConvert.DeserializeObject<Anthology>(oldJson);
             return anthology;
         }
 
-        public void Save(FileInfo file)
+        public void Save(DirectoryInfo dir)
         {
+            dir.Create();
+
+            var file = dir.GetFile(AnthologyFileName);
             var json = JsonConvert.SerializeObject(this, Formatting.Indented);
             File.WriteAllText(file.FullName, json);
         }
