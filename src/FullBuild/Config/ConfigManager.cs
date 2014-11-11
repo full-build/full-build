@@ -26,26 +26,34 @@
 using System.Configuration;
 using System.IO;
 using System.Xml.Serialization;
-using FullBuild.Config;
+using FullBuild.Helpers;
 
-namespace FullBuild.Helpers
+namespace FullBuild.Config
 {
     internal static class ConfigManager
     {
-        public static FullBuildConfig GetConfig(DirectoryInfo workspace)
+        public static FullBuildConfig LoadConfig(DirectoryInfo adminDir)
         {
             var bootstrapConfig = (BoostrapConfig) ConfigurationManager.GetSection("FullBuildConfig");
-            bootstrapConfig.SourceControl = bootstrapConfig.SourceControl ?? "Git";
-
-            var fbDir = workspace.GetDirectory(".full-build");
-            var adminConfig = LoadBootstrapConfig(fbDir);
+            var fbDir = adminDir.GetDirectory(".full-build");
+            var adminConfig = LoadAdminConfig(fbDir);
             var config = new FullBuildConfig(bootstrapConfig, adminConfig);
             return config;
         }
 
-        private static AdminConfig LoadBootstrapConfig(DirectoryInfo fbDir)
+        public static void SaveAdminConfig(AdminConfig config, DirectoryInfo adminDir)
         {
-            var file = new FileInfo(Path.Combine(fbDir.FullName, "full-build.config"));
+            var file = new FileInfo(Path.Combine(adminDir.FullName, "full-build.config"));
+            var xmlSer = new XmlSerializer(typeof(AdminConfig));
+            using (var writer = new StreamWriter(file.FullName))
+            {
+                xmlSer.Serialize(writer, config);
+            }
+        }
+
+        public static AdminConfig LoadAdminConfig(DirectoryInfo adminDir)
+        {
+            var file = new FileInfo(Path.Combine(adminDir.FullName, "full-build.config"));
             if (file.Exists)
             {
                 var xmlSer = new XmlSerializer(typeof(AdminConfig));

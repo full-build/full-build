@@ -29,7 +29,6 @@ namespace FullBuild.Config
     {
         public FullBuildConfig(BoostrapConfig boostrapConfig, AdminConfig adminConfig)
         {
-            SourceControl = boostrapConfig.SourceControl;
             AdminRepo = boostrapConfig.AdminRepo;
             BinRepo = adminConfig.BinRepo;
             SourceRepos = adminConfig.SourceRepos;
@@ -37,9 +36,7 @@ namespace FullBuild.Config
             PackageGlobalCache = boostrapConfig.PackageGlobalCache;
         }
 
-        public string SourceControl { get; private set; }
-
-        public string AdminRepo { get; private set; }
+        public RepoConfig AdminRepo { get; private set; }
 
         public string BinRepo { get; private set; }
 

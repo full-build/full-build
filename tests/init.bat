@@ -2,12 +2,12 @@ taskkill /im tgitcache.exe
 rmdir /s /q titi
 mkdir titi
 
-set PATH=%PATH%;c:\dev\projects\full-build\src\bin\Debug
-
-FullBuild init workspace titi || goto :ko
+..\src\bin\Debug\FullBuild init workspace titi || goto :ko
 
 pushd titi
-FullBuild clone repo * || goto :ko
+..\..\src\bin\Debug\FullBuild add git repo cassandra-sharp from https://github.com/pchalamet/cassandra-sharp
+..\..\src\bin\Debug\FullBuild add git repo cassandra-sharp-contrib from https://github.com/pchalamet/cassandra-sharp-contrib
+..\..\src\bin\Debug\FullBuild clone repo * || goto :ko
 popd
 
 :ok

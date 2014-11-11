@@ -42,7 +42,7 @@ namespace FullBuild.Commands
         public void Index()
         {
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.GetConfig(workspace);
+            var config = ConfigManager.LoadConfig(workspace);
 
             // get all csproj in all repos only
             var anthology = LoadOrCreateAnthology();

@@ -1,6 +1,6 @@
 @setlocal
 
-set PATH=%PATH%;c:\dev\projects\full-build\src\bin\Debug
+set PATH=%PATH%;c:\src\projects\full-build\src\bin\Debug
 
 @taskkill /im tgitcache.exe
 @robocopy titi toto /MIR

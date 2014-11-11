@@ -30,13 +30,10 @@ namespace FullBuild.Config
     [XmlRoot("FullBuildConfig")]
     public class BoostrapConfig
     {
-        [XmlElement("SourceControl")]
-        public string SourceControl { get; set; }
-
         [XmlElement("PackageGlobalCache")]
         public string PackageGlobalCache { get; set; }
 
         [XmlElement("AdminRepo")]
-        public string AdminRepo { get; set; }
+        public RepoConfig AdminRepo { get; set; }
     }
 }

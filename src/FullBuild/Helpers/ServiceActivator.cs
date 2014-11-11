@@ -49,8 +49,8 @@ namespace FullBuild.Helpers
                 throw new ArgumentException(emptyTypeMsg);
             }
 
-            Type type;
-            if (!_descriptor.Definition.TryGetValue(customType, out type))
+            var type = _descriptor.Definition.FirstOrDefault(x => x.Key.InvariantEquals(customType)).Value;
+            if (null == type)
             {
                 type = Type.GetType(customType);
             }
