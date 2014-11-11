@@ -28,6 +28,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using FullBuild.Config;
 using FullBuild.Helpers;
 
 namespace FullBuild.Commands
@@ -37,7 +38,7 @@ namespace FullBuild.Commands
         public void InitView(string viewName, string[] repos)
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.GetConfig(wsDir);
+            var config = ConfigManager.LoadConfig(wsDir);
 
             // validate first that repos are valid and clone them
             var sb = new StringBuilder();

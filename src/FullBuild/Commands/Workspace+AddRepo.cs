@@ -23,10 +23,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-namespace FullBuild.Config
+using FullBuild.Config;
+
+namespace FullBuild.Commands
 {
-    public enum SourceControlType
+    internal partial class Workspace
     {
-        Git,
+        public void AddRepo(string name, VersionControlType type, string url)
+        {
+        }
     }
 }
