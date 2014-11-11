@@ -33,7 +33,6 @@ using System.Xml.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
-using Newtonsoft.Json.Linq;
 
 namespace FullBuild.Commands
 {
@@ -44,22 +43,21 @@ namespace FullBuild.Commands
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig(workspace);
 
-            // get all csproj in all repos only
-            var anthology = LoadOrCreateAnthology();
-            anthology = UpdateAnthologyFromSource(config, workspace, anthology);
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var anthology = Anthology.Load(admDir);
 
-            // merge with existing
-            anthology = MergeNewAnthologyWithExisting(anthology);
+            // get all csproj in all repos only
+            anthology = UpdateAnthologyFromSource(config, workspace, anthology);
+            anthology.Save(admDir);
 
             // get packages
             var handler = new Packages();
             handler.Install();
-
+            
             // Promotion
             anthology = AnthologyOptimizer.Optimize(anthology);
 
-            // merge with existing
-            anthology = MergeNewAnthologyWithExisting(anthology);
+            anthology.Save(admDir);
 
             // Generate import files
             GenerateImports(anthology);
@@ -117,40 +115,35 @@ namespace FullBuild.Commands
 
                 // process all projects
                 var csprojs = repoDir.EnumerateFiles("*.csproj", SearchOption.AllDirectories);
-                anthology = csprojs.Aggregate(anthology, (a, p) => ParseAndAddProject(workspace, p, a));
+                var projectAdmDir = repoDir.GetDirectory(".full-build-repo");
+
+                var projectAnthology = Anthology.Load(projectAdmDir);
+                projectAnthology = csprojs.Aggregate(projectAnthology, (a, p) => ParseAndAddProject(workspace, p, a));
+                projectAnthology.Save(projectAdmDir);
+
+                anthology = projectAnthology.Binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
+                anthology = projectAnthology.Packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
+                anthology = projectAnthology.Projects.Aggregate(anthology, (a, p) => a.AddOrUpdateProject(p));
             }
 
             return anthology;
         }
 
-        private static Anthology LoadOrCreateAnthology()
-        {
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthologyFile = admDir.GetFile(Anthology.AnthologyFileName);
-            return anthologyFile.Exists
-                ? Anthology.Load(anthologyFile)
-                : new Anthology();
-        }
+        //private static Anthology MergeNewAnthologyWithExisting(Anthology anthology)
+        //{
+        //    // merge anthology files
+        //    var admDir = WellKnownFolders.GetAdminDirectory();
+        //    var prevAnthology = Anthology.Load(admDir);
+        //    var oldJ = JObject.FromObject(prevAnthology);
+        //    var newJ = JObject.FromObject(anthology);
+        //    var mergeSettings = new JsonMergeSettings {MergeArrayHandling = MergeArrayHandling.Replace};
+        //    oldJ.Merge(newJ, mergeSettings);
 
-        private static Anthology MergeNewAnthologyWithExisting(Anthology anthology)
-        {
-            // merge anthology files
-            var anthologyFile = WellKnownFolders.GetAnthologyFile();
-            if (anthologyFile.Exists)
-            {
-                var prevAnthology = Anthology.Load(anthologyFile);
+        //    anthology = oldJ.ToObject<Anthology>();
 
-                var oldJ = JObject.FromObject(prevAnthology);
-                var newJ = JObject.FromObject(anthology);
-                var mergeSettings = new JsonMergeSettings {MergeArrayHandling = MergeArrayHandling.Replace};
-                oldJ.Merge(newJ, mergeSettings);
-
-                anthology = oldJ.ToObject<Anthology>();
-            }
-
-            anthology.Save(anthologyFile);
-            return anthology;
-        }
+        //    anthology.Save(admDir);
+        //    return anthology;
+        //}
 
         private static IEnumerable<Package> GetNugetPackages(DirectoryInfo projectDir)
         {
