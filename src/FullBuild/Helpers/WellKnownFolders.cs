@@ -56,13 +56,6 @@ namespace FullBuild.Helpers
 
         public static readonly string MsBuildPackagesDir = Path.Combine("$(SolutionDir)", RelativePackageDirectory);
 
-        public static FileInfo GetAnthologyFile()
-        {
-            var admDir = GetAdminDirectory();
-            var anthologyFile = admDir.GetFile(AnthologyFileName);
-            return anthologyFile;
-        }
-
         public static DirectoryInfo GetWorkspaceDirectory()
         {
             var dirInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
