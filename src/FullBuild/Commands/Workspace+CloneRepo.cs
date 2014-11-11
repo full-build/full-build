@@ -24,47 +24,42 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+using FullBuild.Config;
+using FullBuild.Helpers;
+using FullBuild.SourceControl;
 
-namespace FullBuild.NatLangParser
+namespace FullBuild.Commands
 {
-    public class MatchOperation<T> : IMatchOperation
+    internal partial class Workspace
     {
-        private T _value;
-
-        public bool TryParse(string input)
+        public void CloneRepo(string[] repos)
         {
-            try
+            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
+            var config = ConfigManager.LoadConfig(wsDir);
+
+            // validate first that repos are valid and clone them
+            foreach(var repo in repos)
             {
-                if (typeof(T).IsEnum)
+                var match = "^" + repo + "$";
+                var regex = new Regex(match, RegexOptions.IgnoreCase);
+                var repoConfigs = config.SourceRepos.Where(x => regex.IsMatch(x.Name));
+                if (!repoConfigs.Any())
                 {
-                    _value = (T) Enum.Parse(typeof(T), input);
+                    throw new ArgumentException("Invalid repo " + repo);
                 }
-                else
+
+                foreach(var repoConfig in repoConfigs)
                 {
-                    _value = (T) Convert.ChangeType(input, typeof(T));
+                    var repoDir = wsDir.GetDirectory(repoConfig.Name);
+                    if (!repoDir.Exists)
+                    {
+                        var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(repoConfig.Vcs.ToString());
+                        sourceControl.Clone(repoDir, repoConfig.Name, repoConfig.Url);
+                    }
                 }
             }
-            catch
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public object Value
-        {
-            get { return _value; }
-        }
-
-        public string Describe
-        {
-            get { return typeof(T).Name; }
-        }
-
-        public bool IsAccumulator
-        {
-            get { return false; }
         }
     }
 }

@@ -26,6 +26,7 @@
 using System;
 using System.IO;
 using System.Net;
+using FullBuild.Config;
 using FullBuild.Helpers;
 using NLog;
 
@@ -37,7 +38,7 @@ namespace FullBuild.Commands
 
         public static void InstallPackage(Model.Package pkg)
         {
-            var config = ConfigManager.GetConfig(WellKnownFolders.GetWorkspaceDirectory());
+            var config = ConfigManager.LoadConfig(WellKnownFolders.GetWorkspaceDirectory());
 
             var cacheDir = WellKnownFolders.GetCacheDirectory();
             if (null != config.PackageGlobalCache)

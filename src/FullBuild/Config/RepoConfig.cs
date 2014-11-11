@@ -32,6 +32,9 @@ namespace FullBuild.Config
         [XmlAttribute("name")]
         public string Name { get; set; }
 
+        [XmlAttribute("vcs")]
+        public VersionControlType Vcs { get; set; }
+
         [XmlAttribute("url")]
         public string Url { get; set; }
     }

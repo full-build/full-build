@@ -24,7 +24,9 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Linq;
 using FullBuild.Commands;
+using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.NatLangParser;
 
@@ -87,7 +89,7 @@ namespace FullBuild
         private static void CloneRepo(string[] repos)
         {
             var handler = new Workspace();
-            handler.Clone(repos);
+            handler.CloneRepo(repos);
         }
 
         private static void BuildView(string viewname)
@@ -99,12 +101,28 @@ namespace FullBuild
             handler.ExecCommand(cmd, wsDir);
         }
 
+
+        private static void AddRepo(string repoName, VersionControlType vcs, string url)
+        {
+            var adminDir = WellKnownFolders.GetAdminDirectory();
+            var config = ConfigManager.LoadAdminConfig(adminDir);
+
+            var repoConfig = new RepoConfig {Name = repoName, Vcs = vcs, Url = url};
+            var repoConfigs = new[] {repoConfig};
+            config.SourceRepos = config.SourceRepos.Concat(repoConfigs).ToArray();
+
+            ConfigManager.SaveAdminConfig(config, adminDir);
+        }
+
         private static int Main(string[] args)
         {
             var path = Parameter<string>.Create("path");
             var viewname = Parameter<string>.Create("viewname");
             var repos = Parameter<string[]>.Create("repos");
             var command = Parameter<string>.Create("command");
+            var vcs = Parameter<VersionControlType>.Create("vcs");
+            var repo = Parameter<string>.Create("repo");
+            var url = Parameter<string>.Create("url");
 
             var parser = new Parser
                          {
@@ -183,11 +201,22 @@ namespace FullBuild
                                          .Command("packages")
                                          .Do(ctx => InstallPackages()),
 
-                             // fix source
+                             // convert ptojects
                              MatchBuilder.Describe("convert projects to ensure compatibility with full-build.")
                                          .Command("convert")
                                          .Command("projects")
                                          .Do(ctx => ConvertProjects()),
+
+                             // add repo
+                             MatchBuilder.Describe("add a new repository to the workspace.")
+                                         .Command("add")
+                                         .Param(vcs)
+                                         .Command("repo")
+                                         .Param(repo)
+                                         .Command("from")
+                                         .Param(url)
+                                         .Do(ctx => AddRepo(ctx.Get(repo), ctx.Get(vcs), ctx.Get(url)))
+
                          };
 
             if (! parser.Parse(args))
@@ -201,5 +230,6 @@ namespace FullBuild
 
             return 0;
         }
+
     }
 }
