@@ -30,7 +30,6 @@ using System.Linq;
 using System.Xml.Linq;
 using FullBuild.Helpers;
 using FullBuild.Model;
-using Newtonsoft.Json;
 
 namespace FullBuild.Commands
 {
@@ -40,9 +39,7 @@ namespace FullBuild.Commands
         {
             // read anthology.json
             var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthologyFile = admDir.GetFile(Anthology.AnthologyFileName);
-            var json = File.ReadAllText(anthologyFile.FullName);
-            var anthology = JsonConvert.DeserializeObject<Anthology>(json);
+            var anthology = Anthology.Load(admDir);
 
             Console.WriteLine("Installing packages:");
             foreach(var pkg in anthology.Packages)
