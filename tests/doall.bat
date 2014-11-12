@@ -1,19 +1,21 @@
 @setlocal
+set HERE=%~dp0
 
-set PATH=%PATH%;c:\src\projects\full-build\src\bin\Debug
+set fullbuild=%HERE%\..\src\bin\debug\FullBuild.exe
 
 @taskkill /im tgitcache.exe
 @robocopy titi toto /MIR
 @robocopy src\.nuget toto\.nuget /MIR
 @pushd toto
 
-FullBuild index workspace || goto :ko
+%FULLBUILD% index workspace || goto :ko
 copy ..\Template.csproj .full-build
-FullBuild convert projects || goto :ko
-FullBuild init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko
-FullBuild generate view cs || goto :ko
-FullBuild build view cs
-fullbuild exec "echo %%FULLBUILD_REPO%% & git log -n 1 | find ""commit"" && echo." || goto :ko
+%FULLBUILD% convert projects || goto :ko
+%FULLBUILD% init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko
+%FULLBUILD% generate view cs || goto :ko
+%FULLBUILD% build view cs
+%FULLBUILD% exec "echo %%FULLBUILD_REPO%% & git log -n 1 | find ""commit"" && echo." || goto :ko
+%FULLBUILD% exec "git status" || got :ko
 
 popd
 
