@@ -59,7 +59,10 @@ namespace FullBuild
 
         private static void RefreshWorkspace()
         {
-            throw new NotImplementedException();
+            var handler = new Exec();
+
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            handler.ExecCommand("git pull --rebase", admDir);
         }
 
         private static void ConvertProjects()
