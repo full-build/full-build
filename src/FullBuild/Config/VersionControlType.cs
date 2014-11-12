@@ -28,8 +28,12 @@ namespace FullBuild.Config
     public enum VersionControlType
     {
         Git,
-        git = Git,
         Hg,
+
+        // hack to avoid case sensitiveness in XmlSerializer
+// ReSharper disable once InconsistentNaming
+        git = Git,
+// ReSharper disable once InconsistentNaming
         hg = Hg,
     }
 }
