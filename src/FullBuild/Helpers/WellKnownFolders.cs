@@ -48,15 +48,15 @@ namespace FullBuild.Helpers
 
         public static readonly string RelativeProjectAdminRepo = ".full-build-repo";
 
-        public static readonly string MsBuildAdminDir = Path.Combine("$(SolutionDir)", RelativeAdminDirectory);
+        public static readonly string MsBuildAdminDir = Path.Combine("$(SolutionDir)", RelativeAdminDirectory).ToUnixSeparator();
 
-        public static readonly string MsBuildBinDir = Path.Combine("$(SolutionDir)", RelativeBinDirectory);
+        public static readonly string MsBuildBinDir = Path.Combine("$(SolutionDir)", RelativeBinDirectory).ToUnixSeparator();
 
-        public static readonly string MsBuildProjectDir = Path.Combine("$(SolutionDir)", RelativeProjectDirectory);
+        public static readonly string MsBuildProjectDir = Path.Combine("$(SolutionDir)", RelativeProjectDirectory).ToUnixSeparator();
 
-        public static readonly string MsBuildViewDir = Path.Combine("$(SolutionDir)", RelativeViewDirectory);
+        public static readonly string MsBuildViewDir = Path.Combine("$(SolutionDir)", RelativeViewDirectory).ToUnixSeparator();
 
-        public static readonly string MsBuildPackagesDir = Path.Combine("$(SolutionDir)", RelativePackageDirectory);
+        public static readonly string MsBuildPackagesDir = Path.Combine("$(SolutionDir)", RelativePackageDirectory).ToUnixSeparator();
 
         public static DirectoryInfo GetWorkspaceDirectory()
         {
