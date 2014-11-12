@@ -54,9 +54,9 @@ namespace FullBuild.Model
 
         private Anthology(IImmutableList<Project> projects, IImmutableList<Binary> binaries, IImmutableList<Package> packages)
         {
-            _projects = projects;
-            _binaries = binaries;
-            _packages = packages;
+            _projects = projects.OrderBy(x => x.Guid).ToImmutableList();
+            _binaries = binaries.OrderBy(x => x.AssemblyName).ToImmutableList();
+            _packages = packages.OrderBy(x => x.Name).ToImmutableList();
         }
 
         [JsonIgnore]
