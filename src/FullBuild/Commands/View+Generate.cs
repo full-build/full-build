@@ -70,7 +70,11 @@ namespace FullBuild.Commands
                 sb.AppendFormat("\tProjectSection(ProjectDependencies) = postProject").AppendLine();
                 foreach(var dependency in prj.ProjectReferences)
                 {
-                    sb.AppendFormat("\t\t{0:B} = {0:B}", dependency).AppendLine();
+                    // add a build order if dependency is included in solution
+                    if (projects.Any(x => x.Guid == dependency))
+                    {
+                        sb.AppendFormat("\t\t{0:B} = {0:B}", dependency).AppendLine();
+                    }
                 }
                 sb.AppendFormat("\tEndProjectSection").AppendLine();
                 sb.AppendLine("EndProject");
