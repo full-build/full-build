@@ -107,7 +107,7 @@ namespace FullBuild.Commands
                 var bin = b2p.Key;
                 if (1 < b2p.Count())
                 {
-                    Console.WriteLine("WARNING: Too many candidate projects to promote binary {0} to project:", bin.AssemblyName);
+                    Console.WriteLine("WARNING: Too many candidate projects to promote binary {0}:", bin.AssemblyName);
                     b2p.ForEach(x => Console.WriteLine("  {0} {1}", Path.GetFileName(x.Prj.ProjectFile), x.Prj.Guid.ToString("B")));
                 }
                 else
@@ -149,7 +149,7 @@ namespace FullBuild.Commands
                 var pkg = p2p.Key;
                 if (1 < p2p.Count())
                 {
-                    Console.WriteLine("WARNING: Too many candidate projects to promote package {0} to project:", pkg.Name);
+                    Console.WriteLine("WARNING: Too many candidate projects to promote package {0}:", pkg.Name);
                     p2p.ForEach(x => Console.WriteLine("  {0} {1}", Path.GetFileName(x.Prj.ProjectFile), x.Prj.Guid.ToString("B")));
                 }
                 else
