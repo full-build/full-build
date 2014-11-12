@@ -110,12 +110,12 @@ namespace FullBuild.Commands
                 }
 
                 // delete all solution files
-                var slns = repoDir.EnumerateFiles("*.sln", SearchOption.AllDirectories);
+                var slns = repoDir.EnumerateFiles(WellKnownFolders.SlnFilter, SearchOption.AllDirectories);
                 slns.ForEach(x => x.Delete());
 
                 // process all projects
-                var csprojs = repoDir.EnumerateFiles("*.csproj", SearchOption.AllDirectories);
-                var projectAdmDir = repoDir.GetDirectory(".full-build-repo");
+                var csprojs = repoDir.EnumerateFiles(WellKnownFolders.CsprojFilter, SearchOption.AllDirectories);
+                var projectAdmDir = repoDir.GetDirectory(WellKnownFolders.RelativeProjectAdminRepo);
 
                 var projectAnthology = Anthology.Load(projectAdmDir);
                 projectAnthology = csprojs.Aggregate(projectAnthology, (a, p) => ParseAndAddProject(workspace, p, a));
@@ -128,22 +128,6 @@ namespace FullBuild.Commands
 
             return anthology;
         }
-
-        //private static Anthology MergeNewAnthologyWithExisting(Anthology anthology)
-        //{
-        //    // merge anthology files
-        //    var admDir = WellKnownFolders.GetAdminDirectory();
-        //    var prevAnthology = Anthology.Load(admDir);
-        //    var oldJ = JObject.FromObject(prevAnthology);
-        //    var newJ = JObject.FromObject(anthology);
-        //    var mergeSettings = new JsonMergeSettings {MergeArrayHandling = MergeArrayHandling.Replace};
-        //    oldJ.Merge(newJ, mergeSettings);
-
-        //    anthology = oldJ.ToObject<Anthology>();
-
-        //    anthology.Save(admDir);
-        //    return anthology;
-        //}
 
         private static IEnumerable<Package> GetNugetPackages(DirectoryInfo projectDir)
         {
