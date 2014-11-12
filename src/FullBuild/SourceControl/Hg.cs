@@ -23,6 +23,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
 using System.IO;
 using Mercurial;
 
@@ -32,6 +33,8 @@ namespace FullBuild.SourceControl
     {
         public void Clone(DirectoryInfo rootDir, string name, string url)
         {
+            Console.WriteLine("Cloning {0}", name);
+
             rootDir.Create();
             var repo = new Repository(rootDir.FullName);
             repo.Clone(url, new CloneCommand().WithTimeout(10000000));
