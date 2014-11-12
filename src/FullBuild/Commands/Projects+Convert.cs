@@ -27,6 +27,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
 using NLog;
@@ -43,7 +44,6 @@ namespace FullBuild.Commands
             var admDir = WellKnownFolders.GetAdminDirectory();
 
             var anthology = Anthology.Load(admDir);
-
             foreach(var projectDef in anthology.Projects)
             {
                 _logger.Debug("Converting project {0}", projectDef.GetName());
@@ -55,16 +55,16 @@ namespace FullBuild.Commands
                 }
 
                 // get template according to project type
-                string templateFileName = "Template" + projectFile.Extension;
+                var templateFileName = "Template" + projectFile.Extension;
                 var templateFile = admDir.GetFile(templateFileName);
-             
+
                 // extract info from real project
                 var realProjectDoc = XDocument.Load(projectFile.FullName);
                 var rootNamespace = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "RootNamespace").Single().Value;
                 var outputType = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single().Value;
                 var signAssembly = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "SignAssembly").SingleOrDefault();
                 var originatorKeyFile = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyOriginatorKeyFile").SingleOrDefault();
-                var targetFramework = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").Single().Value;
+                var targetFramework = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").SingleOrDefault();
                 var childrenOfItemGroup = from ig in realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "ItemGroup").Elements()
                                           where ig.Name.LocalName != "Reference"
                                                 && ig.Name.LocalName != "ProjectReference"
@@ -92,12 +92,22 @@ namespace FullBuild.Commands
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single().Value = outputType;
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "RootNamespace").Single().Value = rootNamespace;
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyName").Single().Value = projectDef.AssemblyName;
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").Single().Value = targetFramework;
+
+                if (null != targetFramework)
+                {
+                    xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").Single().Value = targetFramework.Value;
+                }
+
                 if (null != signAssembly)
                 {
                     xdoc.Descendants(XmlHelpers.NsMsBuild + "SignAssembly").Single().Value = signAssembly.Value;
+                }
+
+                if (null != originatorKeyFile)
+                {
                     xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyOriginatorKeyFile").Single().Value = originatorKeyFile.Value;
                 }
+
                 if (null != applicationIcon)
                 {
                     xdoc.Descendants(XmlHelpers.NsMsBuild + "ApplicationIcon").Single().Value = applicationIcon.Value;
@@ -160,11 +170,17 @@ namespace FullBuild.Commands
                 xdoc.Save(projectFile.FullName);
 
                 // remove nuget packages file
-                var projectDir = projectFile.Directory;
-                var packagesConfig = projectDir.GetFile("packages.config");
-                if (packagesConfig.Exists)
+                projectFile.Directory.GetFile("packages.config").Delete();
+            }
+
+            // remove nuget folders
+            var config = ConfigManager.LoadConfig(wsDir);
+            foreach(var repo in config.SourceRepos)
+            {
+                var repoDir = wsDir.GetDirectory(repo.Name);
+                if (repoDir.Exists)
                 {
-                    packagesConfig.Delete();
+                    repoDir.EnumerateNugetDirectories().ForEach(x => x.Delete(true));
                 }
             }
         }
