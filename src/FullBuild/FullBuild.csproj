@@ -88,7 +88,6 @@
     <Compile Include="Helpers\DirectoryInfoExtensions.cs" />
     <Compile Include="Commands\Workspace+Index.cs" />
     <Compile Include="Helpers\EnumerableExtensions.cs" />
-    <Compile Include="Helpers\FullBuildConfigExtensions.cs" />
     <Compile Include="Model\Anthology.cs" />
     <Compile Include="Model\Binary.cs" />
     <Compile Include="Model\Package.cs" />
