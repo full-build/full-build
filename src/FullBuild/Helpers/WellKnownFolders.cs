@@ -44,10 +44,6 @@ namespace FullBuild.Helpers
 
         public const string AnthologyFileName = "anthology.json";
 
-        public const string CsprojFilter = "*.csproj";
-
-        public const string SlnFilter = "*.sln";
-
         public static readonly string MsBuildSolutionDir = "$(SolutionDir)";
 
         public static readonly string RelativeProjectAdminRepo = ".full-build-repo";
