@@ -49,7 +49,10 @@ namespace FullBuild.SourceControl
 
         private static bool OnTransferProgress(TransferProgress progress, string name)
         {
-            Console.Write("\rCloning {0}: {1}/{2}", name, progress.ReceivedObjects, progress.TotalObjects);
+            var percent = 0 < progress.TotalObjects
+                ? (100 * progress.ReceivedObjects) / progress.TotalObjects
+                : 100;
+            Console.Write("\rCloning {0}: {1}%", name, percent);
             return true;
         }
     }

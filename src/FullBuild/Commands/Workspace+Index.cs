@@ -110,15 +110,14 @@ namespace FullBuild.Commands
                 }
 
                 // delete all solution files
-                var slns = repoDir.EnumerateFiles(WellKnownFolders.SlnFilter, SearchOption.AllDirectories);
-                slns.ForEach(x => x.Delete());
+                repoDir.EnumerateSolutionFiles().ForEach(x => x.Delete());
 
                 // process all projects
-                var csprojs = repoDir.EnumerateFiles(WellKnownFolders.CsprojFilter, SearchOption.AllDirectories);
+                var allprojs = repoDir.EnumerateSupportedProjectFiles();
                 var projectAdmDir = repoDir.GetDirectory(WellKnownFolders.RelativeProjectAdminRepo);
 
                 var projectAnthology = Anthology.Load(projectAdmDir);
-                projectAnthology = csprojs.Aggregate(projectAnthology, (a, p) => ParseAndAddProject(workspace, p, a));
+                projectAnthology = allprojs.Aggregate(projectAnthology, (a, p) => ParseAndAddProject(workspace, p, a));
                 projectAnthology.Save(projectAdmDir);
 
                 anthology = projectAnthology.Binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
@@ -161,6 +160,7 @@ namespace FullBuild.Commands
             }
             catch(Exception)
             {
+                // F# project GUID are badly formatted
                 projectGuid = Guid.ParseExact((string) xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single(), "D");
             }
 

@@ -23,7 +23,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace FullBuild.Helpers
 {
@@ -41,6 +43,26 @@ namespace FullBuild.Helpers
             var filePath = Path.Combine(@this.FullName, fileName);
             var file = new FileInfo(filePath);
             return file;
+        }
+
+        public static IEnumerable<FileInfo> EnumerateSupportedProjectFiles(this DirectoryInfo dir)
+        {
+            var csproj = dir.GetFiles("*.csproj", SearchOption.AllDirectories);
+            var vbproj = dir.GetFiles("*.vbproj", SearchOption.AllDirectories);
+            var fsproj = dir.GetFiles("*.fsproj", SearchOption.AllDirectories);
+            return csproj.Concat(vbproj).Concat(fsproj);
+        }
+
+        public static IEnumerable<FileInfo> EnumerateSolutionFiles(this DirectoryInfo dir)
+        {
+            var sln = dir.GetFiles("*.sln", SearchOption.AllDirectories);
+            return sln;
+        }
+
+        public static IEnumerable<DirectoryInfo> EnumerateNugetDirectories(this DirectoryInfo dir)
+        {
+            var nuget = dir.GetDirectories(".nuget", SearchOption.AllDirectories);
+            return nuget;
         }
     }
 }
