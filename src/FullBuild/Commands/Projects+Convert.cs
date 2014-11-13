@@ -24,6 +24,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -81,11 +82,13 @@ namespace FullBuild.Commands
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantContains(WellKnownFolders.RelativeAdminDirectory)).Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "Reference").Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantContains("NuGet.targets")).Remove();
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantContains("paket.targets")).Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantStartsWith(WellKnownFolders.RelativeAdminDirectory)).Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantStartsWith(WellKnownFolders.MsBuildPackagesDir)).Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "Target").Where(x => x.Attribute("Name").Value.InvariantEquals("EnsureNuGetPackageBuildImports")).Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "RestorePackages").Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "ItemGroup").Where(x => !x.DescendantNodes().Any()).Remove();
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "Choose").Remove();
 
                 // setup project guid
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single().Value = projectDef.Guid.ToString("B");
@@ -121,16 +124,7 @@ namespace FullBuild.Commands
                 itemGroupReference.AddAfterSelf(itemGroupFile);
 
                 // generate binary references
-                var spuriousReferences = projectDef.BinaryReferences.Where(x => !x.InvariantStartsWith("System") && ! x.InvariantStartsWith("Microsoft."));
-                if (spuriousReferences.Any())
-                {
-                    Console.WriteLine("WARNING: Project {0} has spurious binary references", projectDef.ProjectFile);
-                    foreach(var spuriousRef in spuriousReferences)
-                    {
-                        Console.WriteLine("  {0}", spuriousRef);
-                    }
-                }
-
+                var spuriousReferences = new List<string>();
                 foreach(var refBin in projectDef.BinaryReferences)
                 {
                     var bin = anthology.Binaries.SingleOrDefault(x => x.AssemblyName.InvariantEquals(refBin));
@@ -139,6 +133,20 @@ namespace FullBuild.Commands
                                                     new XAttribute("Include", bin.AssemblyName),
                                                     hintPath);
                     itemGroupReference.Add(binReference);
+
+                    if (null != hintPath)
+                    {
+                        spuriousReferences.Add(bin.AssemblyName);
+                    }
+                }
+
+                if (0 < spuriousReferences.Count)
+                {
+                    Console.WriteLine("WARNING: Project {0} has spurious binary references", projectDef.ProjectFile);
+                    foreach (var spuriousRef in spuriousReferences)
+                    {
+                        Console.WriteLine("  {0}", spuriousRef);
+                    }
                 }
 
                 // add imports to project reference

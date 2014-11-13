@@ -52,7 +52,7 @@ namespace FullBuild.Model
         {
         }
 
-        private Anthology(IImmutableList<Project> projects, IImmutableList<Binary> binaries, IImmutableList<Package> packages)
+        private Anthology(IEnumerable<Project> projects, IEnumerable<Binary> binaries, IEnumerable<Package> packages)
         {
             _projects = projects.OrderBy(x => x.Guid).ToImmutableList();
             _binaries = binaries.OrderBy(x => x.AssemblyName).ToImmutableList();
