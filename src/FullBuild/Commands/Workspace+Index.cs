@@ -53,7 +53,7 @@ namespace FullBuild.Commands
             // get packages
             var handler = new Packages();
             handler.Install();
-            
+
             // Promotion
             anthology = AnthologyOptimizer.Optimize(anthology);
 
@@ -98,6 +98,38 @@ namespace FullBuild.Commands
             }
         }
 
+        private static Anthology AddPaketDependencies(FileInfo paketDependencies, Anthology anthology)
+        {
+            var nugetFound = false;
+            foreach(var line in File.ReadAllLines(paketDependencies.FullName))
+            {
+                if (!nugetFound)
+                {
+                    nugetFound = line.Trim() == "NUGET";
+                    continue;
+                }
+
+                if (0 == line.Length || (line[0] != ' ' && line[0] != '\t'))
+                {
+                    break;
+                }
+
+                if (!line.Contains('('))
+                {
+                    continue;
+                }
+
+                var items = line.Split(new [] {" ", "\t", "(", ")", ">="}, StringSplitOptions.RemoveEmptyEntries);
+                var name = items[0];
+                var version = items[1];
+
+                var package = new Package(name, version);
+                anthology = anthology.AddOrUpdatePackages(package);
+            }
+
+            return anthology;
+        }
+
         private static Anthology UpdateAnthologyFromSource(FullBuildConfig config, DirectoryInfo workspace, Anthology anthology)
         {
             foreach(var repo in config.SourceRepos)
@@ -108,6 +140,10 @@ namespace FullBuild.Commands
                 {
                     continue;
                 }
+
+                // add paket dependencies first
+                var paketDependencies = repoDir.EnumeratePaketDependencies();
+                anthology = paketDependencies.Aggregate(anthology, (a, f) => AddPaketDependencies(f, a));
 
                 // delete all solution files
                 repoDir.EnumerateSolutionFiles().ForEach(x => x.Delete());
@@ -147,7 +183,7 @@ namespace FullBuild.Commands
 
         private static Anthology ParseAndAddProject(DirectoryInfo workspace, FileInfo projectFile, Anthology anthology)
         {
-            Console.WriteLine("  Found project {0}", projectFile.FullName.Substring(workspace.FullName.Length+1));
+            Console.WriteLine("  Found project {0}", projectFile.FullName.Substring(workspace.FullName.Length + 1));
 
             var xdoc = XDocument.Load(projectFile.FullName);
 
@@ -183,17 +219,30 @@ namespace FullBuild.Commands
                            let assName = new AssemblyName((string) binRef.Attribute("Include")).Name
                            let maybeHintPath = binRef.Descendants(XmlHelpers.NsMsBuild + "HintPath").SingleOrDefault()
                            select new Binary(assName, null != maybeHintPath ? maybeHintPath.Value.ToUnixSeparator() : null);
-            var binaryReferences = binaries.Select(x => x.AssemblyName).ToImmutableList();
+            var binaryReferences = binaries.Select(x => x.AssemblyName).Distinct().ToImmutableList();
 
-            // extract all packages
+            // extract all packages (full-build)
             var nugetPackages = GetNugetPackages(projectFile.Directory);
             var fbPackages = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
                              let importProject = (string) import.Attribute("Project")
                              where importProject.InvariantStartsWith(WellKnownFolders.MsBuildPackagesDir)
                              let importProjectName = Path.GetFileNameWithoutExtension(importProject)
                              select new Package(importProjectName, "0.0.0");
-            var packages = nugetPackages.Concat(fbPackages);
-            var packageNames = packages.Select(x => x.Name).ToImmutableList();
+  
+            // extract paket dependencies
+            var paketFile = projectFile.Directory.GetFile("paket.references");
+            var paketPackages = Enumerable.Empty<Package>();
+            if (paketFile.Exists)
+            {
+                paketPackages = from line in File.ReadAllLines(paketFile.FullName)
+                                let depPackageName = line.Trim()
+                                where ! string.IsNullOrEmpty(depPackageName) && !depPackageName.InvariantContains("File:")
+                                select new Package(depPackageName, "0.0.0");
+            }
+
+            // build all packages
+            var packages = nugetPackages.Concat(fbPackages).Concat(paketPackages);
+            var packageNames = packages.Select(x => x.Name).Distinct().ToImmutableList();
 
             // update anthology with this new project
             var project = new Project(projectGuid, projectFileName, assemblyName, extension, fxTarget, allProjectReferences, binaryReferences, packageNames);
