@@ -40,6 +40,7 @@ namespace FullBuild.Commands
             "v4.5.1",
             "v4.5.2",
             "v4.5.3",
+            "v4.5.4",
         };
 
         public static Dictionary<string, string[]> FxVersion2Folder = new Dictionary<string, string[]>
