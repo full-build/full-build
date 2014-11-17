@@ -83,6 +83,12 @@ namespace FullBuild
             handler.List(viewName);
         }
 
+        private static void ListViews()
+        {
+            var handler = new View();
+            handler.ListAll();
+        }
+
         private static void UpdateView(string viewName)
         {
             var handler = new View();
@@ -153,6 +159,12 @@ namespace FullBuild
                                          .Command("view")
                                          .Param(viewname)
                                          .Do(ctx => ListView(ctx.Get(viewname))),
+
+                             // list views>
+                             MatchBuilder.Describe("list all available views.")
+                                         .Command("list")
+                                         .Command("views")
+                                         .Do(ctx => ListViews()),
                                          
                              // init workspace
                              MatchBuilder.Describe("initialize workspace in folder <path>.")

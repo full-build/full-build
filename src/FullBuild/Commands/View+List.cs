@@ -49,5 +49,16 @@ namespace FullBuild.Commands
                 }
             }
         }
+
+        public void ListAll()
+        {
+            var viewDir = WellKnownFolders.GetViewDirectory();
+            var views = viewDir.EnumerateFiles("*.view");
+            foreach(var view in views)
+            {
+                var viewName = Path.GetFileNameWithoutExtension(view.Name);
+                Console.WriteLine(viewName);
+            }
+        }
     }
 }
