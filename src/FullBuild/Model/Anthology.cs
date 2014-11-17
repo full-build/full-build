@@ -122,8 +122,8 @@ namespace FullBuild.Model
             var newPackages = _packages;
             if (null != existing)
             {
-                var version = ParseSemVersion(package.Version);
-                var existingVersion = ParseSemVersion(existing.Version);
+                var version = ParseSemVersion(package.Version ?? "0.0.0");
+                var existingVersion = ParseSemVersion(existing.Version ?? "0.0.0");
                 var higherVersion = Comparer<SemVersion>.Default.Compare(existingVersion, version) < 0;
                 if (higherVersion)
                 {
