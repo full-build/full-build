@@ -129,6 +129,11 @@ namespace FullBuild
             ConfigManager.SaveAdminConfig(config, adminDir);
         }
 
+        private static void SetConfig(string key, string value)
+        {
+            ConfigManager.SetBootstrapConfig(key, value);
+        }
+
         private static int Main(string[] args)
         {
             var path = Parameter<string>.Create("path");
@@ -138,13 +143,11 @@ namespace FullBuild
             var vcs = Parameter<VersionControlType>.Create("vcs");
             var repo = Parameter<string>.Create("repo");
             var url = Parameter<string>.Create("url");
+            var key = Parameter<string>.Create("key");
+            var value = Parameter<string>.Create("value");
 
             var parser = new Parser
                          {
-                             // ----------------------------------------------------------
-                             // porcelain commands
-                             // ----------------------------------------------------------
-
                              // init view <viewname> with <repos> ...
                              MatchBuilder.Describe("init view file <viewname> with provided repositories (<repos>).")
                                          .Command("init")
@@ -213,10 +216,6 @@ namespace FullBuild
                                          .Param(viewname)
                                          .Do(ctx => BuildView(ctx.Get(viewname))),
 
-                             // ----------------------------------------------------------
-                             // plumbing commands
-                             // ----------------------------------------------------------
-
                              // update workspace
                              MatchBuilder.Describe("index workspace with local changes.")
                                          .Command("index")
@@ -243,7 +242,15 @@ namespace FullBuild
                                          .Param(repo)
                                          .Command("from")
                                          .Param(url)
-                                         .Do(ctx => AddRepo(ctx.Get(repo), ctx.Get(vcs), ctx.Get(url)))
+                                         .Do(ctx => AddRepo(ctx.Get(repo), ctx.Get(vcs), ctx.Get(url))),
+
+                             // config <key> <value>
+                             MatchBuilder.Describe("set configuration <key> to <value>")
+                                         .Command("set")
+                                         .Command("config")
+                                         .Param(key)
+                                         .Param(value)
+                                         .Do(ctx => SetConfig(ctx.Get(key), ctx.Get(value)))
                          };
 
             if (! parser.Parse(args))

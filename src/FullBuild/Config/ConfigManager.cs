@@ -23,8 +23,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
 using System.Configuration;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Xml.Serialization;
 using FullBuild.Helpers;
 
@@ -32,20 +35,73 @@ namespace FullBuild.Config
 {
     internal static class ConfigManager
     {
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool WritePrivateProfileString(
+            string lpAppName, string lpKeyName, string lpString, string lpFileName);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        private static extern uint GetPrivateProfileString(
+            string lpAppName,
+            string lpKeyName,
+            string lpDefault,
+            StringBuilder lpReturnedString,
+            uint nSize,
+            string lpFileName);
+
         public static FullBuildConfig LoadConfig(DirectoryInfo adminDir)
         {
-            var bootstrapConfig = (BoostrapConfig) ConfigurationManager.GetSection("FullBuildConfig");
+            var bootstrapConfig = LoadBootstrapConfig();
             var fbDir = adminDir.GetDirectory(".full-build");
             var adminConfig = LoadAdminConfig(fbDir);
             var config = new FullBuildConfig(bootstrapConfig, adminConfig);
             return config;
         }
 
+        public static BoostrapConfig LoadBootstrapConfig()
+        {
+            var userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+            var configFile = userProfileDir.GetFile(".fbconfig");
+            if (! configFile.Exists)
+            {
+                return null;
+            }
+
+            var packageGlobalCache = new StringBuilder(255);
+            GetPrivateProfileString("FullBuild", "PackageGlobalCache", "", packageGlobalCache, 255, configFile.FullName);
+
+            var adminVcs = new StringBuilder(255);
+            GetPrivateProfileString("FullBuild", "AdminVcs", "", adminVcs, 255, configFile.FullName);
+
+            var adminRepo = new StringBuilder(255);
+            GetPrivateProfileString("FullBuild", "AdminRepo", "", adminRepo, 255, configFile.FullName);
+
+            var boostrapConfig = new BoostrapConfig
+                                 {
+                                     PackageGlobalCache = packageGlobalCache.ToString(),
+                                     AdminRepo = new RepoConfig
+                                                 {
+                                                     Name = "admin",
+                                                     Vcs = (VersionControlType) Enum.Parse(typeof(VersionControlType), adminVcs.ToString()),
+                                                     Url = adminRepo.ToString()
+                                                 }
+                                 };
+
+            return boostrapConfig;
+        }
+
+        public static void SetBootstrapConfig(string key, string value)
+        {
+            var userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+            var configFile = userProfileDir.GetFile(".fbconfig");
+
+            WritePrivateProfileString("FullBuild", key, value, configFile.FullName);
+        }
+
         public static void SaveAdminConfig(AdminConfig config, DirectoryInfo adminDir)
         {
             var file = new FileInfo(Path.Combine(adminDir.FullName, "full-build.config"));
             var xmlSer = new XmlSerializer(typeof(AdminConfig));
-            using (var writer = new StreamWriter(file.FullName))
+            using(var writer = new StreamWriter(file.FullName))
             {
                 xmlSer.Serialize(writer, config);
             }
