@@ -153,11 +153,18 @@ namespace FullBuild.Commands
                 foreach(var refGuid in projectDef.ProjectReferences)
                 {
                     var project = anthology.Projects.SingleOrDefault(x => x.Guid == refGuid);
-                    var refProject = project;
-                    var targetFileName = refProject.Guid + ".targets";
-                    var import = Path.Combine(WellKnownFolders.MsBuildProjectDir, targetFileName).ToUnixSeparator();
-                    var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import));
-                    itemGroupFile.AddBeforeSelf(newProjectRef);
+                    if (null == project)
+                    {
+                        Console.WriteLine("ERROR: project {0} references unknown project {1}", projectDef.Guid, refGuid);
+                    }
+                    else
+                    {
+                        var refProject = project;
+                        var targetFileName = refProject.Guid + ".targets";
+                        var import = Path.Combine(WellKnownFolders.MsBuildProjectDir, targetFileName).ToUnixSeparator();
+                        var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import));
+                        itemGroupFile.AddBeforeSelf(newProjectRef);
+                    }
                 }
 
                 // add packages
@@ -188,7 +195,15 @@ namespace FullBuild.Commands
                 var repoDir = wsDir.GetDirectory(repo.Name);
                 if (repoDir.Exists)
                 {
-                    repoDir.EnumerateNugetDirectories().ForEach(x => x.Delete(true));
+                    repoDir.EnumerateNugetDirectories().ForEach(x =>
+                    {
+                        if (x.Exists)
+                            try
+                            {
+                                x.Delete(true);
+                            }
+                            catch{ }
+                    });
                 }
             }
         }

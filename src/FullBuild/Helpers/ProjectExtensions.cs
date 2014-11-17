@@ -23,9 +23,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using FullBuild.Model;
 
 namespace FullBuild.Helpers
@@ -39,8 +37,11 @@ namespace FullBuild.Helpers
 
         public static string GetProjectName(this Project @this)
         {
+            var projectFile = @this.ProjectFile.Split('/')[0];
             var propName = string.Format("{0} ({1})", @this.AssemblyName, @this.FxTarget);
-            return propName;
+
+            var projectName = projectFile + propName;
+            return projectName;
         }
 
         public static string GetProjectPropertyGroupName(this Project @this)

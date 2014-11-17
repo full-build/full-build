@@ -25,9 +25,11 @@
 
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using FullBuild.Config;
 using FullBuild.Helpers;
+using FullBuild.Model;
 using NLog;
 
 namespace FullBuild.Commands
@@ -36,11 +38,11 @@ namespace FullBuild.Commands
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public static void InstallPackage(Model.Package pkg)
+        public static void InstallPackage(Package pkg)
         {
-            var config = ConfigManager.LoadConfig(WellKnownFolders.GetWorkspaceDirectory());
+            FullBuildConfig config = ConfigManager.LoadConfig(WellKnownFolders.GetWorkspaceDirectory());
 
-            var cacheDir = WellKnownFolders.GetCacheDirectory();
+            DirectoryInfo cacheDir = WellKnownFolders.GetCacheDirectory();
             if (null != config.PackageGlobalCache)
             {
                 cacheDir = new DirectoryInfo(config.PackageGlobalCache);
@@ -54,8 +56,8 @@ namespace FullBuild.Commands
                 DownloadNugetPackage(pkg, pkgFile, config.Nugets);
             }
 
-            var pkgsDir = WellKnownFolders.GetPackageDirectory();
-            var pkgDir = pkgsDir.GetDirectory(pkg.Name);
+            DirectoryInfo pkgsDir = WellKnownFolders.GetPackageDirectory();
+            DirectoryInfo pkgDir = pkgsDir.GetDirectory(pkg.Name);
             if (pkgDir.Exists)
             {
                 pkgDir.Delete(true);
@@ -64,24 +66,24 @@ namespace FullBuild.Commands
             pkgDir.Create();
 
             _logger.Debug("Unzipping package {0}:{1}", pkg.Name, pkg.Version);
-            System.IO.Compression.ZipFile.ExtractToDirectory(pkgFile.FullName, pkgDir.FullName);
+            ZipFile.ExtractToDirectory(pkgFile.FullName, pkgDir.FullName);
         }
 
-        private static void DownloadNugetPackage(Model.Package pkg, FileInfo pkgFile, string[] nugets)
+        private static void DownloadNugetPackage(Package pkg, FileInfo pkgFile, string[] nugets)
         {
             if (null == nugets || 0 == nugets.Length)
             {
                 nugets = new[] {"https://www.nuget.org/api/v2/package"};
             }
 
-            foreach(var nuget in nugets)
+            foreach (var nuget in nugets)
             {
                 try
                 {
                     DownloadNugetPackage(pkg, pkgFile, nuget);
                     return;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _logger.Debug("Download error", ex);
                     _logger.Debug("Failed to download package {0} {1} from {2}", pkg.Name, pkg.Version, nuget);
@@ -92,9 +94,12 @@ namespace FullBuild.Commands
             throw new ArgumentException(msg);
         }
 
-        private static void DownloadNugetPackage(Model.Package pkg, FileInfo pkgFile, string nuget)
+        private static void DownloadNugetPackage(Package pkg, FileInfo pkgFile, string nuget)
         {
-            var packageUrl = string.Format("{0}/{1}/{2}", nuget, pkg.Name, pkg.Version);
+            var packageUrl = null != pkg.Version
+                ? string.Format("{0}/{1}/{2}", nuget, pkg.Name, pkg.Version)
+                : string.Format("{0}/{1}", nuget, pkg.Name);
+
             _logger.Debug("Downloading package {0}:{1} from {2}", pkg.Name, pkg.Version, packageUrl);
             var webClient = new WebClient();
             webClient.DownloadFile(packageUrl, pkgFile.FullName);
