@@ -110,7 +110,8 @@ namespace FullBuild
         private static void BuildView(string viewname)
         {
             var handler = new Exec();
-            var cmd = string.Format("msbuild {0}.sln", viewname);
+            var build = Commands.Exec.IsRunningOnMono() ? "xbuild" : "msbuild";
+            var cmd = string.Format("{0} {1}.sln", build, viewname);
 
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             handler.ExecCommand(cmd, wsDir);
