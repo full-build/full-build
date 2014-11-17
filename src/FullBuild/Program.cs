@@ -77,6 +77,12 @@ namespace FullBuild
             handler.InitView(viewName, repos);
         }
 
+        private static void ListView(string viewName)
+        {
+            var handler = new View();
+            handler.List(viewName);
+        }
+
         private static void UpdateView(string viewName)
         {
             var handler = new View();
@@ -103,7 +109,6 @@ namespace FullBuild
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             handler.ExecCommand(cmd, wsDir);
         }
-
 
         private static void AddRepo(string repoName, VersionControlType vcs, string url)
         {
@@ -141,6 +146,13 @@ namespace FullBuild
                                          .Command("with")
                                          .Param(repos)
                                          .Do(ctx => InitView(ctx.Get(viewname), ctx.Get(repos))),
+
+                             // list view <viewname>
+                             MatchBuilder.Describe("list view content.")
+                                         .Command("list")
+                                         .Command("view")
+                                         .Param(viewname)
+                                         .Do(ctx => ListView(ctx.Get(viewname))),
                                          
                              // init workspace
                              MatchBuilder.Describe("initialize workspace in folder <path>.")
@@ -219,7 +231,6 @@ namespace FullBuild
                                          .Command("from")
                                          .Param(url)
                                          .Do(ctx => AddRepo(ctx.Get(repo), ctx.Get(vcs), ctx.Get(url)))
-
                          };
 
             if (! parser.Parse(args))
@@ -233,6 +244,5 @@ namespace FullBuild
 
             return 0;
         }
-
     }
 }

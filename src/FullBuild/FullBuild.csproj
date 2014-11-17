@@ -75,6 +75,7 @@
     <Compile Include="Commands\View+Init.cs" />
     <Compile Include="Commands\View+Generate.cs" />
     <Compile Include="Commands\Packages+Install.cs" />
+    <Compile Include="Commands\View+List.cs" />
     <Compile Include="Commands\Workspace+AddRepo.cs" />
     <Compile Include="Commands\Workspace+CloneRepo.cs" />
     <Compile Include="Commands\Workspace+Init.cs" />
