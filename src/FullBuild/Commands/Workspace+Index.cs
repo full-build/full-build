@@ -216,7 +216,9 @@ namespace FullBuild.Commands
 
             // extract binary references - both nuget and direct reference to assemblies (broken project reference)
             var binaries = from binRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "Reference")
-                           let assName = new AssemblyName((string) binRef.Attribute("Include")).Name
+                           let include = ((string)binRef.Attribute("Include")).Split(new [] {','}, StringSplitOptions.RemoveEmptyEntries)[0]
+                           where ! string.IsNullOrEmpty(include)
+                           let assName = new AssemblyName(include).Name
                            let maybeHintPath = binRef.Descendants(XmlHelpers.NsMsBuild + "HintPath").SingleOrDefault()
                            select new Binary(assName, null != maybeHintPath ? maybeHintPath.Value.ToUnixSeparator() : null);
             var binaryReferences = binaries.Select(x => x.AssemblyName).Distinct().ToImmutableList();
@@ -227,7 +229,7 @@ namespace FullBuild.Commands
                              let importProject = (string) import.Attribute("Project")
                              where importProject.InvariantStartsWith(WellKnownFolders.MsBuildPackagesDir)
                              let importProjectName = Path.GetFileNameWithoutExtension(importProject)
-                             select new Package(importProjectName, "0.0.0");
+                             select new Package(importProjectName, null);
   
             // extract paket dependencies
             var paketFile = projectFile.Directory.GetFile("paket.references");
@@ -237,7 +239,7 @@ namespace FullBuild.Commands
                 paketPackages = from line in File.ReadAllLines(paketFile.FullName)
                                 let depPackageName = line.Trim()
                                 where ! string.IsNullOrEmpty(depPackageName) && !depPackageName.InvariantContains("File:")
-                                select new Package(depPackageName, "0.0.0");
+                                select new Package(depPackageName, null);
             }
 
             // build all packages
