@@ -23,6 +23,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
 using System.Diagnostics;
 using System.IO;
 using FullBuild.Config;
@@ -32,6 +33,11 @@ namespace FullBuild.Commands
 {
     internal class Exec
     {
+        public static bool IsRunningOnMono()
+        {
+            return Type.GetType("Mono.Runtime") != null;
+        }
+
         public void ForEachRepo(string command)
         {
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
