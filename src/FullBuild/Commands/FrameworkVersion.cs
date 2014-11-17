@@ -52,7 +52,8 @@ namespace FullBuild.Commands
                                                                           {"v4.5", new[] {"45", "net45", "net45-full"}},
                                                                           {"v4.5.1", new[] {"net451"}},
                                                                           {"v4.5.2", new[] {"net452"}},
-                                                                          {"v4.5.3", new[] {"net2453"}},
+                                                                          {"v4.5.3", new[] {"net453"}},
+                                                                          {"v4.5.4", new[] {"net454"}},
                                                                       };
     }
 }
