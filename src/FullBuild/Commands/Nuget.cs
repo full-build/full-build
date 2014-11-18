@@ -43,7 +43,7 @@ namespace FullBuild.Commands
             FullBuildConfig config = ConfigManager.LoadConfig(WellKnownFolders.GetWorkspaceDirectory());
 
             DirectoryInfo cacheDir = WellKnownFolders.GetCacheDirectory();
-            if (null != config.PackageGlobalCache)
+            if (! string.IsNullOrEmpty(config.PackageGlobalCache))
             {
                 cacheDir = new DirectoryInfo(config.PackageGlobalCache);
                 cacheDir.Create();
