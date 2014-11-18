@@ -60,20 +60,20 @@ namespace FullBuild.Config
         public static BoostrapConfig LoadBootstrapConfig()
         {
             var userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-            var configFile = userProfileDir.GetFile(".fbconfig");
+            var configFile = userProfileDir.GetFile(".full-build-config");
             if (! configFile.Exists)
             {
-                return null;
+                throw new ArgumentException("Configure full-build before proceeding.");
             }
 
             var packageGlobalCache = new StringBuilder(255);
             GetPrivateProfileString("FullBuild", "PackageGlobalCache", "", packageGlobalCache, 255, configFile.FullName);
 
             var adminVcs = new StringBuilder(255);
-            GetPrivateProfileString("FullBuild", "AdminVcs", "", adminVcs, 255, configFile.FullName);
+            GetPrivateProfileString("FullBuild", "RepoType", "", adminVcs, 255, configFile.FullName);
 
             var adminRepo = new StringBuilder(255);
-            GetPrivateProfileString("FullBuild", "AdminRepo", "", adminRepo, 255, configFile.FullName);
+            GetPrivateProfileString("FullBuild", "RepoUrl", "", adminRepo, 255, configFile.FullName);
 
             var boostrapConfig = new BoostrapConfig
                                  {
@@ -92,7 +92,7 @@ namespace FullBuild.Config
         public static void SetBootstrapConfig(string key, string value)
         {
             var userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-            var configFile = userProfileDir.GetFile(".fbconfig");
+            var configFile = userProfileDir.GetFile(".full-build-config");
 
             WritePrivateProfileString("FullBuild", key, value, configFile.FullName);
         }
