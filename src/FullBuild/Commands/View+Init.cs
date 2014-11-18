@@ -68,6 +68,8 @@ namespace FullBuild.Commands
             var viewDir = WellKnownFolders.GetViewDirectory();
             var viewFile = viewDir.GetFile(viewName + ".view");
             File.WriteAllText(viewFile.FullName, sb.ToString());
+
+            Generate(viewName);
         }
     }
 }

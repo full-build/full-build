@@ -3,8 +3,8 @@ remove-item -Recurse -Force titi
 New-Item -itemtype Directory -path titi
 
 fullbuild set config PackageGlobalCache c:\PackageGlobalCache
-fullbuild set config AdminVcs Git
-fullbuild set config AdminRepo https://github.com/pchalamet/cassandra-sharp-full-build
+fullbuild set config RepoType Git
+fullbuild set config RepoUrl https://github.com/pchalamet/cassandra-sharp-full-build
 
 fullbuild init workspace titi
 
