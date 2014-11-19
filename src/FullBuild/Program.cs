@@ -119,17 +119,11 @@ namespace FullBuild
 
         private static void AddRepo(string repoName, VersionControlType vcs, string url)
         {
-            var adminDir = WellKnownFolders.GetAdminDirectory();
-            var config = ConfigManager.LoadAdminConfig(adminDir);
-
-            var repoConfig = new RepoConfig {Name = repoName, Vcs = vcs, Url = url};
-            var repoConfigs = new[] {repoConfig};
-            config.SourceRepos = config.SourceRepos.Concat(repoConfigs).ToArray();
-
-            ConfigManager.SaveAdminConfig(config, adminDir);
+            var handler = new Workspace();
+            handler.AddRepo(repoName, vcs, url);
         }
 
-        private static void SetConfig(string key, string value)
+        private static void SetConfig(ConfigParameter key, string value)
         {
             ConfigManager.SetBootstrapConfig(key, value);
         }
@@ -137,105 +131,70 @@ namespace FullBuild
         private static int Main(string[] args)
         {
             var path = Parameter<string>.Create("path");
-            var viewname = Parameter<string>.Create("viewname");
-            var repos = Parameter<string[]>.Create("repos");
+            var viewname = Parameter<string>.Create("viewName");
+            var repos = Parameter<string[]>.Create("regex");
             var command = Parameter<string>.Create("command");
             var vcs = Parameter<VersionControlType>.Create("vcs");
-            var repo = Parameter<string>.Create("repo");
+            var repo = Parameter<string>.Create("repoName");
             var url = Parameter<string>.Create("url");
-            var key = Parameter<string>.Create("key");
+            var key = Parameter<ConfigParameter>.Create("key");
             var value = Parameter<string>.Create("value");
 
             var parser = new Parser
                          {
-                             // init view <viewname> with <repos> ...
-                             MatchBuilder.Describe("init view file <viewname> with provided repositories (<repos>).")
-                                         .Command("init")
-                                         .Command("view")
-                                         .Param(viewname)
-                                         .Command("with")
-                                         .Param(repos)
-                                         .Do(ctx => InitView(ctx.Get(viewname), ctx.Get(repos))),
+                             
+                             // ============================== WORKSPACE ============================================
 
-                             // list view <viewname>
-                             MatchBuilder.Describe("list view content.")
-                                         .Command("list")
-                                         .Command("view")
-                                         .Param(viewname)
-                                         .Do(ctx => ListView(ctx.Get(viewname))),
-
-                             // list views>
-                             MatchBuilder.Describe("list all available views.")
-                                         .Command("list")
-                                         .Command("views")
-                                         .Do(ctx => ListViews()),
-                                         
                              // init workspace
-                             MatchBuilder.Describe("initialize workspace in folder <path>.")
+                             MatchBuilder.Describe("initialize workspace in folder <path>")
                                          .Command("init")
                                          .Command("workspace")
                                          .Param(path)
                                          .Do(ctx => InitWorkspace(ctx.Get(path))),
 
-                             // update view <viewname>
-                             MatchBuilder.Describe("generate solution <viewname>.")
-                                         .Command("generate")
-                                         .Command("view")
-                                         .Param(viewname)
-                                         .Do(ctx => UpdateView(ctx.Get(viewname))),
                                          
+
                              // refresh workspace
-                             MatchBuilder.Describe("refresh workspace from remote.")
+                             MatchBuilder.Describe("refresh workspace from remote")
                                          .Command("refresh")
                                          .Command("workspace")
                                          .Do(ctx => RefreshWorkspace()),
 
+                                         
+
                              // clone repo
-                             MatchBuilder.Describe("clone repo <repos> ...")
+                             MatchBuilder.Describe("clone repositories which names matching given {0}", repos)
                                          .Command("clone")
                                          .Command("repo")
                                          .Param(repos)
                                          .Do(ctx => CloneRepo(ctx.Get(repos))),
 
                              // refresh source
-                             MatchBuilder.Describe("refresh sources from source control.")
+                             MatchBuilder.Describe("refresh sources from source control")
                                          .Command("refresh")
                                          .Command("sources")
                                          .Do(ctx => RefreshSources()),
 
-                             // exec
-                             MatchBuilder.Describe("exec command on each repo")
-                                         .Command("exec")
-                                         .Param(command)
-                                         .Do(ctx => Exec(ctx.Get(command))),
-
-                             // build view
-                             MatchBuilder.Describe("build view <viewname>")
-                                         .Command("build")
-                                         .Command("view")
-                                         .Param(viewname)
-                                         .Do(ctx => BuildView(ctx.Get(viewname))),
-
-                             // update workspace
-                             MatchBuilder.Describe("index workspace with local changes.")
+                                         
+                             MatchBuilder.Describe("index workspace with local changes")
                                          .Command("index")
                                          .Command("workspace")
                                          .Do(ctx => UpdateWorkspace()),
 
                              // install package
-                             MatchBuilder.Describe("install packages.")
+                             MatchBuilder.Describe("install packages")
                                          .Command("install")
                                          .Command("packages")
                                          .Do(ctx => InstallPackages()),
 
                              // convert ptojects
-                             MatchBuilder.Describe("convert projects to ensure compatibility with full-build.")
+                             MatchBuilder.Describe("convert projects to ensure compatibility with full-build")
                                          .Command("convert")
                                          .Command("projects")
                                          .Do(ctx => ConvertProjects()),
 
                              // add repo
-                             MatchBuilder.Describe("add a new repository to the workspace.")
+                             MatchBuilder.Describe("add a new repository to the workspace")
                                          .Command("add")
                                          .Param(vcs)
                                          .Command("repo")
@@ -244,8 +203,57 @@ namespace FullBuild
                                          .Param(url)
                                          .Do(ctx => AddRepo(ctx.Get(repo), ctx.Get(vcs), ctx.Get(url))),
 
+                             // ============================== VIEW ============================================
+
+                             // init view <viewname> with <repos> ...
+                             MatchBuilder.Describe("init view file {0} with provided repositories which names matching given {1}", viewname, repos)
+                                         .Command("init")
+                                         .Command("view")
+                                         .Param(viewname)
+                                         .Command("with")
+                                         .Param(repos)
+                                         .Do(ctx => InitView(ctx.Get(viewname), ctx.Get(repos))),
+                                         
+                             // list views>
+                             MatchBuilder.Describe("list all available views")
+                                         .Command("list")
+                                         .Command("views")
+                                         .Do(ctx => ListViews()),
+                                         
+                             // list view <viewname>
+                             MatchBuilder.Describe("list view content")
+                                         .Command("list")
+                                         .Command("view")
+                                         .Param(viewname)
+                                         .Do(ctx => ListView(ctx.Get(viewname))),
+
+                             // update view <viewname>
+                             MatchBuilder.Describe("generate solution {0}", viewname)
+                                         .Command("generate")
+                                         .Command("view")
+                                         .Param(viewname)
+                                         .Do(ctx => UpdateView(ctx.Get(viewname))),
+                                         
+                             // build view
+                             MatchBuilder.Describe("build view {0}", viewname)
+                                         .Command("build")
+                                         .Command("view")
+                                         .Param(viewname)
+                                         .Do(ctx => BuildView(ctx.Get(viewname))),
+
+                             // ============================== EXEC ============================================
+
+                             // exec
+                             MatchBuilder.Describe("exec command on each repo")
+                                         .Command("exec")
+                                         .Param(command)
+                                         .Do(ctx => Exec(ctx.Get(command))),
+
+                             // ============================== CONFIG ============================================
+
+                             // update workspace
                              // config <key> <value>
-                             MatchBuilder.Describe("set configuration <key> to <value>")
+                             MatchBuilder.Describe("set configuration {0} to {1}", key, value)
                                          .Command("set")
                                          .Command("config")
                                          .Param(key)

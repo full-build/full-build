@@ -24,6 +24,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Linq;
+using System.Text;
 
 namespace FullBuild.NatLangParser
 {
@@ -37,7 +39,7 @@ namespace FullBuild.NatLangParser
             {
                 if (typeof(T).IsEnum)
                 {
-                    _value = (T) Enum.Parse(typeof(T), input);
+                    _value = (T) Enum.Parse(typeof(T), input, true);
                 }
                 else
                 {
@@ -59,7 +61,16 @@ namespace FullBuild.NatLangParser
 
         public string Describe
         {
-            get { return typeof(T).Name; }
+            get
+            {
+                if (typeof(T).IsEnum)
+                {
+                    var res = typeof(T).GetEnumNames().Aggregate(new StringBuilder(), (sb, e) => sb.AppendFormat("|{0}", e));
+                    return res.ToString(1, res.Length-1);
+                }
+                
+                return typeof(T).Name;
+            }
         }
 
         public bool IsAccumulator
