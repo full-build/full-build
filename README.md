@@ -1,6 +1,8 @@
-full-build is a workspace management for .net.
+full-build is a workspace management for .NET
+=============================================
+![build status](https://ci.appveyor.com/api/projects/status/github/pchalamet/full-build?branch=master)
 
-With full-build, you can:
+full-build helps to:
 - link a workspace to several git or mercurial repositories
 - build from sources all your projects in one shot
 - build a single repository (or more) against all other projects but as binary imports - focus on specific projects
