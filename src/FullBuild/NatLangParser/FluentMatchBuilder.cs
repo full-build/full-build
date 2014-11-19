@@ -33,11 +33,14 @@ namespace FullBuild.NatLangParser
     {
         private readonly string _description;
 
+        private readonly object[] _args;
+
         private readonly List<KeyValuePair<string, IMatchOperation>> _operations = new List<KeyValuePair<string, IMatchOperation>>();
 
-        public FluentMatchBuilder(string description)
+        public FluentMatchBuilder(string description, params object[] args)
         {
             _description = description;
+            _args = args;
         }
 
         private void AddOperation(string name, IMatchOperation operation)
@@ -75,7 +78,7 @@ namespace FullBuild.NatLangParser
 
         public Matcher Do(Action<Context> action)
         {
-            return new Matcher(_description, _operations.AsEnumerable(), action);
+            return new Matcher(_description, _args, _operations.AsEnumerable(), action);
         }
     }
 }

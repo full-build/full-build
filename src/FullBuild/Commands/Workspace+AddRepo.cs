@@ -23,7 +23,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System.Linq;
 using FullBuild.Config;
+using FullBuild.Helpers;
 
 namespace FullBuild.Commands
 {
@@ -31,6 +33,19 @@ namespace FullBuild.Commands
     {
         public void AddRepo(string name, VersionControlType type, string url)
         {
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var config = ConfigManager.LoadAdminConfig(admDir);
+
+            var newRepo = new RepoConfig
+                          {
+                              Name = name,
+                              Vcs = type,
+                              Url = url
+                          };
+
+            config.SourceRepos = config.SourceRepos.Concat(new[] {newRepo}).ToArray();
+
+            ConfigManager.SaveAdminConfig(config, admDir);
         }
     }
 }
