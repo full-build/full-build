@@ -83,6 +83,7 @@
     <Compile Include="Config\BoostrapConfig.cs" />
     <Compile Include="Config\ConfigManager.cs" />
     <Compile Include="Config\ActionType.cs" />
+    <Compile Include="Config\ConfigParameter.cs" />
     <Compile Include="Config\FullBuildConfig.cs" />
     <Compile Include="Config\RepoConfig.cs" />
     <Compile Include="Config\VersionControlType.cs" />

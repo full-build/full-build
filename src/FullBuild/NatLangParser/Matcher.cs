@@ -36,12 +36,15 @@ namespace FullBuild.NatLangParser
 
         private readonly string _description;
 
+        private readonly object[] _args;
+
         private readonly KeyValuePair<string, IMatchOperation>[] _operations;
 
-        public Matcher(string description, IEnumerable<KeyValuePair<string, IMatchOperation>> operations, Action<Context> action)
+        public Matcher(string description, object[] args, IEnumerable<KeyValuePair<string, IMatchOperation>> operations, Action<Context> action)
         {
             _operations = operations.ToArray();
             _description = description;
+            _args = args;
             _action = action;
         }
 
@@ -94,7 +97,7 @@ namespace FullBuild.NatLangParser
             {
                 if (null != op.Key)
                 {
-                    sb.AppendFormat("<{0}>:{1}", op.Key, op.Value.Describe);
+                    sb.AppendFormat("<{0}:{1}>", op.Key, op.Value.Describe);
                 }
                 else
                 {
@@ -104,7 +107,7 @@ namespace FullBuild.NatLangParser
                 return sb.Append(" ");
             });
 
-            res.AppendFormat(": {0}", _description);
+            res.AppendFormat(": {0}", string.Format(_description, _args) + ".");
 
             return res.ToString();
         }

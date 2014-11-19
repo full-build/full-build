@@ -66,40 +66,38 @@ namespace FullBuild.Config
                 throw new ArgumentException("Configure full-build before proceeding.");
             }
 
-            var packageGlobalCache = new StringBuilder(255);
-            GetPrivateProfileString("FullBuild", "PackageGlobalCache", "", packageGlobalCache, 255, configFile.FullName);
+            var packageGlobalCacheConfig = new StringBuilder(255);
+            GetPrivateProfileString("FullBuild", "PackageGlobalCache", "", packageGlobalCacheConfig, 255, configFile.FullName);
 
-            var adminVcs = new StringBuilder(255);
-            GetPrivateProfileString("FullBuild", "RepoType", "", adminVcs, 255, configFile.FullName);
+            var adminVcsConfig = new StringBuilder(255);
+            GetPrivateProfileString("FullBuild", "RepoType", "", adminVcsConfig, 255, configFile.FullName);
 
-            var adminRepo = new StringBuilder(255);
-            GetPrivateProfileString("FullBuild", "RepoUrl", "", adminRepo, 255, configFile.FullName);
+            var adminRepoConfig = new StringBuilder(255);
+            GetPrivateProfileString("FullBuild", "RepoUrl", "", adminRepoConfig, 255, configFile.FullName);
 
-            var boostrapConfig = new BoostrapConfig
-                                 {
-                                     PackageGlobalCache = packageGlobalCache.ToString(),
-                                     AdminRepo = new RepoConfig
-                                                 {
-                                                     Name = "admin",
-                                                     Vcs = (VersionControlType) Enum.Parse(typeof(VersionControlType), adminVcs.ToString()),
-                                                     Url = adminRepo.ToString()
-                                                 }
-                                 };
+            var adminRepo = new RepoConfig
+                            {
+                                Name = "admin",
+                                Vcs = (VersionControlType) Enum.Parse(typeof(VersionControlType), adminVcsConfig.ToString(), true),
+                                Url = adminRepoConfig.ToString()
+                            };
+            var boostrapConfig = new BoostrapConfig(packageGlobalCacheConfig.ToString(), adminRepo);
 
             return boostrapConfig;
         }
 
-        public static void SetBootstrapConfig(string key, string value)
+        public static void SetBootstrapConfig(ConfigParameter key, string value)
         {
             var userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
             var configFile = userProfileDir.GetFile(".full-build-config");
+            var keyName = key.ToString();
 
-            WritePrivateProfileString("FullBuild", key, value, configFile.FullName);
+            WritePrivateProfileString("FullBuild", keyName, value, configFile.FullName);
         }
 
         public static void SaveAdminConfig(AdminConfig config, DirectoryInfo adminDir)
         {
-            var file = new FileInfo(Path.Combine(adminDir.FullName, "full-build.config"));
+            var file = adminDir.GetFile("full-build.config");
             var xmlSer = new XmlSerializer(typeof(AdminConfig));
             using(var writer = new StreamWriter(file.FullName))
             {
@@ -109,7 +107,7 @@ namespace FullBuild.Config
 
         public static AdminConfig LoadAdminConfig(DirectoryInfo adminDir)
         {
-            var file = new FileInfo(Path.Combine(adminDir.FullName, "full-build.config"));
+            var file = adminDir.GetFile("full-build.config");
             if (file.Exists)
             {
                 var xmlSer = new XmlSerializer(typeof(AdminConfig));
