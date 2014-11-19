@@ -7,9 +7,7 @@ assembly_info:
   assembly_informational_version: "{version}"
 
 platform: Any CPU
-configuration: 
-  - Debug
-  - Release
+configuration: Release
 build:
   project: src/full-build.sln
 
