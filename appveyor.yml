@@ -1,6 +1,3 @@
-init:
-  - git config --global core.autocrlf input
-  
 version: 0.1.{build}
 assembly_info:
   patch: true
@@ -8,13 +5,13 @@ assembly_info:
   assembly_version: "{version}"
   assembly_file_version: "{version}"
   assembly_informational_version: "{version}"
-  
+
 platform: Any CPU
-configuration: Release
-build_script:
+configuration: 
+  - Debug
+  - Release
+build:
   - project: src/full-build.sln
-  
-test: off
 
 artifacts:
   - path: src/bin/$(configuration)
