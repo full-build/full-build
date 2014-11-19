@@ -1,9 +1,21 @@
 init:
   - git config --global core.autocrlf input
-build_script:
-  - msbuild: src/full-build.sln /p:Configuration=Release
-test: off
+  
 version: 0.1.{build}
+assembly_info:
+  patch: true
+  file: AssemblyInfo.*
+  assembly_version: "{version}"
+  assembly_file_version: "{version}"
+  assembly_informational_version: "{version}"
+  
+platform: Any CPU
+configuration: Release
+build_script:
+  - project: src/full-build.sln
+  
+test: off
+
 artifacts:
-  - path: src/bin/Release
+  - path: src/bin/$(configuration)
     name: bin
