@@ -11,8 +11,8 @@ configuration:
   - Debug
   - Release
 build:
-  - project: src/full-build.sln
+  project: src/full-build.sln
 
 artifacts:
-  - path: src/bin/$(configuration)
-    name: bin
+  path: src/bin/$(configuration)
+  name: bin
