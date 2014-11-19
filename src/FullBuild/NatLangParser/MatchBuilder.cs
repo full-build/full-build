@@ -27,9 +27,9 @@ namespace FullBuild.NatLangParser
 {
     public static class MatchBuilder
     {
-        public static FluentMatchBuilder Describe(string description)
+        public static FluentMatchBuilder Describe(string description, params object[] args)
         {
-            return new FluentMatchBuilder(description);
+            return new FluentMatchBuilder(description, args);
         }
     }
 }

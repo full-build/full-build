@@ -23,17 +23,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.Xml.Serialization;
-
 namespace FullBuild.Config
 {
-    [XmlRoot("FullBuildConfig")]
     public class BoostrapConfig
     {
-        [XmlElement("PackageGlobalCache")]
-        public string PackageGlobalCache { get; set; }
+        public BoostrapConfig(string globalCache, RepoConfig adminRepo)
+        {
+            PackageGlobalCache = globalCache;
+            AdminRepo = adminRepo;
+        }
 
-        [XmlElement("AdminRepo")]
-        public RepoConfig AdminRepo { get; set; }
+        public string PackageGlobalCache { get; private set; }
+
+        public RepoConfig AdminRepo { get; private set; }
     }
 }

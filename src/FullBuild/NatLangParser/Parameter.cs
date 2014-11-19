@@ -38,5 +38,10 @@ namespace FullBuild.NatLangParser
         {
             return new Parameter<T>(name);
         }
+
+        public override string ToString()
+        {
+            return string.Format("<{0}>", Name);
+        }
     }
 }
