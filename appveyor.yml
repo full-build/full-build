@@ -1,3 +1,7 @@
+environment:
+  GITHUB_TOKEN:
+    secure: YSV4SlGvkdAW8aGW4q/m3vkof5Aq5Pznd+A9Rq7gQLgZeB23YKgn+vb4Ws3hzGxS
+
 version: 0.1.{build}
 assembly_info:
   patch: true
@@ -11,6 +15,8 @@ configuration: Release
 build:
   project: src/full-build.sln
 
+test_script:
+  
 artifacts:
   path: src/bin/$(configuration)
-  name: bin
+  name: $(configuration)
