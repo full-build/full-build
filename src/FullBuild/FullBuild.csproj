@@ -121,7 +121,7 @@
     <Compile Include="NatLangParser\MatchOperationText.cs" />
     <Compile Include="NatLangParser\Parameter.cs" />
     <Compile Include="Commands\NuGet.cs" />
-    <Compile Include="Commands\Nuspec.cs" />
+    <Compile Include="Commands\NuSpec.cs" />
     <Compile Include="NatLangParser\Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
