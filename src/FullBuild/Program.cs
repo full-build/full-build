@@ -24,7 +24,6 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.Linq;
 using FullBuild.Commands;
 using FullBuild.Config;
 using FullBuild.Helpers;
@@ -128,6 +127,24 @@ namespace FullBuild
             ConfigManager.SetBootstrapConfig(key, value);
         }
 
+        private static void AvailablePackages()
+        {
+            var handler = new Packages();
+            handler.Available();
+        }
+
+        private static void AddNuGet(string url)
+        {
+            var handler = new Packages();
+            handler.AddNuGet(url);
+        }
+
+        private static void ListNuGets()
+        {
+            var handler = new Packages();
+            handler.ListNuGet();
+        }
+
         private static int Main(string[] args)
         {
             var path = Parameter<string>.Create("path");
@@ -142,7 +159,6 @@ namespace FullBuild
 
             var parser = new Parser
                          {
-                             
                              // ============================== WORKSPACE ============================================
 
                              // init workspace
@@ -174,18 +190,10 @@ namespace FullBuild
                                          .Command("refresh")
                                          .Command("sources")
                                          .Do(ctx => RefreshSources()),
-
-                                         
                              MatchBuilder.Describe("index workspace with local changes")
                                          .Command("index")
                                          .Command("workspace")
                                          .Do(ctx => UpdateWorkspace()),
-
-                             // install package
-                             MatchBuilder.Describe("install packages")
-                                         .Command("install")
-                                         .Command("packages")
-                                         .Do(ctx => InstallPackages()),
 
                              // convert ptojects
                              MatchBuilder.Describe("convert projects to ensure compatibility with full-build")
@@ -202,6 +210,35 @@ namespace FullBuild
                                          .Command("from")
                                          .Param(url)
                                          .Do(ctx => AddRepo(ctx.Get(repo), ctx.Get(vcs), ctx.Get(url))),
+
+
+                             // ============================== PACKAGES ============================================
+                                         
+                             // add nuget feed
+                             MatchBuilder.Describe("add nuget feed")
+                                         .Command("add")
+                                         .Command("nuget")
+                                         .Param(url)
+                                         .Do(ctx => AddNuGet(ctx.Get(url))),
+
+                             // list nuget feed
+                             MatchBuilder.Describe("list nuget feeds")
+                                         .Command("list")
+                                         .Command("packages")
+                                         .Do(ctx => ListNuGets()),
+
+                             // install package
+                             MatchBuilder.Describe("install packages")
+                                         .Command("install")
+                                         .Command("packages")
+                                         .Do(ctx => InstallPackages()),
+
+                                                  
+                             // available packages
+                             MatchBuilder.Describe("list available packages")
+                                         .Command("available")
+                                         .Command("packages")
+                                         .Do(ctx => AvailablePackages()),
 
                              // ============================== VIEW ============================================
 

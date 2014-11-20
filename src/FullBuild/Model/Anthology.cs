@@ -97,35 +97,15 @@ namespace FullBuild.Model
                                  _packages);
         }
 
-        private static SemVersion ParseSemVersion(string version)
-        {
-            SemVersion semVersion;
-            try
-            {
-                semVersion = SemVersion.Parse(version);
-            }
-            catch
-            {
-                // nuget does support 4 numbers version (legacy scheme)
-                // still have to support this (Moq for example)
-                var idx = version.LastIndexOf('.');
-                var patchVersion = version.Substring(0, idx);
-                semVersion = SemVersion.Parse(patchVersion);
-            }
-
-            return semVersion;
-        }
-
         public Anthology AddOrUpdatePackages(Package package)
         {
             var existing = Packages.FirstOrDefault(x => x.Name.InvariantEquals(package.Name));
             var newPackages = _packages;
             if (null != existing)
             {
-                var version = ParseSemVersion(package.Version ?? "0.0.0");
-                var existingVersion = ParseSemVersion(existing.Version ?? "0.0.0");
-                var higherVersion = Comparer<SemVersion>.Default.Compare(existingVersion, version) < 0;
-                if (higherVersion)
+                var version = package.Version.ParseSemVersion();
+                var existingVersion = existing.Version.ParseSemVersion();
+                if (existingVersion < version)
                 {
                     newPackages = newPackages.Replace(existing, package);
                 }

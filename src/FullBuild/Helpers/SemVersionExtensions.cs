@@ -23,43 +23,30 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
-using System.Linq;
-using System.Text.RegularExpressions;
-using FullBuild.Config;
-using FullBuild.Helpers;
-using FullBuild.SourceControl;
+using Semver;
 
-namespace FullBuild.Commands
+namespace FullBuild.Helpers
 {
-    internal partial class Workspace
+    public static class SemVersionExtensions
     {
-        public void CloneRepo(string[] repos)
+        public static SemVersion ParseSemVersion(this string version)
         {
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.LoadConfig(wsDir);
-
-            // validate first that repos are valid and clone them
-            foreach(var repo in repos)
+            version = version ?? "0.0.0";
+            SemVersion semVersion;
+            try
             {
-                var match = "^" + repo + "$";
-                var regex = new Regex(match, RegexOptions.IgnoreCase);
-                var repoConfigs = config.SourceRepos.Where(x => regex.IsMatch(x.Name));
-                if (!repoConfigs.Any())
-                {
-                    throw new ArgumentException("Invalid repo " + repo);
-                }
-
-                foreach(var repoConfig in repoConfigs)
-                {
-                    var repoDir = wsDir.GetDirectory(repoConfig.Name);
-                    if (!repoDir.Exists)
-                    {
-                        var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(repoConfig.Vcs.ToString());
-                        sourceControl.Clone(repoDir, repoConfig.Name, repoConfig.Url);
-                    }
-                }
+                semVersion = SemVersion.Parse(version);
             }
+            catch
+            {
+                // nuget does support 4 numbers version (legacy scheme)
+                // still have to support this (Moq for example)
+                var idx = version.LastIndexOf('.');
+                var patchVersion = version.Substring(0, idx);
+                semVersion = SemVersion.Parse(patchVersion);
+            }
+
+            return semVersion;
         }
     }
 }
