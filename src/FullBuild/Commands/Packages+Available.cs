@@ -23,20 +23,36 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.Xml.Serialization;
+using System;
+using FullBuild.Config;
+using FullBuild.Helpers;
+using FullBuild.Model;
 
-namespace FullBuild.Config
+namespace FullBuild.Commands
 {
-    [XmlRoot("FullBuildConfig")]
-    public class AdminConfig
+    internal partial class Packages
     {
-        [XmlElement("BinRepo")]
-        public string BinRepo { get; set; }
+        public void Available()
+        {
+            // read anthology.json
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var anthology = Anthology.Load(admDir);
 
-        [XmlElement("NuGet")]
-        public string[] NuGets { get; set; }
+            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
+            var config = ConfigManager.LoadConfig(wsDir);
+            Console.WriteLine(admDir.FullName);
 
-        [XmlElement("SourceRepo")]
-        public RepoConfig[] SourceRepos { get; set; }
+            foreach(var pkg in anthology.Packages)
+            {
+                var slatestVersion = NuGet.GetLatestPackageVersion(pkg.Name, config.Nugets);
+                var latestVersion = slatestVersion.ParseSemVersion();
+                var currentVersion = pkg.Version.ParseSemVersion();
+
+                if (currentVersion < latestVersion)
+                {
+                    Console.WriteLine("{0} version {1} is available (current is {2})", pkg.Name, slatestVersion, pkg.Version);
+                }
+            }
+        }
     }
 }

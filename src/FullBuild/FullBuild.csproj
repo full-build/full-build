@@ -46,6 +46,15 @@
     <Reference Include="Mercurial.Net">
       <HintPath>..\packages\Mercurial.Net.1.1.1.607\lib\net35-Client\Mercurial.Net.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Data.Edm, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.Edm.5.6.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.OData, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.OData.5.6.0\lib\net40\Microsoft.Data.OData.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.Services.Client, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.0\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -64,20 +73,26 @@
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Spatial, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Spatial.5.6.0\lib\net40\System.Spatial.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AnthologyOptimizer.cs" />
     <Compile Include="Commands\Exec.cs" />
+    <Compile Include="Commands\Packages+NuGet.cs" />
+    <Compile Include="Commands\Packages+Available.cs" />
     <Compile Include="Commands\Projects+Convert.cs" />
     <Compile Include="Commands\FrameworkVersion.cs" />
     <Compile Include="Commands\View+Init.cs" />
     <Compile Include="Commands\View+Generate.cs" />
     <Compile Include="Commands\Packages+Install.cs" />
     <Compile Include="Commands\View+List.cs" />
-    <Compile Include="Commands\Workspace+AddRepo.cs" />
-    <Compile Include="Commands\Workspace+CloneRepo.cs" />
+    <Compile Include="Commands\Workspace+Repo.cs" />
     <Compile Include="Commands\Workspace+Init.cs" />
     <Compile Include="Config\AdminConfig.cs" />
     <Compile Include="Config\BoostrapConfig.cs" />
@@ -90,6 +105,7 @@
     <Compile Include="Helpers\DirectoryInfoExtensions.cs" />
     <Compile Include="Commands\Workspace+Index.cs" />
     <Compile Include="Helpers\EnumerableExtensions.cs" />
+    <Compile Include="Helpers\SemVersionExtensions.cs" />
     <Compile Include="Model\Anthology.cs" />
     <Compile Include="Model\Binary.cs" />
     <Compile Include="Model\Package.cs" />
@@ -104,13 +120,18 @@
     <Compile Include="NatLangParser\MatchOperationAggregate.cs" />
     <Compile Include="NatLangParser\MatchOperationText.cs" />
     <Compile Include="NatLangParser\Parameter.cs" />
-    <Compile Include="Commands\Nuget.cs" />
+    <Compile Include="Commands\NuGet.cs" />
     <Compile Include="Commands\Nuspec.cs" />
     <Compile Include="NatLangParser\Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SectionHandler.cs" />
     <Compile Include="Helpers\ServiceActivator.cs" />
+    <Compile Include="Service References\NuGetService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.datasvcmap</DependentUpon>
+    </Compile>
     <Compile Include="SourceControl\Factory.cs" />
     <Compile Include="SourceControl\Git.cs" />
     <Compile Include="SourceControl\Hg.cs" />
@@ -122,8 +143,22 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="Service References\NuGetService\service.edmx" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ServiceReferenceMetadataStorage Include="Service References\NuGetService\">
+      <Type>datasvcmap</Type>
+    </ServiceReferenceMetadataStorage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NuGetService\Reference.datasvcmap">
+      <Generator>DataServicesCoreClientGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

@@ -11,7 +11,7 @@ try
     FullBuild init view cs with cassandra-sharp cassandra-sharp-contrib
     FullBuild generate view cs
     FullBuild build view cs
-    FullBuild exec "echo %FULLBUILD_REPO% & git log -n 1 | find ""commit"" && echo."
+    FullBuild exec "echo %FULLBUILD_REPO% & git log -n 1 && echo."
     FullBuild exec "git status"
 
     write-host *********************************************

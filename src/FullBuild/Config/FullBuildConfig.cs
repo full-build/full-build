@@ -32,7 +32,7 @@ namespace FullBuild.Config
             AdminRepo = boostrapConfig.AdminRepo;
             BinRepo = adminConfig.BinRepo;
             SourceRepos = adminConfig.SourceRepos;
-            Nugets = adminConfig.Nugets;
+            Nugets = adminConfig.NuGets;
             PackageGlobalCache = boostrapConfig.PackageGlobalCache;
         }
 
