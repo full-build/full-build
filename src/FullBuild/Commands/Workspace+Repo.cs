@@ -64,7 +64,8 @@ namespace FullBuild.Commands
                 var repoConfigs = config.SourceRepos.Where(x => regex.IsMatch(x.Name));
                 if (!repoConfigs.Any())
                 {
-                    throw new ArgumentException("Invalid repo " + repo);
+                    Console.WriteLine("WARNING: no repository found");
+                    return;
                 }
 
                 foreach(var repoConfig in repoConfigs)
