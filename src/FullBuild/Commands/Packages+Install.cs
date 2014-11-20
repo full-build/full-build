@@ -33,7 +33,7 @@ using FullBuild.Model;
 
 namespace FullBuild.Commands
 {
-    internal class Packages
+    internal partial class Packages
     {
         public void Install()
         {
@@ -45,7 +45,7 @@ namespace FullBuild.Commands
             foreach(var pkg in anthology.Packages)
             {
                 Console.WriteLine("  {0} {1}", pkg.Name, pkg.Version);
-                Nuget.InstallPackage(pkg);
+                NuGet.InstallPackage(pkg);
                 GenerateTargetsForProject(pkg);
             }
         }
