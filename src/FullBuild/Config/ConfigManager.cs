@@ -24,7 +24,6 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.Configuration;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -48,10 +47,10 @@ namespace FullBuild.Config
             uint nSize,
             string lpFileName);
 
-        public static FullBuildConfig LoadConfig(DirectoryInfo adminDir)
+        public static FullBuildConfig LoadConfig(DirectoryInfo wsDir)
         {
             var bootstrapConfig = LoadBootstrapConfig();
-            var fbDir = adminDir.GetDirectory(".full-build");
+            var fbDir = wsDir.GetDirectory(".full-build");
             var adminConfig = LoadAdminConfig(fbDir);
             var config = new FullBuildConfig(bootstrapConfig, adminConfig);
             return config;
@@ -95,7 +94,7 @@ namespace FullBuild.Config
             WritePrivateProfileString("FullBuild", keyName, value, configFile.FullName);
         }
 
-        public static void SaveAdminConfig(AdminConfig config, DirectoryInfo adminDir)
+        public static void SaveAdminConfig(DirectoryInfo adminDir, AdminConfig config)
         {
             var file = adminDir.GetFile("full-build.config");
             var xmlSer = new XmlSerializer(typeof(AdminConfig));
@@ -120,7 +119,7 @@ namespace FullBuild.Config
                 }
             }
 
-            return new AdminConfig {SourceRepos = new RepoConfig[0]};
+            return new AdminConfig {NuGets = new string[0], SourceRepos = new RepoConfig[0]};
         }
     }
 }

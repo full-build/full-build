@@ -23,29 +23,29 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
 using System.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
 
 namespace FullBuild.Commands
 {
-    internal partial class Workspace
+    internal partial class Packages
     {
-        public void AddRepo(string name, VersionControlType type, string url)
+        public void AddNuGet(string url)
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             var config = ConfigManager.LoadAdminConfig(admDir);
+            config.NuGets = config.NuGets.Concat(new[] {url}).Distinct().ToArray();
+            ConfigManager.SaveAdminConfig(admDir, config);
+        }
 
-            var newRepo = new RepoConfig
-                          {
-                              Name = name,
-                              Vcs = type,
-                              Url = url
-                          };
-
-            config.SourceRepos = config.SourceRepos.Concat(new[] {newRepo}).ToArray();
-
-            ConfigManager.SaveAdminConfig(config, admDir);
+        public void ListNuGet()
+        {
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var config = ConfigManager.LoadAdminConfig(admDir);
+            config.NuGets.ForEach(Console.WriteLine);
+            ConfigManager.SaveAdminConfig(admDir, config);
         }
     }
 }
