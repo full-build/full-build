@@ -44,6 +44,18 @@ namespace FullBuild.Commands
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var admDir = WellKnownFolders.GetAdminDirectory();
 
+            // first check we have all sources available
+            var config = ConfigManager.LoadConfig(wsDir);
+            foreach(var repo in config.SourceRepos)
+            {
+                var repoDir = wsDir.GetDirectory(repo.Name);
+                if (! repoDir.Exists)
+                {
+                    Console.WriteLine("ERROR: repo {0} is not cloned in workspace", repo);
+                    return;
+                }
+            }
+
             var anthology = Anthology.Load(admDir);
             foreach(var projectDef in anthology.Projects)
             {
@@ -189,7 +201,6 @@ namespace FullBuild.Commands
             }
 
             // remove nuget folders
-            var config = ConfigManager.LoadConfig(wsDir);
             foreach(var repo in config.SourceRepos)
             {
                 var repoDir = wsDir.GetDirectory(repo.Name);
