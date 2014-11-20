@@ -30,7 +30,7 @@ using FullBuild.Helpers;
 
 namespace FullBuild.Commands
 {
-    internal class Nuspec
+    internal class NuSpec
     {
         public static IEnumerable<string> Assemblies(DirectoryInfo pkgDir)
         {
