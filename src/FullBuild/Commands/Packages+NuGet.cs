@@ -54,7 +54,7 @@ namespace FullBuild.Commands
             var admDir = WellKnownFolders.GetAdminDirectory();
             var anthology = Anthology.Load(admDir);
 
-            anthology.Packages.ForEach(x => Console.WriteLine("Package {0} version {1}", x.Name, x.Version));
+            anthology.Packages.ForEach(x => Console.WriteLine("{0} {1}", x.Name, x.Version));
         }
 
         public void UsePackage(string id, string version)
