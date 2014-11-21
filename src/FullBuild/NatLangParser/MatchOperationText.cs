@@ -50,7 +50,7 @@ namespace FullBuild.NatLangParser
 
         public string Describe
         {
-            get { return _text; }
+            get { return _text.ToCamelCase(); }
         }
 
         public bool IsAccumulator
