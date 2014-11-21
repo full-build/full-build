@@ -157,6 +157,12 @@ namespace FullBuild
             handler.UsePackage(id, version);
         }
 
+        private static void ListRepos()
+        {
+            var handler = new Workspace();
+            handler.ListRepos();
+        }
+
         private static int Main(string[] args)
         {
             var path = Parameter<string>.Create("path");
@@ -209,7 +215,7 @@ namespace FullBuild
                                          .Command("workspace")
                                          .Do(ctx => UpdateWorkspace()),
 
-                             // convert ptojects
+                             // convert projects
                              MatchBuilder.Describe("convert projects to ensure compatibility with full-build")
                                          .Command("convert")
                                          .Command("projects")
@@ -225,6 +231,11 @@ namespace FullBuild
                                          .Param(url)
                                          .Do(ctx => AddRepo(ctx.Get(repo), ctx.Get(vcs), ctx.Get(url))),
 
+                             // list repos
+                             MatchBuilder.Describe("list repositories")
+                                         .Command("list")
+                                         .Command("repos")
+                                         .Do(ctx => ListRepos()),
 
                              // ============================== PACKAGES ============================================
                                          
