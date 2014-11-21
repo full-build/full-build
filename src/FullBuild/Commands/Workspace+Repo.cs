@@ -28,12 +28,21 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using FullBuild.Config;
 using FullBuild.Helpers;
+using FullBuild.Model;
 using FullBuild.SourceControl;
 
 namespace FullBuild.Commands
 {
     internal partial class Workspace
     {
+        public void ListRepos()
+        {
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var config = ConfigManager.LoadAdminConfig(admDir);
+
+            config.SourceRepos.ForEach(x => Console.WriteLine(x.Name));
+        }
+
         public void AddRepo(string name, VersionControlType type, string url)
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
