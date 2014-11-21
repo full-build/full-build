@@ -260,7 +260,7 @@ namespace FullBuild
                                          .Do(ctx => AvailablePackages()),
 
                              // check packages
-                             MatchBuilder.Describe("use package with version (eventually upgrade version)")
+                             MatchBuilder.Describe("use package with version (* for latest)")
                                          .Command("use")
                                          .Command("package")
                                          .Param(package)
