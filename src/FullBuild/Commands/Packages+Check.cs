@@ -32,7 +32,7 @@ namespace FullBuild.Commands
 {
     internal partial class Packages
     {
-        public void Available()
+        public void Check()
         {
             // read anthology.json
             var admDir = WellKnownFolders.GetAdminDirectory();
@@ -40,7 +40,6 @@ namespace FullBuild.Commands
 
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig(wsDir);
-            Console.WriteLine(admDir.FullName);
 
             foreach(var pkg in anthology.Packages)
             {

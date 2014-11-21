@@ -85,7 +85,7 @@
     <Compile Include="Commands\AnthologyOptimizer.cs" />
     <Compile Include="Commands\Exec.cs" />
     <Compile Include="Commands\Packages+NuGet.cs" />
-    <Compile Include="Commands\Packages+Available.cs" />
+    <Compile Include="Commands\Packages+Check.cs" />
     <Compile Include="Commands\Projects+Convert.cs" />
     <Compile Include="Commands\FrameworkVersion.cs" />
     <Compile Include="Commands\View+Init.cs" />
