@@ -53,5 +53,10 @@ namespace FullBuild.Helpers
         {
             return @this.Replace("-", "_").Replace(".", "_");
         }
+
+        public static string ToCamelCase(this string @this)
+        {
+            return @this.Substring(0, 1).ToLowerInvariant() + @this.Substring(1);
+        }
     }
 }

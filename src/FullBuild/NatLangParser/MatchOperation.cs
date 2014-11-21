@@ -26,6 +26,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using FullBuild.Helpers;
 
 namespace FullBuild.NatLangParser
 {
@@ -65,11 +66,11 @@ namespace FullBuild.NatLangParser
             {
                 if (typeof(T).IsEnum)
                 {
-                    var res = typeof(T).GetEnumNames().Aggregate(new StringBuilder(), (sb, e) => sb.AppendFormat("|{0}", e));
+                    var res = typeof(T).GetEnumNames().Aggregate(new StringBuilder(), (sb, e) => sb.AppendFormat("|{0}", e.ToCamelCase()));
                     return res.ToString(1, res.Length-1);
                 }
                 
-                return typeof(T).Name;
+                return typeof(T).Name.ToCamelCase();
             }
         }
 
