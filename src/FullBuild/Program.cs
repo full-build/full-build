@@ -193,7 +193,7 @@ namespace FullBuild
                                          
 
                              // clone repo
-                             MatchBuilder.Describe("clone repositories which names matching given {0}", repos)
+                             MatchBuilder.Describe("clone repositories which names matching {0}", repos)
                                          .Command("clone")
                                          .Command("repo")
                                          .Param(repos)
@@ -271,7 +271,7 @@ namespace FullBuild
                              // ============================== VIEW ============================================
 
                              // init view <viewname> with <repos> ...
-                             MatchBuilder.Describe("init view file {0} with provided repositories which names matching given {1}", viewname, repos)
+                             MatchBuilder.Describe("init view file {0} with provided repositories which names matching {1}", viewname, repos)
                                          .Command("init")
                                          .Command("view")
                                          .Param(viewname)
