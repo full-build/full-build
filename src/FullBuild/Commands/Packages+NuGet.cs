@@ -27,6 +27,7 @@ using System;
 using System.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
+using FullBuild.Model;
 
 namespace FullBuild.Commands
 {
@@ -46,6 +47,38 @@ namespace FullBuild.Commands
             var config = ConfigManager.LoadAdminConfig(admDir);
             config.NuGets.ForEach(Console.WriteLine);
             ConfigManager.SaveAdminConfig(admDir, config);
+        }
+
+        public void ListPackages()
+        {
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var anthology = Anthology.Load(admDir);
+
+            anthology.Packages.ForEach(x => Console.WriteLine("Package {0} version {1}", x.Name, x.Version));
+        }
+
+        public void UsePackage(string id, string version)
+        {
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var anthology = Anthology.Load(admDir);
+
+            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
+            var config = ConfigManager.LoadConfig(wsDir);
+
+            if (version == "*")
+            {
+                version = NuGet.GetLatestPackageVersion(id, config.Nugets);
+            }
+
+            Console.WriteLine("Using package {0} version {1}", id, version);
+
+            var pkg = new Package(id, version);
+            anthology = anthology.AddOrUpdatePackages(pkg);
+
+            anthology.Save(admDir);
+
+            // force package installation
+            InstallPackage(pkg);
         }
     }
 }

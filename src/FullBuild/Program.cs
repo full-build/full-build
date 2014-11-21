@@ -130,7 +130,7 @@ namespace FullBuild
         private static void AvailablePackages()
         {
             var handler = new Packages();
-            handler.Available();
+            handler.Check();
         }
 
         private static void AddNuGet(string url)
@@ -145,6 +145,18 @@ namespace FullBuild
             handler.ListNuGet();
         }
 
+        private static void ListPackages()
+        {
+            var handler = new Packages();
+            handler.ListPackages();
+        }
+
+        private static void UsePackage(string id, string version)
+        {
+            var handler = new Packages();
+            handler.UsePackage(id, version);
+        }
+
         private static int Main(string[] args)
         {
             var path = Parameter<string>.Create("path");
@@ -156,6 +168,8 @@ namespace FullBuild
             var url = Parameter<string>.Create("url");
             var key = Parameter<ConfigParameter>.Create("key");
             var value = Parameter<string>.Create("value");
+            var package = Parameter<string>.Create("package");
+            var version = Parameter<string>.Create("version");
 
             var parser = new Parser
                          {
@@ -224,21 +238,35 @@ namespace FullBuild
                              // list nuget feed
                              MatchBuilder.Describe("list nuget feeds")
                                          .Command("list")
-                                         .Command("packages")
+                                         .Command("nugets")
                                          .Do(ctx => ListNuGets()),
+
+                             // list packages
+                             MatchBuilder.Describe("list packages")
+                                         .Command("list")
+                                         .Command("packages")
+                                         .Do(ctx => ListPackages()),
 
                              // install package
                              MatchBuilder.Describe("install packages")
                                          .Command("install")
                                          .Command("packages")
                                          .Do(ctx => InstallPackages()),
-
                                                   
-                             // available packages
-                             MatchBuilder.Describe("list available packages")
-                                         .Command("available")
+                             // check packages
+                             MatchBuilder.Describe("check for new packages versions")
+                                         .Command("check")
                                          .Command("packages")
                                          .Do(ctx => AvailablePackages()),
+
+                             // check packages
+                             MatchBuilder.Describe("use package with version (eventually upgrade version)")
+                                         .Command("use")
+                                         .Command("package")
+                                         .Param(package)
+                                         .Command("version")
+                                         .Param(version)
+                                         .Do(ctx => UsePackage(ctx.Get(package), ctx.Get(version))),
 
                              // ============================== VIEW ============================================
 

@@ -45,9 +45,14 @@ namespace FullBuild.Commands
             foreach(var pkg in anthology.Packages)
             {
                 Console.WriteLine("  {0} {1}", pkg.Name, pkg.Version);
-                NuGet.InstallPackage(pkg);
-                GenerateTargetsForProject(pkg);
+                InstallPackage(pkg);
             }
+        }
+
+        public static void InstallPackage(Package pkg)
+        {
+            NuGet.InstallPackage(pkg);
+            GenerateTargetsForProject(pkg);
         }
 
         private static XElement Generatewhen(IEnumerable<string> foldersToTry, string fxVersion, DirectoryInfo libDir)
