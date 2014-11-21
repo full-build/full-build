@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using FullBuild.Helpers;
 
 namespace FullBuild.NatLangParser
 {
@@ -54,7 +55,7 @@ namespace FullBuild.NatLangParser
 
         public string Describe
         {
-            get { return string.Format("{0} ...", typeof(T).Name); }
+            get { return string.Format("{0} ...", typeof(T).Name.ToCamelCase()); }
         }
 
         public bool IsAccumulator
