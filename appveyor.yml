@@ -1,6 +1,6 @@
 environment:
   GITHUB_TOKEN:
-    secure: YSV4SlGvkdAW8aGW4q/m3vkof5Aq5Pznd+A9Rq7gQLgZeB23YKgn+vb4Ws3hzGxS
+    secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
 
 version: 0.0.{build}
 assembly_info:
