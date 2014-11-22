@@ -6,8 +6,8 @@ version: {build}.0.0
 assembly_info:
   patch: true
   file: AssemblyInfo.*
-  assembly_version: "{build}"
-  assembly_file_version: "{build}"
+  assembly_version: "{version}"
+  assembly_file_version: "{version}"
   assembly_informational_version: "$(APPVEYOR_REPO_COMMIT) $(APPVEYOR_REPO_BRANCH)"
 
 platform: Any CPU
