@@ -10,6 +10,8 @@ echo APPVEYOR_BUILD_VERSION %APPVEYOR_BUILD_VERSION%
 echo APPVEYOR_REPO_BRANCH %APPVEYOR_REPO_BRANCH%
 echo APPVEYOR_REPO_COMMIT %APPVEYOR_REPO_COMMIT%
 
+dir /s *.zip
+
 echo %HERE%tools/github-release.exe release ^
                          --user pchalamet ^
                          --repo full-build ^
