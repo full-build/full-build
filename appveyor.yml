@@ -2,13 +2,15 @@ environment:
   GITHUB_TOKEN:
     secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
 
-version: 0.0.{build}
+skip_tags: true
+
+version: 0.5.{build}
 assembly_info:
   patch: true
   file: AssemblyInfo.*
   assembly_version: "{version}"
   assembly_file_version: "{version}"
-  assembly_informational_version: "$(APPVEYOR_REPO_COMMIT) $(APPVEYOR_REPO_BRANCH)"
+  assembly_informational_version: "{version}"
 
 platform: Any CPU
 configuration: Release
