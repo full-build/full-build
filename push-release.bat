@@ -1,9 +1,9 @@
-rem if "%APPVEYOR_REPO_TAG%" NEQ "True" goto :ok
+if "%APPVEYOR_REPO_TAG%" NEQ "True" goto :ok
 
 set HERE=%~dp0
 
 git tag -a %APPVEYOR_BUILD_VERSION% -m "Release vesion %APPVEYOR_BUILD_VERSION%" || goto :ko
-git push --tags || goto :ko
+git push --tags https://%GITHUB_TOKEN%:@github.com/pchalamet/full-build.git || goto :ko
 
 %HERE%tools\github-release.exe release ^
                          --user pchalamet ^
