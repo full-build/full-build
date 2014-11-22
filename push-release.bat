@@ -2,11 +2,11 @@ rem if "%APPVEYOR_REPO_TAG%" NEQ "True" goto :ok
 
 set HERE=%~dp0
 
-git config --global user.email "%APPVEYOR_REPO_COMMIT_AUTHOR%"
-git config --global user.name "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%"
+git config --global user.email "%APPVEYOR_REPO_COMMIT_AUTHOR%" 1>NUL 2>NUL
+git config --global user.name "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%" 1>NUL 2>NUL
 
-git tag -a %APPVEYOR_BUILD_VERSION% -m "Release vesion %APPVEYOR_BUILD_VERSION%" || goto :ko
-git push --tags https://%GITHUB_TOKEN%@github.com/pchalamet/full-build.git || goto :ko
+git tag -a %APPVEYOR_BUILD_VERSION% -m "Release vesion %APPVEYOR_BUILD_VERSION%" 1>NUL 2>NUL || goto :ko
+git push --tags https://%GITHUB_TOKEN%@github.com/pchalamet/full-build.git 1>NUL 2>NUL || goto :ko
 
 %HERE%tools\github-release.exe release ^
                          --user pchalamet ^
