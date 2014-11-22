@@ -15,8 +15,8 @@ configuration: Release
 build:
   project: src/full-build.sln
 
-#deploy_script:
-#  -cmd: src/push-release.bat
+deploy_script:
+  -cmd: push-release.bat
   
 artifacts:
   path: src/bin/$(configuration)
