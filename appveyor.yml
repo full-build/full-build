@@ -2,13 +2,13 @@ environment:
   GITHUB_TOKEN:
     secure: YSV4SlGvkdAW8aGW4q/m3vkof5Aq5Pznd+A9Rq7gQLgZeB23YKgn+vb4Ws3hzGxS
 
-version: 0.1.{build}
+version: {build}
 assembly_info:
   patch: true
   file: AssemblyInfo.*
-  assembly_version: "{version}"
-  assembly_file_version: "{version}"
-  assembly_informational_version: "{version}"
+  assembly_version: "{build}"
+  assembly_file_version: "{build}"
+  assembly_informational_version: "$(APPVEYOR_REPO_COMMIT) $(APPVEYOR_REPO_BRANCH)"
 
 platform: Any CPU
 configuration: Release
@@ -19,5 +19,5 @@ deploy_script:
   -cmd: push-release.bat
   
 artifacts:
-  path: src/bin/$(configuration)
-  name: $(configuration)
+  path: src/bin/$(CONFIGURATION)
+  name: $(CONFIGURATION)
