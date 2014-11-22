@@ -1,4 +1,4 @@
-if "%APPVEYOR_REPO_TAG%" NEQ "True" goto :ok
+rem if "%APPVEYOR_REPO_TAG%" NEQ "True" goto :ok
 
 set HERE=%~dp0
 
