@@ -23,7 +23,7 @@ echo APPVEYOR_REPO_COMMIT %APPVEYOR_REPO_COMMIT%
 %HERE%tools/github-release.exe upload ^
                      --user pchalamet ^
 					 --repo full-build ^
-                     --tag %APPVEYOR_REPO_BRANCH% ^
+                     --tag %APPVEYOR_BUILD_VERSION% ^
                      --name "%APPVEYOR_PROJECT_NAME%-net45-%PLATFORM%" ^
                      --file %HERE%%CONFIGURATION%.zip || goto :ko
 
