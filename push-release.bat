@@ -10,7 +10,7 @@ rem git push --tags https://%GITHUB_TOKEN%@github.com/pchalamet/full-build.git 1
 
 echo pushing %APPVEYOR_PROJECT_NAME% %CONFIGURATION% %PLATFORM% %APPVEYOR_BUILD_VERSION% from %HERE%
 
-tools/github-release.exe release ^
+%HERE%tools/github-release.exe release ^
                          --user %APPVEYOR_REPO_COMMIT_AUTHOR% ^
                          --repo %APPVEYOR_PROJECT_NAME% ^
 						 --tag %APPVEYOR_BUILD_VERSION% ^
@@ -18,12 +18,12 @@ tools/github-release.exe release ^
                          --description "%APPVEYOR_PROJECT_NAME% %APPVEYOR_BUILD_VERSION% (%APPVEYOR_REPO_COMMIT%)- %PLATFORM% %CONFIGURATION%" ^
                          --pre-release || goto :ko
 
-tools/github-release.exe upload ^
+%HERE%tools/github-release.exe upload ^
                      --user %APPVEYOR_REPO_COMMIT_AUTHOR% ^
 					 --repo %APPVEYOR_PROJECT_NAME% ^
                      --tag %APPVEYOR_BUILD_VERSION% ^
                      --name "%APPVEYOR_PROJECT_NAME%-net45-%PLATFORM%" ^
-                     --file src/bin/%CONFIGURATION%.zip || goto :ko
+                     --file %HERE%src/bin/%CONFIGURATION%.zip || goto :ko
 
 :ok
 exit /b 0
