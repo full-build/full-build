@@ -2,20 +2,26 @@ rem if "%APPVEYOR_REPO_TAG%" NEQ "True" goto :ok
 
 set HERE=%~dp0
 
-echo pushing %APPVEYOR_PROJECT_NAME% %CONFIGURATION% %PLATFORM% %APPVEYOR_BUILD_VERSION% from %HERE%
+echo HERE %HERE%
+echo APPVEYOR_PROJECT_NAME %APPVEYOR_PROJECT_NAME% 
+echo CONFIGURATION %CONFIGURATION% 
+echo PLATFORM %PLATFORM% 
+echo APPVEYOR_BUILD_VERSION %APPVEYOR_BUILD_VERSION%
+echo APPVEYOR_REPO_BRANCH %APPVEYOR_REPO_BRANCH%
+echo APPVEYOR_REPO_COMMIT %APPVEYOR_REPO_COMMIT%
 
 echo %HERE%tools/github-release.exe release ^
                          --user pchalamet ^
                          --repo full-build ^
 						 --tag %APPVEYOR_BUILD_VERSION% ^
 						 --name "full-build %APPVEYOR_BUILD_VERSION%" ^
-                         --description "%APPVEYOR_PROJECT_NAME% %APPVEYOR_BUILD_VERSION% (%APPVEYOR_REPO_COMMIT%)- %PLATFORM% %CONFIGURATION%" ^
+                         --description "%APPVEYOR_PROJECT_NAME% %APPVEYOR_BUILD_VERSION% %PLATFORM% %CONFIGURATION% %APPVEYOR_REPO_COMMIT%" ^
                          --pre-release || goto :ko
 
 echo %HERE%tools/github-release.exe upload ^
                      --user pchalamet ^
 					 --repo full-build ^
-                     --tag %APPVEYOR_BUILD_VERSION% ^
+                     --tag %APPVEYOR_REPO_BRANCH% ^
                      --name "%APPVEYOR_PROJECT_NAME%-net45-%PLATFORM%" ^
                      --file %HERE%src/bin/%CONFIGURATION%.zip || goto :ko
 
