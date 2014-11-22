@@ -10,9 +10,9 @@ echo APPVEYOR_BUILD_VERSION %APPVEYOR_BUILD_VERSION%
 echo APPVEYOR_REPO_BRANCH %APPVEYOR_REPO_BRANCH%
 echo APPVEYOR_REPO_COMMIT %APPVEYOR_REPO_COMMIT%
 
-dir /s *.zip
+7z a %CONFIGURATION%.zip .\src\bin\%CONFIGURATION%\*
 
-echo %HERE%tools/github-release.exe release ^
+%HERE%tools/github-release.exe release ^
                          --user pchalamet ^
                          --repo full-build ^
 						 --tag %APPVEYOR_BUILD_VERSION% ^
@@ -20,12 +20,12 @@ echo %HERE%tools/github-release.exe release ^
                          --description "%APPVEYOR_PROJECT_NAME% %APPVEYOR_BUILD_VERSION% %PLATFORM% %CONFIGURATION% %APPVEYOR_REPO_COMMIT%" ^
                          --pre-release || goto :ko
 
-echo %HERE%tools/github-release.exe upload ^
+%HERE%tools/github-release.exe upload ^
                      --user pchalamet ^
 					 --repo full-build ^
                      --tag %APPVEYOR_REPO_BRANCH% ^
                      --name "%APPVEYOR_PROJECT_NAME%-net45-%PLATFORM%" ^
-                     --file %HERE%src/bin/%CONFIGURATION%.zip || goto :ko
+                     --file %HERE%%CONFIGURATION%.zip || goto :ko
 
 :ok
 exit /b 0
