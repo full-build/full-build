@@ -25,28 +25,14 @@
 
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Xml.Serialization;
 using FullBuild.Helpers;
+using Mini;
 
 namespace FullBuild.Config
 {
     internal static class ConfigManager
     {
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern bool WritePrivateProfileString(
-            string lpAppName, string lpKeyName, string lpString, string lpFileName);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        private static extern uint GetPrivateProfileString(
-            string lpAppName,
-            string lpKeyName,
-            string lpDefault,
-            StringBuilder lpReturnedString,
-            uint nSize,
-            string lpFileName);
-
         public static FullBuildConfig LoadConfig(DirectoryInfo wsDir)
         {
             var bootstrapConfig = LoadBootstrapConfig();
@@ -65,22 +51,18 @@ namespace FullBuild.Config
                 throw new ArgumentException("Configure full-build before proceeding.");
             }
 
-            var packageGlobalCacheConfig = new StringBuilder(255);
-            GetPrivateProfileString("FullBuild", "PackageGlobalCache", "", packageGlobalCacheConfig, 255, configFile.FullName);
-
-            var adminVcsConfig = new StringBuilder(255);
-            GetPrivateProfileString("FullBuild", "RepoType", "", adminVcsConfig, 255, configFile.FullName);
-
-            var adminRepoConfig = new StringBuilder(255);
-            GetPrivateProfileString("FullBuild", "RepoUrl", "", adminRepoConfig, 255, configFile.FullName);
+            var ini = new IniDocument(configFile.FullName);
+            var packageGlobalCacheConfig = ini["FullBuild"]["PackageGlobalCache"].Value;
+            var adminVcsConfig = ini["FullBuild"]["RepoType"].Value;
+            var adminRepoConfig = ini["FullBuild"]["RepoUrl"].Value;
 
             var adminRepo = new RepoConfig
                             {
                                 Name = "admin",
-                                Vcs = (VersionControlType) Enum.Parse(typeof(VersionControlType), adminVcsConfig.ToString(), true),
-                                Url = adminRepoConfig.ToString()
+                                Vcs = (VersionControlType) Enum.Parse(typeof(VersionControlType), adminVcsConfig, true),
+                                Url = adminRepoConfig
                             };
-            var boostrapConfig = new BoostrapConfig(packageGlobalCacheConfig.ToString(), adminRepo);
+            var boostrapConfig = new BoostrapConfig(packageGlobalCacheConfig, adminRepo);
 
             return boostrapConfig;
         }
@@ -91,7 +73,9 @@ namespace FullBuild.Config
             var configFile = userProfileDir.GetFile(".full-build-config");
             var keyName = key.ToString();
 
-            WritePrivateProfileString("FullBuild", keyName, value, configFile.FullName);
+            var ini = new IniDocument(configFile.FullName);
+            ini["FullBuild"][keyName].Value = value;
+            ini.Write();
         }
 
         public static void SaveAdminConfig(DirectoryInfo adminDir, AdminConfig config)
