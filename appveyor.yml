@@ -4,7 +4,7 @@ environment:
 
 skip_tags: true
 
-version: 0.5.{build}
+version: 0.6.{build}
 assembly_info:
   patch: true
   file: AssemblyInfo.*
