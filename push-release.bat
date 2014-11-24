@@ -14,7 +14,7 @@ echo APPVEYOR_REPO_COMMIT %APPVEYOR_REPO_COMMIT%
                          --repo full-build ^
 						 --tag %APPVEYOR_BUILD_VERSION% ^
 						 --name "full-build %APPVEYOR_BUILD_VERSION%" ^
-                         --description "%APPVEYOR_PROJECT_NAME% %CONFIGURATION%|%PLATFORM% %APPVEYOR_BUILD_VERSION% %APPVEYOR_REPO_COMMIT%" ^
+                         --description "%APPVEYOR_PROJECT_NAME%-net45-anycpu %CONFIGURATION% %APPVEYOR_BUILD_VERSION%" ^
                          --pre-release || goto :ko
 
 %HERE%tools/github-release.exe upload ^
