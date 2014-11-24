@@ -12,6 +12,9 @@ assembly_info:
   assembly_file_version: "{version}"
   assembly_informational_version: "{version}"
 
+build_script:
+  -cmd: build-release.bat
+  
 platform: Any CPU
 configuration: Release
 build:
