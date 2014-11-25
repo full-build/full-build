@@ -25,22 +25,21 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace FullBuild.NatLangParser
 {
     public class Parser : List<Matcher>
     {
-        public bool Parse(string[] args)
+        public bool ParseAndInvoke(string[] args)
         {
-            var res = this.Any(x => x.ParseAndInvoke(args));
+            var context = new Context(this);
+            var res = this.Any(x => x.ParseAndInvoke(args, context));
             return res;
         }
 
-        public string Usage()
+        public IEnumerable<string> Usage()
         {
-            var res = this.Aggregate(new StringBuilder().Append("\t"), (sb, m) => sb.AppendLine(m.Usage()).Append("\t"));
-            return res.ToString();
+            return this.Select(matcher => matcher.Usage());
         }
     }
 }

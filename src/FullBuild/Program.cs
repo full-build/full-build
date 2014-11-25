@@ -24,15 +24,19 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Collections.Generic;
 using FullBuild.Commands;
 using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.NatLangParser;
+using NLog;
 
 namespace FullBuild
 {
     internal class Program
     {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
         private static void InitWorkspace(string path)
         {
             var handler = new Workspace();
@@ -165,6 +169,28 @@ namespace FullBuild
 
         private static int Main(string[] args)
         {
+            try
+            {
+                TryMain(args);
+                return 0;
+            }
+            catch(Exception ex)
+            {
+                _logger.Debug("Failed with error", ex);
+                Console.WriteLine("Failed with error: {0}", ex.Message);
+            }
+
+            return 5;
+        }
+
+        private static void Usage(IEnumerable<string> usages)
+        {
+            Console.WriteLine("Usage:");
+            usages.ForEach(x => Console.WriteLine("\t{0}", x));
+        }
+
+        private static void TryMain(string[] args)
+        {
             var path = Parameter<string>.Create("path");
             var viewname = Parameter<string>.Create("viewName");
             var repos = Parameter<string[]>.Create("regex");
@@ -179,6 +205,10 @@ namespace FullBuild
 
             var parser = new Parser
                          {
+                             MatchBuilder.Describe("Usage")
+                                         .Command("/?")
+                                         .Do(ctx => Usage(ctx.Usage())),
+
                              // ============================== WORKSPACE ============================================
 
                              // init workspace
@@ -337,16 +367,10 @@ namespace FullBuild
                                          .Do(ctx => SetConfig(ctx.Get(key), ctx.Get(value)))
                          };
 
-            if (! parser.Parse(args))
+            if (! parser.ParseAndInvoke(args))
             {
-                Console.WriteLine("Invalid arguments");
-                Console.WriteLine();
-                Console.WriteLine("Usage:");
-                Console.WriteLine(parser.Usage());
-                return 5;
+                throw new ArgumentException("Invalid arguments. Use /? for usage.");
             }
-
-            return 0;
         }
     }
 }
