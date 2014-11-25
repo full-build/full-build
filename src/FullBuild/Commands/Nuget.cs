@@ -66,8 +66,17 @@ namespace FullBuild.Commands
 
             pkgDir.Create();
 
-            _logger.Debug("Unzipping package {0}:{1}", pkg.Name, pkg.Version);
-            ZipFile.ExtractToDirectory(pkgFile.FullName, pkgDir.FullName);
+            try
+            {
+                _logger.Debug("Unzipping package {0}:{1}", pkg.Name, pkg.Version);
+                ZipFile.ExtractToDirectory(pkgFile.FullName, pkgDir.FullName);
+            }
+            catch(Exception)
+            {
+                // file is probably corrupt...
+                pkgFile.Delete();
+                throw;
+            }
         }
 
         private static void DownloadNugetPackage(Package pkg, FileInfo pkgFile, string[] nugets)

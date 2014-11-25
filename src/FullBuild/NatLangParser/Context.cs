@@ -23,28 +23,32 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace FullBuild.NatLangParser
 {
     public class Context
     {
+        private readonly Parser _parser;
+
         private readonly ImmutableDictionary<string, object> _parameters;
 
-        public Context()
+        public Context(Parser parser)
+            : this(parser, ImmutableDictionary<string, object>.Empty)
         {
-            _parameters = ImmutableDictionary<string, object>.Empty;
         }
 
-        private Context(ImmutableDictionary<string, object> parameters)
+        private Context(Parser parser, ImmutableDictionary<string, object> parameters)
         {
+            _parser = parser;
             _parameters = parameters;
         }
 
         public Context Add(string key, object value)
         {
             var newParameters = _parameters.Add(key, value);
-            return new Context(newParameters);
+            return new Context(_parser, newParameters);
         }
 
         public T Get<T>(Parameter<T> parameter)
@@ -52,6 +56,11 @@ namespace FullBuild.NatLangParser
             var obj = (T) _parameters[parameter.Name];
             var value = (T) obj;
             return value;
+        }
+
+        public IEnumerable<string> Usage()
+        {
+            return _parser.Usage();
         }
     }
 }
