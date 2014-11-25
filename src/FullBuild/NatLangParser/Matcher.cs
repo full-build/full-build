@@ -48,10 +48,8 @@ namespace FullBuild.NatLangParser
             _action = action;
         }
 
-        public bool ParseAndInvoke(string[] args)
+        public bool ParseAndInvoke(string[] args, Context context)
         {
-            var context = new Context();
-
             var isMatch = true;
             var argIndex = 0;
             var opIndex = 0;
