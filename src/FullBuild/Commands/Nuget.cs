@@ -28,6 +28,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Xml.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
@@ -41,6 +42,11 @@ namespace FullBuild.Commands
 
         public static void InstallPackage(Package pkg)
         {
+            InstallPackage(pkg, false);
+        }
+  
+        private static void InstallPackage(Package pkg, bool force)
+        {
             var config = ConfigManager.LoadConfig(WellKnownFolders.GetWorkspaceDirectory());
 
             var cacheDir = WellKnownFolders.GetCacheDirectory();
@@ -52,8 +58,9 @@ namespace FullBuild.Commands
 
             // avoid downloading again the package (they are immutable)
             var pkgFile = new FileInfo(Path.Combine(cacheDir.FullName, string.Format("{0}.{1}.zip", pkg.Name, pkg.Version)));
-            if (!pkgFile.Exists)
+            if (!pkgFile.Exists || force)
             {
+                pkgFile.Delete();
                 DownloadNugetPackage(pkg, pkgFile, config.Nugets);
             }
 
@@ -75,7 +82,15 @@ namespace FullBuild.Commands
             {
                 // file is probably corrupt...
                 pkgFile.Delete();
-                throw;
+                pkgDir.Delete(true);
+                if (! force)
+                {
+                    InstallPackage(pkg, true);
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
 
@@ -101,9 +116,7 @@ namespace FullBuild.Commands
 
         private static void DownloadNugetPackage(Package pkg, FileInfo pkgFile, string nuget)
         {
-            var packageUrl = null != pkg.Version
-                ? string.Format("{0}package/{1}/{2}", nuget, pkg.Name, pkg.Version)
-                : string.Format("{0}package/{1}", nuget, pkg.Name);
+            var packageUrl = GetPackageDownloadUrl(pkg, nuget);
 
             _logger.Debug("Downloading package {0}:{1} from {2}", pkg.Name, pkg.Version, packageUrl);
             var webClient = new WebClient();
@@ -112,19 +125,46 @@ namespace FullBuild.Commands
 
         public static string GetLatestPackageVersion(string name, string[] nugets)
         {
-            foreach(var nuget in nugets)
+            foreach(string nuget in nugets)
             {
-                var ctx = new NuGetService.V2FeedContext(new Uri(nuget));
-                var nugetPkg = (from p in ctx.Packages
-                                where p.Id == name && p.IsLatestVersion && ! p.IsPrerelease
-                                select p).SingleOrDefault();
-                if (null != nugetPkg)
-                {
-                    return nugetPkg.Version;
-                }
+                var version = GetLatestPackageVersion(name, nuget);
+                return version;
             }
 
             return null;
+        }
+
+        private static string GetLatestPackageVersion(string name, string nuget)
+        {
+            var uri = string.Format("{0}/FindPackagesById()?&$filter=IsAbsoluteLatestVersion&id='{1}'", nuget, name);
+            var webClient = new WebClient();
+            var content = webClient.DownloadString(uri);
+
+            var atom = XNamespace.Get("http://www.w3.org/2005/Atom");
+            var ds = XNamespace.Get("http://schemas.microsoft.com/ado/2007/08/dataservices");
+            var xdoc = XDocument.Parse(content);
+            var entry = xdoc.Descendants(atom + "entry").Single();
+            var version = entry.Descendants(ds + "Version").Single().Value;
+            return version;
+        }
+
+        private static string GetPackageDownloadUrl(Package pkg, string nuget)
+        {
+            // /api/v2/FindPackagesById()?$orderby=Published%20desc&$select=Id,Version,Authors,DownloadCount,VersionDownloadCount,PackageHash,PackageSize,Published&id='cassandra-sharp'
+            // /api/v2/Search()?$orderby=DownloadCount%20desc&$filter=IsAbsoluteLatestVersion&$skip=0&$top=15&$select=Id,Version,Authors,DownloadCount,VersionDownloadCount,PackageHash,PackageSize,Published&$inlinecount=allpages&searchTerm='cassandra-sharp'&targetFramework=&includePrerelease=true
+
+            // &$filter=IsAbsoluteLatestVersion
+            var uri = string.Format("{0}/FindPackagesById()?id='{1}'", nuget, pkg.Name);
+            var webClient = new WebClient();
+            var content = webClient.DownloadString(uri);
+
+            var atom =  XNamespace.Get("http://www.w3.org/2005/Atom");
+            var md = XNamespace.Get("http://schemas.microsoft.com/ado/2007/08/dataservices/metadata");
+            var ds = XNamespace.Get("http://schemas.microsoft.com/ado/2007/08/dataservices");
+            var xdoc = XDocument.Parse(content);
+            var entry = xdoc.Descendants(atom + "entry").Single(x => x.Descendants(md + "properties").Descendants(ds + "Version").Single().Value == pkg.Version);
+            var url = entry.Descendants(atom + "content").Single().Attribute("src").Value;
+            return url;
         }
     }
 }
