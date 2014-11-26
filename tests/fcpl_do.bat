@@ -2,14 +2,14 @@
 setlocal
 
 taskkill /im tgitcache.exe 1>NUL 2>NUL
-robocopy titi toto /MIR /NP /NFL /NDL /NJH /NJS
+robocopy fclp_init fclp_do /MIR /NP /NFL /NDL
 
-pushd toto
+pushd fclp_do
 
 fullbuild index workspace || goto :ko
 copy ..\Template.csproj .full-build || goto :ko
 fullbuild convert projects || goto :ko
-fullbuild init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko
+fullbuild init view cs with * || goto :ko
 fullbuild generate view cs || goto :ko
 fullbuild build view cs || goto :ko
 fullbuild exec "echo %fullbuild_REPO% & git log -n 1 && echo." || goto :ko

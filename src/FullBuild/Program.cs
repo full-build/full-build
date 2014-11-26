@@ -177,8 +177,8 @@ namespace FullBuild
             }
             catch(Exception ex)
             {
-                _logger.Debug("Failed with error", ex);
-                Console.WriteLine("Failed with error: {0}", ex.Message);
+                _logger.Debug("Uncaught error", ex);
+                Console.WriteLine("ERROR: {0}", ex.Message);
             }
 
             return 5;
