@@ -62,6 +62,9 @@ namespace FullBuild.Commands
             {
                 pkgFile.Delete();
                 DownloadNugetPackage(pkg, pkgFile, config.Nugets);
+
+                // it's downloaded, no need to force now
+                force = true;
             }
 
             var pkgsDir = WellKnownFolders.GetPackageDirectory();
