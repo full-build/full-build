@@ -32,5 +32,13 @@ namespace FullBuild.Helpers
         public static readonly XNamespace NsMsBuild = "http://schemas.microsoft.com/developer/msbuild/2003";
 
         public static readonly XNamespace NsNuget = "http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd";
+
+        public static readonly XNamespace Atom = "http://www.w3.org/2005/Atom";
+
+        public static readonly XNamespace Metadata = "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata";
+
+        public static readonly XNamespace DataServices = "http://schemas.microsoft.com/ado/2007/08/dataservices";
+
+        public static readonly XNamespace NuGet = "http://www.w3.org/2007/app";
     }
 }
