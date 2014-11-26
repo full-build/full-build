@@ -116,7 +116,7 @@ namespace FullBuild.Commands
                     xdoc.Descendants(XmlHelpers.NsMsBuild + "ApplicationIcon").Single().Value = applicationIcon.Value;
                 }
 
-                var propertyGroup = xdoc.Element(XmlHelpers.NsMsBuild + "Project").Elements(XmlHelpers.NsMsBuild + "PropertyGroup").Last();
+                var propertyGroup = xdoc.Root.Elements(XmlHelpers.NsMsBuild + "PropertyGroup").Last();
                 var itemGroupReference = new XElement(XmlHelpers.NsMsBuild + "ItemGroup");
                 var itemGroupFile = new XElement(XmlHelpers.NsMsBuild + "ItemGroup");
 
