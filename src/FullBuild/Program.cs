@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using FullBuild.Commands;
 using FullBuild.Config;
 using FullBuild.Helpers;
@@ -187,6 +188,20 @@ namespace FullBuild
         {
             Console.WriteLine("Usage:");
             usages.ForEach(x => Console.WriteLine("\t{0}", x));
+        }
+
+        private static void SetBinRepo(string path)
+        {
+            var binRepoDir = new DirectoryInfo(path);
+            if (! binRepoDir.Exists)
+            {
+                throw new ArgumentException("Provided path is unreachable");
+            }
+
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var admConfig = ConfigManager.LoadAdminConfig(admDir);
+            admConfig.BinRepo = path;
+            ConfigManager.SaveAdminConfig(admDir, admConfig);
         }
 
         private static void TryMain(string[] args)
@@ -356,6 +371,13 @@ namespace FullBuild
                                          .Do(ctx => Exec(ctx.Get(command))),
 
                              // ============================== CONFIG ============================================
+
+                             // set binrepo <path>
+                             MatchBuilder.Describe("set binary repository")
+                                         .Command("set")
+                                         .Command("binrepo")
+                                         .Param(path)
+                                         .Do(ctx => SetBinRepo(ctx.Get(path))),
 
                              // update workspace
                              // config <key> <value>
