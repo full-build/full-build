@@ -2,17 +2,17 @@
 setlocal
 
 taskkill /im tgitcache.exe 1>NUL 2>NUL
-if exist titi rmdir /s /q titi || goto :ko
-mkdir titi || goto :ko
+if exist cs_init rmdir /s /q cs_init || goto :ko
+mkdir cs_init || goto :ko
 
 rem setup environment
 fullbuild set config PackageGlobalCache c:\PackageGlobalCache || goto :ko
 fullbuild set config RepoType Git || goto :ko
 fullbuild set config RepoUrl https://github.com/pchalamet/cassandra-sharp-full-build || goto :ko
-fullbuild init workspace titi || goto :ko
+fullbuild init workspace cs_init || goto :ko
 
 rem create workspace
-pushd titi
+pushd cs_init
 
 fullbuild set binrepo c:\BinRepo || goto :ko
 fullbuild add nuget https://www.nuget.org/api/v2/ || goto :ko
