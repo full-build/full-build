@@ -30,7 +30,6 @@ using System.IO;
 using System.Linq;
 using FullBuild.Helpers;
 using Newtonsoft.Json;
-using Semver;
 
 namespace FullBuild.Model
 {
@@ -47,16 +46,20 @@ namespace FullBuild.Model
         [JsonProperty("projects")]
         private readonly IImmutableList<Project> _projects;
 
+        [JsonProperty("applications")]
+        private readonly IImmutableList<Application> _applications;
+
         public Anthology()
-            : this(ImmutableList.Create<Project>(), ImmutableList.Create<Binary>(), ImmutableList.Create<Package>())
+            : this(ImmutableList.Create<Project>(), ImmutableList.Create<Binary>(), ImmutableList.Create<Package>(), ImmutableList.Create<Application>())
         {
         }
 
-        private Anthology(IEnumerable<Project> projects, IEnumerable<Binary> binaries, IEnumerable<Package> packages)
+        private Anthology(IEnumerable<Project> projects, IEnumerable<Binary> binaries, IEnumerable<Package> packages, IEnumerable<Application> applications)
         {
             _projects = projects.OrderBy(x => x.Guid).ToImmutableList();
             _binaries = binaries.OrderBy(x => x.AssemblyName).ToImmutableList();
             _packages = packages.OrderBy(x => x.Name).ToImmutableList();
+            _applications = applications.ToImmutableList();
         }
 
         [JsonIgnore]
@@ -77,6 +80,12 @@ namespace FullBuild.Model
             get { return _projects; }
         }
 
+        [JsonIgnore]
+        public IEnumerable<Application> Applications
+        {
+            get { return _applications; }
+        }
+
         private static IImmutableList<T> AddOrUpdate<T>(T obj, IImmutableList<T> list, Func<T, bool> equals) where T : class
         {
             list = Remove(list, equals).Add(obj);
@@ -87,14 +96,16 @@ namespace FullBuild.Model
         {
             return new Anthology(AddOrUpdate(project, _projects, x => x.Guid == project.Guid),
                                  _binaries,
-                                 _packages);
+                                 _packages,
+                                 _applications);
         }
 
         public Anthology AddOrUpdateBinary(Binary binary)
         {
             return new Anthology(_projects,
                                  AddOrUpdate(binary, _binaries, x => x.AssemblyName.InvariantEquals(binary.AssemblyName)),
-                                 _packages);
+                                 _packages,
+                                 _applications);
         }
 
         public Anthology AddOrUpdatePackages(Package package)
@@ -121,7 +132,8 @@ namespace FullBuild.Model
 
             return new Anthology(_projects,
                                  _binaries,
-                                 newPackages);
+                                 newPackages,
+                                 _applications);
         }
 
         private static IImmutableList<T> Remove<T>(IImmutableList<T> list, Func<T, bool> equals) where T : class
@@ -139,21 +151,24 @@ namespace FullBuild.Model
         {
             return new Anthology(Remove(_projects, x => x.Guid == project.Guid),
                                  _binaries,
-                                 _packages);
+                                 _packages,
+                                 _applications);
         }
 
         public Anthology RemoveBinary(Binary binary)
         {
             return new Anthology(_projects,
                                  Remove(_binaries, x => x.AssemblyName.InvariantEquals(binary.AssemblyName)),
-                                 _packages);
+                                 _packages,
+                                 _applications);
         }
 
         public Anthology RemovePackage(Package package)
         {
             return new Anthology(_projects,
                                  _binaries,
-                                 Remove(_packages, x => x.Name.InvariantEquals(package.Name)));
+                                 Remove(_packages, x => x.Name.InvariantEquals(package.Name)),
+                                 _applications);
         }
 
         public static Anthology Load(DirectoryInfo dir)
