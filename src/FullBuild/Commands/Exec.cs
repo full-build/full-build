@@ -80,6 +80,10 @@ namespace FullBuild.Commands
                 if (null != process)
                 {
                     process.WaitForExit();
+                    if (0 != process.ExitCode)
+                    {
+                        throw new Exception("Process exited with error code " + process.ExitCode);
+                    }
                 }
             }
         }
