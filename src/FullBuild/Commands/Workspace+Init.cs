@@ -53,6 +53,14 @@ namespace FullBuild.Commands
             // reload config now
             config = ConfigManager.LoadConfig(wsDir);
 
+            // force a first config if none exists
+            var admConfig = ConfigManager.LoadAdminConfig(admDir);
+            if (null == admConfig.BinRepo)
+            {
+                ConfigManager.SaveAdminConfig(admDir, admConfig);
+                return;
+            }
+
             // copy all files from binary repo
             var tip = sourceControl.Tip(admDir);
             var binDir = new DirectoryInfo(config.BinRepo);

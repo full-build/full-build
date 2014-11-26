@@ -14,6 +14,7 @@ fullbuild init workspace titi || goto :ko
 rem create workspace
 pushd titi
 
+fullbuild set binrepo c:\BinRepo || goto :ko
 fullbuild add nuget https://www.nuget.org/api/v2/ || goto :ko
 fullbuild add git repo cassandra-sharp from https://github.com/pchalamet/cassandra-sharp || goto :ko
 fullbuild add git repo cassandra-sharp-contrib from https://github.com/pchalamet/cassandra-sharp-contrib || goto :ko
