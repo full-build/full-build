@@ -37,8 +37,12 @@ namespace FullBuild.Commands
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             var config = ConfigManager.LoadAdminConfig(admDir);
+
             config.NuGets = config.NuGets.Concat(new[] {url}).Distinct().ToArray();
             ConfigManager.SaveAdminConfig(admDir, config);
+
+            var title = NuGet.RetrieveFeedTitle(url);
+            Console.WriteLine("Added feed {0} with title {1}", url, title);
         }
 
         public void ListNuGet()
