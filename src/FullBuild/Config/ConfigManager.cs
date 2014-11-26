@@ -98,6 +98,7 @@ namespace FullBuild.Config
                 {
                     var bootstrapConfig = (AdminConfig) xmlSer.Deserialize(reader);
                     bootstrapConfig.SourceRepos = bootstrapConfig.SourceRepos ?? new RepoConfig[0];
+                    bootstrapConfig.NuGets = bootstrapConfig.NuGets ?? new string[0];
 
                     return bootstrapConfig;
                 }

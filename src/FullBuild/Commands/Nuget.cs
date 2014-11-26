@@ -44,7 +44,7 @@ namespace FullBuild.Commands
         {
             InstallPackage(pkg, false);
         }
-  
+
         private static void InstallPackage(Package pkg, bool force)
         {
             var config = ConfigManager.LoadConfig(WellKnownFolders.GetWorkspaceDirectory());
@@ -128,7 +128,7 @@ namespace FullBuild.Commands
 
         public static string GetLatestPackageVersion(string name, string[] nugets)
         {
-            foreach(string nuget in nugets)
+            foreach(var nuget in nugets)
             {
                 var version = GetLatestPackageVersion(name, nuget);
                 return version;
@@ -143,31 +143,35 @@ namespace FullBuild.Commands
             var webClient = new WebClient();
             var content = webClient.DownloadString(uri);
 
-            var atom = XNamespace.Get("http://www.w3.org/2005/Atom");
-            var ds = XNamespace.Get("http://schemas.microsoft.com/ado/2007/08/dataservices");
             var xdoc = XDocument.Parse(content);
-            var entry = xdoc.Descendants(atom + "entry").Single();
-            var version = entry.Descendants(ds + "Version").Single().Value;
+            var entry = xdoc.Descendants(XmlHelpers.Atom + "entry").Single();
+            var version = entry.Descendants(XmlHelpers.DataServices + "Version").Single().Value;
             return version;
         }
 
         private static string GetPackageDownloadUrl(Package pkg, string nuget)
         {
-            // /api/v2/FindPackagesById()?$orderby=Published%20desc&$select=Id,Version,Authors,DownloadCount,VersionDownloadCount,PackageHash,PackageSize,Published&id='cassandra-sharp'
-            // /api/v2/Search()?$orderby=DownloadCount%20desc&$filter=IsAbsoluteLatestVersion&$skip=0&$top=15&$select=Id,Version,Authors,DownloadCount,VersionDownloadCount,PackageHash,PackageSize,Published&$inlinecount=allpages&searchTerm='cassandra-sharp'&targetFramework=&includePrerelease=true
-
-            // &$filter=IsAbsoluteLatestVersion
             var uri = string.Format("{0}/FindPackagesById()?id='{1}'", nuget, pkg.Name);
             var webClient = new WebClient();
             var content = webClient.DownloadString(uri);
 
-            var atom =  XNamespace.Get("http://www.w3.org/2005/Atom");
-            var md = XNamespace.Get("http://schemas.microsoft.com/ado/2007/08/dataservices/metadata");
-            var ds = XNamespace.Get("http://schemas.microsoft.com/ado/2007/08/dataservices");
             var xdoc = XDocument.Parse(content);
-            var entry = xdoc.Descendants(atom + "entry").Single(x => x.Descendants(md + "properties").Descendants(ds + "Version").Single().Value == pkg.Version);
-            var url = entry.Descendants(atom + "content").Single().Attribute("src").Value;
+            var entry = xdoc.Descendants(XmlHelpers.Atom + "entry")
+                            .Single(x => x.Descendants(XmlHelpers.Metadata + "properties")
+                                          .Descendants(XmlHelpers.DataServices + "Version").Single().Value == pkg.Version);
+            var url = entry.Descendants(XmlHelpers.Atom + "content").Single().Attribute("src").Value;
             return url;
+        }
+
+        public static string RetrieveFeedTitle(string nuget)
+        {
+            var client = new WebClient();
+            var content = client.DownloadString(nuget);
+            var xdoc = XDocument.Parse(content);
+            var title = xdoc.Descendants(XmlHelpers.NuGet + "collection")
+                            .Single(x => x.Attribute("href").Value == "Packages")
+                            .Descendants(XmlHelpers.Atom + "title").Single().Value;
+            return title;
         }
     }
 }
