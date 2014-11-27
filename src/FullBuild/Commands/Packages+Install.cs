@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
 
@@ -51,8 +52,26 @@ namespace FullBuild.Commands
 
         public static void InstallPackage(Package pkg)
         {
-            NuGet.InstallPackage(pkg);
+            var config = ConfigManager.LoadConfig(WellKnownFolders.GetWorkspaceDirectory());
+
+            var nuget = new NuGet(config.Nugets);
+
+            var cacheDir = SetupCacheDir(config);
+
+            nuget.Install(nuget.GetHostedPackages(pkg).First(), cacheDir, WellKnownFolders.GetPackageDirectory());
+
             GenerateTargetsForProject(pkg);
+        }
+
+        private static DirectoryInfo SetupCacheDir(FullBuildConfig config)
+        {
+            var cacheDir = WellKnownFolders.GetCacheDirectory();
+            if (!string.IsNullOrEmpty(config.PackageGlobalCache))
+            {
+                cacheDir = new DirectoryInfo(config.PackageGlobalCache);
+                cacheDir.Create();
+            }
+            return cacheDir;
         }
 
         private static XElement Generatewhen(IEnumerable<string> foldersToTry, string fxVersion, DirectoryInfo libDir)
