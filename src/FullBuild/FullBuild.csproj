@@ -72,6 +72,10 @@
   <ItemGroup>
     <Compile Include="Commands\AnthologyOptimizer.cs" />
     <Compile Include="Commands\Exec.cs" />
+    <Compile Include="Commands\HostedPackage.cs" />
+    <Compile Include="Commands\IWebClient.cs" />
+    <Compile Include="Commands\NuGet.cs" />
+    <Compile Include="Commands\NuGetResult.cs" />
     <Compile Include="Commands\Packages+NuGet.cs" />
     <Compile Include="Commands\Packages+Check.cs" />
     <Compile Include="Commands\Projects+Convert.cs" />
@@ -80,6 +84,7 @@
     <Compile Include="Commands\View+Generate.cs" />
     <Compile Include="Commands\Packages+Install.cs" />
     <Compile Include="Commands\View+List.cs" />
+    <Compile Include="Commands\WebClientAdapter.cs" />
     <Compile Include="Commands\Workspace+Repo.cs" />
     <Compile Include="Commands\Workspace+Init.cs" />
     <Compile Include="Config\AdminConfig.cs" />
@@ -109,7 +114,6 @@
     <Compile Include="NatLangParser\MatchOperationAggregate.cs" />
     <Compile Include="NatLangParser\MatchOperationText.cs" />
     <Compile Include="NatLangParser\Parameter.cs" />
-    <Compile Include="Commands\NuGet.cs" />
     <Compile Include="Commands\NuSpec.cs" />
     <Compile Include="NatLangParser\Parser.cs" />
     <Compile Include="Program.cs" />

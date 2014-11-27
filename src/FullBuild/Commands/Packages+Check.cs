@@ -41,10 +41,12 @@ namespace FullBuild.Commands
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig(wsDir);
 
+            var nuget = new NuGet(config.Nugets);
+
             foreach(var pkg in anthology.Packages)
             {
-                var slatestVersion = NuGet.GetLatestPackageVersion(pkg.Name, config.Nugets);
-                var latestVersion = slatestVersion.ParseSemVersion();
+                var slatestVersion = nuget.GetLatestVersion(pkg);
+                var latestVersion = slatestVersion.Version.ParseSemVersion();
                 var currentVersion = pkg.Version.ParseSemVersion();
 
                 if (currentVersion < latestVersion)
