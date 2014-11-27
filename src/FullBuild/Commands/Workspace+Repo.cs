@@ -28,7 +28,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using FullBuild.Config;
 using FullBuild.Helpers;
-using FullBuild.Model;
 using FullBuild.SourceControl;
 
 namespace FullBuild.Commands
