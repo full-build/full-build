@@ -41,7 +41,7 @@ namespace FullBuild.Commands
             config.NuGets = config.NuGets.Concat(new[] {url}).Distinct().ToArray();
             ConfigManager.SaveAdminConfig(admDir, config);
 
-            var title = NuGet.RetrieveFeedTitle(url);
+            var title = new NuGet().RetrieveFeedTitle(new Uri(url));
             Console.WriteLine("Added feed {0} with title {1}", url, title);
         }
 
@@ -69,14 +69,14 @@ namespace FullBuild.Commands
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig(wsDir);
 
+            var pkg = new Package(id, version);
             if (version == "*")
             {
-                version = NuGet.GetLatestPackageVersion(id, config.Nugets);
+                version = new NuGet(config.Nugets).GetLatestVersion(pkg).Version;
             }
 
             Console.WriteLine("Using package {0} version {1}", id, version);
 
-            var pkg = new Package(id, version);
             anthology = anthology.AddOrUpdatePackages(pkg);
 
             anthology.Save(admDir);
