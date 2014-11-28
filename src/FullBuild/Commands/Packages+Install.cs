@@ -54,7 +54,7 @@ namespace FullBuild.Commands
         {
             var config = ConfigManager.LoadConfig(WellKnownFolders.GetWorkspaceDirectory());
 
-            var nuget = new NuGet(config.Nugets);
+            var nuget = NuGet.Default(config.Nugets);
 
             var cacheDir = SetupCacheDir(config);
 

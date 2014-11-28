@@ -15,7 +15,7 @@ namespace FullBuild.Test
         {
             var package = new Package("Castle.Core", "3.3.3");
 
-            var hostedPackage = new NuGet("http://www.nuget.org/api/v2/").GetHostedPackages(package).First();
+            var hostedPackage = NuGet.Default("http://www.nuget.org/api/v2/").GetHostedPackages(package).First();
 
             Assert.Equal("http://www.nuget.org/api/v2/package/Castle.Core/3.3.3", hostedPackage.Content.ToString());
             Assert.Equal(864855, hostedPackage.PackageSize);
@@ -29,7 +29,7 @@ namespace FullBuild.Test
         {
             var package = new Package("Castle.Core", "5.0.0");
 
-            Assert.Null(new NuGet("http://siriona-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetHostedPackages(package).FirstOrDefault());
+            Assert.Null(NuGet.Default("http://siriona-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetHostedPackages(package).FirstOrDefault());
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace FullBuild.Test
         {
             var package = new Package("Castle.Core", "3.3.3");
 
-            Assert.NotNull(new NuGet("http://siriona-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetHostedPackages(package).FirstOrDefault());
+            Assert.NotNull(NuGet.Default("http://siriona-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetHostedPackages(package).FirstOrDefault());
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace FullBuild.Test
         {
             var expected = new Package("Castle.Core", "3.3.3");
 
-            var latestVersion = new NuGet("http://siriona-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetLatestVersion(new Package(expected.Name, "3.2.0"));
+            var latestVersion = NuGet.Default("http://siriona-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetLatestVersion(new Package(expected.Name, "3.2.0"));
 
             Assert.Equal(expected.Version, latestVersion.Version);
         }
@@ -72,7 +72,7 @@ namespace FullBuild.Test
         [Fact]
         public void Get_feed_title_from_repo()
         {
-            Assert.Equal("Packages", new NuGet().RetrieveFeedTitle(new Uri("https://nuget.org/api/v2/")));
+            Assert.Equal("Packages", NuGet.Default().RetrieveFeedTitle(new Uri("https://nuget.org/api/v2/")));
         }
 
         [Fact]
@@ -82,7 +82,7 @@ namespace FullBuild.Test
             using (var pkgDir = new TemporaryDirectory())
             {
                 var package = new Package("Castle.Core", "3.3.3");
-                var nuGet = new NuGet("http://www.nuget.org/api/v2/");
+                var nuGet = NuGet.Default("http://www.nuget.org/api/v2/");
                 var hostedPackage = nuGet.GetHostedPackages(package).First();
 
                 Assert.Empty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*"));
@@ -121,7 +121,7 @@ namespace FullBuild.Test
             using (var pkgDir = new TemporaryDirectory())
             {
                 var package = new Package("Castle.Core", "3.3.3");
-                var nuGet = new NuGet("http://www.nuget.org/api/v2/");
+                var nuGet = NuGet.Default("http://www.nuget.org/api/v2/");
                 var hostedPackage = nuGet.GetHostedPackages(package).First();
 
                 Assert.Empty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*"));
@@ -148,7 +148,7 @@ namespace FullBuild.Test
             using (var pkgDir = new TemporaryDirectory())
             {
                 var package = new Package("Castle.Core", "3.3.3");
-                var nuGet = new NuGet("http://www.nuget.org/api/v2/");
+                var nuGet = NuGet.Default("http://www.nuget.org/api/v2/");
                 var hostedPackage = nuGet.GetHostedPackages(package).First();
 
                 Assert.Empty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*", SearchOption.AllDirectories));
@@ -159,7 +159,7 @@ namespace FullBuild.Test
 
                 Assert.Equal(0, new FileInfo(castlePkg.FullName).Length);
 
-                var nuget = new NuGet("http://www.nuget.org/api/v2/");
+                var nuget = NuGet.Default("http://www.nuget.org/api/v2/");
 
                 nuget.Install(hostedPackage, cacheDir.Directory, pkgDir.Directory);
 

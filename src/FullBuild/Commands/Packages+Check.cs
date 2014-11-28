@@ -41,7 +41,7 @@ namespace FullBuild.Commands
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig(wsDir);
 
-            var nuget = new NuGet(config.Nugets);
+            var nuget = NuGet.Default(config.Nugets);
 
             foreach(var pkg in anthology.Packages)
             {
