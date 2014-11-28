@@ -23,37 +23,28 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
-using FullBuild.Config;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using FullBuild.Helpers;
-using FullBuild.Model;
 
 namespace FullBuild.Commands
 {
-    internal partial class Packages
+    internal class NuPkg
     {
-        public void Check()
+        public static IEnumerable<string> Assemblies(DirectoryInfo pkgDir)
         {
-            // read anthology.json
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthology = Anthology.Load(admDir);
-
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.LoadConfig(wsDir);
-
-            var nuget = NuGet.Default(config.Nugets);
-
-            foreach(var pkg in anthology.Packages)
+            var lib = pkgDir.GetDirectory("lib");
+            if (! lib.Exists)
             {
-                var latestNuspec = nuget.GetLatestVersion(pkg);
-                var latestVersion = latestNuspec.Version.ParseSemVersion();
-                var currentVersion = pkg.Version.ParseSemVersion();
-
-                if (currentVersion < latestVersion)
-                {
-                    Console.WriteLine("{0} version {1} is available (current is {2})", pkg.Name, latestNuspec.Version, pkg.Version);
-                }
+                return Enumerable.Empty<string>();
             }
+
+            var files = lib.EnumerateFiles("*.dll", SearchOption.AllDirectories).Concat(lib.EnumerateFiles("*.exe", SearchOption.AllDirectories));
+            var assemblies = (from file in files
+                              let filename = Path.GetFileNameWithoutExtension(file.FullName)
+                              select filename).Distinct();
+            return assemblies;
         }
     }
 }
