@@ -54,14 +54,14 @@ namespace FullBuild.Commands
             return new NuGet(new WebClientAdapter(), nugets);
         }
 
-        public NuSpec GetLatestVersion(Package package)
+        public NuSpec GetLatestVersion(string name)
         {
-            _logger.Debug("Getting latest version for package {0}", package.Name);
-            var query = string.Format("Packages()?$filter=tolower(Id) eq '{0}'", package.Name);
+            _logger.Debug("Getting latest version for package {0}", name);
+            var query = string.Format("Packages()?$filter=tolower(Id) eq '{0}'", name);
             var nuGetResults = Query(query).Where(nr => nr.IsLatestVersion).ToList();
             var lastVersion = nuGetResults.Max(nr => nr.Published);
             var latestNuspec = nuGetResults.Single(nr => nr.Published == lastVersion);
-            _logger.Debug("Latest version of package {0} is {1}", package.Name, latestNuspec.Version);
+            _logger.Debug("Latest version of package {0} is {1}", name, latestNuspec.Version);
             return latestNuspec;
         }
 
