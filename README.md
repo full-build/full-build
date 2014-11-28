@@ -1,17 +1,12 @@
 full-build is a workspace management for .NET
 =============================================
-![build status](https://ci.appveyor.com/api/projects/status/github/pchalamet/full-build?branch=master)
+[![build status](https://ci.appveyor.com/api/projects/status/github/pchalamet/full-build?branch=master)](https://ci.appveyor.com/api/projects/status/github/pchalamet/full-build?branch=master)
 
-full-build helps to:
-- link a workspace to several git or mercurial repositories
-- build from sources all your projects in one shot
-- build a single repository (or more) against all other projects but as binary imports - focus on specific projects
-- switch from binary to source and vis-versa at will
-- generate views for repositories of your interest (artifact is a solution file you can use with Visual Studio) while maintaining whole workspace consistency
-- promote automatically binary or NuGet references to real project sources (if sources or available in on of your repositories)
-- manage NuGet packages for the entire workspace - not at project level
-- get rid of NuGet hell, slowness and risky packages upgrade
-- get rid of Paket mess (projects file won't be modified if a package is upgraded) - source references are clean
-- still use packages from NuGet or private NuGet
-- migration from NuGet and Paket supported
-- checkout sources/binaries corresponding to a specific build version across all your repositories
+full-build is a enterprise grade workspace management for .net developers (pfeew !).
+
+It provides following benefits:
+* Manage teams repositories (git or mercurial) as single workspace
+* Handle NuGet packages consistency at workspace level
+* Allow a full consistent build (all sources + NuGet) for CI
+* Focus developer on selected repositories (local builds based on full build outputs)
+* Promote code review and low-coupling between developers
