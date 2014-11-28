@@ -33,12 +33,12 @@ namespace FullBuild.Commands
 
             var latestPackage = nuGetResults.Single(nr => nr.Published == lastVersion);
 
-            return new HostedPackage(package, latestPackage);
+            return HostedPackage.CreateFrom(package, latestPackage);
         }
 
         public IEnumerable<HostedPackage> GetHostedPackages(Package package)
         {
-            return Query(string.Format("Packages(Id='{0}',Version='{1}')", package.Name, package.Version)).Select(nuGetResult => new HostedPackage(package, nuGetResult));
+            return Query(string.Format("Packages(Id='{0}',Version='{1}')", package.Name, package.Version)).Select(nuGetResult => HostedPackage.CreateFrom(package, nuGetResult));
         }
 
         private IEnumerable<NuGetResult> Query(string query)
