@@ -11,8 +11,8 @@ namespace FullBuild.Commands
 {
     internal class NuGet
     {
-        private readonly IEnumerable<string> nugets;
-        private readonly IWebClient webClient;
+        private readonly IEnumerable<string> _nugets;
+        private readonly IWebClient _webClient;
 
         public NuGet(params string[] nugets)
             : this(new WebClientAdapter(), nugets)
@@ -22,8 +22,8 @@ namespace FullBuild.Commands
 
         internal NuGet(IWebClient webClient, IEnumerable<string> nugets)
         {
-            this.webClient = webClient;
-            this.nugets = nugets;
+            _webClient = webClient;
+            _nugets = nugets;
         }
 
         public HostedPackage GetLatestVersion(Package package)
@@ -42,11 +42,11 @@ namespace FullBuild.Commands
         private IEnumerable<HostedPackage> Query(Package package)
         {
             var query = string.Format("Packages(Id='{0}',Version='{1}')", package.Name, package.Version);
-            foreach (var nugetQuery in nugets.Select(nuget => new Uri(new Uri(nuget), query)))
+            foreach (var nugetQuery in _nugets.Select(nuget => new Uri(new Uri(nuget), query)))
             {
                 string result;
 
-                if (webClient.TryDownloadString(nugetQuery, out result))
+                if (_webClient.TryDownloadString(nugetQuery, out result))
                 {
                     foreach (var entry in XDocument.Parse(result).Descendants(XmlHelpers.Atom + "entry"))
                     {
@@ -72,7 +72,7 @@ namespace FullBuild.Commands
             if (IsMissed(hostedPackage, cacheFileName))
             {
                 cacheFileName.Delete();
-                webClient.DownloadFile(hostedPackage.Content, cacheFileName.FullName);
+                _webClient.DownloadFile(hostedPackage.Content, cacheFileName.FullName);
             }
         }
 
@@ -94,7 +94,7 @@ namespace FullBuild.Commands
 
         public string RetrieveFeedTitle(Uri nuget)
         {
-            var content = webClient.DownloadString(nuget);
+            var content = _webClient.DownloadString(nuget);
             var xdoc = XDocument.Parse(content);
             var title = xdoc.Descendants(XmlHelpers.NuGet + "collection")
                 .Single(x => x.Attribute("href").Value == "Packages")
