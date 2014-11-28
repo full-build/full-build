@@ -78,7 +78,7 @@ namespace FullBuild.Commands
             var emptyPackages = from package in anthology.Packages
                                 let pkgdir = pkgsDir.GetDirectory(package.Name)
                                 where pkgdir.Exists
-                                let assemblies = NuSpec.Assemblies(pkgdir)
+                                let assemblies = NuPkg.Assemblies(pkgdir)
                                 where !assemblies.Any()
                                 select package;
 
@@ -136,7 +136,7 @@ namespace FullBuild.Commands
             var pkg2prj = from package in anthology.Packages
                           let pkgdir = pkgsDir.GetDirectory(package.Name)
                           where pkgdir.Exists
-                          let assemblies = NuSpec.Assemblies(pkgdir)
+                          let assemblies = NuPkg.Assemblies(pkgdir)
                           from project in anthology.Projects
                           where assemblies.Contains(project.AssemblyName, StringComparer.InvariantCultureIgnoreCase)
                           let newPkg2prj = new {Pkg = package, Prj = project}
@@ -179,7 +179,7 @@ namespace FullBuild.Commands
                 var importedAssemblies = (from pkgRef in project.PackageReferences
                                           let pkgdir = pkgsDir.GetDirectory(pkgRef)
                                           where pkgdir.Exists
-                                          select NuSpec.Assemblies(pkgdir)).SelectMany(x => x).Distinct(StringComparer.InvariantCultureIgnoreCase);
+                                          select NuPkg.Assemblies(pkgdir)).SelectMany(x => x).Distinct(StringComparer.InvariantCultureIgnoreCase);
 
                 // remove imported assemblies
                 var newProject = importedAssemblies.Aggregate(project, (p, a) => p.RemoveBinaryReference(a));

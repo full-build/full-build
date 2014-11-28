@@ -1,0 +1,37 @@
+<ProjectConfiguration>
+  <BuildPriority>1000</BuildPriority>
+  <CopyReferencedAssembliesToWorkspace>false</CopyReferencedAssembliesToWorkspace>
+  <ConsiderInconclusiveTestsAsPassing>false</ConsiderInconclusiveTestsAsPassing>
+  <PreloadReferencedAssemblies>false</PreloadReferencedAssemblies>
+  <AllowDynamicCodeContractChecking>true</AllowDynamicCodeContractChecking>
+  <AllowStaticCodeContractChecking>false</AllowStaticCodeContractChecking>
+  <AllowCodeAnalysis>false</AllowCodeAnalysis>
+  <IgnoreThisComponentCompletely>false</IgnoreThisComponentCompletely>
+  <RunPreBuildEvents>false</RunPreBuildEvents>
+  <RunPostBuildEvents>false</RunPostBuildEvents>
+  <PreviouslyBuiltSuccessfully>true</PreviouslyBuiltSuccessfully>
+  <InstrumentAssembly>true</InstrumentAssembly>
+  <PreventSigningOfAssembly>false</PreventSigningOfAssembly>
+  <AnalyseExecutionTimes>true</AnalyseExecutionTimes>
+  <DetectStackOverflow>true</DetectStackOverflow>
+  <IncludeStaticReferencesInWorkspace>true</IncludeStaticReferencesInWorkspace>
+  <DefaultTestTimeout>60000</DefaultTestTimeout>
+  <UseBuildConfiguration></UseBuildConfiguration>
+  <UseBuildPlatform></UseBuildPlatform>
+  <ProxyProcessPath></ProxyProcessPath>
+  <UseCPUArchitecture>AutoDetect</UseCPUArchitecture>
+  <MSTestThreadApartmentState>STA</MSTestThreadApartmentState>
+  <BuildProcessArchitecture>x86</BuildProcessArchitecture>
+  <IgnoredTests>
+    <NamedTestSelector>
+      <TestName>FullBuild.Test.NuGetTest.Find_available_package_from_multiple_last_repo</TestName>
+    </NamedTestSelector>
+    <NamedTestSelector>
+      <TestName>FullBuild.Test.NuGetTest.Find_latest_version_of_package_accross_nugets</TestName>
+    </NamedTestSelector>
+    <NamedTestSelector>
+      <TestName>FullBuild.Test.NuGetTest.Find_not_available_package_from_multiple_repos</TestName>
+    </NamedTestSelector>
+  </IgnoredTests>
+  <HiddenWarnings>LongTestTimesWithoutParallelExecution</HiddenWarnings>
+</ProjectConfiguration>
