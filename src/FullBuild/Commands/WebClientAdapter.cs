@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014, Pierre Chalamet
+// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -23,28 +23,48 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using FullBuild.Helpers;
+using System;
+using System.Net;
+using NLog;
 
 namespace FullBuild.Commands
 {
-    internal class NuSpec
+    internal class WebClientAdapter : IWebClient
     {
-        public static IEnumerable<string> Assemblies(DirectoryInfo pkgDir)
-        {
-            var lib = pkgDir.GetDirectory("lib");
-            if (! lib.Exists)
-            {
-                return Enumerable.Empty<string>();
-            }
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-            var files = lib.EnumerateFiles("*.dll", SearchOption.AllDirectories).Concat(lib.EnumerateFiles("*.exe", SearchOption.AllDirectories));
-            var assemblies = (from file in files
-                              let filename = Path.GetFileNameWithoutExtension(file.FullName)
-                              select filename).Distinct();
-            return assemblies;
+        public bool TryDownloadString(Uri uri, out string result)
+        {
+            using(var webClient = new WebClient())
+            {
+                try
+                {
+                    result = webClient.DownloadString(uri);
+                    return true;
+                }
+                catch(WebException we)
+                {
+                    _logger.Debug("package not found for uri : {0} with error : {1}", uri, we);
+                    result = string.Empty;
+                    return false;
+                }
+            }
+        }
+
+        public string DownloadString(Uri uri)
+        {
+            using(var webClient = new WebClient())
+            {
+                return webClient.DownloadString(uri);
+            }
+        }
+
+        public void DownloadFile(Uri address, string fileName)
+        {
+            using(var webClient = new WebClient())
+            {
+                webClient.DownloadFile(address, fileName);
+            }
         }
     }
 }

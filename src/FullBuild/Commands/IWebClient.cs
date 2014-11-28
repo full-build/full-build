@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014, Pierre Chalamet
+// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -24,36 +24,15 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using FullBuild.Config;
-using FullBuild.Helpers;
-using FullBuild.Model;
 
 namespace FullBuild.Commands
 {
-    internal partial class Packages
+    internal interface IWebClient
     {
-        public void Check()
-        {
-            // read anthology.json
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthology = Anthology.Load(admDir);
+        bool TryDownloadString(Uri uri, out string result);
 
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.LoadConfig(wsDir);
+        string DownloadString(Uri uri);
 
-            var nuget = NuGet.Default(config.Nugets);
-
-            foreach(var pkg in anthology.Packages)
-            {
-                var latestNuspec = nuget.GetLatestVersion(pkg);
-                var latestVersion = latestNuspec.Version.ParseSemVersion();
-                var currentVersion = pkg.Version.ParseSemVersion();
-
-                if (currentVersion < latestVersion)
-                {
-                    Console.WriteLine("{0} version {1} is available (current is {2})", pkg.Name, latestNuspec.Version, pkg.Version);
-                }
-            }
-        }
+        void DownloadFile(Uri address, string fileName);
     }
 }
