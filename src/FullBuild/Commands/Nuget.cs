@@ -28,21 +28,20 @@ namespace FullBuild.Commands
 
         public HostedPackage GetLatestVersion(Package package)
         {
-            var nuGetResults = Query(string.Format("Packages()?$filter=tolower(Id) eq '{0}'", package.Name)).Where(nr => nr.IsLatestVersion).ToList();
+            var nuGetResults = Query(package).Where(hostedPackage => hostedPackage.IsLatestVersion).ToList();
             var lastVersion = nuGetResults.Max(nr => nr.Published);
 
-            var latestPackage = nuGetResults.Single(nr => nr.Published == lastVersion);
-
-            return HostedPackage.CreateFrom(package, latestPackage);
+            return nuGetResults.Single(nr => nr.Published == lastVersion);
         }
 
         public IEnumerable<HostedPackage> GetHostedPackages(Package package)
         {
-            return Query(string.Format("Packages(Id='{0}',Version='{1}')", package.Name, package.Version)).Select(nuGetResult => HostedPackage.CreateFrom(package, nuGetResult));
+            return Query(package);
         }
 
-        private IEnumerable<NuGetResult> Query(string query)
+        private IEnumerable<HostedPackage> Query(Package package)
         {
+            var query = string.Format("Packages(Id='{0}',Version='{1}')", package.Name, package.Version);
             foreach (var nugetQuery in nugets.Select(nuget => new Uri(new Uri(nuget), query)))
             {
                 string result;
@@ -51,7 +50,7 @@ namespace FullBuild.Commands
                 {
                     foreach (var entry in XDocument.Parse(result).Descendants(XmlHelpers.Atom + "entry"))
                     {
-                        yield return new NuGetResult(entry);
+                        yield return HostedPackage.CreateFrom(package, entry);
                     }
                 }
             }
