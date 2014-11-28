@@ -45,7 +45,7 @@ namespace FullBuild.Commands
 
             foreach(var pkg in anthology.Packages)
             {
-                var latestNuspec = nuget.GetLatestVersion(pkg);
+                var latestNuspec = nuget.GetLatestVersion(pkg.Name);
                 var latestVersion = latestNuspec.Version.ParseSemVersion();
                 var currentVersion = pkg.Version.ParseSemVersion();
 
