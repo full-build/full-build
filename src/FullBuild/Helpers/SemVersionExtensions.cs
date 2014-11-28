@@ -23,12 +23,15 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using NLog;
 using Semver;
 
 namespace FullBuild.Helpers
 {
     public static class SemVersionExtensions
     {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
         public static SemVersion ParseSemVersion(this string version)
         {
             version = version ?? "0.0.0";
@@ -39,6 +42,8 @@ namespace FullBuild.Helpers
             }
             catch
             {
+                _logger.Debug("SemVersion {0} is not valid", version);
+
                 // nuget does support 4 numbers version (legacy scheme)
                 // still have to support this (Moq for example)
                 var idx = version.LastIndexOf('.');
