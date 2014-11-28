@@ -64,7 +64,7 @@ namespace FullBuild.Commands
             anthology.Packages.ForEach(x => Console.WriteLine("{0} {1}", x.Name, x.Version));
         }
 
-        public void UsePackage(string id, string version)
+        public void UsePackage(string name, string version)
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             var anthology = Anthology.Load(admDir);
@@ -72,14 +72,14 @@ namespace FullBuild.Commands
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig(wsDir);
 
-            var pkg = new Package(id, version);
             if (version == "*")
             {
-                version = NuGet.Default(config.Nugets).GetLatestVersion(pkg).Version;
-                pkg = new Package(id, version);
+                version = NuGet.Default(config.Nugets).GetLatestVersion(name).Version;
             }
 
-            Console.WriteLine("Using package {0} version {1}", id, version);
+            var pkg = new Package(name, version);
+
+            Console.WriteLine("Using package {0} version {1}", name, version);
 
             anthology = anthology.AddOrUpdatePackages(pkg);
 

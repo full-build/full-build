@@ -70,7 +70,7 @@ namespace FullBuild.Test
         {
             var expected = new Package("Castle.Core", "3.3.3");
 
-            var latestVersion = NuGet.Default("http://test-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetLatestVersion(new Package(expected.Name, "3.2.0"));
+            var latestVersion = NuGet.Default("http://test-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetLatestVersion(expected.Name);
 
             Assert.Equal(expected.Version, latestVersion.Version);
         }
