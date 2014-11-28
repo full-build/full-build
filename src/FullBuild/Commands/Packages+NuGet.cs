@@ -28,11 +28,14 @@ using System.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
+using NLog;
 
 namespace FullBuild.Commands
 {
     internal partial class Packages
     {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
         public void AddNuGet(string url)
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
@@ -73,6 +76,7 @@ namespace FullBuild.Commands
             if (version == "*")
             {
                 version = NuGet.Default(config.Nugets).GetLatestVersion(pkg).Version;
+                pkg = new Package(id, version);
             }
 
             Console.WriteLine("Using package {0} version {1}", id, version);
