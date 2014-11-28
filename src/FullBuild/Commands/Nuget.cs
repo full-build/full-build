@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014, Pierre Chalamet
+// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -24,149 +24,125 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
 using System.Xml.Linq;
-using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
 using NLog;
 
 namespace FullBuild.Commands
 {
-    internal static class NuGet
+    internal class NuGet
     {
+        private readonly IEnumerable<string> _nugets;
+
+        private readonly IWebClient _webClient;
+
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public static void InstallPackage(Package pkg)
+        internal NuGet(IWebClient webClient, IEnumerable<string> nugets)
         {
-            InstallPackage(pkg, false);
+            _webClient = webClient;
+            _nugets = nugets;
         }
 
-        private static void InstallPackage(Package pkg, bool force)
+        public static NuGet Default(params string[] nugets)
         {
-            var config = ConfigManager.LoadConfig(WellKnownFolders.GetWorkspaceDirectory());
+            return new NuGet(new WebClientAdapter(), nugets);
+        }
 
-            var cacheDir = WellKnownFolders.GetCacheDirectory();
-            if (! string.IsNullOrEmpty(config.PackageGlobalCache))
+        public NuSpec GetLatestVersion(Package package)
+        {
+            _logger.Debug("Getting latest version for package {0}", package.Name);
+            var query = string.Format("Packages()?$filter=tolower(Id) eq '{0}'", package.Name);
+            var nuGetResults = Query(query).Where(nr => nr.IsLatestVersion).ToList();
+            var lastVersion = nuGetResults.Max(nr => nr.Published);
+            var latestNuspec = nuGetResults.Single(nr => nr.Published == lastVersion);
+            _logger.Debug("Latest version of package {0} is {1}", package.Name, latestNuspec.Version);
+            return latestNuspec;
+        }
+
+        public IEnumerable<NuSpec> GetNuSpecs(Package package)
+        {
+            string query = string.Format("Packages(Id='{0}',Version='{1}')", package.Name, package.Version);
+            return Query(query);
+        }
+
+        private IEnumerable<NuSpec> Query(string query)
+        {
+            foreach(var nugetQuery in _nugets.Select(nuget => new Uri(new Uri(nuget), query)))
             {
-                cacheDir = new DirectoryInfo(config.PackageGlobalCache);
-                cacheDir.Create();
-            }
+                _logger.Debug("Trying to download nuspec from package from {0}", nugetQuery);
 
-            // avoid downloading again the package (they are immutable)
-            var pkgFile = new FileInfo(Path.Combine(cacheDir.FullName, string.Format("{0}.{1}.zip", pkg.Name, pkg.Version)));
-            if (!pkgFile.Exists || force)
-            {
-                pkgFile.Delete();
-                DownloadNugetPackage(pkg, pkgFile, config.Nugets);
-
-                // it's downloaded, no need to force now
-                force = true;
-            }
-
-            var pkgsDir = WellKnownFolders.GetPackageDirectory();
-            var pkgDir = pkgsDir.GetDirectory(pkg.Name);
-            if (pkgDir.Exists)
-            {
-                pkgDir.Delete(true);
-            }
-
-            pkgDir.Create();
-
-            try
-            {
-                _logger.Debug("Unzipping package {0}:{1}", pkg.Name, pkg.Version);
-                ZipFile.ExtractToDirectory(pkgFile.FullName, pkgDir.FullName);
-            }
-            catch(Exception)
-            {
-                // file is probably corrupt...
-                pkgFile.Delete();
-                pkgDir.Delete(true);
-                if (! force)
+                string result;
+                if (_webClient.TryDownloadString(nugetQuery, out result))
                 {
-                    InstallPackage(pkg, true);
-                }
-                else
-                {
-                    throw;
+                    _logger.Debug("Download successful", result);
+                    foreach(var entry in XDocument.Parse(result).Descendants(XmlHelpers.Atom + "entry"))
+                    {
+                        yield return NuSpec.CreateFromNugetApiV1(entry);
+                    }
                 }
             }
         }
 
-        private static void DownloadNugetPackage(Package pkg, FileInfo pkgFile, string[] nugets)
+        public void Install(Package pkg, NuSpec nuSpec, DirectoryInfo cacheDirectory, DirectoryInfo packageRoot)
         {
-            foreach(var nuget in nugets)
+            var cacheFileName = new FileInfo(Path.Combine(cacheDirectory.FullName, string.Format("{0}.{1}.nupkg", pkg.Name, nuSpec.Version)));
+            UpdatePackage(pkg, nuSpec, cacheFileName);
+
+            var packageDirectory = SetupPackageDirectory(pkg, packageRoot);
+            ZipFile.ExtractToDirectory(cacheFileName.FullName, packageDirectory.FullName);
+        }
+
+        private void UpdatePackage(Package pkg, NuSpec nuSpec, FileInfo cacheFileName)
+        {
+            if (IsMissingOrInvalid(nuSpec, cacheFileName))
             {
-                try
-                {
-                    DownloadNugetPackage(pkg, pkgFile, nuget);
-                    return;
-                }
-                catch(Exception ex)
-                {
-                    _logger.Debug("Download error", ex);
-                    _logger.Debug("Failed to download package {0} {1} from {2}", pkg.Name, pkg.Version, nuget);
-                }
+                _logger.Debug("Downloading package {0} (package is missing or corrupt)", pkg.Name);
+
+                cacheFileName.Delete();
+                _webClient.DownloadFile(nuSpec.Content, cacheFileName.FullName);
+            }
+        }
+
+        private static DirectoryInfo SetupPackageDirectory(Package pkg, DirectoryInfo packageRoot)
+        {
+            var packageDirectory = packageRoot.GetDirectory(pkg.Name);
+            if (packageDirectory.Exists)
+            {
+                packageDirectory.Delete(true);
             }
 
-            var msg = string.Format("Failed to download package {0} {1} from provided locations", pkg.Name, pkg.Version);
-            throw new ArgumentException(msg);
+            return packageDirectory;
         }
 
-        private static void DownloadNugetPackage(Package pkg, FileInfo pkgFile, string nuget)
+        private static bool IsMissingOrInvalid(NuSpec nuSpec, FileInfo cacheFileName)
         {
-            var packageUrl = GetPackageDownloadUrl(pkg, nuget);
+            _logger.Debug("Sanity check for NuPkg {0} {1}", nuSpec.Title, nuSpec.Version);
 
-            _logger.Debug("Downloading package {0}:{1} from {2}", pkg.Name, pkg.Version, packageUrl);
-            var webClient = new WebClient();
-            webClient.DownloadFile(packageUrl, pkgFile.FullName);
-        }
-
-        public static string GetLatestPackageVersion(string name, string[] nugets)
-        {
-            foreach(var nuget in nugets)
+            if (! cacheFileName.Exists)
             {
-                var version = GetLatestPackageVersion(name, nuget);
-                return version;
+                _logger.Debug("NuPkg {0} is missing", cacheFileName);
+                return true;
             }
 
-            return null;
+            //if (cacheFileName.Length != nuSpec.PackageSize)
+            //{
+            //    _logger.Debug("NuPkg {0} has unexpected size {1} vs expected {2}", cacheFileName, cacheFileName.Length, nuSpec.PackageSize);
+            //    return true;
+            //}
+
+            _logger.Debug("NuPkg {0} is sane", cacheFileName);
+            return false;
         }
 
-        private static string GetLatestPackageVersion(string name, string nuget)
+        public string RetrieveFeedTitle(Uri nuget)
         {
-            var uri = string.Format("{0}/FindPackagesById()?&$filter=IsAbsoluteLatestVersion&id='{1}'", nuget, name);
-            var webClient = new WebClient();
-            var content = webClient.DownloadString(uri);
-
-            var xdoc = XDocument.Parse(content);
-            var entry = xdoc.Descendants(XmlHelpers.Atom + "entry").Single();
-            var version = entry.Descendants(XmlHelpers.DataServices + "Version").Single().Value;
-            return version;
-        }
-
-        private static string GetPackageDownloadUrl(Package pkg, string nuget)
-        {
-            var uri = string.Format("{0}/FindPackagesById()?id='{1}'", nuget, pkg.Name);
-            var webClient = new WebClient();
-            var content = webClient.DownloadString(uri);
-
-            var xdoc = XDocument.Parse(content);
-            var entry = xdoc.Descendants(XmlHelpers.Atom + "entry")
-                            .Single(x => x.Descendants(XmlHelpers.Metadata + "properties")
-                                          .Descendants(XmlHelpers.DataServices + "Version").Single().Value == pkg.Version);
-            var url = entry.Descendants(XmlHelpers.Atom + "content").Single().Attribute("src").Value;
-            return url;
-        }
-
-        public static string RetrieveFeedTitle(string nuget)
-        {
-            var client = new WebClient();
-            var content = client.DownloadString(nuget);
+            var content = _webClient.DownloadString(nuget);
             var xdoc = XDocument.Parse(content);
             var title = xdoc.Descendants(XmlHelpers.NuGet + "collection")
                             .Single(x => x.Attribute("href").Value == "Packages")
