@@ -7,7 +7,7 @@ namespace FullBuild.Model
 {
     internal class HostedPackage
     {
-        public static HostedPackage CreateFrom(Package package, XContainer entry)
+        public static HostedPackage CreateFromNugetApiV1(Package package, XContainer entry)
         {
             var content = entry.Descendants(XmlHelpers.Atom + "content").Single().Attribute("src").Value;
             var packageSize = Int64.Parse(entry.Descendants(XmlHelpers.DataServices + "PackageSize").Single().Value);

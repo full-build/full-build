@@ -41,7 +41,7 @@ namespace FullBuild.Commands
             config.NuGets = config.NuGets.Concat(new[] {url}).Distinct().ToArray();
             ConfigManager.SaveAdminConfig(admDir, config);
 
-            var title = new NuGet().RetrieveFeedTitle(new Uri(url));
+            var title = NuGet.Default(config.NuGets).RetrieveFeedTitle(new Uri(url));
             Console.WriteLine("Added feed {0} with title {1}", url, title);
         }
 
@@ -72,7 +72,7 @@ namespace FullBuild.Commands
             var pkg = new Package(id, version);
             if (version == "*")
             {
-                version = new NuGet(config.Nugets).GetLatestVersion(pkg).Version;
+                version = NuGet.Default(config.Nugets).GetLatestVersion(pkg).Version;
             }
 
             Console.WriteLine("Using package {0} version {1}", id, version);
