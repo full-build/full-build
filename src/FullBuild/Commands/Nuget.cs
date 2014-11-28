@@ -9,7 +9,7 @@ using FullBuild.Model;
 
 namespace FullBuild.Commands
 {
-    class NuGet
+    internal class NuGet
     {
         private readonly IEnumerable<string> nugets;
         private readonly IWebClient webClient;
