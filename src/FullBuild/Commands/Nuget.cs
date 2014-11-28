@@ -50,7 +50,7 @@ namespace FullBuild.Commands
                 {
                     foreach (var entry in XDocument.Parse(result).Descendants(XmlHelpers.Atom + "entry"))
                     {
-                        yield return HostedPackage.CreateFrom(package, entry);
+                        yield return HostedPackage.CreateFromNugetApiV1(package, entry);
                     }
                 }
             }
