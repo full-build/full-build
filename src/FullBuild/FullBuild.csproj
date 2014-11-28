@@ -75,7 +75,6 @@
     <Compile Include="Commands\HostedPackage.cs" />
     <Compile Include="Commands\IWebClient.cs" />
     <Compile Include="Commands\NuGet.cs" />
-    <Compile Include="Commands\NuGetResult.cs" />
     <Compile Include="Commands\Packages+NuGet.cs" />
     <Compile Include="Commands\Packages+Check.cs" />
     <Compile Include="Commands\Projects+Convert.cs" />
