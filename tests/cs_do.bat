@@ -15,8 +15,11 @@ fullbuild build view cs || goto :ko
 fullbuild exec "echo %fullbuild_REPO% & git log -n 1 && echo." || goto :ko
 fullbuild exec "git status" || goto :ko
 fullbuild check packages || goto :ko
+fullbuild use package moq version * || goto :ko
+fullbuild check packages || goto :ko
 fullbuild list packages || goto :ko
 fullbuild list nugets || goto :ko
+
 
 :ok
 echo *** SUCCESSFUL
