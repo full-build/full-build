@@ -57,8 +57,10 @@ namespace FullBuild.Commands
             var nuget = NuGet.Default(config.Nugets);
 
             var cacheDir = SetupCacheDir(config);
+            var pkgDir = WellKnownFolders.GetPackageDirectory();
 
-            nuget.Install(nuget.GetHostedPackages(pkg).First(), cacheDir, WellKnownFolders.GetPackageDirectory());
+            NuSpec nuSpec = nuget.GetNuSpecs(pkg).Single(x => x.Version == pkg.Version);
+            nuget.Install(pkg, nuSpec, cacheDir, pkgDir);
 
             GenerateTargetsForProject(pkg);
         }
@@ -71,6 +73,7 @@ namespace FullBuild.Commands
                 cacheDir = new DirectoryInfo(config.PackageGlobalCache);
                 cacheDir.Create();
             }
+
             return cacheDir;
         }
 
