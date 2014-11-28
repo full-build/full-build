@@ -45,13 +45,13 @@ namespace FullBuild.Commands
 
             foreach(var pkg in anthology.Packages)
             {
-                var slatestVersion = nuget.GetLatestVersion(pkg);
-                var latestVersion = slatestVersion.Version.ParseSemVersion();
+                var latestNuspec = nuget.GetLatestVersion(pkg);
+                var latestVersion = latestNuspec.Version.ParseSemVersion();
                 var currentVersion = pkg.Version.ParseSemVersion();
 
                 if (currentVersion < latestVersion)
                 {
-                    Console.WriteLine("{0} version {1} is available (current is {2})", pkg.Name, slatestVersion, pkg.Version);
+                    Console.WriteLine("{0} version {1} is available (current is {2})", pkg.Name, latestNuspec.Version, pkg.Version);
                 }
             }
         }
