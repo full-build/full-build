@@ -14,12 +14,10 @@ namespace FullBuild.Commands
         private readonly IEnumerable<string> _nugets;
         private readonly IWebClient _webClient;
 
-        public NuGet(params string[] nugets)
-            : this(new WebClientAdapter(), nugets)
+        public static NuGet Default(params string[] nugets)
         {
-
+            return new NuGet(new WebClientAdapter(), nugets);
         }
-
         internal NuGet(IWebClient webClient, IEnumerable<string> nugets)
         {
             _webClient = webClient;
