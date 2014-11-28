@@ -100,7 +100,7 @@
     <Compile Include="Model\Anthology.cs" />
     <Compile Include="Model\Application.cs" />
     <Compile Include="Model\Binary.cs" />
-    <Compile Include="Model\HostedPackage.cs" />
+    <Compile Include="Model\NuSpec.cs" />
     <Compile Include="Model\Package.cs" />
     <Compile Include="Model\Project.cs" />
     <Compile Include="Helpers\ProjectExtensions.cs" />
@@ -113,7 +113,7 @@
     <Compile Include="NatLangParser\MatchOperationAggregate.cs" />
     <Compile Include="NatLangParser\MatchOperationText.cs" />
     <Compile Include="NatLangParser\Parameter.cs" />
-    <Compile Include="Commands\NuSpec.cs" />
+    <Compile Include="Commands\NuPkg.cs" />
     <Compile Include="NatLangParser\Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

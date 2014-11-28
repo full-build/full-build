@@ -1,4 +1,29 @@
-﻿using System;
+﻿// Copyright (c) 2014, Pierre Chalamet
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of Pierre Chalamet nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL PIERRE CHALAMET BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -15,13 +40,13 @@ namespace FullBuild.Test
         {
             var package = new Package("Castle.Core", "3.3.3");
 
-            var hostedPackage = NuGet.Default("http://www.nuget.org/api/v2/").GetHostedPackages(package).First();
+            var nuspec = NuGet.Default("http://www.nuget.org/api/v2/").GetNuSpecs(package).First();
 
-            Assert.Equal("http://www.nuget.org/api/v2/package/Castle.Core/3.3.3", hostedPackage.Content.ToString());
-            Assert.Equal(864855, hostedPackage.PackageSize);
-            Assert.Equal("tvVrLbHhtAGubUUDbEkH9JlivdlJOTI25u3hlyHpPxuJdTVi/yVQKWCYvGpafGPm7G1ibdWj4brqhtSQkAmN+g==", hostedPackage.PackageHash);
-            Assert.Equal(true, hostedPackage.IsLatestVersion);
-            Assert.Equal(new DateTime(2014, 11, 6, 2, 19, 10, 157), hostedPackage.Published);
+            Assert.Equal("http://www.nuget.org/api/v2/package/Castle.Core/3.3.3", nuspec.Content.ToString());
+            Assert.Equal(864855, nuspec.PackageSize);
+            Assert.Equal("tvVrLbHhtAGubUUDbEkH9JlivdlJOTI25u3hlyHpPxuJdTVi/yVQKWCYvGpafGPm7G1ibdWj4brqhtSQkAmN+g==", nuspec.PackageHash);
+            Assert.Equal(true, nuspec.IsLatestVersion);
+            Assert.Equal(new DateTime(2014, 11, 6, 2, 19, 10, 157), nuspec.Published);
         }
 
         [Fact]
@@ -29,7 +54,7 @@ namespace FullBuild.Test
         {
             var package = new Package("Castle.Core", "5.0.0");
 
-            Assert.Null(NuGet.Default("http://siriona-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetHostedPackages(package).FirstOrDefault());
+            Assert.Null(NuGet.Default("http://test-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetNuSpecs(package).FirstOrDefault());
         }
 
         [Fact]
@@ -37,7 +62,7 @@ namespace FullBuild.Test
         {
             var package = new Package("Castle.Core", "3.3.3");
 
-            Assert.NotNull(NuGet.Default("http://siriona-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetHostedPackages(package).FirstOrDefault());
+            Assert.NotNull(NuGet.Default("http://test-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetNuSpecs(package).FirstOrDefault());
         }
 
         [Fact]
@@ -45,28 +70,9 @@ namespace FullBuild.Test
         {
             var expected = new Package("Castle.Core", "3.3.3");
 
-            var latestVersion = NuGet.Default("http://siriona-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetLatestVersion(new Package(expected.Name, "3.2.0"));
+            var latestVersion = NuGet.Default("http://test-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetLatestVersion(new Package(expected.Name, "3.2.0"));
 
             Assert.Equal(expected.Version, latestVersion.Version);
-        }
-
-        class TemporaryDirectory : IDisposable
-        {
-            public DirectoryInfo Directory { get; private set; }
-
-            public TemporaryDirectory()
-            {
-                Directory = new DirectoryInfo(Path.GetRandomFileName());
-                Directory.Create();
-            }
-
-            public void Dispose()
-            {
-                if (Directory.Exists)
-                {
-                    Directory.Delete(true);
-                }
-            }
         }
 
         [Fact]
@@ -78,25 +84,86 @@ namespace FullBuild.Test
         [Fact]
         public void Install_package_never_downloaded()
         {
-            using (var cacheDir = new TemporaryDirectory())
-            using (var pkgDir = new TemporaryDirectory())
+            using(var cacheDir = new TemporaryDirectory())
             {
-                var package = new Package("Castle.Core", "3.3.3");
-                var nuGet = NuGet.Default("http://www.nuget.org/api/v2/");
-                var hostedPackage = nuGet.GetHostedPackages(package).First();
+                using(var pkgDir = new TemporaryDirectory())
+                {
+                    var package = new Package("Castle.Core", "3.3.3");
+                    var nuget = NuGet.Default("http://www.nuget.org/api/v2/");
+                    var nuspec = nuget.GetNuSpecs(package).First();
 
-                Assert.Empty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*"));
-                Assert.Empty(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*"));
+                    Assert.Empty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*"));
+                    Assert.Empty(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*"));
 
-                nuGet.Install(hostedPackage, cacheDir.Directory, pkgDir.Directory);
+                    nuget.Install(package, nuspec, cacheDir.Directory, cacheDir.Directory);
 
-                Assert.NotEmpty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*Castle.Core.3.3.3.nupkg"));
-                Assert.NotEmpty(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*Castle*.dll", SearchOption.AllDirectories));
+                    Assert.NotEmpty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*Castle.Core.3.3.3.nupkg"));
+                    Assert.NotEmpty(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*Castle*.dll", SearchOption.AllDirectories));
+                }
+            }
+        }
+
+        [Fact]
+        public void Install_package_already_installed()
+        {
+            using(var cacheDir = new TemporaryDirectory())
+            {
+                using(var pkgDir = new TemporaryDirectory())
+                {
+                    var package = new Package("Castle.Core", "3.3.3");
+                    var nuget = NuGet.Default("http://www.nuget.org/api/v2/");
+                    var nuspec = nuget.GetNuSpecs(package).First();
+
+                    Assert.Empty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*"));
+                    Assert.Empty(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*"));
+
+                    nuget.Install(package, nuspec, cacheDir.Directory, cacheDir.Directory);
+
+                    Assert.NotEmpty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*Castle.Core.3.3.3.nupkg"));
+                    Assert.NotEmpty(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*Castle*.dll", SearchOption.AllDirectories));
+
+                    var disconnectedNuget = new NuGet(new DisconnectedWebClient(), new[] {"http://www.nuget.org/api/v2/"});
+
+                    disconnectedNuget.Install(package, nuspec, cacheDir.Directory, cacheDir.Directory);
+
+                    Assert.NotEmpty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*Castle.Core.3.3.3.nupkg"));
+                    Assert.NotEmpty(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*Castle*.dll", SearchOption.AllDirectories));
+                }
+            }
+        }
+
+        [Fact]
+        public void Force_install_if_package_is_corrupt()
+        {
+            using(var cacheDir = new TemporaryDirectory())
+            {
+                using(var pkgDir = new TemporaryDirectory())
+                {
+                    var package = new Package("Castle.Core", "3.3.3");
+                    var nuGet = NuGet.Default("http://www.nuget.org/api/v2/");
+                    var nuspec = nuGet.GetNuSpecs(package).First();
+
+                    Assert.Empty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*", SearchOption.AllDirectories));
+                    Assert.Empty(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*", SearchOption.AllDirectories));
+
+                    var castlePkg = new FileInfo(Path.Combine(cacheDir.Directory.FullName, "Castle.Core.3.3.3.nupkg"));
+                    using(File.Open(castlePkg.FullName, FileMode.Create, FileAccess.Write))
+                    {
+                    }
+
+                    Assert.Equal(0, new FileInfo(castlePkg.FullName).Length);
+
+                    var nuget = NuGet.Default("http://www.nuget.org/api/v2/");
+
+                    nuget.Install(package, nuspec, cacheDir.Directory, cacheDir.Directory);
+
+                    Assert.Equal(nuspec.PackageSize, new FileInfo(castlePkg.FullName).Length);
+                }
             }
         }
 
         [ExcludeFromCodeCoverage]
-        class DisconnectedWebClient : IWebClient
+        private class DisconnectedWebClient : IWebClient
         {
             public bool TryDownloadString(Uri uri, out string result)
             {
@@ -114,56 +181,22 @@ namespace FullBuild.Test
             }
         }
 
-        [Fact]
-        public void Install_package_already_installed()
+        private class TemporaryDirectory : IDisposable
         {
-            using (var cacheDir = new TemporaryDirectory())
-            using (var pkgDir = new TemporaryDirectory())
+            public TemporaryDirectory()
             {
-                var package = new Package("Castle.Core", "3.3.3");
-                var nuGet = NuGet.Default("http://www.nuget.org/api/v2/");
-                var hostedPackage = nuGet.GetHostedPackages(package).First();
-
-                Assert.Empty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*"));
-                Assert.Empty(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*"));
-
-                nuGet.Install(hostedPackage, cacheDir.Directory, pkgDir.Directory);
-
-                Assert.NotEmpty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*Castle.Core.3.3.3.nupkg"));
-                Assert.NotEmpty(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*Castle*.dll", SearchOption.AllDirectories));
-
-                var disconnectedNuget = new NuGet(new DisconnectedWebClient(), new[] { "http://www.nuget.org/api/v2/" });
-
-                disconnectedNuget.Install(hostedPackage, cacheDir.Directory, pkgDir.Directory);
-
-                Assert.NotEmpty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*Castle.Core.3.3.3.nupkg"));
-                Assert.NotEmpty(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*Castle*.dll", SearchOption.AllDirectories));
+                Directory = new DirectoryInfo(Path.GetRandomFileName());
+                Directory.Create();
             }
-        }
 
-        [Fact]
-        public void Force_install_if_package_is_corrupt()
-        {
-            using (var cacheDir = new TemporaryDirectory())
-            using (var pkgDir = new TemporaryDirectory())
+            public DirectoryInfo Directory { get; private set; }
+
+            public void Dispose()
             {
-                var package = new Package("Castle.Core", "3.3.3");
-                var nuGet = NuGet.Default("http://www.nuget.org/api/v2/");
-                var hostedPackage = nuGet.GetHostedPackages(package).First();
-
-                Assert.Empty(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*", SearchOption.AllDirectories));
-                Assert.Empty(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*", SearchOption.AllDirectories));
-
-                var castlePkg = new FileInfo(Path.Combine(cacheDir.Directory.FullName, "Castle.Core.3.3.3.nupkg"));
-                using (File.Open(castlePkg.FullName, FileMode.Create, FileAccess.Write)) { }
-
-                Assert.Equal(0, new FileInfo(castlePkg.FullName).Length);
-
-                var nuget = NuGet.Default("http://www.nuget.org/api/v2/");
-
-                nuget.Install(hostedPackage, cacheDir.Directory, pkgDir.Directory);
-
-                Assert.Equal(hostedPackage.PackageSize, new FileInfo(castlePkg.FullName).Length);
+                if (Directory.Exists)
+                {
+                    Directory.Delete(true);
+                }
             }
         }
     }
