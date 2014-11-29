@@ -264,34 +264,13 @@ namespace FullBuild.Commands
             // update anthology with this new project
             var project = new Project(projectGuid, projectFileName, assemblyName, extension, fxTarget, allProjectReferences, binaryReferences, packageNames);
 
-            // check first that project does not exist with same GUID and different project file (copied project)
+            // check first that project does not exist with same GUID and different project file (duplicated project)
             var similarProjects = anthology.Projects.Where(x => x.Guid == project.Guid && (!x.AssemblyName.InvariantEquals(project.AssemblyName) || !x.ProjectFile.InvariantEquals(project.ProjectFile)));
             if (! similarProjects.Any())
             {
-                // check that references for this projects are valid (GUID and Include are correct)   
-                var checkReferenceOk = true;
-                foreach (var projectLoc in projectRefWithLocation)
-                {
-                    var similarGuidedProjects = from prj in anthology.Projects
-                                                let prjFileName = Path.GetFileName(prj.ProjectFile)
-                                                let thisFileName = Path.GetFileName(projectLoc.Include)
-                                                where prj.Guid == projectLoc.Guid && ! prjFileName.InvariantEquals(thisFileName)
-                                                select prj;
-
-                    if (similarGuidedProjects.Any())
-                    {
-                        Console.WriteLine("ERROR: Project {0} has spurious project references", project.ProjectFile);
-                        similarGuidedProjects.ForEach(x => Console.WriteLine("  {0}", x.ProjectFile));
-                        checkReferenceOk = false;
-                    }
-                }
-
-                if (checkReferenceOk)
-                {
-                    anthology = anthology.AddOrUpdateProject(project);
-                    anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
-                    anthology = packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
-                }
+                anthology = anthology.AddOrUpdateProject(project);
+                anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
+                anthology = packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
             }
             else
             {
