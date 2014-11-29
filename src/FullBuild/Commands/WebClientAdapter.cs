@@ -24,6 +24,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.IO;
 using System.Net;
 using NLog;
 
@@ -61,9 +62,16 @@ namespace FullBuild.Commands
 
         public void DownloadFile(Uri address, string fileName)
         {
+            var tempFile = new FileInfo(Path.GetRandomFileName());
+            var target = new FileInfo(fileName);
+
+            target.Delete();
+            tempFile.Delete();
+            
             using(var webClient = new WebClient())
             {
-                webClient.DownloadFile(address, fileName);
+                webClient.DownloadFile(address, tempFile.FullName);
+                tempFile.MoveTo(target.FullName);
             }
         }
     }
