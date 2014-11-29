@@ -56,25 +56,6 @@ namespace FullBuild.Test
             }
         }
 
-        private class TemporaryDirectory : IDisposable
-        {
-            public TemporaryDirectory()
-            {
-                Directory = new DirectoryInfo(Path.GetRandomFileName());
-                Directory.Create();
-            }
-
-            public DirectoryInfo Directory { get; private set; }
-
-            public void Dispose()
-            {
-                if (Directory.Exists)
-                {
-                    Directory.Delete(true);
-                }
-            }
-        }
-
         [Test]
         public void Find_available_package_from_multiple_last_repo()
         {

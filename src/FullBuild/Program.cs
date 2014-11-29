@@ -25,7 +25,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using FullBuild.Commands;
 using FullBuild.Config;
 using FullBuild.Helpers;
@@ -170,7 +172,7 @@ namespace FullBuild
             handler.ListRepos();
         }
 
-        private static int Main(string[] args)
+        public static int Main(string[] args)
         {
             try
             {
@@ -180,7 +182,7 @@ namespace FullBuild
             catch (Exception ex)
             {
                 _logger.Debug("Uncaught error", ex);
-                Console.WriteLine("ERROR: {0}", ex.Message);
+                Console.Error.WriteLine("ERROR: {0}", ex.Message);
             }
 
             return 5;
@@ -190,6 +192,12 @@ namespace FullBuild
         {
             Console.WriteLine("Usage:");
             usages.ForEach(x => Console.WriteLine("\t{0}", x));
+            Console.WriteLine();
+
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = fvi.FileVersion;
+            Console.WriteLine("full-build version {0}", version);
         }
 
         private static void SetBinRepo(string path)
