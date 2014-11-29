@@ -38,9 +38,7 @@ namespace FullBuild.Commands
     internal class NuGet
     {
         private readonly IEnumerable<string> _nugets;
-
         private readonly IWebClient _webClient;
-
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         internal NuGet(IWebClient webClient, IEnumerable<string> nugets)
@@ -91,33 +89,31 @@ namespace FullBuild.Commands
 
         public void Install(Package pkg, NuSpec nuSpec, DirectoryInfo cacheDirectory, DirectoryInfo packageRoot)
         {
-            var cacheFileName = new FileInfo(Path.Combine(cacheDirectory.FullName, string.Format("{0}.{1}.nupkg", pkg.Name, nuSpec.Version)));
+            var cacheFile = new FileInfo(Path.Combine(cacheDirectory.FullName, string.Format("{0}.{1}.nupkg", pkg.Name, nuSpec.Version)));
             var packageDirectory = SetupPackageDirectory(pkg, packageRoot);
 
-            UpdatePackage(pkg, nuSpec, cacheFileName);
+            UpdatePackage(pkg, nuSpec, cacheFile);
             try
             {
-                ZipFile.ExtractToDirectory(cacheFileName.FullName, packageDirectory.FullName);
+                ZipFile.ExtractToDirectory(cacheFile.FullName, packageDirectory.FullName);
             }
             catch(Exception ex)
             {
                 _logger.Debug("Failed to unzip. Considering file as corrupt", ex);
 
-                cacheFileName.Delete();
-                cacheFileName.Refresh();
-                UpdatePackage(pkg, nuSpec, cacheFileName);
-                ZipFile.ExtractToDirectory(cacheFileName.FullName, packageDirectory.FullName);
+                cacheFile.Delete();
+                cacheFile.Refresh();
+                UpdatePackage(pkg, nuSpec, cacheFile);
+                ZipFile.ExtractToDirectory(cacheFile.FullName, packageDirectory.FullName);
             }
           }
 
-        private void UpdatePackage(Package pkg, NuSpec nuSpec, FileInfo cacheFileName)
+        private void UpdatePackage(Package pkg, NuSpec nuSpec, FileInfo cacheFile)
         {
-            if (IsMissingOrInvalid(nuSpec, cacheFileName))
+            if (IsMissing(nuSpec, cacheFile))
             {
                 _logger.Debug("Downloading package {0} (package is missing or corrupt)", pkg.Name);
-
-                cacheFileName.Delete();
-                _webClient.DownloadFile(nuSpec.Content, cacheFileName.FullName);
+                _webClient.DownloadFile(nuSpec.Content, cacheFile.FullName);
             }
         }
 
@@ -132,7 +128,7 @@ namespace FullBuild.Commands
             return packageDirectory;
         }
 
-        private static bool IsMissingOrInvalid(NuSpec nuSpec, FileInfo cacheFileName)
+        private static bool IsMissing(NuSpec nuSpec, FileInfo cacheFileName)
         {
             _logger.Debug("Sanity check for NuPkg {0} {1}", nuSpec.Title, nuSpec.Version);
 
@@ -141,12 +137,6 @@ namespace FullBuild.Commands
                 _logger.Debug("NuPkg {0} is missing", cacheFileName);
                 return true;
             }
-
-            //if (cacheFileName.Length != nuSpec.PackageSize)
-            //{
-            //    _logger.Debug("NuPkg {0} has unexpected size {1} vs expected {2}", cacheFileName, cacheFileName.Length, nuSpec.PackageSize);
-            //    return true;
-            //}
 
             _logger.Debug("NuPkg {0} is sane", cacheFileName);
             return false;
