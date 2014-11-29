@@ -2,21 +2,21 @@
 setlocal
 
 taskkill /im tgitcache.exe 1>NUL 2>NUL
-if exist fclp_init rmdir /s /q fclp_init || goto :ko
-mkdir fclp_init || goto :ko
+if exist rc-init rmdir /s /q rc-init || goto :ko
+mkdir rc-init || goto :ko
 
 rem setup environment
 fullbuild set config PackageGlobalCache c:\PackageGlobalCache || goto :ko
 fullbuild set config RepoType Git || goto :ko
 fullbuild set config RepoUrl https://github.com/pchalamet/cassandra-sharp-full-build || goto :ko
-fullbuild init workspace fclp_init || goto :ko
+fullbuild init workspace rc-init || goto :ko
 
 rem create workspace
-pushd fclp_init
+pushd rc-init
 
 fullbuild set binrepo c:\BinRepo || goto :ko
 fullbuild add nuget https://www.nuget.org/api/v2/ || goto :ko
-fullbuild add git repo fcpl from https://github.com/fclp/fluent-command-line-parser.git || goto :ko
+fullbuild add git repo fcpl from https://github.com/VesaKarvonen/Recalled.git || goto :ko
 fullbuild clone repo *  || goto :ko
 
 :ok
