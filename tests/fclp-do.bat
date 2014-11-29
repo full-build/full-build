@@ -3,7 +3,7 @@ setlocal
 
 taskkill /im tgitcache.exe 1>NUL 2>NUL
 if not exist fclp-init call fclp-init.bat || goto :ko
-robocopy fclp-init fclp-do /MIR /NP /NFL /NDL
+robocopy fclp-init fclp-do /MIR >NUL || goto :ko
 
 pushd fclp-do
 

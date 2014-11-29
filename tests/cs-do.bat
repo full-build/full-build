@@ -3,7 +3,7 @@ setlocal
 
 taskkill /im tgitcache.exe 1>NUL 2>NUL
 if not exist cs-init call cs-init.bat || goto :ko
-robocopy cs-init cs-do /MIR /NP /NFL /NDL
+robocopy cs-init cs-do /MIR >NUL || goto :ko
 
 pushd cs-do
 
