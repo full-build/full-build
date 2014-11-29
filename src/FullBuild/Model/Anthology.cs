@@ -37,6 +37,9 @@ namespace FullBuild.Model
     {
         private const string AnthologyFileName = "anthology.json";
 
+        [JsonProperty("applications")]
+        private readonly IImmutableList<Application> _applications;
+
         [JsonProperty("binaries")]
         private readonly IImmutableList<Binary> _binaries;
 
@@ -45,9 +48,6 @@ namespace FullBuild.Model
 
         [JsonProperty("projects")]
         private readonly IImmutableList<Project> _projects;
-
-        [JsonProperty("applications")]
-        private readonly IImmutableList<Application> _applications;
 
         public Anthology()
             : this(ImmutableList.Create<Project>(), ImmutableList.Create<Binary>(), ImmutableList.Create<Package>(), ImmutableList.Create<Application>())

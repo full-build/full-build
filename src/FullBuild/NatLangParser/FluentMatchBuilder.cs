@@ -31,9 +31,9 @@ namespace FullBuild.NatLangParser
 {
     public class FluentMatchBuilder
     {
-        private readonly string _description;
-
         private readonly object[] _args;
+
+        private readonly string _description;
 
         private readonly List<KeyValuePair<string, IMatchOperation>> _operations = new List<KeyValuePair<string, IMatchOperation>>();
 
@@ -56,7 +56,7 @@ namespace FullBuild.NatLangParser
             {
                 var matchOpAggType = typeof(MatchOperationAggregate<>);
                 var matchOpAggOfTtype = matchOpAggType.MakeGenericType(typeof(T).GetElementType());
-                operation = (IMatchOperation) Activator.CreateInstance(matchOpAggOfTtype);
+                operation = (IMatchOperation)Activator.CreateInstance(matchOpAggOfTtype);
             }
             else
             {

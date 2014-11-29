@@ -70,7 +70,7 @@ namespace FullBuild.Commands
                 Console.WriteLine("Copying build output version {0}", tip);
                 var targetBinDir = wsDir.GetDirectory("bin");
                 targetBinDir.Create();
-                foreach(var binFile in binVersionDir.EnumerateFiles())
+                foreach (var binFile in binVersionDir.EnumerateFiles())
                 {
                     var targetFile = targetBinDir.GetFile(binFile.Name);
                     binFile.CopyTo(targetFile.FullName, true);

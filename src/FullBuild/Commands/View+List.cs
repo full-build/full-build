@@ -41,7 +41,7 @@ namespace FullBuild.Commands
             }
 
             var repos = File.ReadAllLines(viewFile.FullName);
-            foreach(var repo in repos)
+            foreach (var repo in repos)
             {
                 if (! string.IsNullOrEmpty(repo))
                 {
@@ -54,7 +54,7 @@ namespace FullBuild.Commands
         {
             var viewDir = WellKnownFolders.GetViewDirectory();
             var views = viewDir.EnumerateFiles("*.view");
-            foreach(var view in views)
+            foreach (var view in views)
             {
                 var viewName = Path.GetFileNameWithoutExtension(view.Name);
                 Console.WriteLine(viewName);

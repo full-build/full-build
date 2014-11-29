@@ -43,7 +43,7 @@ namespace FullBuild.Commands
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig(workspace);
 
-            foreach(var repo in config.SourceRepos)
+            foreach (var repo in config.SourceRepos)
             {
                 var repoDir = workspace.GetDirectory(repo.Name);
                 if (! repoDir.Exists)
@@ -75,7 +75,7 @@ namespace FullBuild.Commands
                 psi.EnvironmentVariables.Add("FULLBUILD_REPO_URL", repoConfig.Url);
             }
 
-            using(var process = Process.Start(psi))
+            using (var process = Process.Start(psi))
             {
                 if (null != process)
                 {

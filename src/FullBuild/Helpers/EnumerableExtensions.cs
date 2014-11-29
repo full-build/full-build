@@ -32,7 +32,7 @@ namespace FullBuild.Helpers
     {
         public static void ForEach<T>(this IEnumerable<T> @this, Action<T> action)
         {
-            foreach(var t in @this)
+            foreach (var t in @this)
             {
                 action(t);
             }

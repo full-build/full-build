@@ -37,7 +37,7 @@ namespace FullBuild.NatLangParser
         {
             try
             {
-                var value = (T) Convert.ChangeType(input, typeof(T));
+                var value = (T)Convert.ChangeType(input, typeof(T));
                 _value.Add(value);
             }
             catch
