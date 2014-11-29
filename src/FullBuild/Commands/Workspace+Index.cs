@@ -248,9 +248,20 @@ namespace FullBuild.Commands
 
             // update anthology with this new project
             var project = new Project(projectGuid, projectFileName, assemblyName, extension, fxTarget, allProjectReferences, binaryReferences, packageNames);
-            anthology = anthology.AddOrUpdateProject(project);
-            anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
-            anthology = packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
+
+                  // check first that project does not exist with same GUID and different project file (copied project)
+            var similarProjects = anthology.Projects.Where(x => x.Guid == project.Guid && (x.AssemblyName != project.AssemblyName || !x.ProjectFile.InvariantEquals(project.ProjectFile)));
+            if (! similarProjects.Any())
+            {
+                anthology = anthology.AddOrUpdateProject(project);
+                anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
+                anthology = packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
+            }
+            else
+            {
+                Console.WriteLine("ERROR: project {0} conflicts with other projects (same GUID but different location)", project.ProjectFile);
+                similarProjects.ForEach(x => Console.WriteLine("  {0}", x.ProjectFile));
+            }
 
             return anthology;
         }
