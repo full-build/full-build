@@ -118,9 +118,9 @@ namespace FullBuild.Test
         [Test]
         public void Force_install_if_package_is_corrupt()
         {
-            using(var cacheDir = new TemporaryDirectory())
+            using (var cacheDir = new TemporaryDirectory())
             {
-                using(var pkgDir = new TemporaryDirectory())
+                using (var pkgDir = new TemporaryDirectory())
                 {
                     var package = new Package("Castle.Core", "3.3.3");
                     var nuGet = NuGet.Default("http://www.nuget.org/api/v2/");
@@ -130,7 +130,7 @@ namespace FullBuild.Test
                     Check.That(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
 
                     var castlePkg = new FileInfo(Path.Combine(cacheDir.Directory.FullName, "Castle.Core.3.3.3.nupkg"));
-                    using(File.Open(castlePkg.FullName, FileMode.Create, FileAccess.Write))
+                    using (File.Open(castlePkg.FullName, FileMode.Create, FileAccess.Write))
                     {
                     }
 
@@ -154,9 +154,9 @@ namespace FullBuild.Test
         [Test]
         public void Install_package_already_installed()
         {
-            using(var cacheDir = new TemporaryDirectory())
+            using (var cacheDir = new TemporaryDirectory())
             {
-                using(var pkgDir = new TemporaryDirectory())
+                using (var pkgDir = new TemporaryDirectory())
                 {
                     var package = new Package("Castle.Core", "3.3.3");
                     var nuget = NuGet.Default("http://www.nuget.org/api/v2/");
@@ -183,9 +183,9 @@ namespace FullBuild.Test
         [Test]
         public void Install_package_never_downloaded()
         {
-            using(var cacheDir = new TemporaryDirectory())
+            using (var cacheDir = new TemporaryDirectory())
             {
-                using(var pkgDir = new TemporaryDirectory())
+                using (var pkgDir = new TemporaryDirectory())
                 {
                     var package = new Package("Castle.Core", "3.3.3");
                     var nuget = NuGet.Default("http://www.nuget.org/api/v2/");

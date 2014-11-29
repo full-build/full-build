@@ -43,7 +43,7 @@ namespace FullBuild.Commands
             var anthology = Anthology.Load(admDir);
 
             Console.WriteLine("Installing packages:");
-            foreach(var pkg in anthology.Packages)
+            foreach (var pkg in anthology.Packages)
             {
                 Console.WriteLine("  {0} {1}", pkg.Name, pkg.Version);
                 InstallPackage(pkg);
@@ -59,7 +59,7 @@ namespace FullBuild.Commands
             var cacheDir = SetupCacheDir(config);
             var pkgDir = WellKnownFolders.GetPackageDirectory();
 
-            NuSpec nuSpec = nuget.GetNuSpecs(pkg).First(x => x.Version == pkg.Version);
+            var nuSpec = nuget.GetNuSpecs(pkg).First(x => x.Version == pkg.Version);
             nuget.Install(pkg, nuSpec, cacheDir, pkgDir);
 
             GenerateTargetsForProject(pkg);
@@ -79,7 +79,7 @@ namespace FullBuild.Commands
 
         private static XElement Generatewhen(IEnumerable<string> foldersToTry, string fxVersion, DirectoryInfo libDir)
         {
-            foreach(var folderToTry in foldersToTry)
+            foreach (var folderToTry in foldersToTry)
             {
                 var fxLibs = libDir.GetDirectory(folderToTry);
                 if (fxLibs.Exists)
@@ -104,12 +104,12 @@ namespace FullBuild.Commands
             var whens = new List<XElement>();
             if (libDir.Exists)
             {
-                for(var i = 0; i < FrameworkVersion.CompatibilityOrder.Length; ++i)
+                for (var i = 0; i < FrameworkVersion.CompatibilityOrder.Length; ++i)
                 {
                     var fxVersion = FrameworkVersion.CompatibilityOrder[i];
 
                     XElement when = null;
-                    for(var j = i; j >= 0; --j)
+                    for (var j = i; j >= 0; --j)
                     {
                         var substituteVersion = FrameworkVersion.CompatibilityOrder[j];
                         var foldersToTry = FrameworkVersion.FxVersion2Folder[substituteVersion];
@@ -130,7 +130,7 @@ namespace FullBuild.Commands
             var nuspecFile = new FileInfo(Path.Combine(pkgDir.FullName, nuspecFileName));
             var xdocNuspec = XDocument.Load(nuspecFile.FullName);
             var dependencies = from d in xdocNuspec.Descendants(XmlHelpers.NsNuget + "dependency")
-                               select (string) d.Attribute("id");
+                               select (string)d.Attribute("id");
 
             var imports = from dependency in dependencies
                           let dependencyPackageFileName = dependency + ".targets"

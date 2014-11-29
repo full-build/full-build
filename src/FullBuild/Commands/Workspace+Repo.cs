@@ -65,7 +65,7 @@ namespace FullBuild.Commands
             var config = ConfigManager.LoadConfig(wsDir);
 
             // validate first that repos are valid and clone them
-            foreach(var repo in repos)
+            foreach (var repo in repos)
             {
                 var match = "^" + repo + "$";
                 var regex = new Regex(match, RegexOptions.IgnoreCase);
@@ -76,7 +76,7 @@ namespace FullBuild.Commands
                     return;
                 }
 
-                foreach(var repoConfig in repoConfigs)
+                foreach (var repoConfig in repoConfigs)
                 {
                     var repoDir = wsDir.GetDirectory(repoConfig.Name);
                     if (!repoDir.Exists)

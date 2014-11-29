@@ -36,14 +36,14 @@ namespace FullBuild.Commands
 
         public bool TryDownloadString(Uri uri, out string result)
         {
-            using(var webClient = new WebClient())
+            using (var webClient = new WebClient())
             {
                 try
                 {
                     result = webClient.DownloadString(uri);
                     return true;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _logger.Debug("Download failed for uri " + uri, ex);
                     result = string.Empty;
@@ -54,7 +54,7 @@ namespace FullBuild.Commands
 
         public string DownloadString(Uri uri)
         {
-            using(var webClient = new WebClient())
+            using (var webClient = new WebClient())
             {
                 return webClient.DownloadString(uri);
             }
@@ -67,8 +67,8 @@ namespace FullBuild.Commands
 
             target.Delete();
             tempFile.Delete();
-            
-            using(var webClient = new WebClient())
+
+            using (var webClient = new WebClient())
             {
                 webClient.DownloadFile(address, tempFile.FullName);
                 tempFile.MoveTo(target.FullName);

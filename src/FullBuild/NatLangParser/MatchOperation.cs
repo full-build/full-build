@@ -40,11 +40,11 @@ namespace FullBuild.NatLangParser
             {
                 if (typeof(T).IsEnum)
                 {
-                    _value = (T) Enum.Parse(typeof(T), input, true);
+                    _value = (T)Enum.Parse(typeof(T), input, true);
                 }
                 else
                 {
-                    _value = (T) Convert.ChangeType(input, typeof(T));
+                    _value = (T)Convert.ChangeType(input, typeof(T));
                 }
             }
             catch
@@ -67,9 +67,9 @@ namespace FullBuild.NatLangParser
                 if (typeof(T).IsEnum)
                 {
                     var res = typeof(T).GetEnumNames().Aggregate(new StringBuilder(), (sb, e) => sb.AppendFormat("|{0}", e.ToCamelCase()));
-                    return res.ToString(1, res.Length-1);
+                    return res.ToString(1, res.Length - 1);
                 }
-                
+
                 return typeof(T).Name.ToCamelCase();
             }
         }

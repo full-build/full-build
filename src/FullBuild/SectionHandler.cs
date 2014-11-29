@@ -39,7 +39,7 @@ namespace FullBuild
             var xmlRootNode = xmlDoc.AppendChild(xmlDoc.CreateElement("FullBuildConfig"));
             xmlRootNode.InnerXml = section.InnerXml;
 
-            foreach(XmlAttribute xmlAttr in section.Attributes)
+            foreach (XmlAttribute xmlAttr in section.Attributes)
             {
                 var newXmlAttr = xmlDoc.CreateAttribute(xmlAttr.Name, xmlAttr.NamespaceURI);
                 newXmlAttr.Value = xmlAttr.Value;
@@ -53,9 +53,9 @@ namespace FullBuild
         private static BoostrapConfig ReadConfig(XmlDocument xmlDoc)
         {
             var xmlSer = new XmlSerializer(typeof(BoostrapConfig));
-            using(XmlReader xmlReader = new XmlNodeReader(xmlDoc))
+            using (XmlReader xmlReader = new XmlNodeReader(xmlDoc))
             {
-                return (BoostrapConfig) xmlSer.Deserialize(xmlReader);
+                return (BoostrapConfig)xmlSer.Deserialize(xmlReader);
             }
         }
     }

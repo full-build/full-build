@@ -65,13 +65,13 @@ namespace FullBuild.Helpers
             var ci = type.GetConstructors().Single();
             var pis = ci.GetParameters();
             var ciPrms = new object[pis.Length];
-            for(var idx = 0; idx < ciPrms.Length; ++idx)
+            for (var idx = 0; idx < ciPrms.Length; ++idx)
             {
                 var piType = pis[idx].ParameterType;
                 ciPrms[idx] = prms.First(piType.IsInstanceOfType);
             }
 
-            return (TI) Activator.CreateInstance(type, ciPrms);
+            return (TI)Activator.CreateInstance(type, ciPrms);
         }
     }
 }
