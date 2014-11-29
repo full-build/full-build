@@ -41,7 +41,7 @@ namespace FullBuild.SourceControl
 
         public string Tip(DirectoryInfo rootDir)
         {
-            using(var repo = new Repository(rootDir.FullName))
+            using (var repo = new Repository(rootDir.FullName))
             {
                 return repo.Head.Tip.Sha;
             }

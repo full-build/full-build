@@ -30,9 +30,9 @@ namespace FullBuild.NatLangParser
 {
     public class Context
     {
-        private readonly Parser _parser;
-
         private readonly ImmutableDictionary<string, object> _parameters;
+
+        private readonly Parser _parser;
 
         public Context(Parser parser)
             : this(parser, ImmutableDictionary<string, object>.Empty)
@@ -53,8 +53,8 @@ namespace FullBuild.NatLangParser
 
         public T Get<T>(Parameter<T> parameter)
         {
-            var obj = (T) _parameters[parameter.Name];
-            var value = (T) obj;
+            var obj = (T)_parameters[parameter.Name];
+            var value = (T)obj;
             return value;
         }
 

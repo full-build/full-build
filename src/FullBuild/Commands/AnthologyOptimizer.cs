@@ -82,7 +82,7 @@ namespace FullBuild.Commands
                                 where !assemblies.Any()
                                 select package;
 
-            foreach(var project in anthology.Projects)
+            foreach (var project in anthology.Projects)
             {
                 var newProject = emptyPackages.Aggregate(project, (p, pa) => p.RemovePackageReference(pa.Name));
                 anthology = anthology.AddOrUpdateProject(newProject);
@@ -102,7 +102,7 @@ namespace FullBuild.Commands
                           into g
                           select g;
 
-            foreach(var b2p in bin2prj)
+            foreach (var b2p in bin2prj)
             {
                 var bin = b2p.Key;
                 if (1 < b2p.Count())
@@ -114,7 +114,7 @@ namespace FullBuild.Commands
                 {
                     var prj = b2p.Single().Prj;
                     _logger.Debug("Converting binary {0} to project {1}", bin.AssemblyName, prj.ProjectFile);
-                    foreach(var project in anthology.Projects)
+                    foreach (var project in anthology.Projects)
                     {
                         if (project.BinaryReferences.Contains(bin.AssemblyName, StringComparer.InvariantCultureIgnoreCase))
                         {
@@ -144,7 +144,7 @@ namespace FullBuild.Commands
                           into g
                           select g;
 
-            foreach(var p2p in pkg2prj)
+            foreach (var p2p in pkg2prj)
             {
                 var pkg = p2p.Key;
                 if (1 < p2p.Count())
@@ -156,7 +156,7 @@ namespace FullBuild.Commands
                 {
                     var prj = p2p.Single().Prj;
                     _logger.Debug("Converting package {0} to project {1}", pkg.Name, prj.ProjectFile);
-                    foreach(var project in anthology.Projects)
+                    foreach (var project in anthology.Projects)
                     {
                         if (project.PackageReferences.Contains(pkg.Name, StringComparer.InvariantCultureIgnoreCase))
                         {
@@ -173,7 +173,7 @@ namespace FullBuild.Commands
         private static Anthology RemoveBinariesFromPackages(Anthology anthology)
         {
             var pkgsDir = WellKnownFolders.GetPackageDirectory();
-            foreach(var project in anthology.Projects)
+            foreach (var project in anthology.Projects)
             {
                 // gather all assemblies from packages in this project
                 var importedAssemblies = (from pkgRef in project.PackageReferences

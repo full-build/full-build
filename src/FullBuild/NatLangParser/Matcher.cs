@@ -34,9 +34,9 @@ namespace FullBuild.NatLangParser
     {
         private readonly Action<Context> _action;
 
-        private readonly string _description;
-
         private readonly object[] _args;
+
+        private readonly string _description;
 
         private readonly KeyValuePair<string, IMatchOperation>[] _operations;
 
@@ -92,18 +92,18 @@ namespace FullBuild.NatLangParser
         public string Usage()
         {
             var res = _operations.Aggregate(new StringBuilder(), (sb, op) =>
-            {
-                if (null != op.Key)
-                {
-                    sb.AppendFormat("<{0}:{1}>", op.Key, op.Value.Describe);
-                }
-                else
-                {
-                    sb.Append(op.Value.Describe);
-                }
+                                                                 {
+                                                                     if (null != op.Key)
+                                                                     {
+                                                                         sb.AppendFormat("<{0}:{1}>", op.Key, op.Value.Describe);
+                                                                     }
+                                                                     else
+                                                                     {
+                                                                         sb.Append(op.Value.Describe);
+                                                                     }
 
-                return sb.Append(" ");
-            });
+                                                                     return sb.Append(" ");
+                                                                 });
 
             res.AppendFormat(": {0}", string.Format(_description, _args) + ".");
 

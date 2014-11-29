@@ -28,6 +28,7 @@ namespace FullBuild.Config
     public enum VersionControlType
     {
         Git,
+
         Hg,
     }
 }

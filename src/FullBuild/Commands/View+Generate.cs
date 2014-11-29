@@ -63,12 +63,12 @@ namespace FullBuild.Commands
                            where prj.ProjectFile.InvariantStartsWith(repo + "/")
                            select prj;
 
-            foreach(var prj in projects)
+            foreach (var prj in projects)
             {
                 sb.AppendFormat(@"Project(""{{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}}"") = ""{0}"", ""{1}"", ""{2:B}""",
                                 prj.GetProjectName(), prj.ProjectFile, prj.Guid).AppendLine();
                 sb.AppendFormat("\tProjectSection(ProjectDependencies) = postProject").AppendLine();
-                foreach(var dependency in prj.ProjectReferences)
+                foreach (var dependency in prj.ProjectReferences)
                 {
                     // add a build order if dependency is included in solution
                     if (projects.Any(x => x.Guid == dependency))
@@ -88,7 +88,7 @@ namespace FullBuild.Commands
             sb.AppendLine("\tEndGlobalSection");
             sb.AppendLine("\tGlobalSection(ProjectConfigurationPlatforms) = postSolution");
 
-            foreach(var prj in projects)
+            foreach (var prj in projects)
             {
                 sb.AppendFormat("\t\t{0:B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU", prj.Guid).AppendLine();
                 sb.AppendFormat("\t\t{0:B}.Debug|Any CPU.Build.0 = Debug|Any CPU", prj.Guid).AppendLine();

@@ -68,7 +68,7 @@ namespace FullBuild.Commands
             var targetDir = WellKnownFolders.GetProjectDirectory();
             targetDir.Create();
 
-            foreach(var project in anthology.Projects)
+            foreach (var project in anthology.Projects)
             {
                 var projectFile = Path.Combine(WellKnownFolders.MsBuildSolutionDir, project.ProjectFile);
                 var binFile = Path.Combine(WellKnownFolders.MsBuildBinDir, project.AssemblyName + project.Extension);
@@ -101,7 +101,7 @@ namespace FullBuild.Commands
         private static Anthology AddPaketDependencies(FileInfo paketDependencies, Anthology anthology)
         {
             var nugetFound = false;
-            foreach(var line in File.ReadAllLines(paketDependencies.FullName))
+            foreach (var line in File.ReadAllLines(paketDependencies.FullName))
             {
                 if (!nugetFound)
                 {
@@ -119,7 +119,7 @@ namespace FullBuild.Commands
                     continue;
                 }
 
-                var items = line.Split(new [] {" ", "\t", "(", ")", ">="}, StringSplitOptions.RemoveEmptyEntries);
+                var items = line.Split(new[] {" ", "\t", "(", ")", ">="}, StringSplitOptions.RemoveEmptyEntries);
                 var name = items[0];
                 var version = items[1];
 
@@ -132,7 +132,7 @@ namespace FullBuild.Commands
 
         private static Anthology UpdateAnthologyFromSource(FullBuildConfig config, DirectoryInfo workspace, Anthology anthology)
         {
-            foreach(var repo in config.SourceRepos)
+            foreach (var repo in config.SourceRepos)
             {
                 Console.WriteLine("Processing repo {0}:", repo.Name);
                 var repoDir = workspace.GetDirectory(repo.Name);
@@ -174,8 +174,8 @@ namespace FullBuild.Commands
 
             var docPackage = XDocument.Load(packageFile.FullName);
             var packages = from element in docPackage.Descendants("package")
-                           let name = (string) element.Attribute("id")
-                           let version = (string) element.Attribute("version")
+                           let name = (string)element.Attribute("id")
+                           let version = (string)element.Attribute("version")
                            select new Package(name, version);
 
             return packages;
@@ -192,23 +192,25 @@ namespace FullBuild.Commands
             Guid projectGuid;
             try
             {
-                projectGuid = Guid.ParseExact((string) xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single(), "B");
+                projectGuid = Guid.ParseExact((string)xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single(), "B");
             }
-            catch(Exception)
+            catch (Exception)
             {
                 // F# project GUID are badly formatted
-                projectGuid = Guid.ParseExact((string) xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single(), "D");
+                projectGuid = Guid.ParseExact((string)xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single(), "D");
             }
 
-            var assemblyName = (string) xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyName").Single();
-            var fxTarget = (string) xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").SingleOrDefault() ?? "v4.5";
-            var extension = ((string) xdoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single()).InvariantEquals("Library") ? ".dll" : ".exe";
+            var assemblyName = (string)xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyName").Single();
+            var fxTarget = (string)xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").SingleOrDefault() ?? "v4.5";
+            var extension = ((string)xdoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single()).InvariantEquals("Library")
+                ? ".dll"
+                : ".exe";
 
             // extract project references
             var projectReferences = from prjRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference").Descendants(XmlHelpers.NsMsBuild + "Project")
                                     select Guid.ParseExact(prjRef.Value, "B");
             var fbProjectReferences = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
-                                      let importProject = (string) import.Attribute("Project")
+                                      let importProject = (string)import.Attribute("Project")
                                       where importProject.InvariantStartsWith(WellKnownFolders.MsBuildProjectDir)
                                       let importProjectName = Path.GetFileNameWithoutExtension(importProject)
                                       select Guid.Parse(importProjectName);
@@ -216,21 +218,23 @@ namespace FullBuild.Commands
 
             // extract binary references - both nuget and direct reference to assemblies (broken project reference)
             var binaries = from binRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "Reference")
-                           let include = ((string)binRef.Attribute("Include")).Split(new [] {','}, StringSplitOptions.RemoveEmptyEntries)[0]
+                           let include = ((string)binRef.Attribute("Include")).Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries)[0]
                            where ! string.IsNullOrEmpty(include)
                            let assName = new AssemblyName(include).Name
                            let maybeHintPath = binRef.Descendants(XmlHelpers.NsMsBuild + "HintPath").SingleOrDefault()
-                           select new Binary(assName, null != maybeHintPath ? maybeHintPath.Value.ToUnixSeparator() : null);
+                           select new Binary(assName, null != maybeHintPath
+                               ? maybeHintPath.Value.ToUnixSeparator()
+                               : null);
             var binaryReferences = binaries.Select(x => x.AssemblyName).Distinct().ToImmutableList();
 
             // extract all packages (full-build)
             var nugetPackages = GetNugetPackages(projectFile.Directory);
             var fbPackages = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
-                             let importProject = (string) import.Attribute("Project")
+                             let importProject = (string)import.Attribute("Project")
                              where importProject.InvariantStartsWith(WellKnownFolders.MsBuildPackagesDir)
                              let importProjectName = Path.GetFileNameWithoutExtension(importProject)
                              select new Package(importProjectName, null);
-  
+
             // extract paket dependencies
             var paketFile = projectFile.Directory.GetFile("paket.references");
             var paketPackages = Enumerable.Empty<Package>();
@@ -249,7 +253,7 @@ namespace FullBuild.Commands
             // update anthology with this new project
             var project = new Project(projectGuid, projectFileName, assemblyName, extension, fxTarget, allProjectReferences, binaryReferences, packageNames);
 
-                  // check first that project does not exist with same GUID and different project file (copied project)
+            // check first that project does not exist with same GUID and different project file (copied project)
             var similarProjects = anthology.Projects.Where(x => x.Guid == project.Guid && (x.AssemblyName != project.AssemblyName || !x.ProjectFile.InvariantEquals(project.ProjectFile)));
             if (! similarProjects.Any())
             {

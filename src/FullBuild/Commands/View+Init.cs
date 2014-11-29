@@ -42,7 +42,7 @@ namespace FullBuild.Commands
 
             // validate first that repos are valid and clone them
             var sb = new StringBuilder();
-            foreach(var repo in repos)
+            foreach (var repo in repos)
             {
                 var match = "^" + repo + "$";
                 var regex = new Regex(match, RegexOptions.IgnoreCase);
@@ -52,7 +52,7 @@ namespace FullBuild.Commands
                     throw new ArgumentException("Invalid repo " + repo);
                 }
 
-                foreach(var repoConfig in repoConfigs)
+                foreach (var repoConfig in repoConfigs)
                 {
                     var repoDir = wsDir.GetDirectory(repoConfig.Name);
                     if (!repoDir.Exists)
