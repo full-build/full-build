@@ -152,7 +152,13 @@ namespace FullBuild.Commands
                 var allprojs = repoDir.EnumerateSupportedProjectFiles();
                 var projectAdmDir = repoDir.GetDirectory(WellKnownFolders.RelativeProjectAdminRepo);
 
+                // merge project anthology first
                 var projectAnthology = Anthology.Load(projectAdmDir);
+                anthology = projectAnthology.Binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
+                anthology = projectAnthology.Packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
+                anthology = projectAnthology.Projects.Aggregate(anthology, (a, p) => a.AddOrUpdateProject(p));
+
+                // scan projects and import
                 projectAnthology = allprojs.Aggregate(projectAnthology, (a, p) => ParseAndAddProject(workspace, p, a));
                 projectAnthology.Save(projectAdmDir);
 
@@ -206,15 +212,20 @@ namespace FullBuild.Commands
                 ? ".dll"
                 : ".exe";
 
+            // extract project reference along project location to help detecting invalid project references
+            var projectRefWithLocation = from prjRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference")
+                                         let guid = Guid.ParseExact(prjRef.Element(XmlHelpers.NsMsBuild + "Project").Value, "B")
+                                         let include = Path.GetFileName(prjRef.Attribute("Include").Value)
+                                         select new {Guid = guid, Include = include};
+
             // extract project references
-            var projectReferences = from prjRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference").Descendants(XmlHelpers.NsMsBuild + "Project")
-                                    select Guid.ParseExact(prjRef.Value, "B");
+            var projectReferences = projectRefWithLocation.Select(x => x.Guid);
             var fbProjectReferences = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
                                       let importProject = (string)import.Attribute("Project")
                                       where importProject.InvariantStartsWith(WellKnownFolders.MsBuildProjectDir)
                                       let importProjectName = Path.GetFileNameWithoutExtension(importProject)
                                       select Guid.Parse(importProjectName);
-            var allProjectReferences = projectReferences.Concat(fbProjectReferences).ToImmutableList();
+            var allProjectReferences = projectReferences.Union(fbProjectReferences).ToImmutableList();
 
             // extract binary references - both nuget and direct reference to assemblies (broken project reference)
             var binaries = from binRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "Reference")
@@ -254,12 +265,31 @@ namespace FullBuild.Commands
             var project = new Project(projectGuid, projectFileName, assemblyName, extension, fxTarget, allProjectReferences, binaryReferences, packageNames);
 
             // check first that project does not exist with same GUID and different project file (copied project)
-            var similarProjects = anthology.Projects.Where(x => x.Guid == project.Guid && (x.AssemblyName != project.AssemblyName || !x.ProjectFile.InvariantEquals(project.ProjectFile)));
+            var similarProjects = anthology.Projects.Where(x => x.Guid == project.Guid && (!x.AssemblyName.InvariantEquals(project.AssemblyName) || !x.ProjectFile.InvariantEquals(project.ProjectFile)));
             if (! similarProjects.Any())
             {
-                anthology = anthology.AddOrUpdateProject(project);
-                anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
-                anthology = packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
+                // check that references for this projects are valid (GUID and Include are correct)   
+                var checkReferenceOk = true;
+                foreach (var projectLoc in projectRefWithLocation)
+                {
+                    var similarGuidedProjects = from prj in anthology.Projects
+                                                where prj.Guid == projectLoc.Guid && ! Path.GetFileName(prj.ProjectFile).InvariantEquals(projectLoc.Include)
+                                                select prj;
+
+                    if (similarGuidedProjects.Any())
+                    {
+                        Console.WriteLine("ERROR: Project {0} has spurious project references", project.ProjectFile);
+                        similarGuidedProjects.ForEach(x => Console.WriteLine("  {0}", x.ProjectFile));
+                        checkReferenceOk = false;
+                    }
+                }
+
+                if (checkReferenceOk)
+                {
+                    anthology = anthology.AddOrUpdateProject(project);
+                    anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
+                    anthology = packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
+                }
             }
             else
             {
