@@ -92,11 +92,21 @@ namespace FullBuild.Commands
         public void Install(Package pkg, NuSpec nuSpec, DirectoryInfo cacheDirectory, DirectoryInfo packageRoot)
         {
             var cacheFileName = new FileInfo(Path.Combine(cacheDirectory.FullName, string.Format("{0}.{1}.nupkg", pkg.Name, nuSpec.Version)));
-            UpdatePackage(pkg, nuSpec, cacheFileName);
-
             var packageDirectory = SetupPackageDirectory(pkg, packageRoot);
-            ZipFile.ExtractToDirectory(cacheFileName.FullName, packageDirectory.FullName);
-        }
+
+            UpdatePackage(pkg, nuSpec, cacheFileName);
+            try
+            {
+                ZipFile.ExtractToDirectory(cacheFileName.FullName, packageDirectory.FullName);
+            }
+            catch
+            {
+                cacheFileName.Delete();
+                cacheFileName.Refresh();
+                UpdatePackage(pkg, nuSpec, cacheFileName);
+                ZipFile.ExtractToDirectory(cacheFileName.FullName, packageDirectory.FullName);
+            }
+          }
 
         private void UpdatePackage(Package pkg, NuSpec nuSpec, FileInfo cacheFileName)
         {
