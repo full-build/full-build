@@ -38,9 +38,7 @@ namespace FullBuild.Commands
     internal class NuGet
     {
         private readonly IEnumerable<string> _nugets;
-
         private readonly IWebClient _webClient;
-
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         internal NuGet(IWebClient webClient, IEnumerable<string> nugets)
@@ -116,7 +114,6 @@ namespace FullBuild.Commands
             {
                 _logger.Debug("Downloading package {0} (package is missing or corrupt)", pkg.Name);
 
-                cacheFileName.Delete();
                 _webClient.DownloadFile(nuSpec.Content, cacheFileName.FullName);
             }
         }
@@ -141,12 +138,6 @@ namespace FullBuild.Commands
                 _logger.Debug("NuPkg {0} is missing", cacheFileName);
                 return true;
             }
-
-            //if (cacheFileName.Length != nuSpec.PackageSize)
-            //{
-            //    _logger.Debug("NuPkg {0} has unexpected size {1} vs expected {2}", cacheFileName, cacheFileName.Length, nuSpec.PackageSize);
-            //    return true;
-            //}
 
             _logger.Debug("NuPkg {0} is sane", cacheFileName);
             return false;
