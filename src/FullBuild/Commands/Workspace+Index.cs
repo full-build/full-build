@@ -273,7 +273,9 @@ namespace FullBuild.Commands
                 foreach (var projectLoc in projectRefWithLocation)
                 {
                     var similarGuidedProjects = from prj in anthology.Projects
-                                                where prj.Guid == projectLoc.Guid && ! Path.GetFileName(prj.ProjectFile).InvariantEquals(projectLoc.Include)
+                                                let prjFileName = Path.GetFileName(prj.ProjectFile)
+                                                let thisFileName = Path.GetFileName(projectLoc.Include)
+                                                where prj.Guid == projectLoc.Guid && ! prjFileName.InvariantEquals(thisFileName)
                                                 select prj;
 
                     if (similarGuidedProjects.Any())
