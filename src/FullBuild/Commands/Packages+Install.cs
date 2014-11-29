@@ -59,7 +59,7 @@ namespace FullBuild.Commands
             var cacheDir = SetupCacheDir(config);
             var pkgDir = WellKnownFolders.GetPackageDirectory();
 
-            NuSpec nuSpec = nuget.GetNuSpecs(pkg).Single(x => x.Version == pkg.Version);
+            NuSpec nuSpec = nuget.GetNuSpecs(pkg).First(x => x.Version == pkg.Version);
             nuget.Install(pkg, nuSpec, cacheDir, pkgDir);
 
             GenerateTargetsForProject(pkg);

@@ -42,9 +42,9 @@ namespace FullBuild.Commands
                     result = webClient.DownloadString(uri);
                     return true;
                 }
-                catch(WebException we)
+                catch(Exception ex)
                 {
-                    _logger.Debug("package not found for uri : {0} with error : {1}", uri, we);
+                    _logger.Debug("Download failed for uri " + uri, ex);
                     result = string.Empty;
                     return false;
                 }
