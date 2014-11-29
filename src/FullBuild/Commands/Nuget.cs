@@ -75,7 +75,7 @@ namespace FullBuild.Commands
         {
             foreach(var nugetQuery in _nugets.Select(nuget => new Uri(new Uri(nuget), query)))
             {
-                _logger.Debug("Trying to download nuspec from package from {0}", nugetQuery);
+                _logger.Debug("Trying to download nuspec from {0}", nugetQuery);
 
                 string result;
                 if (_webClient.TryDownloadString(nugetQuery, out result))
@@ -99,8 +99,10 @@ namespace FullBuild.Commands
             {
                 ZipFile.ExtractToDirectory(cacheFileName.FullName, packageDirectory.FullName);
             }
-            catch
+            catch(Exception ex)
             {
+                _logger.Debug("Failed to unzip. Considering file as corrupt", ex);
+
                 cacheFileName.Delete();
                 cacheFileName.Refresh();
                 UpdatePackage(pkg, nuSpec, cacheFileName);
