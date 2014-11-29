@@ -37,9 +37,11 @@ namespace FullBuild.Commands
 {
     internal class NuGet
     {
-        private readonly IEnumerable<string> _nugets;
-        private readonly IWebClient _webClient;
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+        private readonly IEnumerable<string> _nugets;
+
+        private readonly IWebClient _webClient;
 
         internal NuGet(IWebClient webClient, IEnumerable<string> nugets)
         {
@@ -65,13 +67,13 @@ namespace FullBuild.Commands
 
         public IEnumerable<NuSpec> GetNuSpecs(Package package)
         {
-            string query = string.Format("Packages(Id='{0}',Version='{1}')", package.Name, package.Version);
+            var query = string.Format("Packages(Id='{0}',Version='{1}')", package.Name, package.Version);
             return Query(query);
         }
 
         private IEnumerable<NuSpec> Query(string query)
         {
-            foreach(var nugetQuery in _nugets.Select(nuget => new Uri(new Uri(nuget), query)))
+            foreach (var nugetQuery in _nugets.Select(nuget => new Uri(new Uri(nuget), query)))
             {
                 _logger.Debug("Trying to download nuspec from {0}", nugetQuery);
 
@@ -79,7 +81,7 @@ namespace FullBuild.Commands
                 if (_webClient.TryDownloadString(nugetQuery, out result))
                 {
                     _logger.Debug("Download successful", result);
-                    foreach(var entry in XDocument.Parse(result).Descendants(XmlHelpers.Atom + "entry"))
+                    foreach (var entry in XDocument.Parse(result).Descendants(XmlHelpers.Atom + "entry"))
                     {
                         yield return NuSpec.CreateFromNugetApiV1(entry);
                     }
@@ -97,7 +99,7 @@ namespace FullBuild.Commands
             {
                 ZipFile.ExtractToDirectory(cacheFile.FullName, packageDirectory.FullName);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.Debug("Failed to unzip. Considering file as corrupt", ex);
 
@@ -106,7 +108,7 @@ namespace FullBuild.Commands
                 UpdatePackage(pkg, nuSpec, cacheFile);
                 ZipFile.ExtractToDirectory(cacheFile.FullName, packageDirectory.FullName);
             }
-          }
+        }
 
         private void UpdatePackage(Package pkg, NuSpec nuSpec, FileInfo cacheFile)
         {

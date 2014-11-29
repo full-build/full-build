@@ -59,7 +59,7 @@ namespace FullBuild.Config
             var adminRepo = new RepoConfig
                             {
                                 Name = "admin",
-                                Vcs = (VersionControlType) Enum.Parse(typeof(VersionControlType), adminVcsConfig, true),
+                                Vcs = (VersionControlType)Enum.Parse(typeof(VersionControlType), adminVcsConfig, true),
                                 Url = adminRepoConfig
                             };
             var boostrapConfig = new BoostrapConfig(packageGlobalCacheConfig, adminRepo);
@@ -82,7 +82,7 @@ namespace FullBuild.Config
         {
             var file = adminDir.GetFile("full-build.config");
             var xmlSer = new XmlSerializer(typeof(AdminConfig));
-            using(var writer = new StreamWriter(file.FullName))
+            using (var writer = new StreamWriter(file.FullName))
             {
                 xmlSer.Serialize(writer, config);
             }
@@ -94,9 +94,9 @@ namespace FullBuild.Config
             if (file.Exists)
             {
                 var xmlSer = new XmlSerializer(typeof(AdminConfig));
-                using(var reader = new StreamReader(file.FullName))
+                using (var reader = new StreamReader(file.FullName))
                 {
-                    var bootstrapConfig = (AdminConfig) xmlSer.Deserialize(reader);
+                    var bootstrapConfig = (AdminConfig)xmlSer.Deserialize(reader);
                     bootstrapConfig.SourceRepos = bootstrapConfig.SourceRepos ?? new RepoConfig[0];
                     bootstrapConfig.NuGets = bootstrapConfig.NuGets ?? new string[0];
 

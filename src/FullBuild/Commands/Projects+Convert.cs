@@ -45,7 +45,7 @@ namespace FullBuild.Commands
             var admDir = WellKnownFolders.GetAdminDirectory();
 
             var anthology = Anthology.Load(admDir);
-            foreach(var projectDef in anthology.Projects)
+            foreach (var projectDef in anthology.Projects)
             {
                 _logger.Debug("Converting project {0}", projectDef.GetName());
 
@@ -74,7 +74,9 @@ namespace FullBuild.Commands
                 var applicationIcon = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "ApplicationIcon").SingleOrDefault();
 
                 // prepare project structure either from template or original project file
-                var templateForProjectFile = templateFile.Exists ? templateFile : projectFile;
+                var templateForProjectFile = templateFile.Exists
+                    ? templateFile
+                    : projectFile;
                 var xdoc = XDocument.Load(templateForProjectFile.FullName);
 
                 // remove all import from .full-build and project reference
@@ -125,10 +127,12 @@ namespace FullBuild.Commands
 
                 // generate binary references
                 var spuriousReferences = new List<string>();
-                foreach(var refBin in projectDef.BinaryReferences)
+                foreach (var refBin in projectDef.BinaryReferences)
                 {
                     var bin = anthology.Binaries.SingleOrDefault(x => x.AssemblyName.InvariantEquals(refBin));
-                    var hintPath = null != bin.HintPath ? new XElement(XmlHelpers.NsMsBuild + "HintPath", bin.HintPath) : null;
+                    var hintPath = null != bin.HintPath
+                        ? new XElement(XmlHelpers.NsMsBuild + "HintPath", bin.HintPath)
+                        : null;
                     var binReference = new XElement(XmlHelpers.NsMsBuild + "Reference",
                                                     new XAttribute("Include", bin.AssemblyName),
                                                     hintPath);
@@ -150,7 +154,7 @@ namespace FullBuild.Commands
                 }
 
                 // add imports to project reference
-                foreach(var refGuid in projectDef.ProjectReferences)
+                foreach (var refGuid in projectDef.ProjectReferences)
                 {
                     var project = anthology.Projects.SingleOrDefault(x => x.Guid == refGuid);
                     if (null == project)
@@ -168,7 +172,7 @@ namespace FullBuild.Commands
                 }
 
                 // add packages
-                foreach(var refPkg in projectDef.PackageReferences)
+                foreach (var refPkg in projectDef.PackageReferences)
                 {
                     var pkg = anthology.Packages.SingleOrDefault(x => x.Name.InvariantEquals(refPkg));
                     var refPackage = pkg;
@@ -196,14 +200,18 @@ namespace FullBuild.Commands
                 if (repoDir.Exists)
                 {
                     repoDir.EnumerateNugetDirectories().ForEach(x =>
-                    {
-                        if (x.Exists)
-                            try
-                            {
-                                x.Delete(true);
-                            }
-                            catch{ }
-                    });
+                                                                {
+                                                                    if (x.Exists)
+                                                                    {
+                                                                        try
+                                                                        {
+                                                                            x.Delete(true);
+                                                                        }
+                                                                        catch
+                                                                        {
+                                                                        }
+                                                                    }
+                                                                });
                 }
             }
         }
