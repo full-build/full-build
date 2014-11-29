@@ -2,9 +2,10 @@
 setlocal
 
 taskkill /im tgitcache.exe 1>NUL 2>NUL
-robocopy fclp_init fclp_do /MIR /NP /NFL /NDL
+if not exist rc-init call rc-init.bat || goto :ko
+robocopy rc-init rc-do /MIR /NP /NFL /NDL
 
-pushd fclp_do
+pushd rc-do
 
 fullbuild index workspace || goto :ko
 copy ..\Template.csproj .full-build || goto :ko
