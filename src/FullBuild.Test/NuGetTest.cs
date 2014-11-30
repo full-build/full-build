@@ -97,7 +97,7 @@ namespace FullBuild.Test
         }
 
         [Test]
-        public void Force_install_if_package_is_corrupt()
+        public void Ensure_failure_if_package_is_corrupt()
         {
             using (var cacheDir = new TemporaryDirectory())
             {
@@ -119,9 +119,12 @@ namespace FullBuild.Test
 
                     var nuget = NuGet.Default("http://www.nuget.org/api/v2/");
 
-                    nuget.Install(package, nuspec, cacheDir.Directory, pkgDir.Directory);
+                    Check.That(nuget.IsPackageInCache(package, cacheDir.Directory)).IsTrue();
 
-                    Check.That(new FileInfo(castlePkg.FullName).Length).IsEqualTo(nuspec.PackageSize);
+                    Check.ThatCode(() => nuget.InstallPackageFromCache(package, cacheDir.Directory, pkgDir.Directory)).Throws<Exception>();
+
+                    castlePkg.Refresh();
+                    Check.That(castlePkg.Exists).IsFalse();
                 }
             }
         }
@@ -130,57 +133,6 @@ namespace FullBuild.Test
         public void Get_feed_title_from_repo()
         {
             Check.That(NuGet.Default().RetrieveFeedTitle(new Uri("https://nuget.org/api/v2/"))).IsEqualTo("Packages");
-        }
-
-        [Test]
-        public void Install_package_already_installed()
-        {
-            using (var cacheDir = new TemporaryDirectory())
-            {
-                using (var pkgDir = new TemporaryDirectory())
-                {
-                    var package = new Package("Castle.Core", "3.3.3");
-                    var nuget = NuGet.Default("http://www.nuget.org/api/v2/");
-                    var nuspec = nuget.GetNuSpecs(package).First();
-
-                    Check.That(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*")).IsEmpty();
-                    Check.That(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*")).IsEmpty();
-
-                    nuget.Install(package, nuspec, cacheDir.Directory, pkgDir.Directory);
-
-                    Check.That(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*Castle.Core.3.3.3.nupkg")).Not.IsEmpty();
-                    Check.That(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*Castle*.dll", SearchOption.AllDirectories)).Not.IsEmpty();
-
-                    var disconnectedNuget = new NuGet(new DisconnectedWebClient(), new[] {"http://www.nuget.org/api/v2/"});
-
-                    disconnectedNuget.Install(package, nuspec, cacheDir.Directory, cacheDir.Directory);
-
-                    Check.That(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*Castle.Core.3.3.3.nupkg")).Not.IsEmpty();
-                    Check.That(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*Castle*.dll", SearchOption.AllDirectories)).Not.IsEmpty();
-                }
-            }
-        }
-
-        [Test]
-        public void Install_package_never_downloaded()
-        {
-            using (var cacheDir = new TemporaryDirectory())
-            {
-                using (var pkgDir = new TemporaryDirectory())
-                {
-                    var package = new Package("Castle.Core", "3.3.3");
-                    var nuget = NuGet.Default("http://www.nuget.org/api/v2/");
-                    var nuspec = nuget.GetNuSpecs(package).First();
-
-                    Check.That(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*")).IsEmpty();
-                    Check.That(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*")).IsEmpty();
-
-                    nuget.Install(package, nuspec, cacheDir.Directory, pkgDir.Directory);
-
-                    Check.That(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*Castle.Core.3.3.3.nupkg")).Not.IsEmpty();
-                    Check.That(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*Castle*.dll", SearchOption.AllDirectories)).Not.IsEmpty();
-                }
-            }
         }
     }
 }
