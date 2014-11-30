@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 setlocal
 
 taskkill /im tgitcache.exe 1>NUL 2>NUL

@@ -32,7 +32,7 @@ namespace FullBuild.Commands
 {
     internal partial class Packages
     {
-        public void Check()
+        private static void CheckPackages()
         {
             // read anthology.json
             var admDir = WellKnownFolders.GetAdminDirectory();

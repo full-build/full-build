@@ -24,41 +24,33 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 using FullBuild.Helpers;
+using FullBuild.NatLangParser;
 
 namespace FullBuild.Commands
 {
-    internal partial class View
+    internal class Usage
     {
-        public void List(string viewName)
+        public static IEnumerable<Matcher> Commands()
         {
-            var viewDir = WellKnownFolders.GetViewDirectory();
-            var viewFile = viewDir.GetFile(viewName + ".view");
-            if (! viewFile.Exists)
-            {
-                throw new ArgumentException("Invalid view name");
-            }
-
-            var repos = File.ReadAllLines(viewFile.FullName);
-            foreach (var repo in repos)
-            {
-                if (! string.IsNullOrEmpty(repo))
-                {
-                    Console.WriteLine(repo);
-                }
-            }
+            yield return MatchBuilder.Describe("Usage")
+                                     .Command("/?")
+                                     .Do(ctx => DisplayUsage(ctx.Usage()));
         }
 
-        public void ListAll()
+        private static void DisplayUsage(IEnumerable<string> usages)
         {
-            var viewDir = WellKnownFolders.GetViewDirectory();
-            var views = viewDir.EnumerateFiles("*.view");
-            foreach (var view in views)
-            {
-                var viewName = Path.GetFileNameWithoutExtension(view.Name);
-                Console.WriteLine(viewName);
-            }
+            Console.WriteLine("Usage:");
+            usages.ForEach(x => Console.WriteLine("\t{0}", x));
+            Console.WriteLine();
+
+            var assembly = Assembly.GetExecutingAssembly();
+            var fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            var version = fvi.FileVersion;
+            Console.WriteLine("full-build version {0}", version);
         }
     }
 }

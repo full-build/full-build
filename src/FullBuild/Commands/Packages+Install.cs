@@ -36,7 +36,7 @@ namespace FullBuild.Commands
 {
     internal partial class Packages
     {
-        public void Install()
+        public static void InstallPackages()
         {
             // read anthology.json
             var admDir = WellKnownFolders.GetAdminDirectory();
@@ -68,7 +68,7 @@ namespace FullBuild.Commands
         private static DirectoryInfo SetupCacheDir(FullBuildConfig config)
         {
             var cacheDir = WellKnownFolders.GetCacheDirectory();
-            if (!string.IsNullOrEmpty(config.PackageGlobalCache))
+            if (!String.IsNullOrEmpty(config.PackageGlobalCache))
             {
                 cacheDir = new DirectoryInfo(config.PackageGlobalCache);
                 cacheDir.Create();
@@ -84,7 +84,7 @@ namespace FullBuild.Commands
                 var fxLibs = libDir.GetDirectory(folderToTry);
                 if (fxLibs.Exists)
                 {
-                    var condition = string.Format("'$(TargetFrameworkVersion)' == '{0}'", fxVersion);
+                    var condition = String.Format("'$(TargetFrameworkVersion)' == '{0}'", fxVersion);
                     var when = new XElement(XmlHelpers.NsMsBuild + "When",
                                             new XAttribute("Condition", condition),
                                             GenerateItemGroup(fxLibs));
@@ -126,7 +126,7 @@ namespace FullBuild.Commands
                 }
             }
 
-            var nuspecFileName = string.Format("{0}.nuspec", package.Name);
+            var nuspecFileName = String.Format("{0}.nuspec", package.Name);
             var nuspecFile = new FileInfo(Path.Combine(pkgDir.FullName, nuspecFileName));
             var xdocNuspec = XDocument.Load(nuspecFile.FullName);
             var dependencies = from d in xdocNuspec.Descendants(XmlHelpers.NsNuget + "dependency")
@@ -135,7 +135,7 @@ namespace FullBuild.Commands
             var imports = from dependency in dependencies
                           let dependencyPackageFileName = dependency + ".targets"
                           let dependencyTargets = Path.Combine(WellKnownFolders.MsBuildPackagesDir, dependencyPackageFileName)
-                          let condition = string.Format("'$(FullBuild_{0}_Pkg)' == ''", dependency.ToMsBuild())
+                          let condition = String.Format("'$(FullBuild_{0}_Pkg)' == ''", dependency.ToMsBuild())
                           select new XElement(XmlHelpers.NsMsBuild + "Import",
                                               new XAttribute("Project", dependencyTargets),
                                               new XAttribute("Condition", condition));
@@ -144,7 +144,7 @@ namespace FullBuild.Commands
                 ? new XElement(XmlHelpers.NsMsBuild + "Choose", whens)
                 : GenerateItemGroup(libDir);
 
-            var defineName = string.Format("FullBuild_{0}_Pkg", package.Name.ToMsBuild());
+            var defineName = String.Format("FullBuild_{0}_Pkg", package.Name.ToMsBuild());
             var define = new XElement(XmlHelpers.NsMsBuild + "PropertyGroup",
                                       new XElement(XmlHelpers.NsMsBuild + defineName, "Y"));
 

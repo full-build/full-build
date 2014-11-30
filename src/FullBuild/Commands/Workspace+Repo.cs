@@ -34,7 +34,7 @@ namespace FullBuild.Commands
 {
     internal partial class Workspace
     {
-        public void ListRepos()
+        private static void ListRepos()
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             var config = ConfigManager.LoadAdminConfig(admDir);
@@ -42,7 +42,7 @@ namespace FullBuild.Commands
             config.SourceRepos.ForEach(x => Console.WriteLine(x.Name));
         }
 
-        public void AddRepo(string name, VersionControlType type, string url)
+        private static void AddRepo(string name, VersionControlType type, string url)
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             var config = ConfigManager.LoadAdminConfig(admDir);
@@ -59,7 +59,7 @@ namespace FullBuild.Commands
             ConfigManager.SaveAdminConfig(admDir, config);
         }
 
-        public void CloneRepo(string[] repos)
+        private static void CloneRepo(string[] repos)
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig(wsDir);

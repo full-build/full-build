@@ -24,29 +24,22 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace FullBuild.NatLangParser
 {
-    public class Parser
+    public class ParserBuilder
     {
-        private readonly IEnumerable<Matcher> _matchers;
+        private readonly List<Matcher> _matchers = new List<Matcher>();
 
-        public Parser(IEnumerable<Matcher> matchers)
+        public ParserBuilder With(IEnumerable<Matcher> matchers)
         {
-            _matchers = matchers;
+            _matchers.AddRange(matchers);
+            return this;
         }
 
-        public bool ParseAndInvoke(string[] args)
+        public Parser Build()
         {
-            var context = new Context(this);
-            var res = _matchers.Any(x => x.ParseAndInvoke(args, context));
-            return res;
-        }
-
-        public IEnumerable<string> Usage()
-        {
-            return _matchers.Select(matcher => matcher.Usage());
+            return new Parser(_matchers);
         }
     }
 }

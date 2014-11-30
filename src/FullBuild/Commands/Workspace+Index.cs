@@ -51,8 +51,7 @@ namespace FullBuild.Commands
             anthology.Save(admDir);
 
             // get packages
-            var handler = new Packages();
-            handler.Install();
+            Packages.InstallPackages();
 
             // Promotion
             anthology = AnthologyOptimizer.Optimize(anthology);
