@@ -143,10 +143,10 @@ namespace FullBuild.Commands
 
                 if (0 < spuriousReferences.Count)
                 {
-                    Console.WriteLine("WARNING: Project {0} has spurious binary references", projectDef.ProjectFile);
+                    Console.Error.WriteLine("WARNING | Project {0} has spurious binary references", projectDef.ProjectFile);
                     foreach (var spuriousRef in spuriousReferences)
                     {
-                        Console.WriteLine("  {0}", spuriousRef);
+                        Console.Error.WriteLine("      | {0}", spuriousRef);
                     }
                 }
 
@@ -156,7 +156,7 @@ namespace FullBuild.Commands
                     var project = anthology.Projects.SingleOrDefault(x => x.Guid == refGuid);
                     if (null == project)
                     {
-                        Console.WriteLine("ERROR: project {0} references unknown project {1}", projectDef.Guid, refGuid);
+                        Console.Error.WriteLine("ERROR | Project {0:B} references unknown project {1:B}", projectDef.Guid, refGuid);
                     }
                     else
                     {

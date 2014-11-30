@@ -186,14 +186,8 @@ namespace FullBuild.Commands
             return packages;
         }
 
-        private static Anthology ParseAndAddProject(DirectoryInfo workspace, FileInfo projectFile, Anthology anthology)
+        private static Guid ExtractProjectGuid(XDocument xdoc)
         {
-            Console.WriteLine("  Found project {0}", projectFile.FullName.Substring(workspace.FullName.Length + 1));
-
-            var xdoc = XDocument.Load(projectFile.FullName);
-
-            // extract infos from project
-            var projectFileName = projectFile.FullName.Substring(workspace.FullName.Length + 1);
             Guid projectGuid;
             try
             {
@@ -205,6 +199,19 @@ namespace FullBuild.Commands
                 projectGuid = Guid.ParseExact((string)xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single(), "D");
             }
 
+            return projectGuid;
+        }
+
+        private static Anthology ParseAndAddProject(DirectoryInfo workspace, FileInfo projectFile, Anthology anthology)
+        {
+            Console.WriteLine("  Found project {0}", projectFile.FullName.Substring(workspace.FullName.Length + 1));
+
+            var xdoc = XDocument.Load(projectFile.FullName);
+
+            // extract infos from project
+            var projectFileName = projectFile.FullName.Substring(workspace.FullName.Length + 1);
+            var projectGuid = ExtractProjectGuid(xdoc);
+
             var assemblyName = (string)xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyName").Single();
             var fxTarget = (string)xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").SingleOrDefault() ?? "v4.5";
             var extension = ((string)xdoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single()).InvariantEquals("Library")
@@ -214,7 +221,7 @@ namespace FullBuild.Commands
             // extract project reference along project location to help detecting invalid project references
             var projectRefWithLocation = from prjRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference")
                                          let guid = Guid.ParseExact(prjRef.Element(XmlHelpers.NsMsBuild + "Project").Value, "B")
-                                         let include = Path.GetFileName(prjRef.Attribute("Include").Value)
+                                         let include = prjRef.Attribute("Include").Value
                                          select new {Guid = guid, Include = include};
 
             // extract project references
@@ -265,17 +272,31 @@ namespace FullBuild.Commands
 
             // check first that project does not exist with same GUID and different project file (duplicated project)
             var similarProjects = anthology.Projects.Where(x => x.Guid == project.Guid && (!x.AssemblyName.InvariantEquals(project.AssemblyName) || !x.ProjectFile.InvariantEquals(project.ProjectFile)));
-            if (! similarProjects.Any())
+            if (similarProjects.Any())
             {
-                anthology = anthology.AddOrUpdateProject(project);
-                anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
-                anthology = packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
+                Console.Error.WriteLine("ERROR | Project '{0}' conflicts with other projects (same GUID but different location)", project.ProjectFile);
+                similarProjects.ForEach(x => Console.Error.WriteLine("      | {0}", x.ProjectFile));
+                return anthology;
             }
-            else
+
+            // read each referenced projects to check guid
+            var projectPath = projectFile.Directory;
+            var projectRefGuids = from prjRef in projectRefWithLocation
+                                  let prjRefFileName = projectPath.GetFile(prjRef.Include)
+                                  let prjRefXDoc = XDocument.Load(prjRefFileName.FullName)
+                                  let prjRefGuid = ExtractProjectGuid(prjRefXDoc)
+                                  where prjRefGuid != prjRef.Guid
+                                  select prjRef;
+            if (projectRefGuids.Any())
             {
-                Console.WriteLine("ERROR: project {0} conflicts with other projects (same GUID but different location)", project.ProjectFile);
-                similarProjects.ForEach(x => Console.WriteLine("  {0}", x.ProjectFile));
+                Console.Error.WriteLine("ERROR | Project '{0}' has invalid project GUID references:", projectFileName);
+                projectRefGuids.ForEach(x => Console.Error.WriteLine("      | {0:B} {1}", x.Guid, x.Include));
+                return anthology;
             }
+
+            anthology = anthology.AddOrUpdateProject(project);
+            anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
+            anthology = packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
 
             return anthology;
         }
