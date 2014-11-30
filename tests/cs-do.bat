@@ -3,7 +3,7 @@ setlocal
 
 taskkill /im tgitcache.exe 1>NUL 2>NUL
 if not exist cs-init call cs-init.bat || goto :ko
-robocopy cs-init cs-do /MIR >NUL || goto :ko
+robocopy cs-init cs-do /MIR
 
 pushd cs-do
 
@@ -20,6 +20,7 @@ fullbuild use package moq version * || goto :ko
 fullbuild check packages || goto :ko
 fullbuild list packages || goto :ko
 fullbuild list nugets || goto :ko
+fullbuild describe view cs || goto :ko
 
 
 :ok

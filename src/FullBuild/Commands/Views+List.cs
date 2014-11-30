@@ -25,51 +25,40 @@
 
 using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using FullBuild.Config;
 using FullBuild.Helpers;
 
 namespace FullBuild.Commands
 {
-    internal partial class View
+    internal partial class Views
     {
-        public void InitView(string viewName, string[] repos)
+        private static void DescribeView(string viewName)
         {
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.LoadConfig(wsDir);
-
-            // validate first that repos are valid and clone them
-            var sb = new StringBuilder();
-            foreach (var repo in repos)
-            {
-                var match = "^" + repo + "$";
-                var regex = new Regex(match, RegexOptions.IgnoreCase);
-                var repoConfigs = config.SourceRepos.Where(x => regex.IsMatch(x.Name));
-                if (!repoConfigs.Any())
-                {
-                    throw new ArgumentException("Invalid repo " + repo);
-                }
-
-                foreach (var repoConfig in repoConfigs)
-                {
-                    var repoDir = wsDir.GetDirectory(repoConfig.Name);
-                    if (!repoDir.Exists)
-                    {
-                        var msg = string.Format("Clone repository {0} before creating the view", repo);
-                        throw new ArgumentException(msg);
-                    }
-
-                    sb.AppendLine(repoConfig.Name);
-                }
-            }
-
             var viewDir = WellKnownFolders.GetViewDirectory();
             var viewFile = viewDir.GetFile(viewName + ".view");
-            File.WriteAllText(viewFile.FullName, sb.ToString());
+            if (! viewFile.Exists)
+            {
+                throw new ArgumentException("Invalid view name");
+            }
 
-            Generate(viewName);
+            var repos = File.ReadAllLines(viewFile.FullName);
+            foreach (var repo in repos)
+            {
+                if (! string.IsNullOrEmpty(repo))
+                {
+                    Console.WriteLine(repo);
+                }
+            }
+        }
+
+        private static void ListViews()
+        {
+            var viewDir = WellKnownFolders.GetViewDirectory();
+            var views = viewDir.EnumerateFiles("*.view");
+            foreach (var view in views)
+            {
+                var viewName = Path.GetFileNameWithoutExtension(view.Name);
+                Console.WriteLine(viewName);
+            }
         }
     }
 }

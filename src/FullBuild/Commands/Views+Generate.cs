@@ -33,9 +33,9 @@ using FullBuild.Model;
 
 namespace FullBuild.Commands
 {
-    internal partial class View
+    internal partial class Views
     {
-        public void Generate(string viewName)
+        private static void GenerateView(string viewName)
         {
             // read anthology.json
             var admDir = WellKnownFolders.GetAdminDirectory();
