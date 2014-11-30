@@ -54,8 +54,7 @@ namespace FullBuild.NatLangParser
         public T Get<T>(Parameter<T> parameter)
         {
             var obj = (T)_parameters[parameter.Name];
-            var value = (T)obj;
-            return value;
+            return obj;
         }
 
         public IEnumerable<string> Usage()
