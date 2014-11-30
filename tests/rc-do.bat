@@ -3,7 +3,7 @@ setlocal
 
 taskkill /im tgitcache.exe 1>NUL 2>NUL
 if not exist rc-init call rc-init.bat || goto :ko
-robocopy rc-init rc-do /MIR >NUL || goto :ko
+robocopy rc-init rc-do /MIR
 
 pushd rc-do
 
