@@ -24,21 +24,34 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using FullBuild.Config;
 using FullBuild.Helpers;
+using FullBuild.NatLangParser;
 
 namespace FullBuild.Commands
 {
     internal class Exec
     {
+        public static IEnumerable<Matcher> Commands()
+        {
+            var command = Parameter<string>.Create("command");
+
+            // exec
+            yield return MatchBuilder.Describe("exec command on each repo")
+                                     .Command("exec")
+                                     .Param(command)
+                                     .Do(ctx => ForEachRepo(ctx.Get(command)));
+        }
+
         public static bool IsRunningOnMono()
         {
             return Type.GetType("Mono.Runtime") != null;
         }
 
-        public void ForEachRepo(string command)
+        public static void ForEachRepo(string command)
         {
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig(workspace);
@@ -55,7 +68,7 @@ namespace FullBuild.Commands
             }
         }
 
-        public void ExecCommand(string command, DirectoryInfo dir, RepoConfig repoConfig = null)
+        public static void ExecCommand(string command, DirectoryInfo dir, RepoConfig repoConfig = null)
         {
             const string filename = "cmd";
             var arguments = string.Format("/c \"{0}\"", command);

@@ -36,7 +36,7 @@ namespace FullBuild.Commands
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public void AddNuGet(string url)
+        private static void AddNuGet(string url)
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             var config = ConfigManager.LoadAdminConfig(admDir);
@@ -48,7 +48,7 @@ namespace FullBuild.Commands
             Console.WriteLine("Added feed {0} with title {1}", url, title);
         }
 
-        public void ListNuGet()
+        private static void ListNuGets()
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             var config = ConfigManager.LoadAdminConfig(admDir);
@@ -56,7 +56,7 @@ namespace FullBuild.Commands
             ConfigManager.SaveAdminConfig(admDir, config);
         }
 
-        public void ListPackages()
+        private static void ListPackages()
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             var anthology = Anthology.Load(admDir);
@@ -64,7 +64,7 @@ namespace FullBuild.Commands
             anthology.Packages.ForEach(x => Console.WriteLine("{0} {1}", x.Name, x.Version));
         }
 
-        public void UsePackage(string name, string version)
+        private static void UsePackage(string name, string version)
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             var anthology = Anthology.Load(admDir);
