@@ -45,6 +45,12 @@ namespace FullBuild.Commands
                                      .Param(repos)
                                      .Do(ctx => InitView(ctx.Get(viewname), ctx.Get(repos)));
 
+            yield return MatchBuilder.Describe("drop view {0}", viewname)
+                                     .Command("drop")
+                                     .Command("view")
+                                     .Param(viewname)
+                                     .Do(ctx => DeleteView(ctx.Get(viewname)));
+
             // list views>
             yield return MatchBuilder.Describe("list all available views")
                                      .Command("list")
