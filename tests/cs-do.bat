@@ -21,6 +21,9 @@ fullbuild check packages || goto :ko
 fullbuild list packages || goto :ko
 fullbuild list nugets || goto :ko
 fullbuild describe view cs || goto :ko
+fullbuild list views || goto :ko
+fullbuild drop view cs || goto :ko
+fullbuild list views || goto :ko
 
 
 :ok
