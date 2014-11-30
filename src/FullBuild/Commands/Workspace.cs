@@ -27,11 +27,14 @@ using System.Collections.Generic;
 using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.NatLangParser;
+using NLog;
 
 namespace FullBuild.Commands
 {
     internal partial class Workspace
     {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
         public static IEnumerable<Matcher> Commands()
         {
             var path = Parameter<string>.Create("path");
@@ -56,7 +59,7 @@ namespace FullBuild.Commands
             yield return MatchBuilder.Describe("index workspace with local changes")
                                      .Command("index")
                                      .Command("workspace")
-                                     .Do(ctx => UpdateWorkspace());
+                                     .Do(ctx => IndexWorkspace());
 
             // convert projects
             yield return MatchBuilder.Describe("convert projects to ensure compatibility with full-build")
@@ -99,28 +102,10 @@ namespace FullBuild.Commands
             Exec.ForEachRepo("echo ** running 'git pull --rebase' on %FULLBUILD_REPO% && git pull --rebase");
         }
 
-        private static void InitWorkspace(string path)
-        {
-            var handler = new Workspace();
-            handler.Init(path);
-        }
-
         private static void RefreshWorkspace()
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             Exec.ExecCommand("git pull --rebase", admDir);
-        }
-
-        private static void UpdateWorkspace()
-        {
-            var handler = new Workspace();
-            handler.Index();
-        }
-
-        private static void ConvertProjects()
-        {
-            var handler = new Projects();
-            handler.Convert();
         }
     }
 }
