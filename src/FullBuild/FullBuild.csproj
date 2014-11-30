@@ -71,6 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AnthologyOptimizer.cs" />
+    <Compile Include="Commands\Configuration.cs" />
+    <Compile Include="Commands\Packages.cs" />
     <Compile Include="Commands\Exec.cs" />
     <Compile Include="Commands\IWebClient.cs" />
     <Compile Include="Commands\NuGet.cs" />
@@ -78,13 +80,16 @@
     <Compile Include="Commands\Packages+Check.cs" />
     <Compile Include="Commands\Projects+Convert.cs" />
     <Compile Include="Commands\FrameworkVersion.cs" />
-    <Compile Include="Commands\View+Init.cs" />
-    <Compile Include="Commands\View+Generate.cs" />
+    <Compile Include="Commands\Usage.cs" />
+    <Compile Include="Commands\Views+Init.cs" />
+    <Compile Include="Commands\Views+Generate.cs" />
     <Compile Include="Commands\Packages+Install.cs" />
-    <Compile Include="Commands\View+List.cs" />
+    <Compile Include="Commands\Views+List.cs" />
+    <Compile Include="Commands\Views.cs" />
     <Compile Include="Commands\WebClientAdapter.cs" />
     <Compile Include="Commands\Workspace+Repo.cs" />
     <Compile Include="Commands\Workspace+Init.cs" />
+    <Compile Include="Commands\Workspace.cs" />
     <Compile Include="Config\AdminConfig.cs" />
     <Compile Include="Config\BoostrapConfig.cs" />
     <Compile Include="Config\ConfigManager.cs" />
@@ -115,6 +120,7 @@
     <Compile Include="NatLangParser\Parameter.cs" />
     <Compile Include="Commands\NuPkg.cs" />
     <Compile Include="NatLangParser\Parser.cs" />
+    <Compile Include="NatLangParser\ParserBuilder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SectionHandler.cs" />
