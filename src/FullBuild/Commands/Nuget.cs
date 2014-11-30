@@ -89,33 +89,44 @@ namespace FullBuild.Commands
             }
         }
 
-        public void Install(Package pkg, NuSpec nuSpec, DirectoryInfo cacheDirectory, DirectoryInfo packageRoot)
+        private static FileInfo GetCachedPackageName(Package pkg, DirectoryInfo cacheDirectory)
         {
-            var cacheFile = new FileInfo(Path.Combine(cacheDirectory.FullName, string.Format("{0}.{1}.nupkg", pkg.Name, nuSpec.Version)));
-            var packageDirectory = SetupPackageDirectory(pkg, packageRoot);
+            var cacheFileName = string.Format("{0}.{1}.nupkg", pkg.Name, pkg.Version);
+            var cacheFile = cacheDirectory.GetFile(cacheFileName);
+            return cacheFile;
+        }
 
-            UpdatePackage(pkg, nuSpec, cacheFile);
+        public bool IsPackageInCache(Package pkg, DirectoryInfo cacheDirectory)
+        {
+            var cacheFile = GetCachedPackageName(pkg, cacheDirectory);
+            return cacheFile.Exists;
+        }
+
+        public void DownloadNuSpecToCache(Package pkg, NuSpec nuSpec, DirectoryInfo cacheDirectory)
+        {
+            if (!IsPackageInCache(pkg, cacheDirectory))
+            {
+                _logger.Debug("Downloading package {0} (package is missing or corrupt)", nuSpec.Title);
+
+                var cacheFile = GetCachedPackageName(pkg, cacheDirectory);
+                _webClient.DownloadFile(nuSpec.Content, cacheFile.FullName);
+            }
+        }
+
+        public void InstallPackageFromCache(Package pkg, DirectoryInfo cacheDirectory, DirectoryInfo packageRoot)
+        {
+            var cacheFileName = string.Format("{0}.{1}.nupkg", pkg.Name, pkg.Version);
+            var cacheFile = cacheDirectory.GetFile(cacheFileName);
+
             try
             {
+                var packageDirectory = SetupPackageDirectory(pkg, packageRoot);
                 ZipFile.ExtractToDirectory(cacheFile.FullName, packageDirectory.FullName);
             }
             catch (Exception ex)
             {
-                _logger.Debug("Failed to unzip. Considering file as corrupt", ex);
-
                 cacheFile.Delete();
-                cacheFile.Refresh();
-                UpdatePackage(pkg, nuSpec, cacheFile);
-                ZipFile.ExtractToDirectory(cacheFile.FullName, packageDirectory.FullName);
-            }
-        }
-
-        private void UpdatePackage(Package pkg, NuSpec nuSpec, FileInfo cacheFile)
-        {
-            if (IsMissing(nuSpec, cacheFile))
-            {
-                _logger.Debug("Downloading package {0} (package is missing or corrupt)", pkg.Name);
-                _webClient.DownloadFile(nuSpec.Content, cacheFile.FullName);
+                throw new Exception("Failed to unzip package, please retry.", ex);
             }
         }
 
@@ -127,21 +138,8 @@ namespace FullBuild.Commands
                 packageDirectory.Delete(true);
             }
 
+            packageDirectory.Create();
             return packageDirectory;
-        }
-
-        private static bool IsMissing(NuSpec nuSpec, FileInfo cacheFileName)
-        {
-            _logger.Debug("Sanity check for NuPkg {0} {1}", nuSpec.Title, nuSpec.Version);
-
-            if (! cacheFileName.Exists)
-            {
-                _logger.Debug("NuPkg {0} is missing", cacheFileName);
-                return true;
-            }
-
-            _logger.Debug("NuPkg {0} is sane", cacheFileName);
-            return false;
         }
 
         public string RetrieveFeedTitle(Uri nuget)
