@@ -31,15 +31,12 @@ using System.Xml.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
-using NLog;
 
 namespace FullBuild.Commands
 {
-    internal class Projects
+    internal partial class Workspace
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public void Convert()
+        private static void ConvertProjects()
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var admDir = WellKnownFolders.GetAdminDirectory();
@@ -201,16 +198,8 @@ namespace FullBuild.Commands
                 {
                     repoDir.EnumerateNugetDirectories().ForEach(x =>
                                                                 {
-                                                                    if (x.Exists)
-                                                                    {
-                                                                        try
-                                                                        {
-                                                                            x.Delete(true);
-                                                                        }
-                                                                        catch
-                                                                        {
-                                                                        }
-                                                                    }
+                                                                    x.Refresh();
+                                                                    x.Delete(true);
                                                                 });
                 }
             }

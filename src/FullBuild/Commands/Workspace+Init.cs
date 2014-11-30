@@ -33,7 +33,7 @@ namespace FullBuild.Commands
 {
     internal partial class Workspace
     {
-        public void Init(string path)
+        private static void InitWorkspace(string path)
         {
             var wsDir = new DirectoryInfo(path);
             wsDir.Create();
