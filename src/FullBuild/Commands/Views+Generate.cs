@@ -115,5 +115,25 @@ namespace FullBuild.Commands
             var targetFile = Path.Combine(viewDir.FullName, targetFileName);
             xdoc.Save(targetFile);
         }
+
+        private static void DeleteView(string viewName)
+        {
+            var viewDir = WellKnownFolders.GetViewDirectory();
+            var targetFileName = viewName + ".targets";
+            var targetFile = viewDir.GetFile(targetFileName);
+            targetFile.Delete();
+
+            var viewFileName = viewName + ".view";
+            var viewFile = viewDir.GetFile(viewFileName);
+            viewFile.Delete();
+
+            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
+            var slnFileName = viewName + ".sln";
+            var slnFile = wsDir.GetFile(slnFileName);
+            if (slnFile.Exists)
+            {
+                slnFile.Delete();
+            }
+        }
     }
 }
