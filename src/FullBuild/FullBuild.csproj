@@ -78,7 +78,7 @@
     <Compile Include="Commands\NuGet.cs" />
     <Compile Include="Commands\Packages+NuGet.cs" />
     <Compile Include="Commands\Packages+Check.cs" />
-    <Compile Include="Commands\Projects+Convert.cs" />
+    <Compile Include="Commands\Workspace+Convert.cs" />
     <Compile Include="Commands\FrameworkVersion.cs" />
     <Compile Include="Commands\Usage.cs" />
     <Compile Include="Commands\Views+Init.cs" />
