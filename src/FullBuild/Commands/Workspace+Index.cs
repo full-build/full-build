@@ -38,7 +38,7 @@ namespace FullBuild.Commands
 {
     internal partial class Workspace
     {
-        public void Index()
+        private static void IndexWorkspace()
         {
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig(workspace);
