@@ -286,11 +286,11 @@ namespace FullBuild.Commands
                                   let prjRefXDoc = XDocument.Load(prjRefFileName.FullName)
                                   let prjRefGuid = ExtractProjectGuid(prjRefXDoc)
                                   where prjRefGuid != prjRef.Guid
-                                  select prjRef;
+                                  select new {Guid = prjRef.Guid, Include = prjRef.Include, GoodGuid = prjRefGuid};
             if (projectRefGuids.Any())
             {
                 Console.Error.WriteLine("ERROR | Project '{0}' has invalid project GUID references:", projectFileName);
-                projectRefGuids.ForEach(x => Console.Error.WriteLine("      | {0:B} {1}", x.Guid, x.Include));
+                projectRefGuids.ForEach(x => Console.Error.WriteLine("      | {0} {1:B} ==> {2:B}", x.Include, x.Guid, x.GoodGuid));
                 return anthology;
             }
 
