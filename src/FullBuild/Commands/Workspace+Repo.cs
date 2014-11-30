@@ -72,7 +72,7 @@ namespace FullBuild.Commands
                 var repoConfigs = config.SourceRepos.Where(x => regex.IsMatch(x.Name));
                 if (!repoConfigs.Any())
                 {
-                    Console.WriteLine("WARNING: no repository found");
+                    Console.WriteLine("WARNING |No repository found");
                     return;
                 }
 
