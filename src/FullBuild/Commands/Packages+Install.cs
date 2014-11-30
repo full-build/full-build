@@ -59,9 +59,13 @@ namespace FullBuild.Commands
             var cacheDir = SetupCacheDir(config);
             var pkgDir = WellKnownFolders.GetPackageDirectory();
 
-            var nuSpec = nuget.GetNuSpecs(pkg).First(x => x.Version == pkg.Version);
-            nuget.Install(pkg, nuSpec, cacheDir, pkgDir);
+            if (! nuget.IsPackageInCache(pkg, cacheDir))
+            {
+                var nuSpec = nuget.GetNuSpecs(pkg).First(x => x.Version == pkg.Version);
+                nuget.DownloadNuSpecToCache(pkg, nuSpec, cacheDir);
+            }
 
+            nuget.InstallPackageFromCache(pkg, cacheDir, pkgDir);
             GenerateTargetsForProject(pkg);
         }
 
@@ -127,7 +131,7 @@ namespace FullBuild.Commands
             }
 
             var nuspecFileName = String.Format("{0}.nuspec", package.Name);
-            var nuspecFile = new FileInfo(Path.Combine(pkgDir.FullName, nuspecFileName));
+            var nuspecFile = pkgDir.GetFile(nuspecFileName);
             var xdocNuspec = XDocument.Load(nuspecFile.FullName);
             var dependencies = from d in xdocNuspec.Descendants(XmlHelpers.NsNuget + "dependency")
                                select (string)d.Attribute("id");
