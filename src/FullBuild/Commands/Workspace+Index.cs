@@ -41,7 +41,7 @@ namespace FullBuild.Commands
         private static void IndexWorkspace()
         {
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.LoadConfig(workspace);
+            var config = ConfigManager.LoadConfig();
 
             var admDir = WellKnownFolders.GetAdminDirectory();
 

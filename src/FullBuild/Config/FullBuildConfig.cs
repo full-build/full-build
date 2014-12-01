@@ -23,27 +23,27 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System.Xml.Linq;
+using System.Xml.Serialization;
+
 namespace FullBuild.Config
 {
+    [XmlRoot("FullBuildConfig")]
     public class FullBuildConfig
     {
-        public FullBuildConfig(BoostrapConfig boostrapConfig, AdminConfig adminConfig)
-        {
-            AdminRepo = boostrapConfig.AdminRepo;
-            BinRepo = adminConfig.BinRepo;
-            SourceRepos = adminConfig.SourceRepos;
-            Nugets = adminConfig.NuGets;
-            PackageGlobalCache = boostrapConfig.PackageGlobalCache;
-        }
+        [XmlElement("AdminRepo")]
+        public RepoConfig AdminRepo { get; set; }
 
-        public RepoConfig AdminRepo { get; private set; }
+        [XmlElement("PackageGlobalCache")]
+        public string PackageGlobalCache { get; set; }
 
-        public string BinRepo { get; private set; }
+        [XmlElement("BinRepo")]
+        public string BinRepo { get; set; }
 
-        public string[] Nugets { get; private set; }
+        [XmlElement("NuGet")]
+        public string[] NuGets { get; set; }
 
-        public string PackageGlobalCache { get; private set; }
-
-        public RepoConfig[] SourceRepos { get; private set; }
+        [XmlElement("SourceRepo")]
+        public RepoConfig[] SourceRepos { get; set; }
     }
 }

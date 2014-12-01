@@ -23,80 +23,39 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
 using System.IO;
 using System.Xml.Serialization;
 using FullBuild.Helpers;
-using Mini;
 
 namespace FullBuild.Config
 {
     internal static class ConfigManager
     {
-        public static FullBuildConfig LoadConfig(DirectoryInfo wsDir)
-        {
-            var bootstrapConfig = LoadBootstrapConfig();
-            var fbDir = wsDir.GetDirectory(".full-build");
-            var adminConfig = LoadAdminConfig(fbDir);
-            var config = new FullBuildConfig(bootstrapConfig, adminConfig);
-            return config;
-        }
-
-        public static BoostrapConfig LoadBootstrapConfig()
-        {
-            var userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-            var configFile = userProfileDir.GetFile(".full-build-config");
-            if (! configFile.Exists)
-            {
-                throw new ArgumentException("Configure full-build before proceeding.");
-            }
-
-            var ini = new IniDocument(configFile.FullName);
-            var packageGlobalCacheConfig = ini["FullBuild"]["PackageGlobalCache"].Value;
-            var adminVcsConfig = ini["FullBuild"]["RepoType"].Value;
-            var adminRepoConfig = ini["FullBuild"]["RepoUrl"].Value;
-
-            var adminRepo = new RepoConfig
-                            {
-                                Name = "admin",
-                                Vcs = (VersionControlType)Enum.Parse(typeof(VersionControlType), adminVcsConfig, true),
-                                Url = adminRepoConfig
-                            };
-            var boostrapConfig = new BoostrapConfig(packageGlobalCacheConfig, adminRepo);
-
-            return boostrapConfig;
-        }
-
-        public static void SetBootstrapConfig(ConfigParameter key, string value)
-        {
-            var userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-            var configFile = userProfileDir.GetFile(".full-build-config");
-            var keyName = key.ToString();
-
-            var ini = new IniDocument(configFile.FullName);
-            ini["FullBuild"][keyName].Value = value;
-            ini.Write();
-        }
-
-        public static void SaveAdminConfig(DirectoryInfo adminDir, AdminConfig config)
+        public static void SaveConfig(DirectoryInfo adminDir, FullBuildConfig config)
         {
             var file = adminDir.GetFile("full-build.config");
-            var xmlSer = new XmlSerializer(typeof(AdminConfig));
+            var xmlSer = new XmlSerializer(typeof(FullBuildConfig));
             using (var writer = new StreamWriter(file.FullName))
             {
                 xmlSer.Serialize(writer, config);
             }
         }
 
-        public static AdminConfig LoadAdminConfig(DirectoryInfo adminDir)
+        public static void SaveConfig(FullBuildConfig config)
+        {
+            var adminDir = WellKnownFolders.GetAdminDirectory();
+            SaveConfig(adminDir, config);
+        }
+
+        public static FullBuildConfig LoadConfig(DirectoryInfo adminDir)
         {
             var file = adminDir.GetFile("full-build.config");
             if (file.Exists)
             {
-                var xmlSer = new XmlSerializer(typeof(AdminConfig));
+                var xmlSer = new XmlSerializer(typeof(FullBuildConfig));
                 using (var reader = new StreamReader(file.FullName))
                 {
-                    var bootstrapConfig = (AdminConfig)xmlSer.Deserialize(reader);
+                    var bootstrapConfig = (FullBuildConfig)xmlSer.Deserialize(reader);
                     bootstrapConfig.SourceRepos = bootstrapConfig.SourceRepos ?? new RepoConfig[0];
                     bootstrapConfig.NuGets = bootstrapConfig.NuGets ?? new string[0];
 
@@ -104,7 +63,13 @@ namespace FullBuild.Config
                 }
             }
 
-            return new AdminConfig {NuGets = new string[0], SourceRepos = new RepoConfig[0]};
+            return new FullBuildConfig {NuGets = new string[0], SourceRepos = new RepoConfig[0]};
+        }
+
+        public static FullBuildConfig LoadConfig()
+        {
+            var adminDir = WellKnownFolders.GetAdminDirectory();
+            return LoadConfig(adminDir);
         }
     }
 }
