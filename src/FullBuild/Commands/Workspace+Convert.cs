@@ -189,7 +189,7 @@ namespace FullBuild.Commands
             }
 
             // remove nuget folders
-            var config = ConfigManager.LoadConfig(wsDir);
+            var config = ConfigManager.LoadConfig();
             foreach (var repo in config.SourceRepos)
             {
                 var repoDir = wsDir.GetDirectory(repo.Name);

@@ -25,6 +25,7 @@
 
 using System;
 using System.IO;
+using FullBuild.Config;
 
 namespace FullBuild.Helpers
 {
@@ -92,6 +93,12 @@ namespace FullBuild.Helpers
 
         public static DirectoryInfo GetCacheDirectory()
         {
+            var config = ConfigManager.LoadConfig();
+            if (null != config.PackageGlobalCache)
+            {
+                return new DirectoryInfo(config.PackageGlobalCache);
+            }
+
             var wsDir = GetWorkspaceDirectory();
             var target = wsDir.GetDirectory(RelativeCacheDirectory);
             target.Create();

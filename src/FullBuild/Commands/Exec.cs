@@ -54,7 +54,7 @@ namespace FullBuild.Commands
         public static void ForEachRepo(string command)
         {
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.LoadConfig(workspace);
+            var config = ConfigManager.LoadConfig();
 
             foreach (var repo in config.SourceRepos)
             {

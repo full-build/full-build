@@ -1,24 +1,21 @@
-rem @echo off
+@echo off
 setlocal
+
+call fb-init.bat
 
 taskkill /im tgitcache.exe 1>NUL 2>NUL
 if exist cs-init rmdir /s /q cs-init || goto :ko
-mkdir cs-init || goto :ko
 
 rem setup environment
-fullbuild set config PackageGlobalCache c:\PackageGlobalCache || goto :ko
-fullbuild set config RepoType Git || goto :ko
-fullbuild set config RepoUrl https://github.com/pchalamet/cassandra-sharp-full-build || goto :ko
-fullbuild init workspace cs-init || goto :ko
+%FULLBUILD% init workspace cs-init from git https://github.com/pchalamet/cassandra-sharp-full-build || goto :ko
 
 rem create workspace
 pushd cs-init
 
-fullbuild set binrepo c:\BinRepo || goto :ko
-fullbuild add nuget https://www.nuget.org/api/v2/ || goto :ko
-fullbuild add git repo cassandra-sharp from https://github.com/pchalamet/cassandra-sharp || goto :ko
-fullbuild add git repo cassandra-sharp-contrib from https://github.com/pchalamet/cassandra-sharp-contrib || goto :ko
-fullbuild clone repo *  || goto :ko
+%FULLBUILD% add nuget https://www.nuget.org/api/v2/ || goto :ko
+%FULLBUILD% add git repo cassandra-sharp from https://github.com/pchalamet/cassandra-sharp || goto :ko
+%FULLBUILD% add git repo cassandra-sharp-contrib from https://github.com/pchalamet/cassandra-sharp-contrib || goto :ko
+%FULLBUILD% clone repo *  || goto :ko
 
 :ok
 echo *** SUCCESSFUL

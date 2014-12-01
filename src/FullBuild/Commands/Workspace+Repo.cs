@@ -36,17 +36,12 @@ namespace FullBuild.Commands
     {
         private static void ListRepos()
         {
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var config = ConfigManager.LoadAdminConfig(admDir);
-
+            var config = ConfigManager.LoadConfig();
             config.SourceRepos.ForEach(x => Console.WriteLine(x.Name));
         }
 
         private static void AddRepo(string name, VersionControlType type, string url)
         {
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var config = ConfigManager.LoadAdminConfig(admDir);
-
             var newRepo = new RepoConfig
                           {
                               Name = name,
@@ -54,15 +49,16 @@ namespace FullBuild.Commands
                               Url = url
                           };
 
+            var config = ConfigManager.LoadConfig();
             config.SourceRepos = config.SourceRepos.Concat(new[] {newRepo}).ToArray();
 
-            ConfigManager.SaveAdminConfig(admDir, config);
+            ConfigManager.SaveConfig(config);
         }
 
         private static void CloneRepo(string[] repos)
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.LoadConfig(wsDir);
+            var config = ConfigManager.LoadConfig();
 
             // validate first that repos are valid and clone them
             foreach (var repo in repos)
@@ -72,7 +68,7 @@ namespace FullBuild.Commands
                 var repoConfigs = config.SourceRepos.Where(x => regex.IsMatch(x.Name));
                 if (!repoConfigs.Any())
                 {
-                    Console.WriteLine("WARNING |No repository found");
+                    Console.WriteLine("WARNING | No repository found");
                     return;
                 }
 
