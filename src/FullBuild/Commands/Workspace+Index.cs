@@ -276,16 +276,20 @@ namespace FullBuild.Commands
             var packages = nugetPackages.Concat(fbPackages).Concat(paketPackages);
             var packageNames = packages.Select(x => x.Name).Distinct().ToImmutableList();
 
-            // update anthology with this new project
-            var project = new Project(projectGuid, projectFileName, assemblyName, extension, fxTarget, allProjectReferences, binaryReferences, packageNames);
-
             // check first that project does not exist with same GUID and different project file (duplicated project)
-            var similarProjects = anthology.Projects.Where(x => x.Guid == project.Guid && (!x.AssemblyName.InvariantEquals(project.AssemblyName) || !x.ProjectFile.InvariantEquals(project.ProjectFile)));
+            var similarProjects = anthology.Projects.Where(x => x.Guid == projectGuid && (!x.AssemblyName.InvariantEquals(assemblyName) || !x.ProjectFile.InvariantEquals(projectFileName)));
             if (similarProjects.Any())
             {
-                var errorMsg = string.Format("Project '{0}' conflicts with other projects (same GUID but different location)", project.ProjectFile);
-                throw new ProcessingException(errorMsg, () => similarProjects.Select(x => x.ProjectFile));
+                var newProjectGuid = Guid.NewGuid();
+                Console.Error.WriteLine("WARNING | Project '{0}' conflicts with other projects (same GUID but different location)", projectFileName);
+                Console.WriteLine("        | New project GUID assigned {0} --> {1}", projectGuid, newProjectGuid);
+                projectGuid = newProjectGuid;
+
+                similarProjects.ForEach(x => Console.Error.WriteLine("        | {0}", x.ProjectFile));
             }
+
+            // update anthology with this new project
+            var project = new Project(projectGuid, projectFileName, assemblyName, extension, fxTarget, allProjectReferences, binaryReferences, packageNames);
 
             anthology = anthology.AddOrUpdateProject(project);
             anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
