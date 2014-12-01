@@ -43,10 +43,10 @@ namespace FullBuild
             }
             catch (Exception ex)
             {
-                _logger.Debug("Uncaught error", ex);
+                _logger.Debug("Failed with error", ex);
 
-                Console.WriteLine("ERROR:");
-                Console.WriteLine(ex.Message);
+                Console.Error.WriteLine("ERROR:");
+                Console.Error.WriteLine(ex.Message);
             }
 
             return 5;
@@ -58,7 +58,6 @@ namespace FullBuild
                                             .With(Workspace.Commands())
                                             .With(Packages.Commands())
                                             .With(Views.Commands())
-                                            .With(Configuration.Commands())
                                             .With(Exec.Commands()).Build();
             
             if (! parser.ParseAndInvoke(args))

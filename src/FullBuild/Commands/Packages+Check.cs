@@ -39,9 +39,9 @@ namespace FullBuild.Commands
             var anthology = Anthology.Load(admDir);
 
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.LoadConfig(wsDir);
+            var config = ConfigManager.LoadConfig();
 
-            var nuget = NuGet.Default(config.Nugets);
+            var nuget = NuGet.Default(config.NuGets);
 
             foreach (var pkg in anthology.Packages)
             {

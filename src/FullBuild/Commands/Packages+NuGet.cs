@@ -38,11 +38,10 @@ namespace FullBuild.Commands
 
         private static void AddNuGet(string url)
         {
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var config = ConfigManager.LoadAdminConfig(admDir);
+            var config = ConfigManager.LoadConfig();
 
             config.NuGets = config.NuGets.Concat(new[] {url}).Distinct().ToArray();
-            ConfigManager.SaveAdminConfig(admDir, config);
+            ConfigManager.SaveConfig(config);
 
             var title = NuGet.Default(config.NuGets).RetrieveFeedTitle(new Uri(url));
             Console.WriteLine("Added feed {0} with title {1}", url, title);
@@ -50,10 +49,8 @@ namespace FullBuild.Commands
 
         private static void ListNuGets()
         {
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var config = ConfigManager.LoadAdminConfig(admDir);
+            var config = ConfigManager.LoadConfig();
             config.NuGets.ForEach(Console.WriteLine);
-            ConfigManager.SaveAdminConfig(admDir, config);
         }
 
         private static void ListPackages()
@@ -70,11 +67,11 @@ namespace FullBuild.Commands
             var anthology = Anthology.Load(admDir);
 
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.LoadConfig(wsDir);
+            var config = ConfigManager.LoadConfig();
 
             if (version == "*")
             {
-                version = NuGet.Default(config.Nugets).GetLatestVersion(name).Version;
+                version = NuGet.Default(config.NuGets).GetLatestVersion(name).Version;
             }
 
             var pkg = new Package(name, version);

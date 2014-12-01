@@ -52,11 +52,9 @@ namespace FullBuild.Commands
 
         public static void InstallPackage(Package pkg)
         {
-            var config = ConfigManager.LoadConfig(WellKnownFolders.GetWorkspaceDirectory());
-
-            var nuget = NuGet.Default(config.Nugets);
-
-            var cacheDir = SetupCacheDir(config);
+            var config = ConfigManager.LoadConfig();
+            var nuget = NuGet.Default(config.NuGets);
+            var cacheDir = WellKnownFolders.GetCacheDirectory();
             var pkgDir = WellKnownFolders.GetPackageDirectory();
 
             if (! nuget.IsPackageInCache(pkg, cacheDir))
@@ -67,18 +65,6 @@ namespace FullBuild.Commands
 
             nuget.InstallPackageFromCache(pkg, cacheDir, pkgDir);
             GenerateTargetsForProject(pkg);
-        }
-
-        private static DirectoryInfo SetupCacheDir(FullBuildConfig config)
-        {
-            var cacheDir = WellKnownFolders.GetCacheDirectory();
-            if (!String.IsNullOrEmpty(config.PackageGlobalCache))
-            {
-                cacheDir = new DirectoryInfo(config.PackageGlobalCache);
-                cacheDir.Create();
-            }
-
-            return cacheDir;
         }
 
         private static XElement Generatewhen(IEnumerable<string> foldersToTry, string fxVersion, DirectoryInfo libDir)
