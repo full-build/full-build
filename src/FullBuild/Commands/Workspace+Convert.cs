@@ -197,8 +197,14 @@ namespace FullBuild.Commands
                 {
                     repoDir.EnumerateNugetDirectories().ForEach(x =>
                                                                 {
-                                                                    x.Refresh();
-                                                                    x.Delete(true);
+                                                                    try
+                                                                    {
+                                                                        x.Refresh();
+                                                                        x.Delete(true);
+                                                                    }
+                                                                    catch
+                                                                    {
+                                                                    }
                                                                 });
                 }
             }
