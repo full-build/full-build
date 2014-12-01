@@ -235,7 +235,7 @@ namespace FullBuild.Commands
 
             if (projectsWithInvalidGuidReference.Any())
             {
-                Console.WriteLine("WARNING | Project '{0}' has invalid project GUID references", projectFileName);
+                Console.Error.WriteLine("WARNING | Project '{0}' has invalid project GUID references", projectFileName);
                 projectsWithInvalidGuidReference.ForEach(x => Console.Error.WriteLine("        | Project reference '{0}' forced to {1:B}", x.Include, x.Guid));
             }
 
