@@ -29,6 +29,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Xml.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
@@ -149,17 +150,15 @@ namespace FullBuild.Commands
 
                 // process all projects
                 var allprojs = repoDir.EnumerateSupportedProjectFiles();
-                var projectAdmDir = repoDir.GetDirectory(WellKnownFolders.RelativeProjectAdminRepo);
 
-                // merge project anthology first
-                var projectAnthology = Anthology.Load(projectAdmDir);
+                // new anthology for this project
+                var projectAnthology = new Anthology();
                 anthology = projectAnthology.Binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
                 anthology = projectAnthology.Packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
                 anthology = projectAnthology.Projects.Aggregate(anthology, (a, p) => a.AddOrUpdateProject(p));
 
                 // scan projects and import
                 projectAnthology = allprojs.Aggregate(projectAnthology, (a, p) => ParseAndAddProject(workspace, p, a));
-                projectAnthology.Save(projectAdmDir);
 
                 anthology = projectAnthology.Binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
                 anthology = projectAnthology.Packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
@@ -274,9 +273,8 @@ namespace FullBuild.Commands
             var similarProjects = anthology.Projects.Where(x => x.Guid == project.Guid && (!x.AssemblyName.InvariantEquals(project.AssemblyName) || !x.ProjectFile.InvariantEquals(project.ProjectFile)));
             if (similarProjects.Any())
             {
-                Console.Error.WriteLine("ERROR | Project '{0}' conflicts with other projects (same GUID but different location)", project.ProjectFile);
-                similarProjects.ForEach(x => Console.Error.WriteLine("      | {0}", x.ProjectFile));
-                return anthology;
+                var errorMsg = string.Format("Project '{0}' conflicts with other projects (same GUID but different location)", project.ProjectFile);
+                throw new ProcessingException(errorMsg, () => similarProjects.Select(x => x.ProjectFile));
             }
 
             // read each referenced projects to check guid
@@ -289,9 +287,8 @@ namespace FullBuild.Commands
                                   select new {Guid = prjRef.Guid, Include = prjRef.Include, GoodGuid = prjRefGuid};
             if (projectRefGuids.Any())
             {
-                Console.Error.WriteLine("ERROR | Project '{0}' has invalid project GUID references:", projectFileName);
-                projectRefGuids.ForEach(x => Console.Error.WriteLine("      | {0} {1:B} ==> {2:B}", x.Include, x.Guid, x.GoodGuid));
-                return anthology;
+                var errorMsg = string.Format("Project '{0}' has invalid project GUID references", project.ProjectFile);
+                throw new ProcessingException(errorMsg, () => projectRefGuids.Select(x => string.Format("{0} {1:B} ==> {2:B}", x.Include, x.Guid, x.GoodGuid)));
             }
 
             anthology = anthology.AddOrUpdateProject(project);
