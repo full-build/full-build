@@ -78,7 +78,7 @@ namespace FullBuild.Commands
 
                 // remove all import from .full-build and project reference
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference").Remove();
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantContains(WellKnownFolders.RelativeAdminDirectory)).Remove();
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantStartsWith(WellKnownFolders.MsBuildProjectDir)).Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "Reference").Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantContains("NuGet.targets")).Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantContains("paket.targets")).Remove();
