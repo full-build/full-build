@@ -151,14 +151,8 @@ namespace FullBuild.Commands
                 // process all projects
                 var allprojs = repoDir.EnumerateSupportedProjectFiles();
 
-                // new anthology for this project
-                var projectAnthology = new Anthology();
-                anthology = projectAnthology.Binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
-                anthology = projectAnthology.Packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
-                anthology = projectAnthology.Projects.Aggregate(anthology, (a, p) => a.AddOrUpdateProject(p));
-
                 // scan projects and import
-                projectAnthology = allprojs.Aggregate(projectAnthology, (a, p) => ParseAndAddProject(workspace, p, a));
+                var projectAnthology = allprojs.Aggregate(anthology, (a, p) => ParseAndAddProject(workspace, p, a));
 
                 anthology = projectAnthology.Binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
                 anthology = projectAnthology.Packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
@@ -292,7 +286,6 @@ namespace FullBuild.Commands
                 var errorMsg = string.Format("Project '{0}' conflicts with other projects (same GUID but different location)", project.ProjectFile);
                 throw new ProcessingException(errorMsg, () => similarProjects.Select(x => x.ProjectFile));
             }
-
 
             anthology = anthology.AddOrUpdateProject(project);
             anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
