@@ -78,6 +78,7 @@
     <Compile Include="Commands\NuGet.cs" />
     <Compile Include="Commands\Packages+NuGet.cs" />
     <Compile Include="Commands\Packages+Check.cs" />
+    <Compile Include="Commands\ProcessingException.cs" />
     <Compile Include="Commands\Workspace+Convert.cs" />
     <Compile Include="Commands\FrameworkVersion.cs" />
     <Compile Include="Commands\Usage.cs" />

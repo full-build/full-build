@@ -156,16 +156,15 @@ namespace FullBuild.Commands
                     var project = anthology.Projects.SingleOrDefault(x => x.Guid == refGuid);
                     if (null == project)
                     {
-                        Console.Error.WriteLine("ERROR | Project {0:B} references unknown project {1:B}", projectDef.Guid, refGuid);
+                        var errMsg = string.Format("Project {0:B} references unknown project {1:B}", projectDef.Guid, refGuid);
+                        throw new ProcessingException(errMsg, () => Enumerable.Empty<string>());
                     }
-                    else
-                    {
-                        var refProject = project;
-                        var targetFileName = refProject.Guid + ".targets";
-                        var import = Path.Combine(WellKnownFolders.MsBuildProjectDir, targetFileName).ToUnixSeparator();
-                        var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import));
-                        itemGroupFile.AddBeforeSelf(newProjectRef);
-                    }
+
+                    var refProject = project;
+                    var targetFileName = refProject.Guid + ".targets";
+                    var import = Path.Combine(WellKnownFolders.MsBuildProjectDir, targetFileName).ToUnixSeparator();
+                    var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import));
+                    itemGroupFile.AddBeforeSelf(newProjectRef);
                 }
 
                 // add packages
