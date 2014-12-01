@@ -24,44 +24,30 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using FullBuild.Commands;
-using FullBuild.NatLangParser;
-using NLog;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace FullBuild
+namespace FullBuild.Commands
 {
-    internal class Program
+    public class ProcessingException : Exception
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private readonly Func<IEnumerable<string>> _context;
 
-        public static int Main(string[] args)
+        public ProcessingException(string msg, Func<IEnumerable<string>> context, Exception innerException = null)
+            : base(msg, innerException)
         {
-            try
-            {
-                TryMain(args);
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.Debug("Uncaught error", ex);
-                Console.WriteLine(ex);
-            }
-
-            return 5;
+            _context = context;
         }
 
-        private static void TryMain(string[] args)
+        public override string Message
         {
-            var parser = new ParserBuilder().With(Usage.Commands())
-                                            .With(Workspace.Commands())
-                                            .With(Packages.Commands())
-                                            .With(Views.Commands())
-                                            .With(Configuration.Commands())
-                                            .With(Exec.Commands()).Build();
-            
-            if (! parser.ParseAndInvoke(args))
+            get
             {
-                throw new ArgumentException("Invalid arguments. Use /? for usage.");
+                var sb = new StringBuilder();
+                sb.AppendLine(base.Message);
+                sb = _context().Aggregate(sb, (s, ctx) => s.AppendLine(ctx));
+                return sb.ToString();
             }
         }
     }
