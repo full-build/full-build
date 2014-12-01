@@ -37,11 +37,13 @@ namespace FullBuild.Helpers
 
         public static string GetProjectName(this Project @this)
         {
-            var projectFile = @this.ProjectFile.Split('/')[0];
-            var propName = string.Format("{0} ({1})", @this.AssemblyName, @this.FxTarget);
+            return Path.GetFileName(@this.ProjectFile);
 
-            var projectName = projectFile + propName;
-            return projectName;
+            //var projectFile = @this.ProjectFile.Split('/')[0];
+            //var propName = string.Format("{0} ({1})", @this.AssemblyName, @this.FxTarget);
+
+            //var projectName = projectFile + propName;
+            //return projectName;
         }
 
         public static string GetProjectPropertyGroupName(this Project @this)
