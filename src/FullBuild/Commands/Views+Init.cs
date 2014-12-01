@@ -57,11 +57,13 @@ namespace FullBuild.Commands
                     var repoDir = wsDir.GetDirectory(repoConfig.Name);
                     if (!repoDir.Exists)
                     {
-                        var msg = string.Format("Clone repository {0} before creating the view", repo);
-                        throw new ArgumentException(msg);
+                        sb.AppendLine(repoConfig.Name);
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("WARNING | Skipping repository {0} (not cloned)", repo);
                     }
 
-                    sb.AppendLine(repoConfig.Name);
                 }
             }
 
