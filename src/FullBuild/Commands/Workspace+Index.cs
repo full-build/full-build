@@ -223,6 +223,22 @@ namespace FullBuild.Commands
                                          let include = prjRef.Attribute("Include").Value
                                          select new {Guid = guid, Include = include};
 
+            // read each referenced projects to check guid
+            var projectPath = projectFile.Directory;
+            var projectRefGuids = from prjRef in projectRefWithLocation
+                                  let prjRefFileName = projectPath.GetFile(prjRef.Include)
+                                  let prjRefXDoc = XDocument.Load(prjRefFileName.FullName)
+                                  let prjRefGuid = ExtractProjectGuid(prjRefXDoc)
+                                  where prjRefGuid != prjRef.Guid
+                                  select new { BadGuid = prjRef.Guid, Include = prjRef.Include, Guid = prjRefGuid };
+            var projectsWithInvalidGuidReference = projectRefGuids.Where(x => x.Guid != x.BadGuid);
+
+            if (projectsWithInvalidGuidReference.Any())
+            {
+                Console.WriteLine("WARNING | Project '{0}' has invalid project GUID references", projectFileName);
+                projectsWithInvalidGuidReference.ForEach(x => Console.Error.WriteLine("        | Project reference '{0}' forced to {1:B}", x.Include, x.Guid));
+            }
+
             // extract project references
             var projectReferences = projectRefWithLocation.Select(x => x.Guid);
             var fbProjectReferences = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
@@ -277,19 +293,6 @@ namespace FullBuild.Commands
                 throw new ProcessingException(errorMsg, () => similarProjects.Select(x => x.ProjectFile));
             }
 
-            // read each referenced projects to check guid
-            var projectPath = projectFile.Directory;
-            var projectRefGuids = from prjRef in projectRefWithLocation
-                                  let prjRefFileName = projectPath.GetFile(prjRef.Include)
-                                  let prjRefXDoc = XDocument.Load(prjRefFileName.FullName)
-                                  let prjRefGuid = ExtractProjectGuid(prjRefXDoc)
-                                  where prjRefGuid != prjRef.Guid
-                                  select new {Guid = prjRef.Guid, Include = prjRef.Include, GoodGuid = prjRefGuid};
-            if (projectRefGuids.Any())
-            {
-                var errorMsg = string.Format("Project '{0}' has invalid project GUID references", project.ProjectFile);
-                throw new ProcessingException(errorMsg, () => projectRefGuids.Select(x => string.Format("{0} {1:B} ==> {2:B}", x.Include, x.Guid, x.GoodGuid)));
-            }
 
             anthology = anthology.AddOrUpdateProject(project);
             anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
