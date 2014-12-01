@@ -55,15 +55,14 @@ namespace FullBuild.Commands
                 foreach (var repoConfig in repoConfigs)
                 {
                     var repoDir = wsDir.GetDirectory(repoConfig.Name);
-                    if (!repoDir.Exists)
+                    if (repoDir.Exists)
                     {
                         sb.AppendLine(repoConfig.Name);
                     }
                     else
                     {
-                        Console.Error.WriteLine("WARNING | Skipping repository {0} (not cloned)", repo);
+                        Console.Error.WriteLine("WARNING | Skipping repository {0} (not cloned)", repoConfig.Name);
                     }
-
                 }
             }
 
