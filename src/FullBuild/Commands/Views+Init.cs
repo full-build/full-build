@@ -38,7 +38,7 @@ namespace FullBuild.Commands
         private static void InitView(string viewName, string[] repos)
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var config = ConfigManager.LoadConfig(wsDir);
+            var config = ConfigManager.LoadConfig();
 
             // validate first that repos are valid and clone them
             var sb = new StringBuilder();
