@@ -44,7 +44,9 @@ namespace FullBuild
             catch (Exception ex)
             {
                 _logger.Debug("Uncaught error", ex);
-                Console.WriteLine(ex);
+
+                Console.WriteLine("ERROR:");
+                Console.WriteLine(ex.Message);
             }
 
             return 5;
