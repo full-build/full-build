@@ -29,7 +29,6 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Xml.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
@@ -45,9 +44,11 @@ namespace FullBuild.Commands
             var config = ConfigManager.LoadConfig(workspace);
 
             var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthology = Anthology.Load(admDir);
+
+            EnsureProjectGuidsAreUnique(config, workspace);
 
             // get all csproj in all repos only
+            var anthology = Anthology.Load(admDir);
             anthology = UpdateAnthologyFromSource(config, workspace, anthology);
             anthology.Save(admDir);
 
@@ -61,6 +62,44 @@ namespace FullBuild.Commands
 
             // Generate import files
             GenerateImports(anthology);
+        }
+
+        private static void EnsureProjectGuidsAreUnique(FullBuildConfig config, DirectoryInfo workspace)
+        {
+            Console.WriteLine("Ensuring projets GUID are unique");
+
+            var existingGuids = new HashSet<Guid>();
+            foreach (var repo in config.SourceRepos)
+            {
+                Console.WriteLine("Processing repo {0}:", repo.Name);
+                var repoDir = workspace.GetDirectory(repo.Name);
+                if (!repoDir.Exists)
+                {
+                    continue;
+                }
+
+                // process all projects
+                var allprojs = repoDir.EnumerateSupportedProjectFiles();
+
+                // scan projects and import
+                foreach (var proj in allprojs)
+                {
+                    var xdoc = XDocument.Load(proj.FullName);
+
+                    // extract infos from project
+                    var projectGuid = ExtractProjectGuid(xdoc);
+                    if (existingGuids.Contains(projectGuid))
+                    {
+                        Console.Error.WriteLine("WARNING | Project '{0}' GUID conflicts with other projects", proj.FullName);
+
+                        projectGuid = Guid.NewGuid();
+                        xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single().Value = projectGuid.ToString("B");
+                        xdoc.Save(proj.FullName);
+                    }
+
+                    existingGuids.Add(projectGuid);
+                }
+            }
         }
 
         private static void GenerateImports(Anthology anthology)
@@ -211,6 +250,14 @@ namespace FullBuild.Commands
                 ? ".dll"
                 : ".exe";
 
+            // check first that project does not exist with same GUID and different project file (duplicated project)
+            var similarProjects = anthology.Projects.Where(x => x.Guid == projectGuid && (!x.AssemblyName.InvariantEquals(assemblyName) || !x.ProjectFile.InvariantEquals(projectFileName)));
+            if (similarProjects.Any())
+            {
+                var errMsg = string.Format("ERROR | Project '{0}' conflicts with other projects (same GUID but different location)", projectFileName);
+                throw new ProcessingException(errMsg, () => similarProjects.Select(x => x.ProjectFile));
+            }
+
             // extract project reference along project location to help detecting invalid project references
             var projectRefWithLocation = from prjRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference")
                                          let guid = Guid.ParseExact(prjRef.Element(XmlHelpers.NsMsBuild + "Project").Value, "B")
@@ -224,7 +271,7 @@ namespace FullBuild.Commands
                                   let prjRefXDoc = XDocument.Load(prjRefFileName.FullName)
                                   let prjRefGuid = ExtractProjectGuid(prjRefXDoc)
                                   where prjRefGuid != prjRef.Guid
-                                  select new { BadGuid = prjRef.Guid, Include = prjRef.Include, Guid = prjRefGuid };
+                                  select new {BadGuid = prjRef.Guid, Include = prjRef.Include, Guid = prjRefGuid};
             var projectsWithInvalidGuidReference = projectRefGuids.Where(x => x.Guid != x.BadGuid);
 
             if (projectsWithInvalidGuidReference.Any())
@@ -275,18 +322,6 @@ namespace FullBuild.Commands
             // build all packages
             var packages = nugetPackages.Concat(fbPackages).Concat(paketPackages);
             var packageNames = packages.Select(x => x.Name).Distinct().ToImmutableList();
-
-            // check first that project does not exist with same GUID and different project file (duplicated project)
-            var similarProjects = anthology.Projects.Where(x => x.Guid == projectGuid && (!x.AssemblyName.InvariantEquals(assemblyName) || !x.ProjectFile.InvariantEquals(projectFileName)));
-            if (similarProjects.Any())
-            {
-                var newProjectGuid = Guid.NewGuid();
-                Console.Error.WriteLine("WARNING | Project '{0}' conflicts with other projects (same GUID but different location)", projectFileName);
-                Console.WriteLine("        | New project GUID assigned {0} --> {1}", projectGuid, newProjectGuid);
-                projectGuid = newProjectGuid;
-
-                similarProjects.ForEach(x => Console.Error.WriteLine("        | {0}", x.ProjectFile));
-            }
 
             // update anthology with this new project
             var project = new Project(projectGuid, projectFileName, assemblyName, extension, fxTarget, allProjectReferences, binaryReferences, packageNames);
