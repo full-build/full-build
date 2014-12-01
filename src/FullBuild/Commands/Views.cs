@@ -83,7 +83,7 @@ namespace FullBuild.Commands
         {
             var build = Exec.IsRunningOnMono()
                 ? "xbuild"
-                : "msbuild";
+                : "msbuild /q";
             var cmd = string.Format("{0} {1}.sln", build, viewname);
 
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
