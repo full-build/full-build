@@ -46,7 +46,7 @@ namespace FullBuild.Commands
 
             // get bootstrap config
             var config = ConfigManager.LoadConfig(admDir);
-            
+
             // get bootstrap config
             var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.AdminRepo.Vcs.ToString());
             sourceControl.Clone(admDir, ".full-build", config.AdminRepo.Url);

@@ -157,7 +157,7 @@ namespace FullBuild.Commands
                     if (null == project)
                     {
                         var errMsg = string.Format("Project {0:B} references unknown project {1:B}", projectDef.Guid, refGuid);
-                        throw new ProcessingException(errMsg, () => Enumerable.Empty<string>());
+                        throw new ProcessingException(errMsg, Enumerable.Empty<string>);
                     }
 
                     var refProject = project;
