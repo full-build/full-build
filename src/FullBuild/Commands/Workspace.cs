@@ -28,7 +28,6 @@ using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.NatLangParser;
 using NLog;
-using NLog.Time;
 
 namespace FullBuild.Commands
 {
@@ -49,10 +48,7 @@ namespace FullBuild.Commands
                                      .Command("init")
                                      .Command("workspace")
                                      .Param(path)
-                                     .Command("from")
-                                     .Param(vcs)
-                                     .Param(url)
-                                     .Do(ctx => InitWorkspace(ctx.Get(path), ctx.Get(vcs), ctx.Get(url)));
+                                     .Do(ctx => InitWorkspace(ctx.Get(path)));
 
             // refresh workspace
             yield return MatchBuilder.Describe("refresh workspace from remote")

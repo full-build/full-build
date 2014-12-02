@@ -33,7 +33,7 @@ namespace FullBuild.Commands
 {
     internal partial class Workspace
     {
-        private static void InitWorkspace(string path, VersionControlType vcs, string url)
+        private static void InitWorkspace(string path)
         {
             var wsDir = new DirectoryInfo(path);
             wsDir.Create();
@@ -45,21 +45,15 @@ namespace FullBuild.Commands
             }
 
             // get bootstrap config
-            var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(vcs.ToString());
-            sourceControl.Clone(admDir, ".full-build", url);
-
-            // load config now
             var config = ConfigManager.LoadConfig(admDir);
-            if (null == config.AdminRepo)
-            {
-                config.AdminRepo = new RepoConfig {Name = ".full-build", Vcs = vcs, Url = url};
-                ConfigManager.SaveConfig(admDir, config);
-            }
+            
+            // get bootstrap config
+            var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.AdminRepo.Vcs.ToString());
+            sourceControl.Clone(admDir, ".full-build", config.AdminRepo.Url);
 
-            if (null == config.BinRepo)
-            {
-                throw new ArgumentException("Set binary repository in configuration before proceeding");
-            }
+            // reload config (after clone)
+            config = ConfigManager.LoadConfig(admDir);
+            ConfigManager.SaveConfig(admDir, config);
 
             // copy all files from binary repo
             var tip = sourceControl.Tip(admDir);
