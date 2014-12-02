@@ -32,12 +32,15 @@ namespace FullBuild.Commands
 {
     public class ProcessingException : Exception
     {
-        private readonly Func<IEnumerable<string>> _context;
+        private readonly string _context;
 
         public ProcessingException(string msg, Func<IEnumerable<string>> context, Exception innerException = null)
             : base(msg, innerException)
         {
-            _context = context;
+            var sb = new StringBuilder();
+            sb.AppendLine(base.Message);
+            sb = context().Aggregate(sb, (s, ctx) => s.AppendLine(ctx));
+            _context = sb.ToString();
         }
 
         public override string Message
@@ -46,7 +49,7 @@ namespace FullBuild.Commands
             {
                 var sb = new StringBuilder();
                 sb.AppendLine(base.Message);
-                sb = _context().Aggregate(sb, (s, ctx) => s.AppendLine(ctx));
+                sb.AppendLine(_context);
                 return sb.ToString();
             }
         }

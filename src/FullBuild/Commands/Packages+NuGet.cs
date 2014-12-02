@@ -28,14 +28,11 @@ using System.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
-using NLog;
 
 namespace FullBuild.Commands
 {
     internal partial class Packages
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
         private static void AddNuGet(string url)
         {
             var config = ConfigManager.LoadConfig();
@@ -65,8 +62,6 @@ namespace FullBuild.Commands
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             var anthology = Anthology.Load(admDir);
-
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig();
 
             if (version == "*")
