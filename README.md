@@ -2,6 +2,8 @@ full-build: workspace management for .NET
 =========================================
 [![build status](https://ci.appveyor.com/api/projects/status/github/pchalamet/full-build?branch=master)](https://ci.appveyor.com/project/pchalamet/full-build)
 
+Check out [full-build.io](http://full-build.io)
+
 full-build is a enterprise grade workspace management for .net developers (pfeew !).
 
 It provides following benefits:
