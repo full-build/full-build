@@ -7,7 +7,10 @@ taskkill /im tgitcache.exe 1>NUL 2>NUL
 if exist cs-init rmdir /s /q cs-init || goto :ko
 
 rem setup environment
-%FULLBUILD% init workspace cs-init from git https://github.com/pchalamet/cassandra-sharp-full-build || goto :ko
+%FULLBUILD% set config binrepo c:\BinRepo
+%FULLBUILD% set config repoType git
+%FULLBUILD% set config repoUrl https://github.com/pchalamet/cassandra-sharp-full-build
+%FULLBUILD% init workspace cs-init || goto :ko
 
 rem create workspace
 pushd cs-init

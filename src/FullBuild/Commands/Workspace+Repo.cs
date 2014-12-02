@@ -50,8 +50,12 @@ namespace FullBuild.Commands
                           };
 
             var config = ConfigManager.LoadConfig();
-            config.SourceRepos = config.SourceRepos.Concat(new[] {newRepo}).ToArray();
+            if (config.SourceRepos.Any(x => x.Name.InvariantEquals(name)))
+            {
+                throw new ArgumentException("Repository already exists");
+            }
 
+            config.SourceRepos = config.SourceRepos.Concat(new[] {newRepo}).ToArray();
             ConfigManager.SaveConfig(config);
         }
 
