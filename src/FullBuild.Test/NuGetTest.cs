@@ -28,6 +28,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using FullBuild.Commands;
+using FullBuild.Helpers;
 using FullBuild.Model;
 using NFluent;
 using NUnit.Framework;
@@ -70,7 +71,7 @@ namespace FullBuild.Test
                     Check.That(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
                     Check.That(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
 
-                    var castlePkg = new FileInfo(Path.Combine(cacheDir.Directory.FullName, "Castle.Core.3.3.3.nupkg"));
+                    var castlePkg = cacheDir.Directory.GetFile("Castle.Core.3.3.3.nupkg");
                     using (File.Open(castlePkg.FullName, FileMode.Create, FileAccess.Write))
                     {
                     }
