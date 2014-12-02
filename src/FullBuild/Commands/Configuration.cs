@@ -23,16 +23,32 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-namespace FullBuild.Config
+using System.Collections.Generic;
+using FullBuild.Config;
+using FullBuild.NatLangParser;
+
+namespace FullBuild.Commands
 {
-    public enum ConfigParameter
+    public partial class Configuration
     {
-        PackageGlobalCache,
+        public static IEnumerable<Matcher> Commands()
+        {
+            var key = Parameter<ConfigParameter>.Create("key");
+            var value = Parameter<string>.Create("value");
 
-        BinRepo,
+            // update workspace
+            // config <key> <value>
+            yield return MatchBuilder.Describe("set configuration {0} to {1}", key, value)
+                                     .Command("set")
+                                     .Command("config")
+                                     .Param(key)
+                                     .Param(value)
+                                     .Do(ctx => SetConfig(ctx.Get(key), ctx.Get(value)));
+        }
 
-        RepoType,
-
-        RepoUrl,
+        private static void SetConfig(ConfigParameter key, string value)
+        {
+            ConfigManager.SetBootstrapConfig(key, value);
+        }
     }
 }

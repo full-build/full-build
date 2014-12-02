@@ -71,7 +71,6 @@ namespace FullBuild.Commands
             var existingGuids = new HashSet<Guid>();
             foreach (var repo in config.SourceRepos)
             {
-                Console.WriteLine("Processing repo {0}:", repo.Name);
                 var repoDir = workspace.GetDirectory(repo.Name);
                 if (!repoDir.Exists)
                 {
@@ -95,6 +94,10 @@ namespace FullBuild.Commands
                         projectGuid = Guid.NewGuid();
                         xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single().Value = projectGuid.ToString("B");
                         xdoc.Save(proj.FullName);
+                    }
+                    else
+                    {
+                        Console.WriteLine("No conflict {0} {1}", proj.FullName, projectGuid);
                     }
 
                     existingGuids.Add(projectGuid);

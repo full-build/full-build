@@ -23,9 +23,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
 using System.IO;
 using System.Xml.Serialization;
 using FullBuild.Helpers;
+using Mini;
 
 namespace FullBuild.Config
 {
@@ -49,27 +51,72 @@ namespace FullBuild.Config
 
         public static FullBuildConfig LoadConfig(DirectoryInfo adminDir)
         {
+            var config = new FullBuildConfig {NuGets = new string[0], SourceRepos = new RepoConfig[0]};
+
+            // try to load config from admin repo if any
             var file = adminDir.GetFile("full-build.config");
             if (file.Exists)
             {
                 var xmlSer = new XmlSerializer(typeof(FullBuildConfig));
                 using (var reader = new StreamReader(file.FullName))
                 {
-                    var bootstrapConfig = (FullBuildConfig)xmlSer.Deserialize(reader);
-                    bootstrapConfig.SourceRepos = bootstrapConfig.SourceRepos ?? new RepoConfig[0];
-                    bootstrapConfig.NuGets = bootstrapConfig.NuGets ?? new string[0];
-
-                    return bootstrapConfig;
+                    config = (FullBuildConfig)xmlSer.Deserialize(reader);
+                    config.SourceRepos = config.SourceRepos ?? new RepoConfig[0];
+                    config.NuGets = config.NuGets ?? new string[0];
                 }
             }
 
-            return new FullBuildConfig {NuGets = new string[0], SourceRepos = new RepoConfig[0]};
+            // load bootstrap config and merge it
+            var userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+            var configFile = userProfileDir.GetFile(".full-build-config");
+            var ini = new IniDocument(configFile.FullName);
+            var fbSection = ini["FullBuild"];
+
+            if (null == config.PackageGlobalCache && fbSection.HasSetting(ConfigParameter.PackageGlobalCache.ToString()))
+            {
+                var packageGlobalCacheConfig = fbSection[ConfigParameter.PackageGlobalCache.ToString()].Value;
+                config.PackageGlobalCache = packageGlobalCacheConfig;
+            }
+
+            if (null == config.AdminRepo && fbSection.HasSetting(ConfigParameter.RepoType.ToString()) && fbSection.HasSetting(ConfigParameter.RepoUrl.ToString()))
+            {
+                var adminVcsConfig = fbSection[ConfigParameter.RepoType.ToString()].Value;
+                var adminRepoConfig = fbSection[ConfigParameter.RepoUrl.ToString()].Value;
+
+                var adminRepo = new RepoConfig
+                                {
+                                    Name = ".full-build",
+                                    Vcs = (VersionControlType)Enum.Parse(typeof(VersionControlType), adminVcsConfig, true),
+                                    Url = adminRepoConfig
+                                };
+
+                config.AdminRepo = adminRepo;
+            }
+
+            if (null == config.BinRepo && fbSection.HasSetting(ConfigParameter.BinRepo.ToString()))
+            {
+                var binRepo = fbSection[ConfigParameter.BinRepo.ToString()].Value;
+                config.BinRepo = binRepo;
+            }
+
+            return config;
         }
 
         public static FullBuildConfig LoadConfig()
         {
             var adminDir = WellKnownFolders.GetAdminDirectory();
             return LoadConfig(adminDir);
+        }
+
+        public static void SetBootstrapConfig(ConfigParameter key, string value)
+        {
+            var userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+            var configFile = userProfileDir.GetFile(".full-build-config");
+            var keyName = key.ToString();
+
+            var ini = new IniDocument(configFile.FullName);
+            ini["FullBuild"][keyName].Value = value;
+            ini.Write();
         }
     }
 }
