@@ -60,7 +60,7 @@ namespace FullBuild
                                             .With(Views.Commands())
                                             .With(Configuration.Commands())
                                             .With(Exec.Commands()).Build();
-            
+
             if (! parser.ParseAndInvoke(args))
             {
                 throw new ArgumentException("Invalid arguments. Use /? for usage.");
