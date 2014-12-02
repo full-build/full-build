@@ -57,6 +57,39 @@ namespace FullBuild.Test
         }
 
         [Test]
+        public void Ensure_failure_if_package_is_corrupt()
+        {
+            using (var cacheDir = new TemporaryDirectory())
+            {
+                using (var pkgDir = new TemporaryDirectory())
+                {
+                    var package = new Package("Castle.Core", "3.3.3");
+                    var nuGet = NuGet.Default("http://www.nuget.org/api/v2/");
+                    var nuspec = nuGet.GetNuSpecs(package).First();
+
+                    Check.That(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
+                    Check.That(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
+
+                    var castlePkg = new FileInfo(Path.Combine(cacheDir.Directory.FullName, "Castle.Core.3.3.3.nupkg"));
+                    using (File.Open(castlePkg.FullName, FileMode.Create, FileAccess.Write))
+                    {
+                    }
+
+                    Check.That(new FileInfo(castlePkg.FullName).Length).IsEqualTo(0);
+
+                    var nuget = NuGet.Default("http://www.nuget.org/api/v2/");
+
+                    Check.That(nuget.IsPackageInCache(package, cacheDir.Directory)).IsTrue();
+
+                    Check.ThatCode(() => nuget.InstallPackageFromCache(package, cacheDir.Directory, pkgDir.Directory)).Throws<Exception>();
+
+                    castlePkg.Refresh();
+                    Check.That(castlePkg.Exists).IsFalse();
+                }
+            }
+        }
+
+        [Test]
         public void Find_available_package_from_multiple_last_repo()
         {
             var package = new Package("Castle.Core", "3.3.3");
@@ -94,39 +127,6 @@ namespace FullBuild.Test
             var package = new Package("Castle.Core", "5.0.0");
 
             Assert.Null(NuGet.Default("http://test-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetNuSpecs(package).FirstOrDefault());
-        }
-
-        [Test]
-        public void Ensure_failure_if_package_is_corrupt()
-        {
-            using (var cacheDir = new TemporaryDirectory())
-            {
-                using (var pkgDir = new TemporaryDirectory())
-                {
-                    var package = new Package("Castle.Core", "3.3.3");
-                    var nuGet = NuGet.Default("http://www.nuget.org/api/v2/");
-                    var nuspec = nuGet.GetNuSpecs(package).First();
-
-                    Check.That(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
-                    Check.That(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
-
-                    var castlePkg = new FileInfo(Path.Combine(cacheDir.Directory.FullName, "Castle.Core.3.3.3.nupkg"));
-                    using (File.Open(castlePkg.FullName, FileMode.Create, FileAccess.Write))
-                    {
-                    }
-
-                    Check.That(new FileInfo(castlePkg.FullName).Length).IsEqualTo(0);
-
-                    var nuget = NuGet.Default("http://www.nuget.org/api/v2/");
-
-                    Check.That(nuget.IsPackageInCache(package, cacheDir.Directory)).IsTrue();
-
-                    Check.ThatCode(() => nuget.InstallPackageFromCache(package, cacheDir.Directory, pkgDir.Directory)).Throws<Exception>();
-
-                    castlePkg.Refresh();
-                    Check.That(castlePkg.Exists).IsFalse();
-                }
-            }
         }
 
         [Test]
