@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -67,6 +68,7 @@ namespace FullBuild.Commands
                                           where ig.Name.LocalName != "Reference"
                                                 && ig.Name.LocalName != "ProjectReference"
                                                 && ig.Name.LocalName != "BootstrapperPackage"
+                                                && !(ig.Name.LocalName == "None" && ig.Attribute("Include").Value.InvariantEquals("packages.config"))
                                           select ig;
                 var applicationIcon = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "ApplicationIcon").SingleOrDefault();
 
