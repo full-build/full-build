@@ -95,10 +95,6 @@ namespace FullBuild.Commands
                         xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single().Value = projectGuid.ToString("B");
                         xdoc.Save(proj.FullName);
                     }
-                    else
-                    {
-                        Console.WriteLine("No conflict {0} {1}", proj.FullName, projectGuid);
-                    }
 
                     existingGuids.Add(projectGuid);
                 }
