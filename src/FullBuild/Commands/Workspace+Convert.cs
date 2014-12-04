@@ -68,7 +68,6 @@ namespace FullBuild.Commands
                                           where ig.Name.LocalName != "Reference"
                                                 && ig.Name.LocalName != "ProjectReference"
                                                 && ig.Name.LocalName != "BootstrapperPackage"
-                                                && !(ig.Name.LocalName == "None" && ig.Attribute("Include").Value.InvariantEquals("packages.config"))
                                           select ig;
                 var applicationIcon = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "ApplicationIcon").SingleOrDefault();
 
@@ -186,10 +185,12 @@ namespace FullBuild.Commands
                     itemGroupFile.Add(childrenOfItemGroup);
                 }
 
-                xdoc.Save(projectFile.FullName);
 
                 // remove nuget packages file
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "None").Where(x => null != x.Attribute("Include") && x.Attribute("Include").Value.InvariantEquals("packages.config")).Remove();
                 projectFile.Directory.GetFile("packages.config").Delete();
+
+                xdoc.Save(projectFile.FullName);
             }
 
             // remove nuget folders
