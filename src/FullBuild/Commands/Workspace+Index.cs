@@ -172,7 +172,7 @@ namespace FullBuild.Commands
         {
             foreach (var repo in config.SourceRepos)
             {
-                Console.WriteLine("Processing repo {0}:", repo.Name);
+                Console.WriteLine("Processing repository {0}", repo.Name);
                 var repoDir = workspace.GetDirectory(repo.Name);
                 if (! repoDir.Exists)
                 {
@@ -235,12 +235,10 @@ namespace FullBuild.Commands
 
         private static Anthology ParseAndAddProject(DirectoryInfo workspace, FileInfo projectFile, Anthology anthology)
         {
-            Console.WriteLine("  Found project {0}", projectFile.FullName.Substring(workspace.FullName.Length + 1));
-
             var xdoc = XDocument.Load(projectFile.FullName);
 
             // extract infos from project
-            var projectFileName = projectFile.FullName.Substring(workspace.FullName.Length + 1);
+            var projectFileName = projectFile.FullName.Substring(workspace.FullName.Length + 1).ToUnixSeparator();
             var projectGuid = ExtractProjectGuid(xdoc);
 
             var assemblyName = (string)xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyName").Single();
@@ -271,13 +269,6 @@ namespace FullBuild.Commands
                                   let prjRefGuid = ExtractProjectGuid(prjRefXDoc)
                                   where prjRefGuid != prjRef.Guid
                                   select new {BadGuid = prjRef.Guid, Include = prjRef.Include, Guid = prjRefGuid};
-            var projectsWithInvalidGuidReference = projectRefGuids.Where(x => x.Guid != x.BadGuid);
-
-            if (projectsWithInvalidGuidReference.Any())
-            {
-                Console.Error.WriteLine("WARNING | Project '{0}' has invalid project GUID references", projectFileName);
-                projectsWithInvalidGuidReference.ForEach(x => Console.Error.WriteLine("        | Project reference '{0}' forced to {1:B}", x.Include, x.Guid));
-            }
 
             // extract project references
             var projectReferences = projectRefWithLocation.Select(x => x.Guid);

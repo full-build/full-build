@@ -146,7 +146,7 @@ namespace FullBuild.Commands
                     Console.Error.WriteLine("WARNING | Project {0} has spurious binary references", projectDef.ProjectFile);
                     foreach (var spuriousRef in spuriousReferences)
                     {
-                        Console.Error.WriteLine("      | {0}", spuriousRef);
+                        Console.Error.WriteLine("        | {0}", spuriousRef);
                     }
                 }
 
