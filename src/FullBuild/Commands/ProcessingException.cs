@@ -38,7 +38,6 @@ namespace FullBuild.Commands
             : base(msg, innerException)
         {
             var sb = new StringBuilder();
-            sb.AppendLine(base.Message);
             sb = context().Aggregate(sb, (s, ctx) => s.AppendLine(ctx));
             _context = sb.ToString();
         }
