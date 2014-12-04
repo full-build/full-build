@@ -170,9 +170,10 @@ namespace FullBuild.Commands
 
         private static Anthology UpdateAnthologyFromSource(FullBuildConfig config, DirectoryInfo workspace, Anthology anthology)
         {
+            Console.WriteLine("Processing repositories");
             foreach (var repo in config.SourceRepos)
             {
-                Console.WriteLine("Processing repository {0}", repo.Name);
+                Console.WriteLine("  {0}", repo.Name);
                 var repoDir = workspace.GetDirectory(repo.Name);
                 if (! repoDir.Exists)
                 {
