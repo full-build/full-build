@@ -42,7 +42,7 @@ namespace FullBuild.Commands
             var admDir = WellKnownFolders.GetAdminDirectory();
             var anthology = Anthology.Load(admDir);
 
-            Console.WriteLine("Installing packages:");
+            Console.WriteLine("Installing packages");
             foreach (var pkg in anthology.Packages)
             {
                 Console.WriteLine("  {0} {1}", pkg.Name, pkg.Version);
