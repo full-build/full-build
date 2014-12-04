@@ -87,8 +87,6 @@ namespace FullBuild.Commands
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "Target").Where(x => x.Attribute("Name").Value.InvariantEquals("EnsureNuGetPackageBuildImports")).Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "RestorePackages").Remove();
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "ItemGroup").Where(x => !x.DescendantNodes().Any()).Remove();
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "Choose").Where(x => !x.Descendants(XmlHelpers.NsMsBuild + "FSharpTargetsPath").Any()).Remove();
-                childrenOfItemGroup.Remove();
 
                 // setup project guid
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single().Value = projectDef.Guid.ToString("B");
@@ -181,7 +179,10 @@ namespace FullBuild.Commands
                 }
 
                 // add files
-                itemGroupFile.Add(childrenOfItemGroup);
+                if (templateFile.Exists)
+                {
+                    itemGroupFile.Add(childrenOfItemGroup);
+                }
 
                 xdoc.Save(projectFile.FullName);
 
