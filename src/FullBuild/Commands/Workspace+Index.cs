@@ -173,13 +173,14 @@ namespace FullBuild.Commands
             Console.WriteLine("Processing repositories");
             foreach (var repo in config.SourceRepos)
             {
-                Console.WriteLine("  {0}", repo.Name);
                 var repoDir = workspace.GetDirectory(repo.Name);
                 if (! repoDir.Exists)
                 {
                     continue;
                 }
-
+     
+                Console.WriteLine("  {0}", repo.Name);
+     
                 // add paket dependencies first
                 var paketDependencies = repoDir.EnumeratePaketDependencies();
                 anthology = paketDependencies.Aggregate(anthology, (a, f) => AddPaketDependencies(f, a));
@@ -262,15 +263,6 @@ namespace FullBuild.Commands
                                          let include = prjRef.Attribute("Include").Value
                                          select new {Guid = guid, Include = include};
 
-            // read each referenced projects to check guid
-            var projectPath = projectFile.Directory;
-            var projectRefGuids = from prjRef in projectRefWithLocation
-                                  let prjRefFileName = projectPath.GetFile(prjRef.Include)
-                                  let prjRefXDoc = XDocument.Load(prjRefFileName.FullName)
-                                  let prjRefGuid = ExtractProjectGuid(prjRefXDoc)
-                                  where prjRefGuid != prjRef.Guid
-                                  select new {BadGuid = prjRef.Guid, Include = prjRef.Include, Guid = prjRefGuid};
-
             // extract project references
             var projectReferences = projectRefWithLocation.Select(x => x.Guid);
             var fbProjectReferences = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
@@ -290,6 +282,16 @@ namespace FullBuild.Commands
                                ? maybeHintPath.Value.ToUnixSeparator()
                                : null);
             var binaryReferences = binaries.Select(x => x.AssemblyName).Distinct().ToImmutableList();
+
+            // try to guess packages as they could came from missing nuget packages
+            var guessPackages = (from binary in binaries
+                                where null != binary.HintPath && binary.HintPath.InvariantContains("/packages/")
+                                let startOfPackageId = binary.HintPath.InvariantIndexOf("/packages/") + "/packages/".Length
+                                let endOfPackageId = binary.HintPath.InvariantFirstIndexOf(new[] {".0", ".1", ".2", ".3", ".4", ".5", ".6", ".7", ".8", ".9"}, startOfPackageId)
+                                let packageId = binary.HintPath.Substring(startOfPackageId, endOfPackageId - startOfPackageId)
+                                let endOfPackageVersion = binary.HintPath.IndexOf('/', endOfPackageId)
+                                let packageVersion = binary.HintPath.Substring(endOfPackageId + 1, endOfPackageVersion - (endOfPackageId + 1))
+                                select new Package(packageId, packageVersion)).Distinct();
 
             // extract all packages (full-build)
             var nugetPackages = GetNugetPackages(projectFile.Directory);
@@ -311,7 +313,14 @@ namespace FullBuild.Commands
             }
 
             // build all packages
-            var packages = nugetPackages.Concat(fbPackages).Concat(paketPackages);
+            var remainingGuessPackages = guessPackages.Where(x => ! nugetPackages.Contains(x) && ! fbPackages.Contains(x));
+            if (remainingGuessPackages.Any())
+            {
+                Console.WriteLine("WARNING | Project {0} contains package references not declared in packages.config", projectFile.FullName);
+                remainingGuessPackages.ForEach(x => Console.Error.WriteLine("        | {0} {1}", x.Name, x.Version));
+            }
+
+            var packages = nugetPackages.Concat(fbPackages).Concat(paketPackages).Concat(remainingGuessPackages);
             var packageNames = packages.Select(x => x.Name).Distinct().ToImmutableList();
 
             // update anthology with this new project

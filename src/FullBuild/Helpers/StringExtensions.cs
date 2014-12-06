@@ -24,6 +24,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FullBuild.Helpers
 {
@@ -41,7 +43,35 @@ namespace FullBuild.Helpers
 
         public static bool InvariantContains(this string @this, string what)
         {
-            return -1 != @this.IndexOf(what, StringComparison.InvariantCultureIgnoreCase);
+            return -1 != @this.InvariantIndexOf(what);
+        }
+
+        public static int InvariantIndexOf(this string @this, string what)
+        {
+            return @this.IndexOf(what, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public static int InvariantFirstIndexOf(this string @this, string[] whats, int startIndex)
+        {
+            if (null != whats)
+            {
+                var idxs = new List<int>();
+                foreach (var what in whats)
+                {
+                    var idx = @this.IndexOf(what, startIndex, StringComparison.InvariantCultureIgnoreCase);
+                    if (-1 != idx)
+                    {
+                        idxs.Add(idx);
+                    }
+                }
+
+                if (idxs.Any())
+                {
+                    return idxs.Min();
+                }
+            }
+
+            return -1;
         }
 
         public static string ToUnixSeparator(this string @this)
