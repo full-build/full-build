@@ -39,7 +39,8 @@ namespace FullBuild.Commands
         public static Anthology Optimize(Anthology anthology)
         {
             Console.WriteLine("Optimizing anthology");
-            anthology = RemoveBinariesFromPackages(anthology);
+            anthology = RemoveBinariesFromReferencedPackages(anthology);
+            anthology = UsePackageInsteadOfBinaries(anthology);
             anthology = PromoteBinaryToProject(anthology);
             anthology = PromotePackageToProject(anthology);
             anthology = RemoveUnusedStuff(anthology);
@@ -170,22 +171,54 @@ namespace FullBuild.Commands
             return anthology;
         }
 
-        private static Anthology RemoveBinariesFromPackages(Anthology anthology)
+        private static Anthology RemoveBinariesFromReferencedPackages(Anthology anthology)
         {
             var pkgsDir = WellKnownFolders.GetPackageDirectory();
             foreach (var project in anthology.Projects)
             {
                 // gather all assemblies from packages in this project
-                var importedAssemblies = (from pkgRef in project.PackageReferences
+                var allImportedAssemblies = (from pkgRef in project.PackageReferences
                                           let pkgdir = pkgsDir.GetDirectory(pkgRef)
                                           where pkgdir.Exists
-                                          select NuPkg.Assemblies(pkgdir)).SelectMany(x => x).Distinct(StringComparer.InvariantCultureIgnoreCase);
+                                          select NuPkg.Assemblies(pkgdir));
+                var importedAssemblies = allImportedAssemblies.SelectMany(x => x).Distinct(StringComparer.InvariantCultureIgnoreCase);
 
                 // remove imported assemblies
                 var newProject = importedAssemblies.Aggregate(project, (p, a) => p.RemoveBinaryReference(a));
                 anthology = anthology.AddOrUpdateProject(newProject);
             }
+
             return anthology;
         }
+
+
+
+        private static Anthology UsePackageInsteadOfBinaries(Anthology anthology)
+        {
+            var pkgsDir = WellKnownFolders.GetPackageDirectory();
+            var pkg2assemblies = (from package in anthology.Packages
+                                  let pkgdir = pkgsDir.GetDirectory(package.Name)
+                                  where pkgdir.Exists
+                                  select new {Name = package.Name, Assemblies = NuPkg.Assemblies(pkgdir)}).ToDictionary(x => x.Name, x => x.Assemblies);
+
+            foreach (var project in anthology.Projects)
+            {
+                foreach (var binary in project.BinaryReferences)
+                {
+                    var packages = (from pkg2assembly in pkg2assemblies
+                                   where pkg2assembly.Value.Contains(binary, StringComparer.InvariantCultureIgnoreCase)
+                                   select pkg2assembly).OrderBy(x => x.Value.Count());
+                    if (packages.Any())
+                    {
+                        var newProject = project.RemoveBinaryReference(binary);
+                        newProject = newProject.AddPackageReference(packages.First().Key);
+                        anthology = anthology.AddOrUpdateProject(newProject);
+                    }
+                }
+            }
+
+            return anthology;
+        }
+
     }
 }

@@ -78,5 +78,12 @@ namespace FullBuild.Model
             var newPackages = PackageReferences.Remove(package, StringComparer.InvariantCultureIgnoreCase);
             return new Project(Guid, ProjectFile, AssemblyName, Extension, FxTarget, ProjectReferences, BinaryReferences, newPackages);
         }
+
+        public Project AddPackageReference(string package)
+        {
+            var newPackages = PackageReferences.Add(package).Distinct(StringComparer.InvariantCultureIgnoreCase).ToImmutableList();
+            return new Project(Guid, ProjectFile, AssemblyName, Extension, FxTarget, ProjectReferences, BinaryReferences, newPackages);
+                 
+        }
     }
 }
