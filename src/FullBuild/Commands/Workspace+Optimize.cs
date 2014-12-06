@@ -1,4 +1,4 @@
-// Copyright (c) 2014, Pierre Chalamet
+﻿// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -23,52 +23,21 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-namespace FullBuild.Model
+using FullBuild.Helpers;
+using FullBuild.Model;
+
+namespace FullBuild.Commands
 {
-    internal class Package
+    internal partial class Workspace
     {
-        public Package(string name, string version)
+        private static void Optimize()
         {
-            Name = name;
-            Version = version;
-        }
+            var admDir = WellKnownFolders.GetAdminDirectory();
 
-        public string Name { get; private set; }
-
-        public string Version { get; private set; }
-
-        protected bool Equals(Package other)
-        {
-            return string.Equals(Name, other.Name) && string.Equals(Version, other.Version);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-            if (obj.GetType() != GetType())
-            {
-                return false;
-            }
-            return Equals((Package)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return ((Name != null
-                    ? Name.GetHashCode()
-                    : 0) * 397) ^ (Version != null
-                        ? Version.GetHashCode()
-                        : 0);
-            }
+            // get all csproj in all repos only
+            var anthology = Anthology.Load(admDir);
+            anthology = AnthologyOptimizer.Optimize(anthology);
+            anthology.Save(admDir);
         }
     }
 }
