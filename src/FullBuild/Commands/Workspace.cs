@@ -95,6 +95,12 @@ namespace FullBuild.Commands
                                      .Command("list")
                                      .Command("repos")
                                      .Do(ctx => ListRepos());
+
+            // optimize anthology
+            yield return MatchBuilder.Describe("optimize anthology")
+                                     .Command("optimize")
+                                     .Command("anthology")
+                                     .Do(ctx => Optimize());
         }
 
         private static void RefreshSources()

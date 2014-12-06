@@ -88,6 +88,7 @@
     <Compile Include="Commands\Views+List.cs" />
     <Compile Include="Commands\Views.cs" />
     <Compile Include="Commands\WebClientAdapter.cs" />
+    <Compile Include="Commands\Workspace+Optimize.cs" />
     <Compile Include="Commands\Workspace+Repo.cs" />
     <Compile Include="Commands\Workspace+Init.cs" />
     <Compile Include="Commands\Workspace.cs" />

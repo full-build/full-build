@@ -36,5 +36,39 @@ namespace FullBuild.Model
         public string AssemblyName { get; private set; }
 
         public string HintPath { get; private set; }
+
+        protected bool Equals(Binary other)
+        {
+            return string.Equals(AssemblyName, other.AssemblyName) && string.Equals(HintPath, other.HintPath);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+            return Equals((Binary)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((AssemblyName != null
+                    ? AssemblyName.GetHashCode()
+                    : 0) * 397) ^ (HintPath != null
+                        ? HintPath.GetHashCode()
+                        : 0);
+            }
+        }
     }
 }
