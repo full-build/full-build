@@ -81,7 +81,19 @@ namespace FullBuild.Commands
                 if (_webClient.TryDownloadString(nugetQuery, out result))
                 {
                     _logger.Debug("Download successful", result);
-                    foreach (var entry in XDocument.Parse(result).Descendants(XmlHelpers.Atom + "entry"))
+                    XDocument xdoc;
+                    try
+                    {
+                        xdoc = XDocument.Parse(result);
+                    }
+                    catch(Exception ex)
+                    {
+                        _logger.Debug("Failed to parse response {0}", result, ex);
+                        var msg = string.Format("Invalid response for query {0}", nugetQuery);
+                        throw new Exception(msg);
+                    }
+
+                    foreach (var entry in xdoc.Descendants(XmlHelpers.Atom + "entry"))
                     {
                         yield return NuSpec.CreateFromNugetApiV1(entry);
                     }
