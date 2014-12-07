@@ -90,7 +90,7 @@ namespace FullBuild.Commands
                     {
                         _logger.Debug("Failed to parse response {0}", result, ex);
                         var msg = string.Format("Invalid response for query {0}", nugetQuery);
-                        throw new Exception(msg);
+                        throw new ApplicationException(msg);
                     }
 
                     foreach (var entry in xdoc.Descendants(XmlHelpers.Atom + "entry"))
@@ -138,7 +138,7 @@ namespace FullBuild.Commands
             catch (Exception ex)
             {
                 cacheFile.Delete();
-                throw new Exception("Failed to unzip package, please retry.", ex);
+                throw new ApplicationException("Failed to unzip package, please retry.", ex);
             }
         }
 
@@ -153,7 +153,8 @@ namespace FullBuild.Commands
             packageDirectory.Refresh();
             if (packageDirectory.Exists)
             {
-                throw new ApplicationException("Failed to remove folder {0} (application has a lock ?)");
+                var msg = string.Format("Failed to remove folder {0} (application has a lock ?)", packageDirectory.FullName);
+                throw new ApplicationException(msg);
             }
 
             return packageDirectory;

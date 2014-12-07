@@ -313,23 +313,25 @@ namespace FullBuild.Commands
 
         private static IEnumerable<Package> GuessNuGetPackagesNotCorrectlyDeclared(FileInfo projectFile, IEnumerable<Binary> binaries, IEnumerable<Package> importedPackaged)
         {
-            var guessPackages = (from binary in binaries
-                                 where null != binary.HintPath && binary.HintPath.InvariantContains("/packages/")
-                                 let startOfPackageId = binary.HintPath.InvariantIndexOf("/packages/") + "/packages/".Length
-                                 let endOfPackageId = binary.HintPath.InvariantFirstIndexOf(new[] {".0", ".1", ".2", ".3", ".4", ".5", ".6", ".7", ".8", ".9"}, startOfPackageId)
-                                 let packageId = binary.HintPath.Substring(startOfPackageId, endOfPackageId - startOfPackageId)
-                                 let endOfPackageVersion = binary.HintPath.IndexOf('/', endOfPackageId)
-                                 let packageVersion = binary.HintPath.Substring(endOfPackageId + 1, endOfPackageVersion - (endOfPackageId + 1))
-                                 select new Package(packageId, packageVersion)).Distinct().ToList();
+            return Enumerable.Empty<Package>();
 
-            var remainingGuessPackages = guessPackages.Where(x => !importedPackaged.Contains(x)).ToList();
-            if (remainingGuessPackages.Any())
-            {
-                Console.WriteLine("WARNING | Project {0} contains package references not declared in packages.config", projectFile.FullName);
-                remainingGuessPackages.ForEach(x => Console.Error.WriteLine("        | {0} {1}", x.Name, x.Version));
-            }
+            //var guessPackages = (from binary in binaries
+            //                     where null != binary.HintPath && binary.HintPath.InvariantContains("/packages/")
+            //                     let startOfPackageId = binary.HintPath.InvariantIndexOf("/packages/") + "/packages/".Length
+            //                     let endOfPackageId = binary.HintPath.InvariantFirstIndexOf(new[] {".0", ".1", ".2", ".3", ".4", ".5", ".6", ".7", ".8", ".9"}, startOfPackageId)
+            //                     let packageId = binary.HintPath.Substring(startOfPackageId, endOfPackageId - startOfPackageId)
+            //                     let endOfPackageVersion = binary.HintPath.IndexOf('/', endOfPackageId)
+            //                     let packageVersion = binary.HintPath.Substring(endOfPackageId + 1, endOfPackageVersion - (endOfPackageId + 1))
+            //                     select new Package(packageId, packageVersion)).Distinct().ToList();
 
-            return remainingGuessPackages;
+            //var remainingGuessPackages = guessPackages.Where(x => !importedPackaged.Contains(x)).ToList();
+            //if (remainingGuessPackages.Any())
+            //{
+            //    Console.WriteLine("WARNING | Project {0} contains package references not declared in packages.config", projectFile.FullName);
+            //    remainingGuessPackages.ForEach(x => Console.Error.WriteLine("        | {0} {1}", x.Name, x.Version));
+            //}
+
+            //return remainingGuessPackages;
         }
 
         private static IEnumerable<Package> GetFullBuildPackages(XDocument xdoc)
