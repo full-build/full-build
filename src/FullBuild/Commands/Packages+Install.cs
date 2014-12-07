@@ -59,6 +59,7 @@ namespace FullBuild.Commands
 
             if (! nuget.IsPackageInCache(pkg, cacheDir))
             {
+                _logger.Debug("Package {0} version {1} was not found in cache {2}", pkg.Name, pkg.Version, cacheDir.FullName);
                 var nuSpec = nuget.GetNuSpecs(pkg).First(x => x.Version == pkg.Version);
                 nuget.DownloadNuSpecToCache(pkg, nuSpec, cacheDir);
             }
