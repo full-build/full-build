@@ -253,7 +253,7 @@ namespace FullBuild.Commands
             EnsureGuidIsUnique(anthology, projectGuid, assemblyName, projectFileName);
 
             // extract project reference along project location to help detecting invalid project references
-            var allProjectReferences = GetProjectReferences(xdoc);
+            var allProjectReferences = GetProjectReferences(projectFile.Directory, xdoc);
 
             // extract binary references - both nuget and direct reference to assemblies (broken project reference)
             var binaries = GetBinaryReferences(xdoc).ToList();
@@ -355,15 +355,17 @@ namespace FullBuild.Commands
             return binaries;
         }
 
-        private static ImmutableList<Guid> GetProjectReferences(XDocument xdoc)
+        private static ImmutableList<Guid> GetProjectReferences(DirectoryInfo projectDir, XDocument xdoc)
         {
-            var projectRefWithLocation = from prjRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference")
-                                         let guid = Guid.ParseExact(prjRef.Element(XmlHelpers.NsMsBuild + "Project").Value, "B")
-                                         let include = prjRef.Attribute("Include").Value
-                                         select new {Guid = guid, Include = include};
+            // do not used Guid associated with ProjectReference as they could be wrong (Guid renaming step ensure everything is unique)
+            var projectReferences = from prjRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference")
+                                    let include = prjRef.Attribute("Include").Value
+                                    let includeProjectFile = projectDir.GetFile(include)
+                                    let xProject = XDocument.Load(includeProjectFile.FullName)
+                                    let xGuid = ExtractProjectGuid(xProject)
+                                    select xGuid;
 
             // extract project references
-            var projectReferences = projectRefWithLocation.Select(x => x.Guid);
             var fbProjectReferences = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
                                       let importProject = (string)import.Attribute("Project")
                                       where importProject.InvariantStartsWith(WellKnownFolders.MsBuildProjectDir)
