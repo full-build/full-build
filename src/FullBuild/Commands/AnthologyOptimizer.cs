@@ -40,7 +40,7 @@ namespace FullBuild.Commands
         {
             Console.WriteLine("Optimizing anthology");
             anthology = RemoveBinariesFromReferencedPackages(anthology);
-            anthology = UsePackageInsteadOfBinaries(anthology);
+            //anthology = UsePackageInsteadOfBinaries(anthology);
             anthology = PromoteBinaryToProject(anthology);
             anthology = PromotePackageToProject(anthology);
             anthology = RemoveUnusedStuff(anthology);
