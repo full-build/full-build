@@ -86,7 +86,7 @@ namespace FullBuild.Commands
                     {
                         xdoc = XDocument.Parse(result);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         _logger.Debug("Failed to parse response {0}", result, ex);
                         var msg = string.Format("Invalid response for query {0}", nugetQuery);
@@ -130,9 +130,9 @@ namespace FullBuild.Commands
             var cacheFileName = string.Format("{0}.{1}.nupkg", pkg.Name, pkg.Version);
             var cacheFile = cacheDirectory.GetFile(cacheFileName);
 
+            var packageDirectory = SetupPackageDirectory(pkg, packageRoot);
             try
             {
-                var packageDirectory = SetupPackageDirectory(pkg, packageRoot);
                 ZipFile.ExtractToDirectory(cacheFile.FullName, packageDirectory.FullName);
             }
             catch (Exception ex)
@@ -155,7 +155,7 @@ namespace FullBuild.Commands
             {
                 throw new ApplicationException("Failed to remove folder {0} (application has a lock ?)");
             }
-            
+
             return packageDirectory;
         }
 
