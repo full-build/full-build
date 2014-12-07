@@ -178,9 +178,9 @@ namespace FullBuild.Commands
                 {
                     continue;
                 }
-     
+
                 Console.WriteLine("  {0}", repo.Name);
-     
+
                 // add paket dependencies first
                 var paketDependencies = repoDir.EnumeratePaketDependencies();
                 anthology = paketDependencies.Aggregate(anthology, (a, f) => AddPaketDependencies(f, a));
@@ -202,7 +202,7 @@ namespace FullBuild.Commands
             return anthology;
         }
 
-        private static IEnumerable<Package> GetNugetPackages(DirectoryInfo projectDir)
+        private static IEnumerable<Package> GetNuGetPackages(DirectoryInfo projectDir)
         {
             var packageFile = projectDir.GetFile("packages.config");
             if (!packageFile.Exists)
@@ -250,14 +250,113 @@ namespace FullBuild.Commands
                 : ".exe";
 
             // check first that project does not exist with same GUID and different project file (duplicated project)
-            var similarProjects = anthology.Projects.Where(x => x.Guid == projectGuid && (!x.AssemblyName.InvariantEquals(assemblyName) || !x.ProjectFile.InvariantEquals(projectFileName)));
+            EnsureGuidIsUnique(anthology, projectGuid, assemblyName, projectFileName);
+
+            // extract project reference along project location to help detecting invalid project references
+            var allProjectReferences = GetProjectReferences(xdoc);
+
+            // extract binary references - both nuget and direct reference to assemblies (broken project reference)
+            var binaries = GetBinaryReferences(xdoc).ToList();
+
+            // extract all packages (nuget, fullbuild paket and guessed based on binaries)
+            var packages = GetPackages(projectFile, xdoc, binaries).ToList();
+
+            // update anthology with this new project
+            var binaryReferences = binaries.Select(x => x.AssemblyName).Distinct().ToImmutableList();
+            var packageNames = packages.Select(x => x.Name).Distinct().ToImmutableList();
+            var project = new Project(projectGuid, projectFileName, assemblyName, extension, fxTarget, allProjectReferences, binaryReferences, packageNames);
+
+            anthology = anthology.AddOrUpdateProject(project);
+            anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
+            anthology = packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
+
+            return anthology;
+        }
+
+        private static void EnsureGuidIsUnique(Anthology anthology, Guid projectGuid, string assemblyName, string projectFileName)
+        {
+            var similarProjects = anthology.Projects.Where(x => x.Guid == projectGuid && (!x.AssemblyName.InvariantEquals(assemblyName) || !x.ProjectFile.InvariantEquals(projectFileName))).ToList();
             if (similarProjects.Any())
             {
                 var errMsg = string.Format("ERROR | Project '{0}' conflicts with other projects (same GUID but different location)", projectFileName);
                 throw new ProcessingException(errMsg, () => similarProjects.Select(x => x.ProjectFile));
             }
+        }
 
-            // extract project reference along project location to help detecting invalid project references
+        private static IEnumerable<Package> GetPackages(FileInfo projectFile, XDocument xdoc, IEnumerable<Binary> binaries)
+        {
+            var nugetPackages = GetNuGetPackages(projectFile.Directory);
+            var fullbuildPackages = GetFullBuildPackages(xdoc).ToList();
+            var paketPackages = GetPaketPackages(projectFile).ToList();
+            var importedPackages = nugetPackages.Concat(fullbuildPackages).Concat(paketPackages).Distinct().ToList();
+
+            // try to guess packages as they could came from missing nuget packages
+            var guessedPackages = GuessNuGetPackagesNotCorrectlyDeclared(projectFile, binaries, importedPackages);
+
+            var packages = importedPackages.Concat(guessedPackages);
+            return packages;
+        }
+
+        private static IEnumerable<Package> GetPaketPackages(FileInfo projectFile)
+        {
+            var paketFile = projectFile.Directory.GetFile("paket.references");
+            var paketPackages = Enumerable.Empty<Package>();
+            if (paketFile.Exists)
+            {
+                paketPackages = from line in File.ReadAllLines(paketFile.FullName)
+                                let depPackageName = line.Trim()
+                                where !string.IsNullOrEmpty(depPackageName) && !depPackageName.InvariantContains("File:")
+                                select new Package(depPackageName, null);
+            }
+            return paketPackages;
+        }
+
+        private static IEnumerable<Package> GuessNuGetPackagesNotCorrectlyDeclared(FileInfo projectFile, IEnumerable<Binary> binaries, IEnumerable<Package> importedPackaged)
+        {
+            var guessPackages = (from binary in binaries
+                                 where null != binary.HintPath && binary.HintPath.InvariantContains("/packages/")
+                                 let startOfPackageId = binary.HintPath.InvariantIndexOf("/packages/") + "/packages/".Length
+                                 let endOfPackageId = binary.HintPath.InvariantFirstIndexOf(new[] {".0", ".1", ".2", ".3", ".4", ".5", ".6", ".7", ".8", ".9"}, startOfPackageId)
+                                 let packageId = binary.HintPath.Substring(startOfPackageId, endOfPackageId - startOfPackageId)
+                                 let endOfPackageVersion = binary.HintPath.IndexOf('/', endOfPackageId)
+                                 let packageVersion = binary.HintPath.Substring(endOfPackageId + 1, endOfPackageVersion - (endOfPackageId + 1))
+                                 select new Package(packageId, packageVersion)).Distinct().ToList();
+
+            var remainingGuessPackages = guessPackages.Where(x => !importedPackaged.Contains(x)).ToList();
+            if (remainingGuessPackages.Any())
+            {
+                Console.WriteLine("WARNING | Project {0} contains package references not declared in packages.config", projectFile.FullName);
+                remainingGuessPackages.ForEach(x => Console.Error.WriteLine("        | {0} {1}", x.Name, x.Version));
+            }
+
+            return remainingGuessPackages;
+        }
+
+        private static IEnumerable<Package> GetFullBuildPackages(XDocument xdoc)
+        {
+            var fbPackages = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
+                             let importProject = (string)import.Attribute("Project")
+                             where importProject.InvariantStartsWith(WellKnownFolders.MsBuildPackagesDir)
+                             let importProjectName = Path.GetFileNameWithoutExtension(importProject)
+                             select new Package(importProjectName, null);
+            return fbPackages;
+        }
+
+        private static IEnumerable<Binary> GetBinaryReferences(XDocument xdoc)
+        {
+            var binaries = from binRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "Reference")
+                           let include = ((string)binRef.Attribute("Include")).Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries)[0]
+                           where ! string.IsNullOrEmpty(include)
+                           let assName = new AssemblyName(include).Name
+                           let maybeHintPath = binRef.Descendants(XmlHelpers.NsMsBuild + "HintPath").SingleOrDefault()
+                           select new Binary(assName, null != maybeHintPath
+                               ? maybeHintPath.Value.ToUnixSeparator()
+                               : null);
+            return binaries;
+        }
+
+        private static ImmutableList<Guid> GetProjectReferences(XDocument xdoc)
+        {
             var projectRefWithLocation = from prjRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference")
                                          let guid = Guid.ParseExact(prjRef.Element(XmlHelpers.NsMsBuild + "Project").Value, "B")
                                          let include = prjRef.Attribute("Include").Value
@@ -271,66 +370,7 @@ namespace FullBuild.Commands
                                       let importProjectName = Path.GetFileNameWithoutExtension(importProject)
                                       select Guid.Parse(importProjectName);
             var allProjectReferences = projectReferences.Union(fbProjectReferences).ToImmutableList();
-
-            // extract binary references - both nuget and direct reference to assemblies (broken project reference)
-            var binaries = from binRef in xdoc.Descendants(XmlHelpers.NsMsBuild + "Reference")
-                           let include = ((string)binRef.Attribute("Include")).Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries)[0]
-                           where ! string.IsNullOrEmpty(include)
-                           let assName = new AssemblyName(include).Name
-                           let maybeHintPath = binRef.Descendants(XmlHelpers.NsMsBuild + "HintPath").SingleOrDefault()
-                           select new Binary(assName, null != maybeHintPath
-                               ? maybeHintPath.Value.ToUnixSeparator()
-                               : null);
-            var binaryReferences = binaries.Select(x => x.AssemblyName).Distinct().ToImmutableList();
-
-            // try to guess packages as they could came from missing nuget packages
-            var guessPackages = (from binary in binaries
-                                where null != binary.HintPath && binary.HintPath.InvariantContains("/packages/")
-                                let startOfPackageId = binary.HintPath.InvariantIndexOf("/packages/") + "/packages/".Length
-                                let endOfPackageId = binary.HintPath.InvariantFirstIndexOf(new[] {".0", ".1", ".2", ".3", ".4", ".5", ".6", ".7", ".8", ".9"}, startOfPackageId)
-                                let packageId = binary.HintPath.Substring(startOfPackageId, endOfPackageId - startOfPackageId)
-                                let endOfPackageVersion = binary.HintPath.IndexOf('/', endOfPackageId)
-                                let packageVersion = binary.HintPath.Substring(endOfPackageId + 1, endOfPackageVersion - (endOfPackageId + 1))
-                                select new Package(packageId, packageVersion)).Distinct();
-
-            // extract all packages (full-build)
-            var nugetPackages = GetNugetPackages(projectFile.Directory);
-            var fbPackages = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
-                             let importProject = (string)import.Attribute("Project")
-                             where importProject.InvariantStartsWith(WellKnownFolders.MsBuildPackagesDir)
-                             let importProjectName = Path.GetFileNameWithoutExtension(importProject)
-                             select new Package(importProjectName, null);
-
-            // extract paket dependencies
-            var paketFile = projectFile.Directory.GetFile("paket.references");
-            var paketPackages = Enumerable.Empty<Package>();
-            if (paketFile.Exists)
-            {
-                paketPackages = from line in File.ReadAllLines(paketFile.FullName)
-                                let depPackageName = line.Trim()
-                                where ! string.IsNullOrEmpty(depPackageName) && !depPackageName.InvariantContains("File:")
-                                select new Package(depPackageName, null);
-            }
-
-            // build all packages
-            var remainingGuessPackages = guessPackages.Where(x => ! nugetPackages.Contains(x) && ! fbPackages.Contains(x));
-            if (remainingGuessPackages.Any())
-            {
-                Console.WriteLine("WARNING | Project {0} contains package references not declared in packages.config", projectFile.FullName);
-                remainingGuessPackages.ForEach(x => Console.Error.WriteLine("        | {0} {1}", x.Name, x.Version));
-            }
-
-            var packages = nugetPackages.Concat(fbPackages).Concat(paketPackages).Concat(remainingGuessPackages);
-            var packageNames = packages.Select(x => x.Name).Distinct().ToImmutableList();
-
-            // update anthology with this new project
-            var project = new Project(projectGuid, projectFileName, assemblyName, extension, fxTarget, allProjectReferences, binaryReferences, packageNames);
-
-            anthology = anthology.AddOrUpdateProject(project);
-            anthology = binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
-            anthology = packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
-
-            return anthology;
+            return allProjectReferences;
         }
     }
 }
