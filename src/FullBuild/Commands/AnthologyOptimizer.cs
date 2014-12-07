@@ -196,10 +196,10 @@ namespace FullBuild.Commands
         private static Anthology UsePackageInsteadOfBinaries(Anthology anthology)
         {
             var pkgsDir = WellKnownFolders.GetPackageDirectory();
-            var pkg2assemblies = (from package in anthology.Packages
+            var pkg2assemblies = ((from package in anthology.Packages
                                   let pkgdir = pkgsDir.GetDirectory(package.Name)
                                   where pkgdir.Exists
-                                  select new {Name = package.Name, Assemblies = NuPkg.Assemblies(pkgdir)}).ToDictionary(x => x.Name, x => x.Assemblies);
+                                  select new {Name = package.Name, Assemblies = NuPkg.Assemblies(pkgdir)}).ToDictionary(x => x.Name, x => x.Assemblies.ToList()));
 
             foreach (var project in anthology.Projects)
             {
