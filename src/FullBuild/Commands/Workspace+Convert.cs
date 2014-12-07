@@ -25,7 +25,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -63,7 +62,6 @@ namespace FullBuild.Commands
                 var outputType = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single().Value;
                 var signAssembly = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "SignAssembly").SingleOrDefault();
                 var originatorKeyFile = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyOriginatorKeyFile").SingleOrDefault();
-                var targetFramework = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").SingleOrDefault();
                 var childrenOfItemGroup = from ig in realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "ItemGroup").Elements()
                                           where ig.Name.LocalName != "Reference"
                                                 && ig.Name.LocalName != "ProjectReference"
@@ -95,10 +93,7 @@ namespace FullBuild.Commands
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "RootNamespace").Single().Value = rootNamespace;
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyName").Single().Value = projectDef.AssemblyName;
 
-                if (null != targetFramework)
-                {
-                    xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").Single().Value = targetFramework.Value;
-                }
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").Single().Value = projectDef.FxTarget;
 
                 if (null != signAssembly)
                 {
@@ -184,7 +179,6 @@ namespace FullBuild.Commands
                 {
                     itemGroupFile.Add(childrenOfItemGroup);
                 }
-
 
                 // remove nuget packages file
                 xdoc.Descendants(XmlHelpers.NsMsBuild + "None").Where(x => null != x.Attribute("Include") && x.Attribute("Include").Value.InvariantEquals("packages.config")).Remove();

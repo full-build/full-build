@@ -25,11 +25,14 @@
 
 using System.Collections.Generic;
 using FullBuild.NatLangParser;
+using NLog;
 
 namespace FullBuild.Commands
 {
     internal partial class Packages
     {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
         public static IEnumerable<Matcher> Commands()
         {
             var url = Parameter<string>.Create("url");
