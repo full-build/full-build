@@ -36,6 +36,41 @@ namespace FullBuild.Commands
 {
     internal partial class Workspace
     {
+        private static void GenerateImports(Anthology anthology)
+        {
+            var targetDir = WellKnownFolders.GetProjectDirectory();
+            targetDir.Create();
+
+            foreach (var project in anthology.Projects)
+            {
+                var projectFile = Path.Combine(WellKnownFolders.MsBuildSolutionDir, project.ProjectFile);
+                var binFile = Path.Combine(WellKnownFolders.MsBuildBinDir, project.AssemblyName + project.Extension);
+                var projectProperty = project.GetProjectPropertyGroupName();
+                var srcCondition = string.Format("'$({0})' != ''", projectProperty);
+                var binCondition = string.Format("'$({0})' == ''", projectProperty);
+
+                var xdoc = new XElement(XmlHelpers.NsMsBuild + "Project",
+                                        new XElement(XmlHelpers.NsMsBuild + "Import",
+                                                     new XAttribute("Project", Path.Combine(WellKnownFolders.MsBuildViewDir, "$(SolutionName).targets")),
+                                                     new XAttribute("Condition", "'$(FullBuild_Config)' == ''")),
+                                        new XElement(XmlHelpers.NsMsBuild + "ItemGroup",
+                                                     new XElement(XmlHelpers.NsMsBuild + "ProjectReference",
+                                                                  new XAttribute("Include", projectFile),
+                                                                  new XAttribute("Condition", srcCondition),
+                                                                  new XElement(XmlHelpers.NsMsBuild + "Project", project.Guid.ToString("B")),
+                                                                  new XElement(XmlHelpers.NsMsBuild + "Name", project.AssemblyName)),
+                                                     new XElement(XmlHelpers.NsMsBuild + "Reference",
+                                                                  new XAttribute("Include", project.AssemblyName),
+                                                                  new XAttribute("Condition", binCondition),
+                                                                  new XElement(XmlHelpers.NsMsBuild + "HintPath", binFile),
+                                                                  new XElement(XmlHelpers.NsMsBuild + "Private", "true"))));
+
+                var targetFileName = project.Guid + ".targets";
+                var prjImport = targetDir.GetFile(targetFileName);
+                xdoc.Save(prjImport.FullName);
+            }
+        }
+
         private static void ConvertProjects()
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
@@ -76,39 +111,10 @@ namespace FullBuild.Commands
                 var xdoc = XDocument.Load(templateForProjectFile.FullName);
 
                 // remove all import from .full-build and project reference
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference").Remove();
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantStartsWith(WellKnownFolders.MsBuildProjectDir)).Remove();
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "Reference").Remove();
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantContains("NuGet.targets")).Remove();
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantContains("paket.targets")).Remove();
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantStartsWith(WellKnownFolders.RelativeAdminDirectory)).Remove();
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantStartsWith(WellKnownFolders.MsBuildPackagesDir)).Remove();
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "Target").Where(x => x.Attribute("Name").Value.InvariantEquals("EnsureNuGetPackageBuildImports")).Remove();
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "RestorePackages").Remove();
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "ItemGroup").Where(x => !x.DescendantNodes().Any()).Remove();
+                CleanUpProject(xdoc);
 
                 // setup project guid
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single().Value = projectDef.Guid.ToString("B");
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single().Value = outputType;
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "RootNamespace").Single().Value = rootNamespace;
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyName").Single().Value = projectDef.AssemblyName;
-
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").Single().Value = projectDef.FxTarget;
-
-                if (null != signAssembly)
-                {
-                    xdoc.Descendants(XmlHelpers.NsMsBuild + "SignAssembly").Single().Value = signAssembly.Value;
-                }
-
-                if (null != originatorKeyFile)
-                {
-                    xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyOriginatorKeyFile").Single().Value = originatorKeyFile.Value;
-                }
-
-                if (null != applicationIcon)
-                {
-                    xdoc.Descendants(XmlHelpers.NsMsBuild + "ApplicationIcon").Single().Value = applicationIcon.Value;
-                }
+                SetProjectOutputSettings(xdoc, projectDef, outputType, rootNamespace, signAssembly, originatorKeyFile, applicationIcon);
 
                 var propertyGroup = xdoc.Root.Elements(XmlHelpers.NsMsBuild + "PropertyGroup").Last();
                 var itemGroupReference = new XElement(XmlHelpers.NsMsBuild + "ItemGroup");
@@ -118,61 +124,13 @@ namespace FullBuild.Commands
                 itemGroupReference.AddAfterSelf(itemGroupFile);
 
                 // generate binary references
-                var spuriousReferences = new List<string>();
-                foreach (var refBin in projectDef.BinaryReferences)
-                {
-                    var bin = anthology.Binaries.SingleOrDefault(x => x.AssemblyName.InvariantEquals(refBin));
-                    var hintPath = null != bin.HintPath
-                        ? new XElement(XmlHelpers.NsMsBuild + "HintPath", bin.HintPath)
-                        : null;
-                    var binReference = new XElement(XmlHelpers.NsMsBuild + "Reference",
-                                                    new XAttribute("Include", bin.AssemblyName),
-                                                    hintPath);
-                    itemGroupReference.Add(binReference);
-
-                    if (null != hintPath)
-                    {
-                        spuriousReferences.Add(bin.AssemblyName);
-                    }
-                }
-
-                if (0 < spuriousReferences.Count)
-                {
-                    Console.Error.WriteLine("WARNING | Project {0} has spurious binary references", projectDef.ProjectFile);
-                    foreach (var spuriousRef in spuriousReferences)
-                    {
-                        Console.Error.WriteLine("        | {0}", spuriousRef);
-                    }
-                }
+                AddBinaryReferences(projectDef, anthology, itemGroupReference);
 
                 // add imports to project reference
-                foreach (var refGuid in projectDef.ProjectReferences)
-                {
-                    var project = anthology.Projects.SingleOrDefault(x => x.Guid == refGuid);
-                    if (null == project)
-                    {
-                        var errMsg = string.Format("Project {0:B} references unknown project {1:B}", projectDef.Guid, refGuid);
-                        throw new ProcessingException(errMsg, Enumerable.Empty<string>);
-                    }
-
-                    var refProject = project;
-                    var targetFileName = refProject.Guid + ".targets";
-                    var import = Path.Combine(WellKnownFolders.MsBuildProjectDir, targetFileName).ToUnixSeparator();
-                    var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import));
-                    itemGroupFile.AddBeforeSelf(newProjectRef);
-                }
+                AddProjectReferences(projectDef, anthology, itemGroupFile);
 
                 // add packages
-                foreach (var refPkg in projectDef.PackageReferences)
-                {
-                    var pkg = anthology.Packages.SingleOrDefault(x => x.Name.InvariantEquals(refPkg));
-                    var refPackage = pkg;
-                    var packageFileName = refPackage.Name + ".targets";
-                    var import = Path.Combine(WellKnownFolders.MsBuildPackagesDir, packageFileName).ToUnixSeparator();
-                    var condition = string.Format("'$(FullBuild_{0}_Pkg)' == ''", refPackage.Name.ToMsBuild());
-                    var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import), new XAttribute("Condition", condition));
-                    itemGroupFile.AddBeforeSelf(newProjectRef);
-                }
+                AddPackageReferences(projectDef, anthology, itemGroupFile);
 
                 // add files
                 if (templateFile.Exists)
@@ -181,11 +139,12 @@ namespace FullBuild.Commands
                 }
 
                 // remove nuget packages file
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "None").Where(x => null != x.Attribute("Include") && x.Attribute("Include").Value.InvariantEquals("packages.config")).Remove();
-                projectFile.Directory.GetFile("packages.config").Delete();
+                RemoveNuGetStuff(xdoc, projectFile);
 
                 xdoc.Save(projectFile.FullName);
             }
+
+            GenerateImports(anthology);
 
             // remove nuget folders
             var config = ConfigManager.LoadConfig();
@@ -207,6 +166,115 @@ namespace FullBuild.Commands
                                                                 });
                 }
             }
+        }
+
+        private static void SetProjectOutputSettings(XDocument xdoc, Project projectDef, string outputType, string rootNamespace, XElement signAssembly, XElement originatorKeyFile,
+                                                     XElement applicationIcon)
+        {
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single().Value = projectDef.Guid.ToString("B");
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single().Value = outputType;
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "RootNamespace").Single().Value = rootNamespace;
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyName").Single().Value = projectDef.AssemblyName;
+
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").Single().Value = projectDef.FxTarget;
+
+            if (null != signAssembly)
+            {
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "SignAssembly").Single().Value = signAssembly.Value;
+            }
+
+            if (null != originatorKeyFile)
+            {
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyOriginatorKeyFile").Single().Value = originatorKeyFile.Value;
+            }
+
+            if (null != applicationIcon)
+            {
+                xdoc.Descendants(XmlHelpers.NsMsBuild + "ApplicationIcon").Single().Value = applicationIcon.Value;
+            }
+        }
+
+        private static void RemoveNuGetStuff(XDocument xdoc, FileInfo projectFile)
+        {
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "None").Where(x => null != x.Attribute("Include") && x.Attribute("Include").Value.InvariantEquals("packages.config")).Remove();
+            projectFile.Directory.GetFile("packages.config").Delete();
+        }
+
+        private static void AddPackageReferences(Project projectDef, Anthology anthology, XElement itemGroupFile)
+        {
+            foreach (var refPkg in projectDef.PackageReferences)
+            {
+                var pkg = anthology.Packages.SingleOrDefault(x => x.Name.InvariantEquals(refPkg));
+                var refPackage = pkg;
+                var packageFileName = refPackage.Name + ".targets";
+                var import = Path.Combine(WellKnownFolders.MsBuildPackagesDir, packageFileName).ToUnixSeparator();
+                var condition = string.Format("'$(FullBuild_{0}_Pkg)' == ''", refPackage.Name.ToMsBuild());
+                var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import), new XAttribute("Condition", condition));
+                itemGroupFile.AddBeforeSelf(newProjectRef);
+            }
+        }
+
+        private static void AddProjectReferences(Project projectDef, Anthology anthology, XElement itemGroupFile)
+        {
+            foreach (var refGuid in projectDef.ProjectReferences)
+            {
+                var project = anthology.Projects.SingleOrDefault(x => x.Guid == refGuid);
+                if (null == project)
+                {
+                    var errMsg = string.Format("Project {0:B} references unknown project {1:B}", projectDef.Guid, refGuid);
+                    throw new ProcessingException(errMsg, Enumerable.Empty<string>);
+                }
+
+                var refProject = project;
+                var targetFileName = refProject.Guid + ".targets";
+                var import = Path.Combine(WellKnownFolders.MsBuildProjectDir, targetFileName).ToUnixSeparator();
+                var newProjectRef = new XElement(XmlHelpers.NsMsBuild + "Import", new XAttribute("Project", import));
+                itemGroupFile.AddBeforeSelf(newProjectRef);
+            }
+        }
+
+        private static void AddBinaryReferences(Project projectDef, Anthology anthology, XElement itemGroupReference)
+        {
+            var spuriousReferences = new List<string>();
+            foreach (var refBin in projectDef.BinaryReferences)
+            {
+                var bin = anthology.Binaries.SingleOrDefault(x => x.AssemblyName.InvariantEquals(refBin));
+                var hintPath = null != bin.HintPath
+                    ? new XElement(XmlHelpers.NsMsBuild + "HintPath", bin.HintPath)
+                    : null;
+                var binReference = new XElement(XmlHelpers.NsMsBuild + "Reference",
+                                                new XAttribute("Include", bin.AssemblyName),
+                                                hintPath);
+                itemGroupReference.Add(binReference);
+
+                if (null != hintPath)
+                {
+                    spuriousReferences.Add(bin.AssemblyName);
+                }
+            }
+
+            if (0 < spuriousReferences.Count)
+            {
+                Console.Error.WriteLine("WARNING | Project {0} has spurious binary references", projectDef.ProjectFile);
+                foreach (var spuriousRef in spuriousReferences)
+                {
+                    Console.Error.WriteLine("        | {0}", spuriousRef);
+                }
+            }
+        }
+
+        private static void CleanUpProject(XDocument xdoc)
+        {
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectReference").Remove();
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantStartsWith(WellKnownFolders.MsBuildProjectDir)).Remove();
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "Reference").Remove();
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantContains("NuGet.targets")).Remove();
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantContains("paket.targets")).Remove();
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantStartsWith(WellKnownFolders.RelativeAdminDirectory)).Remove();
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "Import").Where(x => x.Attribute("Project").Value.InvariantStartsWith(WellKnownFolders.MsBuildPackagesDir)).Remove();
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "Target").Where(x => x.Attribute("Name").Value.InvariantEquals("EnsureNuGetPackageBuildImports")).Remove();
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "RestorePackages").Remove();
+            xdoc.Descendants(XmlHelpers.NsMsBuild + "ItemGroup").Where(x => !x.DescendantNodes().Any()).Remove();
         }
     }
 }
