@@ -150,7 +150,12 @@ namespace FullBuild.Commands
                 packageDirectory.Delete(true);
             }
 
-            packageDirectory.Create();
+            packageDirectory.Refresh();
+            if (packageDirectory.Exists)
+            {
+                throw new ApplicationException("Failed to remove folder {0} (application has a lock ?)");
+            }
+            
             return packageDirectory;
         }
 
