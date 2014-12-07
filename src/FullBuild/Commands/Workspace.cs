@@ -97,9 +97,9 @@ namespace FullBuild.Commands
                                      .Do(ctx => ListRepos());
 
             // optimize anthology
-            yield return MatchBuilder.Describe("optimize anthology")
+            yield return MatchBuilder.Describe("optimize workspace")
                                      .Command("optimize")
-                                     .Command("anthology")
+                                     .Command("workspace")
                                      .Do(ctx => Optimize());
         }
 
