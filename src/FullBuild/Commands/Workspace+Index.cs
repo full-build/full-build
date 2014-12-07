@@ -59,9 +59,6 @@ namespace FullBuild.Commands
             anthology = AnthologyOptimizer.Optimize(anthology);
 
             anthology.Save(admDir);
-
-            // Generate import files
-            GenerateImports(anthology);
         }
 
         private static void EnsureProjectGuidsAreUnique(FullBuildConfig config, DirectoryInfo workspace)
@@ -98,41 +95,6 @@ namespace FullBuild.Commands
 
                     existingGuids.Add(projectGuid);
                 }
-            }
-        }
-
-        private static void GenerateImports(Anthology anthology)
-        {
-            var targetDir = WellKnownFolders.GetProjectDirectory();
-            targetDir.Create();
-
-            foreach (var project in anthology.Projects)
-            {
-                var projectFile = Path.Combine(WellKnownFolders.MsBuildSolutionDir, project.ProjectFile);
-                var binFile = Path.Combine(WellKnownFolders.MsBuildBinDir, project.AssemblyName + project.Extension);
-                var projectProperty = project.GetProjectPropertyGroupName();
-                var srcCondition = string.Format("'$({0})' != ''", projectProperty);
-                var binCondition = string.Format("'$({0})' == ''", projectProperty);
-
-                var xdoc = new XElement(XmlHelpers.NsMsBuild + "Project",
-                                        new XElement(XmlHelpers.NsMsBuild + "Import",
-                                                     new XAttribute("Project", Path.Combine(WellKnownFolders.MsBuildViewDir, "$(SolutionName).targets")),
-                                                     new XAttribute("Condition", "'$(FullBuild_Config)' == ''")),
-                                        new XElement(XmlHelpers.NsMsBuild + "ItemGroup",
-                                                     new XElement(XmlHelpers.NsMsBuild + "ProjectReference",
-                                                                  new XAttribute("Include", projectFile),
-                                                                  new XAttribute("Condition", srcCondition),
-                                                                  new XElement(XmlHelpers.NsMsBuild + "Project", project.Guid.ToString("B")),
-                                                                  new XElement(XmlHelpers.NsMsBuild + "Name", project.AssemblyName)),
-                                                     new XElement(XmlHelpers.NsMsBuild + "Reference",
-                                                                  new XAttribute("Include", project.AssemblyName),
-                                                                  new XAttribute("Condition", binCondition),
-                                                                  new XElement(XmlHelpers.NsMsBuild + "HintPath", binFile),
-                                                                  new XElement(XmlHelpers.NsMsBuild + "Private", "true"))));
-
-                var targetFileName = project.Guid + ".targets";
-                var prjImport = targetDir.GetFile(targetFileName);
-                xdoc.Save(prjImport.FullName);
             }
         }
 
