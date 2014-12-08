@@ -38,7 +38,6 @@ namespace FullBuild.Commands
             var admDir = WellKnownFolders.GetAdminDirectory();
             var anthology = Anthology.Load(admDir);
 
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig();
 
             var nuget = NuGet.Default(config.NuGets);
