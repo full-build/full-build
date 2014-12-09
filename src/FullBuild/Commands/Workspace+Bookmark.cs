@@ -23,6 +23,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
@@ -44,6 +45,10 @@ namespace FullBuild.Commands
             foreach (var repo in config.SourceRepos)
             {
                 var repoDir = wsDir.GetDirectory(repo.Name);
+                if (! repoDir.Exists)
+                {
+                    continue;
+                }
 
                 var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(repo.Vcs.ToString());
                 var tip = sourceControl.Tip(repoDir);
@@ -53,6 +58,38 @@ namespace FullBuild.Commands
             }
 
             anthology.Save(admDir);
+        }
+
+        private static void CheckoutBookmark(string version)
+        {
+            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
+            var config = ConfigManager.LoadConfig();
+
+            var admDir = WellKnownFolders.GetAdminDirectory();
+
+            var adminSourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.AdminRepo.Vcs.ToString());
+            adminSourceControl.Checkout(admDir, version);
+
+            var anthology = Anthology.Load(admDir);
+
+            // validate first that repos are valid and clone them
+            foreach (var repo in config.SourceRepos)
+            {
+                var repoDir = wsDir.GetDirectory(repo.Name);
+                if (! repoDir.Exists)
+                {
+                    continue;
+                }
+
+                var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(repo.Vcs.ToString());
+                var repoBookmark = anthology.Bookmarks.SingleOrDefault(x => x.Name == repo.Name);
+                if (null == repoBookmark)
+                {
+                    continue;
+                }
+
+                sourceControl.Checkout(repoDir, repoBookmark.Version);
+            }
         }
     }
 }
