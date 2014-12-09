@@ -47,6 +47,15 @@ namespace FullBuild.SourceControl
             }
         }
 
+        public void Checkout(DirectoryInfo rootDir, string version)
+        {
+            using (var repo = new Repository(rootDir.FullName))
+            {
+                var options = new CheckoutOptions {CheckoutModifiers = CheckoutModifiers.Force};
+                repo.Checkout(version, options);
+            }
+        }
+
         private static bool OnTransferProgress(TransferProgress progress, string name)
         {
             var percent = 0 < progress.TotalObjects
