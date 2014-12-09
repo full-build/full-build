@@ -101,6 +101,12 @@ namespace FullBuild.Commands
                                      .Command("optimize")
                                      .Command("workspace")
                                      .Do(ctx => Optimize());
+
+            // bookmark workspace
+            yield return MatchBuilder.Describe("bookmark workspace")
+                                     .Command("bookmark")
+                                     .Command("workspace")
+                                     .Do(ctx => Bookmark());
         }
 
         private static void RefreshSources()
