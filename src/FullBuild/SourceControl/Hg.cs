@@ -46,5 +46,12 @@ namespace FullBuild.SourceControl
             var tip = repo.Tip().Hash;
             return tip;
         }
+
+        public void Checkout(DirectoryInfo rootDir, string version)
+        {
+            var repo = new Repository(rootDir.FullName);
+            var revSpec = new RevSpec(version);
+            repo.Update(revSpec);
+        }
     }
 }

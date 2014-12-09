@@ -42,6 +42,7 @@ namespace FullBuild.Commands
             var vcs = Parameter<VersionControlType>.Create("vcs");
             var repo = Parameter<string>.Create("repoName");
             var url = Parameter<string>.Create("url");
+            var version = Parameter<string>.Create("version");
 
             // init workspace
             yield return MatchBuilder.Describe("initialize workspace in folder <path>")
@@ -107,6 +108,13 @@ namespace FullBuild.Commands
                                      .Command("bookmark")
                                      .Command("workspace")
                                      .Do(ctx => Bookmark());
+
+            // checkout workspace
+            yield return MatchBuilder.Describe("checkout workspace {0}", version)
+                                     .Command("checkout")
+                                     .Command("workspace")
+                                     .Param(version)
+                                     .Do(ctx => CheckoutBookmark(ctx.Get(version)));
         }
 
         private static void RefreshSources()
