@@ -32,5 +32,7 @@ namespace FullBuild.SourceControl
         void Clone(DirectoryInfo rootDir, string name, string url);
 
         string Tip(DirectoryInfo rootDir);
+
+        void Checkout(DirectoryInfo rootDir, string version);
     }
 }
