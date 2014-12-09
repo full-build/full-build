@@ -26,6 +26,7 @@ copy ..\Template.csproj .full-build || goto :ko
 %FULLBUILD% list views || goto :ko
 %FULLBUILD% drop view cs || goto :ko
 %FULLBUILD% list views || goto :ko
+%FULLBUILD% bookmark workspace || goto :ko
 
 
 :ok

@@ -43,6 +43,9 @@ namespace FullBuild.Model
         [JsonProperty("binaries")]
         private readonly IImmutableList<Binary> _binaries;
 
+        [JsonProperty("bookmarks")]
+        private readonly IImmutableList<Bookmark> _bookmarks;
+
         [JsonProperty("packages")]
         private readonly IImmutableList<Package> _packages;
 
@@ -50,16 +53,17 @@ namespace FullBuild.Model
         private readonly IImmutableList<Project> _projects;
 
         public Anthology()
-            : this(ImmutableList.Create<Project>(), ImmutableList.Create<Binary>(), ImmutableList.Create<Package>(), ImmutableList.Create<Application>())
+            : this(ImmutableList.Create<Project>(), ImmutableList.Create<Binary>(), ImmutableList.Create<Package>(), ImmutableList.Create<Application>(), ImmutableList.Create<Bookmark>())
         {
         }
 
-        private Anthology(IEnumerable<Project> projects, IEnumerable<Binary> binaries, IEnumerable<Package> packages, IEnumerable<Application> applications)
+        private Anthology(IEnumerable<Project> projects, IEnumerable<Binary> binaries, IEnumerable<Package> packages, IEnumerable<Application> applications, IEnumerable<Bookmark> bookmarks)
         {
             _projects = projects.OrderBy(x => x.Guid).ToImmutableList();
             _binaries = binaries.OrderBy(x => x.AssemblyName).ToImmutableList();
             _packages = packages.OrderBy(x => x.Name).ToImmutableList();
             _applications = applications.ToImmutableList();
+            _bookmarks = bookmarks.ToImmutableList();
         }
 
         [JsonIgnore]
@@ -86,10 +90,25 @@ namespace FullBuild.Model
             get { return _applications; }
         }
 
+        [JsonIgnore]
+        public IEnumerable<Bookmark> Bookmarks
+        {
+            get { return _bookmarks; }
+        }
+
         private static IImmutableList<T> AddOrUpdate<T>(T obj, IImmutableList<T> list, Func<T, bool> equals) where T : class
         {
             list = Remove(list, equals).Add(obj);
             return list;
+        }
+
+        public Anthology AddOrUpdateBookmark(Bookmark bookmark)
+        {
+            return new Anthology(_projects,
+                                 _binaries,
+                                 _packages,
+                                 _applications,
+                                 AddOrUpdate(bookmark, _bookmarks, x => x.Name == bookmark.Name));
         }
 
         public Anthology AddOrUpdateProject(Project project)
@@ -97,7 +116,8 @@ namespace FullBuild.Model
             return new Anthology(AddOrUpdate(project, _projects, x => x.Guid == project.Guid),
                                  _binaries,
                                  _packages,
-                                 _applications);
+                                 _applications,
+                                 _bookmarks);
         }
 
         public Anthology AddOrUpdateBinary(Binary binary)
@@ -105,7 +125,8 @@ namespace FullBuild.Model
             return new Anthology(_projects,
                                  AddOrUpdate(binary, _binaries, x => x.AssemblyName.InvariantEquals(binary.AssemblyName)),
                                  _packages,
-                                 _applications);
+                                 _applications,
+                                 _bookmarks);
         }
 
         public Anthology AddOrUpdatePackages(Package package)
@@ -133,7 +154,8 @@ namespace FullBuild.Model
             return new Anthology(_projects,
                                  _binaries,
                                  newPackages,
-                                 _applications);
+                                 _applications,
+                                 _bookmarks);
         }
 
         private static IImmutableList<T> Remove<T>(IImmutableList<T> list, Func<T, bool> equals) where T : class
@@ -152,7 +174,8 @@ namespace FullBuild.Model
             return new Anthology(Remove(_projects, x => x.Guid == project.Guid),
                                  _binaries,
                                  _packages,
-                                 _applications);
+                                 _applications,
+                                 _bookmarks);
         }
 
         public Anthology RemoveBinary(Binary binary)
@@ -160,7 +183,8 @@ namespace FullBuild.Model
             return new Anthology(_projects,
                                  Remove(_binaries, x => x.AssemblyName.InvariantEquals(binary.AssemblyName)),
                                  _packages,
-                                 _applications);
+                                 _applications,
+                                 _bookmarks);
         }
 
         public Anthology RemovePackage(Package package)
@@ -168,7 +192,8 @@ namespace FullBuild.Model
             return new Anthology(_projects,
                                  _binaries,
                                  Remove(_packages, x => x.Name.InvariantEquals(package.Name)),
-                                 _applications);
+                                 _applications,
+                                 _bookmarks);
         }
 
         public static Anthology Load(DirectoryInfo dir)
