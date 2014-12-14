@@ -74,6 +74,8 @@ namespace FullBuild.Commands
                     continue;
                 }
 
+                _logger.Debug("Processing repository {0}", repo.Name);
+
                 // process all projects
                 var allprojs = repoDir.EnumerateSupportedProjectFiles();
 
@@ -82,18 +84,28 @@ namespace FullBuild.Commands
                 {
                     var xdoc = XDocument.Load(proj.FullName);
 
+                    _logger.Debug("Processing project {0}", proj.FullName);
+
                     // extract infos from project
-                    var projectGuid = ExtractProjectGuid(xdoc);
-                    if (existingGuids.Contains(projectGuid))
+                    try
                     {
-                        Console.Error.WriteLine("WARNING | Project '{0}' GUID conflicts with other projects", proj.FullName);
+                        var projectGuid = ExtractProjectGuid(xdoc);
+                        if (existingGuids.Contains(projectGuid))
+                        {
+                            Console.Error.WriteLine("WARNING | Project '{0}' GUID conflicts with other projects", proj.FullName);
 
-                        projectGuid = Guid.NewGuid();
-                        xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single().Value = projectGuid.ToString("B");
-                        xdoc.Save(proj.FullName);
+                            projectGuid = Guid.NewGuid();
+                            xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single().Value = projectGuid.ToString("B");
+                            xdoc.Save(proj.FullName);
+                        }
+
+                        existingGuids.Add(projectGuid);
                     }
-
-                    existingGuids.Add(projectGuid);
+                    catch (Exception ex)
+                    {
+                        _logger.Debug("Failed to process project", ex);
+                        Console.Error.WriteLine("WARNING | Failed to process project {0}", proj.FullName);
+                    }
                 }
             }
         }
@@ -154,7 +166,7 @@ namespace FullBuild.Commands
                 var allprojs = repoDir.EnumerateSupportedProjectFiles();
 
                 // scan projects and import
-                var projectAnthology = allprojs.Aggregate(anthology, (a, p) => ParseAndAddProject(workspace, p, a));
+                var projectAnthology = allprojs.Aggregate(anthology, (a, p) => TryParseAndAddProject(workspace, p, a));
 
                 anthology = projectAnthology.Binaries.Aggregate(anthology, (a, b) => a.AddOrUpdateBinary(b));
                 anthology = projectAnthology.Packages.Aggregate(anthology, (a, p) => a.AddOrUpdatePackages(p));
@@ -195,6 +207,21 @@ namespace FullBuild.Commands
             }
 
             return projectGuid;
+        }
+
+        private static Anthology TryParseAndAddProject(DirectoryInfo workspace, FileInfo projectFile, Anthology anthology)
+        {
+            try
+            {
+                return ParseAndAddProject(workspace, projectFile, anthology);
+            }
+            catch (Exception ex)
+            {
+                _logger.Debug("Failed to process project {0}", projectFile.FullName, ex);
+                Console.WriteLine("ERROR | Failed to process project {0}", projectFile.FullName);
+
+                return anthology;
+            }
         }
 
         private static Anthology ParseAndAddProject(DirectoryInfo workspace, FileInfo projectFile, Anthology anthology)

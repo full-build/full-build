@@ -28,7 +28,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Xml;
 using System.Xml.Linq;
 using FullBuild.Helpers;
 using FullBuild.Model;
@@ -159,9 +158,9 @@ namespace FullBuild.Commands
             var view = File.ReadAllLines(viewFileName.FullName);
 
             var projectInView = from repo in view
-                           from prj in anthology.Projects
-                           where prj.ProjectFile.InvariantStartsWith(repo + "/")
-                           select prj;
+                                from prj in anthology.Projects
+                                where prj.ProjectFile.InvariantStartsWith(repo + "/")
+                                select prj;
 
             var dgmlFileName = viewName + ".dgml";
             var dgmlFile = wsdir.GetFile(dgmlFileName);
@@ -196,7 +195,9 @@ namespace FullBuild.Commands
                 {
                     var target = anthology.Binaries.Single(x => x.AssemblyName.InvariantEquals(binRef));
                     if (null == target.HintPath)
+                    {
                         continue;
+                    }
 
                     binaries.Add(binRef);
 
@@ -205,7 +206,6 @@ namespace FullBuild.Commands
                                              new XAttribute("Target", target.AssemblyName),
                                              new XAttribute("Category", "BinaryReference"));
                     xLinks.Add(xlink);
-
                 }
 
                 foreach (var pkgRef in prj.PackageReferences)
@@ -231,10 +231,13 @@ namespace FullBuild.Commands
 
             foreach (var package in packages)
             {
+                var target = anthology.Packages.Single(x => x.Name.InvariantEquals(package));
+
                 var xnode = new XElement(XmlHelpers.Dgml + "Node",
                                          new XAttribute("Id", package),
-                                         new XAttribute("Label", package),
-                                         new XAttribute("Category", "Package"));
+                                         new XAttribute("Label", target.Name),
+                                         new XAttribute("Category", "Package"),
+                                         new XAttribute("PackageVersion", target.Version));
                 xNodes.Add(xnode);
             }
 
@@ -255,6 +258,10 @@ namespace FullBuild.Commands
                                              new XAttribute("Id", cat.Key),
                                              new XAttribute("Background", cat.Value)));
             }
+            xCategories.Add(new XElement(XmlHelpers.Dgml + "Category",
+                                         new XAttribute("Id", "PackageVersion"),
+                                         new XAttribute("Label", "Version"),
+                                         new XAttribute("DataType", "System.String")));
 
             var xdoc = new XElement(XmlHelpers.Dgml + "DirectedGraph",
                                     xNodes, xLinks, xCategories);
