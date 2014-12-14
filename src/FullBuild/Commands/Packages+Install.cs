@@ -92,6 +92,10 @@ namespace FullBuild.Commands
             var pkgDir = pkgsDir.GetDirectory(package.Name);
             var libDir = pkgDir.GetDirectory("lib");
 
+            // Algorith is as follow to choose the right binary while compiling:
+            // For each supported framework version we have to find the binaries with the most up-to-date framework version.
+            // This mean that for a given framework version, we start with this version exactly and then go back in the framework version history to find sometjing compatible.
+            // If nothing is found, use th default package (if it exists_. If really no default package exists, there is nothing we can do but skip the request framework version.
             var whens = new List<XElement>();
             if (libDir.Exists)
             {
