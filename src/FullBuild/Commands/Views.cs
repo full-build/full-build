@@ -64,6 +64,14 @@ namespace FullBuild.Commands
                                      .Param(viewname)
                                      .Do(ctx => DescribeView(ctx.Get(viewname)));
 
+
+            // graph view <viewname>
+            yield return MatchBuilder.Describe("graph view")
+                                     .Command("graph")
+                                     .Command("view")
+                                     .Param(viewname)
+                                     .Do(ctx => GraphView(ctx.Get(viewname)));
+
             // update view <viewname>
             yield return MatchBuilder.Describe("generate solution {0}", viewname)
                                      .Command("generate")

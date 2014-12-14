@@ -40,5 +40,7 @@ namespace FullBuild.Helpers
         public static readonly XNamespace DataServices = "http://schemas.microsoft.com/ado/2007/08/dataservices";
 
         public static readonly XNamespace NuGet = "http://www.w3.org/2007/app";
+
+        public static readonly XNamespace Dgml = "http://schemas.microsoft.com/vs/2009/dgml";
     }
 }
