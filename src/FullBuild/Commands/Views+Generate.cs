@@ -24,9 +24,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 using FullBuild.Helpers;
 using FullBuild.Model;
@@ -134,6 +136,130 @@ namespace FullBuild.Commands
             {
                 slnFile.Delete();
             }
+        }
+
+        private static void GraphView(string viewName)
+        {
+            var wsdir = WellKnownFolders.GetWorkspaceDirectory();
+
+            // read anthology.json
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var anthology = Anthology.Load(admDir);
+
+            // get current view
+            var viewDir = WellKnownFolders.GetViewDirectory();
+            viewDir.Create();
+
+            var viewFileName = viewDir.GetFile(viewName + ".view");
+            if (!viewFileName.Exists)
+            {
+                throw new ArgumentException("Initialize first solution with a list of repositories to include.");
+            }
+
+            var view = File.ReadAllLines(viewFileName.FullName);
+
+            var projectInView = from repo in view
+                           from prj in anthology.Projects
+                           where prj.ProjectFile.InvariantStartsWith(repo + "/")
+                           select prj;
+
+            var dgmlFileName = viewName + ".dgml";
+            var dgmlFile = wsdir.GetFile(dgmlFileName);
+
+            var xNodes = new XElement(XmlHelpers.Dgml + "Nodes");
+            var xLinks = new XElement(XmlHelpers.Dgml + "Links");
+
+            var binaries = new List<string>();
+            var packages = new List<string>();
+            var projects = new List<Project>();
+            foreach (var prj in projectInView)
+            {
+                var xnode = new XElement(XmlHelpers.Dgml + "Node",
+                                         new XAttribute("Id", prj.Guid),
+                                         new XAttribute("Label", prj.AssemblyName),
+                                         new XAttribute("Category", "Project"));
+                xNodes.Add(xnode);
+
+                foreach (var prjRef in prj.ProjectReferences)
+                {
+                    var target = anthology.Projects.Single(x => x.Guid == prjRef);
+                    projects.Add(target);
+
+                    var xlink = new XElement(XmlHelpers.Dgml + "Link",
+                                             new XAttribute("Source", prj.Guid),
+                                             new XAttribute("Target", target.Guid),
+                                             new XAttribute("Category", "ProjectReference"));
+                    xLinks.Add(xlink);
+                }
+
+                foreach (var binRef in prj.BinaryReferences)
+                {
+                    var target = anthology.Binaries.Single(x => x.AssemblyName.InvariantEquals(binRef));
+                    if (null == target.HintPath)
+                        continue;
+
+                    binaries.Add(binRef);
+
+                    var xlink = new XElement(XmlHelpers.Dgml + "Link",
+                                             new XAttribute("Source", prj.Guid),
+                                             new XAttribute("Target", target.AssemblyName),
+                                             new XAttribute("Category", "BinaryReference"));
+                    xLinks.Add(xlink);
+
+                }
+
+                foreach (var pkgRef in prj.PackageReferences)
+                {
+                    packages.Add(pkgRef);
+
+                    var xlink = new XElement(XmlHelpers.Dgml + "Link",
+                                             new XAttribute("Source", prj.Guid),
+                                             new XAttribute("Target", pkgRef),
+                                             new XAttribute("Category", "PackageReference"));
+                    xLinks.Add(xlink);
+                }
+            }
+
+            foreach (var bin in binaries)
+            {
+                var xnode = new XElement(XmlHelpers.Dgml + "Node",
+                                         new XAttribute("Id", bin),
+                                         new XAttribute("Label", bin),
+                                         new XAttribute("Category", "Binary"));
+                xNodes.Add(xnode);
+            }
+
+            foreach (var package in packages)
+            {
+                var xnode = new XElement(XmlHelpers.Dgml + "Node",
+                                         new XAttribute("Id", package),
+                                         new XAttribute("Label", package),
+                                         new XAttribute("Category", "Package"));
+                xNodes.Add(xnode);
+            }
+
+            var xCategories = new XElement(XmlHelpers.Dgml + "Categories");
+
+            var allCategories = new Dictionary<string, string>
+                                {
+                                    {"Project", "Green"},
+                                    {"Binary", "Red"},
+                                    {"Package", "Orange"},
+                                    {"ProjectReference", "Green"},
+                                    {"BinaryReference", "Red"},
+                                    {"PackageReference", "Red"},
+                                };
+            foreach (var cat in allCategories)
+            {
+                xCategories.Add(new XElement(XmlHelpers.Dgml + "Category",
+                                             new XAttribute("Id", cat.Key),
+                                             new XAttribute("Background", cat.Value)));
+            }
+
+            var xdoc = new XElement(XmlHelpers.Dgml + "DirectedGraph",
+                                    xNodes, xLinks, xCategories);
+
+            xdoc.Save(dgmlFile.FullName);
         }
     }
 }
