@@ -56,8 +56,6 @@ namespace FullBuild.Commands
 
         private IEnumerable<NuSpec> GetLatestVersion(string name, bool includePreRelease)
         {
-            //var query = string.Format("Search()?$filter=IsAbsoluteLatestVersion&searchTerm='{0}'&targetFramework=&includePrerelease={1}", name, includePreRelease ? "true" : "false");
-
             var query =
                 string.Format("Search()?$orderby=DownloadCount%20desc"
                               + "&$filter=IsAbsoluteLatestVersion"
@@ -151,10 +149,9 @@ namespace FullBuild.Commands
 
         public void InstallPackageFromCache(Package pkg, DirectoryInfo cacheDirectory, DirectoryInfo packageRoot)
         {
+            var packageDirectory = SetupPackageDirectory(pkg, packageRoot);
             var cacheFileName = string.Format("{0}.{1}.nupkg", pkg.Name, pkg.Version);
             var cacheFile = cacheDirectory.GetFile(cacheFileName);
-
-            var packageDirectory = SetupPackageDirectory(pkg, packageRoot);
             try
             {
                 ZipFile.ExtractToDirectory(cacheFile.FullName, packageDirectory.FullName);
@@ -169,18 +166,7 @@ namespace FullBuild.Commands
         private static DirectoryInfo SetupPackageDirectory(Package pkg, DirectoryInfo packageRoot)
         {
             var packageDirectory = packageRoot.GetDirectory(pkg.Name);
-            if (packageDirectory.Exists)
-            {
-                packageDirectory.Delete(true);
-            }
-
-            packageDirectory.Refresh();
-            if (packageDirectory.Exists)
-            {
-                var msg = string.Format("Failed to remove folder {0} (application has a lock ?)", packageDirectory.FullName);
-                throw new ApplicationException(msg);
-            }
-
+            Reliability.Do(() => packageDirectory.Delete(true));
             return packageDirectory;
         }
 

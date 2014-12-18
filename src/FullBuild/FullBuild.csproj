@@ -102,6 +102,7 @@
     <Compile Include="Helpers\DirectoryInfoExtensions.cs" />
     <Compile Include="Commands\Workspace+Index.cs" />
     <Compile Include="Helpers\EnumerableExtensions.cs" />
+    <Compile Include="Helpers\Reliability.cs" />
     <Compile Include="Helpers\SemVersionExtensions.cs" />
     <Compile Include="Model\Anthology.cs" />
     <Compile Include="Model\Application.cs" />
