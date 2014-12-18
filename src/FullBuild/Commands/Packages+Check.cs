@@ -44,7 +44,23 @@ namespace FullBuild.Commands
 
             foreach (var pkg in anthology.Packages)
             {
-                var latestNuspec = nuget.GetLatestVersion(pkg.Name);
+                NuSpec latestNuspec;
+                try
+                {
+                    latestNuspec = nuget.GetLatestVersion(pkg.Name);
+                }
+                catch (Exception ex)
+                {
+                    var msg = string.Format("Nuget GetLatestVersion failed for package {0}", pkg.Name);
+                    throw new ApplicationException(msg, ex);
+                }
+
+                if (null == latestNuspec)
+                {
+                    Console.Error.WriteLine("ERROR | Failed to find package {0}", pkg.Name);
+                    continue;
+                }
+
                 var latestVersion = latestNuspec.Version.ParseSemVersion();
                 var currentVersion = pkg.Version.ParseSemVersion();
 
