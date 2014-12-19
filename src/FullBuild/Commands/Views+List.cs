@@ -25,6 +25,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using FullBuild.Helpers;
 
 namespace FullBuild.Commands
@@ -40,7 +41,10 @@ namespace FullBuild.Commands
                 throw new ArgumentException("Invalid view name");
             }
 
-            var repos = File.ReadAllLines(viewFile.FullName);
+            var repos = File.ReadAllLines(viewFile.FullName)
+                            .Distinct(StringComparer.InvariantCultureIgnoreCase)
+                            .Where(x => !string.IsNullOrEmpty(x)).ToList();
+
             foreach (var repo in repos)
             {
                 if (! string.IsNullOrEmpty(repo))

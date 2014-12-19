@@ -52,7 +52,9 @@ namespace FullBuild.Commands
                 throw new ArgumentException("Initialize first solution with a list of repositories to include.");
             }
 
-            var view = File.ReadAllLines(viewFileName.FullName);
+            var view = File.ReadAllLines(viewFileName.FullName)
+                           .Distinct(StringComparer.InvariantCultureIgnoreCase)
+                           .Where(x => ! string.IsNullOrEmpty(x)).ToList();
 
             var sb = new StringBuilder();
             sb.AppendLine();
