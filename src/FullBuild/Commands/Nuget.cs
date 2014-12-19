@@ -166,7 +166,14 @@ namespace FullBuild.Commands
         private static DirectoryInfo SetupPackageDirectory(Package pkg, DirectoryInfo packageRoot)
         {
             var packageDirectory = packageRoot.GetDirectory(pkg.Name);
-            Reliability.Do(() => packageDirectory.Delete(true));
+            Reliability.Do(() =>
+                           {
+                               packageDirectory.Refresh();
+                               if (packageDirectory.Exists)
+                               {
+                                   packageDirectory.Delete(true);
+                               }
+                           });
             return packageDirectory;
         }
 
