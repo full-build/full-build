@@ -24,6 +24,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -41,7 +42,7 @@ namespace FullBuild.Commands
             var config = ConfigManager.LoadConfig();
 
             // validate first that repos are valid and clone them
-            var sb = new StringBuilder();
+            var view = new List<string>();
             foreach (var repo in repos)
             {
                 var match = "^" + repo + "$";
@@ -57,7 +58,7 @@ namespace FullBuild.Commands
                     var repoDir = wsDir.GetDirectory(repoConfig.Name);
                     if (repoDir.Exists)
                     {
-                        sb.AppendLine(repoConfig.Name);
+                        view.Add(repoConfig.Name);
                     }
                     else
                     {
@@ -66,8 +67,12 @@ namespace FullBuild.Commands
                 }
             }
 
+            view = view.Distinct(StringComparer.InvariantCultureIgnoreCase).Where(x => ! String.IsNullOrEmpty(x)).ToList();
+
             var viewDir = WellKnownFolders.GetViewDirectory();
             var viewFile = viewDir.GetFile(viewName + ".view");
+
+            var sb = view.Aggregate(new StringBuilder(), (s, x) => s.AppendLine(x));
             File.WriteAllText(viewFile.FullName, sb.ToString());
 
             GenerateView(viewName);
