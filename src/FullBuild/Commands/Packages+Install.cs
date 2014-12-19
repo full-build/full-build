@@ -68,9 +68,9 @@ namespace FullBuild.Commands
             GenerateTargetsForProject(pkg);
         }
 
-        private static XElement Generatewhen(IEnumerable<string> foldersToTry, string fxVersion, DirectoryInfo libDir)
+        private static XElement GenerateWhen(IEnumerable<string> fxFolderNamesToTry, string fxVersion, DirectoryInfo libDir)
         {
-            foreach (var folderToTry in foldersToTry)
+            foreach (var folderToTry in fxFolderNamesToTry)
             {
                 var fxLibs = libDir.GetDirectory(folderToTry);
                 if (fxLibs.Exists)
@@ -80,6 +80,30 @@ namespace FullBuild.Commands
                                             new XAttribute("Condition", condition),
                                             GenerateItemGroup(fxLibs));
                     return when;
+                }
+            }
+
+            return null;
+        }
+
+        private static XElement GeneratePortableWhen(IEnumerable<string> fxFolderNamesToTry, string fxVersion, DirectoryInfo libDir)
+        {
+            const string portablePrefix = "portable-";
+            foreach (var folderToTry in fxFolderNamesToTry)
+            {
+                var portableDirs = libDir.GetDirectories(portablePrefix + "*");
+                foreach (var portableDir in portableDirs)
+                {
+                    var portableDirName = portableDir.Name;
+                    var supportedFrameworks = portableDirName.Substring(portablePrefix.Length).Split('+');
+                    if (supportedFrameworks.Any(x => x.InvariantEquals(folderToTry)))
+                    {
+                        var condition = String.Format("'$(TargetFrameworkVersion)' == '{0}'", fxVersion);
+                        var when = new XElement(XmlHelpers.NsMsBuild + "When",
+                                                new XAttribute("Condition", condition),
+                                                GenerateItemGroup(portableDir));
+                        return when;
+                    }
                 }
             }
 
@@ -104,19 +128,42 @@ namespace FullBuild.Commands
                     var fxVersion = FrameworkVersion.CompatibilityOrder[i];
 
                     XElement when = null;
+
+                    // first try to find a standard framework version
                     for (var j = i; j >= 0; --j)
                     {
                         var substituteVersion = FrameworkVersion.CompatibilityOrder[j];
-                        var foldersToTry = FrameworkVersion.FxVersion2Folder[substituteVersion];
+                        var fxFolderNamesToTry = FrameworkVersion.FxVersion2Folder[substituteVersion];
 
-                        when = Generatewhen(foldersToTry, fxVersion, libDir);
+                        when = GenerateWhen(fxFolderNamesToTry, fxVersion, libDir);
                         if (null != when)
                         {
                             break;
                         }
                     }
 
-                    when = when ?? Generatewhen(new[] {""}, fxVersion, libDir);
+                    // if nothing found then try to find a portable version
+                    if (null == when)
+                    {
+                        for (var j = i; j >= 0; --j)
+                        {
+                            var substituteVersion = FrameworkVersion.CompatibilityOrder[j];
+                            var fxFolderNamesToTry = FrameworkVersion.FxVersion2Folder[substituteVersion];
+
+                            when = GeneratePortableWhen(fxFolderNamesToTry, fxVersion, libDir);
+                            if (null != when)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    // nothing found then use default version
+                    if (null == when)
+                    {
+                        when = GenerateWhen(new[] {""}, fxVersion, libDir);
+                    }
+
                     whens.Add(when);
                 }
             }
