@@ -65,8 +65,6 @@ namespace FullBuild.Test
                 using (var pkgDir = new TemporaryDirectory())
                 {
                     var package = new Package("Castle.Core", "3.3.3");
-                    var nuGet = NuGet.Default("http://www.nuget.org/api/v2/");
-                    var nuspec = nuGet.GetNuSpecs(package).First();
 
                     Check.That(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
                     Check.That(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
@@ -84,8 +82,7 @@ namespace FullBuild.Test
 
                     Check.ThatCode(() => nuget.InstallPackageFromCache(package, cacheDir.Directory, pkgDir.Directory)).Throws<Exception>();
 
-                    castlePkg.Refresh();
-                    Check.That(castlePkg.Exists).IsFalse();
+                    Check.That(nuget.IsPackageInCache(package, cacheDir.Directory)).IsFalse();
                 }
             }
         }
