@@ -175,22 +175,33 @@ namespace FullBuild.Commands
             xdoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single().Value = outputType;
             xdoc.Descendants(XmlHelpers.NsMsBuild + "RootNamespace").Single().Value = rootNamespace;
             xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyName").Single().Value = projectDef.AssemblyName;
-
             xdoc.Descendants(XmlHelpers.NsMsBuild + "TargetFrameworkVersion").Single().Value = projectDef.FxTarget;
 
             if (null != signAssembly)
             {
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "SignAssembly").Single().Value = signAssembly.Value;
+                var targetSignAssembly = xdoc.Descendants(XmlHelpers.NsMsBuild + "SignAssembly").SingleOrDefault();
+                if (null != targetSignAssembly)
+                {
+                    targetSignAssembly.Value = signAssembly.Value;
+                }
             }
 
             if (null != originatorKeyFile)
             {
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyOriginatorKeyFile").Single().Value = originatorKeyFile.Value;
+                var targetAssemblyOriginatorKeyFile = xdoc.Descendants(XmlHelpers.NsMsBuild + "AssemblyOriginatorKeyFile").SingleOrDefault();
+                if (null != targetAssemblyOriginatorKeyFile)
+                {
+                    targetAssemblyOriginatorKeyFile.Value = originatorKeyFile.Value;
+                }
             }
 
             if (null != applicationIcon)
             {
-                xdoc.Descendants(XmlHelpers.NsMsBuild + "ApplicationIcon").Single().Value = applicationIcon.Value;
+                var targetApplicationIcon = xdoc.Descendants(XmlHelpers.NsMsBuild + "ApplicationIcon").SingleOrDefault();
+                if (null != targetApplicationIcon)
+                {
+                    targetApplicationIcon.Value = applicationIcon.Value;
+                }
             }
         }
 
