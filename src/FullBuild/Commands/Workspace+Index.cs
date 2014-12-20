@@ -89,16 +89,19 @@ namespace FullBuild.Commands
                 var allprojs = repoDir.EnumerateSupportedProjectFiles();
 
                 // scan projects and import
-                var wsDirPrefixLength = wsDir.FullName.Length;
+                var wsDirPrefixLength = wsDir.FullName.Length + 1;
                 foreach (var proj in allprojs)
                 {
                     // first skip over known projects (if they are in anthology they are OK)
                     var projectFileName = proj.FullName;
-                    projectFileName = projectFileName.Substring(wsDirPrefixLength).ToLowerInvariant();
+                    projectFileName = projectFileName.Substring(wsDirPrefixLength).ToLowerInvariant().ToUnixSeparator();
                     if (projectFileName2Guid.ContainsKey(projectFileName))
                     {
+                        _logger.Debug("Skipping known project {0}", projectFileName);
                         continue;
                     }
+
+                    _logger.Debug("Found new project {0}", projectFileName);
 
                     var xdoc = XDocument.Load(proj.FullName);
 
@@ -266,7 +269,7 @@ namespace FullBuild.Commands
             var binaries = GetBinaryReferences(xdoc).ToList();
 
             // extract all packages (nuget, fullbuild paket and guessed based on binaries)
-            var packages = GetPackages(projectFile, xdoc, binaries).ToList();
+            var packages = GetPackages(anthology, projectFile, xdoc, binaries).ToList();
 
             // update anthology with this new project
             var binaryReferences = binaries.Select(x => x.AssemblyName).Distinct().ToImmutableList();
@@ -290,10 +293,10 @@ namespace FullBuild.Commands
             }
         }
 
-        private static IEnumerable<Package> GetPackages(FileInfo projectFile, XDocument xdoc, IEnumerable<Binary> binaries)
+        private static IEnumerable<Package> GetPackages(Anthology anthology, FileInfo projectFile, XDocument xdoc, IEnumerable<Binary> binaries)
         {
             var nugetPackages = GetNuGetPackages(projectFile.Directory);
-            var fullbuildPackages = GetFullBuildPackages(xdoc).ToList();
+            var fullbuildPackages = GetFullBuildPackages(xdoc, anthology).ToList();
             var paketPackages = GetPaketPackages(projectFile).ToList();
             var importedPackages = nugetPackages.Concat(fullbuildPackages).Concat(paketPackages).Distinct().ToList();
 
@@ -341,13 +344,13 @@ namespace FullBuild.Commands
             //return remainingGuessPackages;
         }
 
-        private static IEnumerable<Package> GetFullBuildPackages(XDocument xdoc)
+        private static IEnumerable<Package> GetFullBuildPackages(XDocument xdoc, Anthology anthology)
         {
             var fbPackages = from import in xdoc.Descendants(XmlHelpers.NsMsBuild + "Import")
                              let importProject = (string)import.Attribute("Project")
                              where importProject.InvariantStartsWith(WellKnownFolders.MsBuildPackagesDir)
                              let importProjectName = Path.GetFileNameWithoutExtension(importProject)
-                             select new Package(importProjectName, null);
+                             select new Package(importProjectName, anthology.Packages.Single(x => x.Name.InvariantEquals(importProjectName)).Version);
             return fbPackages;
         }
 
