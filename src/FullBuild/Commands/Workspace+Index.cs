@@ -45,7 +45,7 @@ namespace FullBuild.Commands
 
             var admDir = WellKnownFolders.GetAdminDirectory();
 
-            EnsureProjectGuidsAreUnique(config, workspace);
+            EnsureProjectGuidsAreUnique(config);
 
             // get all csproj in all repos only
             var anthology = Anthology.Load(admDir);
@@ -61,14 +61,23 @@ namespace FullBuild.Commands
             anthology.Save(admDir);
         }
 
-        private static void EnsureProjectGuidsAreUnique(FullBuildConfig config, DirectoryInfo workspace)
+        private static void EnsureProjectGuidsAreUnique(FullBuildConfig config)
         {
             Console.WriteLine("Ensuring projets GUID are unique");
 
-            var existingGuids = new HashSet<Guid>();
+            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
+            var admDir = WellKnownFolders.GetAdminDirectory();
+
+            // first of all is to get all existing guids from anthology - we want to preserve them
+            var anthology = Anthology.Load(admDir);
+            var projectFileName2Guid = anthology.Projects.ToDictionary(x => x.ProjectFile.ToLowerInvariant(), x => x.Guid);
+            var existingGuids = new HashSet<Guid>(projectFileName2Guid.Values);
+
+            // now we are ready to scan all available projects
+            // if we detect a new project with existing guid then change the guid
             foreach (var repo in config.SourceRepos)
             {
-                var repoDir = workspace.GetDirectory(repo.Name);
+                var repoDir = wsDir.GetDirectory(repo.Name);
                 if (!repoDir.Exists)
                 {
                     continue;
@@ -80,8 +89,17 @@ namespace FullBuild.Commands
                 var allprojs = repoDir.EnumerateSupportedProjectFiles();
 
                 // scan projects and import
+                var wsDirPrefixLength = wsDir.FullName.Length;
                 foreach (var proj in allprojs)
                 {
+                    // first skip over known projects (if they are in anthology they are OK)
+                    var projectFileName = proj.FullName;
+                    projectFileName = projectFileName.Substring(wsDirPrefixLength).ToLowerInvariant();
+                    if (projectFileName2Guid.ContainsKey(projectFileName))
+                    {
+                        continue;
+                    }
+
                     var xdoc = XDocument.Load(proj.FullName);
 
                     _logger.Debug("Processing project {0}", proj.FullName);
