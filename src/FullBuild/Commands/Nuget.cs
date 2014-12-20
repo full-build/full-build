@@ -54,7 +54,7 @@ namespace FullBuild.Commands
             return new NuGet(new WebClientAdapter(), nugets);
         }
 
-        private IEnumerable<NuSpec> GetLatestVersion(string name, bool includePreRelease)
+        private NuSpec GetLatestVersion(string name, bool includePreRelease)
         {
             var query =
                 string.Format("Search()?$orderby=DownloadCount%20desc"
@@ -63,28 +63,26 @@ namespace FullBuild.Commands
                               name, includePreRelease
                                   ? "true"
                                   : "false");
-            var nuGetResults = Query(query).Where(nr => nr.IsLatestVersion);
-            return nuGetResults;
+            var latestNuSpec = Query(query).FirstOrDefault();
+            return latestNuSpec;
         }
 
         public NuSpec GetLatestVersion(string name)
         {
             _logger.Debug("Getting latest version for package {0}", name);
 
-            var nuGetResults = GetLatestVersion(name, false).ToList();
-            if (0 == nuGetResults.Count)
+            var latestNuSpec = GetLatestVersion(name, false);
+            if (null == latestNuSpec)
             {
-                nuGetResults = GetLatestVersion(name, true).ToList();
-                if (0 == nuGetResults.Count)
+                latestNuSpec = GetLatestVersion(name, true);
+                if (null == latestNuSpec)
                 {
                     return null;
                 }
             }
 
-            var lastVersion = nuGetResults.Max(nr => nr.Published);
-            var latestNuspec = nuGetResults.Single(nr => nr.Published == lastVersion);
-            _logger.Debug("Latest version of package {0} is {1}", name, latestNuspec.Version);
-            return latestNuspec;
+            _logger.Debug("Latest version of package {0} is {1}", name, latestNuSpec.Version);
+            return latestNuSpec;
         }
 
         public IEnumerable<NuSpec> GetNuSpecs(Package package)
