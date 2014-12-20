@@ -37,7 +37,17 @@ namespace FullBuild.Commands
         private static void ListRepos()
         {
             var config = ConfigManager.LoadConfig();
-            config.SourceRepos.ForEach(x => Console.WriteLine(x.Name));
+            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
+
+            // validate first that repos are valid and clone them
+            foreach (var repo in config.SourceRepos)
+            {
+                var repoDir = wsDir.GetDirectory(repo.Name);
+                var eol = repoDir.Exists
+                    ? "@"
+                    : "";
+                Console.WriteLine("{0}{1}", repo.Name, eol);
+            }
         }
 
         private static void AddRepo(string name, VersionControlType type, string url)
