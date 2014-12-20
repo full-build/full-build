@@ -50,7 +50,8 @@ namespace FullBuild.Helpers
             var csproj = dir.GetFiles("*.csproj", SearchOption.AllDirectories);
             var vbproj = dir.GetFiles("*.vbproj", SearchOption.AllDirectories);
             var fsproj = dir.GetFiles("*.fsproj", SearchOption.AllDirectories);
-            return csproj.Concat(vbproj).Concat(fsproj);
+            var sqlproj = dir.GetFiles("*.sqlproj", SearchOption.AllDirectories);
+            return csproj.Concat(vbproj).Concat(fsproj).Concat(sqlproj);
         }
 
         public static IEnumerable<FileInfo> EnumerateSolutionFiles(this DirectoryInfo dir)
