@@ -153,19 +153,25 @@ namespace FullBuild.Commands
                 var repoDir = wsDir.GetDirectory(repo.Name);
                 if (repoDir.Exists)
                 {
-                    repoDir.EnumerateNugetDirectories().ForEach(x =>
-                                                                {
-                                                                    try
-                                                                    {
-                                                                        x.Refresh();
-                                                                        x.Delete(true);
-                                                                    }
-                                                                    catch
-                                                                    {
-                                                                    }
-                                                                });
+                    RecursiveDeleteDirectoryButVcs(repoDir);
                 }
             }
+        }
+
+        private static void RecursiveDeleteDirectoryButVcs(DirectoryInfo dir)
+        {
+            if (dir.Name.InvariantEquals(".hg") || dir.Name.InvariantEquals(".git"))
+            {
+                return;
+            }
+
+            if (dir.Name.InvariantEquals(".nuget"))
+            {
+                Reliability.Do(() => dir.Delete(true));
+                return;
+            }
+
+            dir.GetDirectories().ForEach(RecursiveDeleteDirectoryButVcs);
         }
 
         private static void SetProjectOutputSettings(XDocument xdoc, Project projectDef, string outputType, string rootNamespace, XElement signAssembly, XElement originatorKeyFile,

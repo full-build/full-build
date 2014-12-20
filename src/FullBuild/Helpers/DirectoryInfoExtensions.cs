@@ -59,12 +59,6 @@ namespace FullBuild.Helpers
             return sln;
         }
 
-        public static IEnumerable<DirectoryInfo> EnumerateNugetDirectories(this DirectoryInfo dir)
-        {
-            var nuget = dir.GetDirectories(".nuget", SearchOption.AllDirectories);
-            return nuget;
-        }
-
         public static IEnumerable<FileInfo> EnumeratePaketDependencies(this DirectoryInfo dir)
         {
             var paket = dir.GetFiles("paket.lock", SearchOption.AllDirectories);
