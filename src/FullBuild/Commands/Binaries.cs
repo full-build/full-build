@@ -24,47 +24,37 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using FullBuild.Commands;
+using System.Collections.Generic;
+using FullBuild.Helpers;
+using FullBuild.Model;
 using FullBuild.NatLangParser;
-using NLog;
 
-namespace FullBuild
+namespace FullBuild.Commands
 {
-    internal class Program
+    internal partial class Binaries
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static int Main(string[] args)
+        public static IEnumerable<Matcher> Commands()
         {
-            try
-            {
-                TryMain(args);
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.Debug("Failed with error", ex);
-
-                Console.Error.WriteLine("ERROR:");
-                Console.Error.WriteLine(ex.Message);
-            }
-
-            return 5;
+            // add nuget feed
+            yield return MatchBuilder.Describe("list binaries")
+                                     .Command("list")
+                                     .Command("binaries")
+                                     .Do(ctx => ListBinaries());
         }
 
-        private static void TryMain(string[] args)
+        private static void ListBinaries()
         {
-            var parser = new ParserBuilder().With(Usage.Commands())
-                                            .With(Workspace.Commands())
-                                            .With(Packages.Commands())
-                                            .With(Views.Commands())
-                                            .With(Configuration.Commands())
-                                            .With(Binaries.Commands())
-                                            .With(Exec.Commands()).Build();
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var anthology = Anthology.Load(admDir);
 
-            if (! parser.ParseAndInvoke(args))
+            // validate first that repos are valid and clone them
+            foreach (var binary in anthology.Binaries)
             {
-                throw new ArgumentException("Invalid arguments. Use /? for usage.");
+                var binName = binary.AssemblyName;
+                var eol = null != binary.HintPath
+                    ? "@"
+                    : "";
+                Console.WriteLine("{0}{1}", binName, eol);
             }
         }
     }
