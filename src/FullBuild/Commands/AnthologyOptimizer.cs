@@ -40,7 +40,7 @@ namespace FullBuild.Commands
         {
             Console.WriteLine("Optimizing anthology");
             anthology = RemoveBinariesFromReferencedPackages(anthology);
-            //anthology = UsePackageInsteadOfBinaries(anthology);
+            anthology = UsePackageInsteadOfBinaries(anthology);
             anthology = PromoteBinaryToProject(anthology);
             anthology = PromotePackageToProject(anthology);
             anthology = RemoveUnusedStuff(anthology);
@@ -193,25 +193,18 @@ namespace FullBuild.Commands
 
         private static Anthology UsePackageInsteadOfBinaries(Anthology anthology)
         {
-            var pkgsDir = WellKnownFolders.GetPackageDirectory();
-            var pkg2assemblies = ((from package in anthology.Packages
-                                   let pkgdir = pkgsDir.GetDirectory(package.Name)
-                                   where pkgdir.Exists
-                                   select new {Name = package.Name, Assemblies = NuPkg.Assemblies(pkgdir)}).ToDictionary(x => x.Name, x => x.Assemblies.ToList()));
-
             foreach (var project in anthology.Projects)
             {
-                foreach (var binary in project.BinaryReferences)
+                var bin2pkgs = from bin in project.BinaryReferences
+                               from pkg in anthology.Packages
+                               where bin.InvariantEquals(pkg.Name)
+                               select new {Binary = bin, Package = pkg.Name};
+
+                foreach (var bin2pkg in bin2pkgs)
                 {
-                    var packages = (from pkg2assembly in pkg2assemblies
-                                    where pkg2assembly.Value.Contains(binary, StringComparer.InvariantCultureIgnoreCase)
-                                    select pkg2assembly).OrderBy(x => x.Value.Count());
-                    if (packages.Any())
-                    {
-                        var newProject = project.RemoveBinaryReference(binary);
-                        newProject = newProject.AddPackageReference(packages.First().Key);
-                        anthology = anthology.AddOrUpdateProject(newProject);
-                    }
+                    var newProject = project.RemoveBinaryReference(bin2pkg.Binary);
+                    newProject = newProject.AddPackageReference(bin2pkg.Package);
+                    anthology = anthology.AddOrUpdateProject(newProject);
                 }
             }
 

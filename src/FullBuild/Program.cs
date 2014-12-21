@@ -60,6 +60,7 @@ namespace FullBuild
                                             .With(Views.Commands())
                                             .With(Configuration.Commands())
                                             .With(Binaries.Commands())
+                                            .With(Projects.Commands())
                                             .With(Exec.Commands()).Build();
 
             if (! parser.ParseAndInvoke(args))

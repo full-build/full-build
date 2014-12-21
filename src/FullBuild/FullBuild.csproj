@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AnthologyOptimizer.cs" />
+    <Compile Include="Commands\Projects.cs" />
     <Compile Include="Commands\Configuration.cs" />
     <Compile Include="Commands\Packages.cs" />
     <Compile Include="Commands\Exec.cs" />
