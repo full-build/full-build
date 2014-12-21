@@ -61,7 +61,10 @@ namespace FullBuild.Commands
             foreach (var view in views)
             {
                 var viewName = Path.GetFileNameWithoutExtension(view.Name);
-                Console.WriteLine(viewName);
+                if (! string.IsNullOrEmpty(viewName))
+                {
+                    Console.WriteLine(viewName);
+                }
             }
         }
     }

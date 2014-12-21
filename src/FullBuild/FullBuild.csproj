@@ -92,6 +92,7 @@
     <Compile Include="Commands\WebClientAdapter.cs" />
     <Compile Include="Commands\Workspace+Bookmark.cs" />
     <Compile Include="Commands\Workspace+Optimize.cs" />
+    <Compile Include="Commands\Binaries.cs" />
     <Compile Include="Commands\Workspace+Repo.cs" />
     <Compile Include="Commands\Workspace+Init.cs" />
     <Compile Include="Commands\Workspace.cs" />
