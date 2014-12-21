@@ -103,6 +103,7 @@ namespace FullBuild.Commands
                                                 && ig.Name.LocalName != "BootstrapperPackage"
                                           select ig;
                 var applicationIcon = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "ApplicationIcon").SingleOrDefault();
+                var allowUnsafe = realProjectDoc.Descendants(XmlHelpers.NsMsBuild + "AllowUnsafeBlocks").FirstOrDefault();
 
                 // prepare project structure either from template or original project file
                 var templateForProjectFile = templateFile.Exists
@@ -114,7 +115,7 @@ namespace FullBuild.Commands
                 CleanUpProject(xdoc);
 
                 // setup project guid
-                SetProjectOutputSettings(xdoc, projectDef, outputType, rootNamespace, signAssembly, originatorKeyFile, applicationIcon);
+                SetProjectOutputSettings(xdoc, projectDef, outputType, rootNamespace, signAssembly, originatorKeyFile, applicationIcon, allowUnsafe);
 
                 var propertyGroup = xdoc.Root.Elements(XmlHelpers.NsMsBuild + "PropertyGroup").Last();
                 var itemGroupReference = new XElement(XmlHelpers.NsMsBuild + "ItemGroup");
@@ -175,7 +176,7 @@ namespace FullBuild.Commands
         }
 
         private static void SetProjectOutputSettings(XDocument xdoc, Project projectDef, string outputType, string rootNamespace, XElement signAssembly, XElement originatorKeyFile,
-                                                     XElement applicationIcon)
+                                                     XElement applicationIcon, XElement allowUnsafe)
         {
             xdoc.Descendants(XmlHelpers.NsMsBuild + "ProjectGuid").Single().Value = projectDef.Guid.ToString("B");
             xdoc.Descendants(XmlHelpers.NsMsBuild + "OutputType").Single().Value = outputType;
@@ -207,6 +208,14 @@ namespace FullBuild.Commands
                 if (null != targetApplicationIcon)
                 {
                     targetApplicationIcon.Value = applicationIcon.Value;
+                }
+            }
+
+            if (null != allowUnsafe)
+            {
+                foreach (var targetAllowUnsafe in xdoc.Descendants(XmlHelpers.NsMsBuild + "AllowUnsafeBlocks"))
+                {
+                    targetAllowUnsafe.Value = allowUnsafe.Value;
                 }
             }
         }
