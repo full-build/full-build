@@ -79,11 +79,16 @@ namespace FullBuild.Model
             return new Project(Guid, ProjectFile, AssemblyName, Extension, FxTarget, ProjectReferences, BinaryReferences, newPackages);
         }
 
+        public Project RemoveProjectReference(Guid project)
+        {
+            var newProjects = ProjectReferences.Remove(project);
+            return new Project(Guid, ProjectFile, AssemblyName, Extension, FxTarget, newProjects, BinaryReferences, PackageReferences);
+        }
+
         public Project AddPackageReference(string package)
         {
             var newPackages = PackageReferences.Add(package).Distinct(StringComparer.InvariantCultureIgnoreCase).ToImmutableList();
             return new Project(Guid, ProjectFile, AssemblyName, Extension, FxTarget, ProjectReferences, BinaryReferences, newPackages);
-                 
         }
     }
 }

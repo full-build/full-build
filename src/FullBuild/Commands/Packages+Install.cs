@@ -190,7 +190,10 @@ namespace FullBuild.Commands
             var define = new XElement(XmlHelpers.NsMsBuild + "PropertyGroup",
                                       new XElement(XmlHelpers.NsMsBuild + defineName, "Y"));
 
-            var project = new XElement(XmlHelpers.NsMsBuild + "Project", define, imports, choose);
+            var propCondition = string.Format("'$(FullBuild_{0}_Pkg)' == ''", package.Name.ToMsBuild());
+            var projectCondition = new XAttribute("Condition", propCondition);
+
+            var project = new XElement(XmlHelpers.NsMsBuild + "Project", projectCondition, define, imports, choose);
             var xdoc = new XDocument(project);
 
             var packageFileName = package.Name + ".targets";
