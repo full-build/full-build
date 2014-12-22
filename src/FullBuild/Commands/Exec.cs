@@ -95,7 +95,9 @@ namespace FullBuild.Commands
                     process.WaitForExit();
                     if (0 != process.ExitCode)
                     {
-                        Console.WriteLine("ERROR | Process exited with error code " + process.ExitCode);
+                        string msg = string.Format("ERROR | Process exited with error code " + process.ExitCode);
+                        //Console.WriteLine(msg);
+                        throw new ApplicationException(msg);
                     }
                 }
             }
