@@ -95,7 +95,7 @@ namespace FullBuild.Commands
                 foreach (var portableDir in portableDirs)
                 {
                     var portableDirName = portableDir.Name.Replace("%2B", "-");
-                    var supportedFrameworks = portableDirName.Substring(portablePrefix.Length).Split('+');
+                    var supportedFrameworks = portableDirName.Substring(portablePrefix.Length).Split('-');
                     if (supportedFrameworks.Any(x => x.InvariantEquals(folderToTry)))
                     {
                         var condition = String.Format("'$(TargetFrameworkVersion)' == '{0}'", fxVersion);
@@ -213,7 +213,7 @@ namespace FullBuild.Commands
             var imports = from file in files
                           let assemblyName = Path.GetFileNameWithoutExtension(file.FullName)
                           let relativePath = file.FullName.Substring(len)
-                          let hintPath = Path.Combine(WellKnownFolders.MsBuildSolutionDir, relativePath)
+                          let hintPath = Path.Combine(WellKnownFolders.MsBuildSolutionDir, relativePath).ToUnixSeparator()
                           select new XElement(XmlHelpers.NsMsBuild + "Reference",
                                               new XAttribute("Include", assemblyName),
                                               new XElement(XmlHelpers.NsMsBuild + "HintPath", hintPath),
