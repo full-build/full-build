@@ -94,8 +94,8 @@ namespace FullBuild.Commands
                 var portableDirs = libDir.GetDirectories(portablePrefix + "*");
                 foreach (var portableDir in portableDirs)
                 {
-                    var portableDirName = portableDir.Name.Replace("%2B", "-");
-                    var supportedFrameworks = portableDirName.Substring(portablePrefix.Length).Split('-');
+                    var portableDirName = portableDir.Name;
+                    var supportedFrameworks = portableDirName.Substring(portablePrefix.Length).Split('+');
                     if (supportedFrameworks.Any(x => x.InvariantEquals(folderToTry)))
                     {
                         var condition = String.Format("'$(TargetFrameworkVersion)' == '{0}'", fxVersion);

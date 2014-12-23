@@ -56,14 +56,10 @@ namespace FullBuild.Commands
 
         private NuSpec GetLatestVersion(string name, bool includePreRelease)
         {
-            var query =
-                string.Format("Search()?$orderby=DownloadCount%20desc"
-                              + "&$filter=IsAbsoluteLatestVersion"
-                              + "&searchTerm='{0}'&targetFramework=&includePrerelease={1}",
-                              name, includePreRelease
-                                  ? "true"
-                                  : "false");
-            var latestNuSpec = Query(query).FirstOrDefault();
+            var query = string.Format("Packages?filter=Id eq '{0}'&includePrerelease={1}", name, includePreRelease
+                ? "true"
+                : "false");
+            var latestNuSpec = Query(query).LastOrDefault();
             return latestNuSpec;
         }
 
@@ -153,11 +149,35 @@ namespace FullBuild.Commands
             try
             {
                 ZipFile.ExtractToDirectory(cacheFile.FullName, packageDirectory.FullName);
+
+                var libDir = packageDirectory.GetDirectory("lib");
+                if (libDir.Exists)
+                {
+                    RenameFolderWithPlus(libDir);
+                }
             }
             catch (Exception ex)
             {
                 cacheFile.Delete();
                 throw new ApplicationException("Failed to unzip package, please retry.", ex);
+            }
+        }
+
+        private static void RenameFolderWithPlus(DirectoryInfo libDir)
+        {
+            var newLibDirName = libDir.Name;
+            if (newLibDirName.Contains("%2B"))
+            {
+                newLibDirName = newLibDirName.Replace("%2B", "+");
+                var newLibDir = libDir.Parent.GetDirectory(newLibDirName);
+                libDir.MoveTo(newLibDir.FullName);
+
+                libDir = newLibDir;
+            }
+
+            foreach (var subDir in libDir.GetDirectories())
+            {
+                RenameFolderWithPlus(subDir);
             }
         }
 
