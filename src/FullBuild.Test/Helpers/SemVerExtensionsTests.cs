@@ -24,50 +24,37 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using FullBuild.Commands;
-using FullBuild.NatLangParser;
-using NLog;
+using FullBuild.Helpers;
+using NFluent;
+using NUnit.Framework;
+using Semver;
 
-namespace FullBuild
+namespace FullBuild.Test.Helpers
 {
-    internal class Program
+    [TestFixture]
+    public class SemVerExtensionsTests
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static int Main(string[] args)
+        [Test]
+        public void Check_good_semver_3_digits()
         {
-            try
-            {
-                TryMain(args);
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed with error", ex);
-
-                Console.Error.WriteLine("ERROR:");
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(ex);
-            }
-
-            return 5;
+            const string ver = "1.2.3";
+            var semVer = ver.ParseSemVersion();
+            Check.That(semVer).IsEqualTo(new SemVersion(1, 2, 3));
         }
 
-        private static void TryMain(string[] args)
+        [Test]
+        public void Check_good_semver_4_digits()
         {
-            var parser = new ParserBuilder().With(Usage.Commands())
-                                            .With(Workspace.Commands())
-                                            .With(Packages.Commands())
-                                            .With(Views.Commands())
-                                            .With(Configuration.Commands())
-                                            .With(Binaries.Commands())
-                                            .With(Projects.Commands())
-                                            .With(Exec.Commands()).Build();
+            const string ver = "1.2.3.5";
+            var semVer = ver.ParseSemVersion();
+            Check.That(semVer).IsEqualTo(new SemVersion(1, 2, 3));
+        }
 
-            if (! parser.ParseAndInvoke(args))
-            {
-                throw new ArgumentException("Invalid arguments. Use /? for usage.");
-            }
+        [Test]
+        public void Check_invalid_semver()
+        {
+            const string ver = "tralala";
+            Check.ThatCode(() => ver.ParseSemVersion()).Throws<ArgumentException>();
         }
     }
 }

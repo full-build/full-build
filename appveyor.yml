@@ -20,6 +20,11 @@ configuration: Release
 build:
   project: src/full-build.sln
 
+test:
+  categories:
+    except:
+      - integration
+  
 deploy_script:
   -cmd: push-release.bat
   

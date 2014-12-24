@@ -30,6 +30,7 @@ using System.Reflection;
 using FullBuild.Helpers;
 using FullBuild.Model;
 using FullBuild.NatLangParser;
+using FullBuild.NuGet;
 
 namespace FullBuild.Commands
 {

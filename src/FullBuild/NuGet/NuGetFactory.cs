@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014, Pierre Chalamet
+// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -24,49 +24,62 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Linq;
+using System.Net;
+using System.Xml.Linq;
 using FullBuild.Commands;
-using FullBuild.NatLangParser;
-using NLog;
+using FullBuild.Config;
+using FullBuild.Helpers;
 
-namespace FullBuild
+namespace FullBuild.NuGet
 {
-    internal class Program
+    internal class NuGetFactory
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static int Main(string[] args)
+        public static INuGet CreateAll(params NuGetConfig[] nugets)
         {
-            try
-            {
-                TryMain(args);
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed with error", ex);
-
-                Console.Error.WriteLine("ERROR:");
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(ex);
-            }
-
-            return 5;
+            return new NuGetAll(nugets);
         }
 
-        private static void TryMain(string[] args)
+        public static INuGet Create(NuGetConfig nuget)
         {
-            var parser = new ParserBuilder().With(Usage.Commands())
-                                            .With(Workspace.Commands())
-                                            .With(Packages.Commands())
-                                            .With(Views.Commands())
-                                            .With(Configuration.Commands())
-                                            .With(Binaries.Commands())
-                                            .With(Projects.Commands())
-                                            .With(Exec.Commands()).Build();
-
-            if (! parser.ParseAndInvoke(args))
+            switch (nuget.Version)
             {
-                throw new ArgumentException("Invalid arguments. Use /? for usage.");
+                case 1:
+                    return new NuGet1(nuget.Url);
+
+                case 2:
+                    return new NuGet2(nuget.Url);
+
+                default:
+                    throw new ArgumentException("Unsupported NuGet version");
+            }
+        }
+
+        public static int GetNuGetVersion(string url)
+        {
+            using (var webClient = new WebClient())
+            {
+                var uri = new Uri(new Uri(url), "$metadata");
+                var resp = webClient.DownloadString(uri);
+                var xresp = XDocument.Parse(resp);
+                var entityType = xresp.Descendants(XmlHelpers.Edm + "EntityType").FirstOrDefault();
+                if (null == entityType)
+                {
+                    throw new ApplicationException("Can't determine NuGet feed version");
+                }
+
+                var entityName = entityType.Attribute("Name").Value;
+                switch (entityName)
+                {
+                    case "Package":
+                        return 1;
+
+                    case "V2FeedPackage":
+                        return 2;
+
+                    default:
+                        throw new ApplicationException("Can't determine NuGet version");
+                }
             }
         }
     }

@@ -40,7 +40,7 @@ namespace FullBuild.Config
         public string BinRepo { get; set; }
 
         [XmlElement("NuGet")]
-        public string[] NuGets { get; set; }
+        public NuGetConfig[] NuGets { get; set; }
 
         [XmlElement("SourceRepo")]
         public RepoConfig[] SourceRepos { get; set; }

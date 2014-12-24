@@ -23,51 +23,58 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
-using FullBuild.Commands;
-using FullBuild.NatLangParser;
-using NLog;
+using System.Collections.Generic;
+using System.Linq;
+using FullBuild.Config;
+using FullBuild.Model;
 
-namespace FullBuild
+namespace FullBuild.NuGet
 {
-    internal class Program
+    internal class NuGetAll : INuGet
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private readonly NuGetConfig[] _nugets;
 
-        public static int Main(string[] args)
+        public NuGetAll(NuGetConfig[] nugets)
         {
-            try
-            {
-                TryMain(args);
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed with error", ex);
-
-                Console.Error.WriteLine("ERROR:");
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(ex);
-            }
-
-            return 5;
+            _nugets = nugets;
         }
 
-        private static void TryMain(string[] args)
+        public NuSpec GetLatestVersion(string name)
         {
-            var parser = new ParserBuilder().With(Usage.Commands())
-                                            .With(Workspace.Commands())
-                                            .With(Packages.Commands())
-                                            .With(Views.Commands())
-                                            .With(Configuration.Commands())
-                                            .With(Binaries.Commands())
-                                            .With(Projects.Commands())
-                                            .With(Exec.Commands()).Build();
-
-            if (! parser.ParseAndInvoke(args))
+            var nuspecs = new List<NuSpec>();
+            foreach (var nugetConfig in _nugets)
             {
-                throw new ArgumentException("Invalid arguments. Use /? for usage.");
+                var nuget = NuGetFactory.Create(nugetConfig);
+                var nuspec = nuget.GetLatestVersion(name);
+                if (null != nuspec)
+                {
+                    nuspecs.Add(nuspec);
+                }
             }
+
+            if (nuspecs.Any())
+            {
+                var maxPublished = nuspecs.Max(x => x.Published);
+                var latest = nuspecs.Single(x => x.Published == maxPublished);
+                return latest;
+            }
+
+            return null;
+        }
+
+        public NuSpec GetVersion(Package package)
+        {
+            foreach (var nugetConfig in _nugets)
+            {
+                var nuget = NuGetFactory.Create(nugetConfig);
+                var nuspec = nuget.GetVersion(package);
+                if (null != nuspec)
+                {
+                    return nuspec;
+                }
+            }
+
+            return null;
         }
     }
 }

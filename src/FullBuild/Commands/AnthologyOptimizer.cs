@@ -28,6 +28,7 @@ using System.IO;
 using System.Linq;
 using FullBuild.Helpers;
 using FullBuild.Model;
+using FullBuild.NuGet;
 using NLog;
 
 namespace FullBuild.Commands
@@ -193,17 +194,20 @@ namespace FullBuild.Commands
 
         private static Anthology UsePackageInsteadOfBinaries(Anthology anthology)
         {
-            foreach (var project in anthology.Projects)
+            foreach (var binary in anthology.Binaries)
             {
-                var bin2pkgs = from bin in project.BinaryReferences
-                               from pkg in anthology.Packages
-                               where bin.InvariantEquals(pkg.Name)
-                               select new {Binary = bin, Package = pkg.Name};
-
-                foreach (var bin2pkg in bin2pkgs)
+                var package = HintPathParser.ExtractPackageNameFromPackagePlusVersion(binary.HintPath);
+                if (null == package)
                 {
-                    var newProject = project.RemoveBinaryReference(bin2pkg.Binary);
-                    newProject = newProject.AddPackageReference(bin2pkg.Package);
+                    continue;
+                }
+
+                anthology = anthology.RemoveBinary(binary);
+                anthology = anthology.AddOrUpdatePackages(package);
+
+                foreach (var project in anthology.Projects)
+                {
+                    var newProject = project.RemoveBinaryReference(binary.AssemblyName);
                     anthology = anthology.AddOrUpdateProject(newProject);
                 }
             }

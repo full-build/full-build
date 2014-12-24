@@ -24,50 +24,55 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using FullBuild.Commands;
-using FullBuild.NatLangParser;
-using NLog;
+using FullBuild.Helpers;
+using NFluent;
+using NUnit.Framework;
 
-namespace FullBuild
+namespace FullBuild.Test.Helpers
 {
-    internal class Program
+    [TestFixture]
+    public class ReliabilityTests
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static int Main(string[] args)
+        [Test]
+        public void Check_default_retry_count_max()
         {
-            try
-            {
-                TryMain(args);
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed with error", ex);
+            var callCount = 0;
+            Action action = () =>
+                            {
+                                ++callCount;
+                                throw new ApplicationException("Error !");
+                            };
 
-                Console.Error.WriteLine("ERROR:");
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(ex);
-            }
-
-            return 5;
+            Check.ThatCode(() => Reliability.Do(action)).Throws<ApplicationException>();
+            Check.That(callCount).IsEqualTo(3);
         }
 
-        private static void TryMain(string[] args)
+        [Test]
+        public void Check_failure_if_lower_than_zero_try_count()
         {
-            var parser = new ParserBuilder().With(Usage.Commands())
-                                            .With(Workspace.Commands())
-                                            .With(Packages.Commands())
-                                            .With(Views.Commands())
-                                            .With(Configuration.Commands())
-                                            .With(Binaries.Commands())
-                                            .With(Projects.Commands())
-                                            .With(Exec.Commands()).Build();
+            var callCount = 0;
+            Action action = () =>
+                            {
+                                ++callCount;
+                                throw new ApplicationException("Error !");
+                            };
 
-            if (! parser.ParseAndInvoke(args))
-            {
-                throw new ArgumentException("Invalid arguments. Use /? for usage.");
-            }
+            Check.ThatCode(() => Reliability.Do(action, 0)).Throws<ArgumentException>();
+            Check.That(callCount).IsEqualTo(0);
+        }
+
+        [Test]
+        public void Check_specified_retry_count_max()
+        {
+            var callCount = 0;
+            Action action = () =>
+                            {
+                                ++callCount;
+                                throw new ApplicationException("Error !");
+                            };
+
+            Check.ThatCode(() => Reliability.Do(action, 2)).Throws<ApplicationException>();
+            Check.That(callCount).IsEqualTo(2);
         }
     }
 }

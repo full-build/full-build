@@ -23,51 +23,16 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
-using FullBuild.Commands;
-using FullBuild.NatLangParser;
-using NLog;
+using System.Xml.Serialization;
 
-namespace FullBuild
+namespace FullBuild.Config
 {
-    internal class Program
+    public class NuGetConfig
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        [XmlAttribute("version")]
+        public int Version { get; set; }
 
-        public static int Main(string[] args)
-        {
-            try
-            {
-                TryMain(args);
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed with error", ex);
-
-                Console.Error.WriteLine("ERROR:");
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(ex);
-            }
-
-            return 5;
-        }
-
-        private static void TryMain(string[] args)
-        {
-            var parser = new ParserBuilder().With(Usage.Commands())
-                                            .With(Workspace.Commands())
-                                            .With(Packages.Commands())
-                                            .With(Views.Commands())
-                                            .With(Configuration.Commands())
-                                            .With(Binaries.Commands())
-                                            .With(Projects.Commands())
-                                            .With(Exec.Commands()).Build();
-
-            if (! parser.ParseAndInvoke(args))
-            {
-                throw new ArgumentException("Invalid arguments. Use /? for usage.");
-            }
-        }
+        [XmlText]
+        public string Url { get; set; }
     }
 }
