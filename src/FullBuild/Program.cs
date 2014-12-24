@@ -47,7 +47,6 @@ namespace FullBuild
 
                 Console.Error.WriteLine("ERROR:");
                 Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(ex);
             }
 
             return 5;
