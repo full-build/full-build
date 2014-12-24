@@ -60,10 +60,13 @@ namespace FullBuild.NuGet
                               select NuSpec.CreateFromEntry(xentry);
 
                 NuSpec entry = null;
-                var max = DateTime.MinValue;
                 foreach (var candidate in entries)
                 {
-                    if (max < candidate.Published && candidate.IsLatestVersion)
+                    if (null == entry)
+                    {
+                        entry = candidate;
+                    }
+                    else if (entry.Published < candidate.Published && candidate.IsLatestVersion)
                     {
                         entry = candidate;
                     }
