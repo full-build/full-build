@@ -72,7 +72,25 @@ namespace FullBuild.NuGet
 
                 _logger.Debug("Querying version {0}", uri);
 
-                var resp = client.DownloadString(uri);
+                string resp;
+                try
+                {
+                    resp = client.DownloadString(uri);
+                }
+                catch (WebException ex)
+                {
+                    if (ex.Status == WebExceptionStatus.ProtocolError && ex.Response != null)
+                    {
+                        var httpresp = (HttpWebResponse)ex.Response;
+                        if (httpresp.StatusCode == HttpStatusCode.NotFound) // HTTP 404
+                        {
+                            return null;
+                        }
+                    }
+
+                    throw;
+                }
+
                 var xresp = XDocument.Parse(resp);
 
                 var xentry = xresp.Descendants(XmlHelpers.Atom + "entry").SingleOrDefault();

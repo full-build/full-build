@@ -41,11 +41,39 @@ namespace FullBuild.Test.NuGet
         {
             var package = new Package("Castle.Core", "3.3.3");
 
-            var nugetConfig1 = new NuGetConfig {Url = "http://test-proget/nuget/default/", Version = 1};
+            var nugetConfig1 = new NuGetConfig {Url = "http://siriona-proget/nuget/default/", Version = 1};
             var nugetConfig2 = new NuGetConfig {Url = "http://www.nuget.org/api/v2/", Version = 2};
             var nugetConfig = new[] {nugetConfig1, nugetConfig2};
 
             Assert.NotNull(NuGetFactory.CreateAll(nugetConfig).GetVersion(package));
+        }
+
+        [Test]
+        [Category("integration")]
+        public void Find_available_package()
+        {
+            var package = new Package("Siriona.Availpro.Common", "3.3.3");
+
+            var nugetConfig1 = new NuGetConfig { Url = "http://siriona-proget/nuget/default/", Version = 1 };
+            var nugetConfig2 = new NuGetConfig { Url = "http://www.nuget.org/api/v2/", Version = 2 };
+            var nugetConfig = new[] { nugetConfig1, nugetConfig2 };
+
+            Assert.NotNull(NuGetFactory.CreateAll(nugetConfig).GetLatestVersion(package.Name));
+        }
+
+
+        [Test]
+        [Category("integration")]
+        public void Check_package_download()
+        {
+            var package = new Package("Connectivity.Services.Model", "1.1.26");
+
+            var nugetConfig1 = new NuGetConfig { Url = "http://siriona-proget/nuget/default/", Version = 1 };
+            var nugetConfig2 = new NuGetConfig { Url = "http://www.nuget.org/api/v2/", Version = 2 };
+            var nugetConfig = new[] { nugetConfig1, nugetConfig2 };
+
+            NuSpec anObject = NuGetFactory.CreateAll(nugetConfig).GetVersion(package);
+            Assert.NotNull(anObject);
         }
 
         [Test]
@@ -70,7 +98,7 @@ namespace FullBuild.Test.NuGet
         {
             var expected = new Package("Castle.Core", "3.3.3");
 
-            var nugetConfig1 = new NuGetConfig {Url = "http://test-proget/nuget/default/", Version = 1};
+            var nugetConfig1 = new NuGetConfig {Url = "http://siriona-proget/nuget/default/", Version = 1};
             var nugetConfig2 = new NuGetConfig {Url = "http://www.nuget.org/api/v2/", Version = 2};
             var nugetConfig = new[] {nugetConfig1, nugetConfig2};
 
@@ -84,7 +112,7 @@ namespace FullBuild.Test.NuGet
         public void Find_not_available_package_from_multiple_repos()
         {
             var package = new Package("Castle.Core", "5.0.0");
-            var nugetConfig1 = new NuGetConfig {Url = "http://test-proget/nuget/default/", Version = 1};
+            var nugetConfig1 = new NuGetConfig {Url = "http://siriona-proget/nuget/default/", Version = 1};
             var nugetConfig2 = new NuGetConfig {Url = "http://www.nuget.org/api/v2/", Version = 2};
             var nugetConfig = new[] {nugetConfig1, nugetConfig2};
 
