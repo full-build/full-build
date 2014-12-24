@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014, Pierre Chalamet
+// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -23,51 +23,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
-using FullBuild.Commands;
-using FullBuild.NatLangParser;
-using NLog;
+using FullBuild.Model;
 
-namespace FullBuild
+namespace FullBuild.NuGet
 {
-    internal class Program
+    internal interface INuGet
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        NuSpec GetLatestVersion(string name);
 
-        public static int Main(string[] args)
-        {
-            try
-            {
-                TryMain(args);
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed with error", ex);
-
-                Console.Error.WriteLine("ERROR:");
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(ex);
-            }
-
-            return 5;
-        }
-
-        private static void TryMain(string[] args)
-        {
-            var parser = new ParserBuilder().With(Usage.Commands())
-                                            .With(Workspace.Commands())
-                                            .With(Packages.Commands())
-                                            .With(Views.Commands())
-                                            .With(Configuration.Commands())
-                                            .With(Binaries.Commands())
-                                            .With(Projects.Commands())
-                                            .With(Exec.Commands()).Build();
-
-            if (! parser.ParseAndInvoke(args))
-            {
-                throw new ArgumentException("Invalid arguments. Use /? for usage.");
-            }
-        }
+        NuSpec GetVersion(Package package);
     }
 }

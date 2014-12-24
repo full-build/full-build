@@ -31,6 +31,7 @@ using System.Xml.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
+using FullBuild.NuGet;
 
 namespace FullBuild.Commands
 {
@@ -53,18 +54,18 @@ namespace FullBuild.Commands
         public static void InstallPackage(Package pkg)
         {
             var config = ConfigManager.LoadConfig();
-            var nuget = NuGet.Default(config.NuGets);
+            var nuget = NuGetFactory.CreateAll(config.NuGets);
             var cacheDir = WellKnownFolders.GetCacheDirectory();
             var pkgDir = WellKnownFolders.GetPackageDirectory();
 
-            if (! nuget.IsPackageInCache(pkg, cacheDir))
+            if (! GlobalCache.IsPackageInCache(pkg, cacheDir))
             {
                 _logger.Debug("Package {0} version {1} was not found in cache {2}", pkg.Name, pkg.Version, cacheDir.FullName);
-                var nuSpec = nuget.GetNuSpecs(pkg).First(x => x.Version == pkg.Version);
-                nuget.DownloadNuSpecToCache(pkg, nuSpec, cacheDir);
+                var nuSpec = nuget.GetVersion(pkg);
+                GlobalCache.DownloadNuSpecToCache(pkg, nuSpec, cacheDir);
             }
 
-            nuget.InstallPackageFromCache(pkg, cacheDir, pkgDir);
+            GlobalCache.InstallPackageFromCache(pkg, cacheDir, pkgDir);
             GenerateTargetsForProject(pkg);
         }
 

@@ -51,7 +51,7 @@ namespace FullBuild.Config
 
         public static FullBuildConfig LoadConfig(DirectoryInfo adminDir)
         {
-            var config = new FullBuildConfig {NuGets = new string[0], SourceRepos = new RepoConfig[0]};
+            var config = new FullBuildConfig {NuGets = new NuGetConfig[0], SourceRepos = new RepoConfig[0]};
 
             // try to load config from admin repo if any
             var file = adminDir.GetFile("full-build.config");
@@ -62,7 +62,7 @@ namespace FullBuild.Config
                 {
                     config = (FullBuildConfig)xmlSer.Deserialize(reader);
                     config.SourceRepos = config.SourceRepos ?? new RepoConfig[0];
-                    config.NuGets = config.NuGets ?? new string[0];
+                    config.NuGets = config.NuGets ?? new NuGetConfig[0];
                 }
             }
 

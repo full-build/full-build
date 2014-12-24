@@ -51,6 +51,11 @@ namespace FullBuild.Helpers
             return @this.IndexOf(what, StringComparison.InvariantCultureIgnoreCase);
         }
 
+        public static int InvariantIndexOf(this string @this, string what, int startIndex)
+        {
+            return @this.IndexOf(what, startIndex, StringComparison.InvariantCultureIgnoreCase);
+        }
+
         public static int InvariantFirstIndexOf(this string @this, string[] whats, int startIndex)
         {
             if (null != whats)

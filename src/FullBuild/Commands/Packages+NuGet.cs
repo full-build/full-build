@@ -28,6 +28,7 @@ using System.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
+using FullBuild.NuGet;
 
 namespace FullBuild.Commands
 {
@@ -36,12 +37,13 @@ namespace FullBuild.Commands
         private static void AddNuGet(string url)
         {
             var config = ConfigManager.LoadConfig();
+            int nuGetVersion = NuGetFactory.GetNuGetVersion(url);
+            var nuGetConfig = new NuGetConfig {Url = url, Version = nuGetVersion};
 
-            config.NuGets = config.NuGets.Concat(new[] {url}).Distinct().ToArray();
+            config.NuGets = config.NuGets.Append(nuGetConfig).Distinct().ToArray();
             ConfigManager.SaveConfig(config);
-
-            var title = NuGet.Default(config.NuGets).RetrieveFeedTitle(new Uri(url));
-            Console.WriteLine("Added feed {0} with title {1}", url, title);
+            
+            Console.WriteLine("Added NuGet feed {0}", url);
         }
 
         private static void ListNuGets()
@@ -66,7 +68,7 @@ namespace FullBuild.Commands
 
             if (version == "*")
             {
-                version = NuGet.Default(config.NuGets).GetLatestVersion(name).Version;
+                version = NuGetFactory.CreateAll(config.NuGets).GetLatestVersion(name).Version;
             }
 
             var pkg = new Package(name, version);

@@ -27,6 +27,7 @@ using System;
 using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
+using FullBuild.NuGet;
 
 namespace FullBuild.Commands
 {
@@ -37,10 +38,8 @@ namespace FullBuild.Commands
             // read anthology.json
             var admDir = WellKnownFolders.GetAdminDirectory();
             var anthology = Anthology.Load(admDir);
-
             var config = ConfigManager.LoadConfig();
-
-            var nuget = NuGet.Default(config.NuGets);
+            var nuget = NuGetFactory.CreateAll(config.NuGets);
 
             foreach (var pkg in anthology.Packages)
             {
@@ -67,6 +66,10 @@ namespace FullBuild.Commands
                 if (currentVersion < latestVersion)
                 {
                     Console.WriteLine("{0} version {1} is available (current is {2})", pkg.Name, latestNuspec.Version, pkg.Version);
+                }
+                else
+                {
+                    Console.WriteLine("Package {0} is using latest version {1}", pkg.Name, latestNuspec.Version);
                 }
             }
         }

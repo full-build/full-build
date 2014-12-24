@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014, Pierre Chalamet
+// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -23,28 +23,17 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using FullBuild.Helpers;
+using FullBuild.Model;
 
-namespace FullBuild.Commands
+namespace FullBuild.NuGet
 {
-    internal class NuPkg
+    internal interface IPackageCache
     {
-        public static IEnumerable<string> Assemblies(DirectoryInfo pkgDir)
-        {
-            var lib = pkgDir.GetDirectory("lib");
-            if (! lib.Exists)
-            {
-                return Enumerable.Empty<string>();
-            }
+        bool IsPackageInCache(Package pkg, DirectoryInfo cacheDirectory);
 
-            var files = lib.EnumerateFiles("*.dll", SearchOption.AllDirectories).Concat(lib.EnumerateFiles("*.exe", SearchOption.AllDirectories));
-            var assemblies = (from file in files
-                              let filename = Path.GetFileNameWithoutExtension(file.FullName)
-                              select filename).Distinct();
-            return assemblies;
-        }
+        void DownloadNuSpecToCache(Package pkg, NuSpec nuSpec, DirectoryInfo cacheDirectory);
+
+        void InstallPackageFromCache(Package pkg, DirectoryInfo cacheDirectory, DirectoryInfo packageRoot);
     }
 }
