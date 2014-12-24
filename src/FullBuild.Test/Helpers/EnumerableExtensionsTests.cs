@@ -23,51 +23,44 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
-using FullBuild.Commands;
-using FullBuild.NatLangParser;
-using NLog;
+using System.Linq;
+using FullBuild.Helpers;
+using NFluent;
+using NUnit.Framework;
 
-namespace FullBuild
+namespace FullBuild.Test.Helpers
 {
-    internal class Program
+    [TestFixture]
+    public class EnumerableExtensionsTests
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static int Main(string[] args)
+        [Test]
+        public void Append_ok_with_collection()
         {
-            try
-            {
-                TryMain(args);
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed with error", ex);
-
-                Console.Error.WriteLine("ERROR:");
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(ex);
-            }
-
-            return 5;
+            var set1 = Enumerable.Range(1, 10);
+            var set2 = set1.Append(11, 12, 13);
+            Check.That(set2.Count()).IsEqualTo(13);
+            Check.That(set2.First()).IsEqualTo(1);
+            Check.That(set2.Last()).IsEqualTo(13);
         }
 
-        private static void TryMain(string[] args)
+        [Test]
+        public void Append_ok_with_empty_collection()
         {
-            var parser = new ParserBuilder().With(Usage.Commands())
-                                            .With(Workspace.Commands())
-                                            .With(Packages.Commands())
-                                            .With(Views.Commands())
-                                            .With(Configuration.Commands())
-                                            .With(Binaries.Commands())
-                                            .With(Projects.Commands())
-                                            .With(Exec.Commands()).Build();
+            var set1 = Enumerable.Range(1, 10);
+            var set2 = set1.Append();
+            Check.That(set2.Count()).IsEqualTo(10);
+            Check.That(set2.First()).IsEqualTo(1);
+            Check.That(set2.Last()).IsEqualTo(10);
+        }
 
-            if (! parser.ParseAndInvoke(args))
-            {
-                throw new ArgumentException("Invalid arguments. Use /? for usage.");
-            }
+        [Test]
+        public void Append_ok_with_null_array()
+        {
+            var set1 = Enumerable.Range(1, 10);
+            var set2 = set1.Append(null);
+            Check.That(set2.Count()).IsEqualTo(10);
+            Check.That(set2.First()).IsEqualTo(1);
+            Check.That(set2.Last()).IsEqualTo(10);
         }
     }
 }

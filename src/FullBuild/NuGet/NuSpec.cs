@@ -28,7 +28,7 @@ using System.Linq;
 using System.Xml.Linq;
 using FullBuild.Helpers;
 
-namespace FullBuild.Commands
+namespace FullBuild.NuGet
 {
     internal class NuSpec
     {
@@ -57,7 +57,7 @@ namespace FullBuild.Commands
 
         public DateTime Published { get; private set; }
 
-        public static NuSpec CreateFromNugetApiV1(XElement entry)
+        public static NuSpec CreateFromEntry(XElement entry)
         {
             var title = entry.Descendants(XmlHelpers.Atom + "title").Single().Value;
             var content = entry.Descendants(XmlHelpers.Atom + "content").Single().Attribute("src").Value;

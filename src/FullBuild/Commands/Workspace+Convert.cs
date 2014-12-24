@@ -268,6 +268,12 @@ namespace FullBuild.Commands
             foreach (var refBin in projectDef.BinaryReferences)
             {
                 var bin = anthology.Binaries.SingleOrDefault(x => x.AssemblyName.InvariantEquals(refBin));
+                if (null == bin)
+                {
+                    Console.WriteLine("ERROR | Invalid binary reference {0}", refBin);
+                    continue;
+                }
+
                 var hintPath = null != bin.HintPath
                     ? new XElement(XmlHelpers.NsMsBuild + "HintPath", bin.HintPath)
                     : null;
