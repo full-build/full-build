@@ -67,10 +67,10 @@ namespace FullBuild.Commands
                 {
                     Console.WriteLine("{0} version {1} is available (current is {2})", pkg.Name, latestNuspec.Version, pkg.Version);
                 }
-                else
-                {
-                    Console.WriteLine("Package {0} is using latest version {1}", pkg.Name, latestNuspec.Version);
-                }
+                //else
+                //{
+                //    Console.WriteLine("Package {0} is using latest version {1}", pkg.Name, latestNuspec.Version);
+                //}
             }
         }
     }
