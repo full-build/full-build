@@ -25,11 +25,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FullBuild.Helpers
 {
     internal static class EnumerableExtensions
     {
+        public static IEnumerable<T> Append<T>(this IEnumerable<T> @this, params T[] newItems)
+        {
+            return null == newItems
+                ? @this
+                : @this.Concat(newItems);
+        }
+
         public static void ForEach<T>(this IEnumerable<T> @this, Action<T> action)
         {
             foreach (var t in @this)

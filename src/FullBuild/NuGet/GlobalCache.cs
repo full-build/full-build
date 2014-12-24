@@ -24,98 +24,18 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Xml.Linq;
+using System.Net;
 using FullBuild.Helpers;
 using FullBuild.Model;
 using NLog;
 
-namespace FullBuild.Commands
+namespace FullBuild.NuGet
 {
-    internal class NuGet
+    internal class GlobalCache
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        private readonly IEnumerable<string> _nugets;
-
-        private readonly IWebClient _webClient;
-
-        internal NuGet(IWebClient webClient, IEnumerable<string> nugets)
-        {
-            _webClient = webClient;
-            _nugets = nugets;
-        }
-
-        public static NuGet Default(params string[] nugets)
-        {
-            return new NuGet(new WebClientAdapter(), nugets);
-        }
-
-        private NuSpec GetLatestVersion(string name, bool includePreRelease)
-        {
-            var query = string.Format("Packages?filter=Id eq '{0}'&includePrerelease={1}", name, includePreRelease
-                ? "true"
-                : "false");
-            var latestNuSpec = Query(query).LastOrDefault();
-            return latestNuSpec;
-        }
-
-        public NuSpec GetLatestVersion(string name)
-        {
-            _logger.Debug("Getting latest version for package {0}", name);
-
-            var latestNuSpec = GetLatestVersion(name, false);
-            if (null == latestNuSpec)
-            {
-                latestNuSpec = GetLatestVersion(name, true);
-                if (null == latestNuSpec)
-                {
-                    return null;
-                }
-            }
-
-            _logger.Debug("Latest version of package {0} is {1}", name, latestNuSpec.Version);
-            return latestNuSpec;
-        }
-
-        public IEnumerable<NuSpec> GetNuSpecs(Package package)
-        {
-            var query = string.Format("Packages(Id='{0}',Version='{1}')", package.Name, package.Version);
-            return Query(query);
-        }
-
-        private IEnumerable<NuSpec> Query(string query)
-        {
-            foreach (var nugetQuery in _nugets.Select(nuget => new Uri(new Uri(nuget), query)))
-            {
-                _logger.Debug("Trying to download nuspec from {0}", nugetQuery);
-
-                string result;
-                if (_webClient.TryDownloadString(nugetQuery, out result))
-                {
-                    _logger.Debug("Download successful", result);
-                    XDocument xdoc;
-                    try
-                    {
-                        xdoc = XDocument.Parse(result);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Debug("Failed to parse response {0}", result, ex);
-                        var msg = string.Format("Invalid response for query {0}", nugetQuery);
-                        throw new ApplicationException(msg);
-                    }
-
-                    foreach (var entry in xdoc.Descendants(XmlHelpers.Atom + "entry"))
-                    {
-                        yield return NuSpec.CreateFromNugetApiV1(entry);
-                    }
-                }
-            }
-        }
 
         private static FileInfo GetCachedPackageName(Package pkg, DirectoryInfo cacheDirectory)
         {
@@ -124,24 +44,27 @@ namespace FullBuild.Commands
             return cacheFile;
         }
 
-        public bool IsPackageInCache(Package pkg, DirectoryInfo cacheDirectory)
+        public static bool IsPackageInCache(Package pkg, DirectoryInfo cacheDirectory)
         {
             var cacheFile = GetCachedPackageName(pkg, cacheDirectory);
             return cacheFile.Exists;
         }
 
-        public void DownloadNuSpecToCache(Package pkg, NuSpec nuSpec, DirectoryInfo cacheDirectory)
+        public static void DownloadNuSpecToCache(Package pkg, NuSpec nuSpec, DirectoryInfo cacheDirectory)
         {
             if (!IsPackageInCache(pkg, cacheDirectory))
             {
                 _logger.Debug("Downloading package {0} (package is missing or corrupt)", nuSpec.Title);
 
                 var cacheFile = GetCachedPackageName(pkg, cacheDirectory);
-                _webClient.DownloadFile(nuSpec.Content, cacheFile.FullName);
+                using (var webClient = new WebClient())
+                {
+                    webClient.DownloadFile(nuSpec.Content, cacheFile.FullName);
+                }
             }
         }
 
-        public void InstallPackageFromCache(Package pkg, DirectoryInfo cacheDirectory, DirectoryInfo packageRoot)
+        public static void InstallPackageFromCache(Package pkg, DirectoryInfo cacheDirectory, DirectoryInfo packageRoot)
         {
             var packageDirectory = SetupPackageDirectory(pkg, packageRoot);
             var cacheFileName = string.Format("{0}.{1}.nupkg", pkg.Name, pkg.Version);
@@ -193,16 +116,6 @@ namespace FullBuild.Commands
                                }
                            });
             return packageDirectory;
-        }
-
-        public string RetrieveFeedTitle(Uri nuget)
-        {
-            var content = _webClient.DownloadString(nuget);
-            var xdoc = XDocument.Parse(content);
-            var title = xdoc.Descendants(XmlHelpers.NuGet + "collection")
-                            .Single(x => x.Attribute("href").Value == "Packages")
-                            .Descendants(XmlHelpers.Atom + "title").Single().Value;
-            return title;
         }
     }
 }

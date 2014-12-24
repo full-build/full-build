@@ -23,51 +23,28 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
-using FullBuild.Commands;
-using FullBuild.NatLangParser;
-using NLog;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using FullBuild.Helpers;
 
-namespace FullBuild
+namespace FullBuild.NuGet
 {
-    internal class Program
+    internal class NuPkg
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static int Main(string[] args)
+        public static IEnumerable<string> Assemblies(DirectoryInfo pkgDir)
         {
-            try
+            var lib = pkgDir.GetDirectory("lib");
+            if (! lib.Exists)
             {
-                TryMain(args);
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed with error", ex);
-
-                Console.Error.WriteLine("ERROR:");
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(ex);
+                return Enumerable.Empty<string>();
             }
 
-            return 5;
-        }
-
-        private static void TryMain(string[] args)
-        {
-            var parser = new ParserBuilder().With(Usage.Commands())
-                                            .With(Workspace.Commands())
-                                            .With(Packages.Commands())
-                                            .With(Views.Commands())
-                                            .With(Configuration.Commands())
-                                            .With(Binaries.Commands())
-                                            .With(Projects.Commands())
-                                            .With(Exec.Commands()).Build();
-
-            if (! parser.ParseAndInvoke(args))
-            {
-                throw new ArgumentException("Invalid arguments. Use /? for usage.");
-            }
+            var files = lib.EnumerateFiles("*.dll", SearchOption.AllDirectories).Concat(lib.EnumerateFiles("*.exe", SearchOption.AllDirectories));
+            var assemblies = (from file in files
+                              let filename = Path.GetFileNameWithoutExtension(file.FullName)
+                              select filename).Distinct();
+            return assemblies;
         }
     }
 }

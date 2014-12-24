@@ -73,12 +73,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AnthologyOptimizer.cs" />
+    <Compile Include="Commands\HintPathParser.cs" />
+    <Compile Include="NuGet\INuGet.cs" />
+    <Compile Include="NuGet\IPackageCache.cs" />
+    <Compile Include="NuGet\NuGet2.cs" />
+    <Compile Include="NuGet\NuGetFactory.cs" />
+    <Compile Include="NuGet\NuGetAll.cs" />
+    <Compile Include="NuGet\GlobalCache.cs" />
     <Compile Include="Commands\Projects.cs" />
     <Compile Include="Commands\Configuration.cs" />
     <Compile Include="Commands\Packages.cs" />
     <Compile Include="Commands\Exec.cs" />
     <Compile Include="Commands\IWebClient.cs" />
-    <Compile Include="Commands\NuGet.cs" />
+    <Compile Include="NuGet\NuGet1.cs" />
     <Compile Include="Commands\Packages+NuGet.cs" />
     <Compile Include="Commands\Packages+Check.cs" />
     <Compile Include="Commands\ProcessingException.cs" />
@@ -101,6 +108,7 @@
     <Compile Include="Config\ConfigManager.cs" />
     <Compile Include="Config\ActionType.cs" />
     <Compile Include="Config\ConfigParameter.cs" />
+    <Compile Include="Config\NuGetConfig.cs" />
     <Compile Include="Config\RepoConfig.cs" />
     <Compile Include="Config\VersionControlType.cs" />
     <Compile Include="Helpers\DirectoryInfoExtensions.cs" />
@@ -111,7 +119,7 @@
     <Compile Include="Model\Anthology.cs" />
     <Compile Include="Model\Application.cs" />
     <Compile Include="Model\Binary.cs" />
-    <Compile Include="Commands\NuSpec.cs" />
+    <Compile Include="NuGet\NuSpec.cs" />
     <Compile Include="Model\Bookmark.cs" />
     <Compile Include="Model\Package.cs" />
     <Compile Include="Model\Project.cs" />
@@ -125,7 +133,7 @@
     <Compile Include="NatLangParser\MatchOperationAggregate.cs" />
     <Compile Include="NatLangParser\MatchOperationText.cs" />
     <Compile Include="NatLangParser\Parameter.cs" />
-    <Compile Include="Commands\NuPkg.cs" />
+    <Compile Include="NuGet\NuPkg.cs" />
     <Compile Include="NatLangParser\Parser.cs" />
     <Compile Include="NatLangParser\ParserBuilder.cs" />
     <Compile Include="Program.cs" />

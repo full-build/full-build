@@ -29,7 +29,7 @@ namespace FullBuild.Helpers
 {
     internal static class Reliability
     {
-        private static void Do(Action action, int remaining)
+        private static void TryDo(Action action, int remaining)
         {
             try
             {
@@ -37,7 +37,7 @@ namespace FullBuild.Helpers
             }
             catch
             {
-                if (0 == remaining)
+                if (1 == remaining)
                 {
                     throw;
                 }
@@ -46,9 +46,14 @@ namespace FullBuild.Helpers
             }
         }
 
-        public static void Do(Action action)
+        public static void Do(Action action, int maxTries = 3)
         {
-            Do(action, 3);
+            if (maxTries <= 0)
+            {
+                throw new ArgumentException("maxTries must be greater than 0");
+            }
+
+            TryDo(action, maxTries);
         }
     }
 }

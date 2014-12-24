@@ -24,83 +24,38 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using FullBuild.Commands;
-using FullBuild.Helpers;
+using FullBuild.Config;
 using FullBuild.Model;
+using FullBuild.NuGet;
 using NFluent;
 using NUnit.Framework;
 
-namespace FullBuild.Test
+namespace FullBuild.Test.NuGet
 {
     [TestFixture]
-    public class NuGetTest
+    public class NuGetTests
     {
-        [ExcludeFromCodeCoverage]
-        private class DisconnectedWebClient : IWebClient
-        {
-            public bool TryDownloadString(Uri uri, out string result)
-            {
-                throw new Exception("failed");
-            }
-
-            public string DownloadString(Uri uri)
-            {
-                throw new Exception("failed");
-            }
-
-            public void DownloadFile(Uri address, string fileName)
-            {
-                throw new Exception("failed");
-            }
-        }
-
         [Test]
-        public void Ensure_failure_if_package_is_corrupt()
-        {
-            using (var cacheDir = new TemporaryDirectory())
-            {
-                using (var pkgDir = new TemporaryDirectory())
-                {
-                    var package = new Package("Castle.Core", "3.3.3");
-
-                    Check.That(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
-                    Check.That(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
-
-                    var castlePkg = cacheDir.Directory.GetFile("Castle.Core.3.3.3.nupkg");
-                    using (File.Open(castlePkg.FullName, FileMode.Create, FileAccess.Write))
-                    {
-                    }
-
-                    Check.That(new FileInfo(castlePkg.FullName).Length).IsEqualTo(0);
-
-                    var nuget = NuGet.Default("http://www.nuget.org/api/v2/");
-
-                    Check.That(nuget.IsPackageInCache(package, cacheDir.Directory)).IsTrue();
-
-                    Check.ThatCode(() => nuget.InstallPackageFromCache(package, cacheDir.Directory, pkgDir.Directory)).Throws<Exception>();
-
-                    Check.That(nuget.IsPackageInCache(package, cacheDir.Directory)).IsFalse();
-                }
-            }
-        }
-
-        [Test]
+        [Category("integration")]
         public void Find_available_package_from_multiple_last_repo()
         {
             var package = new Package("Castle.Core", "3.3.3");
 
-            Assert.NotNull(NuGet.Default("http://test-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetNuSpecs(package).FirstOrDefault());
+            var nugetConfig1 = new NuGetConfig {Url = "http://test-proget/nuget/default/", Version = 1};
+            var nugetConfig2 = new NuGetConfig {Url = "http://www.nuget.org/api/v2/", Version = 2};
+            var nugetConfig = new[] {nugetConfig1, nugetConfig2};
+
+            Assert.NotNull(NuGetFactory.CreateAll(nugetConfig).GetVersion(package));
         }
 
         [Test]
+        [Category("integration")]
         public void Find_available_package_from_nugets_for_one_repo()
         {
             var package = new Package("Castle.Core", "3.3.3");
 
-            var nuspec = NuGet.Default("http://www.nuget.org/api/v2/").GetNuSpecs(package).First();
+            var nugetConfig2 = new NuGetConfig {Url = "http://www.nuget.org/api/v2/", Version = 2};
+            var nuspec = NuGetFactory.Create(nugetConfig2).GetVersion(package);
 
             Check.That(nuspec.Content.ToString()).IsEqualTo("http://www.nuget.org/api/v2/package/Castle.Core/3.3.3");
             Check.That(nuspec.PackageSize).IsEqualTo(864855);
@@ -110,27 +65,38 @@ namespace FullBuild.Test
         }
 
         [Test]
+        [Category("integration")]
         public void Find_latest_version_of_package_accross_nugets()
         {
             var expected = new Package("Castle.Core", "3.3.3");
 
-            var latestVersion = NuGet.Default("http://test-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetLatestVersion(expected.Name);
+            var nugetConfig1 = new NuGetConfig {Url = "http://test-proget/nuget/default/", Version = 1};
+            var nugetConfig2 = new NuGetConfig {Url = "http://www.nuget.org/api/v2/", Version = 2};
+            var nugetConfig = new[] {nugetConfig1, nugetConfig2};
+
+            var latestVersion = NuGetFactory.CreateAll(nugetConfig).GetLatestVersion(expected.Name);
 
             Check.That(latestVersion.Version).IsEqualTo(expected.Version);
         }
 
         [Test]
+        [Category("integration")]
         public void Find_not_available_package_from_multiple_repos()
         {
             var package = new Package("Castle.Core", "5.0.0");
+            var nugetConfig1 = new NuGetConfig {Url = "http://test-proget/nuget/default/", Version = 1};
+            var nugetConfig2 = new NuGetConfig {Url = "http://www.nuget.org/api/v2/", Version = 2};
+            var nugetConfig = new[] {nugetConfig1, nugetConfig2};
 
-            Assert.Null(NuGet.Default("http://test-proget/nuget/default/", "http://www.nuget.org/api/v2/").GetNuSpecs(package).FirstOrDefault());
+            Assert.Null(NuGetFactory.CreateAll(nugetConfig).GetVersion(package));
         }
 
         [Test]
-        public void Get_feed_title_from_repo()
+        [Category("integration")]
+        public void Get_feed_version_from_repo()
         {
-            Check.That(NuGet.Default().RetrieveFeedTitle(new Uri("https://nuget.org/api/v2/"))).IsEqualTo("Packages");
+            var version = NuGetFactory.GetNuGetVersion("http://www.nuget.org/api/v2/");
+            Check.That(version).IsEqualTo(2);
         }
     }
 }

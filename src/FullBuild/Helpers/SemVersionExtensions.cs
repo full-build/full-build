@@ -23,6 +23,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
 using Semver;
 
 namespace FullBuild.Helpers
@@ -41,9 +42,16 @@ namespace FullBuild.Helpers
             {
                 // nuget does support 4 numbers version (legacy scheme)
                 // still have to support this (Moq for example)
-                var idx = version.LastIndexOf('.');
-                var patchVersion = version.Substring(0, idx);
-                semVersion = SemVersion.Parse(patchVersion);
+                try
+                {
+                    var idx = version.LastIndexOf('.');
+                    var patchVersion = version.Substring(0, idx);
+                    semVersion = SemVersion.Parse(patchVersion);
+                }
+                catch (Exception ex)
+                {
+                    throw new ArgumentException("Provided value is invalid", ex);
+                }
             }
 
             return semVersion;

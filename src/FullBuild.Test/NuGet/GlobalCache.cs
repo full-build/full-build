@@ -24,49 +24,40 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using FullBuild.Commands;
-using FullBuild.NatLangParser;
-using NLog;
+using System.IO;
+using FullBuild.Helpers;
+using FullBuild.Model;
+using FullBuild.NuGet;
+using NFluent;
+using NUnit.Framework;
 
-namespace FullBuild
+namespace FullBuild.Test.NuGet
 {
-    internal class Program
+    [TestFixture]
+    public class GlobalCacheTests
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static int Main(string[] args)
+        [Test]
+        public void Ensure_failure_if_package_is_corrupt()
         {
-            try
+            using (var cacheDir = new TemporaryDirectory())
             {
-                TryMain(args);
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed with error", ex);
+                using (var pkgDir = new TemporaryDirectory())
+                {
+                    var package = new Package("Castle.Core", "3.3.3");
 
-                Console.Error.WriteLine("ERROR:");
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(ex);
-            }
+                    Check.That(Directory.EnumerateFiles(cacheDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
+                    Check.That(Directory.EnumerateFiles(pkgDir.Directory.FullName, "*.*", SearchOption.AllDirectories)).IsEmpty();
 
-            return 5;
-        }
+                    var castlePkg = cacheDir.Directory.GetFile("Castle.Core.3.3.3.nupkg");
+                    using (File.Open(castlePkg.FullName, FileMode.Create, FileAccess.Write))
+                    {
+                    }
 
-        private static void TryMain(string[] args)
-        {
-            var parser = new ParserBuilder().With(Usage.Commands())
-                                            .With(Workspace.Commands())
-                                            .With(Packages.Commands())
-                                            .With(Views.Commands())
-                                            .With(Configuration.Commands())
-                                            .With(Binaries.Commands())
-                                            .With(Projects.Commands())
-                                            .With(Exec.Commands()).Build();
-
-            if (! parser.ParseAndInvoke(args))
-            {
-                throw new ArgumentException("Invalid arguments. Use /? for usage.");
+                    Check.That(new FileInfo(castlePkg.FullName).Length).IsEqualTo(0);
+                    Check.That(GlobalCache.IsPackageInCache(package, cacheDir.Directory)).IsTrue();
+                    Check.ThatCode(() => GlobalCache.InstallPackageFromCache(package, cacheDir.Directory, pkgDir.Directory)).Throws<Exception>();
+                    Check.That(GlobalCache.IsPackageInCache(package, cacheDir.Directory)).IsFalse();
+                }
             }
         }
     }

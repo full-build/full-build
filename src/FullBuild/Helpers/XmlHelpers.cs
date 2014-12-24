@@ -42,5 +42,7 @@ namespace FullBuild.Helpers
         public static readonly XNamespace NuGet = "http://www.w3.org/2007/app";
 
         public static readonly XNamespace Dgml = "http://schemas.microsoft.com/vs/2009/dgml";
+
+        public static readonly XNamespace Edm = "http://schemas.microsoft.com/ado/2006/04/edm";
     }
 }
