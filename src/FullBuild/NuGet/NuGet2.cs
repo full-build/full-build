@@ -67,7 +67,7 @@ namespace FullBuild.NuGet
         {
             using (var client = new WebClient())
             {
-                var query = string.Format("FindPackagesById()?id='{0}'", package.Name);
+                var query = string.Format("Packages(Id='{0}',Version='{1}')", package.Name, package.Version);
                 var uri = new Uri(_url, query);
 
                 _logger.Debug("Querying version {0}", uri);
@@ -75,13 +75,9 @@ namespace FullBuild.NuGet
                 var resp = client.DownloadString(uri);
                 var xresp = XDocument.Parse(resp);
 
-                var entry = xresp.Descendants(XmlHelpers.Atom + "entry")
-                                 .SingleOrDefault(x => x.Descendants(XmlHelpers.Metadata + "properties")
-                                                        .Descendants(XmlHelpers.DataServices + "Version")
-                                                        .Single().Value == package.Version);
-
-                return null != entry
-                    ? NuSpec.CreateFromEntry(entry)
+                var xentry = xresp.Descendants(XmlHelpers.Atom + "entry").SingleOrDefault();
+                return null != xentry
+                    ? NuSpec.CreateFromEntry(xentry)
                     : null;
             }
         }
