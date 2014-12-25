@@ -184,7 +184,16 @@ namespace FullBuild.Commands
                 foreach (var prjRef in prj.ProjectReferences)
                 {
                     var target = anthology.Projects.Single(x => x.Guid == prjRef);
-                    projects.Add(target);
+                    if (! projects.Contains(target))
+                    {
+                        projects.Add(target);
+
+                        var xnodetarget = new XElement(XmlHelpers.Dgml + "Node",
+                                                       new XAttribute("Id", target.Guid),
+                                                       new XAttribute("Label", target.AssemblyName),
+                                                       new XAttribute("Category", "Project"));
+                        xNodes.Add(xnodetarget);
+                    }
 
                     var xlink = new XElement(XmlHelpers.Dgml + "Link",
                                              new XAttribute("Source", prj.Guid),
