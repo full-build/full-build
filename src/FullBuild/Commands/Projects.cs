@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Xml.Linq;
 using FullBuild.Helpers;
 using FullBuild.Model;
 using FullBuild.NatLangParser;
@@ -43,6 +44,82 @@ namespace FullBuild.Commands
                                      .Command("optimize")
                                      .Command("projects")
                                      .Do(ctx => OptimizeProjects());
+
+            // add nuget feed
+            yield return MatchBuilder.Describe("check projects")
+                                     .Command("check")
+                                     .Command("projects")
+                                     .Do(ctx => CheckProjects());
+        }
+
+        private static void CheckProjects()
+        {
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var anthology = Anthology.Load(admDir);
+            var prjDir = WellKnownFolders.GetProjectDirectory();
+
+            // validate first that repos are valid and clone them
+            foreach (var project in anthology.Projects)
+            {
+                var what = string.Format("Checking project {0}", project.ProjectFile);
+
+                foreach (var binRef in project.BinaryReferences)
+                {
+                    var bin = anthology.Binaries.SingleOrDefault(x => x.AssemblyName.InvariantEquals(binRef));
+                    if (null == bin)
+                    {
+                        if (null != what)
+                        {
+                            Console.WriteLine(what);
+                            what = null;
+                        }
+
+                        Console.WriteLine("  Missing binary {0}", binRef);
+                    }
+                }
+
+                foreach (var pkgRef in project.PackageReferences)
+                {
+                    var pkg = anthology.Packages.SingleOrDefault(x => x.Name.InvariantEquals(pkgRef));
+                    if (null == pkg)
+                    {
+                        if (null != what)
+                        {
+                            Console.WriteLine(what);
+                            what = null;
+                        }
+
+                        Console.WriteLine("  Missing package {0}", pkgRef);
+                    }
+                }
+
+                foreach (var prjRef in project.ProjectReferences)
+                {
+                    var prj = anthology.Projects.SingleOrDefault(x => x.Guid == prjRef);
+                    if (null == prj)
+                    {
+                        if (null != what)
+                        {
+                            Console.WriteLine(what);
+                            what = null;
+                        }
+
+                        var prjFileName = prjRef + ".targets";
+                        var prjFile = prjDir.GetFile(prjFileName);
+                        if (prjFile.Exists)
+                        {
+                            var xdoc = XDocument.Load(prjFile.FullName);
+                            var xref = xdoc.Descendants(XmlHelpers.NsMsBuild + "Reference").Single();
+                            var prjName = xref.Attribute("Include").Value;
+                            Console.WriteLine("  Missing project {0} ({1})", prjRef, prjName);
+                        }
+                        else
+                        {
+                            Console.WriteLine("  Missing project {0}", prjRef);
+                        }
+                    }
+                }
+            }
         }
 
         private static void OptimizeProjects()
