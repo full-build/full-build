@@ -274,8 +274,9 @@ namespace FullBuild.Commands
                                          new XAttribute("Label", "Version"),
                                          new XAttribute("DataType", "System.String")));
 
-            var xdoc = new XElement(XmlHelpers.Dgml + "DirectedGraph",
-                                    xNodes, xLinks, xCategories);
+            var xLayout = new XAttribute("Layout", "ForceDirected");
+
+            var xdoc = new XElement(XmlHelpers.Dgml + "DirectedGraph", xLayout, xNodes, xLinks, xCategories);
 
             xdoc.Save(dgmlFile.FullName);
         }
