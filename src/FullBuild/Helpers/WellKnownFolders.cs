@@ -96,7 +96,13 @@ namespace FullBuild.Helpers
             var config = ConfigManager.LoadConfig();
             if (null != config.PackageGlobalCache)
             {
-                return new DirectoryInfo(config.PackageGlobalCache);
+                var globalCacheDir = new DirectoryInfo(config.PackageGlobalCache);
+                if (globalCacheDir.Exists)
+                {
+                    return globalCacheDir;
+                }
+
+                throw new ApplicationException("GlobalCache does not exist");
             }
 
             var wsDir = GetWorkspaceDirectory();
