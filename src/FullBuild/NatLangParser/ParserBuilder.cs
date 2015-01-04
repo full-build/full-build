@@ -31,15 +31,23 @@ namespace FullBuild.NatLangParser
     {
         private readonly List<Matcher> _matchers = new List<Matcher>();
 
+        private readonly List<OptionMatcher> _options = new List<OptionMatcher>();
+
         public ParserBuilder With(IEnumerable<Matcher> matchers)
         {
             _matchers.AddRange(matchers);
             return this;
         }
 
+        public ParserBuilder With(IEnumerable<OptionMatcher> options)
+        {
+            _options.AddRange(options);
+            return this;
+        }
+
         public Parser Build()
         {
-            return new Parser(_matchers);
+            return new Parser(_matchers, _options);
         }
     }
 }

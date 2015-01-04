@@ -38,7 +38,7 @@ namespace FullBuild.Commands
 
             // update workspace
             // config <key> <value>
-            yield return MatchBuilder.Describe("set configuration {0} to {1}", key, value)
+            yield return MatcherBuilder.Describe("set configuration {0} to {1}", key, value)
                                      .Command("set")
                                      .Command("config")
                                      .Param(key)

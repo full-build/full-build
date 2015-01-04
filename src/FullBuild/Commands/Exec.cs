@@ -40,10 +40,10 @@ namespace FullBuild.Commands
             var command = Parameter<string>.Create("command");
 
             // exec
-            yield return MatchBuilder.Describe("exec command on each repo")
-                                     .Command("exec")
-                                     .Param(command)
-                                     .Do(ctx => ForEachRepo(ctx.Get(command)));
+            yield return MatcherBuilder.Describe("exec command on each repo")
+                                       .Command("exec")
+                                       .Param(command)
+                                       .Do(ctx => ForEachRepo(ctx.Get(command)));
         }
 
         public static bool IsRunningOnMono()
@@ -96,8 +96,12 @@ namespace FullBuild.Commands
                     if (0 != process.ExitCode)
                     {
                         var msg = string.Format("ERROR | Process exited with error code " + process.ExitCode);
-                        //Console.WriteLine(msg);
-                        throw new ApplicationException(msg);
+                        if (!GlobalOptions.Force)
+                        {
+                            throw new ApplicationException(msg);
+                        }
+
+                        Console.WriteLine(msg);
                     }
                 }
             }

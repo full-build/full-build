@@ -36,7 +36,7 @@ namespace FullBuild.Commands
     {
         public static IEnumerable<Matcher> Commands()
         {
-            yield return MatchBuilder.Describe("Usage")
+            yield return MatcherBuilder.Describe("Usage")
                                      .Command("/?")
                                      .Do(ctx => DisplayUsage(ctx.Usage()));
         }

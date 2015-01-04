@@ -23,41 +23,62 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.CodeDom;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.AccessControl;
 
 namespace FullBuild.NatLangParser
 {
-    public class Parser
+    public class FluentMatcherBuilder
     {
-        private readonly IEnumerable<Matcher> _matchers;
+        private readonly object[] _args;
 
-        private readonly IEnumerable<OptionMatcher> _options;
+        private readonly string _description;
 
-        public Parser(IEnumerable<Matcher> matchers, IEnumerable<OptionMatcher> options)
+        private readonly List<KeyValuePair<string, IMatchOperation>> _operations = new List<KeyValuePair<string, IMatchOperation>>();
+
+        public FluentMatcherBuilder(string description, params object[] args)
         {
-            _matchers = matchers;
-            _options = options;
+            _description = description;
+            _args = args;
         }
 
-        public bool ParseAndInvoke(string[] args)
+        private void AddOperation(string name, IMatchOperation operation)
         {
-            ISet<string> enabledOptions;
-            var newArgs = OptionParser.Parse(args, _options, out enabledOptions).ToArray();
-
-            var context = new Context(Usage);
-            var res = _matchers.Any(x => x.ParseAndInvoke(newArgs, context));
-            return res;
+            var kvp = new KeyValuePair<string, IMatchOperation>(name, operation);
+            _operations.Add(kvp);
         }
 
-        public IEnumerable<string> Usage()
+        public FluentMatcherBuilder Param<T>(Parameter<T> parameter)
         {
-            var optionUsage = _options.Select(x => x.Usage());
-            var cmdUsage = _matchers.Select(matcher => matcher.Usage());
-            var allUsage = optionUsage.Concat(cmdUsage);
-            return allUsage;
+            IMatchOperation operation;
+            if (typeof(T).IsArray)
+            {
+                var matchOpAggType = typeof(MatchOperationAggregate<>);
+                var matchOpAggOfTtype = matchOpAggType.MakeGenericType(typeof(T).GetElementType());
+                operation = (IMatchOperation)Activator.CreateInstance(matchOpAggOfTtype);
+            }
+            else
+            {
+                operation = new MatchOperation<T>();
+            }
+
+            AddOperation(parameter.Name, operation);
+
+            return this;
+        }
+
+        public FluentMatcherBuilder Command(string text)
+        {
+            var operation = new MatchOperationText(text);
+            AddOperation(null, operation);
+
+            return this;
+        }
+
+        public Matcher Do(Action<Context> action)
+        {
+            return new Matcher(_description, _args, _operations.AsEnumerable(), action);
         }
     }
 }
