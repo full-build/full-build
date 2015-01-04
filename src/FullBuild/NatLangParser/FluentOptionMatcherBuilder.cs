@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014, Pierre Chalamet
+// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -23,41 +23,30 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.CodeDom;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.AccessControl;
+using System;
 
 namespace FullBuild.NatLangParser
 {
-    public class Parser
+    public class FluentOptionMatcherBuilder
     {
-        private readonly IEnumerable<Matcher> _matchers;
+        private readonly string _description;
 
-        private readonly IEnumerable<OptionMatcher> _options;
+        private string _name;
 
-        public Parser(IEnumerable<Matcher> matchers, IEnumerable<OptionMatcher> options)
+        public FluentOptionMatcherBuilder(string description)
         {
-            _matchers = matchers;
-            _options = options;
+            _description = description;
         }
 
-        public bool ParseAndInvoke(string[] args)
+        public FluentOptionMatcherBuilder WithName(string name)
         {
-            ISet<string> enabledOptions;
-            var newArgs = OptionParser.Parse(args, _options, out enabledOptions).ToArray();
-
-            var context = new Context(Usage);
-            var res = _matchers.Any(x => x.ParseAndInvoke(newArgs, context));
-            return res;
+            _name = name;
+            return this;
         }
 
-        public IEnumerable<string> Usage()
+        public OptionMatcher Do(Action action)
         {
-            var optionUsage = _options.Select(x => x.Usage());
-            var cmdUsage = _matchers.Select(matcher => matcher.Usage());
-            var allUsage = optionUsage.Concat(cmdUsage);
-            return allUsage;
+            return new OptionMatcher(_description, _name, action);
         }
     }
 }

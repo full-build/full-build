@@ -25,60 +25,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace FullBuild.NatLangParser
 {
-    public class FluentMatchBuilder
+    public class OptionMatcher : Matcher
     {
-        private readonly object[] _args;
-
-        private readonly string _description;
-
-        private readonly List<KeyValuePair<string, IMatchOperation>> _operations = new List<KeyValuePair<string, IMatchOperation>>();
-
-        public FluentMatchBuilder(string description, params object[] args)
+        public OptionMatcher(string description, string name, Action action)
+            : base(description,
+                   new object[0],
+                   new[] {new KeyValuePair<string, IMatchOperation>(null, new MatchOperationText(name))},
+                   _ => action())
         {
-            _description = description;
-            _args = args;
-        }
-
-        private void AddOperation(string name, IMatchOperation operation)
-        {
-            var kvp = new KeyValuePair<string, IMatchOperation>(name, operation);
-            _operations.Add(kvp);
-        }
-
-        public FluentMatchBuilder Param<T>(Parameter<T> parameter)
-        {
-            IMatchOperation operation;
-            if (typeof(T).IsArray)
-            {
-                var matchOpAggType = typeof(MatchOperationAggregate<>);
-                var matchOpAggOfTtype = matchOpAggType.MakeGenericType(typeof(T).GetElementType());
-                operation = (IMatchOperation)Activator.CreateInstance(matchOpAggOfTtype);
-            }
-            else
-            {
-                operation = new MatchOperation<T>();
-            }
-
-            AddOperation(parameter.Name, operation);
-
-            return this;
-        }
-
-        public FluentMatchBuilder Command(string text)
-        {
-            var operation = new MatchOperationText(text);
-            AddOperation(null, operation);
-
-            return this;
-        }
-
-        public Matcher Do(Action<Context> action)
-        {
-            return new Matcher(_description, _args, _operations.AsEnumerable(), action);
         }
     }
 }

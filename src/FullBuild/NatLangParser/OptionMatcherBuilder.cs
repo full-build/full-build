@@ -25,11 +25,11 @@
 
 namespace FullBuild.NatLangParser
 {
-    public static class MatchBuilder
+    public static class OptionMatcherBuilder
     {
-        public static FluentMatchBuilder Describe(string description, params object[] args)
+        public static FluentOptionMatcherBuilder Describe(string description)
         {
-            return new FluentMatchBuilder(description, args);
+            return new FluentOptionMatcherBuilder(description);
         }
     }
 }

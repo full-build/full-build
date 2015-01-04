@@ -23,41 +23,36 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.CodeDom;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.AccessControl;
 
 namespace FullBuild.NatLangParser
 {
-    public class Parser
+    internal class OptionParser
     {
-        private readonly IEnumerable<Matcher> _matchers;
-
-        private readonly IEnumerable<OptionMatcher> _options;
-
-        public Parser(IEnumerable<Matcher> matchers, IEnumerable<OptionMatcher> options)
+        public static IEnumerable<string> Parse(IEnumerable<string> args, IEnumerable<OptionMatcher> options, out ISet<string> optionsEnabled)
         {
-            _matchers = matchers;
-            _options = options;
-        }
+            optionsEnabled = new HashSet<string>();
+            var remainingArgs = new List<string>(args);
+            while (0 < remainingArgs.Count)
+            {
+                var arg = remainingArgs[0];
+                if (!arg.StartsWith("-"))
+                {
+                    return remainingArgs;
+                }
+                remainingArgs.RemoveAt(0);
 
-        public bool ParseAndInvoke(string[] args)
-        {
-            ISet<string> enabledOptions;
-            var newArgs = OptionParser.Parse(args, _options, out enabledOptions).ToArray();
+                var option = new[] {arg};
+                var isMatched = options.Any(x => x.ParseAndInvoke(option, null));
+                if (! isMatched)
+                {
+                    throw new ArgumentException("Invalid args");
+                }
+            }
 
-            var context = new Context(Usage);
-            var res = _matchers.Any(x => x.ParseAndInvoke(newArgs, context));
-            return res;
-        }
-
-        public IEnumerable<string> Usage()
-        {
-            var optionUsage = _options.Select(x => x.Usage());
-            var cmdUsage = _matchers.Select(matcher => matcher.Usage());
-            var allUsage = optionUsage.Concat(cmdUsage);
-            return allUsage;
+            return Enumerable.Empty<string>();
         }
     }
 }

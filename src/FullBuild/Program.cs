@@ -24,12 +24,23 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Collections.Generic;
 using FullBuild.Commands;
 using FullBuild.NatLangParser;
 using NLog;
 
 namespace FullBuild
 {
+    public static class GlobalOptions
+    {
+        public static bool Force { get; set; }
+
+        public static IEnumerable<OptionMatcher> Options()
+        {
+            yield return OptionMatcherBuilder.Describe("force").WithName("-f").Do(() => { Force = true; });
+        }
+    }
+
     internal class Program
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -54,7 +65,8 @@ namespace FullBuild
 
         private static void TryMain(string[] args)
         {
-            var parser = new ParserBuilder().With(Usage.Commands())
+            var parser = new ParserBuilder().With(GlobalOptions.Options())
+                                            .With(Usage.Commands())
                                             .With(Workspace.Commands())
                                             .With(Packages.Commands())
                                             .With(Views.Commands())
