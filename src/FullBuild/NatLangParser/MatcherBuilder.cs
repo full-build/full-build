@@ -23,41 +23,13 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System.CodeDom;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.AccessControl;
-
 namespace FullBuild.NatLangParser
 {
-    public class Parser
+    public static class MatcherBuilder
     {
-        private readonly IEnumerable<Matcher> _matchers;
-
-        private readonly IEnumerable<OptionMatcher> _options;
-
-        public Parser(IEnumerable<Matcher> matchers, IEnumerable<OptionMatcher> options)
+        public static FluentMatcherBuilder Describe(string description, params object[] args)
         {
-            _matchers = matchers;
-            _options = options;
-        }
-
-        public bool ParseAndInvoke(string[] args)
-        {
-            ISet<string> enabledOptions;
-            var newArgs = OptionParser.Parse(args, _options, out enabledOptions).ToArray();
-
-            var context = new Context(Usage);
-            var res = _matchers.Any(x => x.ParseAndInvoke(newArgs, context));
-            return res;
-        }
-
-        public IEnumerable<string> Usage()
-        {
-            var optionUsage = _options.Select(x => x.Usage());
-            var cmdUsage = _matchers.Select(matcher => matcher.Usage());
-            var allUsage = optionUsage.Concat(cmdUsage);
-            return allUsage;
+            return new FluentMatcherBuilder(description, args);
         }
     }
 }

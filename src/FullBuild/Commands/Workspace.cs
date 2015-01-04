@@ -45,44 +45,44 @@ namespace FullBuild.Commands
             var version = Parameter<string>.Create("version");
 
             // init workspace
-            yield return MatchBuilder.Describe("initialize workspace in folder <path>")
+            yield return MatcherBuilder.Describe("initialize workspace in folder <path>")
                                      .Command("init")
                                      .Command("workspace")
                                      .Param(path)
                                      .Do(ctx => InitWorkspace(ctx.Get(path)));
 
             // refresh workspace
-            yield return MatchBuilder.Describe("refresh workspace from remote")
+            yield return MatcherBuilder.Describe("refresh workspace from remote")
                                      .Command("refresh")
                                      .Command("workspace")
                                      .Do(ctx => RefreshWorkspace());
 
-            yield return MatchBuilder.Describe("index workspace with local changes")
+            yield return MatcherBuilder.Describe("index workspace with local changes")
                                      .Command("index")
                                      .Command("workspace")
                                      .Do(ctx => IndexWorkspace());
 
             // convert projects
-            yield return MatchBuilder.Describe("convert projects to ensure compatibility with full-build")
+            yield return MatcherBuilder.Describe("convert projects to ensure compatibility with full-build")
                                      .Command("convert")
                                      .Command("projects")
                                      .Do(ctx => ConvertProjects());
 
             // clone repo
-            yield return MatchBuilder.Describe("clone repositories which names matching {0}", repos)
+            yield return MatcherBuilder.Describe("clone repositories which names matching {0}", repos)
                                      .Command("clone")
                                      .Command("repo")
                                      .Param(repos)
                                      .Do(ctx => CloneRepo(ctx.Get(repos)));
 
             // refresh source
-            yield return MatchBuilder.Describe("refresh sources from source control")
+            yield return MatcherBuilder.Describe("refresh sources from source control")
                                      .Command("refresh")
                                      .Command("sources")
                                      .Do(ctx => RefreshSources());
 
             // add repo
-            yield return MatchBuilder.Describe("add a new repository to the workspace")
+            yield return MatcherBuilder.Describe("add a new repository to the workspace")
                                      .Command("add")
                                      .Param(vcs)
                                      .Command("repo")
@@ -92,25 +92,25 @@ namespace FullBuild.Commands
                                      .Do(ctx => AddRepo(ctx.Get(repo), ctx.Get(vcs), ctx.Get(url)));
 
             // list repos
-            yield return MatchBuilder.Describe("list repositories")
+            yield return MatcherBuilder.Describe("list repositories")
                                      .Command("list")
                                      .Command("repos")
                                      .Do(ctx => ListRepos());
 
             // optimize anthology
-            yield return MatchBuilder.Describe("optimize workspace")
+            yield return MatcherBuilder.Describe("optimize workspace")
                                      .Command("optimize")
                                      .Command("workspace")
                                      .Do(ctx => Optimize());
 
             // bookmark workspace
-            yield return MatchBuilder.Describe("bookmark workspace")
+            yield return MatcherBuilder.Describe("bookmark workspace")
                                      .Command("bookmark")
                                      .Command("workspace")
                                      .Do(ctx => Bookmark());
 
             // checkout workspace
-            yield return MatchBuilder.Describe("checkout workspace {0}", version)
+            yield return MatcherBuilder.Describe("checkout workspace {0}", version)
                                      .Command("checkout")
                                      .Command("workspace")
                                      .Param(version)

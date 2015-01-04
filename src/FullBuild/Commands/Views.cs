@@ -37,7 +37,7 @@ namespace FullBuild.Commands
             var repos = Parameter<string[]>.Create("regex");
 
             // init view <viewname> with <repos> ...
-            yield return MatchBuilder.Describe("init view file {0} with provided repositories which names matching {1}", viewname, repos)
+            yield return MatcherBuilder.Describe("init view file {0} with provided repositories which names matching {1}", viewname, repos)
                                      .Command("init")
                                      .Command("view")
                                      .Param(viewname)
@@ -45,20 +45,20 @@ namespace FullBuild.Commands
                                      .Param(repos)
                                      .Do(ctx => InitView(ctx.Get(viewname), ctx.Get(repos)));
 
-            yield return MatchBuilder.Describe("drop view {0}", viewname)
+            yield return MatcherBuilder.Describe("drop view {0}", viewname)
                                      .Command("drop")
                                      .Command("view")
                                      .Param(viewname)
                                      .Do(ctx => DeleteView(ctx.Get(viewname)));
 
             // list views>
-            yield return MatchBuilder.Describe("list all available views")
+            yield return MatcherBuilder.Describe("list all available views")
                                      .Command("list")
                                      .Command("views")
                                      .Do(ctx => ListViews());
 
             // list view <viewname>
-            yield return MatchBuilder.Describe("describe view content")
+            yield return MatcherBuilder.Describe("describe view content")
                                      .Command("describe")
                                      .Command("view")
                                      .Param(viewname)
@@ -66,21 +66,21 @@ namespace FullBuild.Commands
 
 
             // graph view <viewname>
-            yield return MatchBuilder.Describe("graph view")
+            yield return MatcherBuilder.Describe("graph view")
                                      .Command("graph")
                                      .Command("view")
                                      .Param(viewname)
                                      .Do(ctx => GraphView(ctx.Get(viewname)));
 
             // update view <viewname>
-            yield return MatchBuilder.Describe("generate solution {0}", viewname)
+            yield return MatcherBuilder.Describe("generate solution {0}", viewname)
                                      .Command("generate")
                                      .Command("view")
                                      .Param(viewname)
                                      .Do(ctx => GenerateView(ctx.Get(viewname)));
 
             // build view
-            yield return MatchBuilder.Describe("build view {0}", viewname)
+            yield return MatcherBuilder.Describe("build view {0}", viewname)
                                      .Command("build")
                                      .Command("view")
                                      .Param(viewname)
