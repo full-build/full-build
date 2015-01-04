@@ -40,38 +40,38 @@ namespace FullBuild.Commands
             var version = Parameter<string>.Create("version");
 
             // add nuget feed
-            yield return MatchBuilder.Describe("add nuget feed")
+            yield return MatcherBuilder.Describe("add nuget feed")
                                      .Command("add")
                                      .Command("nuget")
                                      .Param(url)
                                      .Do(ctx => AddNuGet(ctx.Get(url)));
 
             // list nuget feed
-            yield return MatchBuilder.Describe("list nuget feeds")
+            yield return MatcherBuilder.Describe("list nuget feeds")
                                      .Command("list")
                                      .Command("nugets")
                                      .Do(ctx => ListNuGets());
 
             // list packages
-            yield return MatchBuilder.Describe("list packages")
+            yield return MatcherBuilder.Describe("list packages")
                                      .Command("list")
                                      .Command("packages")
                                      .Do(ctx => ListPackages());
 
             // install package
-            yield return MatchBuilder.Describe("install packages")
+            yield return MatcherBuilder.Describe("install packages")
                                      .Command("install")
                                      .Command("packages")
                                      .Do(ctx => InstallPackages());
 
             // check packages
-            yield return MatchBuilder.Describe("check for new packages versions")
+            yield return MatcherBuilder.Describe("check for new packages versions")
                                      .Command("check")
                                      .Command("packages")
                                      .Do(ctx => CheckPackages());
 
             // check packages
-            yield return MatchBuilder.Describe("use package with version (* for latest)")
+            yield return MatcherBuilder.Describe("use package with version (* for latest)")
                                      .Command("use")
                                      .Command("package")
                                      .Param(package)

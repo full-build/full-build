@@ -36,7 +36,7 @@ namespace FullBuild.Commands
         public static IEnumerable<Matcher> Commands()
         {
             // add nuget feed
-            yield return MatchBuilder.Describe("list binaries")
+            yield return MatcherBuilder.Describe("list binaries")
                                      .Command("list")
                                      .Command("binaries")
                                      .Do(ctx => ListBinaries());

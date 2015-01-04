@@ -40,13 +40,13 @@ namespace FullBuild.Commands
         public static IEnumerable<Matcher> Commands()
         {
             // add nuget feed
-            yield return MatchBuilder.Describe("optimize projects")
+            yield return MatcherBuilder.Describe("optimize projects")
                                      .Command("optimize")
                                      .Command("projects")
                                      .Do(ctx => OptimizeProjects());
 
             // add nuget feed
-            yield return MatchBuilder.Describe("check projects")
+            yield return MatcherBuilder.Describe("check projects")
                                      .Command("check")
                                      .Command("projects")
                                      .Do(ctx => CheckProjects());
