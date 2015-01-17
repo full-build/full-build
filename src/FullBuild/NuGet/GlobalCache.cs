@@ -50,11 +50,11 @@ namespace FullBuild.NuGet
             return cacheFile.Exists;
         }
 
-        public static void DownloadNuSpecToCache(Package pkg, NuSpec nuSpec, DirectoryInfo cacheDirectory)
+        public static void DownloadPackageToCache(Package pkg, NuSpec nuSpec, DirectoryInfo cacheDirectory)
         {
             if (!IsPackageInCache(pkg, cacheDirectory))
             {
-                _logger.Debug("Downloading package {0} (package is missing or corrupt)", nuSpec.Title);
+                _logger.Debug("Downloading package {0} (package is missing or corrupt)", nuSpec.PackageId.Name);
 
                 var cacheFile = GetCachedPackageName(pkg, cacheDirectory);
                 using (var webClient = new WebClient())

@@ -140,6 +140,7 @@
     <Compile Include="NuGet\NuPkg.cs" />
     <Compile Include="NatLangParser\Parser.cs" />
     <Compile Include="NatLangParser\ParserBuilder.cs" />
+    <Compile Include="NuGet\PackageId.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\ServiceActivator.cs" />

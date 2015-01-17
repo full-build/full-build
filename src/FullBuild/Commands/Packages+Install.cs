@@ -62,7 +62,7 @@ namespace FullBuild.Commands
             {
                 _logger.Debug("Package {0} version {1} was not found in cache {2}", pkg.Name, pkg.Version, cacheDir.FullName);
                 var nuSpec = nuget.GetVersion(pkg);
-                GlobalCache.DownloadNuSpecToCache(pkg, nuSpec, cacheDir);
+                GlobalCache.DownloadPackageToCache(pkg, nuSpec, cacheDir);
             }
 
             GlobalCache.InstallPackageFromCache(pkg, cacheDir, pkgDir);

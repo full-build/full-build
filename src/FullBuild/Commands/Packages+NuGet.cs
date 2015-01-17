@@ -68,7 +68,7 @@ namespace FullBuild.Commands
 
             if (version == "*")
             {
-                version = NuGetFactory.CreateAll(config.NuGets).GetLatestVersion(name).Version;
+                version = NuGetFactory.CreateAll(config.NuGets).GetLatestVersion(name).PackageId.Version;
             }
 
             var pkg = new Package(name, version);
