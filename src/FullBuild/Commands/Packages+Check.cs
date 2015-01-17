@@ -60,18 +60,18 @@ namespace FullBuild.Commands
                     continue;
                 }
 
-                var latestVersion = latestNuspec.Version.ParseSemVersion();
+                var latestVersion = latestNuspec.PackageId.Version.ParseSemVersion();
                 var currentVersion = pkg.Version.ParseSemVersion();
 
                 if (currentVersion < latestVersion)
                 {
-                    Console.WriteLine("{0} version {1} is available (current is {2})", pkg.Name, latestNuspec.Version, pkg.Version);
+                    Console.WriteLine("{0} version {1} is available (current is {2})", pkg.Name, latestNuspec.PackageId.Version, pkg.Version);
                 }
                 else
                 {
-                    if (pkg.Version != latestNuspec.Version)
+                    if (pkg.Version != latestNuspec.PackageId.Version)
                     {
-                        Console.WriteLine("Package {0} is using spurious version {1} (found {2})", pkg.Name, pkg.Version, latestNuspec.Version);
+                        Console.WriteLine("Package {0} is using spurious version {1} (found {2})", pkg.Name, pkg.Version, latestNuspec.PackageId.Version);
                     }
                 }
             }

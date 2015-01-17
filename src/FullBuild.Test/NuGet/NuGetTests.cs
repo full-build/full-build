@@ -24,6 +24,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Linq;
 using FullBuild.Config;
 using FullBuild.Model;
 using FullBuild.NuGet;
@@ -94,6 +95,39 @@ namespace FullBuild.Test.NuGet
 
         [Test]
         [Category("integration")]
+        public void Find_available_package_with_dependencies()
+        {
+            var package = new Package("cassandra-sharp", "3.3.2");
+
+            var nugetConfig2 = new NuGetConfig {Url = "http://www.nuget.org/api/v2/", Version = 2};
+            var nuspec = NuGetFactory.Create(nugetConfig2).GetVersion(package);
+
+            Check.That(nuspec.Content.ToString()).IsEqualTo("http://www.nuget.org/api/v2/package/cassandra-sharp/3.3.2");
+            Check.That(nuspec.PackageId.Name).IsEqualTo("cassandra-sharp");
+            Check.That(nuspec.PackageId.Version).IsEqualTo("3.3.2");
+            Check.That(nuspec.Dependencies).HasSize(2);
+            Check.That(nuspec.Dependencies.ElementAt(0)).IsEqualTo(new PackageId("cassandra-sharp-interfaces", "3.3.1"));
+            Check.That(nuspec.Dependencies.ElementAt(1)).IsEqualTo(new PackageId("cassandra-sharp-core", "3.3.2"));
+        }
+
+        [Test]
+        [Category("integration")]
+        public void Find_available_package_with_dependencies_portable()
+        {
+            var package = new Package("FSharp.Data", "2.1.1");
+
+            var nugetConfig2 = new NuGetConfig { Url = "http://www.nuget.org/api/v2/", Version = 2 };
+            var nuspec = NuGetFactory.Create(nugetConfig2).GetVersion(package);
+
+            Check.That(nuspec.Content.ToString()).IsEqualTo("http://www.nuget.org/api/v2/package/FSharp.Data/2.1.1");
+            Check.That(nuspec.PackageId.Name).IsEqualTo("FSharp.Data");
+            Check.That(nuspec.PackageId.Version).IsEqualTo("2.1.1");
+            Check.That(nuspec.Dependencies).HasSize(1);
+            Check.That(nuspec.Dependencies.ElementAt(0)).IsEqualTo(new PackageId("Zlib.Portable", "1.10.0"));
+        }        
+
+        [Test]
+        [Category("integration")]
         public void Find_latest_version_of_package_accross_nugets()
         {
             var expected = new Package("Castle.Core", "3.3.3");
@@ -104,7 +138,7 @@ namespace FullBuild.Test.NuGet
 
             var latestVersion = NuGetFactory.CreateAll(nugetConfig).GetLatestVersion(expected.Name);
 
-            Check.That(latestVersion.Version).IsEqualTo(expected.Version);
+            Check.That(latestVersion.PackageId.Version).IsEqualTo(expected.Version);
         }
 
         [Test]
