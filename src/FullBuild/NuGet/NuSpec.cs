@@ -24,6 +24,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using FullBuild.Helpers;
@@ -32,10 +33,10 @@ namespace FullBuild.NuGet
 {
     internal class NuSpec
     {
-        private NuSpec(string title, string version, Uri content, long packageSize, string packageHash, bool isLatestVersion, DateTime published)
+        private NuSpec(PackageId packageId, IEnumerable<PackageId> dependencies, Uri content, long packageSize, string packageHash, bool isLatestVersion, DateTime published)
         {
-            Title = title;
-            Version = version;
+            PackageId = packageId;
+            Dependencies = dependencies.ToArray();
             Published = published;
             IsLatestVersion = isLatestVersion;
             Content = content;
@@ -43,9 +44,9 @@ namespace FullBuild.NuGet
             PackageHash = packageHash;
         }
 
-        public string Title { get; private set; }
+        public PackageId PackageId { get; private set; }
 
-        public string Version { get; private set; }
+        public IEnumerable<PackageId> Dependencies { get; private set; }
 
         public Uri Content { get; private set; }
 
@@ -57,6 +58,20 @@ namespace FullBuild.NuGet
 
         public DateTime Published { get; private set; }
 
+        private static IEnumerable<PackageId> CreateDependencies(string dependencies)
+        {
+            // Zlib.Portable:1.10.0:portable-net40+sl50+wp80+win80|::net40
+            // cassandra-sharp-interfaces:3.3.1:|cassandra-sharp-core:3.3.2:
+            // autofixture:3.22.0:|RhinoMocks:3.6:
+            var items = dependencies.Split(new[] {":|"}, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var item in items)
+            {
+                var nameVersion = item.Split(':');
+                var packageId = new PackageId(nameVersion[0], nameVersion[1]);
+                yield return packageId;
+            }
+        }
+
         public static NuSpec CreateFromEntry(XElement entry)
         {
             var title = entry.Descendants(XmlHelpers.Atom + "title").Single().Value;
@@ -66,8 +81,12 @@ namespace FullBuild.NuGet
             var isLatestVersion = bool.Parse(entry.Descendants(XmlHelpers.DataServices + "IsAbsoluteLatestVersion").Single().Value);
             var published = DateTime.Parse(entry.Descendants(XmlHelpers.DataServices + "Published").Single().Value);
             var version = entry.Descendants(XmlHelpers.DataServices + "Version").Single().Value;
+            var dependencies = entry.Descendants(XmlHelpers.DataServices + "Dependencies").Single().Value;
 
-            return new NuSpec(title, version, new Uri(content), packageSize, packageHash, isLatestVersion, published);
+            var packageId = new PackageId(title, version);
+            var packageDependencies = CreateDependencies(dependencies);
+
+            return new NuSpec(packageId, packageDependencies, new Uri(content), packageSize, packageHash, isLatestVersion, published);
         }
     }
 }
