@@ -24,6 +24,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -36,6 +37,16 @@ namespace FullBuild.Commands
 {
     internal partial class Views
     {
+        private static void CopySlnFile(FileInfo fileInfo, string solutionName, DirectoryInfo target)
+        {
+            const string template = "template";
+            var fileName = fileInfo.Name;
+            var targetFileName = solutionName + fileInfo.Name.Substring(template.Length);
+            var targetFile = target.GetFile(targetFileName).FullName;
+
+            fileInfo.CopyTo(targetFile);
+        }
+
         private static void GenerateView(string viewName)
         {
             // read anthology.json
@@ -106,6 +117,10 @@ namespace FullBuild.Commands
             var slnFileName = viewName + ".sln";
             var slnFile = wsDir.GetFile(slnFileName);
             File.WriteAllText(slnFile.FullName, sb.ToString());
+
+            // copy templates for solution - this could be either resharper settings or ncrunch
+            var slnTemplates = admDir.EnumerateFiles("template.sln.*");
+            slnTemplates.ForEach(x => CopySlnFile(x, viewName, wsDir));
 
             // generate target for solution
             var xdoc = new XElement(XmlHelpers.NsMsBuild + "Project",
