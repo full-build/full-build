@@ -49,15 +49,8 @@ namespace FullBuild.Commands
 
             // get all csproj in all repos only
             var anthology = Anthology.Load(admDir);
+            anthology = RemoveDeletedProjects(config, workspace, anthology);
             anthology = UpdateAnthologyFromSource(config, workspace, anthology);
-            anthology.Save(admDir);
-
-            // get packages
-            Packages.InstallPackages();
-
-            // Promotion
-            anthology = AnthologyOptimizer.Optimize(anthology);
-
             anthology.Save(admDir);
         }
 
@@ -129,6 +122,31 @@ namespace FullBuild.Commands
                     }
                 }
             }
+        }
+
+        private static Anthology RemoveDeletedProjects(FullBuildConfig config, DirectoryInfo wsDir, Anthology anthology)
+        {
+            foreach (var repo in config.SourceRepos)
+            {
+                var repoDir = wsDir.GetDirectory(repo.Name);
+                if (!repoDir.Exists)
+                {
+                    continue;
+                }
+
+                _logger.Debug("Processing repository {0}", repo.Name);
+                var projectsFromRepo = anthology.Projects.Where(x => x.ProjectFile.InvariantStartsWith(repo.Name + "/"));
+                foreach (var project in projectsFromRepo)
+                {
+                    var projectFile = wsDir.GetFile(project.ProjectFile);
+                    if (! projectFile.Exists)
+                    {
+                        anthology = anthology.RemoveProject(project);
+                    }
+                }
+            }
+
+            return anthology;
         }
 
         private static Anthology AddPaketDependencies(FileInfo paketDependencies, Anthology anthology)
