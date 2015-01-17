@@ -10,6 +10,8 @@ robocopy cs-init cs-do /MIR
 pushd cs-do
 
 %FULLBUILD% index workspace || goto :ko
+%FULLBUILD% install packages || goto :ko
+%FULLBUILD% optimize workspace || goto :ko
 copy ..\Template.csproj .full-build || goto :ko
 %FULLBUILD% convert projects || goto :ko
 %FULLBUILD% init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko

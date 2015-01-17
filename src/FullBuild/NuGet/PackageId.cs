@@ -1,4 +1,4 @@
-// Copyright (c) 2014, Pierre Chalamet
+﻿// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -23,62 +23,51 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
-using System.Linq;
-using System.Net;
-using System.Xml.Linq;
-using FullBuild.Config;
-using FullBuild.Helpers;
-
 namespace FullBuild.NuGet
 {
-    internal class NuGetFactory
+    public class PackageId
     {
-        public static INuGet CreateAll(params NuGetConfig[] nugets)
+        public PackageId(string name, string version)
         {
-            return new NuGetAll(nugets);
+            Name = name;
+            Version = version;
         }
 
-        public static INuGet Create(NuGetConfig nuget)
+        public string Name { get; private set; }
+
+        public string Version { get; private set; }
+
+        protected bool Equals(PackageId other)
         {
-            switch (nuget.Version)
+            return string.Equals(Name, other.Name) && string.Equals(Version, other.Version);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
             {
-                case 1:
-                    return new NuGet1(nuget.Url);
-
-                case 2:
-                    return new NuGet2(nuget.Url);
-
-                default:
-                    throw new ArgumentException("Unsupported NuGet version");
+                return false;
             }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+            return Equals((PackageId)obj);
         }
 
-        public static int GetNuGetVersion(string url)
+        public override int GetHashCode()
         {
-            using (var webClient = new WebClient())
+            unchecked
             {
-                var uri = new Uri(new Uri(url), "$metadata");
-                var resp = webClient.DownloadString(uri);
-                var xresp = XDocument.Parse(resp);
-                var entityType = xresp.Descendants(XmlHelpers.Edm + "EntityType").FirstOrDefault();
-                if (null == entityType)
-                {
-                    throw new ApplicationException("Can't determine NuGet feed version");
-                }
-
-                var entityName = entityType.Attribute("Name").Value;
-                switch (entityName)
-                {
-                    case "Package":
-                        return 1;
-
-                    case "V2FeedPackage":
-                        return 2;
-
-                    default:
-                        throw new ApplicationException("Can't determine NuGet version");
-                }
+                return ((Name != null
+                    ? Name.GetHashCode()
+                    : 0) * 397) ^ (Version != null
+                        ? Version.GetHashCode()
+                        : 0);
             }
         }
     }
