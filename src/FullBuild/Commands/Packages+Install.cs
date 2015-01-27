@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 using FullBuild.Config;
 using FullBuild.Helpers;
@@ -51,12 +52,22 @@ namespace FullBuild.Commands
             }
         }
 
+
+        private static IEnumerable<Package> GetDependencies(XElement xpackage)
+        {
+            var packages = from x in xpackage.Descendants().Where(x => x.Name.LocalName == "dependency")
+                          let id = (string)x.Attribute("id")
+                          let version = (string)x.Attribute("version")
+                          select new Package(id, version);
+            return packages;
+        }
+
         public static void InstallPackage(Package pkg)
         {
             var config = ConfigManager.LoadConfig();
             var nuget = NuGetFactory.CreateAll(config.NuGets);
             var cacheDir = WellKnownFolders.GetCacheDirectory();
-            var pkgDir = WellKnownFolders.GetPackageDirectory();
+            var pkgsDir = WellKnownFolders.GetPackageDirectory();
 
             if (! GlobalCache.IsPackageInCache(pkg, cacheDir))
             {
@@ -65,7 +76,16 @@ namespace FullBuild.Commands
                 GlobalCache.DownloadPackageToCache(pkg, nuSpec, cacheDir);
             }
 
-            GlobalCache.InstallPackageFromCache(pkg, cacheDir, pkgDir);
+            GlobalCache.InstallPackageFromCache(pkg, cacheDir, pkgsDir);
+
+            // install dependencies
+            var pkgDir = pkgsDir.GetDirectory(pkg.Name);
+            var nuspecFile = pkgDir.GetFile(pkg.Name + ".nuspec");
+            var xnuspec = XDocument.Load(nuspecFile.FullName);
+            var dependencies = GetDependencies(xnuspec.Root);
+            dependencies.ForEach(InstallPackage);
+
+            // create target file for project
             GenerateTargetsForProject(pkg);
         }
 
@@ -172,13 +192,12 @@ namespace FullBuild.Commands
             var nuspecFileName = String.Format("{0}.nuspec", package.Name);
             var nuspecFile = pkgDir.GetFile(nuspecFileName);
             var xdocNuspec = XDocument.Load(nuspecFile.FullName);
-            var dependencies = from d in xdocNuspec.Descendants(XmlHelpers.NsNuget + "dependency")
-                               select (string)d.Attribute("id");
+            var dependencies = GetDependencies(xdocNuspec.Root);
 
             var imports = from dependency in dependencies
-                          let dependencyPackageFileName = dependency + ".targets"
-                          let dependencyTargets = Path.Combine(WellKnownFolders.MsBuildPackagesDir, dependencyPackageFileName)
-                          let condition = String.Format("'$(FullBuild_{0}_Pkg)' == ''", dependency.ToMsBuild())
+                          let dependencyPackageFileName = dependency.Name + ".targets"
+                          let dependencyTargets = Path.Combine(WellKnownFolders.MsBuildPackagesDir, dependencyPackageFileName).ToUnixSeparator()
+                          let condition = String.Format("'$(FullBuild_{0}_Pkg)' == ''", dependency.Name.ToMsBuild())
                           select new XElement(XmlHelpers.NsMsBuild + "Import",
                                               new XAttribute("Project", dependencyTargets),
                                               new XAttribute("Condition", condition));
