@@ -33,6 +33,8 @@ namespace FullBuild.Helpers
 
         public static readonly XNamespace NsNuget = "http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd";
 
+   //     public static readonly XNamespace NsNupackage = "http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd";
+
         public static readonly XNamespace Atom = "http://www.w3.org/2005/Atom";
 
         public static readonly XNamespace Metadata = "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata";
