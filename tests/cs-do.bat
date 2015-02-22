@@ -22,6 +22,8 @@ copy ..\Template.csproj .full-build || goto :ko
 %FULLBUILD% check packages || goto :ko
 %FULLBUILD% use package moq version * || goto :ko
 %FULLBUILD% check packages || goto :ko
+%FULLBUILD% upgrade packages || goto :ko
+%FULLBUILD% check packages || goto :ko
 %FULLBUILD% list packages || goto :ko
 %FULLBUILD% list nugets || goto :ko
 %FULLBUILD% describe view cs || goto :ko
