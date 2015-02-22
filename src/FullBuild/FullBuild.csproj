@@ -73,7 +73,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AnthologyOptimizer.cs" />
+    <Compile Include="Commands\Binaries\Registrar.cs" />
+    <Compile Include="Commands\Configuration\Registrar.cs" />
+    <Compile Include="Commands\Exec\Registrar.cs" />
     <Compile Include="Commands\HintPathParser.cs" />
+    <Compile Include="Commands\Packages\Registrar.cs" />
+    <Compile Include="Commands\Projects\Registrar.cs" />
+    <Compile Include="Commands\Usage\Registrar.cs" />
+    <Compile Include="Commands\Views\Registrar.cs" />
+    <Compile Include="Commands\Workspace\Registrar.cs" />
+    <Compile Include="Helpers\PlatformInfo.cs" />
     <Compile Include="NatLangParser\FluentOptionMatcherBuilder.cs" />
     <Compile Include="NatLangParser\OptionMatcher.cs" />
     <Compile Include="NatLangParser\OptionMatcherBuilder.cs" />
@@ -84,30 +93,27 @@
     <Compile Include="NuGet\NuGetFactory.cs" />
     <Compile Include="NuGet\NuGetAll.cs" />
     <Compile Include="NuGet\GlobalCache.cs" />
-    <Compile Include="Commands\Projects.cs" />
-    <Compile Include="Commands\Configuration.cs" />
-    <Compile Include="Commands\Packages.cs" />
-    <Compile Include="Commands\Exec.cs" />
-    <Compile Include="Commands\IWebClient.cs" />
+    <Compile Include="Commands\Projects\Projects.cs" />
+    <Compile Include="Commands\Configuration\Configuration.cs" />
+    <Compile Include="Commands\Exec\Exec.cs" />
     <Compile Include="NuGet\NuGet1.cs" />
-    <Compile Include="Commands\Packages+NuGet.cs" />
-    <Compile Include="Commands\Packages+Check.cs" />
+    <Compile Include="Commands\Packages\Packages+NuGet.cs" />
+    <Compile Include="Commands\Packages\Packages+Check.cs" />
     <Compile Include="Commands\ProcessingException.cs" />
-    <Compile Include="Commands\Workspace+Convert.cs" />
+    <Compile Include="Commands\Workspace\Workspace+Convert.cs" />
     <Compile Include="Commands\FrameworkVersion.cs" />
-    <Compile Include="Commands\Usage.cs" />
-    <Compile Include="Commands\Views+Init.cs" />
-    <Compile Include="Commands\Views+Generate.cs" />
-    <Compile Include="Commands\Packages+Install.cs" />
-    <Compile Include="Commands\Views+List.cs" />
-    <Compile Include="Commands\Views.cs" />
-    <Compile Include="Commands\WebClientAdapter.cs" />
-    <Compile Include="Commands\Workspace+Bookmark.cs" />
-    <Compile Include="Commands\Workspace+Optimize.cs" />
-    <Compile Include="Commands\Binaries.cs" />
-    <Compile Include="Commands\Workspace+Repo.cs" />
-    <Compile Include="Commands\Workspace+Init.cs" />
-    <Compile Include="Commands\Workspace.cs" />
+    <Compile Include="Commands\Usage\Usage.cs" />
+    <Compile Include="Commands\Views\Views+Management.cs" />
+    <Compile Include="Commands\Views\Views+Generate.cs" />
+    <Compile Include="Commands\Packages\Packages+Install.cs" />
+    <Compile Include="Commands\Views\Views+Info.cs" />
+    <Compile Include="Commands\Views\Views.cs" />
+    <Compile Include="Commands\Workspace\Workspace+Bookmark.cs" />
+    <Compile Include="Commands\Workspace\Workspace+Optimize.cs" />
+    <Compile Include="Commands\Binaries\Binarie+Info.cs" />
+    <Compile Include="Commands\Workspace\Workspace+Repo.cs" />
+    <Compile Include="Commands\Workspace\Workspace+Init.cs" />
+    <Compile Include="Commands\Workspace\Workspace.cs" />
     <Compile Include="Config\FullBuildConfig.cs" />
     <Compile Include="Config\ConfigManager.cs" />
     <Compile Include="Config\ActionType.cs" />
@@ -116,7 +122,7 @@
     <Compile Include="Config\RepoConfig.cs" />
     <Compile Include="Config\VersionControlType.cs" />
     <Compile Include="Helpers\DirectoryInfoExtensions.cs" />
-    <Compile Include="Commands\Workspace+Index.cs" />
+    <Compile Include="Commands\Workspace\Workspace+Index.cs" />
     <Compile Include="Helpers\EnumerableExtensions.cs" />
     <Compile Include="Helpers\Reliability.cs" />
     <Compile Include="Helpers\SemVersionExtensions.cs" />
@@ -156,6 +162,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

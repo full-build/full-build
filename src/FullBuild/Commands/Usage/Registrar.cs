@@ -23,39 +23,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
 using System.Collections.Generic;
-using FullBuild.Helpers;
-using FullBuild.Model;
 using FullBuild.NatLangParser;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Usage
 {
-    internal partial class Binaries
+    public class Registrar
     {
         public static IEnumerable<Matcher> Commands()
         {
-            // add nuget feed
-            yield return MatcherBuilder.Describe("list binaries")
-                                     .Command("list")
-                                     .Command("binaries")
-                                     .Do(ctx => ListBinaries());
-        }
-
-        private static void ListBinaries()
-        {
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthology = Anthology.Load(admDir);
-
-            // validate first that repos are valid and clone them
-            foreach (var binary in anthology.Binaries)
-            {
-                var binName = binary.AssemblyName;
-                var eol = null != binary.HintPath
-                    ? "@"
-                    : "";
-                Console.WriteLine("{0}{1}", binName, eol);
-            }
+            yield return MatcherBuilder.Describe("Usage")
+                                       .Command("help")
+                                       .Do(ctx => Usage.DisplayUsage(ctx.Usage()));
         }
     }
 }

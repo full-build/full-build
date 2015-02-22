@@ -34,11 +34,11 @@ using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Workspace
 {
     internal partial class Workspace
     {
-        private static void IndexWorkspace()
+        public static void IndexWorkspace()
         {
             var workspace = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig();

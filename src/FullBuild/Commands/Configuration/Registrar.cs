@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014, Pierre Chalamet
+// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -27,9 +27,9 @@ using System.Collections.Generic;
 using FullBuild.Config;
 using FullBuild.NatLangParser;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Configuration
 {
-    public partial class Configuration
+    public class Registrar
     {
         public static IEnumerable<Matcher> Commands()
         {
@@ -39,16 +39,11 @@ namespace FullBuild.Commands
             // update workspace
             // config <key> <value>
             yield return MatcherBuilder.Describe("set configuration {0} to {1}", key, value)
-                                     .Command("set")
-                                     .Command("config")
-                                     .Param(key)
-                                     .Param(value)
-                                     .Do(ctx => SetConfig(ctx.Get(key), ctx.Get(value)));
-        }
-
-        private static void SetConfig(ConfigParameter key, string value)
-        {
-            ConfigManager.SetBootstrapConfig(key, value);
+                                       .Command("set")
+                                       .Command("config")
+                                       .Param(key)
+                                       .Param(value)
+                                       .Do(ctx => Configuration.SetConfig(ctx.Get(key), ctx.Get(value)));
         }
     }
 }

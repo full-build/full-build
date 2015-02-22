@@ -24,51 +24,26 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.IO;
-using FullBuild.Config;
 using FullBuild.Helpers;
-using FullBuild.SourceControl;
+using FullBuild.Model;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Binaries
 {
-    internal partial class Workspace
+    internal class Binaries
     {
-        private static void InitWorkspace(string path)
+        public static void List()
         {
-            var wsDir = new DirectoryInfo(path);
-            wsDir.Create();
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var anthology = Anthology.Load(admDir);
 
-            var admDir = wsDir.GetDirectory(".full-build");
-            if (admDir.Exists)
+            // validate first that repos are valid and clone them
+            foreach (var binary in anthology.Binaries)
             {
-                throw new ArgumentException("Workspace is already initialized");
-            }
-
-            // get bootstrap config
-            var config = ConfigManager.LoadConfig(admDir);
-
-            // get bootstrap config
-            var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.AdminRepo.Vcs.ToString());
-            sourceControl.Clone(admDir, ".full-build", config.AdminRepo.Url);
-
-            // reload config (after clone)
-            config = ConfigManager.LoadConfig(admDir);
-            ConfigManager.SaveConfig(admDir, config);
-
-            // copy all files from binary repo
-            var tip = sourceControl.Tip(admDir);
-            var binDir = new DirectoryInfo(config.BinRepo);
-            var binVersionDir = binDir.GetDirectory(tip);
-            if (binVersionDir.Exists)
-            {
-                Console.WriteLine("Copying build output version {0}", tip);
-                var targetBinDir = wsDir.GetDirectory("bin");
-                targetBinDir.Create();
-                foreach (var binFile in binVersionDir.EnumerateFiles())
-                {
-                    var targetFile = targetBinDir.GetFile(binFile.Name);
-                    binFile.CopyTo(targetFile.FullName, true);
-                }
+                var binName = binary.AssemblyName;
+                var eol = null != binary.HintPath
+                    ? "@"
+                    : "";
+                Console.WriteLine("{0}{1}", binName, eol);
             }
         }
     }
