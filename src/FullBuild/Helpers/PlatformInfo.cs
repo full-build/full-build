@@ -1,4 +1,4 @@
-// Copyright (c) 2014, Pierre Chalamet
+﻿// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -24,55 +24,14 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.IO;
-using System.Net;
-using NLog;
 
-namespace FullBuild.Commands
+namespace FullBuild.Helpers
 {
-    internal class WebClientAdapter : IWebClient
+    public static class PlatformInfo
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public bool TryDownloadString(Uri uri, out string result)
+        public static bool IsRunningOnMono()
         {
-            using (var webClient = new WebClient())
-            {
-                try
-                {
-                    result = webClient.DownloadString(uri);
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    _logger.Debug("Download failed for uri " + uri, ex);
-                    result = string.Empty;
-                    return false;
-                }
-            }
-        }
-
-        public string DownloadString(Uri uri)
-        {
-            using (var webClient = new WebClient())
-            {
-                return webClient.DownloadString(uri);
-            }
-        }
-
-        public void DownloadFile(Uri address, string fileName)
-        {
-            var tempFile = new FileInfo(Path.GetRandomFileName());
-            var target = new FileInfo(fileName);
-
-            target.Delete();
-            tempFile.Delete();
-
-            using (var webClient = new WebClient())
-            {
-                webClient.DownloadFile(address, tempFile.FullName);
-                tempFile.MoveTo(target.FullName);
-            }
+            return Type.GetType("Mono.Runtime") != null;
         }
     }
 }

@@ -26,8 +26,17 @@
 using System;
 using System.Collections.Generic;
 using FullBuild.Commands;
+using FullBuild.Commands.Binaries;
+using FullBuild.Commands.Configuration;
+using FullBuild.Commands.Exec;
+using FullBuild.Commands.Packages;
+using FullBuild.Commands.Projects;
+using FullBuild.Commands.Usage;
+using FullBuild.Commands.Views;
+using FullBuild.Commands.Workspace;
 using FullBuild.NatLangParser;
 using NLog;
+using Registrar = FullBuild.Commands.Configuration.Registrar;
 
 namespace FullBuild
 {
@@ -66,18 +75,18 @@ namespace FullBuild
         private static void TryMain(string[] args)
         {
             var parser = new ParserBuilder().With(GlobalOptions.Options())
-                                            .With(Usage.Commands())
-                                            .With(Workspace.Commands())
-                                            .With(Packages.Commands())
-                                            .With(Views.Commands())
-                                            .With(Configuration.Commands())
-                                            .With(Binaries.Commands())
-                                            .With(Projects.Commands())
-                                            .With(Exec.Commands()).Build();
+                                            .With(Commands.Usage.Registrar.Commands())
+                                            .With(Commands.Workspace.Registrar.Commands())
+                                            .With(Commands.Packages.Registrar.Commands())
+                                            .With(Commands.Views.Registrar.Commands())
+                                            .With(Registrar.Commands())
+                                            .With(Commands.Binaries.Registrar.Commands())
+                                            .With(Commands.Projects.Registrar.Commands())
+                                            .With(Commands.Exec.Registrar.Commands()).Build();
 
             if (! parser.ParseAndInvoke(args))
             {
-                throw new ArgumentException("Invalid arguments. Use /? for usage.");
+                throw new ArgumentException("Invalid arguments. Use 'help' for usage.");
             }
         }
     }

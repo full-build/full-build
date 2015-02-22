@@ -32,7 +32,7 @@ using FullBuild.Config;
 using FullBuild.Helpers;
 using FullBuild.Model;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Workspace
 {
     internal partial class Workspace
     {
@@ -71,7 +71,7 @@ namespace FullBuild.Commands
             }
         }
 
-        private static void ConvertProjects()
+        public static void ConvertProjects()
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var admDir = WellKnownFolders.GetAdminDirectory();

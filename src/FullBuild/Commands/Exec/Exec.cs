@@ -24,54 +24,66 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
+using System.Diagnostics;
+using System.IO;
 using FullBuild.Config;
 using FullBuild.Helpers;
-using FullBuild.Model;
-using FullBuild.NuGet;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Exec
 {
-    internal partial class Packages
+    internal class Exec
     {
-        private static void CheckPackages()
+        public static void ForEachRepo(string command)
         {
-            // read anthology.json
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthology = Anthology.Load(admDir);
+            var workspace = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig();
-            var nuget = NuGetFactory.CreateAll(config.NuGets);
 
-            foreach (var pkg in anthology.Packages)
+            foreach (var repo in config.SourceRepos)
             {
-                NuSpec latestNuspec;
-                try
+                var repoDir = workspace.GetDirectory(repo.Name);
+                if (! repoDir.Exists)
                 {
-                    latestNuspec = nuget.GetLatestVersion(pkg.Name);
-                }
-                catch (Exception ex)
-                {
-                    var msg = string.Format("Nuget GetLatestVersion failed for package {0}", pkg.Name);
-                    throw new ApplicationException(msg, ex);
-                }
-
-                if (null == latestNuspec)
-                {
-                    Console.Error.WriteLine("ERROR | Failed to find package {0}", pkg.Name);
                     continue;
                 }
 
-                var latestVersion = latestNuspec.PackageId.Version.ParseSemVersion();
-                var currentVersion = pkg.Version.ParseSemVersion();
+                ExecCommand(command, repoDir, repo);
+            }
+        }
 
-                if (currentVersion < latestVersion)
+        public static void ExecCommand(string command, DirectoryInfo dir, RepoConfig repoConfig = null)
+        {
+            const string filename = "cmd";
+            var arguments = string.Format("/c \"{0}\"", command);
+
+            var psi = new ProcessStartInfo
+                      {
+                          FileName = filename,
+                          Arguments = arguments,
+                          UseShellExecute = false,
+                          WorkingDirectory = dir.FullName,
+                      };
+
+            if (null != repoConfig)
+            {
+                psi.EnvironmentVariables.Add("FULLBUILD_REPO", repoConfig.Name);
+                psi.EnvironmentVariables.Add("FULLBUILD_REPO_PATH", dir.FullName);
+                psi.EnvironmentVariables.Add("FULLBUILD_REPO_URL", repoConfig.Url);
+            }
+
+            using (var process = Process.Start(psi))
+            {
+                if (null != process)
                 {
-                    Console.WriteLine("{0} version {1} is available (current is {2})", pkg.Name, latestNuspec.PackageId.Version, pkg.Version);
-                }
-                else
-                {
-                    if (pkg.Version != latestNuspec.PackageId.Version)
+                    process.WaitForExit();
+                    if (0 != process.ExitCode)
                     {
-                        Console.WriteLine("Package {0} is using spurious version {1} (found {2})", pkg.Name, pkg.Version, latestNuspec.PackageId.Version);
+                        var msg = string.Format("ERROR | Process exited with error code " + process.ExitCode);
+                        if (!GlobalOptions.Force)
+                        {
+                            throw new ApplicationException(msg);
+                        }
+
+                        Console.WriteLine(msg);
                     }
                 }
             }

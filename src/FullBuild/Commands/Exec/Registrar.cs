@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014, Pierre Chalamet
+// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -23,21 +23,22 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using FullBuild.Helpers;
-using FullBuild.Model;
+using System.Collections.Generic;
+using FullBuild.NatLangParser;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Exec
 {
-    internal partial class Workspace
+    public class Registrar
     {
-        private static void Optimize()
+        public static IEnumerable<Matcher> Commands()
         {
-            var admDir = WellKnownFolders.GetAdminDirectory();
+            var command = Parameter<string>.Create("command");
 
-            // get all csproj in all repos only
-            var anthology = Anthology.Load(admDir);
-            anthology = AnthologyOptimizer.Optimize(anthology);
-            anthology.Save(admDir);
+            // exec
+            yield return MatcherBuilder.Describe("exec command on each repo")
+                                       .Command("exec")
+                                       .Param(command)
+                                       .Do(ctx => Exec.ForEachRepo(ctx.Get(command)));
         }
     }
 }
