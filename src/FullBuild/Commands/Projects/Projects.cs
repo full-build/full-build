@@ -24,35 +24,18 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using FullBuild.Helpers;
 using FullBuild.Model;
-using FullBuild.NatLangParser;
 using FullBuild.NuGet;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Projects
 {
-    internal partial class Projects
+    internal class Projects
     {
-        public static IEnumerable<Matcher> Commands()
-        {
-            // add nuget feed
-            yield return MatcherBuilder.Describe("optimize projects")
-                                     .Command("optimize")
-                                     .Command("projects")
-                                     .Do(ctx => OptimizeProjects());
-
-            // add nuget feed
-            yield return MatcherBuilder.Describe("check projects")
-                                     .Command("check")
-                                     .Command("projects")
-                                     .Do(ctx => CheckProjects());
-        }
-
-        private static void CheckProjects()
+        public static void CheckProjects()
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             var anthology = Anthology.Load(admDir);
@@ -122,7 +105,7 @@ namespace FullBuild.Commands
             }
         }
 
-        private static void OptimizeProjects()
+        public static void OptimizeProjects()
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
             var anthology = Anthology.Load(admDir);

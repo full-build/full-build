@@ -32,11 +32,11 @@ using System.Text.RegularExpressions;
 using FullBuild.Config;
 using FullBuild.Helpers;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Views
 {
     internal partial class Views
     {
-        private static void InitView(string viewName, string[] repos)
+        public static void Init(string viewName, string[] repos)
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig();
@@ -75,7 +75,27 @@ namespace FullBuild.Commands
             var sb = view.Aggregate(new StringBuilder(), (s, x) => s.AppendLine(x));
             File.WriteAllText(viewFile.FullName, sb.ToString());
 
-            GenerateView(viewName);
+            Generate(viewName);
+        }
+
+        public static void Delete(string viewName)
+        {
+            var viewDir = WellKnownFolders.GetViewDirectory();
+            var targetFileName = viewName + ".targets";
+            var targetFile = viewDir.GetFile(targetFileName);
+            targetFile.Delete();
+
+            var viewFileName = viewName + ".view";
+            var viewFile = viewDir.GetFile(viewFileName);
+            viewFile.Delete();
+
+            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
+            var slnFileName = viewName + ".sln";
+            var slnFile = wsDir.GetFile(slnFileName);
+            if (slnFile.Exists)
+            {
+                slnFile.Delete();
+            }
         }
     }
 }

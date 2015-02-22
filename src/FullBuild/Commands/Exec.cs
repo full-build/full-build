@@ -24,28 +24,15 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using FullBuild.Config;
 using FullBuild.Helpers;
-using FullBuild.NatLangParser;
 
 namespace FullBuild.Commands
 {
     internal class Exec
     {
-        public static IEnumerable<Matcher> Commands()
-        {
-            var command = Parameter<string>.Create("command");
-
-            // exec
-            yield return MatcherBuilder.Describe("exec command on each repo")
-                                       .Command("exec")
-                                       .Param(command)
-                                       .Do(ctx => ForEachRepo(ctx.Get(command)));
-        }
-
         public static bool IsRunningOnMono()
         {
             return Type.GetType("Mono.Runtime") != null;
