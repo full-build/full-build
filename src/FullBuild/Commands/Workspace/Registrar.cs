@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014, Pierre Chalamet
+// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -25,16 +25,12 @@
 
 using System.Collections.Generic;
 using FullBuild.Config;
-using FullBuild.Helpers;
 using FullBuild.NatLangParser;
-using NLog;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Workspace
 {
-    internal partial class Workspace
+    public class Registrar
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
         public static IEnumerable<Matcher> Commands()
         {
             var path = Parameter<string>.Create("path");
@@ -46,86 +42,75 @@ namespace FullBuild.Commands
 
             // init workspace
             yield return MatcherBuilder.Describe("initialize workspace in folder <path>")
-                                     .Command("init")
-                                     .Command("workspace")
-                                     .Param(path)
-                                     .Do(ctx => InitWorkspace(ctx.Get(path)));
+                                       .Command("init")
+                                       .Command("workspace")
+                                       .Param(path)
+                                       .Do(ctx => Workspace.InitWorkspace(ctx.Get(path)));
 
             // refresh workspace
             yield return MatcherBuilder.Describe("refresh workspace from remote")
-                                     .Command("refresh")
-                                     .Command("workspace")
-                                     .Do(ctx => RefreshWorkspace());
+                                       .Command("refresh")
+                                       .Command("workspace")
+                                       .Do(ctx => Workspace.RefreshWorkspace());
 
             yield return MatcherBuilder.Describe("index workspace with local changes")
-                                     .Command("index")
-                                     .Command("workspace")
-                                     .Do(ctx => IndexWorkspace());
+                                       .Command("index")
+                                       .Command("workspace")
+                                       .Do(ctx => Workspace.IndexWorkspace());
 
             // convert projects
             yield return MatcherBuilder.Describe("convert projects to ensure compatibility with full-build")
-                                     .Command("convert")
-                                     .Command("projects")
-                                     .Do(ctx => ConvertProjects());
+                                       .Command("convert")
+                                       .Command("projects")
+                                       .Do(ctx => Workspace.ConvertProjects());
 
             // clone repo
             yield return MatcherBuilder.Describe("clone repositories which names matching {0}", repos)
-                                     .Command("clone")
-                                     .Command("repo")
-                                     .Param(repos)
-                                     .Do(ctx => CloneRepo(ctx.Get(repos)));
+                                       .Command("clone")
+                                       .Command("repo")
+                                       .Param(repos)
+                                       .Do(ctx => Workspace.CloneRepo(ctx.Get(repos)));
 
             // refresh source
             yield return MatcherBuilder.Describe("refresh sources from source control")
-                                     .Command("refresh")
-                                     .Command("sources")
-                                     .Do(ctx => RefreshSources());
+                                       .Command("refresh")
+                                       .Command("sources")
+                                       .Do(ctx => Workspace.RefreshSources());
 
             // add repo
             yield return MatcherBuilder.Describe("add a new repository to the workspace")
-                                     .Command("add")
-                                     .Param(vcs)
-                                     .Command("repo")
-                                     .Param(repo)
-                                     .Command("from")
-                                     .Param(url)
-                                     .Do(ctx => AddRepo(ctx.Get(repo), ctx.Get(vcs), ctx.Get(url)));
+                                       .Command("add")
+                                       .Param(vcs)
+                                       .Command("repo")
+                                       .Param(repo)
+                                       .Command("from")
+                                       .Param(url)
+                                       .Do(ctx => Workspace.AddRepo(ctx.Get(repo), ctx.Get(vcs), ctx.Get(url)));
 
             // list repos
             yield return MatcherBuilder.Describe("list repositories")
-                                     .Command("list")
-                                     .Command("repos")
-                                     .Do(ctx => ListRepos());
+                                       .Command("list")
+                                       .Command("repos")
+                                       .Do(ctx => Workspace.ListRepos());
 
             // optimize anthology
             yield return MatcherBuilder.Describe("optimize workspace")
-                                     .Command("optimize")
-                                     .Command("workspace")
-                                     .Do(ctx => Optimize());
+                                       .Command("optimize")
+                                       .Command("workspace")
+                                       .Do(ctx => Workspace.Optimize());
 
             // bookmark workspace
             yield return MatcherBuilder.Describe("bookmark workspace")
-                                     .Command("bookmark")
-                                     .Command("workspace")
-                                     .Do(ctx => Bookmark());
+                                       .Command("bookmark")
+                                       .Command("workspace")
+                                       .Do(ctx => Workspace.Bookmark());
 
             // checkout workspace
             yield return MatcherBuilder.Describe("checkout workspace {0}", version)
-                                     .Command("checkout")
-                                     .Command("workspace")
-                                     .Param(version)
-                                     .Do(ctx => CheckoutBookmark(ctx.Get(version)));
-        }
-
-        private static void RefreshSources()
-        {
-            Exec.ForEachRepo("echo ** running 'git pull --rebase' on %FULLBUILD_REPO% && git pull --rebase");
-        }
-
-        private static void RefreshWorkspace()
-        {
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            Exec.ExecCommand("git pull --rebase", admDir);
+                                       .Command("checkout")
+                                       .Command("workspace")
+                                       .Param(version)
+                                       .Do(ctx => Workspace.CheckoutBookmark(ctx.Get(version)));
         }
     }
 }

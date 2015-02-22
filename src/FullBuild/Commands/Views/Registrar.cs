@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014, Pierre Chalamet
+// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -24,12 +24,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System.Collections.Generic;
-using FullBuild.Helpers;
 using FullBuild.NatLangParser;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Views
 {
-    internal partial class Views
+    public class Registrar
     {
         public static IEnumerable<Matcher> Commands()
         {
@@ -38,64 +37,52 @@ namespace FullBuild.Commands
 
             // init view <viewname> with <repos> ...
             yield return MatcherBuilder.Describe("init view file {0} with provided repositories which names matching {1}", viewname, repos)
-                                     .Command("init")
-                                     .Command("view")
-                                     .Param(viewname)
-                                     .Command("with")
-                                     .Param(repos)
-                                     .Do(ctx => InitView(ctx.Get(viewname), ctx.Get(repos)));
+                                       .Command("init")
+                                       .Command("view")
+                                       .Param(viewname)
+                                       .Command("with")
+                                       .Param(repos)
+                                       .Do(ctx => Views.Init(ctx.Get(viewname), ctx.Get(repos)));
 
             yield return MatcherBuilder.Describe("drop view {0}", viewname)
-                                     .Command("drop")
-                                     .Command("view")
-                                     .Param(viewname)
-                                     .Do(ctx => DeleteView(ctx.Get(viewname)));
+                                       .Command("drop")
+                                       .Command("view")
+                                       .Param(viewname)
+                                       .Do(ctx => Views.Delete(ctx.Get(viewname)));
 
             // list views>
             yield return MatcherBuilder.Describe("list all available views")
-                                     .Command("list")
-                                     .Command("views")
-                                     .Do(ctx => ListViews());
+                                       .Command("list")
+                                       .Command("views")
+                                       .Do(ctx => Views.List());
 
             // list view <viewname>
             yield return MatcherBuilder.Describe("describe view content")
-                                     .Command("describe")
-                                     .Command("view")
-                                     .Param(viewname)
-                                     .Do(ctx => DescribeView(ctx.Get(viewname)));
-
+                                       .Command("describe")
+                                       .Command("view")
+                                       .Param(viewname)
+                                       .Do(ctx => Views.Describe(ctx.Get(viewname)));
 
             // graph view <viewname>
             yield return MatcherBuilder.Describe("graph view")
-                                     .Command("graph")
-                                     .Command("view")
-                                     .Param(viewname)
-                                     .Do(ctx => GraphView(ctx.Get(viewname)));
+                                       .Command("graph")
+                                       .Command("view")
+                                       .Param(viewname)
+                                       .Do(ctx => Views.Graph(ctx.Get(viewname)));
 
             // update view <viewname>
             yield return MatcherBuilder.Describe("generate solution {0}", viewname)
-                                     .Command("generate")
-                                     .Command("view")
-                                     .Param(viewname)
-                                     .Do(ctx => GenerateView(ctx.Get(viewname)));
+                                       .Command("generate")
+                                       .Command("view")
+                                       .Param(viewname)
+                                       .Do(ctx => Views.Generate(ctx.Get(viewname)));
 
             // build view
             yield return MatcherBuilder.Describe("build view {0}", viewname)
-                                     .Command("build")
-                                     .Command("view")
-                                     .Param(viewname)
-                                     .Do(ctx => BuildView(ctx.Get(viewname)));
-        }
-
-        private static void BuildView(string viewname)
-        {
-            var build = Exec.IsRunningOnMono()
-                ? "xbuild"
-                : "msbuild /nologo /verbosity:quiet";
-            var cmd = string.Format("{0} {1}.sln", build, viewname);
-
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            Exec.ExecCommand(cmd, wsDir);
+                                       .Command("build")
+                                       .Command("view")
+                                       .Param(viewname)
+                                       .Do(ctx => Views.BuildView(ctx.Get(viewname)));
         }
     }
 }

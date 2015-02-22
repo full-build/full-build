@@ -24,137 +24,54 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 using FullBuild.Helpers;
 using FullBuild.Model;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Views
 {
     internal partial class Views
     {
-        private static void CopySlnFile(FileInfo fileInfo, string solutionName, DirectoryInfo target)
+        public static void Describe(string viewName)
         {
-            const string template = "template";
-            var fileName = fileInfo.Name;
-            var targetFileName = solutionName + fileInfo.Name.Substring(template.Length);
-            var targetFile = target.GetFile(targetFileName).FullName;
-
-            fileInfo.CopyTo(targetFile);
-        }
-
-        public static void GenerateView(string viewName)
-        {
-            // read anthology.json
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthology = Anthology.Load(admDir);
-
-            // get current view
             var viewDir = WellKnownFolders.GetViewDirectory();
-            viewDir.Create();
-
-            var viewFileName = viewDir.GetFile(viewName + ".view");
-            if (! viewFileName.Exists)
+            var viewFile = viewDir.GetFile(viewName + ".view");
+            if (! viewFile.Exists)
             {
-                throw new ArgumentException("Initialize first solution with a list of repositories to include.");
+                throw new ArgumentException("Invalid view name");
             }
 
-            var view = File.ReadAllLines(viewFileName.FullName)
-                           .Distinct(StringComparer.InvariantCultureIgnoreCase)
-                           .Where(x => ! string.IsNullOrEmpty(x)).ToList();
+            var repos = File.ReadAllLines(viewFile.FullName)
+                            .Distinct(StringComparer.InvariantCultureIgnoreCase)
+                            .Where(x => !string.IsNullOrEmpty(x)).ToList();
 
-            var sb = new StringBuilder();
-            sb.AppendLine();
-            sb.AppendLine("Microsoft Visual Studio Solution File, Format Version 12.00");
-            sb.AppendLine("# Visual Studio 2013");
-
-            var projects = from repo in view
-                           from prj in anthology.Projects
-                           where prj.ProjectFile.InvariantStartsWith(repo + "/")
-                           select prj;
-
-            foreach (var prj in projects)
+            foreach (var repo in repos)
             {
-                sb.AppendFormat(@"Project(""{{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}}"") = ""{0}"", ""{1}"", ""{2:B}""",
-                                prj.GetProjectName(), prj.ProjectFile, prj.Guid).AppendLine();
-                sb.AppendFormat("\tProjectSection(ProjectDependencies) = postProject").AppendLine();
-                foreach (var dependency in prj.ProjectReferences)
+                if (! string.IsNullOrEmpty(repo))
                 {
-                    // add a build order if dependency is included in solution
-                    if (projects.Any(x => x.Guid == dependency))
-                    {
-                        sb.AppendFormat("\t\t{0:B} = {0:B}", dependency).AppendLine();
-                    }
+                    Console.WriteLine(repo);
                 }
-                sb.AppendFormat("\tEndProjectSection").AppendLine();
-                sb.AppendLine("EndProject");
             }
-
-            sb.AppendLine("Global");
-
-            sb.AppendLine("\tGlobalSection(SolutionConfigurationPlatforms) = preSolution");
-            sb.AppendLine("\t\tDebug|Any CPU = Debug|Any CPU");
-            sb.AppendLine("\t\tRelease|Any CPU = Release|Any CPU");
-            sb.AppendLine("\tEndGlobalSection");
-            sb.AppendLine("\tGlobalSection(ProjectConfigurationPlatforms) = postSolution");
-
-            foreach (var prj in projects)
-            {
-                sb.AppendFormat("\t\t{0:B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU", prj.Guid).AppendLine();
-                sb.AppendFormat("\t\t{0:B}.Debug|Any CPU.Build.0 = Debug|Any CPU", prj.Guid).AppendLine();
-                sb.AppendFormat("\t\t{0:B}.Release|Any CPU.ActiveCfg = Release|Any CPU", prj.Guid).AppendLine();
-                sb.AppendFormat("\t\t{0:B}.Release|Any CPU.Build.0 = Release|Any CPU", prj.Guid).AppendLine();
-            }
-
-            sb.AppendLine("\tEndGlobalSection");
-            sb.AppendLine("EndGlobal");
-
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var slnFileName = viewName + ".sln";
-            var slnFile = wsDir.GetFile(slnFileName);
-            File.WriteAllText(slnFile.FullName, sb.ToString());
-
-            // copy templates for solution - this could be either resharper settings or ncrunch
-            var slnTemplates = admDir.EnumerateFiles("template.sln.*");
-            slnTemplates.ForEach(x => CopySlnFile(x, viewName, wsDir));
-
-            // generate target for solution
-            var xdoc = new XElement(XmlHelpers.NsMsBuild + "Project",
-                                    new XElement(XmlHelpers.NsMsBuild + "PropertyGroup",
-                                                 new XElement(XmlHelpers.NsMsBuild + "FullBuild_Config", "Y"),
-                                                 from prj in projects
-                                                 let projectProperty = prj.GetProjectPropertyGroupName()
-                                                 select new XElement(XmlHelpers.NsMsBuild + projectProperty, "Y")));
-            var targetFileName = viewName + ".targets";
-            var targetFile = Path.Combine(viewDir.FullName, targetFileName);
-            xdoc.Save(targetFile);
         }
 
-        public static void DeleteView(string viewName)
+        public static void List()
         {
             var viewDir = WellKnownFolders.GetViewDirectory();
-            var targetFileName = viewName + ".targets";
-            var targetFile = viewDir.GetFile(targetFileName);
-            targetFile.Delete();
-
-            var viewFileName = viewName + ".view";
-            var viewFile = viewDir.GetFile(viewFileName);
-            viewFile.Delete();
-
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            var slnFileName = viewName + ".sln";
-            var slnFile = wsDir.GetFile(slnFileName);
-            if (slnFile.Exists)
+            var views = viewDir.EnumerateFiles("*.view");
+            foreach (var view in views)
             {
-                slnFile.Delete();
+                var viewName = Path.GetFileNameWithoutExtension(view.Name);
+                if (! string.IsNullOrEmpty(viewName))
+                {
+                    Console.WriteLine(viewName);
+                }
             }
         }
 
-        public static void GraphView(string viewName)
+        public static void Graph(string viewName)
         {
             var wsdir = WellKnownFolders.GetWorkspaceDirectory();
 
@@ -199,7 +116,7 @@ namespace FullBuild.Commands
                 foreach (var prjRef in prj.ProjectReferences)
                 {
                     var target = anthology.Projects.Single(x => x.Guid == prjRef);
-                    if (! projects.Contains(target))
+                    if (!projects.Contains(target))
                     {
                         projects.Add(target);
 

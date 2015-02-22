@@ -23,72 +23,78 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using FullBuild.Config;
 using FullBuild.Helpers;
-using FullBuild.Model;
 using FullBuild.SourceControl;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Workspace
 {
     internal partial class Workspace
     {
-        private static void Bookmark()
+        public static void ListRepos()
         {
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig();
-
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthology = Anthology.Load(admDir);
+            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
 
             // validate first that repos are valid and clone them
             foreach (var repo in config.SourceRepos)
             {
                 var repoDir = wsDir.GetDirectory(repo.Name);
-                if (! repoDir.Exists)
-                {
-                    continue;
-                }
-
-                var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(repo.Vcs.ToString());
-                var tip = sourceControl.Tip(repoDir);
-
-                var bookmark = new Bookmark(repo.Name, tip);
-                anthology = anthology.AddOrUpdateBookmark(bookmark);
+                var eol = repoDir.Exists
+                    ? "@"
+                    : "";
+                Console.WriteLine("{0}{1}", repo.Name, eol);
             }
-
-            anthology.Save(admDir);
         }
 
-        private static void CheckoutBookmark(string version)
+        public static void AddRepo(string name, VersionControlType type, string url)
+        {
+            var newRepo = new RepoConfig
+                          {
+                              Name = name,
+                              Vcs = type,
+                              Url = url
+                          };
+
+            var config = ConfigManager.LoadConfig();
+            if (config.SourceRepos.Any(x => x.Name.InvariantEquals(name)))
+            {
+                throw new ArgumentException("Repository already exists");
+            }
+
+            config.SourceRepos = config.SourceRepos.Concat(new[] {newRepo}).ToArray();
+            ConfigManager.SaveConfig(config);
+        }
+
+        public static void CloneRepo(string[] repos)
         {
             var wsDir = WellKnownFolders.GetWorkspaceDirectory();
             var config = ConfigManager.LoadConfig();
 
-            var admDir = WellKnownFolders.GetAdminDirectory();
-
-            var adminSourceControl = ServiceActivator<Factory>.Create<ISourceControl>(config.AdminRepo.Vcs.ToString());
-            adminSourceControl.Checkout(admDir, version);
-
-            var anthology = Anthology.Load(admDir);
-
             // validate first that repos are valid and clone them
-            foreach (var repo in config.SourceRepos)
+            foreach (var repo in repos)
             {
-                var repoDir = wsDir.GetDirectory(repo.Name);
-                if (! repoDir.Exists)
+                var match = "^" + repo + "$";
+                var regex = new Regex(match, RegexOptions.IgnoreCase);
+                var repoConfigs = config.SourceRepos.Where(x => regex.IsMatch(x.Name));
+                if (!repoConfigs.Any())
                 {
-                    continue;
+                    Console.WriteLine("WARNING | No repository found");
+                    return;
                 }
 
-                var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(repo.Vcs.ToString());
-                var repoBookmark = anthology.Bookmarks.SingleOrDefault(x => x.Name == repo.Name);
-                if (null == repoBookmark)
+                foreach (var repoConfig in repoConfigs)
                 {
-                    continue;
+                    var repoDir = wsDir.GetDirectory(repoConfig.Name);
+                    if (!repoDir.Exists)
+                    {
+                        var sourceControl = ServiceActivator<Factory>.Create<ISourceControl>(repoConfig.Vcs.ToString());
+                        sourceControl.Clone(repoDir, repoConfig.Name, repoConfig.Url);
+                    }
                 }
-
-                sourceControl.Checkout(repoDir, repoBookmark.Version);
             }
         }
     }

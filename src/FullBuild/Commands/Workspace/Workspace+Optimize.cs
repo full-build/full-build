@@ -23,34 +23,21 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
 using FullBuild.Helpers;
-using FullBuild.NatLangParser;
+using FullBuild.Model;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Workspace
 {
-    internal class Usage
+    internal partial class Workspace
     {
-        public static IEnumerable<Matcher> Commands()
+        public static void Optimize()
         {
-            yield return MatcherBuilder.Describe("Usage")
-                                     .Command("/?")
-                                     .Do(ctx => DisplayUsage(ctx.Usage()));
-        }
+            var admDir = WellKnownFolders.GetAdminDirectory();
 
-        private static void DisplayUsage(IEnumerable<string> usages)
-        {
-            Console.WriteLine("Usage:");
-            usages.ForEach(x => Console.WriteLine("\t{0}", x));
-            Console.WriteLine();
-
-            var assembly = Assembly.GetExecutingAssembly();
-            var fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
-            var version = fvi.FileVersion;
-            Console.WriteLine("full-build version {0}", version);
+            // get all csproj in all repos only
+            var anthology = Anthology.Load(admDir);
+            anthology = AnthologyOptimizer.Optimize(anthology);
+            anthology.Save(admDir);
         }
     }
 }

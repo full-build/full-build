@@ -23,64 +23,24 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
-using System.Linq;
-using FullBuild.Config;
 using FullBuild.Helpers;
-using FullBuild.Model;
-using FullBuild.NuGet;
+using NLog;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Workspace
 {
-    internal partial class Packages
+    internal partial class Workspace
     {
-        private static void AddNuGet(string url)
-        {
-            var config = ConfigManager.LoadConfig();
-            int nuGetVersion = NuGetFactory.GetNuGetVersion(url);
-            var nuGetConfig = new NuGetConfig {Url = url, Version = nuGetVersion};
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-            config.NuGets = config.NuGets.Append(nuGetConfig).Distinct().ToArray();
-            ConfigManager.SaveConfig(config);
-            
-            Console.WriteLine("Added NuGet feed {0}", url);
+        public static void RefreshSources()
+        {
+            Exec.Exec.ForEachRepo("echo ** running 'git pull --rebase' on %FULLBUILD_REPO% && git pull --rebase");
         }
 
-        private static void ListNuGets()
-        {
-            var config = ConfigManager.LoadConfig();
-            config.NuGets.ForEach(Console.WriteLine);
-        }
-
-        private static void ListPackages()
+        public static void RefreshWorkspace()
         {
             var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthology = Anthology.Load(admDir);
-
-            anthology.Packages.ForEach(x => Console.WriteLine("{0} {1}", x.Name, x.Version));
-        }
-
-        private static void UsePackage(string name, string version)
-        {
-            var admDir = WellKnownFolders.GetAdminDirectory();
-            var anthology = Anthology.Load(admDir);
-            var config = ConfigManager.LoadConfig();
-
-            if (version == "*")
-            {
-                version = NuGetFactory.CreateAll(config.NuGets).GetLatestVersion(name).PackageId.Version;
-            }
-
-            var pkg = new Package(name, version);
-
-            Console.WriteLine("Using package {0} version {1}", name, version);
-
-            anthology = anthology.AddOrUpdatePackages(pkg);
-
-            anthology.Save(admDir);
-
-            // force package installation
-            InstallPackage(pkg);
+            Exec.Exec.ExecCommand("git pull --rebase", admDir);
         }
     }
 }

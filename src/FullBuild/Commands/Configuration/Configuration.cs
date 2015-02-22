@@ -1,4 +1,4 @@
-// Copyright (c) 2014, Pierre Chalamet
+﻿// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -23,16 +23,15 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using System;
+using FullBuild.Config;
 
-namespace FullBuild.Commands
+namespace FullBuild.Commands.Configuration
 {
-    internal interface IWebClient
+    public class Configuration
     {
-        bool TryDownloadString(Uri uri, out string result);
-
-        string DownloadString(Uri uri);
-
-        void DownloadFile(Uri address, string fileName);
+        public static void SetConfig(ConfigParameter key, string value)
+        {
+            ConfigManager.SetBootstrapConfig(key, value);
+        }
     }
 }
