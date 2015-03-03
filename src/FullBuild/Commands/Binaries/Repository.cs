@@ -26,15 +26,17 @@
 using System.Collections.Generic;
 using FullBuild.NatLangParser;
 
-namespace FullBuild.Commands.Usage
+namespace FullBuild.Commands.Binaries
 {
-    public class Registrar
+    public class Repository
     {
         public static IEnumerable<Matcher> Commands()
         {
-            yield return MatcherBuilder.Describe("Usage")
-                                       .Command("help")
-                                       .Do(ctx => Usage.DisplayUsage(ctx.Usage()));
+            // add nuget feed
+            yield return MatcherBuilder.Describe("list binaries")
+                                       .Command("list")
+                                       .Command("binaries")
+                                       .Do(ctx => Binaries.List());
         }
     }
 }
