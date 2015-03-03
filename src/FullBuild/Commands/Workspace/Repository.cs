@@ -29,7 +29,7 @@ using FullBuild.NatLangParser;
 
 namespace FullBuild.Commands.Workspace
 {
-    public class Registrar
+    public class Repository
     {
         public static IEnumerable<Matcher> Commands()
         {

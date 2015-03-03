@@ -73,15 +73,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AnthologyOptimizer.cs" />
-    <Compile Include="Commands\Binaries\Registrar.cs" />
-    <Compile Include="Commands\Configuration\Registrar.cs" />
-    <Compile Include="Commands\Exec\Registrar.cs" />
+    <Compile Include="Commands\Binaries\Repository.cs" />
+    <Compile Include="Commands\Configuration\Repository.cs" />
+    <Compile Include="Commands\Exec\Repository.cs" />
     <Compile Include="Commands\HintPathParser.cs" />
-    <Compile Include="Commands\Packages\Registrar.cs" />
-    <Compile Include="Commands\Projects\Registrar.cs" />
-    <Compile Include="Commands\Usage\Registrar.cs" />
-    <Compile Include="Commands\Views\Registrar.cs" />
-    <Compile Include="Commands\Workspace\Registrar.cs" />
+    <Compile Include="Commands\Packages\Repository.cs" />
+    <Compile Include="Commands\Projects\Repository.cs" />
+    <Compile Include="Commands\Usage\Repository.cs" />
+    <Compile Include="Commands\Views\Repository.cs" />
+    <Compile Include="Commands\Workspace\Repository.cs" />
     <Compile Include="Helpers\PlatformInfo.cs" />
     <Compile Include="NatLangParser\FluentOptionMatcherBuilder.cs" />
     <Compile Include="NatLangParser\OptionMatcher.cs" />
