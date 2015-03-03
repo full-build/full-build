@@ -1,4 +1,4 @@
-// Copyright (c) 2014, Pierre Chalamet
+﻿// Copyright (c) 2014, Pierre Chalamet
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -26,19 +26,15 @@
 using System.Collections.Generic;
 using FullBuild.NatLangParser;
 
-namespace FullBuild.Commands.Exec
+namespace FullBuild.Commands.Usage
 {
-    public class Registrar
+    public class Repository
     {
         public static IEnumerable<Matcher> Commands()
         {
-            var command = Parameter<string>.Create("command");
-
-            // exec
-            yield return MatcherBuilder.Describe("exec command on each repo")
-                                       .Command("exec")
-                                       .Param(command)
-                                       .Do(ctx => Exec.ForEachRepo(ctx.Get(command)));
+            yield return MatcherBuilder.Describe("Usage")
+                                       .Command("help")
+                                       .Do(ctx => Usage.DisplayUsage(ctx.Usage()));
         }
     }
 }

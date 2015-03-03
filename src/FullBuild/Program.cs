@@ -25,18 +25,8 @@
 
 using System;
 using System.Collections.Generic;
-using FullBuild.Commands;
-using FullBuild.Commands.Binaries;
-using FullBuild.Commands.Configuration;
-using FullBuild.Commands.Exec;
-using FullBuild.Commands.Packages;
-using FullBuild.Commands.Projects;
-using FullBuild.Commands.Usage;
-using FullBuild.Commands.Views;
-using FullBuild.Commands.Workspace;
 using FullBuild.NatLangParser;
 using NLog;
-using Registrar = FullBuild.Commands.Configuration.Registrar;
 
 namespace FullBuild
 {
@@ -75,14 +65,14 @@ namespace FullBuild
         private static void TryMain(string[] args)
         {
             var parser = new ParserBuilder().With(GlobalOptions.Options())
-                                            .With(Commands.Usage.Registrar.Commands())
-                                            .With(Commands.Workspace.Registrar.Commands())
-                                            .With(Commands.Packages.Registrar.Commands())
-                                            .With(Commands.Views.Registrar.Commands())
-                                            .With(Registrar.Commands())
-                                            .With(Commands.Binaries.Registrar.Commands())
-                                            .With(Commands.Projects.Registrar.Commands())
-                                            .With(Commands.Exec.Registrar.Commands()).Build();
+                                            .With(Commands.Usage.Repository.Commands())
+                                            .With(Commands.Workspace.Repository.Commands())
+                                            .With(Commands.Packages.Repository.Commands())
+                                            .With(Commands.Views.Repository.Commands())
+                                            .With(Commands.Configuration.Repository.Commands())
+                                            .With(Commands.Binaries.Repository.Commands())
+                                            .With(Commands.Projects.Repository.Commands())
+                                            .With(Commands.Exec.Repository.Commands()).Build();
 
             if (! parser.ParseAndInvoke(args))
             {
