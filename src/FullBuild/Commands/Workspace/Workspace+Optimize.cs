@@ -28,7 +28,7 @@ using FullBuild.Model;
 
 namespace FullBuild.Commands.Workspace
 {
-    internal partial class Workspace
+    public partial class Workspace
     {
         public static void Optimize()
         {

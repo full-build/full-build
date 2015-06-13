@@ -36,7 +36,7 @@ using FullBuild.Model;
 
 namespace FullBuild.Commands.Workspace
 {
-    internal partial class Workspace
+    public partial class Workspace
     {
         public static void IndexWorkspace()
         {
@@ -117,7 +117,7 @@ namespace FullBuild.Commands.Workspace
                     }
                     catch (Exception ex)
                     {
-                        _logger.Debug("Failed to process project", ex);
+                        _logger.Debug(ex, "Failed to process project");
                         Console.Error.WriteLine("WARNING | Failed to process project {0}", proj.FullName);
                     }
                 }

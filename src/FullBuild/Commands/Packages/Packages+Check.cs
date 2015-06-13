@@ -32,7 +32,7 @@ using NLog;
 
 namespace FullBuild.Commands.Packages
 {
-    internal partial class Packages
+    public partial class Packages
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 

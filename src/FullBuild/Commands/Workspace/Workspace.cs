@@ -28,7 +28,7 @@ using NLog;
 
 namespace FullBuild.Commands.Workspace
 {
-    internal partial class Workspace
+    public partial class Workspace
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
