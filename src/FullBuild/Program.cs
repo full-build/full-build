@@ -53,7 +53,7 @@ namespace FullBuild
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed with error", ex);
+                _logger.Error(ex, "Failed with error");
 
                 Console.Error.WriteLine("ERROR:");
                 Console.Error.WriteLine(ex.Message);
