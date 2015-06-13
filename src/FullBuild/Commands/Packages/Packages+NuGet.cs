@@ -32,7 +32,7 @@ using FullBuild.NuGet;
 
 namespace FullBuild.Commands.Packages
 {
-    internal partial class Packages
+    public partial class Packages
     {
         public static void AddNuGet(string url)
         {

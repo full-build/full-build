@@ -23,21 +23,28 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System;
 using FullBuild.Helpers;
+using FullBuild.Model;
 
-namespace FullBuild.Commands.Views
+namespace FullBuild.Commands.Binaries
 {
-    public partial class Views
+    public class Binaries
     {
-        public static void BuildView(string viewname)
+        public static void List()
         {
-            var build = PlatformInfo.IsRunningOnMono()
-                ? "xbuild"
-                : "msbuild /nologo /verbosity:quiet";
-            var cmd = string.Format("{0} {1}.sln", build, viewname);
+            var admDir = WellKnownFolders.GetAdminDirectory();
+            var anthology = Anthology.Load(admDir);
 
-            var wsDir = WellKnownFolders.GetWorkspaceDirectory();
-            Exec.Exec.ExecCommand(cmd, wsDir);
+            // validate first that repos are valid and clone them
+            foreach (var binary in anthology.Binaries)
+            {
+                var binName = binary.AssemblyName;
+                var eol = null != binary.HintPath
+                    ? "@"
+                    : "";
+                Console.WriteLine("{0}{1}", binName, eol);
+            }
         }
     }
 }
