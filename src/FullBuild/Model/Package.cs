@@ -25,7 +25,7 @@
 
 namespace FullBuild.Model
 {
-    internal class Package
+    public class Package
     {
         public Package(string name, string version)
         {

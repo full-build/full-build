@@ -33,7 +33,7 @@ using FullBuild.Model;
 
 namespace FullBuild.Commands.Views
 {
-    internal partial class Views
+    public partial class Views
     {
         public static void Describe(string viewName)
         {
