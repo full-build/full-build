@@ -9,9 +9,8 @@ open CommandLineParsing
 let main argv = 
     let cmd = ParseCommandLine (argv |> Seq.toList)
     match cmd with
-    | Help -> DisplayHelp ()
     | Usage -> DisplayUsage ()
-    | InitWorkspace (relativePath) -> FullBuild.Commands.Workspace.Workspace.InitWorkspace (relativePath.FullName)
+    | InitWorkspace (path) -> FullBuild.Commands.Workspace.Workspace.InitWorkspace (path)
     | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()
     | IndexWorkspace -> FullBuild.Commands.Workspace.Workspace.IndexWorkspace ()
     | ConvertWorkspace -> FullBuild.Commands.Workspace.Workspace.ConvertProjects ()
@@ -40,6 +39,5 @@ let main argv =
     | BuildView vwName -> FullBuild.Commands.Views.Views.BuildView (vwName)
     | RefreshSources -> FullBuild.Commands.Workspace.Workspace.RefreshSources ()
     | ListBinaries -> FullBuild.Commands.Binaries.Binaries.List ()
-    | _ -> printfn "command line is %A" cmd
 
     0 // return an integer exit code
