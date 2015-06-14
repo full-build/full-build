@@ -73,6 +73,7 @@
     <Compile Include="CommandLineParsing.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Workspace.fs" />
+    <Compile Include="Repo.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
