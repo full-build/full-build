@@ -4,32 +4,37 @@ open System
 open System.IO
 open FileExtensions
 
-//[FullBuild]
-//BinRepo=c:\BinRepo
-//RepoType=git
-//RepoUrl=https://github.com/pchalamet/cassandra-sharp-full-build
-//PackageGlobalCache=c:\PackageGlobalCache
-
-
-type GlobalConfiguration = { BinRepo : string; RepoType : string; RepoUrl : string; PackageGlobalCache : string}
-
+type GlobalConfiguration = 
+    { 
+        BinRepo : string
+        RepoType : string
+        RepoUrl : string
+        PackageGlobalCache : string
+        NuGets : string list
+    }
 
 let GlobalIniFileFromFile (configFile : FileInfo) =
     let ini = new Mini.IniDocument(configFile.FullName);
-    let fbSection = ini.["FullBuild"];
-    fbSection
+    ini
     
-let GlobalIniFilename = 
+let DefaultGlobalIniFilename () = 
     let userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
     let configFile = ".full-build" |> GetFile userProfileDir  
     configFile
 
-let GlobalConfigurationFromFile (globalIniFile : FileInfo) : GlobalConfiguration =
+let GlobalConfigurationFromFile globalIniFile =
     let globalIni = GlobalIniFileFromFile globalIniFile
-    let binRepo = globalIni.["BinRepo"].Value
-    let repoType = globalIni.["RepoType"].Value
-    let repoUrl = globalIni.["RepoUrl"].Value
-    let packageGlobalCache = globalIni.["PackageGlobalCache"].Value
-    { BinRepo = binRepo; RepoType = repoType; RepoUrl = repoUrl; PackageGlobalCache = packageGlobalCache}
+    let fbSection = globalIni.["FullBuild"]
+    let binRepo = fbSection.["BinRepo"].Value
+    let repoType = fbSection.["RepoType"].Value
+    let repoUrl = fbSection.["RepoUrl"].Value
+    let packageGlobalCache = fbSection.["PackageGlobalCache"].Value
 
-let GlobalConfiguration = GlobalConfigurationFromFile GlobalIniFilename
+    let ngSection = globalIni.["NuGet"]
+    let nugets = ngSection |> Seq.map (fun x -> x.Value) |> Seq.toList
+
+    { BinRepo = binRepo; RepoType = repoType; RepoUrl = repoUrl; PackageGlobalCache = packageGlobalCache; NuGets = nugets }
+
+let GlobalConfig : GlobalConfiguration = 
+    let filename = DefaultGlobalIniFilename ()
+    GlobalConfigurationFromFile filename
