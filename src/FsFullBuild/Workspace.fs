@@ -9,11 +9,12 @@ open Configuration
 open Vcs
 
 let Init (path : WorkspacePath) =
-    let pathDir = new DirectoryInfo(path)
-    pathDir.Create()
+    let wsDir = new DirectoryInfo(path)
+    wsDir.Create()
 
-    let subDir = pathDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
+    let subDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
     if subDir.Exists then failwith "Workspace already exists"
 
-    VcsCloneRepo GlobalConfig.Repository subDir
+    VcsCloneRepo wsDir GlobalConfig.Repository 
+
 

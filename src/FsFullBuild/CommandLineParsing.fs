@@ -12,7 +12,7 @@ type Command =
     | BookmarkWorkspace
     | CheckoutWorkspace of WorkspaceVersion
     | AddRepository of Repository
-    | CloneRepositories of NameFilter
+    | CloneRepositories of string list
     | ListRepositories
     | AddNuGet of Url
     | ListNuGets
@@ -60,8 +60,7 @@ let ParsePackage (args : string list) =
 
 let ParseRepo (args : string list) =
     match args with
-    | [Token(Token.Clone); filter] -> let (ToNameFilter repoFilter) = filter
-                                      CloneRepositories (repoFilter)
+    | Token(Token.Clone) :: filters -> CloneRepositories (filters)
     | [Token(Token.Add); vcs; name; url] -> let (ToRepository repo) = (vcs, name, url)
                                             AddRepository (repo)
     | [Token(Token.List)] -> ListRepositories

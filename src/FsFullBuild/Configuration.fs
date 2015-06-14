@@ -35,7 +35,7 @@ let GlobalConfigurationFromFile file =
     let repoType = fbSection.["RepoType"].Value
     let repoUrl = fbSection.["RepoUrl"].Value
     let packageGlobalCache = fbSection.["PackageGlobalCache"].Value
-    let (ToRepository repo) = (repoType, repoUrl, "full-build")
+    let (ToRepository repo) = (repoType, repoUrl, ".full-build")
 
     let ngSection = ini.["NuGet"]
     let nugets = ngSection |> Seq.map (fun x -> x.Value) |> Seq.toList
