@@ -58,6 +58,7 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <ItemGroup>
+    <Compile Include="FileExtensionsTests.fs" />
     <Compile Include="ConfigurationTests.fs" />
     <None Include="app.config" />
     <None Include="WorkspaceConfig.ini">
