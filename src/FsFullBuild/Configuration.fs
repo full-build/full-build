@@ -4,26 +4,19 @@ open System
 open System.IO
 open FileExtensions
 open WellknownFolders
+open Types
 
 type GlobalConfiguration = 
     { 
         BinRepo : string
-        RepoType : string
-        RepoUrl : string
+        Repository : Repository
         PackageGlobalCache : string
         NuGets : string list
     }
 
-type RepositoryConfiguration =
-    {
-        Name : string
-        RepoType : string
-        RepoUrl : string
-    }
-
 type WorkspaceConfiguration =
     {
-        Repositories : RepositoryConfiguration list
+        Repositories : Repository list
     }
 
 let IniDocFromFile (configFile : FileInfo) =
@@ -42,11 +35,12 @@ let GlobalConfigurationFromFile file =
     let repoType = fbSection.["RepoType"].Value
     let repoUrl = fbSection.["RepoUrl"].Value
     let packageGlobalCache = fbSection.["PackageGlobalCache"].Value
+    let (ToRepository repo) = (repoType, repoUrl, "full-build")
 
     let ngSection = ini.["NuGet"]
     let nugets = ngSection |> Seq.map (fun x -> x.Value) |> Seq.toList
 
-    { BinRepo = binRepo; RepoType = repoType; RepoUrl = repoUrl; PackageGlobalCache = packageGlobalCache; NuGets = nugets }
+    { BinRepo = binRepo; Repository = repo; PackageGlobalCache = packageGlobalCache; NuGets = nugets }
 
 
 let DefaultWorkspaceIniFilename () =
@@ -59,7 +53,8 @@ let RepositoryConfigurationFromSection (section : Mini.IniSection) =
     let name = section.Name
     let vcs = section.["vcs"].Value
     let url = section.["url"].Value
-    { Name = name; RepoType = vcs; RepoUrl = url }
+    let (ToRepository repo) = (vcs, url, name)
+    repo
 
 let WorkspaceConfigurationFromFile file =
     let ini = IniDocFromFile file

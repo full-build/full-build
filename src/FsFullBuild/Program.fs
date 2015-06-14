@@ -18,8 +18,8 @@ let main argv =
     | BookmarkWorkspace -> FullBuild.Commands.Workspace.Workspace.Bookmark ()
     | CheckoutWorkspace wsVersion -> FullBuild.Commands.Workspace.Workspace.CheckoutBookmark (wsVersion)
     | AddRepository (repoVcs) -> let (vcsType, vcsName, vcsUrl) = match repoVcs with
-                                                                  | Types.Git (name, url) -> (FullBuild.Config.VersionControlType.Git, name, url)
-                                                                  | Types.Hg (name, url) -> (FullBuild.Config.VersionControlType.Hg, name, url)
+                                                                  | (Types.Git, name, url) -> (FullBuild.Config.VersionControlType.Git, name, url)
+                                                                  | (Types.Hg, name, url) -> (FullBuild.Config.VersionControlType.Hg, name, url)
                                  FullBuild.Commands.Workspace.Workspace.AddRepo(vcsName, vcsType, vcsUrl)
     | CloneRepositories filter -> FullBuild.Commands.Workspace.Workspace.CloneRepo ( [| filter |])
     | ListRepositories -> FullBuild.Commands.Workspace.Workspace.ListRepos ()
