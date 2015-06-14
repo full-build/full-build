@@ -17,7 +17,10 @@ let rec WorkspaceFolderSearch (dir : DirectoryInfo) =
     if fbdir.Exists then dir
     else WorkspaceFolderSearch dir.Parent
 
-let WorkspaceFolder () : DirectoryInfo =
+let CurrentFolder () : DirectoryInfo =
     let currDir = new DirectoryInfo(Environment.CurrentDirectory)
-    WorkspaceFolderSearch currDir
+    currDir
 
+let WorkspaceFolder () : DirectoryInfo =
+    let currDir = CurrentFolder ()
+    WorkspaceFolderSearch currDir

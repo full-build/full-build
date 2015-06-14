@@ -10,7 +10,7 @@ let main argv =
     let cmd = ParseCommandLine (argv |> Seq.toList)
     match cmd with
     | Usage -> DisplayUsage ()
-    | InitWorkspace (path) -> FullBuild.Commands.Workspace.Workspace.InitWorkspace (path)
+    | InitWorkspace (path) -> Workspace.Init path
     | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()
     | IndexWorkspace -> FullBuild.Commands.Workspace.Workspace.IndexWorkspace ()
     | ConvertWorkspace -> FullBuild.Commands.Workspace.Workspace.ConvertProjects ()
