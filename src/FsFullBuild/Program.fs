@@ -21,8 +21,8 @@ let main argv =
                                                                   | (Types.Git, name, url) -> (FullBuild.Config.VersionControlType.Git, name, url)
                                                                   | (Types.Hg, name, url) -> (FullBuild.Config.VersionControlType.Hg, name, url)
                                  FullBuild.Commands.Workspace.Workspace.AddRepo(vcsName, vcsType, vcsUrl)
-    | CloneRepositories filter -> FullBuild.Commands.Workspace.Workspace.CloneRepo ( [| filter |])
-    | ListRepositories -> FullBuild.Commands.Workspace.Workspace.ListRepos ()
+    | CloneRepositories filters -> Repo.Clone filters
+    | ListRepositories -> Repo.List ()
     | AddNuGet url -> FullBuild.Commands.Packages.Packages.AddNuGet(url)
     | ListNuGets -> FullBuild.Commands.Packages.Packages.ListNuGets ()
     | ListPackages -> FullBuild.Commands.Binaries.Binaries.List ()
