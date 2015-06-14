@@ -66,9 +66,10 @@
     <Compile Include="FileExtensions.fs" />
     <Compile Include="Constants.fs" />
     <Compile Include="Types.fs" />
-    <Compile Include="WorkspaceInit.fs" />
     <Compile Include="CommandLineToken.fs" />
     <Compile Include="CommandLineParsing.fs" />
+    <Compile Include="Configuration.fs" />
+    <Compile Include="Workspace.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
