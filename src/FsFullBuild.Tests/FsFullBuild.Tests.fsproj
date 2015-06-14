@@ -60,6 +60,9 @@
   <ItemGroup>
     <Compile Include="ConfigurationTests.fs" />
     <None Include="app.config" />
+    <None Include="WorkspaceConfig.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="GlobalConfig.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
