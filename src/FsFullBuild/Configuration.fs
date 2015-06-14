@@ -65,6 +65,7 @@ let GlobalConfig : GlobalConfiguration =
     let filename = DefaultGlobalIniFilename ()
     GlobalConfigurationFromFile filename
 
-let WorkspaceConfig : WorkspaceConfiguration =
+let WorkspaceConfig () : WorkspaceConfiguration =
     let filename = DefaultWorkspaceIniFilename ()
     WorkspaceConfigurationFromFile filename
+

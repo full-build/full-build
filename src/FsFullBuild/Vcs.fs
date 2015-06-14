@@ -1,5 +1,6 @@
 ﻿module Vcs
 
+open System
 open System.IO
 open Types
 open Exec
@@ -7,11 +8,11 @@ open Exec
 
 let GitCloneRepo (url : Url) (target : DirectoryInfo) =
     let args = sprintf "clone %A %A" url target.FullName
-    Exec "git" args
+    Exec "git" args Environment.CurrentDirectory
 
 let HgCloneRepo (url : Url) (target : DirectoryInfo) =
     let args = sprintf "clone %A %A" url target.FullName
-    Exec "hg" args
+    Exec "hg" args Environment.CurrentDirectory
 
 let VcsCloneRepo (repo : Repository) (target : DirectoryInfo) =
     match repo with
