@@ -3,6 +3,7 @@
 open NUnit.Framework
 open FsUnit
 open Configuration
+open System
 open System.IO
 
 [<Test>]
@@ -17,3 +18,8 @@ let CheckGlobalIniFilename () =
                      NuGets = ["https://www.nuget.org/api/v2/"; "https://www.nuget.org/api/v3/"] }
 
     config |> should equal expected
+
+[<Test>]
+let CheckDefaultConfigurationFile () =
+    let file = DefaultGlobalIniFilename ()
+    file.FullName.Contains(".full-build") |> should equal true
