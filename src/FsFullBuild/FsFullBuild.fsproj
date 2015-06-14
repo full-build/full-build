@@ -68,6 +68,7 @@
     <Compile Include="Types.fs" />
     <Compile Include="CommandLineToken.fs" />
     <Compile Include="CommandLineParsing.fs" />
+    <Compile Include="WellknownFolders.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Workspace.fs" />
     <Compile Include="Program.fs" />
