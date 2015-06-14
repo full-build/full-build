@@ -1,6 +1,6 @@
 ﻿module Types
 
-type RelativePath = System.IO.DirectoryInfo
+type WorkspacePath = string
 
 type NameFilter = string
 
@@ -16,9 +16,8 @@ type WorkspaceVersion = string
 
 type PackageVersion = string
 
-let (|ToRelativePath|) input = 
-    let pathInfo = new System.IO.DirectoryInfo(input)
-    pathInfo
+let (|ToWorkspacePath|) (path : string) = 
+    path
 
 let (|ToNameFilter|) input = input
 let (|ToUrl|) (input : string) = input
