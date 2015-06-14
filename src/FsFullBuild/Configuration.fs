@@ -30,11 +30,9 @@ let IniDocFromFile (configFile : FileInfo) =
     let ini = new Mini.IniDocument(configFile.FullName);
     ini
     
-
-
 let DefaultGlobalIniFilename () = 
     let userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-    let configFile = userProfileDir |> GetFile ".full-build" 
+    let configFile = userProfileDir |> GetFile WORKSPACE_CONFIG_FILE
     configFile
 
 let GlobalConfigurationFromFile file =
@@ -53,7 +51,7 @@ let GlobalConfigurationFromFile file =
 
 let DefaultWorkspaceIniFilename () =
     let wsDir = WorkspaceFolder ()
-    let fbDir = wsDir |> GetSubDirectory ".full-build"
+    let fbDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
     let wsConfigFile = fbDir |> GetFile "config"
     wsConfigFile
 

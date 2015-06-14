@@ -3,9 +3,8 @@ open Types
 open CommandLineToken
 
 type Command =
-    | Help
     | Usage
-    | InitWorkspace of RelativePath
+    | InitWorkspace of WorkspacePath
     | RefreshWorkspace
     | IndexWorkspace
     | ConvertWorkspace
@@ -34,11 +33,11 @@ type Command =
 
 let ParseWorkspace (args : string list) =
     match args with
-    | [Token(Create); wsPath] -> let (ToRelativePath wsPath) = wsPath
+    | [Token(Create); wsPath] -> let (ToWorkspacePath wsPath) = wsPath
                                  Command.InitWorkspace wsPath
     | [Token(Index)] -> Command.IndexWorkspace
     | [Token(Update)] -> RefreshWorkspace
-    | _ -> Command.Help
+    | _ -> Command.Usage
 
 let ParseView (args : string list) =
     match args with
@@ -46,7 +45,7 @@ let ParseView (args : string list) =
     | [Token (Token.Drop); vwName] -> Command.DropView (vwName)
     | [Token (Token.Build); vwName] -> Command.BuildView (vwName)
     | [Token (Token.Graph); vwName] -> Command.GraphView (vwName)
-    | _ -> Command.Help
+    | _ -> Command.Usage
 
 let ParsePackage (args : string list) =
     match args with
@@ -57,7 +56,7 @@ let ParsePackage (args : string list) =
     | [Token(Token.Add); name; version] -> let (ToName pkgName) = name
                                            let (ToWorkspaceVersion wsVersion) = version
                                            UsePackage (pkgName, wsVersion)
-    | _ -> Command.Help
+    | _ -> Command.Usage
 
 let ParseRepo (args : string list) =
     match args with
@@ -66,7 +65,7 @@ let ParseRepo (args : string list) =
     | [Token(Token.Add); vcs; name; url] -> let (ToVcs repoVcs) = (vcs, name, url)
                                             AddRepository (repoVcs)
     | [Token(Token.List)] -> ListRepositories
-    | _ -> Command.Help
+    | _ -> Command.Usage
 
 
 
@@ -74,7 +73,7 @@ let ParseRepo (args : string list) =
 let ParseCommandLine (args : string list) : Command =
     match args with
     | head::tail -> match head with
-                    | Token (Token.Help) -> Command.Help
+                    | Token (Token.Help) -> Command.Usage
                     | Token (Token.Workspace) -> ParseWorkspace tail
                     | Token (Token.View) -> ParseView tail
                     | Token (Token.Package) -> ParsePackage tail

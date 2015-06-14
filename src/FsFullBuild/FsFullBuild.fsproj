@@ -25,7 +25,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>..\bin\Debug\FsFullBuild.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -64,7 +65,6 @@
   </Target>
   <ItemGroup>
     <Compile Include="FileExtensions.fs" />
-    <Compile Include="Constants.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="CommandLineToken.fs" />
     <Compile Include="CommandLineParsing.fs" />
