@@ -10,7 +10,10 @@ let CheckGlobalIniFilename () =
     let file = new FileInfo("GlobalConfig.ini")
     let config = GlobalConfigurationFromFile file
 
-    config.BinRepo |> should equal "c:\BinRepo"
-    config.RepoType |> should equal "git"
-    config.RepoUrl |> should equal "https://github.com/pchalamet/full-build"
-    config.PackageGlobalCache |> should equal "c:\PackageGlobalCache"
+    let expected = { BinRepo = "c:\BinRepo"
+                     RepoType = "git"
+                     RepoUrl = "https://github.com/pchalamet/full-build"
+                     PackageGlobalCache = "c:\PackageGlobalCache"
+                     NuGets = ["https://www.nuget.org/api/v2/"; "https://www.nuget.org/api/v3/"] }
+
+    config |> should equal expected
