@@ -5,6 +5,7 @@ open FsUnit
 open Configuration
 open System
 open System.IO
+open Types
 
 [<Test>]
 let CheckGlobalIniFilename () =
@@ -13,8 +14,7 @@ let CheckGlobalIniFilename () =
     let config = GlobalConfigurationFromFile file
 
     let expected = { BinRepo = "c:\BinRepo"
-                     RepoType = "git"
-                     RepoUrl = "https://github.com/pchalamet/full-build"
+                     Repository = (Git, "full-build", "https://github.com/pchalamet/full-build")
                      PackageGlobalCache = "c:\PackageGlobalCache"
                      NuGets = ["https://www.nuget.org/api/v2/"; "https://www.nuget.org/api/v3/"] }
 
@@ -33,12 +33,7 @@ let CheckWorkspaceIniFilename () =
     file.Exists |> should equal true
     let config = WorkspaceConfigurationFromFile file
 
-    let expected = { Repositories = [ {   Name = "cassandra_sharp"
-                                          RepoType = "git"
-                                          RepoUrl = "https://github.com/pchalamet/cassandra-sharp" } ;
-                                      {   Name = "cassandra_sharp_contrib"
-                                          RepoType = "git"
-                                          RepoUrl = "https://github.com/pchalamet/cassandra-sharp-contrib"
-                                      } ] }
+    let expected = { Repositories = [ (Git, "cassandra_sharp", "https://github.com/pchalamet/cassandra-sharp")
+                                      (Git, "cassandra_sharp_contrib", "https://github.com/pchalamet/cassandra-sharp-contrib") ] }
 
     config |> should equal expected

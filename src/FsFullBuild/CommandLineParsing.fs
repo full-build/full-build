@@ -11,7 +11,7 @@ type Command =
     | OptimizeWorkspace
     | BookmarkWorkspace
     | CheckoutWorkspace of WorkspaceVersion
-    | AddRepository of Vcs
+    | AddRepository of Repository
     | CloneRepositories of NameFilter
     | ListRepositories
     | AddNuGet of Url
@@ -62,8 +62,8 @@ let ParseRepo (args : string list) =
     match args with
     | [Token(Token.Clone); filter] -> let (ToNameFilter repoFilter) = filter
                                       CloneRepositories (repoFilter)
-    | [Token(Token.Add); vcs; name; url] -> let (ToVcs repoVcs) = (vcs, name, url)
-                                            AddRepository (repoVcs)
+    | [Token(Token.Add); vcs; name; url] -> let (ToRepository repo) = (vcs, name, url)
+                                            AddRepository (repo)
     | [Token(Token.List)] -> ListRepositories
     | _ -> Command.Usage
 
