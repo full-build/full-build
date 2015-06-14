@@ -60,6 +60,7 @@
   </Target>
   <ItemGroup>
     <Compile Include="FileExtensionsTests.fs" />
+    <Compile Include="ExecTests.fs" />
     <Compile Include="ConfigurationTests.fs" />
     <Compile Include="CommandLineParsingTests.fs" />
     <None Include="app.config" />
