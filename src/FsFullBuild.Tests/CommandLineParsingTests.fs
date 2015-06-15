@@ -13,9 +13,8 @@ let CheckUsageInvoked () =
 
 [<Test>]
 let CheckWorkspaceCreate () =
-    let result = ParseCommandLine [ "workspace"; "create"; @"c:\toto" ]
-    let (ToWorkspacePath wsPath) = @"c:\toto"
-    let expected = Command.InitWorkspace (wsPath)
+    let result = ParseCommandLine [ "workspace"; "checkout"; "1234" ]
+    let expected = Command.CheckoutWorkspace {Version="1234"}
     result |> should equal expected
 
 [<Test>]

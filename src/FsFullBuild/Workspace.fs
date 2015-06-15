@@ -8,7 +8,7 @@ open Exec
 open Configuration
 open Vcs
 
-let Init (path : WorkspacePath) =
+let Init (path : string) =
     let wsDir = new DirectoryInfo(path)
     wsDir.Create()
 

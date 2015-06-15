@@ -14,7 +14,7 @@ let CheckGlobalIniFilename () =
     let config = GlobalConfigurationFromFile file
 
     let expected = { BinRepo = "c:\BinRepo"
-                     Repository = (Git, ".full-build", "https://github.com/pchalamet/full-build")
+                     Repository = { Vcs=Git; Name=".full-build"; Url="https://github.com/pchalamet/full-build"}
                      PackageGlobalCache = "c:\PackageGlobalCache"
                      NuGets = ["https://www.nuget.org/api/v2/"; "https://www.nuget.org/api/v3/"] }
 
@@ -33,7 +33,7 @@ let CheckWorkspaceIniFilename () =
     file.Exists |> should equal true
     let config = WorkspaceConfigurationFromFile file
 
-    let expected = { Repositories = [ (Git, "cassandra_sharp", "https://github.com/pchalamet/cassandra-sharp")
-                                      (Git, "cassandra_sharp_contrib", "https://github.com/pchalamet/cassandra-sharp-contrib") ] }
+    let expected = { Repositories = [ {Vcs=Git; Name="cassandra_sharp"; Url="https://github.com/pchalamet/cassandra-sharp"}
+                                      {Vcs=Git; Name="cassandra_sharp_contrib"; Url="https://github.com/pchalamet/cassandra-sharp-contrib"} ] }
 
     config |> should equal expected
