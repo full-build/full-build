@@ -8,11 +8,11 @@ open WellknownFolders
 open FileExtensions
 
 
-let GitCloneRepo (url : Url) (target : DirectoryInfo) =
+let GitCloneRepo (url : string) (target : DirectoryInfo) =
     let args = sprintf "clone %A %A" url target.FullName
     Exec "git" args Environment.CurrentDirectory
 
-let HgCloneRepo (url : Url) (target : DirectoryInfo) =
+let HgCloneRepo (url : string) (target : DirectoryInfo) =
     let args = sprintf "clone %A %A" url target.FullName
     Exec "hg" args Environment.CurrentDirectory
 
