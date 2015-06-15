@@ -8,8 +8,7 @@ open WellknownFolders
 
 let rec List2 (repos : Repository list) =
     match repos with
-    | head::tail -> let (vcs, name, url) = head
-                    printfn "%s : %s [%A]" name url vcs
+    | repo::tail -> printfn "%s : %s [%A]" repo.Name repo.Url repo.Vcs
                     List2 tail
     | [] -> ()
 
@@ -20,8 +19,7 @@ let List () =
 let MatchRepo (repo : Repository seq) (filter : string) =
     let matchRegex = "^" + filter + "$"
     let regex = new Regex(matchRegex, RegexOptions.IgnoreCase)
-    repo |> Seq.filter ( fun x -> let (_, name, _) = x
-                                  regex.IsMatch(name)) |> Seq.distinct
+    repo |> Seq.filter ( fun x -> regex.IsMatch(x.Name)) |> Seq.distinct
 
 let Clone (filters : string list) =
     let wsDir = WorkspaceFolder ()
