@@ -17,8 +17,8 @@ let HgCloneRepo (url : Url) (target : DirectoryInfo) =
     Exec "hg" args Environment.CurrentDirectory
 
 let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) =
-    let (vcs, name, url) = repo
-    let checkoutDir = wsDir |> GetSubDirectory name 
-    match vcs with
-    | Git -> GitCloneRepo url checkoutDir
-    | Hg -> HgCloneRepo url checkoutDir
+    let checkoutDir = wsDir |> GetSubDirectory repo.Name 
+    let cloneRepo = match repo.Vcs with
+                    | Git -> GitCloneRepo
+                    | Hg -> HgCloneRepo
+    cloneRepo repo.Url checkoutDir
