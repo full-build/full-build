@@ -17,12 +17,6 @@ type Package =
         Version : string
     }
 
-type Url = string
-
-type Name = string
-
-type NameFilter = string
-
 let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) = 
     let vcs = match vcsType with
               | "git" -> Git
