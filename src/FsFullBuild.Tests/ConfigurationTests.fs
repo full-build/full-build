@@ -14,7 +14,7 @@ let CheckGlobalIniFilename () =
     let config = GlobalConfigurationFromFile file
 
     let expected = { BinRepo = "c:\BinRepo"
-                     Repository = (Git, "full-build", "https://github.com/pchalamet/full-build")
+                     Repository = (Git, ".full-build", "https://github.com/pchalamet/full-build")
                      PackageGlobalCache = "c:\PackageGlobalCache"
                      NuGets = ["https://www.nuget.org/api/v2/"; "https://www.nuget.org/api/v3/"] }
 
