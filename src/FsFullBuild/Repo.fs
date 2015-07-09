@@ -28,7 +28,6 @@ module Repo
 open Types
 open Configuration
 open System.Text.RegularExpressions
-open Vcs
 open WellknownFolders
 
 let rec List2 (repos : Repository list) =
