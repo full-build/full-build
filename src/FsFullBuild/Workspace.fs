@@ -26,10 +26,8 @@
 module Workspace
 
 open System.IO
-open Types
 open FileExtensions
 open WellknownFolders
-open Exec
 open Configuration
 open Vcs
 
