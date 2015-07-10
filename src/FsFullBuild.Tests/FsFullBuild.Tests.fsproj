@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="FileExtensionsTests.fs" />
     <Compile Include="ExecTests.fs" />
+    <Compile Include="AnthologyTests.fs" />
     <Compile Include="ConfigurationTests.fs" />
     <Compile Include="CommandLineParsingTests.fs" />
     <None Include="app.config" />
@@ -69,6 +70,9 @@
     </None>
     <None Include="packages.config" />
     <None Include="GlobalConfig.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="anthology.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
