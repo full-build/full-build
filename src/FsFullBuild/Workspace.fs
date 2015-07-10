@@ -41,3 +41,5 @@ let Init (path : string) =
     VcsCloneRepo wsDir GlobalConfig.Repository 
 
 
+let ConvertProject () =
+    failwith "not implemented"
