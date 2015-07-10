@@ -31,9 +31,11 @@ let main argv =
     match cmd with
     | Usage -> DisplayUsage ()
     | InitWorkspace {Name=path} -> Workspace.Init path
+    | CloneRepositories {Filters=filters} -> Repo.Clone filters
+    | ListRepositories -> Repo.List ()
+    | ConvertWorkspace -> FullBuild.Commands.Workspace.Workspace.ConvertProjects ()
     | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()
     | IndexWorkspace -> FullBuild.Commands.Workspace.Workspace.IndexWorkspace ()
-    | ConvertWorkspace -> FullBuild.Commands.Workspace.Workspace.ConvertProjects ()
     | OptimizeWorkspace -> FullBuild.Commands.Workspace.Workspace.Optimize ()
     | BookmarkWorkspace -> FullBuild.Commands.Workspace.Workspace.Bookmark ()
     | CheckoutWorkspace {Version=wsVersion} -> FullBuild.Commands.Workspace.Workspace.CheckoutBookmark (wsVersion)
@@ -41,8 +43,6 @@ let main argv =
                                             | Types.Git -> FullBuild.Config.VersionControlType.Git
                                             | Types.Hg -> FullBuild.Config.VersionControlType.Hg
                               FullBuild.Commands.Workspace.Workspace.AddRepo(repo.Name, vcsType, repo.Url)
-    | CloneRepositories {Filters=filters} -> Repo.Clone filters
-    | ListRepositories -> Repo.List ()
     | AddNuGet {Url=url} -> FullBuild.Commands.Packages.Packages.AddNuGet(url)
     | ListNuGets -> FullBuild.Commands.Packages.Packages.ListNuGets ()
     | ListPackages -> FullBuild.Commands.Binaries.Binaries.List ()
