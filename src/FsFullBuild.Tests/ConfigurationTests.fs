@@ -3,7 +3,6 @@
 open NUnit.Framework
 open FsUnit
 open Configuration
-open System
 open System.IO
 open Types
 
