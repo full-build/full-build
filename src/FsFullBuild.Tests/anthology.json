@@ -1,0 +1,52 @@
+{
+    "Applications": [ ],
+    "Binaries": [
+        {
+            "AssemblyName": "System",
+            "HintPath": null
+        },
+        {
+            "AssemblyName": "System.Configuration",
+            "HintPath": null
+        },
+    ],
+    "Bookmarks": [
+        {
+            "Name": "cassandra-sharp",
+            "Version": "b62e33a6ba39f987c91fdde11472f42b2a4acd94"
+        },
+        {
+            "Name": "cassandra-sharp-contrib",
+            "Version": "e0089100b3c5ca520e831c5443ad9dc8ab176052"
+        }
+    ],
+    "Packages": [
+        {
+            "Name": "log4net",
+            "Version": "2.0.3"
+        },
+        {
+            "Name": "moq",
+            "Version": "4.2.1502.0911"
+        },
+    ],
+    "Projects": [
+        {
+            "AssemblyName": "cqlplus",
+            "Extension": ".exe",
+            "ProjectGuid": "0a06398e-69be-487b-a011-4c0be6619b59",
+            "RelativeProjectFile": "cassandra-sharp/cqlplus/cqlplus-net45.csproj",
+            "FxTarget": "v4.5",
+            "ProjectReferences": [
+                "6f6eb447-9569-406a-a23b-c09b6dbdbe10",
+                "c1d252b7-d766-4c28-9c46-0696f896846c"
+            ],
+            "BinaryReferences": [
+                "System",
+                "System.Data",
+                "System.Xml"
+            ],
+            "PackageReferences": [ ]
+        }
+    ]
+}
