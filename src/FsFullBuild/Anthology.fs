@@ -1,11 +1,14 @@
 ﻿module Anthology
 
 open System
+open System.IO
+open WellknownFolders
+open FileExtensions
+open Newtonsoft.Json
 
 
-type OutputType =
-    | Exe
-    | Dll
+
+let ANTHOLOGY_FILENAME = "anthology.json"
 
 type Application =
     {
@@ -16,7 +19,7 @@ type Application =
 type Binary = 
     {
         AssemblyName : string
-        HintPath : string
+        HintPath : string option
     }
 
 type Bookmark =
@@ -33,9 +36,9 @@ type Package =
 
 type Project =
     {
-        ProjectGuid : Guid
         AssemblyName : string
-        OutputType : OutputType
+        Extension : string
+        ProjectGuid : Guid
         RelativeProjectFile : string
         FxTarget : string
         ProjectReferences : Guid list
@@ -52,10 +55,25 @@ type Anthology =
         Projects : Project list
     }
 
+let private GetAnthologyFileName () =
+    let wsDir = WorkspaceFolder ()
+    let fbDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
+    let anthoFn = fbDir |> GetFile ANTHOLOGY_FILENAME
+    anthoFn
+
+let LoadAnthologyFromFile (anthoFn : FileInfo) : Anthology =
+    let json = File.ReadAllText anthoFn.FullName
+    let antho = JsonConvert.DeserializeObject<Anthology> (json)
+    antho
+
+let SaveAnthologyToFile (anthoFn : FileInfo) (anthology : Anthology) =
+    let json = JsonConvert.SerializeObject(anthology, Formatting.Indented);
+    File.WriteAllText (anthoFn.FullName, json)
 
 let LoadAnthology : Anthology =
-    failwith "not implemented"
-
+    let anthoFn = GetAnthologyFileName ()
+    LoadAnthologyFromFile anthoFn
+    
 let SaveAnthology (anthology : Anthology) =
-    failwith "not implemented"
-
+    let anthoFn = GetAnthologyFileName ()
+    SaveAnthologyToFile anthoFn anthology
