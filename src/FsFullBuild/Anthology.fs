@@ -10,6 +10,11 @@ open Newtonsoft.Json
 
 let ANTHOLOGY_FILENAME = "anthology.json"
 
+[<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>] 
+type OutputType =
+    | Exe = 0
+    | Dll = 1
+
 type Application =
     {
         Name : string
@@ -37,7 +42,7 @@ type Package =
 type Project =
     {
         AssemblyName : string
-        Extension : string
+        OutputType : OutputType
         ProjectGuid : Guid
         RelativeProjectFile : string
         FxTarget : string

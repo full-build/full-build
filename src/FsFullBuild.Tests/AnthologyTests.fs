@@ -16,7 +16,7 @@ let CheckRoundtripAnthology () =
         Bookmarks = [ { Name = "cassandra-sharp"; Version = "b62e33a6ba39f987c91fdde11472f42b2a4acd94" }; { Name = "cassandra-sharp-contrib"; Version = "e0089100b3c5ca520e831c5443ad9dc8ab176052" } ]
         Packages = [ { Name = "log4net"; Version = "2.0.3"}; {Name="moq"; Version="4.2.1502.0911"}]
         Projects = [ { AssemblyName = "cqlplus"
-                       Extension = ".exe"
+                       OutputType = OutputType.Exe
                        ProjectGuid = Guid.Parse ("0a06398e-69be-487b-a011-4c0be6619b59")
                        RelativeProjectFile = "cassandra-sharp/cqlplus/cqlplus-net45.csproj"
                        FxTarget = "v4.5"
