@@ -67,9 +67,8 @@
     <Compile Include="FileExtensions.fs" />
     <Compile Include="WellknownFolders.fs" />
     <Compile Include="Exec.fs" />
-    <Compile Include="Types.fs" />
-    <Compile Include="Vcs.fs" />
     <Compile Include="Anthology.fs" />
+    <Compile Include="Vcs.fs" />
     <Compile Include="CommandLineToken.fs" />
     <Compile Include="CommandLineParsing.fs" />
     <Compile Include="Configuration.fs" />
