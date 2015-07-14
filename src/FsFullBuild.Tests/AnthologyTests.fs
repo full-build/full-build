@@ -18,11 +18,14 @@ let CheckRoundtripAnthology () =
         Projects = [ { AssemblyName = "cqlplus"
                        OutputType = OutputType.Exe
                        ProjectGuid = Guid.Parse ("0a06398e-69be-487b-a011-4c0be6619b59")
-                       RelativeProjectFile = "cassandra-sharp/cqlplus/cqlplus-net45.csproj"
+                       RelativeProjectFile = "cqlplus/cqlplus-net45.csproj"
                        FxTarget = "v4.5"
                        ProjectReferences = [ Guid.Parse ("6f6eb447-9569-406a-a23b-c09b6dbdbe10"); Guid.Parse ("c1d252b7-d766-4c28-9c46-0696f896846c") ]
                        BinaryReferences = [ "System" ; "System.Data"; "System.Xml"]
-                       PackageReferences = [ ] } ]
+                       PackageReferences = [ ]
+                       Repository = "cassandra-sharp" } ]
+        Repositories = [ { Vcs = VcsType.Git; Name = "cassandra-sharp"; Url = "https://github.com/pchalamet/cassandra-sharp" }
+                         { Vcs = VcsType.Git; Name = "cassandra-sharp-contrib"; Url = "https://github.com/pchalamet/cassandra-sharp-contrib" } ]
         }
 
     let file = new FileInfo (Path.GetRandomFileName())

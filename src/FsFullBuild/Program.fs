@@ -40,8 +40,8 @@ let main argv =
     | BookmarkWorkspace -> FullBuild.Commands.Workspace.Workspace.Bookmark ()
     | CheckoutWorkspace {Version=wsVersion} -> FullBuild.Commands.Workspace.Workspace.CheckoutBookmark (wsVersion)
     | AddRepository (repo) -> let vcsType = match repo.Vcs with
-                                            | Types.Git -> FullBuild.Config.VersionControlType.Git
-                                            | Types.Hg -> FullBuild.Config.VersionControlType.Hg
+                                            | Anthology.VcsType.Git -> FullBuild.Config.VersionControlType.Git
+                                            | Anthology.VcsType.Hg -> FullBuild.Config.VersionControlType.Hg
                               FullBuild.Commands.Workspace.Workspace.AddRepo(repo.Name, vcsType, repo.Url)
     | AddNuGet {Url=url} -> FullBuild.Commands.Packages.Packages.AddNuGet(url)
     | ListNuGets -> FullBuild.Commands.Packages.Packages.ListNuGets ()

@@ -2,7 +2,6 @@
 
 open NUnit.Framework
 open FsUnit
-open Types
 open CommandLineParsing
 
 [<Test>]

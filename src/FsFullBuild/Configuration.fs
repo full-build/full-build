@@ -28,8 +28,7 @@ module Configuration
 open System
 open System.IO
 open FileExtensions
-open WellknownFolders
-open Types
+open Anthology
 
 let private WORKSPACE_CONFIG_FILE = ".full-build"
 
@@ -70,29 +69,28 @@ let GlobalConfigurationFromFile file =
 
     { BinRepo = binRepo; Repository = repo; PackageGlobalCache = packageGlobalCache; NuGets = nugets }
 
-
-let DefaultWorkspaceIniFilename () =
-    let fbDir = WorkspaceConfigFolder ()
-    let wsConfigFile = fbDir |> GetFile "config"
-    wsConfigFile
-
-let RepositoryConfigurationFromSection (section : Mini.IniSection) =
-    let name = section.Name
-    let vcs = section.["vcs"].Value
-    let url = section.["url"].Value
-    let (ToRepository repo) = (vcs, url, name)
-    repo
-
-let WorkspaceConfigurationFromFile file =
-    let ini = IniDocFromFile file
-    let repositories = ini |> Seq.map (RepositoryConfigurationFromSection) |> Seq.toList
-    { Repositories = repositories }
-
 let GlobalConfig : GlobalConfiguration = 
     let filename = DefaultGlobalIniFilename ()
     GlobalConfigurationFromFile filename
 
-let WorkspaceConfig () : WorkspaceConfiguration =
-    let filename = DefaultWorkspaceIniFilename ()
-    WorkspaceConfigurationFromFile filename
+//let DefaultWorkspaceIniFilename () =
+//    let fbDir = WorkspaceConfigFolder ()
+//    let wsConfigFile = fbDir |> GetFile "config"
+//    wsConfigFile
+
+//let RepositoryConfigurationFromSection (section : Mini.IniSection) =
+//    let name = section.Name
+//    let vcs = section.["vcs"].Value
+//    let url = section.["url"].Value
+//    let (ToRepository repo) = (vcs, url, name)
+//    repo
+
+//let WorkspaceConfigurationFromFile file =
+//    let ini = IniDocFromFile file
+//    let repositories = ini |> Seq.map (RepositoryConfigurationFromSection) |> Seq.toList
+//    { Repositories = repositories }
+
+//let WorkspaceConfig () : WorkspaceConfiguration =
+//    let filename = DefaultWorkspaceIniFilename ()
+//    WorkspaceConfigurationFromFile filename
 
