@@ -26,10 +26,11 @@
 module Workspace
 
 open System.IO
-open FileExtensions
+open System.Collections.Generic
 open WellknownFolders
 open Configuration
 open Vcs
+open Anthology
 
 let Init (path : string) =
     let wsDir = new DirectoryInfo(path)
@@ -40,5 +41,10 @@ let Init (path : string) =
     VcsCloneRepo wsDir GlobalConfig.Repository 
 
 
+
 let ConvertProject () =
     failwith "not implemented"
+//    let wsDir = WorkspaceFolder ()
+//    let antho = LoadAnthology ()
+//    let knowProjects = antho.Projects |> Seq.map (x => x.Guid) |> new HashSet<Guid>
+//    ()

@@ -37,7 +37,7 @@ namespace FullBuild.Test.NuGet
     public class NuGetTests
     {
         [Test]
-        [Category("integration")]
+        [Category("integration"), Explicit]
         public void Find_available_package_from_multiple_last_repo()
         {
             var package = new Package("Castle.Core", "3.3.3");
@@ -50,7 +50,7 @@ namespace FullBuild.Test.NuGet
         }
 
         [Test]
-        [Category("integration")]
+        [Category("integration"), Explicit]
         public void Find_available_package()
         {
             var package = new Package("Siriona.Availpro.Common", "3.3.3");
@@ -64,7 +64,7 @@ namespace FullBuild.Test.NuGet
 
 
         [Test]
-        [Category("integration")]
+        [Category("integration"), Explicit]
         public void Check_package_download()
         {
             var package = new Package("Connectivity.Services.Model", "1.1.26");
@@ -78,7 +78,7 @@ namespace FullBuild.Test.NuGet
         }
 
         [Test]
-        [Category("integration")]
+        [Category("integration"), Explicit]
         public void Find_available_package_from_nugets_for_one_repo()
         {
             var package = new Package("Castle.Core", "3.3.3");
@@ -94,7 +94,7 @@ namespace FullBuild.Test.NuGet
         }
 
         [Test]
-        [Category("integration")]
+        [Category("integration"), Explicit]
         public void Find_available_package_with_dependencies()
         {
             var package = new Package("cassandra-sharp", "3.3.2");
@@ -111,7 +111,7 @@ namespace FullBuild.Test.NuGet
         }
 
         [Test]
-        [Category("integration")]
+        [Category("integration"), Explicit]
         public void Find_available_package_with_dependencies_portable()
         {
             var package = new Package("FSharp.Data", "2.1.1");
@@ -127,7 +127,7 @@ namespace FullBuild.Test.NuGet
         }        
 
         [Test]
-        [Category("integration")]
+        [Category("integration"), Explicit]
         public void Find_latest_version_of_package_accross_nugets()
         {
             var expected = new Package("Castle.Core", "3.3.3");
@@ -142,7 +142,7 @@ namespace FullBuild.Test.NuGet
         }
 
         [Test]
-        [Category("integration")]
+        [Category("integration"), Explicit]
         public void Find_not_available_package_from_multiple_repos()
         {
             var package = new Package("Castle.Core", "5.0.0");
@@ -154,7 +154,7 @@ namespace FullBuild.Test.NuGet
         }
 
         [Test]
-        [Category("integration")]
+        [Category("integration"), Explicit]
         public void Get_feed_version_from_repo()
         {
             var version = NuGetFactory.GetNuGetVersion("http://www.nuget.org/api/v2/");
