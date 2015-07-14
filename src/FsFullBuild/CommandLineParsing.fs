@@ -25,7 +25,7 @@
 
 module CommandLineParsing
 
-open Types
+open Anthology
 open CommandLineToken
 
 type InitWorkspace =
@@ -120,9 +120,6 @@ let ParseRepo (args : string list) =
                                             AddRepository (repo)
     | [Token(Token.List)] -> ListRepositories
     | _ -> Command.Usage
-
-
-
 
 let ParseCommandLine (args : string list) : Command =
     match args with

@@ -25,7 +25,7 @@
 
 module Repo
 
-open Types
+open Anthology
 open Configuration
 open System.Text.RegularExpressions
 open WellknownFolders
@@ -37,8 +37,8 @@ let rec List2 (repos : Repository list) =
     | [] -> ()
 
 let List () =
-    let wsConfig = WorkspaceConfig ()
-    List2 wsConfig.Repositories
+    let anthology = LoadAnthology ()
+    List2 anthology.Repositories
 
 let MatchRepo (repo : Repository seq) (filter : string) =
     let matchRegex = "^" + filter + "$"
@@ -47,7 +47,7 @@ let MatchRepo (repo : Repository seq) (filter : string) =
 
 let Clone (filters : string list) =
     let wsDir = WorkspaceFolder ()
-    let wsConfig = WorkspaceConfig ()
-    let res = filters |> Seq.map (MatchRepo wsConfig.Repositories) |> Seq.collect (fun x -> x) |> Seq.distinct
+    let antho = LoadAnthology ()
+    let res = filters |> Seq.map (MatchRepo antho.Repositories) |> Seq.collect (fun x -> x) |> Seq.distinct
     res |> Seq.iter (Vcs.VcsCloneRepo wsDir)
 

@@ -27,9 +27,9 @@ module Vcs
 
 open System
 open System.IO
-open Types
 open Exec
 open FileExtensions
+open Anthology
 
 
 let private GitCloneRepo (url : string) (target : DirectoryInfo) =
