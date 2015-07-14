@@ -31,6 +31,9 @@ open FileExtensions
 open WellknownFolders
 open Types
 
+let private WORKSPACE_CONFIG_FILE = ".full-build"
+
+
 type GlobalConfiguration = 
     { 
         BinRepo : string
@@ -69,8 +72,7 @@ let GlobalConfigurationFromFile file =
 
 
 let DefaultWorkspaceIniFilename () =
-    let wsDir = WorkspaceFolder ()
-    let fbDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
+    let fbDir = WorkspaceConfigFolder ()
     let wsConfigFile = fbDir |> GetFile "config"
     wsConfigFile
 
