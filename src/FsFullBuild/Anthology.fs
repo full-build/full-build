@@ -8,7 +8,7 @@ open Newtonsoft.Json
 
 
 
-let ANTHOLOGY_FILENAME = "anthology.json"
+let private ANTHOLOGY_FILENAME = "anthology.json"
 
 [<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>] 
 type OutputType =
@@ -61,8 +61,7 @@ type Anthology =
     }
 
 let private GetAnthologyFileName () =
-    let wsDir = WorkspaceFolder ()
-    let fbDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
+    let fbDir = WorkspaceConfigFolder ()
     let anthoFn = fbDir |> GetFile ANTHOLOGY_FILENAME
     anthoFn
 
