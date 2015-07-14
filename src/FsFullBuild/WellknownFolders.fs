@@ -31,9 +31,8 @@ open FileExtensions
 
 
 
-let WORKSPACE_CONFIG_FOLDER = ".full-build"
+let private WORKSPACE_CONFIG_FOLDER = ".full-build"
 
-let WORKSPACE_CONFIG_FILE = ".full-build"
 
 
 let rec private WorkspaceFolderSearch (dir : DirectoryInfo) =
@@ -45,7 +44,17 @@ let rec private WorkspaceFolderSearch (dir : DirectoryInfo) =
 let CurrentFolder () : DirectoryInfo =
     let currDir = new DirectoryInfo(Environment.CurrentDirectory)
     currDir
-
+        
 let WorkspaceFolder () : DirectoryInfo =
     let currDir = CurrentFolder ()
     WorkspaceFolderSearch currDir
+
+let WorkspaceConfigFolder() : DirectoryInfo =
+    let wsDir = WorkspaceFolder ()
+    let fbDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
+    fbDir
+
+let IsWorkspaceFolder (wsDir : DirectoryInfo) =
+    let subDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
+    subDir.Exists
+

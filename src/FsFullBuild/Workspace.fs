@@ -35,9 +35,8 @@ let Init (path : string) =
     let wsDir = new DirectoryInfo(path)
     wsDir.Create()
 
-    let subDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
-    if subDir.Exists then failwith "Workspace already exists"
-
+    if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
+    
     VcsCloneRepo wsDir GlobalConfig.Repository 
 
 
