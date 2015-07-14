@@ -34,11 +34,13 @@ open FileExtensions
 let private WORKSPACE_CONFIG_FOLDER = ".full-build"
 
 
+let IsWorkspaceFolder (wsDir : DirectoryInfo) =
+    let subDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
+    subDir.Exists
 
 let rec private WorkspaceFolderSearch (dir : DirectoryInfo) =
     if dir = null || not dir.Exists then failwith "Can't find workspace root directory. Check you are in a workspace."
-    let fbdir = dir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
-    if fbdir.Exists then dir
+    if IsWorkspaceFolder dir then dir
     else WorkspaceFolderSearch dir.Parent
 
 let CurrentFolder () : DirectoryInfo =
@@ -54,7 +56,4 @@ let WorkspaceConfigFolder() : DirectoryInfo =
     let fbDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
     fbDir
 
-let IsWorkspaceFolder (wsDir : DirectoryInfo) =
-    let subDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
-    subDir.Exists
 
