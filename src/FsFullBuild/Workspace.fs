@@ -25,8 +25,10 @@
 
 module Workspace
 
+open System
 open System.IO
 open System.Collections.Generic
+open FileExtensions
 open WellknownFolders
 open Configuration
 open Vcs
@@ -40,11 +42,27 @@ let Init (path : string) =
     
     VcsCloneRepo wsDir GlobalConfig.Repository 
 
-
+let private CollectProjects (wsDir : DirectoryInfo) (antho : Anthology) : FileInfo seq =
+    seq {
+        for repo in antho.Repositories do
+            let repoDir = wsDir |> GetSubDirectory repo.Name
+            if repoDir.Exists then 
+                yield! repoDir.EnumerateFiles ("*.csproj", SearchOption.AllDirectories)
+                yield! repoDir.EnumerateFiles ("*.vbproj", SearchOption.AllDirectories)
+                yield! repoDir.EnumerateFiles ("*.fsproj", SearchOption.AllDirectories)
+    }
 
 let ConvertProject () =
-    failwith "not implemented"
-//    let wsDir = WorkspaceFolder ()
-//    let antho = LoadAnthology ()
-//    let knowProjects = antho.Projects |> Seq.map (x => x.Guid) |> new HashSet<Guid>
-//    ()
+    let wsDir = WorkspaceFolder ()
+    let antho = LoadAnthology ()
+
+    let allGuids = antho.Projects |> Seq.map (fun x -> x.ProjectGuid)
+    let knownGuids = HashSet<Guid> allGuids
+
+    let projects = CollectProjects wsDir antho
+    ()
+    
+
+
+
+   // let knowProjects = antho.Projects |> Seq.map (x => x.Guid) |> new HashSet<Guid>
