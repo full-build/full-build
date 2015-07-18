@@ -76,21 +76,19 @@ type Repository =
         Name : string
         Url : string
     }
-
     
 type Project =
     {
+        Repository : string
+        RelativeProjectFile : string
+        ProjectGuid : Guid
         AssemblyName : string
         OutputType : OutputType
-        ProjectGuid : Guid
-        RelativeProjectFile : string
         FxTarget : string
-        ProjectReferences : Guid list
         BinaryReferences : string list
         PackageReferences : string list
-        Repository : string
+        ProjectReferences : Guid list
     }
-
 
 type Anthology =
     {

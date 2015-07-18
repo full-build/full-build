@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Samples>
+    <Sample>CSharpProjectSample1.xml</Sample>
+    <Sample>FSharpProjectSample1.xml</Sample>
+</Samples>
