@@ -35,3 +35,12 @@ let GetSubDirectory (subDir : string) (dir : DirectoryInfo) : DirectoryInfo =
 let GetFile (fileName : string) (dir : DirectoryInfo) : FileInfo =
     let fullFileName = Path.Combine(dir.FullName, fileName)
     new FileInfo(fullFileName)
+
+let rec private ComputeRelativePath2 (topDir : DirectoryInfo) (childDir : DirectoryInfo) (path : string) =
+    if topDir.FullName = childDir.FullName then path
+    else let newPath = Path.Combine (childDir.Name, path) 
+         ComputeRelativePath2 topDir childDir.Parent newPath
+
+let ComputeRelativePath (dir : DirectoryInfo) (file : FileInfo) : string =
+    let path = file.Name
+    ComputeRelativePath2 dir file.Directory path
