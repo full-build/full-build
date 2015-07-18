@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\LibGit2Sharp.0.21.0.176\build\net40\LibGit2Sharp.props" Condition="Exists('..\packages\LibGit2Sharp.0.21.0.176\build\net40\LibGit2Sharp.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3AF55CC8-9998-4039-BC31-54ECBFC91396}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FullBuild</RootNamespace>
+    <AssemblyName>FullBuild</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <NuGetPackageImportStamp>683a6765</NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>$(SolutionDir)\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Prefer32Bit>false</Prefer32Bit>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>$(SolutionDir)\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Prefer32Bit>false</Prefer32Bit>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LibGit2Sharp">
+      <HintPath>..\packages\LibGit2Sharp.0.21.0.176\lib\net40\LibGit2Sharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Mercurial.Net">
+      <HintPath>..\packages\Mercurial.Net.1.1.1.607\lib\net35-Client\Mercurial.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Mini, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mini.0.4.2.0\lib\net40\Mini.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.0.0\lib\net45\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="Semver, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\semver.1.1.2\lib\net45\Semver.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>..\packages\Microsoft.Bcl.Immutable.1.0.34\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Commands\AnthologyOptimizer.cs" />
+    <Compile Include="Commands\Binaries\Repository.cs" />
+    <Compile Include="Commands\Configuration\Repository.cs" />
+    <Compile Include="Commands\Exec\Repository.cs" />
+    <Compile Include="Commands\HintPathParser.cs" />
+    <Compile Include="Commands\Packages\Repository.cs" />
+    <Compile Include="Commands\Projects\Repository.cs" />
+    <Compile Include="Commands\Usage\Repository.cs" />
+    <Compile Include="Commands\Views\Repository.cs" />
+    <Compile Include="Commands\Workspace\Repository.cs" />
+    <Compile Include="Helpers\PlatformInfo.cs" />
+    <Compile Include="NatLangParser\FluentOptionMatcherBuilder.cs" />
+    <Compile Include="NatLangParser\OptionMatcher.cs" />
+    <Compile Include="NatLangParser\OptionMatcherBuilder.cs" />
+    <Compile Include="NatLangParser\OptionParser.cs" />
+    <Compile Include="NuGet\INuGet.cs" />
+    <Compile Include="NuGet\IPackageCache.cs" />
+    <Compile Include="NuGet\NuGet2.cs" />
+    <Compile Include="NuGet\NuGetFactory.cs" />
+    <Compile Include="NuGet\NuGetAll.cs" />
+    <Compile Include="NuGet\GlobalCache.cs" />
+    <Compile Include="Commands\Projects\Projects.cs" />
+    <Compile Include="Commands\Configuration\Configuration.cs" />
+    <Compile Include="Commands\Exec\Exec.cs" />
+    <Compile Include="NuGet\NuGet1.cs" />
+    <Compile Include="Commands\Packages\Packages+NuGet.cs" />
+    <Compile Include="Commands\Packages\Packages+Check.cs" />
+    <Compile Include="Commands\ProcessingException.cs" />
+    <Compile Include="Commands\Workspace\Workspace+Convert.cs" />
+    <Compile Include="Commands\FrameworkVersion.cs" />
+    <Compile Include="Commands\Usage\Usage.cs" />
+    <Compile Include="Commands\Views\Views+Management.cs" />
+    <Compile Include="Commands\Views\Views+Generate.cs" />
+    <Compile Include="Commands\Packages\Packages+Install.cs" />
+    <Compile Include="Commands\Views\Views+Info.cs" />
+    <Compile Include="Commands\Views\Views.cs" />
+    <Compile Include="Commands\Workspace\Workspace+Bookmark.cs" />
+    <Compile Include="Commands\Workspace\Workspace+Optimize.cs" />
+    <Compile Include="Commands\Binaries\Binaries+Info.cs" />
+    <Compile Include="Commands\Workspace\Workspace+Repo.cs" />
+    <Compile Include="Commands\Workspace\Workspace+Init.cs" />
+    <Compile Include="Commands\Workspace\Workspace.cs" />
+    <Compile Include="Config\FullBuildConfig.cs" />
+    <Compile Include="Config\ConfigManager.cs" />
+    <Compile Include="Config\ActionType.cs" />
+    <Compile Include="Config\ConfigParameter.cs" />
+    <Compile Include="Config\NuGetConfig.cs" />
+    <Compile Include="Config\RepoConfig.cs" />
+    <Compile Include="Config\VersionControlType.cs" />
+    <Compile Include="Helpers\DirectoryInfoExtensions.cs" />
+    <Compile Include="Commands\Workspace\Workspace+Index.cs" />
+    <Compile Include="Helpers\EnumerableExtensions.cs" />
+    <Compile Include="Helpers\Reliability.cs" />
+    <Compile Include="Helpers\SemVersionExtensions.cs" />
+    <Compile Include="Model\Anthology.cs" />
+    <Compile Include="Model\Application.cs" />
+    <Compile Include="Model\Binary.cs" />
+    <Compile Include="NuGet\NuSpec.cs" />
+    <Compile Include="Model\Bookmark.cs" />
+    <Compile Include="Model\Package.cs" />
+    <Compile Include="Model\Project.cs" />
+    <Compile Include="Helpers\ProjectExtensions.cs" />
+    <Compile Include="NatLangParser\Context.cs" />
+    <Compile Include="NatLangParser\FluentMatcherBuilder.cs" />
+    <Compile Include="NatLangParser\IMatchOperation.cs" />
+    <Compile Include="NatLangParser\MatcherBuilder.cs" />
+    <Compile Include="NatLangParser\Matcher.cs" />
+    <Compile Include="NatLangParser\MatchOperation.cs" />
+    <Compile Include="NatLangParser\MatchOperationAggregate.cs" />
+    <Compile Include="NatLangParser\MatchOperationText.cs" />
+    <Compile Include="NatLangParser\Parameter.cs" />
+    <Compile Include="NuGet\NuPkg.cs" />
+    <Compile Include="NatLangParser\Parser.cs" />
+    <Compile Include="NatLangParser\ParserBuilder.cs" />
+    <Compile Include="NuGet\PackageId.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Helpers\ServiceActivator.cs" />
+    <Compile Include="SourceControl\Factory.cs" />
+    <Compile Include="SourceControl\Git.cs" />
+    <Compile Include="SourceControl\Hg.cs" />
+    <Compile Include="SourceControl\ISourceControl.cs" />
+    <Compile Include="Helpers\StringExtensions.cs" />
+    <Compile Include="Helpers\WellKnownFolders.cs" />
+    <Compile Include="Helpers\XmlHelpers.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <!--<ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>-->
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+    <Error Condition="!Exists('..\packages\LibGit2Sharp.0.21.0.176\build\net40\LibGit2Sharp.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\LibGit2Sharp.0.21.0.176\build\net40\LibGit2Sharp.props'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
