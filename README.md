@@ -1,6 +1,7 @@
 full-build: workspace management for .NET enterprise projects
 =============================================================
-[![build status](https://ci.appveyor.com/api/projects/status/github/pchalamet/full-build?branch=master)](https://ci.appveyor.com/project/pchalamet/full-build/branch/master)
+master branch [![build status](https://ci.appveyor.com/api/projects/status/github/pchalamet/full-build?branch=master)](https://ci.appveyor.com/project/pchalamet/full-build/branch/master)
+fsharp branch [![build status](https://ci.appveyor.com/api/projects/status/github/pchalamet/full-build?branch=fsharp)](https://ci.appveyor.com/project/pchalamet/full-build/branch/fsharp)
 
 Check out [full-build.io](http://full-build.io)
 
