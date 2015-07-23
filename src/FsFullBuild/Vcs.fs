@@ -43,6 +43,7 @@ let private HgCloneRepo (url : string) (target : DirectoryInfo) =
 let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) =
     let checkoutDir = repo.Name |> GetSubDirectory wsDir
     let cloneRepo = match repo.Vcs with
-                    | Git -> GitCloneRepo
-                    | Hg -> HgCloneRepo
+                    | VcsType.Git -> GitCloneRepo
+                    | VcsType.Hg -> HgCloneRepo
+                    | x -> failwith (sprintf "Unknown VcsType %A" x)
     cloneRepo repo.Url checkoutDir

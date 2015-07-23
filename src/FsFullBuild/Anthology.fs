@@ -46,6 +46,17 @@ type Application =
         Projects : Guid list
     }
 
+
+
+type GacAssembly = {
+    Name : string
+}
+
+type HintPathAssembly = {
+    Name : string
+    HintPath : string
+}
+
 type Binary = 
     {
         AssemblyName : string
@@ -95,7 +106,6 @@ type Anthology =
         Applications : Application list
         Binaries : Binary list
         Bookmarks : Bookmark list
-        Packages : Package list
         Repositories : Repository list
         Projects : Project list
     }

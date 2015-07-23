@@ -7,10 +7,16 @@ open NUnit.Framework
 open FsUnit
 
 [<Test>]
-let CheckBasicParsing () =
+let CheckBasicParsingCSharp () =
     let file = new FileInfo ("./CSharpProjectSample1.xml")
     let project = ProjectParsing.ParseProject file.Directory file
     project.ProjectGuid |> should equal (ProjectParsing.ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396")
+
+[<Test>]
+let CheckBasicParsingFSharp () =
+    let file = new FileInfo ("./FSharpProjectSample1.xml")
+    let project = ProjectParsing.ParseProject file.Directory file
+    project.ProjectGuid |> should equal (ProjectParsing.ParseGuid "5fde3939-c144-4287-bc57-a96ec2d1a9da")
 
 [<Test>]
 let CheckParseVirginProject () =
