@@ -22,7 +22,6 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 module Workspace
 
 open System
@@ -34,35 +33,36 @@ open Configuration
 open Vcs
 open Anthology
 
-let Init (path : string) =
+let Init(path : string) = 
     let wsDir = new DirectoryInfo(path)
     wsDir.Create()
-
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
-    
-    VcsCloneRepo wsDir GlobalConfig.Repository 
+    VcsCloneRepo wsDir GlobalConfig.Repository
 
-let private CollectProjects (wsDir : DirectoryInfo) (antho : Anthology) : FileInfo seq =
-    seq {
-        for repo in antho.Repositories do
-            let repoDir = wsDir |> GetSubDirectory repo.Name
-            if repoDir.Exists then 
-                yield! repoDir.EnumerateFiles ("*.csproj", SearchOption.AllDirectories)
-                yield! repoDir.EnumerateFiles ("*.vbproj", SearchOption.AllDirectories)
-                yield! repoDir.EnumerateFiles ("*.fsproj", SearchOption.AllDirectories)
-    }
+let private FindKnownProjects (repoDir : DirectoryInfo) =
+    ["*.csproj"; "*.vbproj"; "*.fsproj"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
+                                         |> Seq.concat
 
-let ConvertProject () =
-    let wsDir = WorkspaceFolder ()
-    let antho = LoadAnthology ()
+let private ParseRepositoryProjects (parser) (repoDir : DirectoryInfo) =
+    repoDir |> FindKnownProjects 
+            |> Seq.map (parser repoDir)
 
-    let allGuids = antho.Projects |> Seq.map (fun x -> x.ProjectGuid)
-    let knownGuids = HashSet<Guid> allGuids
+let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : string seq) : Project seq = 
+    repos |> Seq.map (GetSubDirectory wsDir) 
+          |> Seq.filter (fun x -> x.Exists) 
+          |> Seq.map (ParseRepositoryProjects parser) 
+          |> Seq.concat
 
-    let projects = CollectProjects wsDir antho
+let ConvertProject() = 
+    let wsDir = WorkspaceFolder()
+    let antho = LoadAnthology()
+    let repos = antho.Repositories |> Seq.map (fun x -> x.Name)
+    let projects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir repos
+
+    // get all known projects and ensure tp
+    let knownGuids = antho.Projects 
+                     |> Seq.map (fun x -> x.ProjectGuid) 
+                     |> HashSet<Guid>
     ()
-    
+// let knowProjects = antho.Projects |> Seq.map (x => x.Guid) |> new HashSet<Guid>
 
-
-
-   // let knowProjects = antho.Projects |> Seq.map (x => x.Guid) |> new HashSet<Guid>
