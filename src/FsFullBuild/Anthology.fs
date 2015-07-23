@@ -102,7 +102,7 @@ type Anthology =
 
 let private GetAnthologyFileName () =
     let fbDir = WorkspaceConfigFolder ()
-    let anthoFn = fbDir |> GetFile ANTHOLOGY_FILENAME
+    let anthoFn = ANTHOLOGY_FILENAME |> GetFile fbDir
     anthoFn
 
 let LoadAnthologyFromFile (anthoFn : FileInfo) : Anthology =
