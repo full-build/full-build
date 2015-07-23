@@ -42,6 +42,7 @@ let main argv =
     | AddRepository (repo) -> let vcsType = match repo.Vcs with
                                             | Anthology.VcsType.Git -> FullBuild.Config.VersionControlType.Git
                                             | Anthology.VcsType.Hg -> FullBuild.Config.VersionControlType.Hg
+                                            | x -> failwith (sprintf "Unknown VcsType %A" x)
                               FullBuild.Commands.Workspace.Workspace.AddRepo(repo.Name, vcsType, repo.Url)
     | AddNuGet {Url=url} -> FullBuild.Commands.Packages.Packages.AddNuGet(url)
     | ListNuGets -> FullBuild.Commands.Packages.Packages.ListNuGets ()
