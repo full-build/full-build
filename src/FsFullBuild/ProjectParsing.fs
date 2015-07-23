@@ -6,6 +6,7 @@ open FSharp.Data
 open System.Linq
 open System.Xml.Linq
 open Anthology
+open System.Reflection
 
 
 let NsMsBuild = XNamespace.Get ("http://schemas.microsoft.com/developer/msbuild/2003")
@@ -41,6 +42,18 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
                  |> Seq.map ParseGuid
     prjRefs |> Seq.append fbRefs |> Seq.distinct |> Seq.toList
 
+let ParseBinary (binRef : XElement) : Binary =
+    let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
+    let incFileName = inc.Split([|',' |], StringSplitOptions.RemoveEmptyEntries).[0]
+    let assName = AssemblyName (incFileName)
+    let hintPath = !> binRef.Descendants(NsMsBuild + "HintPath").SingleOrDefault() : string
+    let hintPath2 = if String.IsNullOrWhiteSpace(hintPath) then Some hintPath
+                    else None
+    { AssemblyName = incFileName; HintPath = hintPath2 }
+
+let GetBinaryReferences (xdoc : XDocument) =
+    xdoc.Descendants(NsMsBuild + "Reference") |> Seq.map ParseBinary
+
 let ParseProject (repoDir : DirectoryInfo) (file : FileInfo) =
     let repoName = repoDir.Name
     let relativeProjectFile = FileExtensions.ComputeRelativePath repoDir file
@@ -54,10 +67,14 @@ let ParseProject (repoDir : DirectoryInfo) (file : FileInfo) =
                     | "Library" -> OutputType.Dll
                     | _ -> OutputType.Exe
 
+    // FIXME
     let fxTarget = "v4.5"
 
     let prjRefs = GetProjectReferences file.Directory xdoc
 
+    let binRefs = GetBinaryReferences xdoc
+    let prjBinRefs = binRefs |> Seq.map (fun x -> x.AssemblyName) |> Seq.toList
+
     { Repository = repoName; RelativeProjectFile = relativeProjectFile;
       ProjectGuid = guid; AssemblyName = assemblyName; OutputType = extension; FxTarget = fxTarget; 
-      BinaryReferences = []; PackageReferences = []; ProjectReferences = prjRefs }
+      BinaryReferences = prjBinRefs; PackageReferences = []; ProjectReferences = prjRefs }
