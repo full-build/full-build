@@ -26,7 +26,7 @@ let ExtractGuid (xdoc : XDocument) =
     ParseGuid sguid
 
 let GetProjectGuid (dir : DirectoryInfo) (relFile : string) : Guid =
-    let file = FileExtensions.GetFile relFile dir
+    let file = relFile |> FileExtensions.GetFile dir
     let xdoc = XDocument.Load (file.FullName)
     ExtractGuid xdoc
 

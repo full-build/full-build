@@ -35,7 +35,7 @@ let private WORKSPACE_CONFIG_FOLDER = ".full-build"
 
 
 let IsWorkspaceFolder (wsDir : DirectoryInfo) =
-    let subDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
+    let subDir = WORKSPACE_CONFIG_FOLDER |> GetSubDirectory wsDir
     subDir.Exists
 
 let rec private WorkspaceFolderSearch (dir : DirectoryInfo) =
@@ -53,7 +53,7 @@ let WorkspaceFolder () : DirectoryInfo =
 
 let WorkspaceConfigFolder() : DirectoryInfo =
     let wsDir = WorkspaceFolder ()
-    let fbDir = wsDir |> GetSubDirectory WORKSPACE_CONFIG_FOLDER
+    let fbDir = WORKSPACE_CONFIG_FOLDER |> GetSubDirectory wsDir
     fbDir
 
 
