@@ -87,6 +87,7 @@ type Anthology =
     { Applications : Application list
       Repositories : Repository list
       Bookmarks : Bookmark list
+      Packages : Package list
       Binaries : Binary list
       Projects : Project list }
 

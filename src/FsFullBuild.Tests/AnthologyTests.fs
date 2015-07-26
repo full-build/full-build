@@ -14,6 +14,13 @@ let CheckRoundtripAnthology () =
         Repositories = [ { Vcs = VcsType.Git; Name = "cassandra-sharp"; Url = "https://github.com/pchalamet/cassandra-sharp" }
                          { Vcs = VcsType.Git; Name = "cassandra-sharp-contrib"; Url = "https://github.com/pchalamet/cassandra-sharp-contrib" } ]
         Binaries = [ { AssemblyName = "System"; HintPath = None }; { AssemblyName = "System.Configuration"; HintPath = None } ]
+        Packages = [ { Id="FSharp.Data"; Version="2.2.5"; TargetFramework="net45" }
+                     { Id="FsUnit"; Version="1.3.0.1"; TargetFramework="net45" }
+                     { Id="Mini"; Version="0.4.2.0"; TargetFramework="net45" }
+                     { Id="Newtonsoft.Json"; Version="7.0.1"; TargetFramework="net45" }
+                     { Id="NLog"; Version="4.0.1"; TargetFramework="net45" }
+                     { Id="NUnit"; Version="2.6.3"; TargetFramework="net45" }
+                     { Id="xunit"; Version="1.9.1"; TargetFramework="net45" } ]
         Projects = [ { AssemblyName = "cqlplus"
                        OutputType = OutputType.Exe
                        ProjectGuid = Guid.Parse ("0a06398e-69be-487b-a011-4c0be6619b59")

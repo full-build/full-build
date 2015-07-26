@@ -41,7 +41,8 @@ type BinaryRef =
 
 type PackageRef = 
     { Target : string }
-    static member From(name : string) : PackageRef = { Target = name.ToUpperInvariant() }
+    static member From(id : string) : PackageRef = { Target = id.ToUpperInvariant() }
+    static member From(pkg : Package) : PackageRef = PackageRef.From pkg.Id
 
 type ProjectRef = 
     { Target : Guid }
@@ -67,7 +68,7 @@ let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : str
           |> Seq.map (ParseRepositoryProjects parser) 
           |> Seq.concat
 
-let ConvertProject() = 
+let ConvertProject () = 
     let wsDir = WorkspaceFolder()
     let antho = LoadAnthology()
     let repos = antho.Repositories |> Seq.map (fun x -> x.Name)
@@ -75,9 +76,11 @@ let ConvertProject() =
 
     // merge binaries
     let foundBinaries = projects |> Seq.map (fun x -> x.Binaries) |> Seq.concat
-    let newBinaries = foundBinaries |> Seq.append antho.Binaries |> Seq.distinctBy (fun x -> BinaryRef.From x.AssemblyName)
+    let newBinaries = foundBinaries |> Seq.append antho.Binaries |> Seq.distinctBy BinaryRef.From
 
-    
+    // merge packages
+    let foundPackages = projects |> Seq.map (fun x -> x.Packages) |> Seq.concat
+    let newPackages = foundPackages |> Seq.append antho.Packages |> Seq.distinctBy PackageRef.From
 
 
 
