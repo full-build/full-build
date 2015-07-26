@@ -57,8 +57,9 @@ type Bookmark =
       Version : string }
 
 type Package = 
-    { Name : string
-      Version : string }
+    { Id : string
+      Version : string 
+      TargetFramework : string }
 
 [<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
 type VcsType = 
@@ -70,14 +71,6 @@ type Repository =
       Name : string
       Url : string }
 
-type BinaryRef = 
-    { Target : string }
-    static member From(assName : string) = { Target = assName.ToUpperInvariant() }
-    static member From(bin : Binary) = BinaryRef.From bin.AssemblyName
-
-type PackageRef = 
-    { Target : string }
-    static member From(name : string) : PackageRef = { Target = name.ToUpperInvariant() }
 
 type Project = 
     { Repository : string
@@ -86,13 +79,9 @@ type Project =
       AssemblyName : string
       OutputType : OutputType
       FxTarget : string
-      BinaryReferences : BinaryRef list
-      PackageReferences : PackageRef list
+      BinaryReferences : string list
+      PackageReferences : string list
       ProjectReferences : Guid list }
-
-type ProjectRef = 
-    { Target : Guid }
-    static member From(prj : Project) : ProjectRef = { Target = prj.ProjectGuid }
 
 type Anthology = 
     { Applications : Application list
@@ -122,11 +111,10 @@ let SaveAnthology(anthology : Anthology) =
     SaveAnthologyToFile anthoFn anthology
 
 let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) = 
-    let vcs = 
-        match vcsType with
-        | "git" -> VcsType.Git
-        | "hg" -> VcsType.Hg
-        | _ -> failwith (sprintf "Unknown vcs type %A" vcsType)
+    let vcs = match vcsType with
+              | "git" -> VcsType.Git
+              | "hg" -> VcsType.Hg
+              | _ -> failwith (sprintf "Unknown vcs type %A" vcsType)
     { Vcs = vcs
       Name = vcsName
       Url = vcsUrl }

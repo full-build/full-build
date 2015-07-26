@@ -8,6 +8,7 @@ open Anthology
 
 type ProjectDescriptor = 
     { Binaries : Binary list
+      Packages : Package list
       Project : Project }
 
 let NsMsBuild = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003")
@@ -57,14 +58,28 @@ let ParseBinary(binRef : XElement) : Binary =
       HintPath = hintPath2 }
 
 let GetBinaries(xdoc : XDocument) = 
-    xdoc.Descendants(NsMsBuild + "Reference")
-    |> Seq.map ParseBinary
-    |> Seq.toList
+    xdoc.Descendants(NsMsBuild + "Reference") |> Seq.map ParseBinary
+                                              |> Seq.toList
 
-let ParseProject (repoDir : DirectoryInfo) (file : FileInfo) : ProjectDescriptor = 
+let ParsePackage (pkgRef : XElement) : Package =
+    let pkgId = !> pkgRef.Attribute(XNamespace.None + "id") : string
+    let pkgVer = !> pkgRef.Attribute(XNamespace.None + "version") : string
+    let pkgFx = !> pkgRef.Attribute(XNamespace.None + "targetFramework") : string
+    { Id = pkgId
+      Version = pkgVer
+      TargetFramework = pkgFx }
+
+let GetPackages (xdocLoader : FileInfo -> XDocument) (prjDir : DirectoryInfo) =
+    let pkgFile = "packages.config" |> FileExtensions.GetFile prjDir
+    let xdoc = xdocLoader pkgFile
+
+    xdoc.Descendants(XNamespace.None + "package") |> Seq.map ParsePackage 
+                                                  |> Seq.toList
+
+let ParseProjectContent (xdocLoader : FileInfo -> XDocument) (repoDir : DirectoryInfo) (file : FileInfo) =
     let repoName = repoDir.Name
     let relativeProjectFile = FileExtensions.ComputeRelativePath repoDir file
-    let xdoc = XDocument.Load file.FullName
+    let xdoc = xdocLoader file
     let xguid = !> xdoc.Descendants(NsMsBuild + "ProjectGuid").Single() : string
     let guid = ParseGuid xguid
     let assemblyName = !> xdoc.Descendants(NsMsBuild + "AssemblyName").Single() : string
@@ -75,9 +90,15 @@ let ParseProject (repoDir : DirectoryInfo) (file : FileInfo) : ProjectDescriptor
     
     let fxTarget = "v4.5"
     let prjRefs = GetProjectReferences file.Directory xdoc
+    
     let binaries = GetBinaries xdoc
-    let binRefs = binaries |> List.map BinaryRef.From
+    let binRefs = binaries |> List.map (fun x -> x.AssemblyName)
+
+    let packages = GetPackages xdocLoader file.Directory
+    let pkgRefs = packages |> List.map (fun x -> x.Id)
+
     { Binaries = binaries
+      Packages = packages
       Project = { Repository = repoName
                   RelativeProjectFile = relativeProjectFile
                   ProjectGuid = guid
@@ -85,5 +106,9 @@ let ParseProject (repoDir : DirectoryInfo) (file : FileInfo) : ProjectDescriptor
                   OutputType = extension
                   FxTarget = fxTarget
                   BinaryReferences = binRefs
-                  PackageReferences = []
+                  PackageReferences = pkgRefs
                   ProjectReferences = prjRefs } }
+
+
+let ParseProject (repoDir : DirectoryInfo) (file : FileInfo) : ProjectDescriptor = 
+    ParseProjectContent (fun x -> XDocument.Load (x.FullName)) repoDir file

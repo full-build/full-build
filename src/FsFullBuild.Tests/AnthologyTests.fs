@@ -20,7 +20,7 @@ let CheckRoundtripAnthology () =
                        RelativeProjectFile = "cqlplus/cqlplus-net45.csproj"
                        FxTarget = "v4.5"
                        ProjectReferences = [ Guid.Parse ("6f6eb447-9569-406a-a23b-c09b6dbdbe10"); Guid.Parse ("c1d252b7-d766-4c28-9c46-0696f896846c") ]
-                       BinaryReferences = [ BinaryRef.From "System" ; BinaryRef.From "System.Data"; BinaryRef.From "System.Xml"]
+                       BinaryReferences = [ "System" ; "System.Data"; "System.Xml"]
                        PackageReferences = [ ]
                        Repository = "cassandra-sharp" } ]
         }
