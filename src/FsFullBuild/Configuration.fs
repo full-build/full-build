@@ -22,7 +22,6 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 module Configuration
 
 open System
@@ -32,30 +31,24 @@ open Anthology
 
 let private WORKSPACE_CONFIG_FILE = ".full-build"
 
-
 type GlobalConfiguration = 
-    { 
-        BinRepo : string
-        Repository : Repository
-        PackageGlobalCache : string
-        NuGets : string list
-    }
+    { BinRepo : string
+      Repository : Repository
+      PackageGlobalCache : string
+      NuGets : string list }
 
-type WorkspaceConfiguration =
-    {
-        Repositories : Repository list
-    }
+type WorkspaceConfiguration = 
+    { Repositories : Repository list }
 
-let IniDocFromFile (configFile : FileInfo) =
-    let ini = new Mini.IniDocument(configFile.FullName);
-    ini
-    
-let DefaultGlobalIniFilename () = 
-    let userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-    let configFile = WORKSPACE_CONFIG_FILE |> GetFile userProfileDir 
+let IniDocFromFile(configFile : FileInfo) = 
+    new Mini.IniDocument(configFile.FullName)
+
+let DefaultGlobalIniFilename() = 
+    let userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
+    let configFile = WORKSPACE_CONFIG_FILE |> GetFile userProfileDir
     configFile
 
-let GlobalConfigurationFromFile file =
+let GlobalConfigurationFromFile file = 
     let ini = IniDocFromFile file
     let fbSection = ini.["FullBuild"]
     let binRepo = fbSection.["BinRepo"].Value
@@ -63,12 +56,16 @@ let GlobalConfigurationFromFile file =
     let repoUrl = fbSection.["RepoUrl"].Value
     let packageGlobalCache = fbSection.["PackageGlobalCache"].Value
     let (ToRepository repo) = (repoType, repoUrl, ".full-build")
-
     let ngSection = ini.["NuGet"]
-    let nugets = ngSection |> Seq.map (fun x -> x.Value) |> Seq.toList
-
-    { BinRepo = binRepo; Repository = repo; PackageGlobalCache = packageGlobalCache; NuGets = nugets }
+    
+    let nugets = ngSection |> Seq.map (fun x -> x.Value)
+                           |> Seq.toList
+    { BinRepo = binRepo
+      Repository = repo
+      PackageGlobalCache = packageGlobalCache
+      NuGets = nugets }
 
 let GlobalConfig : GlobalConfiguration = 
-    let filename = DefaultGlobalIniFilename ()
+    let filename = DefaultGlobalIniFilename()
     GlobalConfigurationFromFile filename
+

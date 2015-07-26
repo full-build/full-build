@@ -22,7 +22,6 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 module Vcs
 
 open System
@@ -31,19 +30,21 @@ open Exec
 open FileExtensions
 open Anthology
 
-
-let private GitCloneRepo (url : string) (target : DirectoryInfo) =
+let private GitCloneRepo (url : string) (target : DirectoryInfo) = 
     let args = sprintf "clone %A %A" url target.FullName
     Exec "git" args Environment.CurrentDirectory
 
-let private HgCloneRepo (url : string) (target : DirectoryInfo) =
+let private HgCloneRepo (url : string) (target : DirectoryInfo) = 
     let args = sprintf "clone %A %A" url target.FullName
     Exec "hg" args Environment.CurrentDirectory
 
-let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) =
+let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) = 
     let checkoutDir = repo.Name |> GetSubDirectory wsDir
-    let cloneRepo = match repo.Vcs with
-                    | VcsType.Git -> GitCloneRepo
-                    | VcsType.Hg -> HgCloneRepo
-                    | x -> failwith (sprintf "Unknown VcsType %A" x)
+    
+    let cloneRepo = 
+        match repo.Vcs with
+        | VcsType.Git -> GitCloneRepo
+        | VcsType.Hg -> HgCloneRepo
+        | x -> failwith (sprintf "Unknown VcsType %A" x)
     cloneRepo repo.Url checkoutDir
+

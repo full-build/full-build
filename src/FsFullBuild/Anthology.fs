@@ -22,7 +22,6 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 module Anthology
 
 open System
@@ -31,112 +30,103 @@ open WellknownFolders
 open FileExtensions
 open Newtonsoft.Json
 
-
-
 let private ANTHOLOGY_FILENAME = "anthology.json"
 
-[<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>] 
-type OutputType =
+[<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
+type OutputType = 
     | Exe = 0
     | Dll = 1
 
-type Application =
-    {
-        Name : string
-        Projects : Guid list
-    }
+type Application = 
+    { Name : string
+      Projects : Guid list }
 
+type GacAssembly = 
+    { Name : string }
 
-
-type GacAssembly = {
-    Name : string
-}
-
-type HintPathAssembly = {
-    Name : string
-    HintPath : string
-}
+type HintPathAssembly = 
+    { Name : string
+      HintPath : string }
 
 type Binary = 
-    {
-        AssemblyName : string
-        HintPath : string option
-    }
+    { AssemblyName : string
+      HintPath : string option }
 
-type Bookmark =
-    {
-        Name : string
-        Version : string
-    }
+type Bookmark = 
+    { Name : string
+      Version : string }
 
-type Package =
-    {
-        Name : string
-        Version : string
-    }
+type Package = 
+    { Name : string
+      Version : string }
 
-
-[<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>] 
+[<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
 type VcsType = 
     | Git = 0
     | Hg = 1
 
 type Repository = 
-    {
-        Vcs : VcsType
-        Name : string
-        Url : string
-    }
-    
-type Project =
-    {
-        Repository : string
-        RelativeProjectFile : string
-        ProjectGuid : Guid
-        AssemblyName : string
-        OutputType : OutputType
-        FxTarget : string
-        BinaryReferences : string list
-        PackageReferences : string list
-        ProjectReferences : Guid list
-    }
+    { Vcs : VcsType
+      Name : string
+      Url : string }
 
-type Anthology =
-    {
-        Applications : Application list
-        Binaries : Binary list
-        Bookmarks : Bookmark list
-        Repositories : Repository list
-        Projects : Project list
-    }
+type BinaryRef = 
+    { Target : string }
+    static member From(assName : string) = { Target = assName.ToUpperInvariant() }
+    static member From(bin : Binary) = BinaryRef.From bin.AssemblyName
 
-let private GetAnthologyFileName () =
-    let fbDir = WorkspaceConfigFolder ()
-    let anthoFn = ANTHOLOGY_FILENAME |> GetFile fbDir
-    anthoFn
+type PackageRef = 
+    { Target : string }
+    static member From(name : string) : PackageRef = { Target = name.ToUpperInvariant() }
 
-let LoadAnthologyFromFile (anthoFn : FileInfo) : Anthology =
+type Project = 
+    { Repository : string
+      RelativeProjectFile : string
+      ProjectGuid : Guid
+      AssemblyName : string
+      OutputType : OutputType
+      FxTarget : string
+      BinaryReferences : BinaryRef list
+      PackageReferences : PackageRef list
+      ProjectReferences : Guid list }
+
+type ProjectRef = 
+    { Target : Guid }
+    static member From(prj : Project) : ProjectRef = { Target = prj.ProjectGuid }
+
+type Anthology = 
+    { Applications : Application list
+      Repositories : Repository list
+      Bookmarks : Bookmark list
+      Binaries : Binary list
+      Projects : Project list }
+
+let private GetAnthologyFileName() = 
+    let fbDir = WorkspaceConfigFolder()
+    ANTHOLOGY_FILENAME |> GetFile fbDir
+
+let LoadAnthologyFromFile(anthoFn : FileInfo) : Anthology = 
     let json = File.ReadAllText anthoFn.FullName
-    let antho = JsonConvert.DeserializeObject<Anthology> (json)
-    antho
+    JsonConvert.DeserializeObject<Anthology>(json)
 
-let SaveAnthologyToFile (anthoFn : FileInfo) (anthology : Anthology) =
-    let json = JsonConvert.SerializeObject(anthology, Formatting.Indented);
-    File.WriteAllText (anthoFn.FullName, json)
+let SaveAnthologyToFile (anthoFn : FileInfo) (anthology : Anthology) = 
+    let json = JsonConvert.SerializeObject(anthology, Formatting.Indented)
+    File.WriteAllText(anthoFn.FullName, json)
 
-let LoadAnthology () : Anthology =
-    let anthoFn = GetAnthologyFileName ()
+let LoadAnthology() : Anthology = 
+    let anthoFn = GetAnthologyFileName()
     LoadAnthologyFromFile anthoFn
-    
-let SaveAnthology (anthology : Anthology) =
-    let anthoFn = GetAnthologyFileName ()
+
+let SaveAnthology(anthology : Anthology) = 
+    let anthoFn = GetAnthologyFileName()
     SaveAnthologyToFile anthoFn anthology
 
-
-    
 let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) = 
-    let vcs = match vcsType with
-              | "git" -> VcsType.Git
-              | "hg" -> VcsType.Hg
-              | _ -> failwith (sprintf "Unknown vcs type %A" vcsType)
-    { Vcs = vcs; Name = vcsName; Url = vcsUrl }
+    let vcs = 
+        match vcsType with
+        | "git" -> VcsType.Git
+        | "hg" -> VcsType.Hg
+        | _ -> failwith (sprintf "Unknown vcs type %A" vcsType)
+    { Vcs = vcs
+      Name = vcsName
+      Url = vcsUrl }

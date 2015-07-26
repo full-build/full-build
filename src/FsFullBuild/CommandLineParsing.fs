@@ -22,44 +22,31 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 module CommandLineParsing
 
 open Anthology
 open CommandLineToken
 
-type InitWorkspace =
-    {
-        Name : string
-    }
+type InitWorkspace = 
+    { Name : string }
 
-type CheckoutWorkspace =
-    {
-        Version : string
-    }
+type CheckoutWorkspace = 
+    { Version : string }
 
-type CloneRepositories =
-    {
-        Filters : string list
-    }
+type CloneRepositories = 
+    { Filters : string list }
 
-type NuGetUrl =
-    {
-        Url : string
-    }
+type NuGetUrl = 
+    { Url : string }
 
-type InitView =
-    {
-        Name : string
-        Filters : string list
-    }
+type InitView = 
+    { Name : string
+      Filters : string list }
 
-type ViewName =
-    {
-        Name : string
-    }
+type ViewName = 
+    { Name : string }
 
-type Command =
+type Command = 
     | Usage
     | InitWorkspace of InitWorkspace
     | RefreshWorkspace
@@ -84,56 +71,54 @@ type Command =
     | DescribeView of ViewName
     | GraphView of ViewName
     | GenerateView of ViewName
-    | BuildView of ViewName    
+    | BuildView of ViewName
     | RefreshSources
     | ListBinaries
 
-let ParseWorkspace (args : string list) =
+let ParseWorkspace(args : string list) = 
     match args with
-    | [Token(Create); wsPath] -> Command.InitWorkspace {Name=wsPath}
-    | [Token(Index)] -> Command.IndexWorkspace
-    | [Token(Update)] -> RefreshWorkspace
-    | [Token(Checkout); version ] -> Command.CheckoutWorkspace { Version=version }
+    | [ Token(Create); wsPath ] -> Command.InitWorkspace { Name = wsPath }
+    | [ Token(Index) ] -> Command.IndexWorkspace
+    | [ Token(Update) ] -> RefreshWorkspace
+    | [ Token(Checkout); version ] -> Command.CheckoutWorkspace { Version = version }
     | _ -> Command.Usage
 
-let ParseView (args : string list) =
+let ParseView(args : string list) = 
     match args with
-    | [Token (Token.Create); vwName; vwFilter] -> Command.InitView {Name=vwName; Filters=[vwFilter]} // FIXME
-    | [Token (Token.Drop); vwName] -> Command.DropView {Name=vwName}
-    | [Token (Token.Build); vwName] -> Command.BuildView {Name=vwName}
-    | [Token (Token.Graph); vwName] -> Command.GraphView {Name=vwName}
+    | [ Token(Token.Create); vwName; vwFilter ] -> Command.InitView { Name = vwName; Filters = [ vwFilter ] }
+    | [ Token(Token.Drop); vwName ] -> Command.DropView { Name = vwName }
+    | [ Token(Token.Build); vwName ] -> Command.BuildView { Name = vwName }
+    | [ Token(Token.Graph); vwName ] -> Command.GraphView { Name = vwName }
     | _ -> Command.Usage
 
-let ParsePackage (args : string list) =
+let ParsePackage(args : string list) = 
     match args with
-    | [Token(Token.List)] -> ListPackages
-    | [Token(Token.Update)] -> InstallPackages
-    | [Token(Token.Check)] -> CheckPackages
-    | [Token(Token.Upgrade)] -> UpgradePackages
-    | [Token(Token.Add); name; version] -> UsePackage {Name=name; Version=version}
+    | [ Token(Token.List) ] -> ListPackages
+    | [ Token(Token.Update) ] -> InstallPackages
+    | [ Token(Token.Check) ] -> CheckPackages
+    | [ Token(Token.Upgrade) ] -> UpgradePackages
+    | [ Token(Token.Add); name; version ] -> UsePackage { Name = name; Version = version }
     | _ -> Command.Usage
 
-let ParseRepo (args : string list) =
+let ParseRepo(args : string list) = 
     match args with
-    | Token(Token.Clone) :: filters -> CloneRepositories {Filters=filters}
-    | [Token(Token.Add); vcs; name; url] -> let (ToRepository repo) = (vcs, name, url)
-                                            AddRepository (repo)
-    | [Token(Token.List)] -> ListRepositories
+    | Token(Token.Clone) :: filters -> CloneRepositories { Filters = filters }
+    | [ Token(Token.Add); vcs; name; url ] -> let (ToRepository repo) = (vcs, name, url)
+                                              AddRepository(repo)
+    | [ Token(Token.List) ] -> ListRepositories
     | _ -> Command.Usage
 
-let ParseCommandLine (args : string list) : Command =
+let ParseCommandLine(args : string list) : Command = 
     match args with
-    | head::tail -> match head with
-                    | Token (Token.Help) -> Command.Usage
-                    | Token (Token.Workspace) -> ParseWorkspace tail
-                    | Token (Token.View) -> ParseView tail
-                    | Token (Token.Package) -> ParsePackage tail
-                    | Token (Token.Repo) -> ParseRepo tail
-                    | _ -> Command.Usage
-    | _ -> Command.Usage  
+    | head :: tail -> 
+        match head with
+        | Token(Token.Help) -> Command.Usage
+        | Token(Token.Workspace) -> ParseWorkspace tail
+        | Token(Token.View) -> ParseView tail
+        | Token(Token.Package) -> ParsePackage tail
+        | Token(Token.Repo) -> ParseRepo tail
+        | _ -> Command.Usage
+    | _ -> Command.Usage
 
-let DisplayUsage () = 
-    printfn "Usage: TBD"
-
-let DisplayHelp () =
-    printfn "Help : TBD"
+let DisplayUsage() = printfn "Usage: TBD"
+let DisplayHelp() = printfn "Help : TBD"

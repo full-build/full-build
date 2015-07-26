@@ -22,25 +22,25 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 module FileExtensions
 
 open System.IO
 
-
-let GetSubDirectory (dir : DirectoryInfo) (subDir : string) : DirectoryInfo =
+let GetSubDirectory (dir : DirectoryInfo) (subDir : string) : DirectoryInfo = 
     let newPath = Path.Combine(dir.FullName, subDir)
     new DirectoryInfo(newPath)
 
-let GetFile (dir : DirectoryInfo) (fileName : string) : FileInfo =
+let GetFile (dir : DirectoryInfo) (fileName : string) : FileInfo = 
     let fullFileName = Path.Combine(dir.FullName, fileName)
     new FileInfo(fullFileName)
 
-let rec private ComputeRelativePath2 (topDir : DirectoryInfo) (childDir : DirectoryInfo) (path : string) =
+let rec private ComputeRelativePath2 (topDir : DirectoryInfo) (childDir : DirectoryInfo) (path : string) = 
     if topDir.FullName = childDir.FullName then path
-    else let newPath = Path.Combine (childDir.Name, path) 
-         ComputeRelativePath2 topDir childDir.Parent newPath
+    else 
+        let newPath = Path.Combine(childDir.Name, path)
+        ComputeRelativePath2 topDir childDir.Parent newPath
 
-let ComputeRelativePath (dir : DirectoryInfo) (file : FileInfo) : string =
+let ComputeRelativePath (dir : DirectoryInfo) (file : FileInfo) : string = 
     let path = file.Name
     ComputeRelativePath2 dir file.Directory path
+
