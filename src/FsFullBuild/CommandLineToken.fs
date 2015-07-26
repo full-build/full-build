@@ -22,11 +22,9 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 module CommandLineToken
 
-
-type Token =
+type Token = 
     | Workspace
     | View
     | Help
@@ -48,9 +46,9 @@ type Token =
     | Check
     | Upgrade
     | Unknown
- 
-let (|Token|) (token : string) =
-    match token with 
+
+let (|Token|) (token : string) = 
+    match token with
     | "workspace" -> Workspace
     | "view" -> View
     | "help" -> Help
@@ -72,3 +70,4 @@ let (|Token|) (token : string) =
     | "check" -> Check
     | "upgrade" -> Upgrade
     | _ -> Unknown
+

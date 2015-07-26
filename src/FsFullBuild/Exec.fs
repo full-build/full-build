@@ -22,12 +22,11 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 module Exec
 
 open System.Diagnostics
 
-let Exec (command : string) (args : string) (dir : string) =
+let Exec (command : string) (args : string) (dir : string) = 
     let psi = new ProcessStartInfo(FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir)
     use proc = Process.Start(psi)
     if proc = null then failwith "Failed to start process"

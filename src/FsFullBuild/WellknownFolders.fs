@@ -22,38 +22,29 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 module WellknownFolders
 
 open System
 open System.IO
 open FileExtensions
 
-
-
 let private WORKSPACE_CONFIG_FOLDER = ".full-build"
 
-
-let IsWorkspaceFolder (wsDir : DirectoryInfo) =
+let IsWorkspaceFolder(wsDir : DirectoryInfo) = 
     let subDir = WORKSPACE_CONFIG_FOLDER |> GetSubDirectory wsDir
     subDir.Exists
 
-let rec private WorkspaceFolderSearch (dir : DirectoryInfo) =
+let rec private WorkspaceFolderSearch(dir : DirectoryInfo) = 
     if dir = null || not dir.Exists then failwith "Can't find workspace root directory. Check you are in a workspace."
     if IsWorkspaceFolder dir then dir
     else WorkspaceFolderSearch dir.Parent
 
-let CurrentFolder () : DirectoryInfo =
-    let currDir = new DirectoryInfo(Environment.CurrentDirectory)
-    currDir
-        
-let WorkspaceFolder () : DirectoryInfo =
-    let currDir = CurrentFolder ()
+let CurrentFolder() : DirectoryInfo = new DirectoryInfo(Environment.CurrentDirectory)
+
+let WorkspaceFolder() : DirectoryInfo = 
+    let currDir = CurrentFolder()
     WorkspaceFolderSearch currDir
 
-let WorkspaceConfigFolder() : DirectoryInfo =
-    let wsDir = WorkspaceFolder ()
-    let fbDir = WORKSPACE_CONFIG_FOLDER |> GetSubDirectory wsDir
-    fbDir
-
-
+let WorkspaceConfigFolder() : DirectoryInfo = 
+    let wsDir = WorkspaceFolder()
+    WORKSPACE_CONFIG_FOLDER |> GetSubDirectory wsDir
