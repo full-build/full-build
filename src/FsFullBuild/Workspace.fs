@@ -47,7 +47,7 @@ let private ParseRepositoryProjects (parser) (repoDir : DirectoryInfo) =
     repoDir |> FindKnownProjects 
             |> Seq.map (parser repoDir)
 
-let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : string seq) : Project seq = 
+let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : string seq) : ProjectParser.ProjectDescriptor seq = 
     repos |> Seq.map (GetSubDirectory wsDir) 
           |> Seq.filter (fun x -> x.Exists) 
           |> Seq.map (ParseRepositoryProjects parser) 
@@ -57,7 +57,15 @@ let ConvertProject() =
     let wsDir = WorkspaceFolder()
     let antho = LoadAnthology()
     let repos = antho.Repositories |> Seq.map (fun x -> x.Name)
-    let projects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir repos
+    let projects = ParseWorkspaceProjects ProjectParser.ParseProject wsDir repos
+
+    // merge binaries
+    let foundBinaries = projects |> Seq.map (fun x -> x.Binaries) |> Seq.concat
+    let newBinaries = foundBinaries |> Seq.append antho.Binaries |> Seq.distinctBy (fun x -> BinaryRef.From x.AssemblyName)
+
+    
+
+
 
     // get all known projects and ensure tp
     let knownGuids = antho.Projects 

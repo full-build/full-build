@@ -69,7 +69,7 @@
     <Compile Include="WellknownFolders.fs" />
     <Compile Include="Exec.fs" />
     <Compile Include="Anthology.fs" />
-    <Compile Include="ProjectParsing.fs" />
+    <Compile Include="ProjectParser.fs" />
     <Compile Include="Vcs.fs" />
     <Compile Include="CommandLineToken.fs" />
     <Compile Include="CommandLineParsing.fs" />
