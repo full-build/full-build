@@ -49,7 +49,7 @@ let main argv =
     | ListPackages -> FullBuild.Commands.Binaries.Binaries.List ()
     | InstallPackages -> FullBuild.Commands.Packages.Packages.InstallAll ()
     | UpgradePackages -> FullBuild.Commands.Packages.Packages.UpgradePackages ()
-    | UsePackage {Name=pkgName; Version=pkgVersion} -> FullBuild.Commands.Packages.Packages.UsePackage (pkgName, pkgVersion)
+    | UsePackage {Id=pkgName; Version=pkgVersion} -> FullBuild.Commands.Packages.Packages.UsePackage (pkgName, pkgVersion)
     | CheckPackages -> FullBuild.Commands.Packages.Packages.CheckPackages ()
     | InitView {Name=vwName; Filters=vwFilter} -> FullBuild.Commands.Views.Views.Init (vwName, vwFilter |> Seq.toArray)
     | DropView {Name=vwName} -> FullBuild.Commands.Views.Views.Delete (vwName)

@@ -97,7 +97,7 @@ let ParsePackage(args : string list) =
     | [ Token(Token.Update) ] -> InstallPackages
     | [ Token(Token.Check) ] -> CheckPackages
     | [ Token(Token.Upgrade) ] -> UpgradePackages
-    | [ Token(Token.Add); name; version ] -> UsePackage { Name = name; Version = version }
+    | [ Token(Token.Add); name; version ] -> UsePackage { Id = name; Version = version; TargetFramework = "net45" } // FIXME
     | _ -> Command.Usage
 
 let ParseRepo(args : string list) = 
