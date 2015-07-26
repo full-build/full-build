@@ -33,6 +33,20 @@ open Configuration
 open Vcs
 open Anthology
 
+
+type BinaryRef = 
+    { Target : string }
+    static member From(assName : string) = { Target = assName.ToUpperInvariant() }
+    static member From(bin : Binary) = BinaryRef.From bin.AssemblyName
+
+type PackageRef = 
+    { Target : string }
+    static member From(name : string) : PackageRef = { Target = name.ToUpperInvariant() }
+
+type ProjectRef = 
+    { Target : Guid }
+    static member From(prj : Project) : ProjectRef = { Target = prj.ProjectGuid }
+
 let Init(path : string) = 
     let wsDir = new DirectoryInfo(path)
     wsDir.Create()
