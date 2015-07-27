@@ -84,10 +84,6 @@
     <Content Include="FSharpProjectSample1.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Data">
-      <HintPath>..\packages\FSharp.Data.2.2.5\lib\net40\FSharp.Data.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Mini">
       <HintPath>..\packages\Mini.0.4.2.0\lib\net40\Mini.dll</HintPath>
       <Private>True</Private>

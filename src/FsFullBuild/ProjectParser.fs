@@ -62,7 +62,7 @@ let GetBinaries(xdoc : XDocument) =
                                               |> Seq.toList
 
 let ParsePackage (pkgRef : XElement) : Package =
-    let pkgId = !> pkgRef.Attribute(XNamespace.None + "id") : string
+    let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "id")
     let pkgVer = !> pkgRef.Attribute(XNamespace.None + "version") : string
     let pkgFx = !> pkgRef.Attribute(XNamespace.None + "targetFramework") : string
     { Id = pkgId
