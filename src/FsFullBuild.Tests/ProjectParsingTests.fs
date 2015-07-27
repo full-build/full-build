@@ -16,6 +16,15 @@ let XDocumentLoader (fi : FileInfo) : XDocument =
                    | x -> x
     XDocument.Load (fileName)
 
+
+[<Test>]
+let CheckCastString () =
+    let x = new XElement(XNamespace.None + "Test", "42")
+    let xs : string = !> x
+    let xi : int = !> x
+    xs |> should equal "42"
+    xi |> should equal 42
+
 [<Test>]
 let CheckBasicParsingCSharp () =
     let expectedPackages = [ { Id="FSharp.Data"; Version="2.2.5"; TargetFramework="net45" }
