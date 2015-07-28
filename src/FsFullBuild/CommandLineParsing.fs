@@ -78,6 +78,7 @@ type Command =
 let ParseWorkspace(args : string list) = 
     match args with
     | [ Token(Create); wsPath ] -> Command.InitWorkspace { Name = wsPath }
+    | [ Token(Convert)] -> Command.ConvertWorkspace
     | [ Token(Index) ] -> Command.IndexWorkspace
     | [ Token(Update) ] -> RefreshWorkspace
     | [ Token(Checkout); version ] -> Command.CheckoutWorkspace { Version = version }
