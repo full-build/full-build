@@ -70,9 +70,7 @@ let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : str
           |> Seq.map (ParseRepositoryProjects parser) 
           |> Seq.concat
 
-let Convert () = 
-    printfn "Converting workspace"
-
+let Index () = 
     let wsDir = WorkspaceFolder()
     let antho = LoadAnthology()
     let repos = antho.Repositories |> Seq.map (fun x -> x.Name)
@@ -95,12 +93,7 @@ let Convert () =
                           Packages = newPackages 
                           Projects = newProjects }
 
-    printfn "Antho %A" newAntho
     SaveAnthology newAntho
 
-//    // get all known projects and ensure tp
-//    let knownGuids = antho.Projects 
-//                     |> Seq.map (fun x -> x.ProjectGuid) 
-//                     |> HashSet<Guid>
-// let knowProjects = antho.Projects |> Seq.map (x => x.Guid) |> new HashSet<Guid>
-
+let Convert () = 
+    ()
