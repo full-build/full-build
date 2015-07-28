@@ -48,6 +48,8 @@ type ViewName =
 
 type Command = 
     | Usage
+    | Error
+
     // workspace
     | CreateWorkspace of CreateWorkspace
     | IndexWorkspace
@@ -107,7 +109,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.View) :: Token(Token.Build) :: name :: [] -> Command.BuildView { Name = name }
     | Token(Token.View) :: Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = name }
 
-    | _ -> Command.Usage
+    | _ -> Command.Error
 
 let DisplayUsage() = printfn "Usage: TBD"
 let DisplayHelp() = printfn "Help : TBD"
