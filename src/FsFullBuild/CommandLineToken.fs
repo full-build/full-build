@@ -46,7 +46,7 @@ type Token =
     | Check
     | Upgrade
     | Describe
-    | With
+    | Using
     | Unknown
 
 let (|Token|) (token : string) = 
@@ -72,6 +72,6 @@ let (|Token|) (token : string) =
     | "check" -> Check
     | "upgrade" -> Upgrade
     | "describe" -> Describe
-    | "with" -> With
+    | "using" -> Using
     | _ -> Unknown
 
