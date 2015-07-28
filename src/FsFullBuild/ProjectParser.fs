@@ -1,4 +1,28 @@
-﻿module ProjectParser
+﻿// Copyright (c) 2014-2015, Pierre Chalamet
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of Pierre Chalamet nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL PIERRE CHALAMET BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+module ProjectParser
 
 open System
 open System.IO
@@ -7,7 +31,7 @@ open System.Xml.Linq
 open Anthology
 
 type ProjectDescriptor = 
-    { Binaries : Binary list
+    { Binaries : Assembly list
       Packages : Package list
       Project : Project }
 
@@ -16,9 +40,9 @@ let inline (!<) (x : ^a) : ^b = (((^a or ^b) : (static member op_Implicit : ^a -
 let inline (!>) (x : ^a) : ^b = (((^a or ^b) : (static member op_Explicit : ^a -> ^b) x))
 
 let ParseGuid(s : string) = 
-    match Guid.TryParseExact(s, "B") with
+    match Guid.TryParseExact(s, "B") with // C# guid
     | true, value -> value
-    | _ ->  match Guid.TryParseExact(s, "D") with // F# guid are badly formatted
+    | _ ->  match Guid.TryParseExact(s, "D") with // F# guid
             | true, value -> value
             | _ -> failwith (sprintf "string %A is not a Guid" s)
 
@@ -33,10 +57,12 @@ let GetProjectGuid (dir : DirectoryInfo) (relFile : string) : Guid =
     ExtractGuid xdoc
 
 let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) = 
+    // VS project references
     let prjRefs = xdoc.Descendants(NsMsBuild + "ProjectReference")
                   |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
                   |> Seq.map (GetProjectGuid prjDir)
     
+    // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.filter (fun x -> x.StartsWith("$(SolutionDir)/.full-build/"))
@@ -47,54 +73,69 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
             |> Seq.distinct
             |> Seq.toList
 
-let ParseBinary(binRef : XElement) : Binary = 
-    let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
-    let incFileName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
-    let hintPath = !> binRef.Descendants(NsMsBuild + "HintPath").SingleOrDefault() : string 
-    
-    let hintPath2 = if String.IsNullOrWhiteSpace(hintPath) then Some hintPath
-                    else None
-    { AssemblyName = incFileName
-      HintPath = hintPath2 }
+let GetBinaries(xdoc : XDocument) : Assembly seq = 
+    seq { 
+        for binRef in xdoc.Descendants(NsMsBuild + "Reference") do
+            let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
+            let assemblyName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
 
-let GetBinaries(xdoc : XDocument) = 
-    xdoc.Descendants(NsMsBuild + "Reference") |> Seq.map ParseBinary
-                                              |> Seq.toList
+            let hintPath = (!> binRef.Descendants(NsMsBuild + "HintPath").SingleOrDefault() : string) |> FileExtensions.ToUnix
+            match hintPath with
+            | null -> yield GacAssembly { AssemblyName = assemblyName}
+            | x when not <| x.Contains("/packages/") -> yield LocalAssembly { AssemblyName = assemblyName; HintPath = x }
+            | _ -> ()
+    }
 
-let ParsePackage (pkgRef : XElement) : Package =
+let ParseNuGetPackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "id")
     let pkgVer = !> pkgRef.Attribute(XNamespace.None + "version") : string
     let pkgFx = !> pkgRef.Attribute(XNamespace.None + "targetFramework") : string
+
     { Id = pkgId
       Version = pkgVer
       TargetFramework = pkgFx }
 
-let GetPackages (xdocLoader : FileInfo -> XDocument) (prjDir : DirectoryInfo) =
-    let pkgFile = "packages.config" |> FileExtensions.GetFile prjDir
-    let xdoc = xdocLoader pkgFile
+let ParseFullBuildPackage (fileName : string) : Package =
+    { Id=Path.GetFileNameWithoutExtension(fileName)
+      Version = String.Empty
+      TargetFramework = String.Empty }
 
-    xdoc.Descendants(XNamespace.None + "package") |> Seq.map ParsePackage 
-                                                  |> Seq.toList
+let GetPackages (prjDoc : XDocument) (nugetDoc : XDocument) =
+    let nugetPkgs = nugetDoc.Descendants(XNamespace.None + "package") |> Seq.map ParseNuGetPackage 
+                                                                      |> Seq.toList
+    let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
+                 |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
+                 |> Seq.filter (fun x -> x.StartsWith("$(SolutionDir)/packages/"))
+                 |> Seq.map ParseFullBuildPackage
+    nugetPkgs |> Seq.append fbPkgs |> Seq.toList
 
-let ParseProjectContent (xdocLoader : FileInfo -> XDocument) (repoDir : DirectoryInfo) (file : FileInfo) =
+let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (file : FileInfo) =
     let repoName = repoDir.Name
     let relativeProjectFile = FileExtensions.ComputeRelativePath repoDir file
-    let xdoc = xdocLoader file
-    let xguid = !> xdoc.Descendants(NsMsBuild + "ProjectGuid").Single() : string
+    let xprj = match xdocLoader file with
+               | Some x -> x
+               | _ -> failwith (sprintf "Failed to load project %A" file.FullName)
+    let xguid = !> xprj.Descendants(NsMsBuild + "ProjectGuid").Single() : string
     let guid = ParseGuid xguid
-    let assemblyName = !> xdoc.Descendants(NsMsBuild + "AssemblyName").Single() : string
+    let assemblyName = !> xprj.Descendants(NsMsBuild + "AssemblyName").Single() : string
     
-    let extension =  match !> xdoc.Descendants(NsMsBuild + "OutputType").Single() : string with
+    let extension =  match !> xprj.Descendants(NsMsBuild + "OutputType").Single() : string with
                      | "Library" -> OutputType.Dll
                      | _ -> OutputType.Exe
     
+    // FIXME
     let fxTarget = "v4.5"
-    let prjRefs = GetProjectReferences file.Directory xdoc
+    let prjRefs = GetProjectReferences file.Directory xprj
     
-    let binaries = GetBinaries xdoc
-    let binRefs = binaries |> List.map (fun x -> x.AssemblyName)
+    let binaries = GetBinaries xprj |> Seq.toList
+    let binRefs = binaries |> List.map (fun x -> match x with
+                                                 | GacAssembly { AssemblyName = assName } -> assName
+                                                 | LocalAssembly { AssemblyName = assName } -> assName)
 
-    let packages = GetPackages xdocLoader file.Directory
+    let pkgFile = "packages.config" |> FileExtensions.GetFile file.Directory
+    let packages = match xdocLoader pkgFile with
+                   | Some xnuget -> GetPackages xprj xnuget
+                   | _ -> [] 
     let pkgRefs = packages |> List.map (fun x -> x.Id)
 
     { Binaries = binaries
@@ -105,10 +146,13 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument) (repoDir : Director
                   AssemblyName = assemblyName
                   OutputType = extension
                   FxTarget = fxTarget
-                  BinaryReferences = binRefs
+                  AssemblyReferences = binRefs
                   PackageReferences = pkgRefs
                   ProjectReferences = prjRefs } }
 
+let XDocumentLoader (f : FileInfo) : XDocument option =
+    if f.Exists then Some (XDocument.Load (f.FullName))
+    else None
 
 let ParseProject (repoDir : DirectoryInfo) (file : FileInfo) : ProjectDescriptor = 
-    ParseProjectContent (fun x -> XDocument.Load (x.FullName)) repoDir file
+    ParseProjectContent XDocumentLoader repoDir file

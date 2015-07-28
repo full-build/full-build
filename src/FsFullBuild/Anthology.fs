@@ -41,16 +41,17 @@ type Application =
     { Name : string
       Projects : Guid list }
 
-type GacAssembly = 
-    { Name : string }
+type GacAssembly =
+    { AssemblyName : string }
 
-type HintPathAssembly = 
-    { Name : string
-      HintPath : string }
-
-type Binary = 
+type LocalAssembly =
     { AssemblyName : string
-      HintPath : string option }
+      HintPath : string }  
+
+[<JsonConverter(typeof<Newtonsoft.Json.Converters.DiscriminatedUnionConverter>)>]
+type Assembly = 
+    | GacAssembly of GacAssembly
+    | LocalAssembly of LocalAssembly
 
 type Bookmark = 
     { Name : string
@@ -58,7 +59,7 @@ type Bookmark =
 
 type Package = 
     { Id : string
-      Version : string 
+      Version : string
       TargetFramework : string }
 
 [<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
@@ -71,7 +72,6 @@ type Repository =
       Name : string
       Url : string }
 
-
 type Project = 
     { Repository : string
       RelativeProjectFile : string
@@ -79,16 +79,16 @@ type Project =
       AssemblyName : string
       OutputType : OutputType
       FxTarget : string
-      BinaryReferences : string list
+      AssemblyReferences : string list
       PackageReferences : string list
       ProjectReferences : Guid list }
 
 type Anthology = 
     { Applications : Application list
       Repositories : Repository list
-      Bookmarks : Bookmark list
+      Bookmarks : Bookmark list 
       Packages : Package list
-      Binaries : Binary list
+      Binaries : Assembly list
       Projects : Project list }
 
 let private GetAnthologyFileName() = 

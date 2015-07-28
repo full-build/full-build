@@ -26,7 +26,6 @@ module Workspace
 
 open System
 open System.IO
-open System.Collections.Generic
 open FileExtensions
 open WellknownFolders
 open Configuration
@@ -37,7 +36,10 @@ open Anthology
 type BinaryRef = 
     { Target : string }
     static member From(assName : string) = { Target = assName.ToUpperInvariant() }
-    static member From(bin : Binary) = BinaryRef.From bin.AssemblyName
+    static member From(ass : Assembly) = let name = match ass with
+                                                    | GacAssembly { AssemblyName=assName }  -> assName
+                                                    | LocalAssembly { AssemblyName=assName } -> assName
+                                         BinaryRef.From name
 
 type PackageRef = 
     { Target : string }
@@ -68,7 +70,9 @@ let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : str
           |> Seq.map (ParseRepositoryProjects parser) 
           |> Seq.concat
 
-let ConvertProject () = 
+let Convert () = 
+    printfn "Converting workspace"
+
     let wsDir = WorkspaceFolder()
     let antho = LoadAnthology()
     let repos = antho.Repositories |> Seq.map (fun x -> x.Name)
@@ -76,18 +80,27 @@ let ConvertProject () =
 
     // merge binaries
     let foundBinaries = projects |> Seq.map (fun x -> x.Binaries) |> Seq.concat
-    let newBinaries = foundBinaries |> Seq.append antho.Binaries |> Seq.distinctBy BinaryRef.From
+    let newBinaries = antho.Binaries |> Seq.append foundBinaries |> Seq.distinctBy BinaryRef.From |> Seq.toList
 
     // merge packages
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) |> Seq.concat
-    let newPackages = foundPackages |> Seq.append antho.Packages |> Seq.distinctBy PackageRef.From
+    let newPackages = antho.Packages |> Seq.append foundPackages |> Seq.distinctBy PackageRef.From |> Seq.toList
 
+    // merge projects
+    let foundProjects = projects |> Seq.map (fun x -> x.Project)
+    let newProjects = antho.Projects |> Seq.append foundProjects |> Seq.distinctBy ProjectRef.From |> Seq.toList
 
+    let newAntho = { antho 
+                     with Binaries = newBinaries
+                          Packages = newPackages 
+                          Projects = newProjects }
 
-    // get all known projects and ensure tp
-    let knownGuids = antho.Projects 
-                     |> Seq.map (fun x -> x.ProjectGuid) 
-                     |> HashSet<Guid>
-    ()
+    printfn "Antho %A" newAntho
+    SaveAnthology newAntho
+
+//    // get all known projects and ensure tp
+//    let knownGuids = antho.Projects 
+//                     |> Seq.map (fun x -> x.ProjectGuid) 
+//                     |> HashSet<Guid>
 // let knowProjects = antho.Projects |> Seq.map (x => x.Guid) |> new HashSet<Guid>
 
