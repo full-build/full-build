@@ -5,10 +5,17 @@ open FsUnit
 open CommandLineParsing
 
 [<Test>]
+let CheckErrorInvoked () =
+    let result = ParseCommandLine [ "workspace"; "blah blah" ]
+    let expected = Command.Error
+    result |> should equal expected
+
+[<Test>]
 let CheckUsageInvoked () =
-    let result = ParseCommandLine [ "workspace"; "create" ]
+    let result = ParseCommandLine [ "help" ]
     let expected = Command.Usage
     result |> should equal expected
+
 
 //[<Test>]
 //let CheckWorkspaceCreate () =
