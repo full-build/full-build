@@ -22,6 +22,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+module Main
 
 open CommandLineParsing
 
@@ -29,36 +30,41 @@ open CommandLineParsing
 let main argv = 
     let cmd = ParseCommandLine (argv |> Seq.toList)
     match cmd with
-    | Usage -> DisplayUsage ()
-    | InitWorkspace {Name=path} -> Workspace.Init path
-    | CloneRepositories {Filters=filters} -> Repo.Clone filters
-    | ListRepositories -> Repo.List ()
+    | CreateWorkspace {Name=path} -> Workspace.Create path
     | IndexWorkspace -> Workspace.Index ()
     | ConvertWorkspace -> Workspace.Convert ()
-    | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()
-    | OptimizeWorkspace -> FullBuild.Commands.Workspace.Workspace.Optimize ()
-    | BookmarkWorkspace -> FullBuild.Commands.Workspace.Workspace.Bookmark ()
-    | CheckoutWorkspace {Version=wsVersion} -> FullBuild.Commands.Workspace.Workspace.CheckoutBookmark (wsVersion)
-    | AddRepository (repo) -> let vcsType = match repo.Vcs with
-                                            | Anthology.VcsType.Git -> FullBuild.Config.VersionControlType.Git
-                                            | Anthology.VcsType.Hg -> FullBuild.Config.VersionControlType.Hg
-                                            | x -> failwith (sprintf "Unknown VcsType %A" x)
-                              FullBuild.Commands.Workspace.Workspace.AddRepo(repo.Name, vcsType, repo.Url)
-    | AddNuGet {Url=url} -> FullBuild.Commands.Packages.Packages.AddNuGet(url)
-    | ListNuGets -> FullBuild.Commands.Packages.Packages.ListNuGets ()
-    | ListPackages -> FullBuild.Commands.Binaries.Binaries.List ()
-    | InstallPackages -> FullBuild.Commands.Packages.Packages.InstallAll ()
-    | UpgradePackages -> FullBuild.Commands.Packages.Packages.UpgradePackages ()
-    | UsePackage {Id=pkgName; Version=pkgVersion} -> FullBuild.Commands.Packages.Packages.UsePackage (pkgName, pkgVersion)
-    | CheckPackages -> FullBuild.Commands.Packages.Packages.CheckPackages ()
-    | InitView {Name=vwName; Filters=vwFilter} -> FullBuild.Commands.Views.Views.Init (vwName, vwFilter |> Seq.toArray)
-    | DropView {Name=vwName} -> FullBuild.Commands.Views.Views.Delete (vwName)
-    | ListViews -> FullBuild.Commands.Views.Views.List ()
-    | DescribeView {Name=vwName} -> FullBuild.Commands.Views.Views.Describe (vwName)
-    | GraphView {Name=vwName} -> FullBuild.Commands.Views.Views.Graph (vwName)
-    | GenerateView {Name=vwName} -> FullBuild.Commands.Views.Views.Generate (vwName)
-    | BuildView {Name=vwName} -> FullBuild.Commands.Views.Views.BuildView (vwName)
-    | RefreshSources -> FullBuild.Commands.Workspace.Workspace.RefreshSources ()
-    | ListBinaries -> FullBuild.Commands.Binaries.Binaries.List ()
+    | AddRepository repo -> Repo.Add repo
+    | CloneRepositories {Filters=filters} -> Repo.Clone filters
+    | ListRepositories -> Repo.List ()
+    | CreateView view -> View.Create view.Name view.Filters
+    | DropView viewName -> View.Drop viewName.Name
+    | ListViews -> View.List ()
+    | DescribeView viewName -> View.Describe viewName.Name
+    | GenerateView viewName -> View.Generate viewName.Name
+//    | GraphView {Name=vwName} -> FullBuild.Commands.Views.Views.Graph (vwName)
+    | _ -> DisplayUsage ()
+//    | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()
+//    | OptimizeWorkspace -> FullBuild.Commands.Workspace.Workspace.Optimize ()
+//    | BookmarkWorkspace -> FullBuild.Commands.Workspace.Workspace.Bookmark ()
+//    | CheckoutWorkspace {Version=wsVersion} -> FullBuild.Commands.Workspace.Workspace.CheckoutBookmark (wsVersion)
+//    | AddNuGet {Url=url} -> FullBuild.Commands.Packages.Packages.AddNuGet(url)
+//    | ListNuGets -> FullBuild.Commands.Packages.Packages.ListNuGets ()
+//    | ListPackages -> FullBuild.Commands.Binaries.Binaries.List ()
+//    | InstallPackages -> FullBuild.Commands.Packages.Packages.InstallAll ()
+//    | UpgradePackages -> FullBuild.Commands.Packages.Packages.UpgradePackages ()
+//    | UsePackage {Id=pkgName; Version=pkgVersion} -> FullBuild.Commands.Packages.Packages.UsePackage (pkgName, pkgVersion)
+//    | CheckPackages -> FullBuild.Commands.Packages.Packages.CheckPackages ()
+//    | InitView {Name=vwName; Filters=vwFilter} -> FullBuild.Commands.Views.Views.Init (vwName, vwFilter |> Seq.toArray)
+//    | DropView {Name=vwName} -> FullBuild.Commands.Views.Views.Delete (vwName)
+//    | ListViews -> FullBuild.Commands.Views.Views.List ()
+//    | DescribeView {Name=vwName} -> FullBuild.Commands.Views.Views.Describe (vwName)
+//    | GraphView {Name=vwName} -> FullBuild.Commands.Views.Views.Graph (vwName)
+//    | GenerateView {Name=vwName} -> FullBuild.Commands.Views.Views.Generate (vwName)
+//    | BuildView {Name=vwName} -> FullBuild.Commands.Views.Views.BuildView (vwName)
+//    | RefreshSources -> FullBuild.Commands.Workspace.Workspace.RefreshSources ()
+//    | ListBinaries -> FullBuild.Commands.Binaries.Binaries.List ()
 
-    0 // return an integer exit code
+    let retCode = match cmd with
+                  | Usage -> 5
+                  | _ -> 0
+    retCode

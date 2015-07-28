@@ -28,27 +28,29 @@ open Anthology
 open System.Text.RegularExpressions
 open WellknownFolders
 
-let rec List2(repos : Repository list) = 
-    match repos with
-    | repo :: tail -> printfn "%s : %s [%A]" repo.Name repo.Url repo.Vcs
-                      List2 tail
-    | [] -> ()
-
 let List() = 
-    let anthology = LoadAnthology()
-    List2 anthology.Repositories
+    let antho = LoadAnthology()
+    antho.Repositories |> Seq.iter (fun x -> printfn "%s : %s [%A]" x.Name x.Url x.Vcs)
 
-let MatchRepo (repo : Repository seq) (filter : string) = 
+let MatchRepo (repo : Repository list) (filter : string) = 
     let matchRegex = "^" + filter + "$"
     let regex = new Regex(matchRegex, RegexOptions.IgnoreCase)
     repo |> Seq.filter (fun x -> regex.IsMatch(x.Name))
          |> Seq.distinct
 
-let Clone(filters : string list) = 
-    let wsDir = WorkspaceFolder()
+let FilterRepos (filters : string list) = 
     let antho = LoadAnthology()
     filters |> Seq.map (MatchRepo antho.Repositories)
             |> Seq.collect (fun x -> x)
             |> Seq.distinct
-            |> Seq.iter (Vcs.VcsCloneRepo wsDir)
 
+let Clone (filters : string list) = 
+    let wsDir = WorkspaceFolder()
+    FilterRepos filters |> Seq.iter (Vcs.VcsCloneRepo wsDir)
+
+let Add (repo : Repository) =
+    let antho = LoadAnthology ()
+    let repos = repo :: antho.Repositories |> Seq.distinctBy (fun x -> x.Name.ToUpperInvariant()) |> Seq.toList
+    let newAntho = {antho 
+                    with Repositories = repos}
+    SaveAnthology newAntho
