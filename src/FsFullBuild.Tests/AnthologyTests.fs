@@ -13,7 +13,7 @@ let CheckRoundtripAnthology () =
         Bookmarks = [ { Name = "cassandra-sharp"; Version = "b62e33a6ba39f987c91fdde11472f42b2a4acd94" }; { Name = "cassandra-sharp-contrib"; Version = "e0089100b3c5ca520e831c5443ad9dc8ab176052" } ]
         Repositories = [ { Vcs = VcsType.Git; Name = "cassandra-sharp"; Url = "https://github.com/pchalamet/cassandra-sharp" }
                          { Vcs = VcsType.Git; Name = "cassandra-sharp-contrib"; Url = "https://github.com/pchalamet/cassandra-sharp-contrib" } ]
-        Binaries = [ { AssemblyName = "System"; HintPath = None }; { AssemblyName = "System.Configuration"; HintPath = None } ]
+        Binaries = [ GacAssembly { AssemblyName = "System" }; GacAssembly { AssemblyName = "System.Configuration" } ]
         Packages = [ { Id="FSharp.Data"; Version="2.2.5"; TargetFramework="net45" }
                      { Id="FsUnit"; Version="1.3.0.1"; TargetFramework="net45" }
                      { Id="Mini"; Version="0.4.2.0"; TargetFramework="net45" }
@@ -27,10 +27,9 @@ let CheckRoundtripAnthology () =
                        RelativeProjectFile = "cqlplus/cqlplus-net45.csproj"
                        FxTarget = "v4.5"
                        ProjectReferences = [ Guid.Parse ("6f6eb447-9569-406a-a23b-c09b6dbdbe10"); Guid.Parse ("c1d252b7-d766-4c28-9c46-0696f896846c") ]
-                       BinaryReferences = [ "System" ; "System.Data"; "System.Xml"]
+                       AssemblyReferences = [ "System" ; "System.Data"; "System.Xml"]
                        PackageReferences = [ ]
-                       Repository = "cassandra-sharp" } ]
-        }
+                       Repository = "cassandra-sharp" } ] }
 
     let file = new FileInfo (Path.GetRandomFileName())
     printfn "Temporary file is %A" file.FullName

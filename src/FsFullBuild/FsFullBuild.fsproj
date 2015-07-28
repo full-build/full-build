@@ -79,9 +79,6 @@
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
-    <Content Include="ProjectSamples.xml" />
-    <Content Include="CSharpProjectSample1.xml" />
-    <Content Include="FSharpProjectSample1.xml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Mini">

@@ -1,4 +1,4 @@
-rem @echo off
+@echo off
 setlocal
 
 call fb-init.bat
@@ -9,28 +9,30 @@ robocopy cs-init cs-do /MIR
 
 pushd cs-do
 
-%FULLBUILD% index workspace || goto :ko
-%FULLBUILD% install packages || goto :ko
-%FULLBUILD% optimize workspace || goto :ko
-copy ..\Template.csproj .full-build || goto :ko
-%FULLBUILD% convert projects || goto :ko
-%FULLBUILD% init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko
-%FULLBUILD% generate view cs || goto :ko
-%FULLBUILD% build view cs || goto :ko
-%FULLBUILD% exec "echo %%FULLBUILD_REPO%% & git log -n 1 && echo." || goto :ko
-%FULLBUILD% exec "git status" || goto :ko
-%FULLBUILD% check packages || goto :ko
-%FULLBUILD% use package moq version * || goto :ko
-%FULLBUILD% check packages || goto :ko
-%FULLBUILD% upgrade packages || goto :ko
-%FULLBUILD% check packages || goto :ko
-%FULLBUILD% list packages || goto :ko
-%FULLBUILD% list nugets || goto :ko
-%FULLBUILD% describe view cs || goto :ko
-%FULLBUILD% list views || goto :ko
-%FULLBUILD% drop view cs || goto :ko
-%FULLBUILD% list views || goto :ko
-%FULLBUILD% bookmark workspace || goto :ko
+%FULLBUILD% workspace convert || goto :ko
+
+rem %FULLBUILD% index workspace || goto :ko
+rem %FULLBUILD% install packages || goto :ko
+rem %FULLBUILD% optimize workspace || goto :ko
+rem copy ..\Template.csproj .full-build || goto :ko
+rem %FULLBUILD% convert projects || goto :ko
+rem %FULLBUILD% init view cs with cassandra-sharp cassandra-sharp-contrib || goto :ko
+rem %FULLBUILD% generate view cs || goto :ko
+rem %FULLBUILD% build view cs || goto :ko
+rem %FULLBUILD% exec "echo %%FULLBUILD_REPO%% & git log -n 1 && echo." || goto :ko
+rem %FULLBUILD% exec "git status" || goto :ko
+rem %FULLBUILD% check packages || goto :ko
+rem %FULLBUILD% use package moq version * || goto :ko
+rem %FULLBUILD% check packages || goto :ko
+rem %FULLBUILD% upgrade packages || goto :ko
+rem %FULLBUILD% check packages || goto :ko
+rem %FULLBUILD% list packages || goto :ko
+rem %FULLBUILD% list nugets || goto :ko
+rem %FULLBUILD% describe view cs || goto :ko
+rem %FULLBUILD% list views || goto :ko
+rem %FULLBUILD% drop view cs || goto :ko
+rem %FULLBUILD% list views || goto :ko
+rem %FULLBUILD% bookmark workspace || goto :ko
 
 
 :ok

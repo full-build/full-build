@@ -39,7 +39,7 @@ let rec private WorkspaceFolderSearch(dir : DirectoryInfo) =
     if IsWorkspaceFolder dir then dir
     else WorkspaceFolderSearch dir.Parent
 
-let CurrentFolder() : DirectoryInfo = new DirectoryInfo(Environment.CurrentDirectory)
+let private CurrentFolder() : DirectoryInfo = new DirectoryInfo(Environment.CurrentDirectory)
 
 let WorkspaceFolder() : DirectoryInfo = 
     let currDir = CurrentFolder()
