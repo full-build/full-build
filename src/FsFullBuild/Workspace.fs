@@ -50,12 +50,6 @@ type ProjectRef =
     { Target : Guid }
     static member From(prj : Project) : ProjectRef = { Target = prj.ProjectGuid }
 
-let Init(path : string) = 
-    let wsDir = new DirectoryInfo(path)
-    wsDir.Create()
-    if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
-    VcsCloneRepo wsDir GlobalConfig.Repository
-
 let private FindKnownProjects (repoDir : DirectoryInfo) =
     ["*.csproj"; "*.vbproj"; "*.fsproj"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
                                          |> Seq.concat
@@ -70,11 +64,26 @@ let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : str
           |> Seq.map (ParseRepositoryProjects parser) 
           |> Seq.concat
 
+
+
+
+let Create(path : string) = 
+    let wsDir = new DirectoryInfo(path)
+    wsDir.Create()
+    if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
+    VcsCloneRepo wsDir GlobalConfig.Repository
+
+    let vwDir = WorkspaceViewFolder ()
+    vwDir.Create ()
+
+
 let Index () = 
     let wsDir = WorkspaceFolder()
     let antho = LoadAnthology()
     let repos = antho.Repositories |> Seq.map (fun x -> x.Name)
     let projects = ParseWorkspaceProjects ProjectParser.ParseProject wsDir repos
+
+    // FIXME: before merging, it would be better to tell about conflicts
 
     // merge binaries
     let foundBinaries = projects |> Seq.map (fun x -> x.Binaries) |> Seq.concat
@@ -94,6 +103,7 @@ let Index () =
                           Projects = newProjects }
 
     SaveAnthology newAntho
+
 
 let Convert () = 
     ()
