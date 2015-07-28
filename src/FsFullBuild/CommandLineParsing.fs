@@ -90,7 +90,7 @@ let ParseWorkspace(args : string list) =
 
 let ParseView(args : string list) = 
     match args with
-    | Token(Token.Create) :: vwName :: Token(Token.With) :: vwFilters -> Command.CreateView { Name = vwName; Filters = vwFilters }
+    | Token(Token.Create) :: vwName :: Token(Token.Using) :: vwFilters -> Command.CreateView { Name = vwName; Filters = vwFilters }
     | [ Token(Token.Drop); vwName ] -> Command.DropView { Name = vwName }
     | [ Token(Token.List) ] -> Command.ListViews
     | [ Token(Token.Describe); vwName ] -> Command.DescribeView { Name = vwName }
