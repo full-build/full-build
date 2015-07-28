@@ -22,34 +22,31 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-module WellknownFolders
 
-open System
+module View
 open System.IO
+open WellknownFolders
 open FileExtensions
 
-let private WORKSPACE_CONFIG_FOLDER = ".full-build"
-let private WORKSPACE_VIEW_FOLDER = ".views"
+let Create (viewName : string) (filters : string list) =
+    let repos = filters |> Repo.FilterRepos |> Seq.map (fun x -> x.Name)
+    let vwDir = WorkspaceViewFolder ()
+    let vwFile = viewName + ".view" |> GetFile vwDir
+    File.WriteAllLines (vwFile.FullName, repos)
 
-let IsWorkspaceFolder(wsDir : DirectoryInfo) = 
-    let subDir = WORKSPACE_CONFIG_FOLDER |> GetSubDirectory wsDir
-    subDir.Exists
+let Drop (viewName : string) =
+    let vwDir = WorkspaceViewFolder ()
+    let vwFile = viewName + ".view"|> GetFile vwDir
+    File.Delete (vwFile.FullName)
 
-let rec private WorkspaceFolderSearch(dir : DirectoryInfo) = 
-    if dir = null || not dir.Exists then failwith "Can't find workspace root directory. Check you are in a workspace."
-    if IsWorkspaceFolder dir then dir
-    else WorkspaceFolderSearch dir.Parent
+let List () =
+    let vwDir = WorkspaceViewFolder ()
+    vwDir.EnumerateFiles ("*.view") |> Seq.iter (fun x -> printfn "%s" (Path.GetFileNameWithoutExtension (x.Name)))
 
-let private CurrentFolder() : DirectoryInfo = new DirectoryInfo(Environment.CurrentDirectory)
+let Describe (viewName : string) =
+    let vwDir = WorkspaceViewFolder ()
+    let vwFile = viewName + ".view" |> GetFile vwDir
+    File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
 
-let WorkspaceFolder() : DirectoryInfo = 
-    let currDir = CurrentFolder()
-    WorkspaceFolderSearch currDir
-
-let WorkspaceConfigFolder() : DirectoryInfo = 
-    let wsDir = WorkspaceFolder()
-    WORKSPACE_CONFIG_FOLDER |> GetSubDirectory wsDir
-
-let WorkspaceViewFolder() : DirectoryInfo =
-    let wsDir = WorkspaceFolder()
-    WORKSPACE_VIEW_FOLDER |> GetSubDirectory wsDir
+let Generate (viewName : string) =
+    ()

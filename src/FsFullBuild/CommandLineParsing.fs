@@ -27,7 +27,7 @@ module CommandLineParsing
 open Anthology
 open CommandLineToken
 
-type InitWorkspace = 
+type CreateWorkspace = 
     { Name : string }
 
 type CheckoutWorkspace = 
@@ -39,7 +39,7 @@ type CloneRepositories =
 type NuGetUrl = 
     { Url : string }
 
-type InitView = 
+type CreateView = 
     { Name : string
       Filters : string list }
 
@@ -48,16 +48,25 @@ type ViewName =
 
 type Command = 
     | Usage
-    | InitWorkspace of InitWorkspace
-    | RefreshWorkspace
+    // workspace
+    | CreateWorkspace of CreateWorkspace
     | IndexWorkspace
     | ConvertWorkspace
-    | OptimizeWorkspace
-    | BookmarkWorkspace
-    | CheckoutWorkspace of CheckoutWorkspace
+    // repository
     | AddRepository of Repository
     | CloneRepositories of CloneRepositories
     | ListRepositories
+    // view
+    | CreateView of CreateView
+    | DropView of ViewName
+    | ListViews
+    | DescribeView of ViewName
+    | GenerateView of ViewName
+
+    | RefreshWorkspace
+    | OptimizeWorkspace
+    | BookmarkWorkspace
+    | CheckoutWorkspace of CheckoutWorkspace
     | AddNuGet of NuGetUrl
     | ListNuGets
     | ListPackages
@@ -65,29 +74,26 @@ type Command =
     | UpgradePackages
     | UsePackage of Package
     | CheckPackages
-    | InitView of InitView
-    | DropView of ViewName
-    | ListViews
-    | DescribeView of ViewName
     | GraphView of ViewName
-    | GenerateView of ViewName
     | BuildView of ViewName
     | RefreshSources
     | ListBinaries
 
 let ParseWorkspace(args : string list) = 
     match args with
-    | [ Token(Create); wsPath ] -> Command.InitWorkspace { Name = wsPath }
-    | [ Token(Convert)] -> Command.ConvertWorkspace
+    | [ Token(Create); wsPath ] -> Command.CreateWorkspace { Name = wsPath }
     | [ Token(Index) ] -> Command.IndexWorkspace
-    | [ Token(Update) ] -> RefreshWorkspace
-    | [ Token(Checkout); version ] -> Command.CheckoutWorkspace { Version = version }
+    | [ Token(Convert)] -> Command.ConvertWorkspace
+//    | [ Token(Update) ] -> RefreshWorkspace
+//    | [ Token(Checkout); version ] -> Command.CheckoutWorkspace { Version = version }
     | _ -> Command.Usage
 
 let ParseView(args : string list) = 
     match args with
-    | [ Token(Token.Create); vwName; vwFilter ] -> Command.InitView { Name = vwName; Filters = [ vwFilter ] }
+    | Token(Token.Create) :: vwName :: Token(Token.With) :: vwFilters -> Command.CreateView { Name = vwName; Filters = vwFilters }
     | [ Token(Token.Drop); vwName ] -> Command.DropView { Name = vwName }
+    | [ Token(Token.List) ] -> Command.ListViews
+    | [ Token(Token.Describe); vwName ] -> Command.DescribeView { Name = vwName }
     | [ Token(Token.Build); vwName ] -> Command.BuildView { Name = vwName }
     | [ Token(Token.Graph); vwName ] -> Command.GraphView { Name = vwName }
     | _ -> Command.Usage
