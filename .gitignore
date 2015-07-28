@@ -1,5 +1,6 @@
 *.user
 *.suo
+*.cache
 bin
 obj
 packages
