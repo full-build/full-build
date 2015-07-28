@@ -28,7 +28,7 @@ open Anthology
 open CommandLineToken
 
 type CreateWorkspace = 
-    { Name : string }
+    { Path : string }
 
 type CheckoutWorkspace = 
     { Version : string }
@@ -79,52 +79,34 @@ type Command =
     | RefreshSources
     | ListBinaries
 
-let ParseWorkspace(args : string list) = 
-    match args with
-    | [ Token(Create); wsPath ] -> Command.CreateWorkspace { Name = wsPath }
-    | [ Token(Index) ] -> Command.IndexWorkspace
-    | [ Token(Convert)] -> Command.ConvertWorkspace
-//    | [ Token(Update) ] -> RefreshWorkspace
-//    | [ Token(Checkout); version ] -> Command.CheckoutWorkspace { Version = version }
-    | _ -> Command.Usage
-
-let ParseView(args : string list) = 
-    match args with
-    | Token(Token.Create) :: vwName :: Token(Token.Using) :: vwFilters -> Command.CreateView { Name = vwName; Filters = vwFilters }
-    | [ Token(Token.Drop); vwName ] -> Command.DropView { Name = vwName }
-    | [ Token(Token.List) ] -> Command.ListViews
-    | [ Token(Token.Describe); vwName ] -> Command.DescribeView { Name = vwName }
-    | [ Token(Token.Build); vwName ] -> Command.BuildView { Name = vwName }
-    | [ Token(Token.Graph); vwName ] -> Command.GraphView { Name = vwName }
-    | _ -> Command.Usage
-
-let ParsePackage(args : string list) = 
-    match args with
-    | [ Token(Token.List) ] -> ListPackages
-    | [ Token(Token.Update) ] -> InstallPackages
-    | [ Token(Token.Check) ] -> CheckPackages
-    | [ Token(Token.Upgrade) ] -> UpgradePackages
-    | [ Token(Token.Add); name; version ] -> UsePackage { Id = name; Version = version; TargetFramework = "net45" } // FIXME
-    | _ -> Command.Usage
-
-let ParseRepo(args : string list) = 
-    match args with
-    | Token(Token.Clone) :: filters -> CloneRepositories { Filters = filters }
-    | [ Token(Token.Add); vcs; name; url ] -> let (ToRepository repo) = (vcs, name, url)
-                                              AddRepository(repo)
-    | [ Token(Token.List) ] -> ListRepositories
-    | _ -> Command.Usage
+//let ParsePackage(args : string list) = 
+//    match args with
+//    | [ Token(Token.List) ] -> ListPackages
+//    | [ Token(Token.Update) ] -> InstallPackages
+//    | [ Token(Token.Check) ] -> CheckPackages
+//    | [ Token(Token.Upgrade) ] -> UpgradePackages
+//    | [ Token(Token.Add); name; version ] -> UsePackage { Id = name; Version = version; TargetFramework = "net45" } // FIXME
+//    | _ -> Command.Usage
 
 let ParseCommandLine(args : string list) : Command = 
     match args with
-    | head :: tail -> 
-        match head with
-        | Token(Token.Help) -> Command.Usage
-        | Token(Token.Workspace) -> ParseWorkspace tail
-        | Token(Token.View) -> ParseView tail
-        | Token(Token.Package) -> ParsePackage tail
-        | Token(Token.Repo) -> ParseRepo tail
-        | _ -> Command.Usage
+    | Token(Token.Help) :: [] -> Command.Usage
+    | Token(Token.Workspace) :: Token(Create) :: path :: [] -> Command.CreateWorkspace { Path = path }
+    | Token(Token.Workspace) :: Token(Index) :: [] -> Command.IndexWorkspace
+    | Token(Token.Workspace) :: Token(Convert) :: [] -> Command.ConvertWorkspace
+
+    | Token(Token.Repo) :: Token(Token.Add) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
+                                                                           AddRepository(repo)
+    | Token(Token.Repo) :: Token(Token.Clone) :: filters -> CloneRepositories { Filters = filters }
+    | Token(Token.Repo) :: Token(Token.List) :: [] -> ListRepositories
+
+    | Token(Token.View) :: Token(Token.Create) :: name :: Token(Token.Using) :: filters -> Command.CreateView { Name = name; Filters = filters }
+    | Token(Token.View) :: Token(Token.Drop) :: name :: [] -> Command.DropView { Name = name }
+    | Token(Token.View) :: Token(Token.List) :: [] -> Command.ListViews
+    | Token(Token.View) :: Token(Token.Describe) :: name :: [] -> Command.DescribeView { Name = name }
+    | Token(Token.View) :: Token(Token.Build) :: name :: [] -> Command.BuildView { Name = name }
+    | Token(Token.View) :: Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = name }
+
     | _ -> Command.Usage
 
 let DisplayUsage() = printfn "Usage: TBD"
