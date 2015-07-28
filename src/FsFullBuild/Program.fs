@@ -33,7 +33,7 @@ let main argv =
     | InitWorkspace {Name=path} -> Workspace.Init path
     | CloneRepositories {Filters=filters} -> Repo.Clone filters
     | ListRepositories -> Repo.List ()
-    | ConvertWorkspace -> FullBuild.Commands.Workspace.Workspace.ConvertProjects ()
+    | ConvertWorkspace -> Workspace.Convert ()
     | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()
     | IndexWorkspace -> FullBuild.Commands.Workspace.Workspace.IndexWorkspace ()
     | OptimizeWorkspace -> FullBuild.Commands.Workspace.Workspace.Optimize ()

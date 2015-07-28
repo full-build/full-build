@@ -26,6 +26,10 @@ module FileExtensions
 
 open System.IO
 
+let ToUnix (f : string) =
+    if f = null then f
+    else f.Replace(@"\", "/")
+
 let GetSubDirectory (dir : DirectoryInfo) (subDir : string) : DirectoryInfo = 
     let newPath = Path.Combine(dir.FullName, subDir)
     new DirectoryInfo(newPath)
@@ -34,13 +38,13 @@ let GetFile (dir : DirectoryInfo) (fileName : string) : FileInfo =
     let fullFileName = Path.Combine(dir.FullName, fileName)
     new FileInfo(fullFileName)
 
-let rec private ComputeRelativePath2 (topDir : DirectoryInfo) (childDir : DirectoryInfo) (path : string) = 
-    if topDir.FullName = childDir.FullName then path
+let rec private ComputeRelativePathInc (topDir : DirectoryInfo) (childDir : DirectoryInfo) (path : string) = 
+    if topDir.FullName = childDir.FullName then path |> ToUnix
     else 
         let newPath = Path.Combine(childDir.Name, path)
-        ComputeRelativePath2 topDir childDir.Parent newPath
+        ComputeRelativePathInc topDir childDir.Parent newPath
 
 let ComputeRelativePath (dir : DirectoryInfo) (file : FileInfo) : string = 
     let path = file.Name
-    ComputeRelativePath2 dir file.Directory path
+    ComputeRelativePathInc dir file.Directory path
 

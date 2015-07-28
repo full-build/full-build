@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="ProjectParsingTests.fs" />
     <Compile Include="FileExtensionsTests.fs" />
+    <Compile Include="WellKnownFolderTests.fs" />
     <Compile Include="ExecTests.fs" />
     <Compile Include="AnthologyTests.fs" />
     <Compile Include="ConfigurationTests.fs" />
