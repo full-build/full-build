@@ -22,33 +22,24 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-module Repo
+module StringExtensions
 
-open Anthology
-open StringExtensions
-open WellknownFolders
 
-let List() = 
-    let antho = LoadAnthology()
-    antho.Repositories |> Seq.iter (fun x -> printfn "%s : %s [%A]" x.Name x.Url x.Vcs)
+let private (|MatchZeroOrMore|_|) c =
+    match c with
+    | '*' -> Some c
+    | _ -> None
 
-let MatchRepo (repo : Repository list) (filter : string) = 
-    repo |> Seq.filter (fun x -> Match x.Name filter)
-         |> Seq.distinct
+let rec private MatchRec (content : char list) (pattern : char list) =
+    match pattern with
+    | [] -> content = []
+    | MatchZeroOrMore(_)::t2 -> match content with
+                                | [] -> MatchRec content t2
+                                | _::t1 -> if MatchRec content t2 then true // zero time
+                                            else MatchRec t1 pattern // 1 more time
+    | h2::t2 -> match content with
+                | h1 :: t1 when h1.ToString().ToUpperInvariant() = h2.ToString().ToUpperInvariant() -> MatchRec t1 t2
+                | _ -> false
 
-let FilterRepos (filters : string list) = 
-    let antho = LoadAnthology()
-    filters |> Seq.map (MatchRepo antho.Repositories)
-            |> Seq.collect (fun x -> x)
-            |> Seq.distinct
-
-let Clone (filters : string list) = 
-    let wsDir = WorkspaceFolder()
-    FilterRepos filters |> Seq.iter (Vcs.VcsCloneRepo wsDir)
-
-let Add (repo : Repository) =
-    let antho = LoadAnthology ()
-    let repos = repo :: antho.Repositories |> Seq.distinctBy (fun x -> x.Name.ToUpperInvariant()) |> Seq.toList
-    let newAntho = {antho 
-                    with Repositories = repos}
-    SaveAnthology newAntho
+let Match (content : string) (pattern : string) =
+    MatchRec (content |> Seq.toList) (pattern |> Seq.toList)

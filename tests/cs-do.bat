@@ -11,7 +11,7 @@ pushd cs-do
 
 %FULLBUILD% workspace index || goto :ko
 %FULLBUILD% workspace convert || goto :ko
-%FULLBUILD% view create cs using * || goto :ko
+%FULLBUILD% view create cs using cassandra* || goto :ko
 %FULLBUILD% view list || goto :ko
 %FULLBUILD% view describe cs || goto :ko
 %FULLBUILD% view drop cs || goto :ko
