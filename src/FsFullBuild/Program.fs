@@ -41,8 +41,9 @@ let main argv =
     | ListViews -> View.List ()
     | DescribeView viewInfo -> View.Describe viewInfo.Name
     | GenerateView viewInfo -> View.Generate viewInfo.Name
-//    | GraphView {Name=vwName} -> FullBuild.Commands.Views.Views.Graph (vwName)
+    | Usage -> DisplayUsage ()
     | _ -> DisplayUsage ()
+//    | GraphView {Name=vwName} -> FullBuild.Commands.Views.Views.Graph (vwName)
 //    | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()
 //    | OptimizeWorkspace -> FullBuild.Commands.Workspace.Workspace.Optimize ()
 //    | BookmarkWorkspace -> FullBuild.Commands.Workspace.Workspace.Bookmark ()
@@ -64,7 +65,6 @@ let main argv =
 //    | RefreshSources -> FullBuild.Commands.Workspace.Workspace.RefreshSources ()
 //    | ListBinaries -> FullBuild.Commands.Binaries.Binaries.List ()
 
-    let retCode = match cmd with
-                  | Usage -> 5
-                  | _ -> 0
+    let retCode = if cmd = Error then 5
+                  else 0
     retCode
