@@ -30,17 +30,17 @@ open CommandLineParsing
 let main argv = 
     let cmd = ParseCommandLine (argv |> Seq.toList)
     match cmd with
-    | CreateWorkspace {Name=path} -> Workspace.Create path
+    | CreateWorkspace wsInfo -> Workspace.Create wsInfo.Path
     | IndexWorkspace -> Workspace.Index ()
     | ConvertWorkspace -> Workspace.Convert ()
     | AddRepository repo -> Repo.Add repo
-    | CloneRepositories {Filters=filters} -> Repo.Clone filters
+    | CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters
     | ListRepositories -> Repo.List ()
-    | CreateView view -> View.Create view.Name view.Filters
-    | DropView viewName -> View.Drop viewName.Name
+    | CreateView viewInfo -> View.Create viewInfo.Name viewInfo.Filters
+    | DropView viewInfo -> View.Drop viewInfo.Name
     | ListViews -> View.List ()
-    | DescribeView viewName -> View.Describe viewName.Name
-    | GenerateView viewName -> View.Generate viewName.Name
+    | DescribeView viewInfo -> View.Describe viewInfo.Name
+    | GenerateView viewInfo -> View.Generate viewInfo.Name
 //    | GraphView {Name=vwName} -> FullBuild.Commands.Views.Views.Graph (vwName)
     | _ -> DisplayUsage ()
 //    | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()
