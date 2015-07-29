@@ -29,7 +29,8 @@ open WellknownFolders
 open FileExtensions
 
 let Create (viewName : string) (filters : string list) =
-    let repos = filters |> Repo.FilterRepos |> Seq.map (fun x -> x.Name)
+    let repos = filters |> Repo.FilterRepos 
+                        |> Seq.map (fun x -> x.Name)
     let vwDir = WorkspaceViewFolder ()
     let vwFile = viewName + ".view" |> GetFile vwDir
     File.WriteAllLines (vwFile.FullName, repos)
