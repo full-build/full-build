@@ -24,22 +24,36 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module PatternMatching
 
-
-let private (|MatchZeroOrMore|_|) c =
+let private (|MatchZeroOrMore|_|) c = 
     match c with
     | '*' -> Some c
     | _ -> None
 
-let rec private MatchRec (content : char list) (pattern : char list) =
-    match pattern with
-    | [] -> content = []
-    | MatchZeroOrMore(_)::t2 -> match content with
-                                | [] -> MatchRec content t2
-                                | _::t1 -> if MatchRec content t2 then true // zero time
-                                            else MatchRec t1 pattern // 1 more time
-    | h2::t2 -> match content with
-                | h1 :: t1 when h1.ToString().ToUpperInvariant() = h2.ToString().ToUpperInvariant() -> MatchRec t1 t2
-                | _ -> false
+let rec private MatchRec (content : char list) (pattern : char list) = 
+    seq {
+        let matchZeroOrMore remainingPattern = 
+            seq {
+                match content with
+                | [] -> yield! MatchRec content remainingPattern
+                | _ :: t1 -> 
+                    yield! MatchRec content remainingPattern // match 0 time
+                    yield! MatchRec t1 pattern // try match one more time
+            }
+    
+        let matchChar firstPatternChar remainingPattern = 
+            seq {
+                match content with
+                | firstContentChar :: remainingContent when firstContentChar = firstPatternChar -> 
+                    yield! MatchRec remainingContent remainingPattern
+                | _ -> yield false
+            }
+    
+        match pattern with
+        | [] -> yield content = []
+        | MatchZeroOrMore(_) :: tail -> yield! matchZeroOrMore tail
+        | head :: tail -> yield! matchChar head tail
+    }
 
-let Match (content : string) (pattern : string) =
-    MatchRec (content |> Seq.toList) (pattern |> Seq.toList)
+let Match (content : string) (pattern : string) = 
+    let matches = MatchRec (content.ToLowerInvariant() |> Seq.toList) (pattern.ToLowerInvariant() |> Seq.toList)
+    matches |> Seq.exists (id)
