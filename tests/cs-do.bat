@@ -14,6 +14,7 @@ pushd cs-do
 %FULLBUILD% view create cs using cassandra* || goto :ko
 %FULLBUILD% view list || goto :ko
 %FULLBUILD% view describe cs || goto :ko
+%FULLBUILD% view generate cs || goto :ko
 %FULLBUILD% view drop cs || goto :ko
 %FULLBUILD% view list || goto :ko
 
