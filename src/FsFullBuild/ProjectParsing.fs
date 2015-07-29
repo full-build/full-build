@@ -22,13 +22,17 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-module ProjectParser
+module ProjectParsing
 
 open System
 open System.IO
 open System.Linq
 open System.Xml.Linq
 open Anthology
+
+let MSBUILD_PROJECT_FOLDER = "$(SolutionDir)/.full-build/projects/"
+let MSBUILD_PACKAGE_FOLDER = "$(SolutionDir)/.full-build/packages/"
+let MSBUILD_NUGET_FOLDER = "../packages/"
 
 type ProjectDescriptor = 
     { Binaries : Assembly list
@@ -65,7 +69,7 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
-                 |> Seq.filter (fun x -> x.StartsWith("$(SolutionDir)/.full-build/"))
+                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER))
                  |> Seq.map (Path.GetFileNameWithoutExtension)
                  |> Seq.map ParseGuid
     
@@ -82,7 +86,7 @@ let GetBinaries(xdoc : XDocument) : Assembly seq =
             let hintPath = (!> binRef.Descendants(NsMsBuild + "HintPath").SingleOrDefault() : string) |> FileExtensions.ToUnix
             match hintPath with
             | null -> yield GacAssembly { AssemblyName = assemblyName}
-            | x when not <| x.Contains("/packages/") -> yield LocalAssembly { AssemblyName = assemblyName; HintPath = x }
+            | x when not <| x.Contains(MSBUILD_NUGET_FOLDER) -> yield LocalAssembly { AssemblyName = assemblyName; HintPath = x }
             | _ -> ()
     }
 
@@ -105,7 +109,7 @@ let GetPackages (prjDoc : XDocument) (nugetDoc : XDocument) =
                                                                       |> Seq.toList
     let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
-                 |> Seq.filter (fun x -> x.StartsWith("$(SolutionDir)/packages/"))
+                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER))
                  |> Seq.map ParseFullBuildPackage
     nugetPkgs |> Seq.append fbPkgs |> Seq.toList
 
