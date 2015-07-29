@@ -65,12 +65,12 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <ItemGroup>
-    <Compile Include="StringExtensions.fs" />
+    <Compile Include="PatternMatching.fs" />
     <Compile Include="FileExtensions.fs" />
     <Compile Include="WellknownFolders.fs" />
     <Compile Include="Exec.fs" />
     <Compile Include="Anthology.fs" />
-    <Compile Include="ProjectParser.fs" />
+    <Compile Include="ProjectParsing.fs" />
     <Compile Include="Vcs.fs" />
     <Compile Include="CommandLineToken.fs" />
     <Compile Include="CommandLineParsing.fs" />

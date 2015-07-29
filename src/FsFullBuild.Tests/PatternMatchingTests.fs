@@ -1,6 +1,6 @@
-﻿module StringExtensionsTests
+﻿module PatternMatchingTests
 
-open StringExtensions
+open PatternMatching
 open NUnit.Framework
 open FsUnit
 

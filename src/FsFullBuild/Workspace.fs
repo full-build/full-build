@@ -35,19 +35,22 @@ open Anthology
 
 type BinaryRef = 
     { Target : string }
-    static member From(assName : string) = { Target = assName.ToUpperInvariant() }
-    static member From(ass : Assembly) = let name = match ass with
-                                                    | GacAssembly { AssemblyName=assName }  -> assName
-                                                    | LocalAssembly { AssemblyName=assName } -> assName
-                                         BinaryRef.From name
+with
+    static member ToBinaryRef(assName : string) = { Target = assName.ToUpperInvariant() }
+    static member ToBinaryRef(ass : Assembly) = let name = match ass with
+                                                           | GacAssembly { AssemblyName=assName }  -> assName
+                                                           | LocalAssembly { AssemblyName=assName } -> assName
+                                                BinaryRef.ToBinaryRef name
 
 type PackageRef = 
     { Target : string }
-    static member From(id : string) : PackageRef = { Target = id.ToUpperInvariant() }
-    static member From(pkg : Package) : PackageRef = PackageRef.From pkg.Id
+with
+    static member ToPackageRef(id : string) : PackageRef = { Target = id.ToUpperInvariant() }
+    static member ToPackageRef(pkg : Package) : PackageRef = PackageRef.ToPackageRef pkg.Id
 
 type ProjectRef = 
     { Target : Guid }
+with
     static member From(prj : Project) : ProjectRef = { Target = prj.ProjectGuid }
 
 let private FindKnownProjects (repoDir : DirectoryInfo) =
@@ -58,7 +61,7 @@ let private ParseRepositoryProjects (parser) (repoDir : DirectoryInfo) =
     repoDir |> FindKnownProjects 
             |> Seq.map (parser repoDir)
 
-let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : string seq) : ProjectParser.ProjectDescriptor seq = 
+let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : string seq) : ProjectParsing.ProjectDescriptor seq = 
     repos |> Seq.map (GetSubDirectory wsDir) 
           |> Seq.filter (fun x -> x.Exists) 
           |> Seq.map (ParseRepositoryProjects parser) 
@@ -81,17 +84,17 @@ let Index () =
     let wsDir = WorkspaceFolder()
     let antho = LoadAnthology()
     let repos = antho.Repositories |> Seq.map (fun x -> x.Name)
-    let projects = ParseWorkspaceProjects ProjectParser.ParseProject wsDir repos
+    let projects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir repos
 
     // FIXME: before merging, it would be better to tell about conflicts
 
     // merge binaries
     let foundBinaries = projects |> Seq.map (fun x -> x.Binaries) |> Seq.concat
-    let newBinaries = antho.Binaries |> Seq.append foundBinaries |> Seq.distinctBy BinaryRef.From |> Seq.toList
+    let newBinaries = antho.Binaries |> Seq.append foundBinaries |> Seq.distinctBy BinaryRef.ToBinaryRef |> Seq.toList
 
     // merge packages
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) |> Seq.concat
-    let newPackages = antho.Packages |> Seq.append foundPackages |> Seq.distinctBy PackageRef.From |> Seq.toList
+    let newPackages = antho.Packages |> Seq.append foundPackages |> Seq.distinctBy PackageRef.ToPackageRef |> Seq.toList
 
     // merge projects
     let foundProjects = projects |> Seq.map (fun x -> x.Project)
