@@ -1,10 +1,10 @@
-﻿module ProjectParserTests
+﻿module ProjectParsingTests
 
 open System
 open System.IO
 open System.Linq
 open System.Xml.Linq
-open ProjectParser
+open ProjectParsing
 open NUnit.Framework
 open FsUnit
 open Anthology
@@ -46,21 +46,21 @@ let CheckBasicParsingCSharp () =
                              { Id="xunit"; Version="1.9.1"; TargetFramework="net45" } ]
     
     let file = new FileInfo ("./CSharpProjectSample1.xml")
-    let prjDescriptor = ProjectParser.ParseProjectContent XDocumentLoader file.Directory file
-    prjDescriptor.Project.ProjectGuid |> should equal (ProjectParser.ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396")
+    let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory file
+    prjDescriptor.Project.ProjectGuid |> should equal (ProjectParsing.ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396")
     prjDescriptor.Packages |> should equal expectedPackages
 
 [<Test>]
 let CheckBasicParsingFSharp () =
     let file = new FileInfo ("./FSharpProjectSample1.xml")
-    let prjDescriptor = ProjectParser.ParseProjectContent XDocumentLoader file.Directory file
-    prjDescriptor.Project.ProjectGuid |> should equal (ProjectParser.ParseGuid "5fde3939-c144-4287-bc57-a96ec2d1a9da")
+    let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory file
+    prjDescriptor.Project.ProjectGuid |> should equal (ProjectParsing.ParseGuid "5fde3939-c144-4287-bc57-a96ec2d1a9da")
 
 [<Test>]
 let CheckParseVirginProject () =
     let file = new FileInfo ("./VirginProject.xml")
-    let prjDescriptor = ProjectParser.ParseProjectContent XDocumentLoader file.Directory file
-    prjDescriptor.Project.ProjectReferences |> should equal [ProjectParser.ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d"]
+    let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory file
+    prjDescriptor.Project.ProjectReferences |> should equal [ProjectParsing.ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d"]
 
 
 [<Test>]
@@ -78,6 +78,6 @@ let CheckParseConvertedProject () =
                              { Id="xunit"; Version="1.9.1"; TargetFramework="net45" } ]
 
     let file = new FileInfo ("./ConvertedProject.xml")
-    let prjDescriptor = ProjectParser.ParseProjectContent XDocumentLoader file.Directory file
-    prjDescriptor.Project.ProjectReferences |> should equal [ProjectParser.ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"]
+    let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory file
+    prjDescriptor.Project.ProjectReferences |> should equal [ProjectParsing.ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"]
     prjDescriptor.Packages |> should equal expectedPackages
