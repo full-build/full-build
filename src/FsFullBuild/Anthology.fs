@@ -119,3 +119,29 @@ let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) =
     { Vcs = vcs
       Name = vcsName
       Url = vcsUrl }
+
+    
+type BinaryRef = 
+    { Target : string }
+with
+    static member ToBinaryRef(assName : string) = { Target = assName.ToLowerInvariant() }
+    static member ToBinaryRef(ass : Assembly) = let name = match ass with
+                                                           | GacAssembly { AssemblyName=assName }  -> assName
+                                                           | LocalAssembly { AssemblyName=assName } -> assName
+                                                BinaryRef.ToBinaryRef name
+
+type PackageRef = 
+    { Target : string }
+with
+    static member ToPackageRef(id : string) : PackageRef = { Target = id.ToLowerInvariant() }
+    static member ToPackageRef(pkg : Package) : PackageRef = PackageRef.ToPackageRef pkg.Id
+
+type ProjectRef = 
+    { Target : Guid }
+with
+    static member From(prj : Project) : ProjectRef = { Target = prj.ProjectGuid }
+
+type RepositoryRef = 
+    { Target : string }
+with
+    static member From(repo : Repository) : RepositoryRef = { Target = repo.Name.ToLowerInvariant() }
