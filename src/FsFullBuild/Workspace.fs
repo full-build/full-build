@@ -70,16 +70,24 @@ let Index () =
     // FIXME: before merging, it would be better to tell about conflicts
 
     // merge binaries
-    let foundBinaries = projects |> Seq.map (fun x -> x.Binaries) |> Seq.concat
-    let newBinaries = antho.Binaries |> Seq.append foundBinaries |> Seq.distinctBy BinaryRef.ToBinaryRef |> Seq.toList
+    let foundBinaries = projects |> Seq.map (fun x -> x.Binaries) 
+                                 |> Seq.concat
+    let newBinaries = antho.Binaries |> Seq.append foundBinaries 
+                                     |> Seq.distinctBy BinaryRef.ToBinaryRef 
+                                     |> Seq.toList
 
     // merge packages
-    let foundPackages = projects |> Seq.map (fun x -> x.Packages) |> Seq.concat
-    let newPackages = antho.Packages |> Seq.append foundPackages |> Seq.distinctBy PackageRef.ToPackageRef |> Seq.toList
+    let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
+                                 |> Seq.concat
+    let newPackages = antho.Packages |> Seq.append foundPackages 
+                                     |> Seq.distinctBy PackageRef.ToPackageRef 
+                                     |> Seq.toList
 
     // merge projects
     let foundProjects = projects |> Seq.map (fun x -> x.Project)
-    let newProjects = antho.Projects |> Seq.append foundProjects |> Seq.distinctBy ProjectRef.From |> Seq.toList
+    let newProjects = antho.Projects |> Seq.append foundProjects 
+                                     |> Seq.distinctBy ProjectRef.From 
+                                     |> Seq.toList
 
     let newAntho = { antho 
                      with Binaries = newBinaries

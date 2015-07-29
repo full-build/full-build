@@ -136,7 +136,8 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                                                  | GacAssembly { AssemblyName = assName } -> assName
                                                  | LocalAssembly { AssemblyName = assName } -> assName)
 
-    let pkgFile = "packages.config" |> FileExtensions.GetFile file.Directory
+    let pkgFile = "packages.config" 
+                  |> FileExtensions.GetFile file.Directory
     let packages = match xdocLoader pkgFile with
                    | Some xnuget -> GetPackages xprj xnuget
                    | _ -> [] 
