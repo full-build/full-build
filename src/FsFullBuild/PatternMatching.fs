@@ -30,30 +30,21 @@ let private (|MatchZeroOrMore|_|) c =
     | _ -> None
 
 let rec private MatchRec (content : char list) (pattern : char list) = 
-    seq {
-        let matchZeroOrMore remainingPattern = 
-            seq {
-                match content with
-                | [] -> yield! MatchRec content remainingPattern
-                | _ :: t1 -> 
-                    yield! MatchRec content remainingPattern // match 0 time
-                    yield! MatchRec t1 pattern // try match one more time
-            }
+    let matchZeroOrMore remainingPattern = 
+        match content with
+        | [] -> MatchRec content remainingPattern
+        | _ :: t1 -> if MatchRec content remainingPattern then true // match 0 time
+                     else MatchRec t1 pattern // try match one more time
     
-        let matchChar firstPatternChar remainingPattern = 
-            seq {
-                match content with
-                | firstContentChar :: remainingContent when firstContentChar = firstPatternChar -> 
-                    yield! MatchRec remainingContent remainingPattern
-                | _ -> yield false
-            }
+    let matchChar firstPatternChar remainingPattern = 
+        match content with
+        | firstContentChar :: remainingContent when firstContentChar = firstPatternChar -> MatchRec remainingContent remainingPattern
+        | _ -> false
     
-        match pattern with
-        | [] -> yield content = []
-        | MatchZeroOrMore(_) :: tail -> yield! matchZeroOrMore tail
-        | head :: tail -> yield! matchChar head tail
-    }
+    match pattern with
+    | [] -> content = []
+    | MatchZeroOrMore(_) :: tail -> matchZeroOrMore tail
+    | head :: tail -> matchChar head tail
 
 let Match (content : string) (pattern : string) = 
-    let matches = MatchRec (content.ToLowerInvariant() |> Seq.toList) (pattern.ToLowerInvariant() |> Seq.toList)
-    matches |> Seq.exists (id)
+    MatchRec (content.ToLowerInvariant() |> Seq.toList) (pattern.ToLowerInvariant() |> Seq.toList)
