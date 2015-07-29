@@ -106,6 +106,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.View) :: Token(Token.Drop) :: name :: [] -> Command.DropView { Name = name }
     | Token(Token.View) :: Token(Token.List) :: [] -> Command.ListViews
     | Token(Token.View) :: Token(Token.Describe) :: name :: [] -> Command.DescribeView { Name = name }
+    | Token(Token.View) :: Token(Token.Generate) :: name :: [] -> Command.GenerateView { Name = name }
     | Token(Token.View) :: Token(Token.Build) :: name :: [] -> Command.BuildView { Name = name }
     | Token(Token.View) :: Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = name }
 
