@@ -33,25 +33,6 @@ open Vcs
 open Anthology
 
 
-type BinaryRef = 
-    { Target : string }
-with
-    static member ToBinaryRef(assName : string) = { Target = assName.ToUpperInvariant() }
-    static member ToBinaryRef(ass : Assembly) = let name = match ass with
-                                                           | GacAssembly { AssemblyName=assName }  -> assName
-                                                           | LocalAssembly { AssemblyName=assName } -> assName
-                                                BinaryRef.ToBinaryRef name
-
-type PackageRef = 
-    { Target : string }
-with
-    static member ToPackageRef(id : string) : PackageRef = { Target = id.ToUpperInvariant() }
-    static member ToPackageRef(pkg : Package) : PackageRef = PackageRef.ToPackageRef pkg.Id
-
-type ProjectRef = 
-    { Target : Guid }
-with
-    static member From(prj : Project) : ProjectRef = { Target = prj.ProjectGuid }
 
 let private FindKnownProjects (repoDir : DirectoryInfo) =
     ["*.csproj"; "*.vbproj"; "*.fsproj"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
