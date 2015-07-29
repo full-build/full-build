@@ -27,6 +27,7 @@ module View
 open System.IO
 open WellknownFolders
 open FileExtensions
+open Anthology
 
 let Create (viewName : string) (filters : string list) =
     let repos = filters |> Repo.FilterRepos 
@@ -49,5 +50,56 @@ let Describe (viewName : string) =
     let vwFile = viewName + ".view" |> GetFile vwDir
     File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
 
+
+let GenerateViewContent (projects : Project list) =
+    seq {
+        yield ""
+        yield "Microsoft Visual Studio Solution File, Format Version 12.00"
+        yield "# Visual Studio 2013"
+
+        for project in projects do
+            yield sprintf @"Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""%s"", ""%s"", ""%s""" 
+                  (Path.GetFileNameWithoutExtension (project.RelativeProjectFile))
+                  (sprintf "%s/%s" project.Repository project.RelativeProjectFile)
+                  (project.ProjectGuid.ToString("B"))
+
+            yield "\tProjectSection(ProjectDependencies) = postProject"
+            for dependency in project.ProjectReferences do
+                if projects |> Seq.exists (fun x -> x.ProjectGuid = dependency) then
+                    let dependencyName = dependency.ToString("B")
+                    yield sprintf "\t\t%s = %s" dependencyName dependencyName
+            yield "\tEndProjectSection"
+            yield "EndProject"
+
+        yield "Global"
+        yield "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution"
+        yield "\t\tDebug|Any CPU = Debug|Any CPU"
+        yield "\t\tRelease|Any CPU = Release|Any CPU"
+        yield "\tEndGlobalSection"
+        yield "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution"
+
+        for project in projects do
+            let guid = project.ProjectGuid.ToString("B")
+            yield sprintf "\t\t%s.Debug|Any CPU.ActiveCfg = Debug|Any CPU" guid
+            yield sprintf "\t\t%s.Debug|Any CPU.Build.0 = Debug|Any CPU" guid
+            yield sprintf "\t\t%s.Release|Any CPU.ActiveCfg = Release|Any CPU" guid
+            yield sprintf "\t\t%s.Release|Any CPU.Build.0 = Release|Any CPU" guid
+
+        yield "\tEndGlobalSection"
+        yield "EndGlobal"
+    }
+
 let Generate (viewName : string) =
-    ()
+    let antho = LoadAnthology ()
+    let wsDir = WorkspaceFolder ()
+    let viewDir = WorkspaceViewFolder ()
+
+    let viewFile = viewName + ".view" |> GetFile viewDir
+    let slnFile = viewName + ".sln" |> GetFile wsDir
+
+    let repos = File.ReadAllLines (viewFile.FullName)
+    let projects = antho.Projects |> Seq.filter (fun x -> Seq.contains x.Repository repos) 
+                                  |> Seq.toList
+
+    let viewContent = GenerateViewContent projects
+    File.WriteAllLines (slnFile.FullName, viewContent)
