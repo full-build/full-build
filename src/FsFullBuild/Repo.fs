@@ -25,7 +25,7 @@
 module Repo
 
 open Anthology
-open StringExtensions
+open PatternMatching
 open WellknownFolders
 
 let List() = 
