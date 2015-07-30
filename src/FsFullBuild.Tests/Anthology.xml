@@ -1,0 +1,325 @@
+{
+  "Applications": [],
+  "Repositories": [
+    {
+      "Vcs": "Git",
+      "Name": "cassandra-sharp",
+      "Url": "https://github.com/pchalamet/cassandra-sharp"
+    },
+    {
+      "Vcs": "Git",
+      "Name": "cassandra-sharp-contrib",
+      "Url": "https://github.com/pchalamet/cassandra-sharp-contrib"
+    }
+  ],
+  "Bookmarks": [],
+  "Packages": [
+    {
+      "Id": "Rx-Core",
+      "Version": "2.2.5",
+      "TargetFramework": "net45"
+    },
+    {
+      "Id": "Rx-Interfaces",
+      "Version": "2.2.5",
+      "TargetFramework": "net45"
+    },
+    {
+      "Id": "Rx-Linq",
+      "Version": "2.2.5",
+      "TargetFramework": "net45"
+    },
+    {
+      "Id": "Rx-Main",
+      "Version": "2.2.5",
+      "TargetFramework": "net45"
+    },
+    {
+      "Id": "Rx-PlatformServices",
+      "Version": "2.2.5",
+      "TargetFramework": "net45"
+    },
+    {
+      "Id": "Moq",
+      "Version": "4.2.1408.0717",
+      "TargetFramework": "net45"
+    },
+    {
+      "Id": "NUnit",
+      "Version": "2.6.3",
+      "TargetFramework": "net45"
+    },
+    {
+      "Id": "cassandra-sharp-interfaces",
+      "Version": "3.3.0",
+      "TargetFramework": "net40"
+    },
+    {
+      "Id": "log4net",
+      "Version": "2.0.0",
+      "TargetFramework": "net45"
+    },
+    {
+      "Id": "cassandra-sharp",
+      "Version": "3.3.0",
+      "TargetFramework": "net45"
+    },
+    {
+      "Id": "cassandra-sharp-core",
+      "Version": "3.3.0",
+      "TargetFramework": "net45"
+    }
+  ],
+  "Binaries": [
+    {
+      "Case": "GacAssembly",
+      "Fields": [
+        {
+          "AssemblyName": "System"
+        }
+      ]
+    },
+    {
+      "Case": "GacAssembly",
+      "Fields": [
+        {
+          "AssemblyName": "System.Numerics"
+        }
+      ]
+    },
+    {
+      "Case": "GacAssembly",
+      "Fields": [
+        {
+          "AssemblyName": "System.Xml"
+        }
+      ]
+    },
+    {
+      "Case": "GacAssembly",
+      "Fields": [
+        {
+          "AssemblyName": "System.Configuration"
+        }
+      ]
+    },
+    {
+      "Case": "GacAssembly",
+      "Fields": [
+        {
+          "AssemblyName": "System.Core"
+        }
+      ]
+    },
+    {
+      "Case": "GacAssembly",
+      "Fields": [
+        {
+          "AssemblyName": "System.Data"
+        }
+      ]
+    },
+    {
+      "Case": "GacAssembly",
+      "Fields": [
+        {
+          "AssemblyName": "System.Web"
+        }
+      ]
+    },
+    {
+      "Case": "LocalAssembly",
+      "Fields": [
+        {
+          "AssemblyName": "CassandraSharp.Interfaces",
+          "HintPath": "../../cassandra-sharp/OutDir/NuGet/cassandra-sharp-interfaces/lib/net45/CassandraSharp.Interfaces.dll"
+        }
+      ]
+    }
+  ],
+  "Projects": [
+    {
+      "Repository": "cassandra-sharp",
+      "RelativeProjectFile": "Apache.Cassandra/Apache.Cassandra-net45.csproj",
+      "ProjectGuid": "984a4b04-c71a-4550-9193-817cfacba30a",
+      "AssemblyName": "Apache.Cassandra",
+      "OutputType": "Dll",
+      "FxTarget": "v4.5",
+      "AssemblyReferences": [
+        "System"
+      ],
+      "PackageReferences": [],
+      "ProjectReferences": [
+        "499eb63c-d74c-47e8-ae48-a2fc94538e9d"
+      ]
+    },
+    {
+      "Repository": "cassandra-sharp",
+      "RelativeProjectFile": "CassandraSharp/CassandraSharp-net45.csproj",
+      "ProjectGuid": "c1d252b7-d766-4c28-9c46-0696f896846c",
+      "AssemblyName": "CassandraSharp",
+      "OutputType": "Dll",
+      "FxTarget": "v4.5",
+      "AssemblyReferences": [
+        "System",
+        "System.Numerics",
+        "System.Xml",
+        "System.Configuration"
+      ],
+      "PackageReferences": [
+        "Rx-Core",
+        "Rx-Interfaces",
+        "Rx-Linq",
+        "Rx-Main",
+        "Rx-PlatformServices"
+      ],
+      "ProjectReferences": [
+        "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+      ]
+    },
+    {
+      "Repository": "cassandra-sharp",
+      "RelativeProjectFile": "CassandraSharp.Interfaces/CassandraSharp.Interfaces-net45.csproj",
+      "ProjectGuid": "6f6eb447-9569-406a-a23b-c09b6dbdbe10",
+      "AssemblyName": "CassandraSharp.Interfaces",
+      "OutputType": "Dll",
+      "FxTarget": "v4.5",
+      "AssemblyReferences": [
+        "System",
+        "System.Core",
+        "System.Xml",
+        "System.Numerics",
+        "System.Configuration"
+      ],
+      "PackageReferences": [],
+      "ProjectReferences": []
+    },
+    {
+      "Repository": "cassandra-sharp",
+      "RelativeProjectFile": "CassandraSharpUnitTests/CassandraSharpUnitTests-net45.csproj",
+      "ProjectGuid": "22d4356f-bc92-4399-a92c-c1f9ef6ecc73",
+      "AssemblyName": "CassandraSharpUnitTests",
+      "OutputType": "Dll",
+      "FxTarget": "v4.5",
+      "AssemblyReferences": [
+        "System",
+        "System.Core",
+        "System.Numerics",
+        "System.Xml",
+        "System.Configuration"
+      ],
+      "PackageReferences": [
+        "Moq",
+        "NUnit",
+        "Rx-Core",
+        "Rx-Interfaces",
+        "Rx-Linq",
+        "Rx-Main",
+        "Rx-PlatformServices"
+      ],
+      "ProjectReferences": [
+        "984a4b04-c71a-4550-9193-817cfacba30a",
+        "6f6eb447-9569-406a-a23b-c09b6dbdbe10",
+        "c1d252b7-d766-4c28-9c46-0696f896846c",
+        "499eb63c-d74c-47e8-ae48-a2fc94538e9d"
+      ]
+    },
+    {
+      "Repository": "cassandra-sharp",
+      "RelativeProjectFile": "cqlplus/cqlplus-net45.csproj",
+      "ProjectGuid": "0a06398e-69be-487b-a011-4c0be6619b59",
+      "AssemblyName": "cqlplus",
+      "OutputType": "Exe",
+      "FxTarget": "v4.5",
+      "AssemblyReferences": [
+        "System",
+        "System.Data",
+        "System.Xml"
+      ],
+      "PackageReferences": [],
+      "ProjectReferences": [
+        "6f6eb447-9569-406a-a23b-c09b6dbdbe10",
+        "c1d252b7-d766-4c28-9c46-0696f896846c"
+      ]
+    },
+    {
+      "Repository": "cassandra-sharp",
+      "RelativeProjectFile": "Samples/Samples-net45.csproj",
+      "ProjectGuid": "8b2359b2-4a73-4a49-8e1e-646014a768a4",
+      "AssemblyName": "Samples",
+      "OutputType": "Exe",
+      "FxTarget": "v4.5",
+      "AssemblyReferences": [
+        "System",
+        "System.Core"
+      ],
+      "PackageReferences": [],
+      "ProjectReferences": [
+        "6f6eb447-9569-406a-a23b-c09b6dbdbe10",
+        "c1d252b7-d766-4c28-9c46-0696f896846c"
+      ]
+    },
+    {
+      "Repository": "cassandra-sharp",
+      "RelativeProjectFile": "Thrift/Thrift-net45.csproj",
+      "ProjectGuid": "499eb63c-d74c-47e8-ae48-a2fc94538e9d",
+      "AssemblyName": "Thrift",
+      "OutputType": "Dll",
+      "FxTarget": "v4.5",
+      "AssemblyReferences": [
+        "System",
+        "System.Core",
+        "System.Web"
+      ],
+      "PackageReferences": [],
+      "ProjectReferences": []
+    },
+    {
+      "Repository": "cassandra-sharp-contrib",
+      "RelativeProjectFile": "CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj",
+      "ProjectGuid": "925833ed-8653-4e90-9c37-b5b6cb693cf4",
+      "AssemblyName": "CassandraSharp.Contrib.log4net",
+      "OutputType": "Dll",
+      "FxTarget": "v4.5",
+      "AssemblyReferences": [
+        "CassandraSharp.Interfaces",
+        "System"
+      ],
+      "PackageReferences": [
+        "cassandra-sharp-interfaces",
+        "log4net",
+        "Rx-Core",
+        "Rx-Interfaces",
+        "Rx-Linq",
+        "Rx-Main",
+        "Rx-PlatformServices"
+      ],
+      "ProjectReferences": []
+    },
+    {
+      "Repository": "cassandra-sharp-contrib",
+      "RelativeProjectFile": "CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj",
+      "ProjectGuid": "9e8648a4-d25a-4cfa-aaee-20d9d63ff571",
+      "AssemblyName": "CassandraSharp.Contrib.log4netUnitTests",
+      "OutputType": "Dll",
+      "FxTarget": "v4.5",
+      "AssemblyReferences": [
+        "System",
+        "System.Core"
+      ],
+      "PackageReferences": [
+        "cassandra-sharp",
+        "cassandra-sharp-core",
+        "cassandra-sharp-interfaces",
+        "log4net",
+        "NUnit",
+        "Rx-Core",
+        "Rx-Interfaces",
+        "Rx-Linq",
+        "Rx-Main",
+        "Rx-PlatformServices"
+      ],
+      "ProjectReferences": []
+    }
+  ]
+}

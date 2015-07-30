@@ -26,7 +26,7 @@
 module View
 open System.IO
 open WellknownFolders
-open FileExtensions
+open FileHelpers
 open Anthology
 
 let Create (viewName : string) (filters : string list) =
@@ -51,7 +51,7 @@ let Describe (viewName : string) =
     File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
 
 
-let GenerateViewContent (projects : Project list) =
+let GenerateSolutionContent (projects : Project list) =
     seq {
         yield ""
         yield "Microsoft Visual Studio Solution File, Format Version 12.00"
@@ -89,6 +89,10 @@ let GenerateViewContent (projects : Project list) =
         yield "EndGlobal"
     }
 
+let SelectProjects (projects : Project seq) (filters : string seq) =
+    projects |> Seq.filter (fun x -> Seq.contains x.Repository filters) 
+             |> Seq.toList
+
 let Generate (viewName : string) =
     let antho = LoadAnthology ()
     let wsDir = WorkspaceFolder ()
@@ -96,10 +100,9 @@ let Generate (viewName : string) =
 
     let viewFile = viewName + ".view" |> GetFile viewDir
     let slnFile = viewName + ".sln" |> GetFile wsDir
-
     let repos = File.ReadAllLines (viewFile.FullName)
-    let projects = antho.Projects |> Seq.filter (fun x -> Seq.contains x.Repository repos) 
-                                  |> Seq.toList
 
-    let viewContent = GenerateViewContent projects
+    let projects = SelectProjects antho.Projects repos
+    let viewContent = GenerateSolutionContent projects
+
     File.WriteAllLines (slnFile.FullName, viewContent)
