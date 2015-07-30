@@ -60,14 +60,16 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <ItemGroup>
+    <Compile Include="StringHelpersTests.fs" />
+    <Compile Include="FileHelpersTests.fs" />
     <Compile Include="PatternMatchingTests.fs" />
     <Compile Include="ProjectParsingTests.fs" />
-    <Compile Include="FileExtensionsTests.fs" />
     <Compile Include="WellKnownFolderTests.fs" />
     <Compile Include="ExecTests.fs" />
     <Compile Include="AnthologyTests.fs" />
     <Compile Include="ConfigurationTests.fs" />
     <Compile Include="RepoTests.fs" />
+    <Compile Include="ViewTests.fs" />
     <Compile Include="CommandLineParsingTests.fs" />
     <None Include="app.config" />
     <None Include="WorkspaceConfig.ini">
@@ -95,6 +97,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />
+    <Content Include="Anthology.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FsUnit.NUnit">

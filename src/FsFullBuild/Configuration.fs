@@ -26,7 +26,7 @@ module Configuration
 
 open System
 open System.IO
-open FileExtensions
+open FileHelpers
 open Anthology
 
 let private WORKSPACE_CONFIG_FILE = ".full-build"
