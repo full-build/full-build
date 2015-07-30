@@ -27,7 +27,7 @@ module Anthology
 open System
 open System.IO
 open WellknownFolders
-open FileExtensions
+open FileHelpers
 open Newtonsoft.Json
 
 let private ANTHOLOGY_FILENAME = "anthology.json"

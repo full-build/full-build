@@ -29,6 +29,7 @@ open System.IO
 open System.Linq
 open System.Xml.Linq
 open Anthology
+open StringHelpers
 
 let MSBUILD_PROJECT_FOLDER = "$(SolutionDir)/.full-build/projects/"
 let MSBUILD_PACKAGE_FOLDER = "$(SolutionDir)/.full-build/packages/"
@@ -43,20 +44,13 @@ let NsMsBuild = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2
 let inline (!<) (x : ^a) : ^b = (((^a or ^b) : (static member op_Implicit : ^a -> ^b) x))
 let inline (!>) (x : ^a) : ^b = (((^a or ^b) : (static member op_Explicit : ^a -> ^b) x))
 
-let ParseGuid(s : string) = 
-    match Guid.TryParseExact(s, "B") with // C# guid
-    | true, value -> value
-    | _ ->  match Guid.TryParseExact(s, "D") with // F# guid
-            | true, value -> value
-            | _ -> failwith (sprintf "string %A is not a Guid" s)
-
 let ExtractGuid(xdoc : XDocument) = 
     let xguid = xdoc.Descendants(NsMsBuild + "ProjectGuid").Single()
     let sguid = !> xguid : string
     ParseGuid sguid
 
 let GetProjectGuid (dir : DirectoryInfo) (relFile : string) : Guid = 
-    let file = relFile |> FileExtensions.GetFile dir
+    let file = relFile |> FileHelpers.GetFile dir
     let xdoc = XDocument.Load(file.FullName)
     ExtractGuid xdoc
 
@@ -83,7 +77,7 @@ let GetBinaries(xdoc : XDocument) : Assembly seq =
             let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
             let assemblyName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
 
-            let hintPath = (!> binRef.Descendants(NsMsBuild + "HintPath").SingleOrDefault() : string) |> FileExtensions.ToUnix
+            let hintPath = (!> binRef.Descendants(NsMsBuild + "HintPath").SingleOrDefault() : string) |> FileHelpers.ToUnix
             match hintPath with
             | null -> yield GacAssembly { AssemblyName = assemblyName}
             | x when not <| x.Contains(MSBUILD_NUGET_FOLDER) -> yield LocalAssembly { AssemblyName = assemblyName; HintPath = x }
@@ -115,7 +109,7 @@ let GetPackages (prjDoc : XDocument) (nugetDoc : XDocument) =
 
 let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (file : FileInfo) =
     let repoName = repoDir.Name
-    let relativeProjectFile = FileExtensions.ComputeRelativePath repoDir file
+    let relativeProjectFile = FileHelpers.ComputeRelativePath repoDir file
     let xprj = match xdocLoader file with
                | Some x -> x
                | _ -> failwith (sprintf "Failed to load project %A" file.FullName)
@@ -137,7 +131,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                                                  | LocalAssembly { AssemblyName = assName } -> assName)
 
     let pkgFile = "packages.config" 
-                  |> FileExtensions.GetFile file.Directory
+                  |> FileHelpers.GetFile file.Directory
     let packages = match xdocLoader pkgFile with
                    | Some xnuget -> GetPackages xprj xnuget
                    | _ -> [] 
