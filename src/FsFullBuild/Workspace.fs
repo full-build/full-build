@@ -73,14 +73,14 @@ let Index () =
     let foundBinaries = projects |> Seq.map (fun x -> x.Binaries) 
                                  |> Seq.concat
     let newBinaries = antho.Binaries |> Seq.append foundBinaries 
-                                     |> Seq.distinctBy BinaryRef.ToBinaryRef 
+                                     |> Seq.distinctBy AssemblyRef.From 
                                      |> Seq.toList
 
     // merge packages
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
                                  |> Seq.concat
     let newPackages = antho.Packages |> Seq.append foundPackages 
-                                     |> Seq.distinctBy PackageRef.ToPackageRef 
+                                     |> Seq.distinctBy PackageRef.From 
                                      |> Seq.toList
 
     // merge projects
