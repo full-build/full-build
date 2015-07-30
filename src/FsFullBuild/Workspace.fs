@@ -26,7 +26,7 @@ module Workspace
 
 open System
 open System.IO
-open FileExtensions
+open FileHelpers
 open WellknownFolders
 open Configuration
 open Vcs

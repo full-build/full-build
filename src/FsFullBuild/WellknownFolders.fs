@@ -26,7 +26,7 @@ module WellknownFolders
 
 open System
 open System.IO
-open FileExtensions
+open FileHelpers
 
 let private WORKSPACE_CONFIG_FOLDER = ".full-build"
 let private WORKSPACE_VIEW_FOLDER = ".views"
