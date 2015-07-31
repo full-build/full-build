@@ -31,10 +31,7 @@ open System.Xml.Linq
 open Anthology
 open StringHelpers
 open MsBuildHelpers
-
-let MSBUILD_PROJECT_FOLDER = "$(SolutionDir)/.full-build/projects/"
-let MSBUILD_PACKAGE_FOLDER = "$(SolutionDir)/.full-build/packages/"
-let MSBUILD_NUGET_FOLDER = "../packages/"
+open Env
 
 type ProjectDescriptor = 
     { Binaries : Assembly list

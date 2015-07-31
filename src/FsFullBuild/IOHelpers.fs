@@ -26,7 +26,26 @@ module IoHelpers
 
 open System.IO
 
-let ToUnix (f : string) =
+
+type Extension =
+    | View
+    | Solution
+    | Targets
+    | CsProj
+    | FsProj
+    | VbProj
+
+let AddExt (fileName : string) (ext : Extension) : string =
+    let sext = match ext with 
+               | View -> "view"
+               | Solution -> "sln"
+               | Targets -> "targets"
+               | CsProj -> "csproj"
+               | FsProj -> "fsproj"
+               | VbProj -> "vbproj"
+    Path.ChangeExtension (fileName, sext)
+
+let ToUnix (f : string) : string =
     if f = null then f
     else f.Replace(@"\", "/")
 
@@ -34,7 +53,7 @@ let GetSubDirectory (dir : DirectoryInfo) (subDir : string) : DirectoryInfo =
     let newPath = Path.Combine(dir.FullName, subDir)
     DirectoryInfo (newPath)
 
-let CreateSubDirectory (parentDir : DirectoryInfo) (dirName : string) =
+let CreateSubDirectory (parentDir : DirectoryInfo) (dirName : string) : DirectoryInfo =
     let dir = dirName |> GetSubDirectory parentDir
     dir.Create ()
     dir

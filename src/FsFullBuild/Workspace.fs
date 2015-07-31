@@ -35,10 +35,11 @@ open System.Xml.Linq
 open StringHelpers
 
 
-
 let private FindKnownProjects (repoDir : DirectoryInfo) =
-    ["*.csproj"; "*.vbproj"; "*.fsproj"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
-                                         |> Seq.concat
+    [AddExt "*" CsProj
+     AddExt "*" VbProj
+     AddExt "*" FsProj] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
+                        |> Seq.concat
 
 let private ParseRepositoryProjects (parser) (repoDir : DirectoryInfo) =
     repoDir |> FindKnownProjects 
@@ -49,8 +50,6 @@ let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : str
           |> Seq.filter (fun x -> x.Exists) 
           |> Seq.map (ParseRepositoryProjects parser) 
           |> Seq.concat
-
-
 
 
 let Create(path : string) = 
@@ -105,12 +104,13 @@ let StringifyOutputType (outputType : OutputType) =
     | OutputType.Dll -> ".dll"
     | _ -> failwith (sprintf "Unknown OutputType %A" outputType)
 
+
 let GenerateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
-    let projectFile = sprintf "$(SolutionDir)/%s/%s" project.Repository project.RelativeProjectFile
-    let binFile = sprintf "$(SolutionDir)/bin/%s%s" project.AssemblyName <| StringifyOutputType project.OutputType
+    let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR project.Repository project.RelativeProjectFile
+    let binFile = sprintf "%s/%s/%s%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT project.AssemblyName <| StringifyOutputType project.OutputType
 
     XElement (NsMsBuild + "Project", 
         XElement (NsMsBuild+"Import",
@@ -132,7 +132,7 @@ let GenerateProjects (projects : Project seq) =
     let prjDir = WorkspaceProjectFolder ()
     for project in projects do
         let content = GenerateProjectTarget project
-        let projectFile = StringifyGuid project.ProjectGuid + ".targets" |>  GetFile prjDir
+        let projectFile = AddExt (StringifyGuid project.ProjectGuid) Targets |> GetFile prjDir
         content.Save projectFile.FullName
 
 let Convert () = 
