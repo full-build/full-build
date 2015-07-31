@@ -6,6 +6,7 @@ open FsUnit
 open Anthology
 open View
 open StringHelpers
+open Configuration
 
 [<Test>]
 let CheckSelectProject () =

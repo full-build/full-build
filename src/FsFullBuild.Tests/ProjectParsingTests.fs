@@ -9,6 +9,7 @@ open NUnit.Framework
 open FsUnit
 open Anthology
 open StringHelpers
+open MsBuildHelpers
 
 let XDocumentLoader (fi : FileInfo) : XDocument option =
     let fileName = match fi.Name with

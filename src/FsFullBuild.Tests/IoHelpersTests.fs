@@ -2,7 +2,7 @@
 
 open System
 open System.IO
-open FileHelpers
+open IoHelpers
 open NUnit.Framework
 open FsUnit
 

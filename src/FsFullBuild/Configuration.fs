@@ -26,8 +26,10 @@ module Configuration
 
 open System
 open System.IO
-open FileHelpers
+open IoHelpers
 open Anthology
+open Env
+open Newtonsoft.Json
 
 let private WORKSPACE_CONFIG_FILE = ".full-build"
 
@@ -69,3 +71,18 @@ let GlobalConfig : GlobalConfiguration =
     let filename = DefaultGlobalIniFilename()
     GlobalConfigurationFromFile filename
 
+let LoadAnthologyFromFile(anthoFn : FileInfo) : Anthology = 
+    let json = File.ReadAllText anthoFn.FullName
+    JsonConvert.DeserializeObject<Anthology>(json)
+
+let SaveAnthologyToFile (anthoFn : FileInfo) (anthology : Anthology) = 
+    let json = JsonConvert.SerializeObject(anthology, Formatting.Indented)
+    File.WriteAllText(anthoFn.FullName, json)
+
+let LoadAnthology() : Anthology = 
+    let anthoFn = GetAnthologyFileName()
+    LoadAnthologyFromFile anthoFn
+
+let SaveAnthology(anthology : Anthology) = 
+    let anthoFn = GetAnthologyFileName()
+    SaveAnthologyToFile anthoFn anthology

@@ -66,11 +66,12 @@
   </Target>
   <ItemGroup>
     <Compile Include="StringHelpers.fs" />
-    <Compile Include="FileHelpers.fs" />
+    <Compile Include="IoHelpers.fs" />
     <Compile Include="PatternMatching.fs" />
-    <Compile Include="WellknownFolders.fs" />
+    <Compile Include="Env.fs" />
     <Compile Include="Exec.fs" />
     <Compile Include="Anthology.fs" />
+    <Compile Include="MsBuildHelpers.fs" />
     <Compile Include="ProjectParsing.fs" />
     <Compile Include="Vcs.fs" />
     <Compile Include="CommandLineToken.fs" />
