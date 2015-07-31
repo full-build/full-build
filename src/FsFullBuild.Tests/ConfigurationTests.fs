@@ -32,7 +32,7 @@ let CheckRoundtripAnthology () =
                        PackageReferences = [ ]
                        Repository = "cassandra-sharp" } ] }
 
-    let file = new FileInfo (Path.GetRandomFileName())
+    let file = FileInfo (Path.GetRandomFileName())
     printfn "Temporary file is %A" file.FullName
 
     SaveAnthologyToFile file expected
@@ -42,7 +42,7 @@ let CheckRoundtripAnthology () =
 
 [<Test>]
 let CheckGlobalIniFilename () =
-    let file = new FileInfo("GlobalConfig.ini")
+    let file = FileInfo("GlobalConfig.ini")
     file.Exists |> should equal true
     let config = GlobalConfigurationFromFile file
 
@@ -52,19 +52,3 @@ let CheckGlobalIniFilename () =
                      NuGets = ["https://www.nuget.org/api/v2/"; "https://www.nuget.org/api/v3/"] }
 
     config |> should equal expected
-
-//[<Test>]
-//let CheckDefaultConfigurationFile () =
-//    let file = DefaultGlobalIniFilename ()
-//    file.FullName.Contains(".full-build") |> should equal true
-
-//[<Test>]
-//let CheckWorkspaceIniFilename () =
-//    let file = new FileInfo("WorkspaceConfig.ini")
-//    file.Exists |> should equal true
-//    let config = WorkspaceConfigurationFromFile file
-//
-//    let expected = { Repositories = [ {Vcs=Git; Name="cassandra_sharp"; Url="https://github.com/pchalamet/cassandra-sharp"}
-//                                      {Vcs=Git; Name="cassandra_sharp_contrib"; Url="https://github.com/pchalamet/cassandra-sharp-contrib"} ] }
-//
-//    config |> should equal expected

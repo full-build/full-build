@@ -43,10 +43,10 @@ type WorkspaceConfiguration =
     { Repositories : Repository list }
 
 let IniDocFromFile(configFile : FileInfo) = 
-    new Mini.IniDocument(configFile.FullName)
+    Mini.IniDocument (configFile.FullName)
 
 let DefaultGlobalIniFilename() = 
-    let userProfileDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
+    let userProfileDir = DirectoryInfo (Environment.GetFolderPath (Environment.SpecialFolder.UserProfile))
     let configFile = WORKSPACE_CONFIG_FILE |> GetFile userProfileDir
     configFile
 
@@ -68,21 +68,21 @@ let GlobalConfigurationFromFile file =
       NuGets = nugets }
 
 let GlobalConfig : GlobalConfiguration = 
-    let filename = DefaultGlobalIniFilename()
+    let filename = DefaultGlobalIniFilename ()
     GlobalConfigurationFromFile filename
 
 let LoadAnthologyFromFile(anthoFn : FileInfo) : Anthology = 
     let json = File.ReadAllText anthoFn.FullName
-    JsonConvert.DeserializeObject<Anthology>(json)
+    JsonConvert.DeserializeObject<Anthology> (json)
 
 let SaveAnthologyToFile (anthoFn : FileInfo) (anthology : Anthology) = 
-    let json = JsonConvert.SerializeObject(anthology, Formatting.Indented)
-    File.WriteAllText(anthoFn.FullName, json)
+    let json = JsonConvert.SerializeObject (anthology, Formatting.Indented)
+    File.WriteAllText (anthoFn.FullName, json)
 
 let LoadAnthology() : Anthology = 
-    let anthoFn = GetAnthologyFileName()
+    let anthoFn = GetAnthologyFileName ()
     LoadAnthologyFromFile anthoFn
 
 let SaveAnthology(anthology : Anthology) = 
-    let anthoFn = GetAnthologyFileName()
+    let anthoFn = GetAnthologyFileName ()
     SaveAnthologyToFile anthoFn anthology
