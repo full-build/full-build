@@ -10,5 +10,5 @@ open FsUnit
 
 [<Test>]
 let CheckIsWorkspaceFolder () =
-    let currDir = new DirectoryInfo (Environment.CurrentDirectory)
+    let currDir = DirectoryInfo (Environment.CurrentDirectory)
     currDir |> IsWorkspaceFolder |> should equal false

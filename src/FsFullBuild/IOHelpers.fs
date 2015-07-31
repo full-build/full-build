@@ -32,7 +32,7 @@ let ToUnix (f : string) =
 
 let GetSubDirectory (dir : DirectoryInfo) (subDir : string) : DirectoryInfo = 
     let newPath = Path.Combine(dir.FullName, subDir)
-    new DirectoryInfo(newPath)
+    DirectoryInfo (newPath)
 
 let CreateSubDirectory (parentDir : DirectoryInfo) (dirName : string) =
     let dir = dirName |> GetSubDirectory parentDir
@@ -41,7 +41,7 @@ let CreateSubDirectory (parentDir : DirectoryInfo) (dirName : string) =
 
 let GetFile (dir : DirectoryInfo) (fileName : string) : FileInfo = 
     let fullFileName = Path.Combine(dir.FullName, fileName)
-    new FileInfo(fullFileName)
+    FileInfo (fullFileName)
 
 let rec private ComputeRelativePathInc (topDir : DirectoryInfo) (childDir : DirectoryInfo) (path : string) = 
     if topDir.FullName = childDir.FullName then path |> ToUnix
