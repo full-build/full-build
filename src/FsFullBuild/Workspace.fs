@@ -54,7 +54,7 @@ let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : str
 
 
 let Create(path : string) = 
-    let wsDir = new DirectoryInfo(path)
+    let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
     VcsCloneRepo wsDir GlobalConfig.Repository
