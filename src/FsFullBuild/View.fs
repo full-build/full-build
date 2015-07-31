@@ -34,21 +34,21 @@ let Create (viewName : string) (filters : string list) =
     let repos = filters |> Repo.FilterRepos 
                         |> Seq.map (fun x -> x.Name)
     let vwDir = WorkspaceViewFolder ()
-    let vwFile = viewName + ".view" |> GetFile vwDir
+    let vwFile = AddExt viewName View |> GetFile vwDir
     File.WriteAllLines (vwFile.FullName, repos)
 
 let Drop (viewName : string) =
     let vwDir = WorkspaceViewFolder ()
-    let vwFile = viewName + ".view"|> GetFile vwDir
+    let vwFile = AddExt viewName View |> GetFile vwDir
     File.Delete (vwFile.FullName)
 
 let List () =
     let vwDir = WorkspaceViewFolder ()
-    vwDir.EnumerateFiles ("*.view") |> Seq.iter (fun x -> printfn "%s" (Path.GetFileNameWithoutExtension (x.Name)))
+    vwDir.EnumerateFiles (AddExt "*" View) |> Seq.iter (fun x -> printfn "%s" (Path.GetFileNameWithoutExtension (x.Name)))
 
 let Describe (viewName : string) =
     let vwDir = WorkspaceViewFolder ()
-    let vwFile = viewName + ".view" |> GetFile vwDir
+    let vwFile = AddExt viewName View |> GetFile vwDir
     File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
 
 
@@ -99,8 +99,8 @@ let Generate (viewName : string) =
     let wsDir = WorkspaceFolder ()
     let viewDir = WorkspaceViewFolder ()
 
-    let viewFile = viewName + ".view" |> GetFile viewDir
-    let slnFile = viewName + ".sln" |> GetFile wsDir
+    let viewFile = AddExt viewName View |> GetFile viewDir
+    let slnFile = AddExt viewName Solution |> GetFile wsDir
     let repos = File.ReadAllLines (viewFile.FullName)
 
     let projects = SelectProjects antho.Projects repos
