@@ -31,4 +31,4 @@ let Exec (command : string) (args : string) (dir : string) =
     use proc = Process.Start (psi)
     if proc = null then failwith "Failed to start process"
     proc.WaitForExit()
-    if proc.ExitCode <> 0 then failwith (sprintf "Process failed with error %d" proc.ExitCode)
+    if proc.ExitCode <> 0 then failwithf "Process failed with error %d" proc.ExitCode

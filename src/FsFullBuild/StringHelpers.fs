@@ -31,7 +31,7 @@ let ParseGuid(s : string) =
     | true, value -> value
     | _ ->  match Guid.TryParseExact(s, "D") with // F# guid
             | true, value -> value
-            | _ -> failwith (sprintf "string %A is not a Guid" s)
+            | _ -> failwithf "string %A is not a Guid" s
 
 let StringifyGuid (guid : Guid) =
     guid.ToString("B")
