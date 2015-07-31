@@ -122,7 +122,7 @@ let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) =
 
     
 type AssemblyRef = 
-    { Target : string }
+    private { Target : string }
 with
     static member From(assName : string) = { Target = assName.ToLowerInvariant() }
     static member From(ass : Assembly) = let name = match ass with
@@ -131,17 +131,17 @@ with
                                          AssemblyRef.From name
 
 type PackageRef = 
-    { Target : string }
+    private { Target : string }
 with
     static member From(id : string) : PackageRef = { Target = id.ToLowerInvariant() }
     static member From(pkg : Package) : PackageRef = PackageRef.From pkg.Id
 
 type ProjectRef = 
-    { Target : Guid }
+    private { Target : Guid }
 with
     static member From(prj : Project) : ProjectRef = { Target = prj.ProjectGuid }
 
 type RepositoryRef = 
-    { Target : string }
+    private { Target : string }
 with
     static member From(repo : Repository) : RepositoryRef = { Target = repo.Name.ToLowerInvariant() }
