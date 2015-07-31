@@ -24,13 +24,15 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module Workspace
 
-open System
 open System.IO
-open FileHelpers
-open WellknownFolders
+open IoHelpers
+open Env
 open Configuration
 open Vcs
 open Anthology
+open MsBuildHelpers
+open System.Xml.Linq
+open StringHelpers
 
 
 
@@ -97,5 +99,42 @@ let Index () =
     SaveAnthology newAntho
 
 
+let StringifyOutputType (outputType : OutputType) =
+    match outputType with
+    | OutputType.Exe -> ".exe"
+    | OutputType.Dll -> ".dll"
+    | _ -> failwith (sprintf "Unknown OutputType %A" outputType)
+
+let GenerateProjectTarget (project : Project) =
+    let projectProperty = ProjectPropertyName project
+    let srcCondition = sprintf "'$(%s)' != ''" projectProperty
+    let binCondition = sprintf "'$(%s)' == ''" projectProperty
+    let projectFile = sprintf "$(SolutionDir)/%s/%s" project.Repository project.RelativeProjectFile
+    let binFile = sprintf "$(SolutionDir)/bin/%s%s" project.AssemblyName <| StringifyOutputType project.OutputType
+
+    XElement (NsMsBuild + "Project", 
+        XElement (NsMsBuild+"Import",
+            XAttribute (NsNone + "Project", "$(SolutionDir)/.full-build/views/$(SolutionName).targets"),
+            XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
+        XElement (NsMsBuild + "ItemGroup",
+            XElement(NsMsBuild + "ProjectReference",
+                XAttribute (NsNone + "Include", projectFile),
+                XAttribute (NsNone + "Condition", srcCondition),
+                XElement (NsMsBuild + "Project", StringifyGuid project.ProjectGuid),
+                XElement (NsMsBuild + "Name", project.AssemblyName)),
+            XElement (NsMsBuild + "Reference",
+                XAttribute (NsNone + "Include", project.AssemblyName),
+                XAttribute (NsNone + "Condition", binCondition),
+                XElement (NsMsBuild + "HintPath", binFile),
+                XElement (NsMsBuild + "Private", "true"))))
+
+let GenerateProjects (projects : Project seq) =
+    let prjDir = WorkspaceProjectFolder ()
+    for project in projects do
+        let content = GenerateProjectTarget project
+        let projectFile = StringifyGuid project.ProjectGuid + ".targets" |>  GetFile prjDir
+        content.Save projectFile.FullName
+
 let Convert () = 
-    ()
+    let antho = LoadAnthology ()
+    GenerateProjects antho.Projects

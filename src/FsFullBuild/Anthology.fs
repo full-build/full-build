@@ -25,12 +25,7 @@
 module Anthology
 
 open System
-open System.IO
-open WellknownFolders
-open FileHelpers
 open Newtonsoft.Json
-
-let private ANTHOLOGY_FILENAME = "anthology.json"
 
 [<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
 type OutputType = 
@@ -91,35 +86,6 @@ type Anthology =
       Binaries : Assembly list
       Projects : Project list }
 
-let private GetAnthologyFileName() = 
-    let fbDir = WorkspaceConfigFolder()
-    ANTHOLOGY_FILENAME |> GetFile fbDir
-
-let LoadAnthologyFromFile(anthoFn : FileInfo) : Anthology = 
-    let json = File.ReadAllText anthoFn.FullName
-    JsonConvert.DeserializeObject<Anthology>(json)
-
-let SaveAnthologyToFile (anthoFn : FileInfo) (anthology : Anthology) = 
-    let json = JsonConvert.SerializeObject(anthology, Formatting.Indented)
-    File.WriteAllText(anthoFn.FullName, json)
-
-let LoadAnthology() : Anthology = 
-    let anthoFn = GetAnthologyFileName()
-    LoadAnthologyFromFile anthoFn
-
-let SaveAnthology(anthology : Anthology) = 
-    let anthoFn = GetAnthologyFileName()
-    SaveAnthologyToFile anthoFn anthology
-
-let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) = 
-    let vcs = match vcsType with
-              | "git" -> VcsType.Git
-              | "hg" -> VcsType.Hg
-              | _ -> failwith (sprintf "Unknown vcs type %A" vcsType)
-    { Vcs = vcs
-      Name = vcsName
-      Url = vcsUrl }
-
     
 type AssemblyRef = 
     private { Target : string }
@@ -145,3 +111,15 @@ type RepositoryRef =
     private { Target : string }
 with
     static member From(repo : Repository) : RepositoryRef = { Target = repo.Name.ToLowerInvariant() }
+
+
+
+
+let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) = 
+    let vcs = match vcsType with
+              | "git" -> VcsType.Git
+              | "hg" -> VcsType.Hg
+              | _ -> failwith (sprintf "Unknown vcs type %A" vcsType)
+    { Vcs = vcs
+      Name = vcsName
+      Url = vcsUrl }

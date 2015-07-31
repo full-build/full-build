@@ -22,7 +22,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-module FileHelpers
+module IoHelpers
 
 open System.IO
 
@@ -33,6 +33,11 @@ let ToUnix (f : string) =
 let GetSubDirectory (dir : DirectoryInfo) (subDir : string) : DirectoryInfo = 
     let newPath = Path.Combine(dir.FullName, subDir)
     new DirectoryInfo(newPath)
+
+let CreateSubDirectory (parentDir : DirectoryInfo) (dirName : string) =
+    let dir = dirName |> GetSubDirectory parentDir
+    dir.Create ()
+    dir
 
 let GetFile (dir : DirectoryInfo) (fileName : string) : FileInfo = 
     let fullFileName = Path.Combine(dir.FullName, fileName)
@@ -47,4 +52,3 @@ let rec private ComputeRelativePathInc (topDir : DirectoryInfo) (childDir : Dire
 let ComputeRelativePath (dir : DirectoryInfo) (file : FileInfo) : string = 
     let path = file.Name
     ComputeRelativePathInc dir file.Directory path
-
