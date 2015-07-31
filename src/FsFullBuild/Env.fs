@@ -22,14 +22,17 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-module WellknownFolders
+module Env
 
 open System
 open System.IO
-open FileHelpers
+open IoHelpers
 
 let private WORKSPACE_CONFIG_FOLDER = ".full-build"
-let private WORKSPACE_VIEW_FOLDER = ".views"
+let private WORKSPACE_VIEW_FOLDER = "views"
+let private WORKSPACE_PROJECT_FOLDER = "projects"
+let private WORKSPACE_PACKAGE_FOLDER = "packages"
+let private ANTHOLOGY_FILENAME = "anthology.json"
 
 let IsWorkspaceFolder(wsDir : DirectoryInfo) = 
     let subDir = WORKSPACE_CONFIG_FOLDER |> GetSubDirectory wsDir
@@ -42,14 +45,33 @@ let rec private WorkspaceFolderSearch(dir : DirectoryInfo) =
 
 let private CurrentFolder() : DirectoryInfo = new DirectoryInfo(Environment.CurrentDirectory)
 
+// $
 let WorkspaceFolder() : DirectoryInfo = 
     let currDir = CurrentFolder()
     WorkspaceFolderSearch currDir
 
+// $/.full-build/views
 let WorkspaceConfigFolder() : DirectoryInfo = 
     let wsDir = WorkspaceFolder()
-    WORKSPACE_CONFIG_FOLDER |> GetSubDirectory wsDir
+    CreateSubDirectory wsDir WORKSPACE_CONFIG_FOLDER
 
+// $/.full-build/views
 let WorkspaceViewFolder() : DirectoryInfo =
-    let wsDir = WorkspaceFolder()
-    WORKSPACE_VIEW_FOLDER |> GetSubDirectory wsDir
+    let wsDir = WorkspaceConfigFolder()
+    CreateSubDirectory wsDir WORKSPACE_VIEW_FOLDER
+
+// $/.full-build/projects
+let WorkspaceProjectFolder() : DirectoryInfo =
+    let wsDir = WorkspaceConfigFolder()
+    CreateSubDirectory wsDir WORKSPACE_PROJECT_FOLDER
+
+// $/.full-build/packages
+let WorkspacePackageFolder() : DirectoryInfo =
+    let wsDir = WorkspaceConfigFolder()
+    CreateSubDirectory wsDir WORKSPACE_PACKAGE_FOLDER
+
+
+
+let GetAnthologyFileName() = 
+    let fbDir = WorkspaceConfigFolder()
+    ANTHOLOGY_FILENAME |> GetFile fbDir

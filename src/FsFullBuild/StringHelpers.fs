@@ -9,3 +9,6 @@ let ParseGuid(s : string) =
             | true, value -> value
             | _ -> failwith (sprintf "string %A is not a Guid" s)
 
+let StringifyGuid (guid : Guid) =
+    guid.ToString("B")
+
