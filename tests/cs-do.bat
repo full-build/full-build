@@ -15,8 +15,8 @@ pushd cs-do
 %FULLBUILD% view list || goto :ko
 %FULLBUILD% view describe cs || goto :ko
 %FULLBUILD% view generate cs || goto :ko
-rem %FULLBUILD% view drop cs || goto :ko
-rem %FULLBUILD% view list || goto :ko
+%FULLBUILD% view drop cs || goto :ko
+%FULLBUILD% view list || goto :ko
 
 rem %FULLBUILD% index workspace || goto :ko
 rem %FULLBUILD% install packages || goto :ko

@@ -28,19 +28,17 @@ open Env
 open IoHelpers
 open Anthology
 open StringHelpers
+open System.Xml.Linq
+open MsBuildHelpers
 open Configuration
-
-let Create (viewName : string) (filters : string list) =
-    let repos = filters |> Repo.FilterRepos 
-                        |> Seq.map (fun x -> x.Name)
-    let vwDir = WorkspaceViewFolder ()
-    let vwFile = AddExt viewName View |> GetFile vwDir
-    File.WriteAllLines (vwFile.FullName, repos)
 
 let Drop (viewName : string) =
     let vwDir = WorkspaceViewFolder ()
     let vwFile = AddExt viewName View |> GetFile vwDir
     File.Delete (vwFile.FullName)
+
+    let vwDefineFile = AddExt viewName Targets |> GetFile vwDir
+    File.Delete (vwDefineFile.FullName)
 
 let List () =
     let vwDir = WorkspaceViewFolder ()
@@ -90,6 +88,12 @@ let GenerateSolutionContent (projects : Project list) =
         yield "EndGlobal"
     }
 
+let GenerateSolutionDefines (projects : Project list) =
+    XElement (NsMsBuild + "Project",
+        XElement (NsMsBuild + "PropertyGroup",
+            XElement(NsMsBuild + "FullBuild_Config", "Y"),
+                projects |> Seq.map (fun x -> XElement (NsMsBuild + (ProjectPropertyName x), "Y") ) ) )
+
 let SelectProjects (projects : Project seq) (filters : string seq) =
     projects |> Seq.filter (fun x -> Seq.contains x.Repository filters) 
              |> Seq.toList
@@ -104,6 +108,20 @@ let Generate (viewName : string) =
     let repos = File.ReadAllLines (viewFile.FullName)
 
     let projects = SelectProjects antho.Projects repos
-    let viewContent = GenerateSolutionContent projects
+    
+    let slnContent = GenerateSolutionContent projects
+    File.WriteAllLines (slnFile.FullName, slnContent)
 
-    File.WriteAllLines (slnFile.FullName, viewContent)
+    let slnDefines = GenerateSolutionDefines projects
+    let slnDefineFile = AddExt viewName Targets |> GetFile viewDir
+    slnDefines.Save (slnDefineFile.FullName)
+
+
+let Create (viewName : string) (filters : string list) =
+    let repos = filters |> Repo.FilterRepos 
+                        |> Seq.map (fun x -> x.Name)
+    let vwDir = WorkspaceViewFolder ()
+    let vwFile = AddExt viewName View |> GetFile vwDir
+    File.WriteAllLines (vwFile.FullName, repos)
+
+    Generate viewName
