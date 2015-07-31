@@ -102,7 +102,7 @@ let StringifyOutputType (outputType : OutputType) =
     match outputType with
     | OutputType.Exe -> ".exe"
     | OutputType.Dll -> ".dll"
-    | _ -> failwith (sprintf "Unknown OutputType %A" outputType)
+    | _ -> failwithf "Unknown OutputType %A" outputType
 
 
 let GenerateProjectTarget (project : Project) =

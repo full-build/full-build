@@ -119,7 +119,7 @@ let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) =
     let vcs = match vcsType with
               | "git" -> VcsType.Git
               | "hg" -> VcsType.Hg
-              | _ -> failwith (sprintf "Unknown vcs type %A" vcsType)
+              | _ -> failwithf "Unknown vcs type %A" vcsType
     { Vcs = vcs
       Name = vcsName
       Url = vcsUrl }

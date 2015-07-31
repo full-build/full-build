@@ -45,6 +45,6 @@ let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) =
         match repo.Vcs with
         | VcsType.Git -> GitCloneRepo
         | VcsType.Hg -> HgCloneRepo
-        | x -> failwith (sprintf "Unknown VcsType %A" x)
+        | x -> failwithf "Unknown VcsType %A" x
     cloneRepo repo.Url checkoutDir
 
