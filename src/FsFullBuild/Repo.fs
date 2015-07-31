@@ -26,7 +26,8 @@ module Repo
 
 open Anthology
 open PatternMatching
-open WellknownFolders
+open Env
+open Configuration
 
 let List() = 
     let antho = LoadAnthology()

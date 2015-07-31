@@ -61,16 +61,16 @@
   </Target>
   <ItemGroup>
     <Compile Include="StringHelpersTests.fs" />
-    <Compile Include="FileHelpersTests.fs" />
+    <Compile Include="IoHelpersTests.fs" />
     <Compile Include="PatternMatchingTests.fs" />
-    <Compile Include="ProjectParsingTests.fs" />
-    <Compile Include="WellKnownFolderTests.fs" />
+    <Compile Include="EnvTests.fs" />
     <Compile Include="ExecTests.fs" />
     <Compile Include="AnthologyTests.fs" />
+    <Compile Include="ProjectParsingTests.fs" />
+    <Compile Include="CommandLineParsingTests.fs" />
     <Compile Include="ConfigurationTests.fs" />
     <Compile Include="RepoTests.fs" />
     <Compile Include="ViewTests.fs" />
-    <Compile Include="CommandLineParsingTests.fs" />
     <None Include="app.config" />
     <None Include="WorkspaceConfig.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

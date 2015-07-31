@@ -25,9 +25,11 @@
 
 module View
 open System.IO
-open WellknownFolders
-open FileHelpers
+open Env
+open IoHelpers
 open Anthology
+open StringHelpers
+open Configuration
 
 let Create (viewName : string) (filters : string list) =
     let repos = filters |> Repo.FilterRepos 
@@ -61,12 +63,12 @@ let GenerateSolutionContent (projects : Project list) =
             yield sprintf @"Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""%s"", ""%s"", ""%s""" 
                   (Path.GetFileNameWithoutExtension (project.RelativeProjectFile))
                   (sprintf "%s/%s" project.Repository project.RelativeProjectFile)
-                  (project.ProjectGuid.ToString("B"))
+                  (StringifyGuid project.ProjectGuid)
 
             yield "\tProjectSection(ProjectDependencies) = postProject"
             for dependency in project.ProjectReferences do
                 if projects |> Seq.exists (fun x -> x.ProjectGuid = dependency) then
-                    let dependencyName = dependency.ToString("B")
+                    let dependencyName = StringifyGuid dependency
                     yield sprintf "\t\t%s = %s" dependencyName dependencyName
             yield "\tEndProjectSection"
             yield "EndProject"
@@ -79,7 +81,7 @@ let GenerateSolutionContent (projects : Project list) =
         yield "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution"
 
         for project in projects do
-            let guid = project.ProjectGuid.ToString("B")
+            let guid = StringifyGuid project.ProjectGuid
             yield sprintf "\t\t%s.Debug|Any CPU.ActiveCfg = Debug|Any CPU" guid
             yield sprintf "\t\t%s.Debug|Any CPU.Build.0 = Debug|Any CPU" guid
             yield sprintf "\t\t%s.Release|Any CPU.ActiveCfg = Release|Any CPU" guid

@@ -27,7 +27,7 @@ module Vcs
 open System
 open System.IO
 open Exec
-open FileHelpers
+open IoHelpers
 open Anthology
 
 let private GitCloneRepo (url : string) (target : DirectoryInfo) = 
