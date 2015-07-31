@@ -35,4 +35,3 @@ let ParseGuid(s : string) =
 
 let StringifyGuid (guid : Guid) =
     guid.ToString("B")
-
