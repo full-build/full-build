@@ -106,7 +106,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let relativeProjectFile = IoHelpers.ComputeRelativePath repoDir file
     let xprj = match xdocLoader file with
                | Some x -> x
-               | _ -> failwith (sprintf "Failed to load project %A" file.FullName)
+               | _ -> failwithf "Failed to load project %A" file.FullName
     let xguid = !> xprj.Descendants(NsMsBuild + "ProjectGuid").Single() : string
     let guid = ParseGuid xguid
     let assemblyName = !> xprj.Descendants(NsMsBuild + "AssemblyName").Single() : string
