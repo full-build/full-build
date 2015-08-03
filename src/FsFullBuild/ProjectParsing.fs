@@ -73,7 +73,7 @@ let GetBinaries(xdoc : XDocument) : Assembly seq =
 
             let hintPath = (!> binRef.Descendants(NsMsBuild + "HintPath").SingleOrDefault() : string) |> IoHelpers.ToUnix
             match hintPath with
-            | null -> yield GacAssembly { AssemblyName = assemblyName}
+            | null -> yield ReferenceAssembly { AssemblyName = assemblyName}
             | x when not <| x.Contains(MSBUILD_NUGET_FOLDER) -> yield LocalAssembly { AssemblyName = assemblyName; HintPath = x }
             | _ -> ()
     }
@@ -121,7 +121,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     
     let binaries = GetBinaries xprj |> Seq.toList
     let binRefs = binaries |> List.map (fun x -> match x with
-                                                 | GacAssembly { AssemblyName = assName } -> assName
+                                                 | ReferenceAssembly { AssemblyName = assName } -> assName
                                                  | LocalAssembly { AssemblyName = assName } -> assName)
 
     let pkgFile = "packages.config" 
