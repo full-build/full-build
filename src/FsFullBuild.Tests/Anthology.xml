@@ -72,7 +72,7 @@
   ],
   "Binaries": [
     {
-      "Case": "GacAssembly",
+      "Case": "ReferenceAssembly",
       "Fields": [
         {
           "AssemblyName": "System"
@@ -80,7 +80,7 @@
       ]
     },
     {
-      "Case": "GacAssembly",
+      "Case": "ReferenceAssembly",
       "Fields": [
         {
           "AssemblyName": "System.Numerics"
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "Case": "GacAssembly",
+      "Case": "ReferenceAssembly",
       "Fields": [
         {
           "AssemblyName": "System.Xml"
@@ -96,7 +96,7 @@
       ]
     },
     {
-      "Case": "GacAssembly",
+      "Case": "ReferenceAssembly",
       "Fields": [
         {
           "AssemblyName": "System.Configuration"
@@ -104,7 +104,7 @@
       ]
     },
     {
-      "Case": "GacAssembly",
+      "Case": "ReferenceAssembly",
       "Fields": [
         {
           "AssemblyName": "System.Core"
@@ -112,7 +112,7 @@
       ]
     },
     {
-      "Case": "GacAssembly",
+      "Case": "ReferenceAssembly",
       "Fields": [
         {
           "AssemblyName": "System.Data"
@@ -120,7 +120,7 @@
       ]
     },
     {
-      "Case": "GacAssembly",
+      "Case": "ReferenceAssembly",
       "Fields": [
         {
           "AssemblyName": "System.Web"
