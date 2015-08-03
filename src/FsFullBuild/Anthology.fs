@@ -36,7 +36,7 @@ type Application =
     { Name : string
       Projects : Guid list }
 
-type GacAssembly =
+type ReferenceAssembly =
     { AssemblyName : string }
 
 type LocalAssembly =
@@ -45,7 +45,7 @@ type LocalAssembly =
 
 [<JsonConverter(typeof<Newtonsoft.Json.Converters.DiscriminatedUnionConverter>)>]
 type Assembly = 
-    | GacAssembly of GacAssembly
+    | ReferenceAssembly of ReferenceAssembly
     | LocalAssembly of LocalAssembly
 
 type Bookmark = 
@@ -92,7 +92,7 @@ type AssemblyRef =
 with
     static member From(assName : string) = { Target = assName.ToLowerInvariant() }
     static member From(ass : Assembly) = let name = match ass with
-                                                    | GacAssembly { AssemblyName=assName }  -> assName
+                                                    | ReferenceAssembly { AssemblyName=assName }  -> assName
                                                     | LocalAssembly { AssemblyName=assName } -> assName
                                          AssemblyRef.From name
 
