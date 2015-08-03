@@ -15,7 +15,7 @@ let CheckReferences () =
         |> should equal 
         <| AssemblyRef.From "TOTO42" 
 
-    AssemblyRef.From (GacAssembly { AssemblyName="toto42"}) 
+    AssemblyRef.From (ReferenceAssembly { AssemblyName="toto42"}) 
         |> should equal 
         <| AssemblyRef.From (LocalAssembly { AssemblyName="TOTO42"; HintPath="c:/tralala" })
 
