@@ -136,7 +136,7 @@ let GenerateProjects (projects : Project seq) =
     let prjDir = WorkspaceProjectFolder ()
     for project in projects do
         let content = GenerateProjectTarget project
-        let projectFile = AddExt (StringifyGuid project.ProjectGuid) Targets |> GetFile prjDir
+        let projectFile = AddExt (project.ProjectGuid.ToString("D")) Targets |> GetFile prjDir
         content.Save projectFile.FullName
 
 let ConvertProject (xproj : XDocument) (project : Project) =
@@ -152,13 +152,14 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         xel.Value <- newValue
 
     let setOutputPath (xel : XElement) =
-        xel.Value <- "$(SolutionDir)/bin"
+        xel.Value <- MSBUILD_BIN_FOLDER
 
     let cproj = XDocument (xproj)
     cproj.Descendants(NsMsBuild + "ProjectReference").Remove()
     cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
-    cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove();
-
+    cproj.Descendants(NsMsBuild + "BaseIntermediateOutputPath").Remove()
+    cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
+    
     // convert nuget to $(SolutionDir)/packages/
     cproj.Descendants(NsMsBuild + "HintPath") |> Seq.iter rebaseNugetPackage
 
@@ -168,7 +169,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     // add project refereces
     let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     for projectReference in project.ProjectReferences do
-        let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER (StringifyGuid projectReference)
+        let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER (projectReference.ToString("D"))
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
         afterItemGroup.AddAfterSelf (import)
