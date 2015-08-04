@@ -31,6 +31,7 @@ open Configuration
 open Vcs
 open Anthology
 open MsBuildHelpers
+open System.Linq
 open System.Xml.Linq
 open StringHelpers
 
@@ -112,6 +113,9 @@ let GenerateProjectTarget (project : Project) =
     let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR project.Repository project.RelativeProjectFile
     let binFile = sprintf "%s/%s/%s%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT project.AssemblyName <| StringifyOutputType project.OutputType
 
+    // This is the import targets that will be Import'ed inside a proj file.
+    // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
+    // Then we end up either importing output assembly or project depending on view configuration
     XElement (NsMsBuild + "Project", 
         XElement (NsMsBuild+"Import",
             XAttribute (NsNone + "Project", "$(SolutionDir)/.full-build/views/$(SolutionName).targets"),
@@ -135,6 +139,52 @@ let GenerateProjects (projects : Project seq) =
         let projectFile = AddExt (StringifyGuid project.ProjectGuid) Targets |> GetFile prjDir
         content.Save projectFile.FullName
 
+let ConvertProject (xproj : XDocument) (project : Project) =
+    let filterProject (xel : XElement) =
+        let attr = xel.Attribute (NsNone + "Project")
+        attr.Value.StartsWith (MSBUILD_PROJECT_FOLDER)
+
+    let hasNoChild (xel : XElement) =
+        not <| xel.DescendantNodes().Any()
+
+    let rebaseNugetPackage (xel : XElement) =
+        let newValue = xel.Value.Replace (@"..\packages\", "$(SolutionDir)/packages/") |> ToUnix
+        xel.Value <- newValue
+
+    let setOutputPath (xel : XElement) =
+        xel.Value <- "$(SolutionDir)/bin"
+
+    let cproj = XDocument (xproj)
+    cproj.Descendants(NsMsBuild + "ProjectReference").Remove()
+    cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
+    cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove();
+
+    // convert nuget to $(SolutionDir)/packages/
+    cproj.Descendants(NsMsBuild + "HintPath") |> Seq.iter rebaseNugetPackage
+
+    // set OutputPath
+    cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
+
+    // add project refereces
+    let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
+    for projectReference in project.ProjectReferences do
+        let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER (StringifyGuid projectReference)
+        let import = XElement (NsMsBuild + "Import",
+                        XAttribute (NsNone + "Project", importFile))
+        afterItemGroup.AddAfterSelf (import)
+    cproj
+
+let ConvertProjects (antho : Anthology) =
+    let wsDir = WorkspaceFolder ()
+    for project in antho.Projects do
+        let repoDir = project.Repository |> GetSubDirectory wsDir
+        let projFile = project.RelativeProjectFile |> GetFile repoDir
+        printfn "Converting project %A" projFile.FullName
+        let xproj = XDocument.Load (projFile.FullName)
+        let convxproj = ConvertProject xproj project
+        convxproj.Save (projFile.FullName)
+
 let Convert () = 
     let antho = LoadAnthology ()
     GenerateProjects antho.Projects
+    ConvertProjects antho
