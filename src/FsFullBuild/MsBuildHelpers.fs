@@ -24,6 +24,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module MsBuildHelpers
 open Anthology
+open StringHelpers
 open System.Xml.Linq
 
 let NsMsBuild = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003")
@@ -36,5 +37,6 @@ let inline (!>) (x : ^a) : ^b = (((^a or ^b) : (static member op_Explicit : ^a -
 
 
 let ProjectPropertyName (project : Project) =
-    sprintf "FullBuild_%s_%s_Prj" project.AssemblyName project.FxTarget
-
+    let prjGuid = project.ProjectGuid.ToString("D").Replace ('-', '_')
+    let prjProp = sprintf "Prj_%s" prjGuid
+    prjProp
