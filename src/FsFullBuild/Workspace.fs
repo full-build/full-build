@@ -46,12 +46,11 @@ let private ParseRepositoryProjects (parser) (repoDir : DirectoryInfo) =
     repoDir |> FindKnownProjects 
             |> Seq.map (parser repoDir)
 
-let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : string seq) : ProjectParsing.ProjectDescriptor seq = 
+let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : string seq) = 
     repos |> Seq.map (GetSubDirectory wsDir) 
           |> Seq.filter (fun x -> x.Exists) 
           |> Seq.map (ParseRepositoryProjects parser) 
           |> Seq.concat
-
 
 let Create(path : string) = 
     let wsDir = DirectoryInfo(path)
@@ -116,7 +115,7 @@ let GenerateProjectTarget (project : Project) =
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
     // Then we end up either importing output assembly or project depending on view configuration
-    XElement (NsMsBuild + "Project", 
+    XDocument (NsMsBuild + "Project", 
         XElement (NsMsBuild+"Import",
             XAttribute (NsNone + "Project", "$(SolutionDir)/.full-build/views/$(SolutionName).targets"),
             XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
@@ -132,12 +131,12 @@ let GenerateProjectTarget (project : Project) =
                 XElement (NsMsBuild + "HintPath", binFile),
                 XElement (NsMsBuild + "Private", "true"))))
 
-let GenerateProjects (projects : Project seq) =
+let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let prjDir = WorkspaceProjectFolder ()
     for project in projects do
         let content = GenerateProjectTarget project
         let projectFile = AddExt (project.ProjectGuid.ToString("D")) Targets |> GetFile prjDir
-        content.Save projectFile.FullName
+        xdocSaver projectFile content
 
 let ConvertProject (xproj : XDocument) (project : Project) =
     let filterProject (xel : XElement) =
@@ -154,6 +153,10 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     let setOutputPath (xel : XElement) =
         xel.Value <- MSBUILD_BIN_FOLDER
 
+    let stringifyGuid (guid : System.Guid) =
+        guid.ToString("D)")
+
+    // cleanup everything that will be modified
     let cproj = XDocument (xproj)
     cproj.Descendants(NsMsBuild + "ProjectReference").Remove()
     cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
@@ -169,23 +172,27 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     // add project refereces
     let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     for projectReference in project.ProjectReferences do
-        let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER (projectReference.ToString("D"))
+        let prjRef = stringifyGuid projectReference
+        let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER prjRef
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
         afterItemGroup.AddAfterSelf (import)
     cproj
 
-let ConvertProjects (antho : Anthology) =
+let ConvertProjects (antho : Anthology) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let wsDir = WorkspaceFolder ()
     for project in antho.Projects do
         let repoDir = project.Repository |> GetSubDirectory wsDir
         let projFile = project.RelativeProjectFile |> GetFile repoDir
-        printfn "Converting project %A" projFile.FullName
+        printfn "Converting %A" projFile.FullName
         let xproj = XDocument.Load (projFile.FullName)
         let convxproj = ConvertProject xproj project
-        convxproj.Save (projFile.FullName)
+        xdocSaver projFile convxproj
+
+let XDocumentSaver (fileName : FileInfo) (xdoc : XDocument) =
+    xdoc.Save (fileName.FullName)
 
 let Convert () = 
     let antho = LoadAnthology ()
-    GenerateProjects antho.Projects
-    ConvertProjects antho
+    GenerateProjects antho.Projects XDocumentSaver
+    ConvertProjects antho XDocumentSaver
