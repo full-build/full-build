@@ -115,21 +115,22 @@ let GenerateProjectTarget (project : Project) =
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
     // Then we end up either importing output assembly or project depending on view configuration
-    XDocument (NsMsBuild + "Project", 
-        XElement (NsMsBuild+"Import",
-            XAttribute (NsNone + "Project", "$(SolutionDir)/.full-build/views/$(SolutionName).targets"),
-            XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
-        XElement (NsMsBuild + "ItemGroup",
-            XElement(NsMsBuild + "ProjectReference",
-                XAttribute (NsNone + "Include", projectFile),
-                XAttribute (NsNone + "Condition", srcCondition),
-                XElement (NsMsBuild + "Project", StringifyGuid project.ProjectGuid),
-                XElement (NsMsBuild + "Name", project.AssemblyName)),
-            XElement (NsMsBuild + "Reference",
-                XAttribute (NsNone + "Include", project.AssemblyName),
-                XAttribute (NsNone + "Condition", binCondition),
-                XElement (NsMsBuild + "HintPath", binFile),
-                XElement (NsMsBuild + "Private", "true"))))
+    XDocument (
+        XElement(NsMsBuild + "Project", 
+            XElement (NsMsBuild + "Import",
+                XAttribute (NsNone + "Project", "$(SolutionDir)/.full-build/views/$(SolutionName).targets"),
+                XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
+            XElement (NsMsBuild + "ItemGroup",
+                XElement(NsMsBuild + "ProjectReference",
+                    XAttribute (NsNone + "Include", projectFile),
+                    XAttribute (NsNone + "Condition", srcCondition),
+                    XElement (NsMsBuild + "Project", StringifyGuid project.ProjectGuid),
+                    XElement (NsMsBuild + "Name", project.AssemblyName)),
+                XElement (NsMsBuild + "Reference",
+                    XAttribute (NsNone + "Include", project.AssemblyName),
+                    XAttribute (NsNone + "Condition", binCondition),
+                    XElement (NsMsBuild + "HintPath", binFile),
+                    XElement (NsMsBuild + "Private", "true")))))
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let prjDir = WorkspaceProjectFolder ()
@@ -154,13 +155,13 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         xel.Value <- MSBUILD_BIN_FOLDER
 
     let stringifyGuid (guid : System.Guid) =
-        guid.ToString("D)")
+        guid.ToString("D")
 
     // cleanup everything that will be modified
     let cproj = XDocument (xproj)
     cproj.Descendants(NsMsBuild + "ProjectReference").Remove()
     cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
-    cproj.Descendants(NsMsBuild + "BaseIntermediateOutputPath").Remove()
+    //cproj.Descendants(NsMsBuild + "BaseIntermediateOutputPath").Remove()
     cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
     
     // convert nuget to $(SolutionDir)/packages/
