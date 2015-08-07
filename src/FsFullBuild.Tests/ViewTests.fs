@@ -62,7 +62,6 @@ let CheckGenerateSolution () =
                        ProjectReferences= [ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"; ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"; ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4" ] } ]
 
     let content = GenerateSolutionContent projects
-    content |> Seq.iter (fun x -> printfn "%A" x)
 
     // NOTE: CassandraSharp.Contrib.log4netUnitTests must depend on CassandraSharp.Contrib.log4net
     //       other dependencies must not be set as outside solution scope (ie: no build order to be specified)
