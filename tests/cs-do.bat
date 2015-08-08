@@ -11,10 +11,16 @@ pushd cs-do
 
 %FULLBUILD% workspace index || goto :ko
 %FULLBUILD% workspace convert || goto :ko
-%FULLBUILD% view create cs using cassandra* || goto :ko
+%FULLBUILD% view create cs using cassandra-sharp || goto :ko
+%FULLBUILD% view create csc using cassandra-sharp-contrib || goto :ko
+%FULLBUILD% view create csa using cassandra-sharp* || goto :ko
 %FULLBUILD% view list || goto :ko
 %FULLBUILD% view describe cs || goto :ko
-%FULLBUILD% view generate cs || goto :ko
+%FULLBUILD% view describe csc || goto :ko
+%FULLBUILD% view describe csa || goto :ko
+rem msbuild csc.sln
+rem msbuild cs.sln
+
 rem %FULLBUILD% view drop cs || goto :ko
 rem %FULLBUILD% view list || goto :ko
 
