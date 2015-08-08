@@ -94,9 +94,27 @@ let GenerateSolutionDefines (projects : Project list) =
             XElement(NsMsBuild + "FullBuild_Config", "Y"),
                 projects |> Seq.map (fun x -> XElement (NsMsBuild + (ProjectPropertyName x), "Y") ) ) )
 
-let SelectProjects (projects : Project seq) (filters : string seq) =
-    projects |> Seq.filter (fun x -> Seq.contains x.Repository filters) 
-             |> Seq.toList
+
+// find all referencing projects of a project
+let ReferencingProjects (dependencyProject : Project) (projects : Project seq) =
+    projects |> Seq.filter (fun x -> x.ProjectReferences |> Seq.contains dependencyProject.ProjectGuid)
+
+let rec ComputePaths (goal : Project list) (allProjects : Project seq) (path : Project list) (current : Project) =
+    if Seq.contains current goal then current::path
+    else
+        let parents = ReferencingProjects current allProjects |> Seq.toList
+        let paths = parents |> Seq.collect (ComputePaths goal allProjects (current::path))
+                            |> Seq.toList
+        paths
+
+let ComputeProjectSelectionClosure (allProjects : Project seq) (filters : string seq) =
+    let goal = allProjects |> Seq.filter (fun x -> Seq.contains x.Repository filters) 
+                           |> Seq.toList
+
+    let transitiveClosure = goal |> Seq.map (ComputePaths goal allProjects [])
+                                 |> Seq.concat
+                                 |> Seq.distinct
+    transitiveClosure
 
 let Generate (viewName : string) =
     let antho = LoadAnthology ()
@@ -107,7 +125,7 @@ let Generate (viewName : string) =
     let slnFile = AddExt viewName Solution |> GetFile wsDir
     let repos = File.ReadAllLines (viewFile.FullName)
 
-    let projects = SelectProjects antho.Projects repos
+    let projects = ComputeProjectSelectionClosure antho.Projects repos |> Seq.toList
     
     let slnContent = GenerateSolutionContent projects
     File.WriteAllLines (slnFile.FullName, slnContent)
