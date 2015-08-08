@@ -13,7 +13,7 @@ let CheckSelectProject () =
     let file = FileInfo ("Anthology.xml")
     let antho = LoadAnthologyFromFile file
     
-    let projects = SelectProjects antho.Projects ["cassandra-sharp-contrib"]
+    let projects = ComputeProjectSelectionClosure antho.Projects ["cassandra-sharp-contrib"] |> Seq.toList
     projects |> should equal [ { Repository="cassandra-sharp-contrib"
                                  RelativeProjectFile="CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj"
                                  ProjectGuid=ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4"
