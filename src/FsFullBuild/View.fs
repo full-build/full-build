@@ -96,14 +96,14 @@ let GenerateSolutionDefines (projects : Project list) =
 
 
 // find all referencing projects of a project
-let ReferencingProjects (dependencyProject : Project) (projects : Project seq) =
-    projects |> Seq.filter (fun x -> x.ProjectReferences |> Seq.contains dependencyProject.ProjectGuid)
+let private ReferencingProjects (projects : Project seq) (current : Project) =
+    projects |> Seq.filter (fun x -> x.ProjectReferences |> Seq.contains current.ProjectGuid)
 
-let rec ComputePaths (goal : Project list) (allProjects : Project seq) (path : Project list) (current : Project) =
+let rec private ComputePaths (findParents : Project -> Project seq) (goal : Project list) (path : Project list) (current : Project) =
     if Seq.contains current goal then current::path
     else
-        let parents = ReferencingProjects current allProjects |> Seq.toList
-        let paths = parents |> Seq.collect (ComputePaths goal allProjects (current::path))
+        let parents = findParents current
+        let paths = parents |> Seq.collect (ComputePaths findParents goal (current::path))
                             |> Seq.toList
         paths
 
@@ -111,7 +111,9 @@ let ComputeProjectSelectionClosure (allProjects : Project seq) (filters : string
     let goal = allProjects |> Seq.filter (fun x -> Seq.contains x.Repository filters) 
                            |> Seq.toList
 
-    let transitiveClosure = goal |> Seq.map (ComputePaths goal allProjects [])
+    let findParents = ReferencingProjects allProjects
+
+    let transitiveClosure = goal |> Seq.map (ComputePaths findParents goal [])
                                  |> Seq.concat
                                  |> Seq.distinct
     transitiveClosure
