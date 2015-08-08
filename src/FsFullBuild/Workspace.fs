@@ -161,7 +161,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     let cproj = XDocument (xproj)
     cproj.Descendants(NsMsBuild + "ProjectReference").Remove()
     cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
-    //cproj.Descendants(NsMsBuild + "BaseIntermediateOutputPath").Remove()
+    cproj.Descendants(NsMsBuild + "BaseIntermediateOutputPath").Remove()
     cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
     
     // convert nuget to $(SolutionDir)/packages/
