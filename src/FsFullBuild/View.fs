@@ -50,7 +50,7 @@ let Describe (viewName : string) =
     File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
 
 
-let GenerateSolutionContent (projects : Project list) =
+let GenerateSolutionContent (projects : Project seq) =
     seq {
         yield ""
         yield "Microsoft Visual Studio Solution File, Format Version 12.00"
@@ -88,7 +88,7 @@ let GenerateSolutionContent (projects : Project list) =
         yield "EndGlobal"
     }
 
-let GenerateSolutionDefines (projects : Project list) =
+let GenerateSolutionDefines (projects : Project seq) =
     XElement (NsMsBuild + "Project",
         XElement (NsMsBuild + "PropertyGroup",
             XElement(NsMsBuild + "FullBuild_Config", "Y"),
@@ -127,7 +127,7 @@ let Generate (viewName : string) =
     let slnFile = AddExt viewName Solution |> GetFile wsDir
     let repos = File.ReadAllLines (viewFile.FullName)
 
-    let projects = ComputeProjectSelectionClosure antho.Projects repos |> Seq.toList
+    let projects = ComputeProjectSelectionClosure antho.Projects repos
     
     let slnContent = GenerateSolutionContent projects
     File.WriteAllLines (slnFile.FullName, slnContent)
