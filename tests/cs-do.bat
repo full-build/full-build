@@ -8,6 +8,8 @@ if not exist cs-init call cs-init.bat || goto :ko
 robocopy cs-init cs-do /MIR 
 
 pushd cs-do
+robocopy c:\src\Paket\bin .paket /MIR
+
 
 %FULLBUILD% workspace index || goto :ko
 %FULLBUILD% workspace convert || goto :ko
@@ -18,6 +20,10 @@ pushd cs-do
 %FULLBUILD% view describe cs || goto :ko
 %FULLBUILD% view describe csc || goto :ko
 %FULLBUILD% view describe csa || goto :ko
+
+
+
+
 rem msbuild csc.sln
 rem msbuild cs.sln
 
