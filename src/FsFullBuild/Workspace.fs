@@ -180,6 +180,23 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         afterItemGroup.AddAfterSelf (import)
     cproj
 
+let GeneratePaketDependenciesContent (packages : Package seq) (config : GlobalConfiguration) =
+    seq {
+        for nuget in config.NuGets do
+            yield sprintf "source %s" nuget
+
+        yield ""
+        for package in packages do
+            yield sprintf "nuget %s %s" package.Id package.Version
+    }
+
+let GeneratePaketDependencies (packages : Package seq) =
+    let config = Configuration.GlobalConfig
+    let content = GeneratePaketDependenciesContent packages config
+    let confDir = Env.WorkspaceConfigFolder ()
+    let paketDep = "paket.dependencies" |> GetFile confDir
+    File.WriteAllLines (paketDep.FullName, content)
+
 let ConvertProjects (antho : Anthology) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let wsDir = WorkspaceFolder ()
     for project in antho.Projects do
@@ -196,4 +213,5 @@ let XDocumentSaver (fileName : FileInfo) (xdoc : XDocument) =
 let Convert () = 
     let antho = LoadAnthology ()
     GenerateProjects antho.Projects XDocumentSaver
+    GeneratePaketDependencies antho.Packages
     ConvertProjects antho XDocumentSaver
