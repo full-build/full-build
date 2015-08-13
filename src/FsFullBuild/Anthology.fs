@@ -83,7 +83,7 @@ type Anthology =
       Repositories : Repository list
       Bookmarks : Bookmark list 
       Packages : Package list
-      Binaries : Assembly list
+      Assemblies : Assembly list
       Projects : Project list }
 
     
