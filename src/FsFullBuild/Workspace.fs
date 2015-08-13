@@ -47,7 +47,7 @@ let private ParseRepositoryProjects (parser) (repoDir : DirectoryInfo) =
             |> Seq.map (parser repoDir)
 
 let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : string seq) = 
-    repos |> Seq.map (GetSubDirectory wsDir) 
+    repos |> Seq.map (fun x -> GetSubDirectory x wsDir) 
           |> Seq.filter (fun x -> x.Exists) 
           |> Seq.map (ParseRepositoryProjects parser) 
           |> Seq.concat
@@ -136,7 +136,7 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
     let prjDir = WorkspaceProjectFolder ()
     for project in projects do
         let content = GenerateProjectTarget project
-        let projectFile = AddExt (project.ProjectGuid.ToString("D")) Targets |> GetFile prjDir
+        let projectFile = prjDir |> GetFile (AddExt (project.ProjectGuid.ToString("D")) Targets)
         xdocSaver projectFile content
 
 let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
@@ -146,7 +146,7 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
 
     let filterNuget (nugetFiles) (xel : XElement) =
         let hintPaths = xel.Descendants (NsMsBuild + "HintPath")
-        hintPaths.Any(fun x -> let hintPath = (!> x : string) |> ToUnix
+        hintPaths.Any(fun x -> let hintPath = !> x : string
                                let filename = Path.GetFileName (hintPath)
                                nugetFiles |> Seq.contains filename)
 
@@ -204,23 +204,30 @@ let GeneratePackages (packages : Package seq) =
     let config = Configuration.GlobalConfig
     let content = GeneratePaketDependenciesContent packages config
     let confDir = Env.WorkspaceConfigFolder ()
-    let paketDep = "paket.dependencies" |> GetFile confDir
+    let paketDep = confDir |> GetFile "paket.dependencies" 
     File.WriteAllLines (paketDep.FullName, content)
 
-let ConvertProjects (antho : Anthology) (package2Files) (xdocSaver : FileInfo -> XDocument -> Unit) =
+let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files) =
+    let nugetFiles = package2Files |> Seq.filter (fun (id, _) -> project.PackageReferences |> Seq.contains id)
+                                    |> Seq.map (fun (_, files) -> files)
+                                    |> Seq.concat
+
+    let convxproj = ConvertProject xproj project nugetFiles
+    convxproj
+
+let ConvertProjects (antho : Anthology) (package2Files) xdocLoader xdocSaver =
     let wsDir = WorkspaceFolder ()
     for project in antho.Projects do
-        let repoDir = project.Repository |> GetSubDirectory wsDir
-        let projFile = project.RelativeProjectFile |> GetFile repoDir
+        let repoDir = wsDir |> GetSubDirectory project.Repository 
+        let projFile = repoDir |> GetFile project.RelativeProjectFile 
         printfn "Converting %A" projFile.FullName
-        let xproj = XDocument.Load (projFile.FullName)
-        let nugetFiles = package2Files |> Seq.filter (fun (id, _) -> project.PackageReferences |> Seq.contains id)
-                                       |> Seq.map (fun (_, files) -> files)
-                                       |> Seq.concat
-
-        let convxproj = ConvertProject xproj project nugetFiles
+        let xproj = xdocLoader projFile
+        let convxproj = ConvertProjectContent xproj project package2Files
 
         xdocSaver projFile convxproj
+
+let XDocumentLoader (fileName : FileInfo) =
+    XDocument.Load fileName.FullName
 
 let XDocumentSaver (fileName : FileInfo) (xdoc : XDocument) =
     xdoc.Save (fileName.FullName)
@@ -228,11 +235,14 @@ let XDocumentSaver (fileName : FileInfo) (xdoc : XDocument) =
 let Convert () = 
     let antho = LoadAnthology ()
 
+    // generate project targets
     GenerateProjects antho.Projects XDocumentSaver
 
+    // generate paket.dependencies and install packages
     GeneratePackages antho.Packages
     Package.Install ()
 
+    // for each package, get all assemblies
     let package2Files = antho.Packages |> Seq.map (fun x -> (x.Id, Package.GatherAllAssemblies x))
 
-    ConvertProjects antho package2Files XDocumentSaver
+    ConvertProjects antho package2Files XDocumentLoader XDocumentSaver

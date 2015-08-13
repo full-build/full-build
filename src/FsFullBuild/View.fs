@@ -34,10 +34,10 @@ open Configuration
 
 let Drop (viewName : string) =
     let vwDir = WorkspaceViewFolder ()
-    let vwFile = AddExt viewName View |> GetFile vwDir
+    let vwFile = vwDir |> GetFile (AddExt viewName View)
     File.Delete (vwFile.FullName)
 
-    let vwDefineFile = AddExt viewName Targets |> GetFile vwDir
+    let vwDefineFile = vwDir |> GetFile (AddExt viewName Targets)
     File.Delete (vwDefineFile.FullName)
 
 let List () =
@@ -46,7 +46,7 @@ let List () =
 
 let Describe (viewName : string) =
     let vwDir = WorkspaceViewFolder ()
-    let vwFile = AddExt viewName View |> GetFile vwDir
+    let vwFile = vwDir |> GetFile (AddExt viewName View)
     File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
 
 
@@ -123,8 +123,8 @@ let Generate (viewName : string) =
     let wsDir = WorkspaceFolder ()
     let viewDir = WorkspaceViewFolder ()
 
-    let viewFile = AddExt viewName View |> GetFile viewDir
-    let slnFile = AddExt viewName Solution |> GetFile wsDir
+    let viewFile = viewDir |> GetFile (AddExt viewName View)
+    let slnFile = wsDir |> GetFile (AddExt viewName Solution)
     let repos = File.ReadAllLines (viewFile.FullName)
 
     let projects = ComputeProjectSelectionClosure antho.Projects repos
@@ -133,7 +133,7 @@ let Generate (viewName : string) =
     File.WriteAllLines (slnFile.FullName, slnContent)
 
     let slnDefines = GenerateSolutionDefines projects
-    let slnDefineFile = AddExt viewName Targets |> GetFile viewDir
+    let slnDefineFile = viewDir |> GetFile (AddExt viewName Targets)
     slnDefines.Save (slnDefineFile.FullName)
 
 
@@ -141,7 +141,7 @@ let Create (viewName : string) (filters : string list) =
     let repos = filters |> Repo.FilterRepos 
                         |> Seq.map (fun x -> x.Name)
     let vwDir = WorkspaceViewFolder ()
-    let vwFile = AddExt viewName View |> GetFile vwDir
+    let vwFile = vwDir |> GetFile (AddExt viewName View)
     File.WriteAllLines (vwFile.FullName, repos)
 
     Generate viewName
