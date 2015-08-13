@@ -65,6 +65,7 @@
     <Compile Include="PatternMatchingTests.fs" />
     <Compile Include="EnvTests.fs" />
     <Compile Include="ExecTests.fs" />
+    <Compile Include="MsBuildHelpersTests.fs" />
     <Compile Include="AnthologyTests.fs" />
     <Compile Include="ProjectParsingTests.fs" />
     <Compile Include="CommandLineParsingTests.fs" />

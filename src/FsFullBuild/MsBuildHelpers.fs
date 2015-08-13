@@ -24,23 +24,23 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module MsBuildHelpers
 open Anthology
-open StringHelpers
 open System.Xml.Linq
 
 let NsMsBuild = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003")
 
 let NsNone = XNamespace.None
 
-let inline (!<) (x : ^a) : ^b = (((^a or ^b) : (static member op_Implicit : ^a -> ^b) x))
-
 let inline (!>) (x : ^a) : ^b = (((^a or ^b) : (static member op_Explicit : ^a -> ^b) x))
 
 
+let ReplaceInvalidChars (s : string) =
+    s.Replace('-', '_').Replace('.', '_')
+
 let ProjectPropertyName (project : Project) =
-    let prjGuid = project.ProjectGuid.ToString("D").Replace ('-', '_')
+    let prjGuid = project.ProjectGuid.ToString("D") |> ReplaceInvalidChars
     let prjProp = sprintf "Prj_%s" prjGuid
     prjProp
 
 let PackagePropertyName (id : string) =
-    let pkgProp = sprintf "FullBuild_%s_Pkg" id
+    let pkgProp = sprintf "FullBuild_%s_Pkg" id |> ReplaceInvalidChars
     pkgProp
