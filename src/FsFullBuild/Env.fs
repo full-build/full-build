@@ -32,11 +32,13 @@ let private CONFIG_FOLDER = ".full-build"
 let private VIEW_FOLDER = "views"
 let private PROJECT_FOLDER = "projects"
 let private PACKAGE_FOLDER = "packages"
+let private ASSEMBLY_FOLDER = "assemblies"
 let private ANTHOLOGY_FILENAME = "anthology.json"
 let MSBUILD_SOLUTION_DIR = "$(SolutionDir)"
 let MSBUILD_BIN_OUTPUT = "bin"
 let MSBUILD_PROJECT_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR CONFIG_FOLDER PROJECT_FOLDER
 let MSBUILD_PACKAGE_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR CONFIG_FOLDER PACKAGE_FOLDER
+let MSBUILD_ASSEMBLY_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR CONFIG_FOLDER ASSEMBLY_FOLDER
 let MSBUILD_BIN_FOLDER = sprintf "%s/%s/" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT
 let MSBUILD_NUGET_FOLDER = sprintf "../%s/" PACKAGE_FOLDER
 
@@ -71,6 +73,11 @@ let WorkspaceViewFolder() : DirectoryInfo =
 let WorkspaceProjectFolder() : DirectoryInfo =
     let wsDir = WorkspaceConfigFolder()
     CreateSubDirectory wsDir PROJECT_FOLDER
+
+// $/.full-build/projects
+let WorkspaceAssemblyFolder() : DirectoryInfo =
+    let wsDir = WorkspaceConfigFolder()
+    CreateSubDirectory wsDir ASSEMBLY_FOLDER
 
 // $/.full-build/packages
 let WorkspacePackageFolder() : DirectoryInfo =

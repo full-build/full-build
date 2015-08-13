@@ -81,15 +81,6 @@ type Command =
     | RefreshSources
     | ListBinaries
 
-//let ParsePackage(args : string list) = 
-//    match args with
-//    | [ Token(Token.List) ] -> ListPackages
-//    | [ Token(Token.Update) ] -> InstallPackages
-//    | [ Token(Token.Check) ] -> CheckPackages
-//    | [ Token(Token.Upgrade) ] -> UpgradePackages
-//    | [ Token(Token.Add); name; version ] -> UsePackage { Id = name; Version = version; TargetFramework = "net45" } // FIXME
-//    | _ -> Command.Usage
-
 let ParseCommandLine(args : string list) : Command = 
     match args with
     | Token(Token.Help) :: [] -> Command.Usage
@@ -109,6 +100,8 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.View) :: Token(Token.Generate) :: name :: [] -> Command.GenerateView { Name = name }
     | Token(Token.View) :: Token(Token.Build) :: name :: [] -> Command.BuildView { Name = name }
     | Token(Token.View) :: Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = name }
+
+    | Token(Token.Package) :: Token(Token.Install) :: [] -> Command.InstallPackages
 
     | _ -> Command.Error
 

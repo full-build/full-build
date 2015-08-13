@@ -71,11 +71,11 @@ let Index () =
     // FIXME: before merging, it would be better to tell about conflicts
 
     // merge binaries
-    let foundBinaries = projects |> Seq.map (fun x -> x.Binaries) 
-                                 |> Seq.concat
-    let newBinaries = antho.Binaries |> Seq.append foundBinaries 
-                                     |> Seq.distinctBy AssemblyRef.From 
-                                     |> Seq.toList
+    let foundAssemblies = projects |> Seq.map (fun x -> x.Assemblies) 
+                                   |> Seq.concat
+    let newAssemblies = antho.Assemblies |> Seq.append foundAssemblies 
+                                         |> Seq.distinctBy AssemblyRef.From 
+                                         |> Seq.toList
 
     // merge packages
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
@@ -91,7 +91,7 @@ let Index () =
                                      |> Seq.toList
 
     let newAntho = { antho 
-                     with Binaries = newBinaries
+                     with Assemblies = newAssemblies
                           Packages = newPackages 
                           Projects = newProjects }
 
@@ -144,12 +144,17 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         let attr = xel.Attribute (NsNone + "Project")
         attr.Value.StartsWith (MSBUILD_PROJECT_FOLDER)
 
+    let filterNuget (xel : XElement) =
+        let hintPaths = xel.Descendants (NsMsBuild + "HintPath")
+        hintPaths.Any(fun x -> let hintPath = (!> x : string) |> ToUnix
+                               hintPath.Contains("/packages/"))
+
     let hasNoChild (xel : XElement) =
         not <| xel.DescendantNodes().Any()
 
-    let rebaseNugetPackage (xel : XElement) =
-        let newValue = xel.Value.Replace (@"..\packages\", "$(SolutionDir)/packages/") |> ToUnix
-        xel.Value <- newValue
+//    let rebaseNugetPackage (xel : XElement) =
+//        let newValue = xel.Value.Replace (@"..\packages\", "$(SolutionDir)/packages/") |> ToUnix
+//        xel.Value <- newValue
 
     let setOutputPath (xel : XElement) =
         xel.Value <- MSBUILD_BIN_FOLDER
@@ -165,7 +170,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
     
     // convert nuget to $(SolutionDir)/packages/
-    cproj.Descendants(NsMsBuild + "HintPath") |> Seq.iter rebaseNugetPackage
+    cproj.Descendants(NsMsBuild + "Reference").Where(filterNuget).Remove()
 
     // set OutputPath
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
@@ -175,6 +180,14 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     for projectReference in project.ProjectReferences do
         let prjRef = stringifyGuid projectReference
         let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER prjRef
+        let import = XElement (NsMsBuild + "Import",
+                        XAttribute (NsNone + "Project", importFile))
+        afterItemGroup.AddAfterSelf (import)
+
+    // add nuget references
+    for packageReference in project.PackageReferences do
+        let pkgRef = packageReference
+        let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER pkgRef
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
         afterItemGroup.AddAfterSelf (import)
@@ -190,7 +203,7 @@ let GeneratePaketDependenciesContent (packages : Package seq) (config : GlobalCo
             yield sprintf "nuget %s %s" package.Id package.Version
     }
 
-let GeneratePaketDependencies (packages : Package seq) =
+let GeneratePackages (packages : Package seq) =
     let config = Configuration.GlobalConfig
     let content = GeneratePaketDependenciesContent packages config
     let confDir = Env.WorkspaceConfigFolder ()
@@ -212,6 +225,10 @@ let XDocumentSaver (fileName : FileInfo) (xdoc : XDocument) =
 
 let Convert () = 
     let antho = LoadAnthology ()
+
     GenerateProjects antho.Projects XDocumentSaver
-    GeneratePaketDependencies antho.Packages
+
+    GeneratePackages antho.Packages
+    Package.Install ()
+
     ConvertProjects antho XDocumentSaver
