@@ -14,7 +14,6 @@ let CheckRoundtripAnthology () =
         Bookmarks = [ { Name = "cassandra-sharp"; Version = "b62e33a6ba39f987c91fdde11472f42b2a4acd94" }; { Name = "cassandra-sharp-contrib"; Version = "e0089100b3c5ca520e831c5443ad9dc8ab176052" } ]
         Repositories = [ { Vcs = VcsType.Git; Name = "cassandra-sharp"; Url = "https://github.com/pchalamet/cassandra-sharp" }
                          { Vcs = VcsType.Git; Name = "cassandra-sharp-contrib"; Url = "https://github.com/pchalamet/cassandra-sharp-contrib" } ]
-        Assemblies = [ ReferenceAssembly { AssemblyName = "System" }; ReferenceAssembly { AssemblyName = "System.Configuration" } ]
         Packages = [ { Id="FSharp.Data"; Version="2.2.5"; TargetFramework="net45" }
                      { Id="FsUnit"; Version="1.3.0.1"; TargetFramework="net45" }
                      { Id="Mini"; Version="0.4.2.0"; TargetFramework="net45" }
@@ -28,7 +27,6 @@ let CheckRoundtripAnthology () =
                        RelativeProjectFile = "cqlplus/cqlplus-net45.csproj"
                        FxTarget = "v4.5"
                        ProjectReferences = [ ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"; ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c" ]
-                       AssemblyReferences = [ "System" ; "System.Data"; "System.Xml"]
                        PackageReferences = [ ]
                        Repository = "cassandra-sharp" } ] }
 
