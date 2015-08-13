@@ -21,12 +21,8 @@ let FxVersion2Folder =
       ("v1.1", ["11"; "net11"])    
       ("v1.0", ["10"]) ] 
 
-let GenerateItemGroup (fxLibs : DirectoryInfo) =
-    let pkgDir = WorkspacePackageFolder ()
+let GenerateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo seq) =
     seq {
-        let dlls = fxLibs.EnumerateFiles("*.dll")
-        let exes = fxLibs.EnumerateFiles("*.exes")
-        let files = Seq.append dlls exes
         for file in files do
             let assemblyName = Path.GetFileNameWithoutExtension (file.FullName)
             let relativePath = ComputeRelativePath pkgDir file
@@ -37,34 +33,48 @@ let GenerateItemGroup (fxLibs : DirectoryInfo) =
                     XElement(NsMsBuild + "Private", "true"))
     }
 
-let rec GenerateWhen (folders : string list) (fxVersion : string) (libDir : DirectoryInfo) =
+let GenerateItemGroup (fxLibs : DirectoryInfo) =
+    let pkgDir = WorkspacePackageFolder ()
+    let dlls = fxLibs.EnumerateFiles("*.dll")
+    let exes = fxLibs.EnumerateFiles("*.exes")
+    let files = Seq.append dlls exes
+    GenerateItemGroupContent pkgDir files
+
+let rec GenerateWhenContent (folders : string list) (fxVersion : string) (fxFolders : DirectoryInfo seq) =
+    let matchLibfolder (fx : string) (dir : DirectoryInfo) =
+        if fx = "" then true
+        else
+            let dirNames = dir.Name.Replace("portable-", "").Split('+')
+            dirNames |> Seq.contains fx
+
     match folders with
     | [] -> null
-    | fxFolder::tail -> let fxLibs = libDir |> GetSubDirectory fxFolder
-                        if not <| fxLibs.Exists then GenerateWhen tail fxVersion libDir
-                        else
-                            let itemGroup = GenerateItemGroup fxLibs
-                            if itemGroup.Any() then
-                                let condition = sprintf "'$(TargetFrameworkVersion)' == '%s'" fxVersion
-                                XElement(NsMsBuild + "When",
-                                    XAttribute(NsNone + "Condition", condition),
-                                    XElement(NsMsBuild + "ItemGroup", 
-                                        itemGroup))
-                            else
-                                null
+    | fxFolder::tail -> let libDir = fxFolders |> Seq.tryFind (matchLibfolder fxFolder)
+                        match libDir with
+                        | None -> GenerateWhenContent tail fxVersion fxFolders
+                        | Some libFolder -> let itemGroup = GenerateItemGroup libFolder
+                                            if itemGroup.Any() then
+                                                let condition = sprintf "'$(TargetFrameworkVersion)' == '%s'" fxVersion
+                                                XElement(NsMsBuild + "When",
+                                                    XAttribute(NsNone + "Condition", condition),
+                                                    XElement(NsMsBuild + "ItemGroup", 
+                                                        itemGroup))
+                                            else
+                                                null
 
-let GenerateTargetForAllFxVersion (package : Package) (libDir : DirectoryInfo) =
+let GenerateTargetForAllFxVersion (libDir : DirectoryInfo) =
     seq {
-        for (fxName, _) in FxVersion2Folder do
-            let fxWhens = FxVersion2Folder |> Seq.skipWhile (fun (fx, _) -> fx <> fxName)
-                                           |> Seq.map (fun (_, folders) -> GenerateWhen folders fxName libDir)
-            // TODO: manage portable libs here
-            let fxDefaultWhen = [ [""] ] |> Seq.map (fun folders -> GenerateWhen folders fxName libDir)
-            let fxWhen = Seq.append fxWhens fxDefaultWhen |> Seq.tryFind (fun x -> x <> null)
+        if libDir.Exists then
+            let fxFolders = libDir.EnumerateDirectories()
+            for (fxName, _) in FxVersion2Folder do
+                let fxWhens = FxVersion2Folder |> Seq.skipWhile (fun (fx, _) -> fx <> fxName)
+                                               |> Seq.map (fun (_, folders) -> GenerateWhenContent folders fxName fxFolders)
+                let fxDefaultWhen = [ [""] ] |> Seq.map (fun folders -> GenerateWhenContent folders fxName [libDir])
+                let fxWhen = Seq.append fxWhens fxDefaultWhen |> Seq.tryFind (fun x -> x <> null)
 
-            match fxWhen with
-            | Some x -> yield x
-            | None -> ()
+                match fxWhen with
+                | Some x -> yield x
+                | None -> ()
     }
 
 let GenerateDependencyImport (dependencies : string seq) =
@@ -92,7 +102,7 @@ let GenerateTargetForPackage (package : Package) =
     let xnuspec = XDocument.Load (nuspecFile.FullName)
     let dependencies = GetPackageDependencies xnuspec
 
-    let whens = GenerateTargetForAllFxVersion package libDir
+    let whens = GenerateTargetForAllFxVersion libDir
     let imports = GenerateDependencyImport dependencies
     let choose = if whens.Any() then XElement (NsMsBuild + "Choose", whens)
                  else null
