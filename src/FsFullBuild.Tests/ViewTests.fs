@@ -20,7 +20,6 @@ let CheckSelectProject () =
                                  AssemblyName="CassandraSharp.Contrib.log4net"
                                  OutputType=OutputType.Dll
                                  FxTarget="v4.5"   
-                                 AssemblyReferences=["CassandraSharp.Interfaces"; "System" ]
                                  PackageReferences= [ "cassandra-sharp-interfaces"; "log4net"
                                                       "Rx-Core"; "Rx-Interfaces"; "Rx-Linq"; "Rx-Main"; "Rx-PlatformServices" ]
                                  ProjectReferences= [] }
@@ -30,7 +29,6 @@ let CheckSelectProject () =
                                  AssemblyName="CassandraSharp.Contrib.log4netUnitTests"
                                  OutputType=OutputType.Dll
                                  FxTarget="v4.5"
-                                 AssemblyReferences= ["System"; "System.Core"]
                                  PackageReferences=["cassandra-sharp"; "cassandra-sharp-core"; "cassandra-sharp-interfaces"; "log4net" 
                                                     "NUnit"; "Rx-Core"; "Rx-Interfaces"; "Rx-Linq"; "Rx-Main"; "Rx-PlatformServices" ]
                                  ProjectReferences= [] } ]
@@ -46,7 +44,6 @@ let CheckGenerateSolution () =
                        AssemblyName="CassandraSharp.Contrib.log4net"
                        OutputType=OutputType.Dll
                        FxTarget="v4.5"   
-                       AssemblyReferences=[ "System" ]
                        PackageReferences= [ "log4net"
                                             "Rx-Core"; "Rx-Interfaces"; "Rx-Linq"; "Rx-Main"; "Rx-PlatformServices" ]
                        ProjectReferences= [ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"] }
@@ -56,7 +53,6 @@ let CheckGenerateSolution () =
                        AssemblyName="CassandraSharp.Contrib.log4netUnitTests"
                        OutputType=OutputType.Dll
                        FxTarget="v4.5"
-                       AssemblyReferences= ["System"; "System.Core"]
                        PackageReferences=["log4net" 
                                           "NUnit"; "Rx-Core"; "Rx-Interfaces"; "Rx-Linq"; "Rx-Main"; "Rx-PlatformServices" ]
                        ProjectReferences= [ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"; ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"; ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4" ] } ]
