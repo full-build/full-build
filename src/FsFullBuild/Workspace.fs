@@ -139,22 +139,19 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
         let projectFile = AddExt (project.ProjectGuid.ToString("D")) Targets |> GetFile prjDir
         xdocSaver projectFile content
 
-let ConvertProject (xproj : XDocument) (project : Project) =
+let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
     let filterProject (xel : XElement) =
         let attr = xel.Attribute (NsNone + "Project")
         attr.Value.StartsWith (MSBUILD_PROJECT_FOLDER)
 
-    let filterNuget (xel : XElement) =
+    let filterNuget (nugetFiles) (xel : XElement) =
         let hintPaths = xel.Descendants (NsMsBuild + "HintPath")
         hintPaths.Any(fun x -> let hintPath = (!> x : string) |> ToUnix
-                               hintPath.Contains("/packages/"))
+                               let filename = Path.GetFileName (hintPath)
+                               nugetFiles |> Seq.contains filename)
 
     let hasNoChild (xel : XElement) =
         not <| xel.DescendantNodes().Any()
-
-//    let rebaseNugetPackage (xel : XElement) =
-//        let newValue = xel.Value.Replace (@"..\packages\", "$(SolutionDir)/packages/") |> ToUnix
-//        xel.Value <- newValue
 
     let setOutputPath (xel : XElement) =
         xel.Value <- MSBUILD_BIN_FOLDER
@@ -170,7 +167,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
     
     // convert nuget to $(SolutionDir)/packages/
-    cproj.Descendants(NsMsBuild + "Reference").Where(filterNuget).Remove()
+    cproj.Descendants(NsMsBuild + "Reference").Where(filterNuget nugetFiles).Remove()
 
     // set OutputPath
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
@@ -210,14 +207,19 @@ let GeneratePackages (packages : Package seq) =
     let paketDep = "paket.dependencies" |> GetFile confDir
     File.WriteAllLines (paketDep.FullName, content)
 
-let ConvertProjects (antho : Anthology) (xdocSaver : FileInfo -> XDocument -> Unit) =
+let ConvertProjects (antho : Anthology) (package2Files) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let wsDir = WorkspaceFolder ()
     for project in antho.Projects do
         let repoDir = project.Repository |> GetSubDirectory wsDir
         let projFile = project.RelativeProjectFile |> GetFile repoDir
         printfn "Converting %A" projFile.FullName
         let xproj = XDocument.Load (projFile.FullName)
-        let convxproj = ConvertProject xproj project
+        let nugetFiles = package2Files |> Seq.filter (fun (id, _) -> project.PackageReferences |> Seq.contains id)
+                                       |> Seq.map (fun (_, files) -> files)
+                                       |> Seq.concat
+
+        let convxproj = ConvertProject xproj project nugetFiles
+
         xdocSaver projFile convxproj
 
 let XDocumentSaver (fileName : FileInfo) (xdoc : XDocument) =
@@ -231,4 +233,6 @@ let Convert () =
     GeneratePackages antho.Packages
     Package.Install ()
 
-    ConvertProjects antho XDocumentSaver
+    let package2Files = antho.Packages |> Seq.map (fun x -> (x.Id, Package.GatherAllAssemblies x))
+
+    ConvertProjects antho package2Files XDocumentSaver
