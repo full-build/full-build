@@ -62,22 +62,24 @@ let rec GenerateWhenContent (folders : string list) (fxVersion : string) (fxFold
                                             else
                                                 null
 
-let GenerateTargetForAllFxVersion (libDir : DirectoryInfo) =
-    seq {
-        if libDir.Exists then
-            let fxFolders = libDir.EnumerateDirectories()
-            for (fxName, _) in FxVersion2Folder do
-                let fxWhens = FxVersion2Folder |> Seq.skipWhile (fun (fx, _) -> fx <> fxName)
-                                               |> Seq.map (fun (_, folders) -> GenerateWhenContent folders fxName fxFolders)
-                let fxDefaultWhen = [ [""] ] |> Seq.map (fun folders -> GenerateWhenContent folders fxName [libDir])
-                let fxWhen = Seq.append fxWhens fxDefaultWhen |> Seq.tryFind (fun x -> x <> null)
+let GenerateChooseContent (libDir : DirectoryInfo) =
+    let whens = seq {
+            if libDir.Exists then
+                let fxFolders = libDir.EnumerateDirectories()
+                for (fxName, _) in FxVersion2Folder do
+                    let fxWhens = FxVersion2Folder |> Seq.skipWhile (fun (fx, _) -> fx <> fxName)
+                                                   |> Seq.map (fun (_, folders) -> GenerateWhenContent folders fxName fxFolders)
+                    let fxDefaultWhen = [ [""] ] |> Seq.map (fun folders -> GenerateWhenContent folders fxName [libDir])
+                    let fxWhen = Seq.append fxWhens fxDefaultWhen |> Seq.tryFind (fun x -> x <> null)
 
-                match fxWhen with
-                | Some x -> yield x
-                | None -> ()
-    }
-
-let GenerateDependencyImportContent (dependencies : string seq) =
+                    match fxWhen with
+                    | Some x -> yield x
+                    | None -> ()
+        }
+    if whens.Any() then XElement (NsMsBuild + "Choose", whens)
+    else null
+    
+let GenerateDependenciesContent (dependencies : string seq) =
     seq {
         for dependency in dependencies do
             let dependencyTargets = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER dependency
@@ -88,6 +90,17 @@ let GenerateDependencyImportContent (dependencies : string seq) =
                       XAttribute(NsNone + "Project", dependencyTargets),
                       XAttribute(NsNone + "Condition", condition))
     }
+
+let GenerateProjectContent (package : Package) (imports : XElement seq) (choose : XElement) =
+    let defineName = PackagePropertyName package.Id
+    let propCondition = sprintf "'$(%s)' == ''" defineName
+    let project = XElement (NsMsBuild + "Project",
+                    XAttribute (NsNone + "Condition", propCondition),
+                    XElement (NsMsBuild + "PropertyGroup",
+                        XElement (NsMsBuild + defineName, "Y")),
+                    imports,
+                    choose)
+    project
 
 let GetPackageDependencies (xnuspec : XDocument) =
     xnuspec.Descendants().Where(fun x -> x.Name.LocalName = "dependency") 
@@ -102,19 +115,9 @@ let GenerateTargetForPackage (package : Package) =
     let xnuspec = XDocument.Load (nuspecFile.FullName)
     let dependencies = GetPackageDependencies xnuspec
 
-    let whens = GenerateTargetForAllFxVersion libDir
-    let imports = GenerateDependencyImportContent dependencies
-    let choose = if whens.Any() then XElement (NsMsBuild + "Choose", whens)
-                 else null
-
-    let defineName = PackagePropertyName package.Id
-    let propCondition = sprintf "'$(%s)' == ''" defineName
-    let project = XElement (NsMsBuild + "Project",
-                    XAttribute (NsNone + "Condition", propCondition),
-                    XElement (NsMsBuild + "PropertyGroup",
-                        XElement (NsMsBuild + defineName, "Y")),
-                    imports,
-                    choose)
+    let imports = GenerateDependenciesContent dependencies
+    let choose = GenerateChooseContent libDir
+    let project = GenerateProjectContent package imports choose
 
     let targetFile = pkgDir |> GetFile "package.targets" 
     project.Save (targetFile.FullName)
