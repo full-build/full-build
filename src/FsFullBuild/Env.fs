@@ -43,7 +43,7 @@ let MSBUILD_BIN_FOLDER = sprintf "%s/%s/" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPU
 let MSBUILD_NUGET_FOLDER = sprintf "../%s/" PACKAGE_FOLDER
 
 let IsWorkspaceFolder(wsDir : DirectoryInfo) = 
-    let subDir = CONFIG_FOLDER |> GetSubDirectory wsDir
+    let subDir = wsDir |> GetSubDirectory CONFIG_FOLDER
     subDir.Exists
 
 let rec private WorkspaceFolderSearch(dir : DirectoryInfo) = 
@@ -86,5 +86,5 @@ let WorkspacePackageFolder() : DirectoryInfo =
 
 let GetAnthologyFileName() = 
     let fbDir = WorkspaceConfigFolder()
-    ANTHOLOGY_FILENAME |> GetFile fbDir
+    fbDir |> GetFile ANTHOLOGY_FILENAME
 

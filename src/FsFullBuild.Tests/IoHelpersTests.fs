@@ -9,11 +9,11 @@ open FsUnit
 [<Test>]
 let CheckGetSubDirectory () =
     let currDir = DirectoryInfo (Environment.CurrentDirectory)
-    let subdir = "toto" |> GetSubDirectory currDir
+    let subdir = currDir |> GetSubDirectory "toto"
     subdir.FullName.Contains("toto") |> should equal true
 
 [<Test>]
 let CheckGetFile () =
     let currDir = DirectoryInfo (Environment.CurrentDirectory)
-    let file = "toto" |> GetFile currDir
+    let file = currDir |> GetFile "toto" 
     file.FullName.Contains("toto") |> should equal true

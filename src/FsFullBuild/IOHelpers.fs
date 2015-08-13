@@ -51,16 +51,16 @@ let ToUnix (f : string) : string =
     if f = null then f
     else f.Replace(@"\", "/")
 
-let GetSubDirectory (dir : DirectoryInfo) (subDir : string) : DirectoryInfo = 
+let GetSubDirectory (subDir : string) (dir : DirectoryInfo) : DirectoryInfo = 
     let newPath = Path.Combine(dir.FullName, subDir)
     DirectoryInfo (newPath)
 
 let CreateSubDirectory (parentDir : DirectoryInfo) (dirName : string) : DirectoryInfo =
-    let dir = dirName |> GetSubDirectory parentDir
+    let dir = parentDir |> GetSubDirectory dirName
     dir.Create ()
     dir
 
-let GetFile (dir : DirectoryInfo) (fileName : string) : FileInfo = 
+let GetFile (fileName : string) (dir : DirectoryInfo) : FileInfo = 
     let fullFileName = Path.Combine(dir.FullName, fileName)
     FileInfo (fullFileName)
 

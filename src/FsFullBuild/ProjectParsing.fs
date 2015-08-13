@@ -44,7 +44,7 @@ let ExtractGuid(xdoc : XDocument) =
     ParseGuid sguid
 
 let GetProjectGuid (dir : DirectoryInfo) (relFile : string) : Guid = 
-    let file = relFile |> IoHelpers.GetFile dir
+    let file = dir |> IoHelpers.GetFile relFile
     let xdoc = XDocument.Load(file.FullName)
     ExtractGuid xdoc
 
@@ -124,8 +124,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                                                  | ReferenceAssembly { AssemblyName = assName } -> assName
                                                  | LocalAssembly { AssemblyName = assName } -> assName)
 
-    let pkgFile = "packages.config" 
-                  |> IoHelpers.GetFile file.Directory
+    let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
     let packages = match xdocLoader pkgFile with
                    | Some xnuget -> GetPackages xprj xnuget
                    | _ -> [] 
