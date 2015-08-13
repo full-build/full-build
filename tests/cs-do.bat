@@ -20,6 +20,7 @@ robocopy c:\src\Paket\bin .paket /MIR
 %FULLBUILD% view describe cs || goto :ko
 %FULLBUILD% view describe csc || goto :ko
 %FULLBUILD% view describe csa || goto :ko
+rem %FULLBUILD% package install || goto :ko
 
 
 

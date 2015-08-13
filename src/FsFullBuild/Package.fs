@@ -109,9 +109,18 @@ let GenerateTargetForPackage (package : Package) =
     let targetFile = "package.targets" |> GetFile pkgDir
     project.Save (targetFile.FullName)
 
+let GatherAllAssemblies (package : Package) =
+    let pkgsDir = Env.WorkspacePackageFolder ()
+    let pkgDir = package.Id |> GetSubDirectory pkgsDir
+    let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
+    let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
+    let files = Seq.append dlls exes
+    let distinctFiles = files |> Seq.map (fun x -> x.Name) |> Seq.distinct
+    distinctFiles
+
 let Install () =
     let confDir = Env.WorkspaceConfigFolder ()
-    //Exec.Exec "paket.exe" "install" confDir.FullName
+    Exec.Exec "paket.exe" "install" confDir.FullName
     
     let antho = Configuration.LoadAnthology ()
     antho.Packages |> Seq.iter GenerateTargetForPackage
