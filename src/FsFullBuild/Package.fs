@@ -77,7 +77,7 @@ let GenerateTargetForAllFxVersion (libDir : DirectoryInfo) =
                 | None -> ()
     }
 
-let GenerateDependencyImport (dependencies : string seq) =
+let GenerateDependencyImportContent (dependencies : string seq) =
     seq {
         for dependency in dependencies do
             let dependencyTargets = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER dependency
@@ -103,7 +103,7 @@ let GenerateTargetForPackage (package : Package) =
     let dependencies = GetPackageDependencies xnuspec
 
     let whens = GenerateTargetForAllFxVersion libDir
-    let imports = GenerateDependencyImport dependencies
+    let imports = GenerateDependencyImportContent dependencies
     let choose = if whens.Any() then XElement (NsMsBuild + "Choose", whens)
                  else null
 
