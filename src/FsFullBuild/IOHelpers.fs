@@ -34,6 +34,7 @@ type Extension =
     | CsProj
     | FsProj
     | VbProj
+    | NuSpec
 
 let AddExt (fileName : string) (ext : Extension) : string =
     let sext = match ext with 
@@ -43,7 +44,8 @@ let AddExt (fileName : string) (ext : Extension) : string =
                | CsProj -> "csproj"
                | FsProj -> "fsproj"
                | VbProj -> "vbproj"
-    Path.ChangeExtension (fileName, sext)
+               | NuSpec -> "nuspec"
+    sprintf "%s.%s" fileName sext
 
 let ToUnix (f : string) : string =
     if f = null then f
