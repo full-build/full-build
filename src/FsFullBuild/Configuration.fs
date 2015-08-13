@@ -47,7 +47,7 @@ let IniDocFromFile(configFile : FileInfo) =
 
 let DefaultGlobalIniFilename() = 
     let userProfileDir = DirectoryInfo (Environment.GetFolderPath (Environment.SpecialFolder.UserProfile))
-    let configFile = WORKSPACE_CONFIG_FILE |> GetFile userProfileDir
+    let configFile = userProfileDir |> GetFile WORKSPACE_CONFIG_FILE
     configFile
 
 let GlobalConfigurationFromFile file = 

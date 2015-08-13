@@ -40,7 +40,7 @@ let GenerateItemGroup (fxLibs : DirectoryInfo) =
 let rec GenerateWhen (folders : string list) (fxVersion : string) (libDir : DirectoryInfo) =
     match folders with
     | [] -> null
-    | fxFolder::tail -> let fxLibs = fxFolder |> GetSubDirectory libDir
+    | fxFolder::tail -> let fxLibs = libDir |> GetSubDirectory fxFolder
                         if not <| fxLibs.Exists then GenerateWhen tail fxVersion libDir
                         else
                             let itemGroup = GenerateItemGroup fxLibs
@@ -85,10 +85,10 @@ let GetPackageDependencies (xnuspec : XDocument) =
 
 let GenerateTargetForPackage (package : Package) =
     let pkgsDir = Env.WorkspacePackageFolder ()
-    let pkgDir = package.Id |> GetSubDirectory pkgsDir
-    let libDir = "lib" |> GetSubDirectory pkgDir
+    let pkgDir = pkgsDir |> GetSubDirectory package.Id
+    let libDir = pkgDir |> GetSubDirectory "lib" 
     
-    let nuspecFile = IoHelpers.AddExt package.Id NuSpec |> GetFile pkgDir
+    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt package.Id NuSpec)
     let xnuspec = XDocument.Load (nuspecFile.FullName)
     let dependencies = GetPackageDependencies xnuspec
 
@@ -106,12 +106,12 @@ let GenerateTargetForPackage (package : Package) =
                     imports,
                     choose)
 
-    let targetFile = "package.targets" |> GetFile pkgDir
+    let targetFile = pkgDir |> GetFile "package.targets" 
     project.Save (targetFile.FullName)
 
 let GatherAllAssemblies (package : Package) =
     let pkgsDir = Env.WorkspacePackageFolder ()
-    let pkgDir = package.Id |> GetSubDirectory pkgsDir
+    let pkgDir = pkgsDir |> GetSubDirectory package.Id 
     let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
     let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
     let files = Seq.append dlls exes

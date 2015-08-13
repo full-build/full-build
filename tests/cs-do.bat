@@ -15,12 +15,12 @@ robocopy c:\src\Paket\bin .paket /MIR
 %FULLBUILD% workspace convert || goto :ko
 %FULLBUILD% view create cs using cassandra-sharp || goto :ko
 %FULLBUILD% view create csc using cassandra-sharp-contrib || goto :ko
-%FULLBUILD% view create csa using cassandra-sharp* || goto :ko
+%FULLBUILD% view create all using * || goto :ko
 %FULLBUILD% view list || goto :ko
 %FULLBUILD% view describe cs || goto :ko
 %FULLBUILD% view describe csc || goto :ko
-%FULLBUILD% view describe csa || goto :ko
-rem %FULLBUILD% package install || goto :ko
+%FULLBUILD% view describe all || goto :ko
+%FULLBUILD% package install || goto :ko
 
 
 
