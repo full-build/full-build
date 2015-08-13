@@ -34,7 +34,7 @@ open MsBuildHelpers
 open Env
 
 type ProjectDescriptor = 
-    { Binaries : Assembly list
+    { Assemblies : Assembly list
       Packages : Package list
       Project : Project }
 
@@ -119,8 +119,8 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let fxTarget = "v4.5"
     let prjRefs = GetProjectReferences file.Directory xprj
     
-    let binaries = GetBinaries xprj |> Seq.toList
-    let binRefs = binaries |> List.map (fun x -> match x with
+    let assemblies = GetBinaries xprj |> Seq.toList
+    let binRefs = assemblies |> List.map (fun x -> match x with
                                                  | ReferenceAssembly { AssemblyName = assName } -> assName
                                                  | LocalAssembly { AssemblyName = assName } -> assName)
 
@@ -131,7 +131,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                    | _ -> [] 
     let pkgRefs = packages |> List.map (fun x -> x.Id)
 
-    { Binaries = binaries
+    { Assemblies = assemblies
       Packages = packages
       Project = { Repository = repoName
                   RelativeProjectFile = relativeProjectFile

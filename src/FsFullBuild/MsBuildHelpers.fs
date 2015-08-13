@@ -40,3 +40,7 @@ let ProjectPropertyName (project : Project) =
     let prjGuid = project.ProjectGuid.ToString("D").Replace ('-', '_')
     let prjProp = sprintf "Prj_%s" prjGuid
     prjProp
+
+let PackagePropertyName (id : string) =
+    let pkgProp = sprintf "FullBuild_%s_Pkg" id
+    pkgProp

@@ -41,6 +41,7 @@ let main argv =
     | ListViews -> View.List ()
     | DescribeView viewInfo -> View.Describe viewInfo.Name
     | GenerateView viewInfo -> View.Generate viewInfo.Name
+    | InstallPackages -> Package.Install ()
     | Usage -> DisplayUsage ()
     | _ -> DisplayUsage ()
 //    | GraphView {Name=vwName} -> FullBuild.Commands.Views.Views.Graph (vwName)
