@@ -73,9 +73,6 @@ let Index () =
     // merge binaries
     let foundAssemblies = projects |> Seq.map (fun x -> x.Assemblies) 
                                    |> Seq.concat
-    let newAssemblies = antho.Assemblies |> Seq.append foundAssemblies 
-                                         |> Seq.distinctBy AssemblyRef.From 
-                                         |> Seq.toList
 
     // merge packages
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
@@ -91,8 +88,7 @@ let Index () =
                                      |> Seq.toList
 
     let newAntho = { antho 
-                     with Assemblies = newAssemblies
-                          Packages = newPackages 
+                     with Packages = newPackages 
                           Projects = newProjects }
 
     SaveAnthology newAntho
