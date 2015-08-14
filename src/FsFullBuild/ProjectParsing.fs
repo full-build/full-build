@@ -70,12 +70,7 @@ let GetBinaries(xdoc : XDocument) : Assembly seq =
         for binRef in xdoc.Descendants(NsMsBuild + "Reference") do
             let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
             let assemblyName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
-
-            let hintPath = (!> binRef.Descendants(NsMsBuild + "HintPath").SingleOrDefault() : string) |> IoHelpers.ToUnix
-            match hintPath with
-            | null -> yield ReferenceAssembly { AssemblyName = assemblyName}
-            | x when not <| x.Contains(MSBUILD_NUGET_FOLDER) -> yield LocalAssembly { AssemblyName = assemblyName; HintPath = x }
-            | _ -> ()
+            yield { AssemblyName = assemblyName }
     }
 
 let ParseNuGetPackage (pkgRef : XElement) : Package =
@@ -120,10 +115,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let prjRefs = GetProjectReferences file.Directory xprj
     
     let assemblies = GetBinaries xprj |> Seq.toList
-    let binRefs = assemblies |> List.map (fun x -> match x with
-                                                 | ReferenceAssembly { AssemblyName = assName } -> assName
-                                                 | LocalAssembly { AssemblyName = assName } -> assName)
-
+    let assemblyRefs = assemblies |> List.map (fun x -> x.AssemblyName)
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
     let packages = match xdocLoader pkgFile with
                    | Some xnuget -> GetPackages xprj xnuget
@@ -138,7 +130,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                   AssemblyName = assemblyName
                   OutputType = extension
                   FxTarget = fxTarget
-                  AssemblyReferences = binRefs
+                  AssemblyReferences = assemblyRefs
                   PackageReferences = pkgRefs
                   ProjectReferences = prjRefs } }
 
