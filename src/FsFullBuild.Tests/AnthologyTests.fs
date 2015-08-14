@@ -1,12 +1,9 @@
 ﻿module AnthologyTests
 
-open System
-open System.IO
 open NUnit.Framework
 open FsUnit
 open Anthology
 open StringHelpers
-open Configuration
 
 [<Test>]
 let CheckReferences () =
@@ -15,9 +12,9 @@ let CheckReferences () =
         |> should equal 
         <| AssemblyRef.From "TOTO42" 
 
-    AssemblyRef.From (ReferenceAssembly { AssemblyName="toto42"}) 
+    AssemblyRef.From "toto42" 
         |> should equal 
-        <| AssemblyRef.From (LocalAssembly { AssemblyName="TOTO42"; HintPath="c:/tralala" })
+        <| AssemblyRef.From ({ Assembly.AssemblyName="toto42" })
 
     // PackageRef
     PackageRef.From "TotO42"
