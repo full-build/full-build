@@ -40,18 +40,18 @@ let GenerateItemGroup (fxLibs : DirectoryInfo) =
     let files = Seq.append dlls exes
     GenerateItemGroupContent pkgDir files
 
-let rec GenerateWhenContent (folders : string list) (fxVersion : string) (fxFolders : DirectoryInfo seq) =
+let rec GenerateWhenContent (fxFolders : DirectoryInfo seq) (fxVersion : string) (nugetFolderAliases : string list) =
     let matchLibfolder (fx : string) (dir : DirectoryInfo) =
         if fx = "" then true
         else
             let dirNames = dir.Name.Replace("portable-", "").Split('+')
             dirNames |> Seq.contains fx
 
-    match folders with
+    match nugetFolderAliases with
     | [] -> null
     | fxFolder::tail -> let libDir = fxFolders |> Seq.tryFind (matchLibfolder fxFolder)
                         match libDir with
-                        | None -> GenerateWhenContent tail fxVersion fxFolders
+                        | None -> GenerateWhenContent fxFolders fxVersion tail
                         | Some libFolder -> let itemGroup = GenerateItemGroup libFolder
                                             if itemGroup.Any() then
                                                 let condition = sprintf "'$(TargetFrameworkVersion)' == '%s'" fxVersion
@@ -68,8 +68,8 @@ let GenerateChooseContent (libDir : DirectoryInfo) =
                 let fxFolders = libDir.EnumerateDirectories()
                 for (fxName, _) in FxVersion2Folder do
                     let fxWhens = FxVersion2Folder |> Seq.skipWhile (fun (fx, _) -> fx <> fxName)
-                                                   |> Seq.map (fun (_, folders) -> GenerateWhenContent folders fxName fxFolders)
-                    let fxDefaultWhen = [ [""] ] |> Seq.map (fun folders -> GenerateWhenContent folders fxName [libDir])
+                                                   |> Seq.map (fun (_, folders) -> GenerateWhenContent fxFolders fxName folders)
+                    let fxDefaultWhen = [ [""] ] |> Seq.map (fun folders -> GenerateWhenContent [libDir] fxName folders)
                     let fxWhen = Seq.append fxWhens fxDefaultWhen |> Seq.tryFind (fun x -> x <> null)
 
                     match fxWhen with
