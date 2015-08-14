@@ -34,7 +34,8 @@ open MsBuildHelpers
 open Env
 
 type ProjectDescriptor = 
-    { Packages : Package list
+    { Assemblies : Assembly list
+      Packages : Package list
       Project : Project }
 
 let ExtractGuid(xdoc : XDocument) = 
@@ -63,6 +64,19 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     prjRefs |> Seq.append fbRefs
             |> Seq.distinct
             |> Seq.toList
+
+let GetBinaries(xdoc : XDocument) : Assembly seq = 
+    seq { 
+        for binRef in xdoc.Descendants(NsMsBuild + "Reference") do
+            let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
+            let assemblyName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
+
+            let hintPath = (!> binRef.Descendants(NsMsBuild + "HintPath").SingleOrDefault() : string) |> IoHelpers.ToUnix
+            match hintPath with
+            | null -> yield ReferenceAssembly { AssemblyName = assemblyName}
+            | x when not <| x.Contains(MSBUILD_NUGET_FOLDER) -> yield LocalAssembly { AssemblyName = assemblyName; HintPath = x }
+            | _ -> ()
+    }
 
 let ParseNuGetPackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "id")
@@ -105,19 +119,26 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let fxTarget = "v4.5"
     let prjRefs = GetProjectReferences file.Directory xprj
     
+    let assemblies = GetBinaries xprj |> Seq.toList
+    let binRefs = assemblies |> List.map (fun x -> match x with
+                                                 | ReferenceAssembly { AssemblyName = assName } -> assName
+                                                 | LocalAssembly { AssemblyName = assName } -> assName)
+
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
     let packages = match xdocLoader pkgFile with
                    | Some xnuget -> GetPackages xprj xnuget
                    | _ -> [] 
     let pkgRefs = packages |> List.map (fun x -> x.Id)
 
-    { Packages = packages
+    { Assemblies = assemblies
+      Packages = packages
       Project = { Repository = repoName
                   RelativeProjectFile = relativeProjectFile
                   ProjectGuid = guid
                   AssemblyName = assemblyName
                   OutputType = extension
                   FxTarget = fxTarget
+                  AssemblyReferences = binRefs
                   PackageReferences = pkgRefs
                   ProjectReferences = prjRefs } }
 
