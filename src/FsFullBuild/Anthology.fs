@@ -36,6 +36,18 @@ type Application =
     { Name : string
       Projects : Guid list }
 
+type ReferenceAssembly =
+    { AssemblyName : string }
+
+type LocalAssembly =
+    { AssemblyName : string
+      HintPath : string }  
+
+[<JsonConverter(typeof<Newtonsoft.Json.Converters.DiscriminatedUnionConverter>)>]
+type Assembly = 
+    | ReferenceAssembly of ReferenceAssembly
+    | LocalAssembly of LocalAssembly
+
 type Bookmark = 
     { Name : string
       Version : string }
@@ -62,6 +74,7 @@ type Project =
       AssemblyName : string
       OutputType : OutputType
       FxTarget : string
+      AssemblyReferences : string list
       PackageReferences : string list
       ProjectReferences : Guid list }
 
@@ -70,7 +83,18 @@ type Anthology =
       Repositories : Repository list
       Bookmarks : Bookmark list 
       Packages : Package list
+      Assemblies : Assembly list
       Projects : Project list }
+
+    
+type AssemblyRef = 
+    private { Target : string }
+with
+    static member From(assName : string) = { Target = assName.ToLowerInvariant() }
+    static member From(ass : Assembly) = let name = match ass with
+                                                    | ReferenceAssembly { AssemblyName=assName }  -> assName
+                                                    | LocalAssembly { AssemblyName=assName } -> assName
+                                         AssemblyRef.From name
 
 type PackageRef = 
     private { Target : string }

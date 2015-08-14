@@ -10,6 +10,15 @@ open Configuration
 
 [<Test>]
 let CheckReferences () =
+    // AssemblyRef
+    AssemblyRef.From "toto42" 
+        |> should equal 
+        <| AssemblyRef.From "TOTO42" 
+
+    AssemblyRef.From (ReferenceAssembly { AssemblyName="toto42"}) 
+        |> should equal 
+        <| AssemblyRef.From (LocalAssembly { AssemblyName="TOTO42"; HintPath="c:/tralala" })
+
     // PackageRef
     PackageRef.From "TotO42"
              |> should equal 
@@ -22,6 +31,7 @@ let CheckReferences () =
                       RelativeProjectFile = "cqlplus/cqlplus-net45.csproj"
                       FxTarget = "v4.5"
                       ProjectReferences = [ ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"; ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c" ]
+                      AssemblyReferences = [ "System" ; "System.Data"; "System.Xml"]
                       PackageReferences = [ ]
                       Repository = "cassandra-sharp" }
         |> should equal 
@@ -31,6 +41,7 @@ let CheckReferences () =
                              RelativeProjectFile = "cqlplus2/cqlplus-net45.csproj"
                              FxTarget = "v4.0"
                              ProjectReferences = [ ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c" ]
+                             AssemblyReferences = [ "System" ; "System.Xml"]
                              PackageReferences = [ "NUnit" ]
                              Repository = "cassandra-sharp2" }
 
