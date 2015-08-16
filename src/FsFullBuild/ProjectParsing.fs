@@ -65,7 +65,6 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
             |> Seq.distinct
             |> Seq.toList
             |> List.map ProjectRef.Bind
-            |> Set
 
 let GetBinaries(xdoc : XDocument) : Assembly seq = 
     seq { 
@@ -116,12 +115,12 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let prjRefs = GetProjectReferences file.Directory xprj
     
     let assemblies = GetBinaries xprj |> Seq.toList
-    let assemblyRefs = assemblies |> List.map AssemblyRef.Bind |> Set
+    let assemblyRefs = assemblies |> List.map AssemblyRef.Bind
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
     let packages = match xdocLoader pkgFile with
                    | Some xnuget -> GetPackages xprj xnuget
                    | _ -> [] 
-    let pkgRefs = packages |> List.map PackageRef.Bind |> Set
+    let pkgRefs = packages |> List.map PackageRef.Bind
 
     { Assemblies = assemblies
       Packages = packages
