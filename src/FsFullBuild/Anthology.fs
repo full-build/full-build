@@ -28,6 +28,8 @@ open System
 open Newtonsoft.Json
 open FSharp.Collections
 
+type set<'T when 'T : comparison> = Set<'T>
+
 [<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
 type OutputType = 
     | Exe = 0
@@ -96,9 +98,9 @@ type Project =
       AssemblyName : string
       OutputType : OutputType
       FxTarget : string
-      AssemblyReferences : AssemblyRef list
-      PackageReferences : PackageRef list
-      ProjectReferences : ProjectRef list }
+      AssemblyReferences : AssemblyRef set
+      PackageReferences : PackageRef set
+      ProjectReferences : ProjectRef set }
 and ProjectRef = 
     { Target : Guid }
 with
@@ -108,10 +110,10 @@ with
 
 type Anthology = 
     { Applications : Application list
-      Repositories : Repository list
+      Repositories : Repository set
       Bookmarks : Bookmark list 
-      Packages : Package list
-      Projects : Project list }
+      Packages : Package set
+      Projects : Project set }
 
     
 

@@ -96,8 +96,8 @@ let GenerateSolutionDefines (projects : Project seq) =
 
 
 // find all referencing projects of a project
-let private ReferencingProjects (projects : Project seq) (current : ProjectRef) =
-    projects |> Seq.filter (fun x -> x.ProjectReferences |> Seq.contains current)
+let private ReferencingProjects (projects : Project set) (current : ProjectRef) =
+    projects |> Seq.filter (fun x -> x.ProjectReferences |> Set.contains current)
 
 let rec private ComputePaths (findParents : ProjectRef -> Project seq) (goal : ProjectRef list) (path : ProjectRef list) (current : ProjectRef) =
     if Seq.contains current goal then current::path
@@ -107,7 +107,7 @@ let rec private ComputePaths (findParents : ProjectRef -> Project seq) (goal : P
                             |> Seq.toList
         paths
 
-let ComputeProjectSelectionClosure (allProjects : Project seq) (filters : RepositoryRef seq) =
+let ComputeProjectSelectionClosure (allProjects : Project set) (filters : RepositoryRef seq) =
     let goal = allProjects |> Seq.filter (fun x -> Seq.contains x.Repository filters) 
                            |> Seq.map ProjectRef.Bind
                            |> Seq.toList

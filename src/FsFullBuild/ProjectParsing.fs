@@ -58,13 +58,12 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER))
-                 |> Seq.map (Path.GetFileNameWithoutExtension)
-                 |> Seq.map ParseGuid
+                 |> Seq.map (ParseGuid << Path.GetFileNameWithoutExtension)
     
     prjRefs |> Seq.append fbRefs
             |> Seq.distinct
-            |> Seq.toList
-            |> List.map ProjectRef.Bind
+            |> Seq.map ProjectRef.Bind
+            |> set
 
 let GetBinaries(xdoc : XDocument) : Assembly seq = 
     seq { 
@@ -115,12 +114,12 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let prjRefs = GetProjectReferences file.Directory xprj
     
     let assemblies = GetBinaries xprj |> Seq.toList
-    let assemblyRefs = assemblies |> List.map AssemblyRef.Bind
+    let assemblyRefs = assemblies |> List.map AssemblyRef.Bind |> set
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
     let packages = match xdocLoader pkgFile with
                    | Some xnuget -> GetPackages xprj xnuget
                    | _ -> [] 
-    let pkgRefs = packages |> List.map PackageRef.Bind
+    let pkgRefs = packages |> List.map PackageRef.Bind |> set
 
     { Assemblies = assemblies
       Packages = packages
