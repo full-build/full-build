@@ -20,10 +20,10 @@ let CheckProjectPropertyName () =
                     ProjectGuid = ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59"
                     RelativeProjectFile = "cqlplus/cqlplus-net45.csproj"
                     FxTarget = "v4.5"
-                    ProjectReferences = [ ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"; ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c" ]
-                    PackageReferences = [ ]
-                    AssemblyReferences = [ "System" ; "System.Xml"]
-                    Repository = "cassandra-sharp" }
+                    ProjectReferences = Set.ofList [ ProjectRef.Bind(ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectRef.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ]
+                    PackageReferences = Set.ofList [ ]
+                    AssemblyReferences = Set.ofList [ AssemblyRef.Bind("System") ; AssemblyRef.Bind("System.Xml")]
+                    Repository = RepositoryRef.Bind("cassandra-sharp") }
 
     let propName = ProjectPropertyName project
     propName |> should equal "Prj_0a06398e_69be_487b_a011_4c0be6619b59"
