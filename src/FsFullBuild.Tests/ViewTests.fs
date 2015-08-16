@@ -10,56 +10,35 @@ open Configuration
 
 [<Test>]
 let CheckSelectProject () =
-    let file = FileInfo ("Anthology.xml")
+    let file = FileInfo ("Anthology.json")
     let antho = LoadAnthologyFromFile file
     
-    let projects = ComputeProjectSelectionClosure antho.Projects ["cassandra-sharp-contrib"] |> Seq.toList
-    projects |> should equal [ { Repository="cassandra-sharp-contrib"
-                                 RelativeProjectFile="CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj"
-                                 ProjectGuid=ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4"
-                                 AssemblyName="CassandraSharp.Contrib.log4net"
-                                 OutputType=OutputType.Dll
-                                 FxTarget="v4.5"   
-                                 AssemblyReferences=["CassandraSharp.Interfaces"; "System" ]
-                                 PackageReferences= [ "cassandra-sharp-interfaces"; "log4net"
-                                                      "Rx-Core"; "Rx-Interfaces"; "Rx-Linq"; "Rx-Main"; "Rx-PlatformServices" ]
-                                 ProjectReferences= [] }
-                               { Repository="cassandra-sharp-contrib"
-                                 RelativeProjectFile="CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"
-                                 ProjectGuid= ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571"
-                                 AssemblyName="CassandraSharp.Contrib.log4netUnitTests"
-                                 OutputType=OutputType.Dll
-                                 FxTarget="v4.5"
-                                 AssemblyReferences= ["System"; "System.Core"]
-                                 PackageReferences=["cassandra-sharp"; "cassandra-sharp-core"; "cassandra-sharp-interfaces"; "log4net" 
-                                                    "NUnit"; "Rx-Core"; "Rx-Interfaces"; "Rx-Linq"; "Rx-Main"; "Rx-PlatformServices" ]
-                                 ProjectReferences= [] } ]
+    let projects = ComputeProjectSelectionClosure antho.Projects [RepositoryRef.Bind "cassandra-sharp-contrib"] |> Seq.toList
+    projects |> should equal [ ProjectRef.Bind (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
+                               ProjectRef.Bind (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571") ]
 
 [<Test>]
 let CheckGenerateSolution () =
-    let file = FileInfo ("Anthology.xml")
-    let antho = LoadAnthologyFromFile file
-
-    let projects = [ { Repository="cassandra-sharp-contrib"
+    let projects = [ { Repository=RepositoryRef.Bind "cassandra-sharp-contrib"
                        RelativeProjectFile="CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj"
                        ProjectGuid=ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4"
                        AssemblyName="CassandraSharp.Contrib.log4net"
                        OutputType=OutputType.Dll
                        FxTarget="v4.5"   
-                       AssemblyReferences=[ "System" ]
-                       PackageReferences= [ "log4net"
-                                            "Rx-Core"; "Rx-Interfaces"; "Rx-Linq"; "Rx-Main"; "Rx-PlatformServices" ]
-                       ProjectReferences= [ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"] }
-                     { Repository="cassandra-sharp-contrib"
+                       AssemblyReferences= Set.ofList [ AssemblyRef.Bind "System" ]
+                       PackageReferences= Set.ofList [ PackageRef.Bind "log4net"
+                                                       PackageRef.Bind "Rx-Core"; PackageRef.Bind "Rx-Interfaces"; PackageRef.Bind "Rx-Linq"; PackageRef.Bind "Rx-Main"; PackageRef.Bind "Rx-PlatformServices" ]
+                       ProjectReferences= Set.ofList [ProjectRef.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")] }
+                     { Repository=RepositoryRef.Bind "cassandra-sharp-contrib"
                        RelativeProjectFile="CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"
                        ProjectGuid= ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571"
                        AssemblyName="CassandraSharp.Contrib.log4netUnitTests"
                        OutputType=OutputType.Dll
                        FxTarget="v4.5"
-                       AssemblyReferences= ["System"; "System.Core"]
-                       PackageReferences=["log4net" 
-                                          "NUnit"; "Rx-Core"; "Rx-Interfaces"; "Rx-Linq"; "Rx-Main"; "Rx-PlatformServices" ]
-                       ProjectReferences= [ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"; ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"; ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4" ] } ]
+                       AssemblyReferences= Set.ofList [AssemblyRef.Bind "System"; AssemblyRef.Bind "System.Core"]
+                       PackageReferences= Set.ofList [ PackageRef.Bind "log4net" 
+                                                       PackageRef.Bind "NUnit"; PackageRef.Bind "Rx-Core"; PackageRef.Bind "Rx-Interfaces"; PackageRef.Bind "Rx-Linq"; PackageRef.Bind "Rx-Main"; PackageRef.Bind "Rx-PlatformServices" ]
+                       ProjectReferences= Set.ofList [ProjectRef.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectRef.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectRef.Bind (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4") ] } ]
 
     let content = GenerateSolutionContent projects
 
@@ -74,7 +53,6 @@ let CheckGenerateSolution () =
                                "EndProject"
                                @"Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""CassandraSharp.Contrib.log4netUnitTests-net45"", ""cassandra-sharp-contrib/CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"", ""{9e8648a4-d25a-4cfa-aaee-20d9d63ff571}"""
                                "\tProjectSection(ProjectDependencies) = postProject"
-//                               "\t\t{925833ed-8653-4e90-9c37-b5b6cb693cf4} = {925833ed-8653-4e90-9c37-b5b6cb693cf4}"
                                "\tEndProjectSection"
                                "EndProject"
                                "Global"

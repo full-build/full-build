@@ -49,7 +49,7 @@ let Clone (filters : string list) =
 
 let Add (repo : Repository) =
     let antho = LoadAnthology ()
-    let repos = repo :: antho.Repositories |> Seq.distinctBy (fun x -> RepositoryRef.From x) 
+    let repos = repo :: antho.Repositories |> Seq.distinctBy RepositoryRef.Bind 
                                            |> Seq.toList
     let newAntho = {antho 
                     with Repositories = repos}

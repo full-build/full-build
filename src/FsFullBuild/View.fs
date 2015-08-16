@@ -59,7 +59,7 @@ let GenerateSolutionContent (projects : Project seq) =
         for project in projects do
             yield sprintf @"Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""%s"", ""%s"", ""%s""" 
                   (Path.GetFileNameWithoutExtension (project.RelativeProjectFile))
-                  (sprintf "%s/%s" project.Repository project.RelativeProjectFile)
+                  (sprintf "%s/%s" (project.Repository.Print()) project.RelativeProjectFile)
                   (StringifyGuid project.ProjectGuid)
 
             yield "\tProjectSection(ProjectDependencies) = postProject"
@@ -96,19 +96,20 @@ let GenerateSolutionDefines (projects : Project seq) =
 
 
 // find all referencing projects of a project
-let private ReferencingProjects (projects : Project seq) (current : Project) =
-    projects |> Seq.filter (fun x -> x.ProjectReferences |> Seq.contains current.ProjectGuid)
+let private ReferencingProjects (projects : Project seq) (current : ProjectRef) =
+    projects |> Seq.filter (fun x -> x.ProjectReferences |> Seq.contains current)
 
-let rec private ComputePaths (findParents : Project -> Project seq) (goal : Project list) (path : Project list) (current : Project) =
+let rec private ComputePaths (findParents : ProjectRef -> Project seq) (goal : ProjectRef list) (path : ProjectRef list) (current : ProjectRef) =
     if Seq.contains current goal then current::path
     else
-        let parents = findParents current
+        let parents = findParents current |> Seq.map ProjectRef.Bind
         let paths = parents |> Seq.collect (ComputePaths findParents goal (current::path))
                             |> Seq.toList
         paths
 
-let ComputeProjectSelectionClosure (allProjects : Project seq) (filters : string seq) =
+let ComputeProjectSelectionClosure (allProjects : Project seq) (filters : RepositoryRef seq) =
     let goal = allProjects |> Seq.filter (fun x -> Seq.contains x.Repository filters) 
+                           |> Seq.map ProjectRef.Bind
                            |> Seq.toList
 
     let findParents = ReferencingProjects allProjects
@@ -125,10 +126,11 @@ let Generate (viewName : string) =
 
     let viewFile = viewDir |> GetFile (AddExt viewName View)
     let slnFile = wsDir |> GetFile (AddExt viewName Solution)
-    let repos = File.ReadAllLines (viewFile.FullName)
+    let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map RepositoryRef.Bind
 
-    let projects = ComputeProjectSelectionClosure antho.Projects repos
-    
+    let projectRefs = ComputeProjectSelectionClosure antho.Projects repos |> set
+    let projects = antho.Projects |> Seq.filter (fun x -> projectRefs.Contains(ProjectRef.Bind(x)))
+
     let slnContent = GenerateSolutionContent projects
     File.WriteAllLines (slnFile.FullName, slnContent)
 
@@ -139,7 +141,8 @@ let Generate (viewName : string) =
 
 let Create (viewName : string) (filters : string list) =
     let repos = filters |> Repo.FilterRepos 
-                        |> Seq.map (fun x -> x.Name)
+                        |> Seq.map RepositoryRef.Bind
+                        |> Seq.map (fun x -> x.Print())
     let vwDir = WorkspaceViewFolder ()
     let vwFile = vwDir |> GetFile (AddExt viewName View)
     File.WriteAllLines (vwFile.FullName, repos)
