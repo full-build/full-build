@@ -42,14 +42,14 @@ let private FindKnownProjects (repoDir : DirectoryInfo) =
      AddExt "*" FsProj] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
                         |> Seq.concat
 
-let private ParseRepositoryProjects (parser) (repoDir : DirectoryInfo) =
+let private ParseRepositoryProjects (parser) (repoRef : RepositoryRef) (repoDir : DirectoryInfo) =
     repoDir |> FindKnownProjects 
-            |> Seq.map (parser repoDir)
+            |> Seq.map (parser repoDir repoRef)
 
-let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : string seq) = 
-    repos |> Seq.map (fun x -> GetSubDirectory x wsDir) 
+let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) = 
+    repos |> Seq.map (fun x -> GetSubDirectory x.Name wsDir) 
           |> Seq.filter (fun x -> x.Exists) 
-          |> Seq.map (ParseRepositoryProjects parser) 
+          |> Seq.map (fun x -> ParseRepositoryProjects parser (RepositoryRef.Bind(x.Name)) x)
           |> Seq.concat
 
 let Create(path : string) = 
@@ -65,8 +65,7 @@ let Create(path : string) =
 let Index () = 
     let wsDir = WorkspaceFolder()
     let antho = LoadAnthology()
-    let repos = antho.Repositories |> Seq.map (fun x -> x.Name)
-    let projects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir repos
+    let projects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir antho.Repositories
 
     // FIXME: before merging, it would be better to tell about conflicts
 
@@ -78,13 +77,13 @@ let Index () =
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
                                  |> Seq.concat
     let newPackages = antho.Packages |> Seq.append foundPackages 
-                                     |> Seq.distinctBy PackageRef.From 
+                                     |> Seq.distinctBy PackageRef.Bind 
                                      |> Seq.toList
 
     // merge projects
     let foundProjects = projects |> Seq.map (fun x -> x.Project)
     let newProjects = antho.Projects |> Seq.append foundProjects 
-                                     |> Seq.distinctBy ProjectRef.From 
+                                     |> Seq.distinctBy ProjectRef.Bind 
                                      |> Seq.toList
 
     let newAntho = { antho 
@@ -105,7 +104,7 @@ let GenerateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
-    let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR project.Repository project.RelativeProjectFile
+    let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.Print()) project.RelativeProjectFile
     let binFile = sprintf "%s/%s/%s%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT project.AssemblyName <| StringifyOutputType project.OutputType
 
     // This is the import targets that will be Import'ed inside a proj file.
@@ -171,7 +170,7 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
     // add project refereces
     let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     for projectReference in project.ProjectReferences do
-        let prjRef = stringifyGuid projectReference
+        let prjRef = projectReference.Print()
         let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER prjRef
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
@@ -180,7 +179,7 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
     // add nuget references
     for packageReference in project.PackageReferences do
         let pkgRef = packageReference
-        let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER pkgRef
+        let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER (pkgRef.Print())
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
         afterItemGroup.AddAfterSelf (import)
@@ -205,8 +204,8 @@ let GeneratePackages (packages : Package seq) =
 
 let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files) =
     let nugetFiles = package2Files |> Seq.filter (fun (id, _) -> project.PackageReferences |> Seq.contains id)
-                                    |> Seq.map (fun (_, files) -> files)
-                                    |> Seq.concat
+                                   |> Seq.map (fun (_, files) -> files)
+                                   |> Seq.concat
 
     let convxproj = ConvertProject xproj project nugetFiles
     convxproj
@@ -214,7 +213,7 @@ let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files
 let ConvertProjects (antho : Anthology) (package2Files) xdocLoader xdocSaver =
     let wsDir = WorkspaceFolder ()
     for project in antho.Projects do
-        let repoDir = wsDir |> GetSubDirectory project.Repository 
+        let repoDir = wsDir |> GetSubDirectory (project.Repository.Print())
         let projFile = repoDir |> GetFile project.RelativeProjectFile 
         printfn "Converting %A" projFile.FullName
         let xproj = xdocLoader projFile
@@ -239,6 +238,6 @@ let Convert () =
     Package.Install ()
 
     // for each package, get all assemblies
-    let package2Files = antho.Packages |> Seq.map (fun x -> (x.Id, Package.GatherAllAssemblies x))
+    let package2Files = antho.Packages |> Seq.map (fun x -> (PackageRef.Bind(x.Id), Package.GatherAllAssemblies x))
 
     ConvertProjects antho package2Files XDocumentLoader XDocumentSaver

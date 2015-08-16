@@ -26,6 +26,7 @@ module Anthology
 
 open System
 open Newtonsoft.Json
+open FSharp.Collections
 
 [<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
 type OutputType = 
@@ -39,6 +40,14 @@ type Application =
 type Assembly = 
     { AssemblyName : string }
 
+type AssemblyRef = 
+    { Target : string }
+with
+    static member Bind(name : string) =  { Target = name.ToLowerInvariant() }
+    static member Bind(ass : Assembly) =  AssemblyRef.Bind(ass.AssemblyName)
+    member this.Print () = this.Target
+
+
 type Bookmark = 
     { Name : string
       Version : string }
@@ -47,6 +56,15 @@ type Package =
     { Id : string
       Version : string
       TargetFramework : string }
+
+type PackageRef = 
+    { Target : string }
+with
+    static member Bind(id : string) : PackageRef = { Target = id.ToLowerInvariant() }
+    static member Bind(pkg : Package) : PackageRef = PackageRef.Bind pkg.Id
+    member this.Print () = this.Target
+
+
 
 [<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
 type VcsType = 
@@ -58,16 +76,35 @@ type Repository =
       Name : string
       Url : string }
 
+type RepositoryRef = 
+    { Target : string }
+with
+    static member Bind(name : string) : RepositoryRef = { Target = name.ToLowerInvariant() }
+    static member Bind(repo : Repository) : RepositoryRef = RepositoryRef.Bind repo.Name
+    member this.Print () = this.Target
+
+
+
+
+
+
+
 type Project = 
-    { Repository : string
+    { Repository : RepositoryRef
       RelativeProjectFile : string
       ProjectGuid : Guid
       AssemblyName : string
       OutputType : OutputType
       FxTarget : string
-      AssemblyReferences : string list
-      PackageReferences : string list
-      ProjectReferences : Guid list }
+      AssemblyReferences : Set<AssemblyRef>
+      PackageReferences : Set<PackageRef>
+      ProjectReferences : Set<ProjectRef> }
+and ProjectRef = 
+    { Target : Guid }
+with
+    static member Bind(guid : Guid) : ProjectRef = { Target = guid }
+    static member Bind(prj : Project) : ProjectRef = ProjectRef.Bind(prj.ProjectGuid)
+    member this.Print () = this.Target.ToString("D")
 
 type Anthology = 
     { Applications : Application list
@@ -77,29 +114,6 @@ type Anthology =
       Projects : Project list }
 
     
-type AssemblyRef = 
-    private { Target : string }
-with
-    static member From(assName : string) = { Target = assName.ToLowerInvariant() }
-    static member From(ass : Assembly) =  AssemblyRef.From ass.AssemblyName
-
-type PackageRef = 
-    private { Target : string }
-with
-    static member From(id : string) : PackageRef = { Target = id.ToLowerInvariant() }
-    static member From(pkg : Package) : PackageRef = PackageRef.From pkg.Id
-
-type ProjectRef = 
-    private { Target : Guid }
-with
-    static member From(prj : Project) : ProjectRef = { Target = prj.ProjectGuid }
-
-type RepositoryRef = 
-    private { Target : string }
-with
-    static member From(repo : Repository) : RepositoryRef = { Target = repo.Name.ToLowerInvariant() }
-
-
 
 
 let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) = 

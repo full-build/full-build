@@ -64,6 +64,8 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     prjRefs |> Seq.append fbRefs
             |> Seq.distinct
             |> Seq.toList
+            |> List.map ProjectRef.Bind
+            |> Set
 
 let GetBinaries(xdoc : XDocument) : Assembly seq = 
     seq { 
@@ -96,8 +98,7 @@ let GetPackages (prjDoc : XDocument) (nugetDoc : XDocument) =
                  |> Seq.map ParseFullBuildPackage
     nugetPkgs |> Seq.append fbPkgs |> Seq.toList
 
-let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (file : FileInfo) =
-    let repoName = repoDir.Name
+let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryRef) (file : FileInfo) =
     let relativeProjectFile = IoHelpers.ComputeRelativePath repoDir file
     let xprj = match xdocLoader file with
                | Some x -> x
@@ -115,16 +116,16 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let prjRefs = GetProjectReferences file.Directory xprj
     
     let assemblies = GetBinaries xprj |> Seq.toList
-    let assemblyRefs = assemblies |> List.map (fun x -> x.AssemblyName)
+    let assemblyRefs = assemblies |> List.map AssemblyRef.Bind |> Set
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
     let packages = match xdocLoader pkgFile with
                    | Some xnuget -> GetPackages xprj xnuget
                    | _ -> [] 
-    let pkgRefs = packages |> List.map (fun x -> x.Id)
+    let pkgRefs = packages |> List.map PackageRef.Bind |> Set
 
     { Assemblies = assemblies
       Packages = packages
-      Project = { Repository = repoName
+      Project = { Repository = repoRef
                   RelativeProjectFile = relativeProjectFile
                   ProjectGuid = guid
                   AssemblyName = assemblyName
@@ -138,5 +139,5 @@ let XDocumentLoader (f : FileInfo) : XDocument option =
     if f.Exists then Some (XDocument.Load (f.FullName))
     else None
 
-let ParseProject (repoDir : DirectoryInfo) (file : FileInfo) : ProjectDescriptor = 
-    ParseProjectContent XDocumentLoader repoDir file
+let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryRef) (file : FileInfo) : ProjectDescriptor = 
+    ParseProjectContent XDocumentLoader repoDir repoRef file
