@@ -26,10 +26,10 @@ let CheckRoundtripAnthology () =
                        ProjectGuid = ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59"
                        RelativeProjectFile = "cqlplus/cqlplus-net45.csproj"
                        FxTarget = "v4.5"
-                       ProjectReferences = [ ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"; ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c" ]
-                       AssemblyReferences = [ "System" ; "System.Data"; "System.Xml"]
-                       PackageReferences = [ ]
-                       Repository = "cassandra-sharp" } ] }
+                       ProjectReferences = Set.ofList [ ProjectRef.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectRef.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ]
+                       AssemblyReferences = Set.ofList [ AssemblyRef.Bind "System" ; AssemblyRef.Bind "System.Data"; AssemblyRef.Bind "System.Xml"]
+                       PackageReferences = Set.ofList [ ]
+                       Repository = RepositoryRef.Bind "cassandra-sharp" } ] }
 
     let file = FileInfo (Path.GetRandomFileName())
     printfn "Temporary file is %A" file.FullName

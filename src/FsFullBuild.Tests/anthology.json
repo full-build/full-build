@@ -1,52 +1,487 @@
+
 {
-    "Applications": [ ],
-    "Binaries": [
-        {
-            "AssemblyName": "System",
-            "HintPath": null
-        },
-        {
-            "AssemblyName": "System.Configuration",
-            "HintPath": null
-        },
-    ],
-    "Bookmarks": [
-        {
-            "Name": "cassandra-sharp",
-            "Version": "b62e33a6ba39f987c91fdde11472f42b2a4acd94"
-        },
-        {
-            "Name": "cassandra-sharp-contrib",
-            "Version": "e0089100b3c5ca520e831c5443ad9dc8ab176052"
-        }
-    ],
-    "Packages": [
-        {
-            "Name": "log4net",
-            "Version": "2.0.3"
-        },
-        {
-            "Name": "moq",
-            "Version": "4.2.1502.0911"
-        },
-    ],
-    "Projects": [
-        {
-            "AssemblyName": "cqlplus",
-            "Extension": ".exe",
-            "ProjectGuid": "0a06398e-69be-487b-a011-4c0be6619b59",
-            "RelativeProjectFile": "cassandra-sharp/cqlplus/cqlplus-net45.csproj",
-            "FxTarget": "v4.5",
-            "ProjectReferences": [
-                "6f6eb447-9569-406a-a23b-c09b6dbdbe10",
-                "c1d252b7-d766-4c28-9c46-0696f896846c"
-            ],
-            "BinaryReferences": [
-                "System",
-                "System.Data",
-                "System.Xml"
-            ],
-            "PackageReferences": [ ]
-        }
-    ]
+	"Applications" : [],
+	"Repositories" : [
+		{
+			"Vcs" : "Git",
+			"Name" : "cassandra-sharp",
+			"Url" : "https://github.com/pchalamet/cassandra-sharp"
+		},
+		{
+			"Vcs" : "Git",
+			"Name" : "cassandra-sharp-contrib",
+			"Url" : "https://github.com/pchalamet/cassandra-sharp-contrib"
+		}
+	],
+	"Bookmarks" : [],
+	"Packages" : [
+		{
+			"Id" : "Rx-Core",
+			"Version" : "2.2.5",
+			"TargetFramework" : "net45"
+		},
+		{
+			"Id" : "Rx-Interfaces",
+			"Version" : "2.2.5",
+			"TargetFramework" : "net45"
+		},
+		{
+			"Id" : "Rx-Linq",
+			"Version" : "2.2.5",
+			"TargetFramework" : "net45"
+		},
+		{
+			"Id" : "Rx-Main",
+			"Version" : "2.2.5",
+			"TargetFramework" : "net45"
+		},
+		{
+			"Id" : "Rx-PlatformServices",
+			"Version" : "2.2.5",
+			"TargetFramework" : "net45"
+		},
+		{
+			"Id" : "Moq",
+			"Version" : "4.2.1408.0717",
+			"TargetFramework" : "net45"
+		},
+		{
+			"Id" : "NUnit",
+			"Version" : "2.6.3",
+			"TargetFramework" : "net45"
+		},
+		{
+			"Id" : "cassandra-sharp-interfaces",
+			"Version" : "3.3.0",
+			"TargetFramework" : "net40"
+		},
+		{
+			"Id" : "log4net",
+			"Version" : "2.0.0",
+			"TargetFramework" : "net45"
+		},
+		{
+			"Id" : "cassandra-sharp",
+			"Version" : "3.3.0",
+			"TargetFramework" : "net45"
+		},
+		{
+			"Id" : "cassandra-sharp-core",
+			"Version" : "3.3.0",
+			"TargetFramework" : "net45"
+		}
+	],
+	"Projects" : [
+		{
+			"Repository" :
+			{
+				"Target" : "cassandra-sharp"
+			},
+			"RelativeProjectFile" : "Apache.Cassandra/Apache.Cassandra-net45.csproj",
+			"ProjectGuid" : "984a4b04-c71a-4550-9193-817cfacba30a",
+			"AssemblyName" : "Apache.Cassandra",
+			"OutputType" : "Dll",
+			"FxTarget" : "v4.5",
+			"AssemblyReferences" : [
+				{
+					"Target" : "system"
+				}
+			],
+			"PackageReferences" : [],
+			"ProjectReferences" : [
+				{
+					"Target" : "499eb63c-d74c-47e8-ae48-a2fc94538e9d"
+				}
+			]
+		},
+		{
+			"Repository" :
+			{
+				"Target" : "cassandra-sharp"
+			},
+			"RelativeProjectFile" : "CassandraSharp/CassandraSharp-net45.csproj",
+			"ProjectGuid" : "c1d252b7-d766-4c28-9c46-0696f896846c",
+			"AssemblyName" : "CassandraSharp",
+			"OutputType" : "Dll",
+			"FxTarget" : "v4.5",
+			"AssemblyReferences" : [
+				{
+					"Target" : "system"
+				},
+				{
+					"Target" : "system.numerics"
+				},
+				{
+					"Target" : "system.xml"
+				},
+				{
+					"Target" : "system.configuration"
+				},
+				{
+					"Target" : "system.reactive.platformservices"
+				},
+				{
+					"Target" : "system.reactive.linq"
+				},
+				{
+					"Target" : "system.reactive.core"
+				},
+				{
+					"Target" : "system.reactive.interfaces"
+				}
+			],
+			"PackageReferences" : [
+				{
+					"Target" : "rx-core"
+				},
+				{
+					"Target" : "rx-interfaces"
+				},
+				{
+					"Target" : "rx-linq"
+				},
+				{
+					"Target" : "rx-main"
+				},
+				{
+					"Target" : "rx-platformservices"
+				}
+			],
+			"ProjectReferences" : [
+				{
+					"Target" : "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+				}
+			]
+		},
+		{
+			"Repository" :
+			{
+				"Target" : "cassandra-sharp"
+			},
+			"RelativeProjectFile" : "CassandraSharp.Interfaces/CassandraSharp.Interfaces-net45.csproj",
+			"ProjectGuid" : "6f6eb447-9569-406a-a23b-c09b6dbdbe10",
+			"AssemblyName" : "CassandraSharp.Interfaces",
+			"OutputType" : "Dll",
+			"FxTarget" : "v4.5",
+			"AssemblyReferences" : [
+				{
+					"Target" : "system"
+				},
+				{
+					"Target" : "system.core"
+				},
+				{
+					"Target" : "system.xml"
+				},
+				{
+					"Target" : "system.numerics"
+				},
+				{
+					"Target" : "system.configuration"
+				}
+			],
+			"PackageReferences" : [],
+			"ProjectReferences" : []
+		},
+		{
+			"Repository" :
+			{
+				"Target" : "cassandra-sharp"
+			},
+			"RelativeProjectFile" : "CassandraSharpUnitTests/CassandraSharpUnitTests-net45.csproj",
+			"ProjectGuid" : "22d4356f-bc92-4399-a92c-c1f9ef6ecc73",
+			"AssemblyName" : "CassandraSharpUnitTests",
+			"OutputType" : "Dll",
+			"FxTarget" : "v4.5",
+			"AssemblyReferences" : [
+				{
+					"Target" : "moq"
+				},
+				{
+					"Target" : "nunit.framework"
+				},
+				{
+					"Target" : "system"
+				},
+				{
+					"Target" : "system.core"
+				},
+				{
+					"Target" : "system.numerics"
+				},
+				{
+					"Target" : "system.xml"
+				},
+				{
+					"Target" : "system.configuration"
+				},
+				{
+					"Target" : "system.reactive.platformservices"
+				},
+				{
+					"Target" : "system.reactive.linq"
+				},
+				{
+					"Target" : "system.reactive.core"
+				},
+				{
+					"Target" : "system.reactive.interfaces"
+				}
+			],
+			"PackageReferences" : [
+				{
+					"Target" : "moq"
+				},
+				{
+					"Target" : "nunit"
+				},
+				{
+					"Target" : "rx-core"
+				},
+				{
+					"Target" : "rx-interfaces"
+				},
+				{
+					"Target" : "rx-linq"
+				},
+				{
+					"Target" : "rx-main"
+				},
+				{
+					"Target" : "rx-platformservices"
+				}
+			],
+			"ProjectReferences" : [
+				{
+					"Target" : "984a4b04-c71a-4550-9193-817cfacba30a"
+				},
+				{
+					"Target" : "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+				},
+				{
+					"Target" : "c1d252b7-d766-4c28-9c46-0696f896846c"
+				},
+				{
+					"Target" : "499eb63c-d74c-47e8-ae48-a2fc94538e9d"
+				}
+			]
+		},
+		{
+			"Repository" :
+			{
+				"Target" : "cassandra-sharp"
+			},
+			"RelativeProjectFile" : "cqlplus/cqlplus-net45.csproj",
+			"ProjectGuid" : "0a06398e-69be-487b-a011-4c0be6619b59",
+			"AssemblyName" : "cqlplus",
+			"OutputType" : "Exe",
+			"FxTarget" : "v4.5",
+			"AssemblyReferences" : [
+				{
+					"Target" : "system"
+				},
+				{
+					"Target" : "system.data"
+				},
+				{
+					"Target" : "system.xml"
+				}
+			],
+			"PackageReferences" : [],
+			"ProjectReferences" : [
+				{
+					"Target" : "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+				},
+				{
+					"Target" : "c1d252b7-d766-4c28-9c46-0696f896846c"
+				}
+			]
+		},
+		{
+			"Repository" :
+			{
+				"Target" : "cassandra-sharp"
+			},
+			"RelativeProjectFile" : "Samples/Samples-net45.csproj",
+			"ProjectGuid" : "8b2359b2-4a73-4a49-8e1e-646014a768a4",
+			"AssemblyName" : "Samples",
+			"OutputType" : "Exe",
+			"FxTarget" : "v4.5",
+			"AssemblyReferences" : [
+				{
+					"Target" : "system"
+				},
+				{
+					"Target" : "system.core"
+				}
+			],
+			"PackageReferences" : [],
+			"ProjectReferences" : [
+				{
+					"Target" : "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+				},
+				{
+					"Target" : "c1d252b7-d766-4c28-9c46-0696f896846c"
+				}
+			]
+		},
+		{
+			"Repository" :
+			{
+				"Target" : "cassandra-sharp"
+			},
+			"RelativeProjectFile" : "Thrift/Thrift-net45.csproj",
+			"ProjectGuid" : "499eb63c-d74c-47e8-ae48-a2fc94538e9d",
+			"AssemblyName" : "Thrift",
+			"OutputType" : "Dll",
+			"FxTarget" : "v4.5",
+			"AssemblyReferences" : [
+				{
+					"Target" : "system"
+				},
+				{
+					"Target" : "system.core"
+				},
+				{
+					"Target" : "system.web"
+				}
+			],
+			"PackageReferences" : [],
+			"ProjectReferences" : []
+		},
+		{
+			"Repository" :
+			{
+				"Target" : "cassandra-sharp-contrib"
+			},
+			"RelativeProjectFile" : "CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj",
+			"ProjectGuid" : "925833ed-8653-4e90-9c37-b5b6cb693cf4",
+			"AssemblyName" : "CassandraSharp.Contrib.log4net",
+			"OutputType" : "Dll",
+			"FxTarget" : "v4.5",
+			"AssemblyReferences" : [
+				{
+					"Target" : "cassandrasharp.interfaces"
+				},
+				{
+					"Target" : "log4net"
+				},
+				{
+					"Target" : "system.reactive.core"
+				},
+				{
+					"Target" : "system.reactive.interfaces"
+				},
+				{
+					"Target" : "system.reactive.linq"
+				},
+				{
+					"Target" : "system.reactive.platformservices"
+				},
+				{
+					"Target" : "system"
+				}
+			],
+			"PackageReferences" : [
+				{
+					"Target" : "cassandra-sharp-interfaces"
+				},
+				{
+					"Target" : "log4net"
+				},
+				{
+					"Target" : "rx-core"
+				},
+				{
+					"Target" : "rx-interfaces"
+				},
+				{
+					"Target" : "rx-linq"
+				},
+				{
+					"Target" : "rx-main"
+				},
+				{
+					"Target" : "rx-platformservices"
+				}
+			],
+			"ProjectReferences" : []
+		},
+		{
+			"Repository" :
+			{
+				"Target" : "cassandra-sharp-contrib"
+			},
+			"RelativeProjectFile" : "CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj",
+			"ProjectGuid" : "9e8648a4-d25a-4cfa-aaee-20d9d63ff571",
+			"AssemblyName" : "CassandraSharp.Contrib.log4netUnitTests",
+			"OutputType" : "Dll",
+			"FxTarget" : "v4.5",
+			"AssemblyReferences" : [
+				{
+					"Target" : "cassandrasharp"
+				},
+				{
+					"Target" : "cassandrasharp.interfaces"
+				},
+				{
+					"Target" : "log4net"
+				},
+				{
+					"Target" : "nunit.framework"
+				},
+				{
+					"Target" : "system"
+				},
+				{
+					"Target" : "system.core"
+				},
+				{
+					"Target" : "system.reactive.core"
+				},
+				{
+					"Target" : "system.reactive.interfaces"
+				},
+				{
+					"Target" : "system.reactive.linq"
+				},
+				{
+					"Target" : "system.reactive.platformservices"
+				}
+			],
+			"PackageReferences" : [
+				{
+					"Target" : "cassandra-sharp"
+				},
+				{
+					"Target" : "cassandra-sharp-core"
+				},
+				{
+					"Target" : "cassandra-sharp-interfaces"
+				},
+				{
+					"Target" : "log4net"
+				},
+				{
+					"Target" : "nunit"
+				},
+				{
+					"Target" : "rx-core"
+				},
+				{
+					"Target" : "rx-interfaces"
+				},
+				{
+					"Target" : "rx-linq"
+				},
+				{
+					"Target" : "rx-main"
+				},
+				{
+					"Target" : "rx-platformservices"
+				}
+			],
+			"ProjectReferences" : []
+		}
+	]
 }
