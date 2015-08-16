@@ -26,9 +26,7 @@ module Anthology
 
 open System
 open Newtonsoft.Json
-open FSharp.Collections
-
-type set<'T when 'T : comparison> = Set<'T>
+open Collections
 
 [<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
 type OutputType = 
@@ -37,7 +35,7 @@ type OutputType =
 
 type Application = 
     { Name : string
-      Projects : Guid list }
+      Projects : Guid set }
 
 type Assembly = 
     { AssemblyName : string }
@@ -109,9 +107,9 @@ with
     member this.Print () = this.Target.ToString("D")
 
 type Anthology = 
-    { Applications : Application list
+    { Applications : Application set
       Repositories : Repository set
-      Bookmarks : Bookmark list 
+      Bookmarks : Bookmark set 
       Packages : Package set
       Projects : Project set }
 

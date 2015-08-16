@@ -31,6 +31,7 @@ open StringHelpers
 open System.Xml.Linq
 open MsBuildHelpers
 open Configuration
+open Collections
 
 let Drop (viewName : string) =
     let vwDir = WorkspaceViewFolder ()
