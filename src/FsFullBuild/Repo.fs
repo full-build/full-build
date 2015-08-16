@@ -33,7 +33,7 @@ let List() =
     let antho = LoadAnthology()
     antho.Repositories |> Seq.iter (fun x -> printfn "%s : %s [%A]" x.Name x.Url x.Vcs)
 
-let MatchRepo (repo : Repository list) (filter : string) = 
+let MatchRepo (repo : Repository seq) (filter : string) = 
     repo |> Seq.filter (fun x -> Match x.Name filter)
          |> Seq.distinct
 
@@ -49,8 +49,9 @@ let Clone (filters : string list) =
 
 let Add (repo : Repository) =
     let antho = LoadAnthology ()
-    let repos = repo :: antho.Repositories |> Seq.distinctBy RepositoryRef.Bind 
-                                           |> Seq.toList
+    let repos = antho.Repositories |> Set.add repo
+                                   |> Seq.distinctBy RepositoryRef.Bind 
+                                   |> set
     let newAntho = {antho 
                     with Repositories = repos}
     SaveAnthology newAntho

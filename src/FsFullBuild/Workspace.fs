@@ -78,13 +78,13 @@ let Index () =
                                  |> Seq.concat
     let newPackages = antho.Packages |> Seq.append foundPackages 
                                      |> Seq.distinctBy PackageRef.Bind 
-                                     |> Seq.toList
+                                     |> set
 
     // merge projects
     let foundProjects = projects |> Seq.map (fun x -> x.Project)
     let newProjects = antho.Projects |> Seq.append foundProjects 
                                      |> Seq.distinctBy ProjectRef.Bind 
-                                     |> Seq.toList
+                                     |> set
 
     let newAntho = { antho 
                      with Packages = newPackages 
