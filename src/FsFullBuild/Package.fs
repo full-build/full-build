@@ -2,7 +2,6 @@
 open Anthology
 open IoHelpers
 open System.IO
-open System.Collections.Generic
 open System.Xml.Linq
 open System.Linq
 open MsBuildHelpers

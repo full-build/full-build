@@ -23,9 +23,9 @@ let CheckReferences () =
                       ProjectGuid = ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59"
                       RelativeProjectFile = "cqlplus/cqlplus-net45.csproj"
                       FxTarget = "v4.5"
-                      ProjectReferences = Set.ofList [ ProjectRef.Bind(ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectRef.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ]
-                      AssemblyReferences = Set.ofList [ AssemblyRef.Bind("System") ; AssemblyRef.Bind("System.Data"); AssemblyRef.Bind("System.Xml")]
-                      PackageReferences = Set.ofList [ ]
+                      ProjectReferences = [ ProjectRef.Bind(ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectRef.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ]
+                      AssemblyReferences = [ AssemblyRef.Bind("System") ; AssemblyRef.Bind("System.Data"); AssemblyRef.Bind("System.Xml")]
+                      PackageReferences = [ ]
                       Repository = RepositoryRef.Bind("cassandra-sharp") }
         |> should equal 
         <| ProjectRef.Bind { AssemblyName = "cqlplus2"
@@ -33,9 +33,9 @@ let CheckReferences () =
                              ProjectGuid = ParseGuid "{0a06398e-69be-487b-a011-4c0be6619b59}"
                              RelativeProjectFile = "cqlplus2/cqlplus-net45.csproj"
                              FxTarget = "v4.0"
-                             ProjectReferences = Set.ofList [ ProjectRef.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ]
-                             AssemblyReferences = Set.ofList [ AssemblyRef.Bind("System") ; AssemblyRef.Bind("System.Xml")]
-                             PackageReferences = Set.ofList [ PackageRef.Bind("NUnit") ]
+                             ProjectReferences = [ ProjectRef.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ]
+                             AssemblyReferences = [ AssemblyRef.Bind("System") ; AssemblyRef.Bind("System.Xml")]
+                             PackageReferences = [ PackageRef.Bind("NUnit") ]
                              Repository = RepositoryRef.Bind("cassandra-sharp2") }
 
 //    // RepositoryRef

@@ -96,9 +96,9 @@ type Project =
       AssemblyName : string
       OutputType : OutputType
       FxTarget : string
-      AssemblyReferences : Set<AssemblyRef>
-      PackageReferences : Set<PackageRef>
-      ProjectReferences : Set<ProjectRef> }
+      AssemblyReferences : AssemblyRef list
+      PackageReferences : PackageRef list
+      ProjectReferences : ProjectRef list }
 and ProjectRef = 
     { Target : Guid }
 with
