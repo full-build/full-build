@@ -34,6 +34,7 @@ open MsBuildHelpers
 open System.Linq
 open System.Xml.Linq
 open StringHelpers
+open Collections
 
 
 let private FindKnownProjects (repoDir : DirectoryInfo) =
@@ -52,15 +53,27 @@ let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Rep
           |> Seq.map (fun x -> ParseRepositoryProjects parser (RepositoryRef.Bind(x.Name)) x)
           |> Seq.concat
 
-let Create(path : string) = 
+let Init(path : string) = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
     VcsCloneRepo wsDir GlobalConfig.Repository
 
-    let vwDir = WorkspaceViewFolder ()
-    vwDir.Create ()
-
+let Create(path : string) = 
+    let wsDir = DirectoryInfo(path)
+    wsDir.Create()
+    if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
+    VcsCloneRepo wsDir GlobalConfig.Repository
+    let antho = { Applications = Set.empty
+                  Bookmarks = Set.empty
+                  Repositories = Set.empty
+                  Packages = Set.empty
+                  Projects = Set.empty }
+    Configuration.SaveAnthology antho
+    // TODO: create git repo in .full-build
+    //       generate .gitignore
+    //       add content of .full-build to git repo
+    //       commit
 
 let Index () = 
     let wsDir = WorkspaceFolder()
@@ -77,7 +90,7 @@ let Index () =
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
                                  |> Seq.concat
     let newPackages = antho.Packages |> Seq.append foundPackages 
-                                     |> Seq.distinctBy PackageRef.Bind 
+                                     |> Seq.distinctBy (fun x -> x.Id)
                                      |> set
 
     // merge projects
@@ -92,7 +105,6 @@ let Index () =
 
     SaveAnthology newAntho
 
-
 let StringifyOutputType (outputType : OutputType) =
     match outputType with
     | OutputType.Exe -> ".exe"
@@ -105,7 +117,7 @@ let GenerateProjectTarget (project : Project) =
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.Print()) project.RelativeProjectFile
-    let binFile = sprintf "%s/%s/%s%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT project.AssemblyName <| StringifyOutputType project.OutputType
+    let binFile = sprintf "%s/%s/%s%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT (project.Output.Print ()) <| StringifyOutputType project.OutputType
 
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -120,9 +132,9 @@ let GenerateProjectTarget (project : Project) =
                     XAttribute (NsNone + "Include", projectFile),
                     XAttribute (NsNone + "Condition", srcCondition),
                     XElement (NsMsBuild + "Project", StringifyGuid project.ProjectGuid),
-                    XElement (NsMsBuild + "Name", project.AssemblyName)),
+                    XElement (NsMsBuild + "Name", project.Output)),
                 XElement (NsMsBuild + "Reference",
-                    XAttribute (NsNone + "Include", project.AssemblyName),
+                    XAttribute (NsNone + "Include", project.Output),
                     XAttribute (NsNone + "Condition", binCondition),
                     XElement (NsMsBuild + "HintPath", binFile),
                     XElement (NsMsBuild + "Private", "true")))))
@@ -139,11 +151,15 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
         let attr = xel.Attribute (NsNone + "Project")
         attr.Value.StartsWith (MSBUILD_PROJECT_FOLDER)
 
+    let filterPackage (xel : XElement) =
+        let attr = xel.Attribute (NsNone + "Project")
+        attr.Value.StartsWith (MSBUILD_PACKAGE_FOLDER)
+
     let filterNuget (nugetFiles) (xel : XElement) =
         let hintPaths = xel.Descendants (NsMsBuild + "HintPath")
         hintPaths.Any(fun x -> let hintPath = !> x : string
-                               let filename = Path.GetFileName (hintPath)
-                               nugetFiles |> Seq.contains filename)
+                               let assemblyRef = AssemblyRef.Bind (FileInfo (hintPath)) 
+                               nugetFiles |> Set.contains assemblyRef)
 
     let hasNoChild (xel : XElement) =
         not <| xel.DescendantNodes().Any()
@@ -158,6 +174,7 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
     let cproj = XDocument (xproj)
     cproj.Descendants(NsMsBuild + "ProjectReference").Remove()
     cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
+    cproj.Descendants(NsMsBuild + "Import").Where(filterPackage).Remove()
     cproj.Descendants(NsMsBuild + "BaseIntermediateOutputPath").Remove()
     cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
     
@@ -185,27 +202,12 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
         afterItemGroup.AddAfterSelf (import)
     cproj
 
-let GeneratePaketDependenciesContent (packages : Package seq) (config : GlobalConfiguration) =
-    seq {
-        for nuget in config.NuGets do
-            yield sprintf "source %s" nuget
-
-        yield ""
-        for package in packages do
-            yield sprintf "nuget %s %s" package.Id package.Version
-    }
-
-let GeneratePackages (packages : Package seq) =
-    let config = Configuration.GlobalConfig
-    let content = GeneratePaketDependenciesContent packages config
-    let confDir = Env.WorkspaceConfigFolder ()
-    let paketDep = confDir |> GetFile "paket.dependencies" 
-    File.WriteAllLines (paketDep.FullName, content)
-
 let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files) =
     let nugetFiles = package2Files |> Seq.filter (fun (id, _) -> project.PackageReferences |> Seq.contains id)
                                    |> Seq.map (fun (_, files) -> files)
+                                   // TODO: should be fold with Set.union probably
                                    |> Seq.concat
+                                   |> set
 
     let convxproj = ConvertProject xproj project nugetFiles
     convxproj
@@ -234,10 +236,10 @@ let Convert () =
     GenerateProjects antho.Projects XDocumentSaver
 
     // generate paket.dependencies and install packages
-    GeneratePackages antho.Packages
     Package.Install ()
 
     // for each package, get all assemblies
-    let package2Files = antho.Packages |> Seq.map (fun x -> (PackageRef.Bind(x.Id), Package.GatherAllAssemblies x))
+    let package2Files = antho.Packages 
+                        |> Seq.map (fun x -> (x.Id, Package.GatherAllAssemblies x))
 
     ConvertProjects antho package2Files XDocumentLoader XDocumentSaver

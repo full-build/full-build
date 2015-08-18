@@ -34,7 +34,7 @@ open MsBuildHelpers
 open Env
 
 type ProjectDescriptor = 
-    { Assemblies : Assembly list
+    { Assemblies : AssemblyRef list
       Packages : Package list
       Project : Project }
 
@@ -65,12 +65,12 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
             |> Seq.map ProjectRef.Bind
             |> set
 
-let GetBinaries(xdoc : XDocument) : Assembly seq = 
+let GetBinaries(xdoc : XDocument) : AssemblyRef seq = 
     seq { 
         for binRef in xdoc.Descendants(NsMsBuild + "Reference") do
             let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
-            let assemblyName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
-            yield { AssemblyName = assemblyName }
+            let assRef = AssemblyRef.Bind (System.Reflection.AssemblyName(inc))
+            yield assRef
     }
 
 let ParseNuGetPackage (pkgRef : XElement) : Package =
@@ -78,12 +78,12 @@ let ParseNuGetPackage (pkgRef : XElement) : Package =
     let pkgVer = !> pkgRef.Attribute(XNamespace.None + "version") : string
     let pkgFx = !> pkgRef.Attribute(XNamespace.None + "targetFramework") : string
 
-    { Id = pkgId
+    { Id = PackageRef.Bind pkgId
       Version = pkgVer
       TargetFramework = pkgFx }
 
 let ParseFullBuildPackage (fileName : string) : Package =
-    { Id=Path.GetFileNameWithoutExtension(fileName)
+    { Id=PackageRef.Bind (Path.GetFileNameWithoutExtension(fileName))
       Version = String.Empty
       TargetFramework = String.Empty }
 
@@ -104,6 +104,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let xguid = !> xprj.Descendants(NsMsBuild + "ProjectGuid").Single() : string
     let guid = ParseGuid xguid
     let assemblyName = !> xprj.Descendants(NsMsBuild + "AssemblyName").Single() : string
+    let assemblyRef = AssemblyRef.Bind (assemblyName)
     
     let extension =  match !> xprj.Descendants(NsMsBuild + "OutputType").Single() : string with
                      | "Library" -> OutputType.Dll
@@ -114,19 +115,19 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let prjRefs = GetProjectReferences file.Directory xprj
     
     let assemblies = GetBinaries xprj |> Seq.toList
-    let assemblyRefs = assemblies |> List.map AssemblyRef.Bind |> set
+    let assemblyRefs = assemblies |> set
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
     let packages = match xdocLoader pkgFile with
                    | Some xnuget -> GetPackages xprj xnuget
                    | _ -> [] 
-    let pkgRefs = packages |> List.map PackageRef.Bind |> set
+    let pkgRefs = packages |> List.map (fun x -> x.Id) |> set
 
     { Assemblies = assemblies
       Packages = packages
       Project = { Repository = repoRef
                   RelativeProjectFile = relativeProjectFile
                   ProjectGuid = guid
-                  AssemblyName = assemblyName
+                  Output = assemblyRef
                   OutputType = extension
                   FxTarget = fxTarget
                   AssemblyReferences = assemblyRefs
