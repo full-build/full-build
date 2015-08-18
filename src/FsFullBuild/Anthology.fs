@@ -26,7 +26,9 @@ module Anthology
 
 open System
 open Newtonsoft.Json
+open System.IO
 open Collections
+open System.Reflection
 
 [<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
 type OutputType = 
@@ -37,14 +39,12 @@ type Application =
     { Name : string
       Projects : Guid set }
 
-type Assembly = 
-    { AssemblyName : string }
-
 type AssemblyRef = 
     { Target : string }
 with
-    static member Bind(name : string) =  { Target = name.ToLowerInvariant() }
-    static member Bind(ass : Assembly) =  AssemblyRef.Bind(ass.AssemblyName)
+    static member Bind (name : string) = { Target = name.ToLowerInvariant() }
+    static member Bind(assName : AssemblyName) =  AssemblyRef.Bind (assName.Name)
+    static member Bind(file : FileInfo) =  AssemblyRef.Bind (Path.GetFileNameWithoutExtension(file.Name))
     member this.Print () = this.Target
 
 
@@ -53,17 +53,14 @@ type Bookmark =
       Version : string }
 
 type Package = 
-    { Id : string
+    { Id : PackageRef
       Version : string
       TargetFramework : string }
-
-type PackageRef = 
+and PackageRef = 
     { Target : string }
 with
     static member Bind(id : string) : PackageRef = { Target = id.ToLowerInvariant() }
-    static member Bind(pkg : Package) : PackageRef = PackageRef.Bind pkg.Id
     member this.Print () = this.Target
-
 
 
 [<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
@@ -93,7 +90,7 @@ type Project =
     { Repository : RepositoryRef
       RelativeProjectFile : string
       ProjectGuid : Guid
-      AssemblyName : string
+      Output : AssemblyRef
       OutputType : OutputType
       FxTarget : string
       AssemblyReferences : AssemblyRef set

@@ -29,6 +29,7 @@ type Token =
     | View
     | Help
     | Create
+    | Init
     | Clone
     | Repo
     | Package
@@ -57,6 +58,7 @@ let (|Token|) (token : string) =
     | "view" -> View
     | "help" -> Help
     | "create" -> Create
+    | "init" -> Init
     | "clone" -> Clone
     | "repo" -> Repo
     | "package" -> Package

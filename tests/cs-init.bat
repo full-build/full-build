@@ -6,6 +6,8 @@ call fb-init.bat
 taskkill /im tgitcache.exe 1>NUL 2>NUL
 if exist cs-init rmdir /s /q cs-init || goto :ko
 
+goto :ok
+
 rem setup environment
 %FULLBUILD% set config binrepo c:\BinRepo
 %FULLBUILD% set config repoType git

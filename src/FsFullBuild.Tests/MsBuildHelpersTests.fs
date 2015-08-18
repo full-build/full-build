@@ -15,7 +15,7 @@ let CheckCast () =
 
 [<Test>]
 let CheckProjectPropertyName () =
-    let project = { AssemblyName = "cqlplus"
+    let project = { Output = AssemblyRef.Bind "cqlplus"
                     OutputType = OutputType.Exe
                     ProjectGuid = ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59"
                     RelativeProjectFile = "cqlplus/cqlplus-net45.csproj"
