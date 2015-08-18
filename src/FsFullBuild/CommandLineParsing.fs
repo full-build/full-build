@@ -52,6 +52,7 @@ type Command =
 
     // workspace
     | CreateWorkspace of CreateWorkspace
+    | InitWorkspace of CreateWorkspace
     | IndexWorkspace
     | ConvertWorkspace
     // repository
@@ -65,43 +66,50 @@ type Command =
     | DescribeView of ViewName
     | GenerateView of ViewName
 
-    | RefreshWorkspace
-    | OptimizeWorkspace
-    | BookmarkWorkspace
-    | CheckoutWorkspace of CheckoutWorkspace
-    | AddNuGet of NuGetUrl
-    | ListNuGets
-    | ListPackages
+    // package
     | InstallPackages
+    | ConvertPackages
     | UpgradePackages
-    | UsePackage of Package
-    | CheckPackages
-    | GraphView of ViewName
-    | BuildView of ViewName
-    | RefreshSources
-    | ListBinaries
+    | ListPackages
+
+    // env
+//    | RefreshWorkspace
+//    | BookmarkWorkspace
+//    | CheckoutWorkspace of CheckoutWorkspace
+//    | AddNuGet of NuGetUrl
+//    | ListNuGets
+//    | UsePackage of Package
+//    | CheckPackages
+//    | GraphView of ViewName
+//    | BuildView of ViewName
+//    | RefreshSources
+//    | ListBinaries
 
 let ParseCommandLine(args : string list) : Command = 
     match args with
     | Token(Token.Help) :: [] -> Command.Usage
-    | Token(Token.Workspace) :: Token(Create) :: path :: [] -> Command.CreateWorkspace { Path = path }
+    | Token(Create) :: path :: [] -> Command.CreateWorkspace { Path = path }
+    | Token(Token.Workspace) :: Token(Init) :: path :: [] -> Command.InitWorkspace { Path = path }
     | Token(Token.Workspace) :: Token(Index) :: [] -> Command.IndexWorkspace
     | Token(Token.Workspace) :: Token(Convert) :: [] -> Command.ConvertWorkspace
 
     | Token(Token.Repo) :: Token(Token.Add) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
                                                                            AddRepository(repo)
-    | Token(Token.Repo) :: Token(Token.Clone) :: filters -> CloneRepositories { Filters = filters }
     | Token(Token.Repo) :: Token(Token.List) :: [] -> ListRepositories
+    | Token(Token.Repo) :: Token(Token.Clone) :: filters -> CloneRepositories { Filters = filters }
 
     | Token(Token.View) :: Token(Token.Create) :: name :: Token(Token.Using) :: filters -> Command.CreateView { Name = name; Filters = filters }
     | Token(Token.View) :: Token(Token.Drop) :: name :: [] -> Command.DropView { Name = name }
     | Token(Token.View) :: Token(Token.List) :: [] -> Command.ListViews
     | Token(Token.View) :: Token(Token.Describe) :: name :: [] -> Command.DescribeView { Name = name }
     | Token(Token.View) :: Token(Token.Generate) :: name :: [] -> Command.GenerateView { Name = name }
-    | Token(Token.View) :: Token(Token.Build) :: name :: [] -> Command.BuildView { Name = name }
-    | Token(Token.View) :: Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = name }
+//    | Token(Token.View) :: Token(Token.Build) :: name :: [] -> Command.BuildView { Name = name }
+//    | Token(Token.View) :: Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = name }
 
     | Token(Token.Package) :: Token(Token.Install) :: [] -> Command.InstallPackages
+    | Token(Token.Package) :: Token(Token.Convert) :: [] -> Command.ConvertPackages
+    | Token(Token.Package) :: Token(Token.Upgrade) :: [] -> Command.UpgradePackages
+    | Token(Token.Package) :: Token(Token.List) :: [] -> Command.ListPackages
 
     | _ -> Command.Error
 
