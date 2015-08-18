@@ -69,7 +69,8 @@ let GetBinaries(xdoc : XDocument) : AssemblyRef seq =
     seq { 
         for binRef in xdoc.Descendants(NsMsBuild + "Reference") do
             let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
-            let assRef = AssemblyRef.Bind (System.Reflection.AssemblyName(inc))
+            let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
+            let assRef = AssemblyRef.Bind (System.Reflection.AssemblyName(assName))
             yield assRef
     }
 
