@@ -45,7 +45,6 @@ type Token =
     | NuGet
     | Graph
     | Check
-    | Upgrade
     | Describe
     | Using
     | Generate
@@ -74,7 +73,6 @@ let (|Token|) (token : string) =
     | "nuget" -> NuGet
     | "graph" -> Graph
     | "check" -> Check
-    | "upgrade" -> Upgrade
     | "describe" -> Describe
     | "using" -> Using
     | "generate" -> Generate

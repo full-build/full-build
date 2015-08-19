@@ -35,7 +35,7 @@ open System.Linq
 open System.Xml.Linq
 open StringHelpers
 open Collections
-
+open System
 
 let private FindKnownProjects (repoDir : DirectoryInfo) =
     [AddExt "*" CsProj
@@ -155,11 +155,17 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
         let attr = xel.Attribute (NsNone + "Project")
         attr.Value.StartsWith (MSBUILD_PACKAGE_FOLDER)
 
-    let filterNuget (nugetFiles) (xel : XElement) =
-        let hintPaths = xel.Descendants (NsMsBuild + "HintPath")
-        hintPaths.Any(fun x -> let hintPath = !> x : string
-                               let assemblyRef = AssemblyRef.Bind (FileInfo (hintPath)) 
-                               nugetFiles |> Set.contains assemblyRef)
+//    let filterNuget (nugetFiles) (xel : XElement) =
+//        let hintPaths = xel.Descendants (NsMsBuild + "HintPath")
+//        hintPaths.Any(fun x -> let hintPath = !> x : string
+//                               let assemblyRef = AssemblyRef.Bind (FileInfo (hintPath)) 
+//                               nugetFiles |> Set.contains assemblyRef)
+
+    let filterAssemblies (assFiles) (xel : XElement) =
+        let inc = !> xel.Attribute(XNamespace.None + "Include") : string
+        let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
+        let assRef = AssemblyRef.Bind (System.Reflection.AssemblyName(assName))
+        nugetFiles |> Set.contains assRef
 
     let hasNoChild (xel : XElement) =
         not <| xel.DescendantNodes().Any()
@@ -172,17 +178,25 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
 
     // cleanup everything that will be modified
     let cproj = XDocument (xproj)
+
+    // remove project references
     cproj.Descendants(NsMsBuild + "ProjectReference").Remove()
+    
+    // remove file references (assemblies & nuget)
+    let filesToRemove = nugetFiles |> Set.union project.AssemblyReferences
+//    cproj.Descendants(NsMsBuild + "Reference").Where(filterNuget nugetFiles).Remove()
+    cproj.Descendants(NsMsBuild + "Reference").Where(filterAssemblies filesToRemove).Remove()
+
+    // remove full-build imports
     cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
     cproj.Descendants(NsMsBuild + "Import").Where(filterPackage).Remove()
-    cproj.Descendants(NsMsBuild + "BaseIntermediateOutputPath").Remove()
-    cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
-    
-    // convert nuget to $(SolutionDir)/packages/
-    cproj.Descendants(NsMsBuild + "Reference").Where(filterNuget nugetFiles).Remove()
 
     // set OutputPath
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
+
+    // cleanup project
+    cproj.Descendants(NsMsBuild + "BaseIntermediateOutputPath").Remove()
+    cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
 
     // add project refereces
     let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
