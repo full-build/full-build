@@ -140,6 +140,81 @@ let Generate (viewName : string) =
     slnDefines.Save (slnDefineFile.FullName)
 
 
+let GraphNodes (antho : Anthology) =
+    seq {
+        for project in antho.Projects do
+            yield XElement(NsDgml + "Node",
+                      XAttribute(NsNone + "Id", project.ProjectGuid),
+                      XAttribute(NsNone + "Label", project.Output.Print()),
+                      XAttribute(NsNone + "Category", "Project"))
+
+        for package in antho.Packages do
+            yield XElement(NsDgml + "Node",
+                      XAttribute(NsNone + "Id", package.Id.Print()),
+                      XAttribute(NsNone + "Label", package.Id.Print()),
+                      XAttribute(NsNone + "Category", "Package"))
+
+        let assemblies = antho.Projects |> Seq.map (fun x -> x.AssemblyReferences)
+                                        |> Seq.concat
+                                        |> set
+        for assembly in assemblies do
+             yield XElement(NsDgml + "Node",
+                      XAttribute(NsNone + "Id", assembly.Print()),
+                      XAttribute(NsNone + "Label", assembly.Print()),
+                      XAttribute(NsNone + "Category", "Assembly"))
+    }
+
+let GraphLinks (antho : Anthology) =
+    seq {
+        for project in antho.Projects do
+            let generateLink target category = 
+                XElement(NsDgml + "Link",
+                              XAttribute(NsNone + "Source", project.ProjectGuid),
+                              XAttribute(NsNone + "Target", target),
+                              XAttribute(NsNone + "Category", category))
+
+            for projectRef in project.ProjectReferences do
+                yield generateLink (projectRef.Print()) "ProjectRef"
+
+            for package in project.PackageReferences do
+                yield generateLink (package.Print()) "PackageRef"
+
+            for assembly in project.AssemblyReferences do
+                yield generateLink (assembly.Print()) "AssemblyRef"
+    }
+
+let GraphCategories () =
+    let allCategories = [ ("Project", "Green")
+                          ("Package", "Orange")
+                          ("Assembly", "Red")       
+                          ("ProjectRef", "Green")
+                          ("PackageRef", "Orange")
+                          ("AssemblyRef", "Red") ]
+
+    let generateCategory (cat) =
+        let (key, value) = cat
+        XElement(NsDgml + "Category", 
+            XAttribute(NsNone + "Id", key), 
+            XAttribute(NsNone + "Background", value))
+
+    allCategories |> Seq.map generateCategory
+
+let GraphContent (antho : Anthology) =
+    let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho)
+    let xLinks = XElement(NsDgml+"Links", GraphLinks antho)
+    let xCategories = XElement(NsDgml + "Categories", GraphCategories ())
+    let xLayout = XAttribute(NsNone + "Layout", "ForceDirected")
+    XDocument(
+        XElement(NsDgml + "DirectedGraph", xLayout, xNodes, xLinks, xCategories))
+
+let Graph (viewName : string) =
+    let antho = Configuration.LoadAnthology ()
+    let graph = GraphContent antho
+
+    let wsDir = Env.WorkspaceFolder ()
+    let graphFile = wsDir |> GetSubDirectory (AddExt viewName Dgml)
+    graph.Save graphFile.FullName
+
 let Create (viewName : string) (filters : string list) =
     let repos = filters |> Repo.FilterRepos 
                         |> Seq.map RepositoryRef.Bind
