@@ -150,20 +150,20 @@ let GeneratePackages (packages : Package seq) =
     File.WriteAllLines (paketDep.FullName, content)
 
 let Install () =
-    let antho = Configuration.LoadAnthology ()
-    GeneratePackages antho.Packages
-
     let pkgDir = Env.WorkspacePackageFolder ()
     pkgDir.Delete (true)
+
+    let antho = Configuration.LoadAnthology ()
+    GeneratePackages antho.Packages
 
     let confDir = Env.WorkspaceConfigFolder ()
     Exec.Exec "paket.exe" "install" confDir.FullName
     
     antho.Packages |> Seq.iter GenerateTargetForPackage
     
-let Upgrade () =
+let Update () =
     let confDir = Env.WorkspaceConfigFolder ()
-    Exec.Exec "paket.exe" "upgrade" confDir.FullName
+    Exec.Exec "paket.exe" "update" confDir.FullName
     
     let antho = Configuration.LoadAnthology ()
     antho.Packages |> Seq.iter GenerateTargetForPackage
