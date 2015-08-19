@@ -35,6 +35,7 @@ type Extension =
     | FsProj
     | VbProj
     | NuSpec
+    | Dgml
 
 let AddExt (fileName : string) (ext : Extension) : string =
     let sext = match ext with 
@@ -45,6 +46,7 @@ let AddExt (fileName : string) (ext : Extension) : string =
                | FsProj -> "fsproj"
                | VbProj -> "vbproj"
                | NuSpec -> "nuspec"
+               | Dgml -> "dgml"
     sprintf "%s.%s" fileName sext
 
 let ToUnix (f : string) : string =

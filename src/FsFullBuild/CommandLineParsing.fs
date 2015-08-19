@@ -65,6 +65,7 @@ type Command =
     | ListViews
     | DescribeView of ViewName
     | GenerateView of ViewName
+    | GraphView of ViewName
 
     // package
     | InstallPackages
@@ -80,7 +81,6 @@ type Command =
 //    | ListNuGets
 //    | UsePackage of Package
 //    | CheckPackages
-//    | GraphView of ViewName
 //    | BuildView of ViewName
 //    | RefreshSources
 //    | ListBinaries
@@ -103,8 +103,8 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.View) :: Token(Token.List) :: [] -> Command.ListViews
     | Token(Token.View) :: Token(Token.Describe) :: name :: [] -> Command.DescribeView { Name = name }
     | Token(Token.View) :: Token(Token.Generate) :: name :: [] -> Command.GenerateView { Name = name }
+    | Token(Token.View) :: Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = name }
 //    | Token(Token.View) :: Token(Token.Build) :: name :: [] -> Command.BuildView { Name = name }
-//    | Token(Token.View) :: Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = name }
 
     | Token(Token.Package) :: Token(Token.Install) :: [] -> Command.InstallPackages
     | Token(Token.Package) :: Token(Token.Convert) :: [] -> Command.ConvertPackages
