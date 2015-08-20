@@ -154,14 +154,14 @@ let GraphNodes (antho : Anthology) =
                       XAttribute(NsNone + "Label", package.Id.Print()),
                       XAttribute(NsNone + "Category", "Package"))
 
-        let assemblies = antho.Projects |> Seq.map (fun x -> x.AssemblyReferences)
-                                        |> Seq.concat
-                                        |> set
-        for assembly in assemblies do
-             yield XElement(NsDgml + "Node",
-                      XAttribute(NsNone + "Id", assembly.Print()),
-                      XAttribute(NsNone + "Label", assembly.Print()),
-                      XAttribute(NsNone + "Category", "Assembly"))
+//        let assemblies = antho.Projects |> Seq.map (fun x -> x.AssemblyReferences)
+//                                        |> Seq.concat
+//                                        |> set
+//        for assembly in assemblies do
+//             yield XElement(NsDgml + "Node",
+//                      XAttribute(NsNone + "Id", assembly.Print()),
+//                      XAttribute(NsNone + "Label", assembly.Print()),
+//                      XAttribute(NsNone + "Category", "Assembly"))
     }
 
 let GraphLinks (antho : Anthology) =
@@ -179,8 +179,8 @@ let GraphLinks (antho : Anthology) =
             for package in project.PackageReferences do
                 yield generateLink (package.Print()) "PackageRef"
 
-            for assembly in project.AssemblyReferences do
-                yield generateLink (assembly.Print()) "AssemblyRef"
+//            for assembly in project.AssemblyReferences do
+//                yield generateLink (assembly.Print()) "AssemblyRef"
     }
 
 let GraphCategories () =
@@ -203,7 +203,7 @@ let GraphContent (antho : Anthology) =
     let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho)
     let xLinks = XElement(NsDgml+"Links", GraphLinks antho)
     let xCategories = XElement(NsDgml + "Categories", GraphCategories ())
-    let xLayout = XAttribute(NsNone + "Layout", "ForceDirected")
+    let xLayout = XAttribute(NsNone + "Layout", "Sugiyama")
     XDocument(
         XElement(NsDgml + "DirectedGraph", xLayout, xNodes, xLinks, xCategories))
 
