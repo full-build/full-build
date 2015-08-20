@@ -194,6 +194,10 @@ let ConvertAllProjects (projects) (package2Files : (PackageRef * AssemblyRef set
         for project in projects do
             // packages used in this project
             let prjFromPackages = package2project |> Seq.filter (fun (id, _) -> project.PackageReferences |> Set.contains id) |> set
+            let usedPackages = package2Files |> Seq.filter (fun (id, _) -> project.PackageReferences |> Set.contains id) |> set
+            let usedAssembliesFromPackages = usedPackages |> Seq.map( fun (_, files) -> files)
+                                                          |> Seq.concat
+                                                          |> set
 
             // projects that can be referenced
             let prjFromAssemblies = projects |> Seq.filter (fun prj -> project.AssemblyReferences |> Set.contains prj.Output) |> set
@@ -203,6 +207,7 @@ let ConvertAllProjects (projects) (package2Files : (PackageRef * AssemblyRef set
                                               |> Set.map ProjectRef.Bind                              
 
             let assToRemove = prjFromAssemblies |> Set.map (fun prj -> prj.Output)
+                                                |> Set.union usedAssembliesFromPackages
             let pkgToRemove = prjFromPackages |> Set.map (fun (pkg, _) -> pkg)
                                               |> Set.union emptyPackages
 
