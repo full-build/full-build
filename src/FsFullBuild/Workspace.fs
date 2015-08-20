@@ -148,18 +148,20 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
 
 let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
     let filterProject (xel : XElement) =
-        let attr = xel.Attribute (NsNone + "Project")
-        attr.Value.StartsWith (MSBUILD_PROJECT_FOLDER)
+        let attr = !> (xel.Attribute (NsNone + "Project")) : string
+        String.Equals(attr, MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
 
     let filterPackage (xel : XElement) =
-        let attr = xel.Attribute (NsNone + "Project")
-        attr.Value.StartsWith (MSBUILD_PACKAGE_FOLDER)
+        let attr = !> (xel.Attribute (NsNone + "Project")) : string
+        String.Equals(attr, MSBUILD_PACKAGE_FOLDER, StringComparison.CurrentCultureIgnoreCase)
 
-//    let filterNuget (nugetFiles) (xel : XElement) =
-//        let hintPaths = xel.Descendants (NsMsBuild + "HintPath")
-//        hintPaths.Any(fun x -> let hintPath = !> x : string
-//                               let assemblyRef = AssemblyRef.Bind (FileInfo (hintPath)) 
-//                               nugetFiles |> Set.contains assemblyRef)
+    let filterNuget (xel : XElement) =
+        let attr = !> (xel.Attribute (NsNone + "Project")) : string
+        String.Equals(attr, "$(SolutionDir)\.nuget\NuGet.targets", StringComparison.CurrentCultureIgnoreCase)
+
+    let filterNugetTarget (xel : XElement) =
+        let attr = !> (xel.Attribute (NsNone + "Name")) : string
+        String.Equals(attr, "EnsureNuGetPackageBuildImports", StringComparison.CurrentCultureIgnoreCase)
 
     let filterAssemblies (assFiles) (xel : XElement) =
         let inc = !> xel.Attribute(XNamespace.None + "Include") : string
@@ -190,6 +192,10 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
     // remove full-build imports
     cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
     cproj.Descendants(NsMsBuild + "Import").Where(filterPackage).Remove()
+
+    // remove nuget stuff
+    cproj.Descendants(NsMsBuild + "Import").Where(filterNuget).Remove()
+    cproj.Descendants(NsMsBuild + "Target").Where(filterNugetTarget).Remove()
 
     // set OutputPath
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
