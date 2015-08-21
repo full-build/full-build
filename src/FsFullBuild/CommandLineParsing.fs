@@ -69,7 +69,7 @@ type Command =
 
     // package
     | InstallPackages
-    | ConvertPackages
+    | SimplifyPackages
     | UpdatePackages
     | ListPackages
 
@@ -107,7 +107,7 @@ let ParseCommandLine(args : string list) : Command =
 //    | Token(Token.View) :: Token(Token.Build) :: name :: [] -> Command.BuildView { Name = name }
 
     | Token(Token.Package) :: Token(Token.Install) :: [] -> Command.InstallPackages
-    | Token(Token.Package) :: Token(Token.Convert) :: [] -> Command.ConvertPackages
+    | Token(Token.Package) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
     | Token(Token.Package) :: Token(Token.Update) :: [] -> Command.UpdatePackages
     | Token(Token.Package) :: Token(Token.List) :: [] -> Command.ListPackages
 

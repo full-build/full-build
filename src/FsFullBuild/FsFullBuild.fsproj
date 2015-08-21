@@ -30,7 +30,7 @@
     </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>package convert</StartArguments>
-    <StartWorkingDirectory>C:\src\full-build\tests\cs-do\</StartWorkingDirectory>
+    <StartWorkingDirectory>C:\src\full-build\tests\cs-do</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>

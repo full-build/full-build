@@ -49,6 +49,7 @@ type Token =
     | Using
     | Generate
     | Install
+    | Simplify
     | Unknown
 
 let (|Token|) (token : string) = 
@@ -77,5 +78,6 @@ let (|Token|) (token : string) =
     | "using" -> Using
     | "generate" -> Generate
     | "install" -> Install
+    | "simplify" -> Simplify
     | _ -> Unknown
 
