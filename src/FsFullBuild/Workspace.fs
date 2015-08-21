@@ -149,15 +149,15 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
 let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
     let filterProject (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
-        String.Equals(attr, MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
+        attr.StartsWith(MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
 
     let filterPackage (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
-        String.Equals(attr, MSBUILD_PACKAGE_FOLDER, StringComparison.CurrentCultureIgnoreCase)
+        attr.StartsWith(MSBUILD_PACKAGE_FOLDER, StringComparison.CurrentCultureIgnoreCase)
 
     let filterNuget (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
-        String.Equals(attr, "$(SolutionDir)\.nuget\NuGet.targets", StringComparison.CurrentCultureIgnoreCase)
+        attr.StartsWith("$(SolutionDir)\.nuget\NuGet.targets", StringComparison.CurrentCultureIgnoreCase)
 
     let filterNugetTarget (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Name")) : string
@@ -215,10 +215,13 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
 
     // add nuget references
     for packageReference in project.PackageReferences do
-        let pkgRef = packageReference
-        let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER (pkgRef.Print())
+        let pkgId = packageReference.Print()
+        let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER pkgId
+        let pkgProperty = PackagePropertyName pkgId
+        let condition = sprintf "'$(%s)' == ''" pkgProperty
         let import = XElement (NsMsBuild + "Import",
-                        XAttribute (NsNone + "Project", importFile))
+                        XAttribute (NsNone + "Project", importFile),
+                        XAttribute(NsNone + "Condition", condition))
         afterItemGroup.AddAfterSelf (import)
     cproj
 
@@ -260,6 +263,6 @@ let Convert () =
 
     // for each package, get all assemblies
     let package2Files = antho.Packages 
-                        |> Seq.map (fun x -> (x.Id, Package.GatherAllAssemblies x))
+                        |> Seq.map (fun x -> (x.Id, Package.GatherAllAssemblies x.Id))
 
     ConvertProjects antho package2Files XDocumentLoader XDocumentSaver
