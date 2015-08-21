@@ -113,5 +113,25 @@ let ParseCommandLine(args : string list) : Command =
 
     | _ -> Command.Error
 
-let DisplayUsage() = printfn "Usage: TBD"
-let DisplayHelp() = printfn "Help : TBD"
+let DisplayUsage() = 
+    printfn "Usage:"
+    printfn "  help : display help"
+    printfn "  create <path> : create a new environment in given path"
+    printfn "  workspace init <path> : initialize a new workspace in givne path"
+    printfn "  workspace index : synchronize anthology with projects"
+    printfn "  workspace convert : adapt projects in workspace"
+    printfn ""
+    printfn "  repo clone <wildcards> : clone repositories using provided wildcards"
+    printfn "  repo add <git|hg> <name> <uri> : declare a new repository"
+    printfn "  repo list : list repositories"
+    printfn ""
+    printfn "  view create <name> using <wildcards> : create a new view using provided repository wildcards"
+    printfn "  view drop <name> : drop a view"
+    printfn "  view list : list views"
+    printfn "  view describe <name> : describe view content"
+    printfn "  view generate <name> : generate sln file for view"
+    printfn "  view graph <name> : graph view content (project, packages, assemblies)"
+    printfn ""
+    printfn "  package install : install packages as defined in anthology"
+    printfn "  package simplify : simplify package graph, promote assemblies or packages to project where permitted"
+    printfn "  package list : list packages"

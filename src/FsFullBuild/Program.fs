@@ -58,27 +58,9 @@ let main argv =
     // misc
     | Usage -> DisplayUsage ()
     | Error -> DisplayUsage ()
-//    | GraphView {Name=vwName} -> FullBuild.Commands.Views.Views.Graph (vwName)
-//    | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()
-//    | OptimizeWorkspace -> FullBuild.Commands.Workspace.Workspace.Optimize ()
 //    | BookmarkWorkspace -> FullBuild.Commands.Workspace.Workspace.Bookmark ()
 //    | CheckoutWorkspace {Version=wsVersion} -> FullBuild.Commands.Workspace.Workspace.CheckoutBookmark (wsVersion)
-//    | AddNuGet {Url=url} -> FullBuild.Commands.Packages.Packages.AddNuGet(url)
-//    | ListNuGets -> FullBuild.Commands.Packages.Packages.ListNuGets ()
-//    | ListPackages -> FullBuild.Commands.Binaries.Binaries.List ()
-//    | InstallPackages -> FullBuild.Commands.Packages.Packages.InstallAll ()
-//    | UpgradePackages -> FullBuild.Commands.Packages.Packages.UpgradePackages ()
-//    | UsePackage {Id=pkgName; Version=pkgVersion} -> FullBuild.Commands.Packages.Packages.UsePackage (pkgName, pkgVersion)
-//    | CheckPackages -> FullBuild.Commands.Packages.Packages.CheckPackages ()
-//    | InitView {Name=vwName; Filters=vwFilter} -> FullBuild.Commands.Views.Views.Init (vwName, vwFilter |> Seq.toArray)
-//    | DropView {Name=vwName} -> FullBuild.Commands.Views.Views.Delete (vwName)
-//    | ListViews -> FullBuild.Commands.Views.Views.List ()
-//    | DescribeView {Name=vwName} -> FullBuild.Commands.Views.Views.Describe (vwName)
-//    | GraphView {Name=vwName} -> FullBuild.Commands.Views.Views.Graph (vwName)
-//    | GenerateView {Name=vwName} -> FullBuild.Commands.Views.Views.Generate (vwName)
-//    | BuildView {Name=vwName} -> FullBuild.Commands.Views.Views.BuildView (vwName)
-//    | RefreshSources -> FullBuild.Commands.Workspace.Workspace.RefreshSources ()
-//    | ListBinaries -> FullBuild.Commands.Binaries.Binaries.List ()
+//    | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()
 
     let retCode = if cmd = Error then 5
                   else 0
