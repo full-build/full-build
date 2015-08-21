@@ -79,11 +79,12 @@ let GenerateChooseContent (libDir : DirectoryInfo) =
     if whens.Any() then XElement (NsMsBuild + "Choose", whens)
     else null
     
-let GenerateDependenciesContent (dependencies : string seq) =
+let GenerateDependenciesContent (dependencies : PackageRef seq) =
     seq {
         for dependency in dependencies do
-            let dependencyTargets = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER dependency
-            let pkgProperty = PackagePropertyName dependency
+            let depId = dependency.Print()
+            let dependencyTargets = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER depId
+            let pkgProperty = PackagePropertyName depId
             let condition = sprintf "'$(%s)' == ''" pkgProperty
     
             yield XElement(NsMsBuild + "Import",
@@ -91,8 +92,8 @@ let GenerateDependenciesContent (dependencies : string seq) =
                       XAttribute(NsNone + "Condition", condition))
     }
 
-let GenerateProjectContent (package : Package) (imports : XElement seq) (choose : XElement) =
-    let defineName = PackagePropertyName (package.Id.Print())
+let GenerateProjectContent (package : PackageRef) (imports : XElement seq) (choose : XElement) =
+    let defineName = PackagePropertyName (package.Print())
     let propCondition = sprintf "'$(%s)' == ''" defineName
     let project = XElement (NsMsBuild + "Project",
                     XAttribute (NsNone + "Condition", propCondition),
@@ -105,13 +106,15 @@ let GenerateProjectContent (package : Package) (imports : XElement seq) (choose 
 let GetPackageDependencies (xnuspec : XDocument) =
     xnuspec.Descendants().Where(fun x -> x.Name.LocalName = "dependency") 
         |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
+        |> Seq.map PackageRef.Bind
+        |> set
 
-let GenerateTargetForPackage (package : Package) =
+let GenerateTargetForPackage (package : PackageRef) =
     let pkgsDir = Env.WorkspacePackageFolder ()
-    let pkgDir = pkgsDir |> GetSubDirectory (package.Id.Print())
+    let pkgDir = pkgsDir |> GetSubDirectory (package.Print())
     let libDir = pkgDir |> GetSubDirectory "lib" 
     
-    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.Id.Print()) NuSpec)
+    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.Print()) NuSpec)
     let xnuspec = XDocument.Load (nuspecFile.FullName)
     let dependencies = GetPackageDependencies xnuspec
 
@@ -122,14 +125,42 @@ let GenerateTargetForPackage (package : Package) =
     let targetFile = pkgDir |> GetFile "package.targets" 
     project.Save (targetFile.FullName)
 
-let GatherAllAssemblies (package : Package) : AssemblyRef set =
+let GatherAllAssemblies (package : PackageRef) : AssemblyRef set =
     let pkgsDir = Env.WorkspacePackageFolder ()
-    let pkgDir = pkgsDir |> GetSubDirectory (package.Id.Print())
+    let pkgDir = pkgsDir |> GetSubDirectory (package.Print())
     let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
     let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
     let files = Seq.append dlls exes
     files |> Seq.map (fun x -> AssemblyRef.Bind x) 
           |> set
+
+
+let rec BuildDependencies (packages : PackageRef seq) = 
+    let pkgsDir = Env.WorkspacePackageFolder ()
+    seq {
+        for package in packages do    
+            let pkgDir = pkgsDir |> GetSubDirectory (package.Print())
+            let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.Print()) NuSpec)
+            let xnuspec = XDocument.Load (nuspecFile.FullName)
+            let dependencies = GetPackageDependencies xnuspec
+            yield (package, dependencies)
+            yield! BuildDependencies dependencies
+    }
+
+let rec BuildPackageDependencies (packages : PackageRef seq) =
+    (BuildDependencies packages) |> Map
+
+
+let rec ComputePackageTransitiveDependencies (packageDeps : Map<PackageRef,PackageRef set>) (package : PackageRef) =
+    let res = seq {
+        yield package
+        let dependencies = packageDeps.[package]
+        yield! dependencies
+
+        for dependency in dependencies do
+            yield! ComputePackageTransitiveDependencies packageDeps dependency
+    }
+    res |> set
 
 
 let GeneratePaketDependenciesContent (packages : Package seq) (config : Configuration.GlobalConfiguration) =
@@ -158,63 +189,100 @@ let Install () =
 
     let confDir = Env.WorkspaceConfigFolder ()
     Exec.Exec "paket.exe" "install" confDir.FullName
-    
-    antho.Packages |> Seq.iter GenerateTargetForPackage
-    
+
+    let packageRefs = antho.Packages |> Seq.map (fun x -> x.Id)
+    let allPackages = BuildPackageDependencies packageRefs |> Map.toSeq 
+                                                           |> Seq.map fst 
+    allPackages |> Seq.iter GenerateTargetForPackage
+
 let Update () =
     let confDir = Env.WorkspaceConfigFolder ()
     Exec.Exec "paket.exe" "update" confDir.FullName
     
     let antho = Configuration.LoadAnthology ()
-    antho.Packages |> Seq.iter GenerateTargetForPackage
+    let packageRefs = antho.Packages |> Seq.map (fun x -> x.Id)
+    let package2packages = BuildPackageDependencies packageRefs
+    let allPackages = packageRefs |> Seq.map (ComputePackageTransitiveDependencies package2packages)
+                                  |> Seq.concat
+                                  |> Set
+    allPackages |> Seq.iter GenerateTargetForPackage
 
 let List () =
     failwith "not implemented"
 
-let ConvertAllProjects (projects) (package2Files : (PackageRef * AssemblyRef set) seq) =
-    let associatePackage2Projects (packages2file : (PackageRef * AssemblyRef) seq) (projects : Project seq) =
-        seq {
-            for (id, file) in packages2file do
-                let project = projects |> Seq.tryFind (fun x -> x.Output = file)
-                match project with
-                | Some x -> yield (id, x)
-                | _ -> ()
-        }
+let AssociatePackage2Projects (file2package : Map<AssemblyRef, PackageRef>) (projects : Project seq) =
+    let res = seq {
+        for project in projects do
+            let package = file2package.TryFind project.Output
+            match package with
+            | Some x -> yield (x, ProjectRef.Bind project)
+            | _ -> ()
+    }
+    res |> Map
 
+let ComputePackageRoots (package2packages : Map<PackageRef, PackageRef set>) (packages : PackageRef set) =
+    let usedPackages = package2packages |> Map.filter (fun pkg _ -> packages |> Set.contains pkg)
+    let roots = usedPackages |> Map.filter (fun pkg _ -> not (Map.exists (fun _ files -> files |> Set.contains pkg) usedPackages))
+                             |> Map.toSeq
+                             |> Seq.map fst
+                             |> Set
+    roots
+
+let ConvertAllProjects (projects) (package2Files : Map<PackageRef, AssemblyRef set>) (package2packages : Map<PackageRef, PackageRef set>) =
     seq {
-        let packages2file = package2Files |> Seq.filter (fun (_, nugetFiles) -> nugetFiles |> Set.count = 1)
-                                          |> Seq.map (fun (id, nugetFiles) -> (id, nugetFiles |> Seq.head))
+        let file2package = package2Files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
+                                         |> Map.toSeq
+                                         |> Seq.map (fun (id,nugetFiles) -> (nugetFiles |> Seq.head, id))
+                                         |> Map.ofSeq
 
-        let emptyPackages = package2Files |> Seq.filter (fun (_, nugetFiles) -> nugetFiles |> Set.count = 0)
-                                          |> Seq.map (fun (id, _) -> id)
-                                          |> set
-
-        let package2project = associatePackage2Projects packages2file projects
+        let package2project = AssociatePackage2Projects file2package projects
+        let packages = (Set << Seq.map fst << Map.toSeq) package2Files
                                                                
         for project in projects do
-            // packages used in this project
-            let prjFromPackages = package2project |> Seq.filter (fun (id, _) -> project.PackageReferences |> Set.contains id) |> set
-            let usedPackages = package2Files |> Seq.filter (fun (id, _) -> project.PackageReferences |> Set.contains id) |> set
-            let usedAssembliesFromPackages = usedPackages |> Seq.map( fun (_, files) -> files)
-                                                          |> Seq.concat
-                                                          |> set
+            // problem we are trying to solve for each project
+            // - packages containing one single assembly can be safely migrated to a project if possible
+            // - assemblies can be safely migrated to a project if possible
+            // ==> this is the candateAssemblies set
+            //
+            // Life is not so simple as package could have also dependencies:
+            // a package can have zero dependency and be considered for migration
+            // also a package can have external nugets and internal project dependencies
+            // this situation is not supported as this is more a mix between packaging and deployment
+            // this is covered using an application and referencing correctly packages there
 
-            // projects that can be referenced
-            let prjFromAssemblies = projects |> Seq.filter (fun prj -> project.AssemblyReferences |> Set.contains prj.Output) |> set
 
-            let newProjects = prjFromPackages |> Set.map (fun (_, prj) -> prj)
-                                              |> Set.union prjFromAssemblies
-                                              |> Set.map ProjectRef.Bind                              
+            let directlyUsedPackages = project.PackageReferences |> Set.intersect packages
+            let transitivelyUsedPackages = directlyUsedPackages |> Seq.map (ComputePackageTransitiveDependencies package2packages)
+                                                              |> Seq.concat
+                                                              |> Set
+            let rootPackages = ComputePackageRoots package2packages transitivelyUsedPackages
+            //let indirectlyUsedPackages = Set.difference transitivelyUsedPackages rootPackages
 
-            let assToRemove = prjFromAssemblies |> Set.map (fun prj -> prj.Output)
-                                                |> Set.union usedAssembliesFromPackages
-            let pkgToRemove = prjFromPackages |> Set.map (fun (pkg, _) -> pkg)
-                                              |> Set.union emptyPackages
+            let candidateAssemblies = package2Files |> Map.filter (fun pkg files -> transitivelyUsedPackages |> Set.contains pkg)
+                                                    |> Map.toSeq
+                                                    |> Seq.map snd
+                                                    |> Seq.concat
+                                                    |> Set
+                                                    |> Set.union project.AssemblyReferences
+
+            // find upgradable packages
+            let packageToUpgrade = package2project |> Map.filter (fun pkg _ -> transitivelyUsedPackages |> Set.contains pkg)
+            let newProjects = packageToUpgrade |> Map.toSeq 
+                                               |> Seq.map (fun (_,prj) -> prj) 
+                                               |> Set
+
+            let removablePackages = packageToUpgrade |> Map.toSeq 
+                                                     |> Seq.map (fun (pkg, _) -> pkg) 
+                                                     |> Set
+            let remainingPackages = transitivelyUsedPackages |> Set.filter (fun pkg -> let removedDependencies = package2packages.[pkg] |> Set.intersect removablePackages
+                                                                                       removedDependencies = Set.empty)
+
+//                                                     |> Set.union indirectlyUsedPackages
 
             let newProject = { project
                                with ProjectReferences = Set.union project.ProjectReferences newProjects
-                                    AssemblyReferences =  Set.difference project.AssemblyReferences assToRemove
-                                    PackageReferences = Set.difference project.PackageReferences pkgToRemove }
+                                    AssemblyReferences =  Set.difference project.AssemblyReferences candidateAssemblies
+                                    PackageReferences = remainingPackages}
         
             yield newProject
     }
@@ -229,15 +297,19 @@ let RemoveUnusedPackages (antho : Anthology) =
                      with Packages = remainingPackages }
     newAntho
 
-let ConvertAnthology (antho) =
-    let package2Files = antho.Packages |> Seq.map (fun x -> (x.Id, GatherAllAssemblies x))
-    let convertedProjects = ConvertAllProjects antho.Projects package2Files |> set
+let SimplifyAnthology (antho) =
+    let packageRefs = antho.Packages |> Seq.map (fun x -> x.Id)
+    let package2packages = BuildPackageDependencies packageRefs
+    let allPackages = package2packages |> Map.toSeq 
+                                       |> Seq.map fst 
+    let package2Files = allPackages |> Seq.map (fun x -> (x, GatherAllAssemblies x)) |> Map
+    let convertedProjects = ConvertAllProjects antho.Projects package2Files package2packages |> Set
     let newAntho = { antho
                      with Projects = convertedProjects }
-    newAntho
+    RemoveUnusedPackages newAntho
 
-let Convert () =
+let Simplify () =
     let antho = Configuration.LoadAnthology ()
-    let newAntho1 = ConvertAnthology antho
-    let newAntho2 = RemoveUnusedPackages newAntho1
-    Configuration.SaveAnthology newAntho2
+    let newAntho = SimplifyAnthology antho
+    Configuration.SaveAnthology newAntho
+
