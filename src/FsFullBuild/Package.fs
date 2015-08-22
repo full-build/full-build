@@ -189,14 +189,6 @@ let AssociatePackage2Projects (file2package : Map<AssemblyRef, PackageRef>) (pro
     }
     res |> Map
 
-let ComputePackageRoots (package2packages : Map<PackageRef, PackageRef set>) (packages : PackageRef set) =
-    let usedPackages = package2packages |> Map.filter (fun pkg _ -> packages |> Set.contains pkg)
-    let roots = usedPackages |> Map.filter (fun pkg _ -> not (Map.exists (fun _ files -> files |> Set.contains pkg) usedPackages))
-                             |> Map.toSeq
-                             |> Seq.map fst
-                             |> Set
-    roots
-
 let ConvertAllProjects (projects) (package2Files : Map<PackageRef, AssemblyRef set>) (package2packages : Map<PackageRef, PackageRef set>) =
     seq {
         let file2package = package2Files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
@@ -224,7 +216,7 @@ let ConvertAllProjects (projects) (package2Files : Map<PackageRef, AssemblyRef s
             let transitivelyUsedPackages = directlyUsedPackages |> Seq.map (ComputePackageTransitiveDependencies package2packages)
                                                               |> Seq.concat
                                                               |> Set
-            let rootPackages = ComputePackageRoots package2packages transitivelyUsedPackages
+            //let rootPackages = ComputePackageRoots package2packages transitivelyUsedPackages
             //let indirectlyUsedPackages = Set.difference transitivelyUsedPackages rootPackages
 
             let candidateAssemblies = package2Files |> Map.filter (fun pkg files -> transitivelyUsedPackages |> Set.contains pkg)
