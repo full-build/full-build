@@ -7,6 +7,7 @@ open System.Linq
 open MsBuildHelpers
 open Env
 open Collections
+open NuGets
 
 let FxVersion2Folder =
     [ ("v4.6", ["net46"]) 
@@ -20,6 +21,7 @@ let FxVersion2Folder =
       ("v2.0", ["20"; "net20"; "net20-full"; "net"])
       ("v1.1", ["11"; "net11"])    
       ("v1.0", ["10"]) ] 
+
 
 let GenerateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo seq) =
     seq {
@@ -103,11 +105,6 @@ let GenerateProjectContent (package : PackageRef) (imports : XElement seq) (choo
                     choose)
     project
 
-let GetPackageDependencies (xnuspec : XDocument) =
-    xnuspec.Descendants().Where(fun x -> x.Name.LocalName = "dependency") 
-        |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
-        |> Seq.map PackageRef.Bind
-        |> set
 
 let GenerateTargetForPackage (package : PackageRef) =
     let pkgsDir = Env.WorkspacePackageFolder ()
@@ -133,34 +130,6 @@ let GatherAllAssemblies (package : PackageRef) : AssemblyRef set =
     let files = Seq.append dlls exes
     files |> Seq.map (fun x -> AssemblyRef.Bind x) 
           |> set
-
-
-let rec BuildDependencies (packages : PackageRef seq) = 
-    let pkgsDir = Env.WorkspacePackageFolder ()
-    seq {
-        for package in packages do    
-            let pkgDir = pkgsDir |> GetSubDirectory (package.Print())
-            let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.Print()) NuSpec)
-            let xnuspec = XDocument.Load (nuspecFile.FullName)
-            let dependencies = GetPackageDependencies xnuspec
-            yield (package, dependencies)
-            yield! BuildDependencies dependencies
-    }
-
-let rec BuildPackageDependencies (packages : PackageRef seq) =
-    (BuildDependencies packages) |> Map
-
-
-let rec ComputePackageTransitiveDependencies (packageDeps : Map<PackageRef,PackageRef set>) (package : PackageRef) =
-    let res = seq {
-        yield package
-        let dependencies = packageDeps.[package]
-        yield! dependencies
-
-        for dependency in dependencies do
-            yield! ComputePackageTransitiveDependencies packageDeps dependency
-    }
-    res |> set
 
 
 let GeneratePaketDependenciesContent (packages : Package seq) (config : Configuration.GlobalConfiguration) =
