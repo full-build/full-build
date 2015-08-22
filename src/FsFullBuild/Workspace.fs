@@ -146,7 +146,7 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
         let projectFile = prjDir |> GetFile (AddExt (project.ProjectGuid.ToString("D")) Targets)
         xdocSaver projectFile content
 
-let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
+let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<AssemblyRef>) =
     let filterProject (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
@@ -225,17 +225,17 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles) =
         afterItemGroup.AddAfterSelf (import)
     cproj
 
-let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files) =
-    let nugetFiles = package2Files |> Seq.filter (fun (id, _) -> project.PackageReferences |> Seq.contains id)
-                                   |> Seq.map (fun (_, files) -> files)
-                                   // TODO: should be fold with Set.union probably
-                                   |> Seq.concat
-                                   |> set
+let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files : Map<PackageRef, Set<AssemblyRef>>) =
+    let usedPackage2Files = package2Files |> Map.filter (fun id _ -> project.PackageReferences |> Set.contains id)
+    let nugetFiles = usedPackage2Files |> Map.toSeq
+                                       |> Seq.map (fun (id, files) -> files)
+                                       |> Seq.concat
+                                       |> Set
 
     let convxproj = ConvertProject xproj project nugetFiles
     convxproj
 
-let ConvertProjects (antho : Anthology) (package2Files) xdocLoader xdocSaver =
+let ConvertProjects (antho : Anthology) (package2Files : Map<PackageRef, Set<AssemblyRef>>) xdocLoader xdocSaver =
     let wsDir = WorkspaceFolder ()
     for project in antho.Projects do
         let repoDir = wsDir |> GetSubDirectory (project.Repository.Print())
@@ -264,5 +264,6 @@ let Convert () =
     // for each package, get all assemblies
     let package2Files = antho.Packages 
                         |> Seq.map (fun x -> (x.Id, Package.GatherAllAssemblies x.Id))
+                        |> Map
 
     ConvertProjects antho package2Files XDocumentLoader XDocumentSaver
