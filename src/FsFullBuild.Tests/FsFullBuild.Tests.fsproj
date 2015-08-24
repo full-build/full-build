@@ -73,6 +73,7 @@
     <Compile Include="RepoTests.fs" />
     <Compile Include="ViewTests.fs" />
     <Compile Include="NuGetTests.fs" />
+    <Compile Include="SimplifyTests.fs" />
     <None Include="app.config" />
     <None Include="WorkspaceConfig.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
