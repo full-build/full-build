@@ -8,6 +8,7 @@ open MsBuildHelpers
 open Env
 open Collections
 open NuGets
+open Simplify
 
 let FxVersion2Folder =
     [ ("v4.6", ["net46"]) 
@@ -171,82 +172,17 @@ let Update () =
     let antho = Configuration.LoadAnthology ()
     let packageRefs = antho.Packages |> Seq.map (fun x -> x.Id)
     let package2packages = BuildPackageDependencies packageRefs
-    let allPackages = packageRefs |> Seq.map (ComputePackageTransitiveDependencies package2packages)
-                                  |> Seq.concat
-                                  |> Set
+    let allPackages = package2packages |> Seq.map (fun x -> x.Value)
+                                       |> Seq.concat
+                                       |> Seq.append (package2packages |> Seq.map (fun x -> x.Key))
+                                       |> Set
     allPackages |> Seq.iter GenerateTargetForPackage
 
 let List () =
     failwith "not implemented"
 
-let AssociatePackage2Projects (file2package : Map<AssemblyRef, PackageRef>) (projects : Project seq) =
-    let res = seq {
-        for project in projects do
-            let package = file2package.TryFind project.Output
-            match package with
-            | Some x -> yield (x, ProjectRef.Bind project)
-            | _ -> ()
-    }
-    res |> Map
-
-let ConvertAllProjects (projects) (package2Files : Map<PackageRef, AssemblyRef set>) (package2packages : Map<PackageRef, PackageRef set>) =
-    seq {
-        let file2package = package2Files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
-                                         |> Map.toSeq
-                                         |> Seq.map (fun (id,nugetFiles) -> (nugetFiles |> Seq.head, id))
-                                         |> Map.ofSeq
-
-        let package2project = AssociatePackage2Projects file2package projects
-        let packages = (Set << Seq.map fst << Map.toSeq) package2Files
-                                                               
-        for project in projects do
-            // problem we are trying to solve for each project
-            // - packages containing one single assembly can be safely migrated to a project if possible
-            // - assemblies can be safely migrated to a project if possible
-            // ==> this is the candateAssemblies set
-            //
-            // Life is not so simple as package could have also dependencies:
-            // a package can have zero dependency and be considered for migration
-            // also a package can have external nugets and internal project dependencies
-            // this situation is not supported as this is more a mix between packaging and deployment
-            // this is covered using an application and referencing correctly packages there
 
 
-            let directlyUsedPackages = project.PackageReferences |> Set.intersect packages
-            let transitivelyUsedPackages = directlyUsedPackages |> Seq.map (ComputePackageTransitiveDependencies package2packages)
-                                                              |> Seq.concat
-                                                              |> Set
-            //let rootPackages = ComputePackageRoots package2packages transitivelyUsedPackages
-            //let indirectlyUsedPackages = Set.difference transitivelyUsedPackages rootPackages
-
-            let candidateAssemblies = package2Files |> Map.filter (fun pkg files -> transitivelyUsedPackages |> Set.contains pkg)
-                                                    |> Map.toSeq
-                                                    |> Seq.map snd
-                                                    |> Seq.concat
-                                                    |> Set
-                                                    |> Set.union project.AssemblyReferences
-
-            // find upgradable packages
-            let packageToUpgrade = package2project |> Map.filter (fun pkg _ -> transitivelyUsedPackages |> Set.contains pkg)
-            let newProjects = packageToUpgrade |> Map.toSeq 
-                                               |> Seq.map (fun (_,prj) -> prj) 
-                                               |> Set
-
-            let removablePackages = packageToUpgrade |> Map.toSeq 
-                                                     |> Seq.map (fun (pkg, _) -> pkg) 
-                                                     |> Set
-            let remainingPackages = transitivelyUsedPackages |> Set.filter (fun pkg -> let removedDependencies = package2packages.[pkg] |> Set.intersect removablePackages
-                                                                                       removedDependencies = Set.empty)
-
-//                                                     |> Set.union indirectlyUsedPackages
-
-            let newProject = { project
-                               with ProjectReferences = Set.union project.ProjectReferences newProjects
-                                    AssemblyReferences =  Set.difference project.AssemblyReferences candidateAssemblies
-                                    PackageReferences = remainingPackages}
-        
-            yield newProject
-    }
 
 let RemoveUnusedPackages (antho : Anthology) =
     let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
@@ -264,9 +200,7 @@ let SimplifyAnthology (antho) =
     let allPackages = package2packages |> Map.toSeq 
                                        |> Seq.map fst 
     let package2Files = allPackages |> Seq.map (fun x -> (x, GatherAllAssemblies x)) |> Map
-    let convertedProjects = ConvertAllProjects antho.Projects package2Files package2packages |> Set
-    let newAntho = { antho
-                     with Projects = convertedProjects }
+    let newAntho = SimplifyAnthology antho package2Files package2packages
     RemoveUnusedPackages newAntho
 
 let Simplify () =
