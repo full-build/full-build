@@ -83,6 +83,7 @@
     <Compile Include="Repo.fs" />
     <Compile Include="View.fs" />
     <Compile Include="NuGets.fs" />
+    <Compile Include="Simplify.fs" />
     <Compile Include="Package.fs" />
     <Compile Include="Workspace.fs" />
     <Compile Include="Program.fs" />
