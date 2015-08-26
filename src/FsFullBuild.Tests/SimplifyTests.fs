@@ -7,6 +7,11 @@ open StringHelpers
 open System.IO
 
 
+let (|Odd|Even|) v =
+    if v % 2 = 1 then Odd
+    else Even
+
+
 [<Test>]
 let CheckSimplifyAssemblies () =
     let anthology = Configuration.LoadAnthologyFromFile (FileInfo("anthology.json"))
@@ -32,4 +37,3 @@ let CheckSimplifyAssemblies () =
     simplifiedlognetunittests.AssemblyReferences |> should not' (contain cassandraSharpItfAssName)
     simplifiedlognetunittests.ProjectReferences |> should contain cassandraSharpPrjRef
     simplifiedlognetunittests.ProjectReferences |> should contain cassandraSharpItfPrjRef
-    
