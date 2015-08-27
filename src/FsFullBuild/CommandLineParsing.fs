@@ -134,4 +134,5 @@ let DisplayUsage() =
     printfn ""
     printfn "  package install : install packages as defined in anthology"
     printfn "  package simplify : simplify package graph, promote assemblies or packages to project where permitted"
+    printfn "  package update : update packages"
     printfn "  package list : list packages"
