@@ -178,6 +178,10 @@ let Update () =
                                        |> Set
     allPackages |> Seq.iter GenerateTargetForPackage
 
+let Outdated () =
+    let confDir = Env.WorkspaceConfigFolder ()
+    Exec.Exec "paket.exe" "outdated" confDir.FullName
+
 let List () =
     failwith "not implemented"
 
