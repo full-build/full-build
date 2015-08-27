@@ -53,6 +53,7 @@ let main argv =
     | InstallPackages -> Package.Install ()
     | SimplifyPackages -> Package.Simplify ()
     | UpdatePackages -> Package.Update ()
+    | OutdatedPackages -> Package.Outdated ()
     | ListPackages -> Package.List ()
 
     // misc
