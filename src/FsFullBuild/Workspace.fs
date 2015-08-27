@@ -246,6 +246,14 @@ let ConvertProjects (antho : Anthology) (package2Files : Map<PackageRef, Set<Ass
 
         xdocSaver projFile convxproj
 
+let RemoveUselessStuff (antho : Anthology) =
+    let wsDir = WorkspaceFolder ()
+    for repo in antho.Repositories do
+        let repoDir = wsDir |> GetSubDirectory (repo.Name)
+        repoDir.EnumerateFiles("*.sln") |> Seq.iter (fun x -> x.Delete())
+        repoDir.EnumerateFiles("packages.config") |> Seq.iter (fun x -> x.Delete())
+        repoDir.EnumerateDirectories("packages") |> Seq.iter (fun x -> x.Delete(true))
+
 let XDocumentLoader (fileName : FileInfo) =
     XDocument.Load fileName.FullName
 
@@ -267,3 +275,5 @@ let Convert () =
                         |> Map
 
     ConvertProjects antho package2Files XDocumentLoader XDocumentSaver
+    RemoveUselessStuff antho
+
