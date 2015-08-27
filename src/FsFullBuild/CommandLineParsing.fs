@@ -71,6 +71,7 @@ type Command =
     | InstallPackages
     | SimplifyPackages
     | UpdatePackages
+    | OutdatedPackages
     | ListPackages
 
     // env
@@ -109,6 +110,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Package) :: Token(Token.Install) :: [] -> Command.InstallPackages
     | Token(Token.Package) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
     | Token(Token.Package) :: Token(Token.Update) :: [] -> Command.UpdatePackages
+    | Token(Token.Package) :: Token(Token.Outdated) :: [] -> Command.OutdatedPackages
     | Token(Token.Package) :: Token(Token.List) :: [] -> Command.ListPackages
 
     | _ -> Command.Error
@@ -135,4 +137,5 @@ let DisplayUsage() =
     printfn "  package install : install packages as defined in anthology"
     printfn "  package simplify : simplify package graph, promote assemblies or packages to project where permitted"
     printfn "  package update : update packages"
+    printfn "  package outdated : display outdated packages"
     printfn "  package list : list packages"
