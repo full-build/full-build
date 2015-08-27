@@ -138,4 +138,4 @@ let DisplayUsage() =
     printfn "  package simplify : simplify package graph, promote assemblies or packages to project where permitted"
     printfn "  package update : update packages"
     printfn "  package outdated : display outdated packages"
-    printfn "  package list : list packages"
+    printfn "  package list : list installed packages"

@@ -183,9 +183,8 @@ let Outdated () =
     Exec.Exec "paket.exe" "outdated" confDir.FullName
 
 let List () =
-    failwith "not implemented"
-
-
+    let confDir = Env.WorkspaceConfigFolder ()
+    Exec.Exec "paket.exe" "show-installed-packages" confDir.FullName
 
 
 let RemoveUnusedPackages (antho : Anthology) =
