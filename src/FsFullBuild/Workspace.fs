@@ -132,9 +132,9 @@ let GenerateProjectTarget (project : Project) =
                     XAttribute (NsNone + "Include", projectFile),
                     XAttribute (NsNone + "Condition", srcCondition),
                     XElement (NsMsBuild + "Project", StringifyGuid project.ProjectGuid),
-                    XElement (NsMsBuild + "Name", project.Output)),
+                    XElement (NsMsBuild + "Name", project.Output.Print())),
                 XElement (NsMsBuild + "Reference",
-                    XAttribute (NsNone + "Include", project.Output),
+                    XAttribute (NsNone + "Include", project.Output.Print()),
                     XAttribute (NsNone + "Condition", binCondition),
                     XElement (NsMsBuild + "HintPath", binFile),
                     XElement (NsMsBuild + "Private", "true")))))
