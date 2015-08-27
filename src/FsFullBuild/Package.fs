@@ -140,7 +140,7 @@ let GeneratePaketDependenciesContent (packages : Package seq) (config : Configur
 
         yield ""
         for package in packages do
-            yield sprintf "nuget %s %s" (package.Id.Print()) package.Version
+            yield sprintf "nuget %s ~> %s" (package.Id.Print()) package.Version
     }
 
 let GeneratePackages (packages : Package seq) =
