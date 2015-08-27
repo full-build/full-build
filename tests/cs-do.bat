@@ -22,6 +22,7 @@ robocopy c:\src\Paket\bin .paket /MIR
 %FULLBUILD% view describe cs || goto :ko
 %FULLBUILD% view describe csc || goto :ko
 %FULLBUILD% view describe all || goto :ko
+%FULLBUILD% view graph all || goto :ko
 
 
 

@@ -120,53 +120,70 @@ let ComputeProjectSelectionClosure (allProjects : Project set) (filters : Reposi
                                  |> Seq.distinct
     transitiveClosure
 
-let Generate (viewName : string) =
+let FindViewProjects (viewName : string) =
     let antho = LoadAnthology ()
-    let wsDir = WorkspaceFolder ()
     let viewDir = WorkspaceViewFolder ()
 
     let viewFile = viewDir |> GetFile (AddExt viewName View)
-    let slnFile = wsDir |> GetFile (AddExt viewName Solution)
     let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map RepositoryRef.Bind
 
     let projectRefs = ComputeProjectSelectionClosure antho.Projects repos |> set
     let projects = antho.Projects |> Seq.filter (fun x -> projectRefs.Contains(ProjectRef.Bind(x)))
+    projects
 
+let Generate (viewName : string) =
+    let projects = FindViewProjects viewName
+
+    let wsDir = WorkspaceFolder ()
+    let slnFile = wsDir |> GetFile (AddExt viewName Solution)
     let slnContent = GenerateSolutionContent projects
     File.WriteAllLines (slnFile.FullName, slnContent)
 
     let slnDefines = GenerateSolutionDefines projects
+    let viewDir = WorkspaceViewFolder ()
     let slnDefineFile = viewDir |> GetFile (AddExt viewName Targets)
     slnDefines.Save (slnDefineFile.FullName)
 
 
-let GraphNodes (antho : Anthology) =
+let GraphNodes (antho : Anthology) (projects : Project set) =
+    let allReferencedProjects = projects |> Seq.map (fun x -> x.ProjectReferences)
+                                         |> Seq.concat
+                                         |> Seq.map (fun x -> antho.Projects |> Seq.find (fun y -> ProjectRef.Bind y = x))
+                                         |> Set
+    let importedProjects = Set.difference allReferencedProjects projects
+    let allPackageReferences = projects |> Seq.map (fun x -> x.PackageReferences)
+                                        |> Seq.concat
+    let allAssemblies = projects |> Seq.map (fun x -> x.AssemblyReferences)
+                                |> Seq.concat
     seq {
-        for project in antho.Projects do
+        for project in projects do
             yield XElement(NsDgml + "Node",
                       XAttribute(NsNone + "Id", project.ProjectGuid),
                       XAttribute(NsNone + "Label", project.Output.Print()),
                       XAttribute(NsNone + "Category", "Project"))
 
-        for package in antho.Packages do
+        for project in importedProjects do
             yield XElement(NsDgml + "Node",
-                      XAttribute(NsNone + "Id", package.Id.Print()),
-                      XAttribute(NsNone + "Label", package.Id.Print()),
-                      XAttribute(NsNone + "Category", "Package"))
+                      XAttribute(NsNone + "Id", project.ProjectGuid),
+                      XAttribute(NsNone + "Label", project.Output.Print()),
+                      XAttribute(NsNone + "Category", "ProjectImport"))
 
-//        let assemblies = antho.Projects |> Seq.map (fun x -> x.AssemblyReferences)
-//                                        |> Seq.concat
-//                                        |> set
-//        for assembly in assemblies do
-//             yield XElement(NsDgml + "Node",
-//                      XAttribute(NsNone + "Id", assembly.Print()),
-//                      XAttribute(NsNone + "Label", assembly.Print()),
-//                      XAttribute(NsNone + "Category", "Assembly"))
+        for package in allPackageReferences do
+            yield XElement(NsDgml + "Node",
+                        XAttribute(NsNone + "Id", package.Print()),
+                        XAttribute(NsNone + "Label", package.Print()),
+                        XAttribute(NsNone + "Category", "Package"))
+
+        for assembly in allAssemblies do
+             yield XElement(NsDgml + "Node",
+                      XAttribute(NsNone + "Id", assembly.Print()),
+                      XAttribute(NsNone + "Label", assembly.Print()),
+                      XAttribute(NsNone + "Category", "Assembly"))
     }
 
-let GraphLinks (antho : Anthology) =
+let GraphLinks (projects : Project seq) =
     seq {
-        for project in antho.Projects do
+        for project in projects do
             let generateLink target category = 
                 XElement(NsDgml + "Link",
                               XAttribute(NsNone + "Source", project.ProjectGuid),
@@ -179,12 +196,13 @@ let GraphLinks (antho : Anthology) =
             for package in project.PackageReferences do
                 yield generateLink (package.Print()) "PackageRef"
 
-//            for assembly in project.AssemblyReferences do
-//                yield generateLink (assembly.Print()) "AssemblyRef"
+            for assembly in project.AssemblyReferences do
+                yield generateLink (assembly.Print()) "AssemblyRef"
     }
 
 let GraphCategories () =
     let allCategories = [ ("Project", "Green")
+                          ("ProjectImport", "Navy")
                           ("Package", "Orange")
                           ("Assembly", "Red")       
                           ("ProjectRef", "Green")
@@ -199,17 +217,19 @@ let GraphCategories () =
 
     allCategories |> Seq.map generateCategory
 
-let GraphContent (antho : Anthology) =
-    let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho)
-    let xLinks = XElement(NsDgml+"Links", GraphLinks antho)
+let GraphContent (antho : Anthology) (viewName : string) =
+    let projects = FindViewProjects viewName |> Set
+    let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho projects)
+    let xLinks = XElement(NsDgml+"Links", GraphLinks projects)
     let xCategories = XElement(NsDgml + "Categories", GraphCategories ())
+    let xGraphDir = XAttribute(NsNone + "GraphDirection", "LeftToRight")
     let xLayout = XAttribute(NsNone + "Layout", "Sugiyama")
     XDocument(
-        XElement(NsDgml + "DirectedGraph", xLayout, xNodes, xLinks, xCategories))
+        XElement(NsDgml + "DirectedGraph", xLayout, xGraphDir, xNodes, xLinks, xCategories))
 
 let Graph (viewName : string) =
     let antho = Configuration.LoadAnthology ()
-    let graph = GraphContent antho
+    let graph = GraphContent antho viewName
 
     let wsDir = Env.WorkspaceFolder ()
     let graphFile = wsDir |> GetSubDirectory (AddExt viewName Dgml)
