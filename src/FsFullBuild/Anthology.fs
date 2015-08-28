@@ -107,7 +107,6 @@ type Anthology =
     { Applications : Application set
       Repositories : Repository set
       Bookmarks : Bookmark set 
-      Packages : Package set
       Projects : Project set }
 
     

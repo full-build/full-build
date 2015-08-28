@@ -78,6 +78,7 @@
     <Compile Include="Exec.fs" />
     <Compile Include="Anthology.fs" />
     <Compile Include="MsBuildHelpers.fs" />
+    <Compile Include="PaketParsing.fs" />
     <Compile Include="ProjectParsing.fs" />
     <Compile Include="Vcs.fs" />
     <Compile Include="CommandLineToken.fs" />

@@ -196,7 +196,13 @@ let GraphNodes (antho : Anthology) (projects : Project set) =
             yield GenerateNode (assembly.Print()) (assembly.Print()) "Assembly"
     }
 
-let GraphLinks (projects : Project seq) =
+let GraphLinks (antho : Anthology) (projects : Project set) =
+    let allReferencedProjects = projects |> Seq.map (fun x -> x.ProjectReferences)
+                                         |> Seq.concat
+                                         |> Seq.map (fun x -> antho.Projects |> Seq.find (fun y -> ProjectRef.Bind y = x))
+                                         |> Set
+    let importedProjects = Set.difference allReferencedProjects projects
+
     seq {
         for project in projects do
             for projectRef in project.ProjectReferences do
@@ -211,6 +217,9 @@ let GraphLinks (projects : Project seq) =
                 yield GenerateLink (project.ProjectGuid) (assembly.Print()) "AssemblyRef"
 
         for project in projects do
+                yield GenerateLink "Projects" (project.ProjectGuid) "Contains"
+
+        for project in importedProjects do
                 yield GenerateLink "Projects" (project.ProjectGuid) "Contains"
 
         for project in projects do
@@ -254,9 +263,9 @@ let GraphCategories () =
 let GraphContent (antho : Anthology) (viewName : string) =
     let projects = FindViewProjects viewName |> Set
     let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho projects)
-    let xLinks = XElement(NsDgml+"Links", GraphLinks projects)
+    let xLinks = XElement(NsDgml+"Links", GraphLinks antho projects)
     let xCategories = XElement(NsDgml + "Categories", GraphCategories ())
-    let xGraphDir = XAttribute(NsNone + "GraphDirection", "TopToBottom")
+    let xGraphDir = XAttribute(NsNone + "GraphDirection", "LeftToRight")
     let xLayout = XAttribute(NsNone + "Layout", "Sugiyama")
     XDocument(
         XElement(NsDgml + "DirectedGraph", xLayout, xGraphDir, xNodes, xLinks, xCategories))
