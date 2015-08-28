@@ -82,10 +82,10 @@ let GenerateChooseContent (libDir : DirectoryInfo) =
     if whens.Any() then XElement (NsMsBuild + "Choose", whens)
     else null
     
-let GenerateDependenciesContent (dependencies : PackageRef seq) =
+let GenerateDependenciesContent (dependencies : PackageId seq) =
     seq {
         for dependency in dependencies do
-            let depId = dependency.Print()
+            let depId = dependency.Value
             let dependencyTargets = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER depId
             let pkgProperty = PackagePropertyName depId
             let condition = sprintf "'$(%s)' == ''" pkgProperty
@@ -95,8 +95,8 @@ let GenerateDependenciesContent (dependencies : PackageRef seq) =
                       XAttribute(NsNone + "Condition", condition))
     }
 
-let GenerateProjectContent (package : PackageRef) (imports : XElement seq) (choose : XElement) =
-    let defineName = PackagePropertyName (package.Print())
+let GenerateProjectContent (package : PackageId) (imports : XElement seq) (choose : XElement) =
+    let defineName = PackagePropertyName (package.Value)
     let propCondition = sprintf "'$(%s)' == ''" defineName
     let project = XElement (NsMsBuild + "Project",
                     XAttribute (NsNone + "Condition", propCondition),
@@ -107,12 +107,12 @@ let GenerateProjectContent (package : PackageRef) (imports : XElement seq) (choo
     project
 
 
-let GenerateTargetForPackage (package : PackageRef) =
+let GenerateTargetForPackage (package : PackageId) =
     let pkgsDir = Env.WorkspacePackageFolder ()
-    let pkgDir = pkgsDir |> GetSubDirectory (package.Print())
+    let pkgDir = pkgsDir |> GetSubDirectory (package.Value)
     let libDir = pkgDir |> GetSubDirectory "lib" 
     
-    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.Print()) NuSpec)
+    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.Value) NuSpec)
     let xnuspec = XDocument.Load (nuspecFile.FullName)
     let dependencies = GetPackageDependencies xnuspec
 
@@ -123,9 +123,9 @@ let GenerateTargetForPackage (package : PackageRef) =
     let targetFile = pkgDir |> GetFile "package.targets" 
     project.Save (targetFile.FullName)
 
-let GatherAllAssemblies (package : PackageRef) : AssemblyRef set =
+let GatherAllAssemblies (package : PackageId) : AssemblyRef set =
     let pkgsDir = Env.WorkspacePackageFolder ()
-    let pkgDir = pkgsDir |> GetSubDirectory (package.Print())
+    let pkgDir = pkgsDir |> GetSubDirectory (package.Value)
     let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
     let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
     let files = Seq.append dlls exes

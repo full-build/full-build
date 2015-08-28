@@ -12,7 +12,7 @@ let ParseContent (lines : string seq) =
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
             match items.[0] with
-            | "nuget" -> yield PackageRef.Bind items.[1]
+            | "nuget" -> yield (PackageId items.[1])
             | _ -> ()
     }
 
@@ -49,7 +49,7 @@ let ParsePaketDependencies () =
 let GenerateDependenciesContent (packages : Package seq) =
     seq {
         for package in packages do
-            yield sprintf "nuget %s ~> %s" (package.Id.Print()) package.Version.Value
+            yield sprintf "nuget %s ~> %s" (package.Id.Value) package.Version.Value
     }
 
 let AppendDependencies (packages : Package seq) = 
@@ -60,17 +60,17 @@ let AppendDependencies (packages : Package seq) =
     let content = GenerateDependenciesContent packages
     File.AppendAllLines (paketDep.FullName, content)
 
-let RemoveDependenciesContent (lines : string seq) (packages : Set<PackageRef>) =
+let RemoveDependenciesContent (lines : string seq) (packages : Set<PackageId>) =
     seq {
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
             match items.[0] with
-            | "nuget" -> if Set.contains (PackageRef.Bind items.[1]) packages then ()
+            | "nuget" -> if Set.contains (PackageId items.[1]) packages then ()
                          else yield line
             | _ -> yield line
     }
 
-let RemoveDependencies (packages : Set<PackageRef>) =
+let RemoveDependencies (packages : Set<PackageId>) =
     let confDir = Env.WorkspaceConfigFolder ()
     let paketDep = confDir |> GetFile "paket.dependencies" 
     let content = File.ReadAllLines (paketDep.FullName)

@@ -8,7 +8,7 @@ if not exist cs-init call cs-init.bat || goto :ko
 robocopy cs-init cs-do /MIR 
 
 pushd cs-do
-robocopy c:\src\Paket\bin .paket /MIR
+rem robocopy c:\src\Paket\bin .paket /MIR
 
 
 %FULLBUILD% workspace index || goto :ko

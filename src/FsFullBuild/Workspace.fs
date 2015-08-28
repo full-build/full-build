@@ -110,7 +110,6 @@ let StringifyOutputType (outputType : OutputType) =
     match outputType with
     | OutputType.Exe -> ".exe"
     | OutputType.Dll -> ".dll"
-    | _ -> failwithf "Unknown OutputType %A" outputType
 
 
 let GenerateProjectTarget (project : Project) =
@@ -216,7 +215,7 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<Ass
 
     // add nuget references
     for packageReference in project.PackageReferences do
-        let pkgId = packageReference.Print()
+        let pkgId = packageReference.Value
         let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER pkgId
         let pkgProperty = PackagePropertyName pkgId
         let condition = sprintf "'$(%s)' == ''" pkgProperty
@@ -226,7 +225,7 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<Ass
         afterItemGroup.AddAfterSelf (import)
     cproj
 
-let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files : Map<PackageRef, Set<AssemblyRef>>) =
+let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files : Map<PackageId, Set<AssemblyRef>>) =
     let usedPackage2Files = package2Files |> Map.filter (fun id _ -> project.PackageReferences |> Set.contains id)
     let nugetFiles = usedPackage2Files |> Map.toSeq
                                        |> Seq.map (fun (id, files) -> files)
@@ -236,7 +235,7 @@ let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files
     let convxproj = ConvertProject xproj project nugetFiles
     convxproj
 
-let ConvertProjects (antho : Anthology) (package2Files : Map<PackageRef, Set<AssemblyRef>>) xdocLoader xdocSaver =
+let ConvertProjects (antho : Anthology) (package2Files : Map<PackageId, Set<AssemblyRef>>) xdocLoader xdocSaver =
     let wsDir = WorkspaceFolder ()
     for project in antho.Projects do
         let repoDir = wsDir |> GetSubDirectory (project.Repository.Print())
