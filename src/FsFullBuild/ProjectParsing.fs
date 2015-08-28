@@ -79,11 +79,11 @@ let ParseNuGetPackage (pkgRef : XElement) : Package =
     let pkgVer = !> pkgRef.Attribute(XNamespace.None + "version") : string
     let pkgFx = !> pkgRef.Attribute(XNamespace.None + "targetFramework") : string
 
-    { Id = PackageRef.Bind pkgId
+    { Id = PackageId pkgId
       Version = PackageVersion pkgVer }
 
 let ParseFullBuildPackage (fileName : string) : Package =
-    { Id=PackageRef.Bind (Path.GetFileNameWithoutExtension(fileName))
+    { Id=PackageId (Path.GetFileNameWithoutExtension(fileName))
       Version = PackageVersion String.Empty }
 
 let GetPackages (prjDoc : XDocument) (nugetDoc : XDocument) =
