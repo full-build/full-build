@@ -22,7 +22,7 @@ let CheckRoundtripAnthology () =
                        ProjectReferences = [ ProjectRef.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectRef.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set
                        AssemblyReferences = [ AssemblyRef.Bind "System" ; AssemblyRef.Bind "System.Data"; AssemblyRef.Bind "System.Xml"] |> set
                        PackageReferences = Set.empty
-                       Repository = RepositoryRef.Bind(RepositoryName "cassandra-sharp") } ] |> set }
+                       Repository = RepositoryName.Bind "cassandra-sharp" } ] |> set }
 
     let file = FileInfo (Path.GetRandomFileName())
     printfn "Temporary file is %A" file.FullName
