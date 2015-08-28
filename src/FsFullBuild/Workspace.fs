@@ -48,9 +48,9 @@ let private ParseRepositoryProjects (parser) (repoRef : RepositoryRef) (repoDir 
             |> Seq.map (parser repoDir repoRef)
 
 let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) = 
-    repos |> Seq.map (fun x -> GetSubDirectory x.Name wsDir) 
+    repos |> Seq.map (fun x -> GetSubDirectory x.Name.Value wsDir) 
           |> Seq.filter (fun x -> x.Exists) 
-          |> Seq.map (fun x -> ParseRepositoryProjects parser (RepositoryRef.Bind(x.Name)) x)
+          |> Seq.map (fun x -> ParseRepositoryProjects parser (RepositoryRef.Bind(RepositoryName x.Name)) x)
           |> Seq.concat
 
 let Init(path : string) = 
@@ -68,9 +68,10 @@ let Create(path : string) =
                   Bookmarks = Set.empty
                   Repositories = Set.empty
                   Projects = Set.empty }
-    Configuration.SaveAnthology antho
+    let confDir = wsDir |> GetSubDirectory ".full-build"
+    let anthoFile = confDir |> GetFile "anthology.json"
+    Configuration.SaveAnthologyToFile anthoFile antho
 
-    failwith "FIXME"
     // FIXME
     //  create git repo in .full-build
     //       generate .gitignore
@@ -249,7 +250,7 @@ let ConvertProjects (antho : Anthology) (package2Files : Map<PackageRef, Set<Ass
 let RemoveUselessStuff (antho : Anthology) =
     let wsDir = WorkspaceFolder ()
     for repo in antho.Repositories do
-        let repoDir = wsDir |> GetSubDirectory (repo.Name)
+        let repoDir = wsDir |> GetSubDirectory (repo.Name.Value)
         repoDir.EnumerateFiles("*.sln") |> Seq.iter (fun x -> x.Delete())
         repoDir.EnumerateFiles("packages.config") |> Seq.iter (fun x -> x.Delete())
         repoDir.EnumerateDirectories("packages") |> Seq.iter (fun x -> x.Delete(true))
