@@ -132,50 +132,28 @@ let GatherAllAssemblies (package : PackageRef) : AssemblyRef set =
     files |> Seq.map (fun x -> AssemblyRef.Bind x) 
           |> set
 
-
-let GeneratePaketDependenciesContent (packages : Package seq) (config : Configuration.GlobalConfiguration) =
-    seq {
-        for nuget in config.NuGets do
-            yield sprintf "source %s" nuget
-
-        yield ""
-        for package in packages do
-            yield sprintf "nuget %s ~> %s" (package.Id.Print()) package.Version
-    }
-
-let GeneratePackages (packages : Package seq) =
-    let config = Configuration.GlobalConfig
-    let content = GeneratePaketDependenciesContent packages config
-    let confDir = Env.WorkspaceConfigFolder ()
-    let paketDep = confDir |> GetFile "paket.dependencies" 
-    File.WriteAllLines (paketDep.FullName, content)
-
 let Install () =
     let pkgDir = Env.WorkspacePackageFolder ()
     pkgDir.Delete (true)
 
-    let antho = Configuration.LoadAnthology ()
-    GeneratePackages antho.Packages
+    let config = Configuration.GlobalConfig
+    PaketParsing.UpdateSources config.NuGets
 
     let confDir = Env.WorkspaceConfigFolder ()
     Exec.Exec "paket.exe" "install" confDir.FullName
 
-    let packageRefs = antho.Packages |> Seq.map (fun x -> x.Id)
-    let allPackages = BuildPackageDependencies packageRefs |> Map.toSeq 
-                                                           |> Seq.map fst 
+    let allPackages = BuildPackageDependencies (PaketParsing.ParsePaketDependencies ())
+                      |> Map.toList
+                      |> Seq.map (fun (k, v) -> k)
     allPackages |> Seq.iter GenerateTargetForPackage
 
 let Update () =
     let confDir = Env.WorkspaceConfigFolder ()
     Exec.Exec "paket.exe" "update" confDir.FullName
     
-    let antho = Configuration.LoadAnthology ()
-    let packageRefs = antho.Packages |> Seq.map (fun x -> x.Id)
-    let package2packages = BuildPackageDependencies packageRefs
-    let allPackages = package2packages |> Seq.map (fun x -> x.Value)
-                                       |> Seq.concat
-                                       |> Seq.append (package2packages |> Seq.map (fun x -> x.Key))
-                                       |> Set
+    let allPackages = BuildPackageDependencies (PaketParsing.ParsePaketDependencies ())
+                      |> Map.toList
+                      |> Seq.map (fun (k, v) -> k)
     allPackages |> Seq.iter GenerateTargetForPackage
 
 let Outdated () =
@@ -188,23 +166,25 @@ let List () =
 
 
 let RemoveUnusedPackages (antho : Anthology) =
+    let packages = PaketParsing.ParsePaketDependencies ()
     let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
                                       |> Seq.concat
                                       |> set
 
-    let remainingPackages = antho.Packages |> Set.filter (fun x -> usedPackages |> Set.contains x.Id)
-    let newAntho = { antho
-                     with Packages = remainingPackages }
-    newAntho
+    let packagesToRemove = packages |> Set.filter (fun x -> not <| Set.contains x usedPackages)
+    PaketParsing.RemoveDependencies packagesToRemove
 
 let SimplifyAnthology (antho) =
-    let packageRefs = antho.Packages |> Seq.map (fun x -> x.Id)
+    let packageRefs = antho.Projects |> Seq.map (fun x -> x.PackageReferences)
+                                     |> Seq.concat
+                                     |> Set
     let package2packages = BuildPackageDependencies packageRefs
     let allPackages = package2packages |> Map.toSeq 
                                        |> Seq.map fst 
     let package2Files = allPackages |> Seq.map (fun x -> (x, GatherAllAssemblies x)) |> Map
     let newAntho = SimplifyAnthology antho package2Files package2packages
     RemoveUnusedPackages newAntho
+    newAntho
 
 let Simplify () =
     let antho = Configuration.LoadAnthology ()
