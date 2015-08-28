@@ -67,10 +67,12 @@ let Create(path : string) =
     let antho = { Applications = Set.empty
                   Bookmarks = Set.empty
                   Repositories = Set.empty
-                  Packages = Set.empty
                   Projects = Set.empty }
     Configuration.SaveAnthology antho
-    // TODO: create git repo in .full-build
+
+    failwith "FIXME"
+    // FIXME
+    //  create git repo in .full-build
     //       generate .gitignore
     //       add content of .full-build to git repo
     //       commit
@@ -82,16 +84,14 @@ let Index () =
 
     // FIXME: before merging, it would be better to tell about conflicts
 
-    // merge binaries
-    let foundAssemblies = projects |> Seq.map (fun x -> x.Assemblies) 
-                                   |> Seq.concat
-
     // merge packages
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
                                  |> Seq.concat
-    let newPackages = antho.Packages |> Seq.append foundPackages 
-                                     |> Seq.distinctBy (fun x -> x.Id)
-                                     |> set
+    let existingPackages = PaketParsing.ParsePaketDependencies ()
+    let packagesToAdd = foundPackages |> Seq.filter (fun x -> not <| Set.contains x.Id existingPackages)
+                                      |> Seq.distinctBy (fun x -> x.Id)
+                                      |> Set
+    PaketParsing.AppendDependencies packagesToAdd
 
     // merge projects
     let foundProjects = projects |> Seq.map (fun x -> x.Project)
@@ -100,10 +100,10 @@ let Index () =
                                      |> set
 
     let newAntho = { antho 
-                     with Packages = newPackages 
-                          Projects = newProjects }
+                     with Projects = newProjects }
 
     SaveAnthology newAntho
+
 
 let StringifyOutputType (outputType : OutputType) =
     match outputType with
@@ -270,8 +270,11 @@ let Convert () =
     Package.Install ()
 
     // for each package, get all assemblies
-    let package2Files = antho.Packages 
-                        |> Seq.map (fun x -> (x.Id, Package.GatherAllAssemblies x.Id))
+    let packageRefs = antho.Projects |> Seq.map (fun x -> x.PackageReferences)
+                                     |> Seq.concat
+                                     |> Set
+    let package2Files = packageRefs 
+                        |> Seq.map (fun x -> (x, Package.GatherAllAssemblies x))
                         |> Map
 
     ConvertProjects antho package2Files XDocumentLoader XDocumentSaver
