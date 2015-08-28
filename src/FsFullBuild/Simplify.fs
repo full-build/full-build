@@ -3,18 +3,11 @@ open Anthology
 open NuGets
 open Collections
 
-
-
 let AssociatePackage2Projects (file2package : Map<AssemblyRef, PackageRef>) (projects : Project seq) =
-    let res = seq {
-        for project in projects do
-            let package = file2package.TryFind project.Output
-            match package with
-            | Some x -> yield (x, ProjectRef.Bind project)
-            | _ -> ()
-    }
-    res |> Map
-
+    let outputs = projects |> Seq.map (fun x -> x.Output) |> Set
+    let res = file2package |> Seq.filter (fun x -> outputs |> Set.contains x.Key)
+                           |> Seq.map (fun x -> (x.Value, x.Key))
+    res
 
 let (|MatchProject|_|) (projects : Project set) (assName : AssemblyRef) = 
     let replacementProject = projects |> Seq.tryFind (fun x -> x.Output = assName)
