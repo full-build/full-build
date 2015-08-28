@@ -125,8 +125,7 @@ let FindViewProjects (viewName : string) =
     let viewDir = WorkspaceViewFolder ()
 
     let viewFile = viewDir |> GetFile (AddExt viewName View)
-    let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map RepositoryRef.Bind
-
+    let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map (fun x -> RepositoryName x |> RepositoryRef.Bind)
     let projectRefs = ComputeProjectSelectionClosure antho.Projects repos |> set
     let projects = antho.Projects |> Seq.filter (fun x -> projectRefs.Contains(ProjectRef.Bind(x)))
     projects
@@ -278,7 +277,7 @@ let Graph (viewName : string) =
     let graphFile = wsDir |> GetSubDirectory (AddExt viewName Dgml)
     graph.Save graphFile.FullName
 
-let Create (viewName : string) (filters : string list) =
+let Create (viewName : string) (filters : RepositoryName list) =
     let repos = filters |> Repo.FilterRepos 
                         |> Seq.map RepositoryRef.Bind
                         |> Seq.map (fun x -> x.Print())

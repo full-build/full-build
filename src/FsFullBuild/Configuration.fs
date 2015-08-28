@@ -29,9 +29,12 @@ open System.IO
 open IoHelpers
 open Anthology
 open Env
-open Newtonsoft.Json
+open Nessos
 
 let private WORKSPACE_CONFIG_FILE = ".full-build"
+
+let private jsonSerializer = FsPickler.Json.FsPickler.CreateJsonSerializer(indent = true)
+
 
 type GlobalConfiguration = 
     { BinRepo : string
@@ -72,12 +75,13 @@ let GlobalConfig : GlobalConfiguration =
     GlobalConfigurationFromFile filename
 
 let LoadAnthologyFromFile(anthoFn : FileInfo) : Anthology = 
-    let json = File.ReadAllText anthoFn.FullName
-    JsonConvert.DeserializeObject<Anthology> (json)
+    use file = anthoFn.OpenText()
+    let antho = jsonSerializer.Deserialize(file)
+    antho
 
 let SaveAnthologyToFile (anthoFn : FileInfo) (anthology : Anthology) = 
-    let json = JsonConvert.SerializeObject (anthology, Formatting.Indented)
-    File.WriteAllText (anthoFn.FullName, json)
+    use file = anthoFn.CreateText()
+    jsonSerializer.Serialize(file, anthology)
 
 let LoadAnthology() : Anthology = 
     let anthoFn = GetAnthologyFileName ()

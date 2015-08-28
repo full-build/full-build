@@ -31,19 +31,19 @@ open Configuration
 
 let List() = 
     let antho = LoadAnthology()
-    antho.Repositories |> Seq.iter (fun x -> printfn "%s : %s [%A]" x.Name x.Url x.Vcs)
+    antho.Repositories |> Seq.iter (fun x -> printfn "%s : %s [%A]" x.Name.Value x.Url.Value x.Vcs)
 
-let MatchRepo (repo : Repository seq) (filter : string) = 
-    repo |> Seq.filter (fun x -> Match x.Name filter)
+let MatchRepo (repo : Repository seq) (filter : RepositoryName) = 
+    repo |> Seq.filter (fun x -> Match x.Name.Value filter.Value)
          |> Seq.distinct
 
-let FilterRepos (filters : string list) = 
+let FilterRepos (filters : RepositoryName seq) = 
     let antho = LoadAnthology()
     filters |> Seq.map (MatchRepo antho.Repositories)
-            |> Seq.collect (fun x -> x)
+            |> Seq.concat
             |> Seq.distinct
 
-let Clone (filters : string list) = 
+let Clone (filters : RepositoryName list) = 
     let wsDir = WorkspaceFolder()
     FilterRepos filters |> Seq.iter (Vcs.VcsCloneRepo wsDir)
 

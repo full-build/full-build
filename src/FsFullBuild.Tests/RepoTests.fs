@@ -7,7 +7,7 @@ open Repo
 
 [<Test>]
 let CheckFilter () =
-    let repos = [ { Vcs = VcsType.Git; Name = "cassandra-sharp"; Url = "https://github.com/pchalamet/cassandra-sharp" }
-                  { Vcs = VcsType.Git; Name = "cassandra-sharp-contrib"; Url = "https://github.com/pchalamet/cassandra-sharp-contrib" } ]
+    let repos = [ { Vcs = VcsType.Git; Name = RepositoryName "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
+                  { Vcs = VcsType.Git; Name = RepositoryName "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } ]
   
-    MatchRepo repos "cassandra*" |> should equal repos
+    MatchRepo repos (RepositoryName "cassandra*") |> should equal repos
