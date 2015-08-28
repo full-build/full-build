@@ -145,6 +145,18 @@ let Generate (viewName : string) =
     slnDefines.Save (slnDefineFile.FullName)
 
 
+let GenerateNode source label category =
+    XElement(NsDgml + "Node",
+        XAttribute(NsNone + "Id", source),
+        XAttribute(NsNone + "Label", label),
+        XAttribute(NsNone + "Category", category))
+
+let GenerateLink source target category =
+    XElement(NsDgml + "Link",
+        XAttribute(NsNone + "Source", source),
+        XAttribute(NsNone + "Target", target),
+        XAttribute(NsNone + "Category", category))
+
 let GraphNodes (antho : Anthology) (projects : Project set) =
     let allReferencedProjects = projects |> Seq.map (fun x -> x.ProjectReferences)
                                          |> Seq.concat
@@ -156,48 +168,59 @@ let GraphNodes (antho : Anthology) (projects : Project set) =
     let allAssemblies = projects |> Seq.map (fun x -> x.AssemblyReferences)
                                 |> Seq.concat
     seq {
+        yield XElement(NsDgml + "Node",
+                XAttribute(NsNone + "Id", "Projects"),
+                XAttribute(NsNone + "Label", "Projects"),
+                XAttribute(NsNone + "Group", "Expanded"))
+
+        yield XElement(NsDgml + "Node",
+                XAttribute(NsNone + "Id", "Packages"),
+                XAttribute(NsNone + "Label", "Packages"),
+                XAttribute(NsNone + "Group", "Expanded"))
+
+        yield XElement(NsDgml + "Node",
+                XAttribute(NsNone + "Id", "Assemblies"),
+                XAttribute(NsNone + "Label", "Assemblies"),
+                XAttribute(NsNone + "Group", "Expanded"))
+
         for project in projects do
-            yield XElement(NsDgml + "Node",
-                      XAttribute(NsNone + "Id", project.ProjectGuid),
-                      XAttribute(NsNone + "Label", project.Output.Print()),
-                      XAttribute(NsNone + "Category", "Project"))
+            yield GenerateNode project.ProjectGuid (project.Output.Print()) "Project"
 
         for project in importedProjects do
-            yield XElement(NsDgml + "Node",
-                      XAttribute(NsNone + "Id", project.ProjectGuid),
-                      XAttribute(NsNone + "Label", project.Output.Print()),
-                      XAttribute(NsNone + "Category", "ProjectImport"))
+            yield GenerateNode project.ProjectGuid (project.Output.Print()) "ProjectImport"
 
         for package in allPackageReferences do
-            yield XElement(NsDgml + "Node",
-                        XAttribute(NsNone + "Id", package.Print()),
-                        XAttribute(NsNone + "Label", package.Print()),
-                        XAttribute(NsNone + "Category", "Package"))
+            yield GenerateNode (package.Print()) (package.Print()) "Package"
 
         for assembly in allAssemblies do
-             yield XElement(NsDgml + "Node",
-                      XAttribute(NsNone + "Id", assembly.Print()),
-                      XAttribute(NsNone + "Label", assembly.Print()),
-                      XAttribute(NsNone + "Category", "Assembly"))
+            yield GenerateNode (assembly.Print()) (assembly.Print()) "Assembly"
     }
 
 let GraphLinks (projects : Project seq) =
     seq {
         for project in projects do
-            let generateLink target category = 
-                XElement(NsDgml + "Link",
-                              XAttribute(NsNone + "Source", project.ProjectGuid),
-                              XAttribute(NsNone + "Target", target),
-                              XAttribute(NsNone + "Category", category))
-
             for projectRef in project.ProjectReferences do
-                yield generateLink (projectRef.Print()) "ProjectRef"
+                yield GenerateLink (project.ProjectGuid) (projectRef.Print()) "ProjectRef"
 
+        for project in projects do
             for package in project.PackageReferences do
-                yield generateLink (package.Print()) "PackageRef"
+                yield GenerateLink (project.ProjectGuid) (package.Print()) "PackageRef"
 
+        for project in projects do
             for assembly in project.AssemblyReferences do
-                yield generateLink (assembly.Print()) "AssemblyRef"
+                yield GenerateLink (project.ProjectGuid) (assembly.Print()) "AssemblyRef"
+
+        for project in projects do
+                yield GenerateLink "Projects" (project.ProjectGuid) "Contains"
+
+        for project in projects do
+            for package in project.PackageReferences do
+                yield GenerateLink "Packages" (package.Print()) "Contains"
+
+        for project in projects do
+            for assembly in project.AssemblyReferences do
+                yield GenerateLink "Assemblies" (assembly.Print()) "Contains"
+
     }
 
 let GraphCategories () =
@@ -215,14 +238,25 @@ let GraphCategories () =
             XAttribute(NsNone + "Id", key), 
             XAttribute(NsNone + "Background", value))
 
-    allCategories |> Seq.map generateCategory
+    let res = (allCategories |> Seq.map generateCategory)
+    seq {
+        yield! (allCategories |> Seq.map generateCategory)
+        yield XElement(NsDgml + "Category", 
+                XAttribute(NsNone + "Id", "Contains"), 
+                XAttribute(NsNone + "Label", "Contains"), 
+                XAttribute(NsNone + "IsContainment", "True"),
+                XAttribute(NsNone + "CanBeDataDriven", "False"),
+                XAttribute(NsNone + "CanLinkedNodesBeDataDriven", "True"),
+                XAttribute(NsNone + "IncomingActionLabel", "Contained By"),
+                XAttribute(NsNone + "OutgoingActionLabel", "Contains"))
+    }
 
 let GraphContent (antho : Anthology) (viewName : string) =
     let projects = FindViewProjects viewName |> Set
     let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho projects)
     let xLinks = XElement(NsDgml+"Links", GraphLinks projects)
     let xCategories = XElement(NsDgml + "Categories", GraphCategories ())
-    let xGraphDir = XAttribute(NsNone + "GraphDirection", "LeftToRight")
+    let xGraphDir = XAttribute(NsNone + "GraphDirection", "TopToBottom")
     let xLayout = XAttribute(NsNone + "Layout", "Sugiyama")
     XDocument(
         XElement(NsDgml + "DirectedGraph", xLayout, xGraphDir, xNodes, xLinks, xCategories))
