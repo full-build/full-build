@@ -70,13 +70,6 @@ let CheckEqualityWithPermutation () =
         Bookmarks = [ { Name = "cassandra-sharp"; Version = "b62e33a6ba39f987c91fdde11472f42b2a4acd94" }; { Name = "cassandra-sharp-contrib"; Version = "e0089100b3c5ca520e831c5443ad9dc8ab176052" } ] |> set
         Repositories = [ { Vcs = VcsType.Git; Name = "cassandra-sharp"; Url = "https://github.com/pchalamet/cassandra-sharp" }
                          { Vcs = VcsType.Git; Name = "cassandra-sharp-contrib"; Url = "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
-        Packages = [ { Id=PackageRef.Bind "FSharp.Data"; Version="2.2.5"; TargetFramework="net45" }
-                     { Id=PackageRef.Bind "FsUnit"; Version="1.3.0.1"; TargetFramework="net45" }
-                     { Id=PackageRef.Bind "Mini"; Version="0.4.2.0"; TargetFramework="net45" }
-                     { Id=PackageRef.Bind "Newtonsoft.Json"; Version="7.0.1"; TargetFramework="net45" }
-                     { Id=PackageRef.Bind "NLog"; Version="4.0.1"; TargetFramework="net45" }
-                     { Id=PackageRef.Bind "NUnit"; Version="2.6.3"; TargetFramework="net45" }
-                     { Id=PackageRef.Bind "xunit"; Version="1.9.1"; TargetFramework="net45" } ] |> set
         Projects = [ { Output = AssemblyRef.Bind "cqlplus"
                        OutputType = OutputType.Exe
                        ProjectGuid = ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59"
@@ -92,13 +85,6 @@ let CheckEqualityWithPermutation () =
         Bookmarks = [ { Name = "cassandra-sharp-contrib"; Version = "e0089100b3c5ca520e831c5443ad9dc8ab176052" }; { Name = "cassandra-sharp"; Version = "b62e33a6ba39f987c91fdde11472f42b2a4acd94" } ] |> set
         Repositories = [ { Vcs = VcsType.Git; Name = "cassandra-sharp-contrib"; Url = "https://github.com/pchalamet/cassandra-sharp-contrib" } 
                          { Vcs = VcsType.Git; Name = "cassandra-sharp"; Url = "https://github.com/pchalamet/cassandra-sharp" } ] |> set
-        Packages = [ { Id=PackageRef.Bind "FSharp.Data"; Version="2.2.5"; TargetFramework="net45" }
-                     { Id=PackageRef.Bind "Mini"; Version="0.4.2.0"; TargetFramework="net45" }
-                     { Id=PackageRef.Bind "Newtonsoft.Json"; Version="7.0.1"; TargetFramework="net45" }
-                     { Id=PackageRef.Bind "NLog"; Version="4.0.1"; TargetFramework="net45" }
-                     { Id=PackageRef.Bind "NUnit"; Version="2.6.3"; TargetFramework="net45" }
-                     { Id=PackageRef.Bind "FsUnit"; Version="1.3.0.1"; TargetFramework="net45" }
-                     { Id=PackageRef.Bind "xunit"; Version="1.9.1"; TargetFramework="net45" } ] |> set
         Projects = [ { Output = AssemblyRef.Bind "cqlplus"
                        OutputType = OutputType.Exe
                        ProjectGuid = ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59"

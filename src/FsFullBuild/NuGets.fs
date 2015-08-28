@@ -37,15 +37,3 @@ let ComputePackagesRoots (package2packages : Map<PackageRef, PackageRef set>) =
                                  |> Seq.map fst
                                  |> Set
     roots
-
-//let rec ComputePackageTransitiveDependencies (packageDeps : Map<PackageRef,PackageRef set>) (package : PackageRef) =
-//    let res = seq {
-//        yield package
-//        let dependencies = packageDeps.[package]
-//        yield! dependencies
-//
-//        for dependency in dependencies do
-//            yield! ComputePackageTransitiveDependencies packageDeps dependency
-//    }
-//    res |> set
-
