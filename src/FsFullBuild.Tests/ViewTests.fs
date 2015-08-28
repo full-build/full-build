@@ -13,13 +13,13 @@ let CheckSelectProject () =
     let file = FileInfo ("Anthology.json")
     let antho = LoadAnthologyFromFile file
     
-    let projects = ComputeProjectSelectionClosure antho.Projects [RepositoryRef.Bind "cassandra-sharp-contrib"] |> Seq.toList
+    let projects = ComputeProjectSelectionClosure antho.Projects [RepositoryRef.Bind(RepositoryName "cassandra-sharp-contrib")] |> Seq.toList
     projects |> should equal [ ProjectRef.Bind (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
                                ProjectRef.Bind (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571") ]
 
 [<Test>]
 let CheckGenerateSolution () =
-    let projects = [ { Repository = RepositoryRef.Bind "cassandra-sharp-contrib"
+    let projects = [ { Repository = RepositoryRef.Bind(RepositoryName "cassandra-sharp-contrib")
                        RelativeProjectFile = "CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj"
                        ProjectGuid = ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4"
                        Output = AssemblyRef.Bind "CassandraSharp.Contrib.log4net"
@@ -29,7 +29,7 @@ let CheckGenerateSolution () =
                        PackageReferences = [ PackageRef.Bind "log4net"
                                              PackageRef.Bind "Rx-Core"; PackageRef.Bind "Rx-Interfaces"; PackageRef.Bind "Rx-Linq"; PackageRef.Bind "Rx-Main"; PackageRef.Bind "Rx-PlatformServices" ] |> set
                        ProjectReferences = [ProjectRef.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")] |> set}
-                     { Repository = RepositoryRef.Bind "cassandra-sharp-contrib"
+                     { Repository = RepositoryRef.Bind(RepositoryName "cassandra-sharp-contrib")
                        RelativeProjectFile = "CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"
                        ProjectGuid = ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571"
                        Output = AssemblyRef.Bind "CassandraSharp.Contrib.log4netUnitTests"

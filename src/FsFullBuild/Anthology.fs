@@ -35,9 +35,13 @@ type OutputType =
     | Exe = 0
     | Dll = 1
 
+type ApplicationName = ApplicationName of string
+type ProjectGuid = ProjectGuid of Guid
+
+
 type Application = 
-    { Name : string
-      Projects : Guid set }
+    { Name : ApplicationName
+      Projects : ProjectGuid set }
 
 type AssemblyRef = 
     { Target : string }
@@ -52,10 +56,18 @@ type Bookmark =
     { Name : string
       Version : string }
 
+type PackageVersion = PackageVersion of string
+with
+    member this.Value = (fun (PackageVersion x) -> x)this
+
+type PackageFramework = PackageFramework of string
+with
+    member this.Value = (fun (PackageFramework x) -> x)this
+
+
 type Package = 
     { Id : PackageRef
-      Version : string
-      TargetFramework : string }
+      Version : PackageVersion }
 and PackageRef = 
     { Target : string }
 with
@@ -68,15 +80,26 @@ type VcsType =
     | Git = 0
     | Hg = 1
 
+type RepositoryName = RepositoryName of string
+with
+    member this.Value = (fun (RepositoryName x) -> x)this
+
+type RepositoryUrl = RepositoryUrl of string
+with
+    member this.Value = (fun (RepositoryUrl x) -> x)this
+
 type Repository = 
     { Vcs : VcsType
-      Name : string
-      Url : string }
+      Name : RepositoryName
+      Url : RepositoryUrl }
 
 type RepositoryRef = 
     { Target : string }
 with
-    static member Bind(name : string) : RepositoryRef = { Target = name.ToLowerInvariant() }
+    static member Bind(name : RepositoryName) : RepositoryRef = 
+        let (RepositoryName target) = name
+        { Target = target.ToLowerInvariant() }
+
     static member Bind(repo : Repository) : RepositoryRef = RepositoryRef.Bind repo.Name
     member this.Print () = this.Target
 
@@ -118,5 +141,5 @@ let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) =
               | "hg" -> VcsType.Hg
               | _ -> failwithf "Unknown vcs type %A" vcsType
     { Vcs = vcs
-      Name = vcsName
-      Url = vcsUrl }
+      Name = RepositoryName vcsName
+      Url = RepositoryUrl vcsUrl }

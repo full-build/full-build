@@ -23,7 +23,7 @@ let CheckProjectPropertyName () =
                     ProjectReferences = [ ProjectRef.Bind(ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectRef.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set
                     PackageReferences = [ ] |> set
                     AssemblyReferences = [ AssemblyRef.Bind("System") ; AssemblyRef.Bind("System.Xml") ] |> set
-                    Repository = RepositoryRef.Bind("cassandra-sharp") }
+                    Repository = RepositoryRef.Bind(RepositoryName "cassandra-sharp") }
 
     let propName = ProjectPropertyName project
     propName |> should equal "Prj_0a06398e_69be_487b_a011_4c0be6619b59"
