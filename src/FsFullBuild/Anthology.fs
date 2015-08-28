@@ -41,13 +41,12 @@ type Application =
     { Name : ApplicationName
       Projects : ProjectGuid set }
 
-type AssemblyRef = 
-    { Target : string }
+type AssemblyRef = private AssemblyRef of string
 with
-    static member Bind (name : string) = { Target = name.ToLowerInvariant() }
-    static member Bind(assName : AssemblyName) =  AssemblyRef.Bind (assName.Name)
-    static member Bind(file : FileInfo) =  AssemblyRef.Bind (Path.GetFileNameWithoutExtension(file.Name))
-    member this.Print () = this.Target
+    member this.Value = (fun (AssemblyRef x) -> x)this
+    static member Bind (name : string) = AssemblyRef (name.ToLowerInvariant())
+    static member Bind (assName : AssemblyName) = AssemblyRef.Bind (assName.Name)
+    static member Bind (file : FileInfo) =  AssemblyRef.Bind (Path.GetFileNameWithoutExtension(file.Name))
 
 type BookmarkName = BookmarkName of string
 
@@ -67,7 +66,7 @@ with
 
 type PackageId = PackageId of string
 with
-    member this.Value= (fun (PackageId x) -> x)this
+    member this.Value = (fun (PackageId x) -> x)this
 
 type Package = 
     { Id : PackageId
@@ -78,37 +77,22 @@ type VcsType =
     | Git
     | Hg
 
-type RepositoryName = RepositoryName of string
+type Repository = 
+    { Name : RepositoryName
+      Vcs : VcsType
+      Url : RepositoryUrl }
+and RepositoryName = RepositoryName of string
 with
     member this.Value = (fun (RepositoryName x) -> x)this
-
-type RepositoryUrl = RepositoryUrl of string
+    static member Bind(name : string) = RepositoryName (name.ToLowerInvariant())
+and RepositoryUrl = RepositoryUrl of string
 with
     member this.Value = (fun (RepositoryUrl x) -> x)this
-
-type Repository = 
-    { Vcs : VcsType
-      Name : RepositoryName
-      Url : RepositoryUrl }
-
-type RepositoryRef = 
-    { Target : string }
-with
-    static member Bind(name : RepositoryName) : RepositoryRef = 
-        let (RepositoryName target) = name
-        { Target = target.ToLowerInvariant() }
-
-    static member Bind(repo : Repository) : RepositoryRef = RepositoryRef.Bind repo.Name
-    member this.Print () = this.Target
-
-
-
-
 
 
 
 type Project = 
-    { Repository : RepositoryRef
+    { Repository : RepositoryName
       RelativeProjectFile : string
       ProjectGuid : Guid
       Output : AssemblyRef

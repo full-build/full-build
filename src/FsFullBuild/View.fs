@@ -60,7 +60,7 @@ let GenerateSolutionContent (projects : Project seq) =
         for project in projects do
             yield sprintf @"Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""%s"", ""%s"", ""%s""" 
                   (Path.GetFileNameWithoutExtension (project.RelativeProjectFile))
-                  (sprintf "%s/%s" (project.Repository.Print()) project.RelativeProjectFile)
+                  (sprintf "%s/%s" (project.Repository.Value) project.RelativeProjectFile)
                   (StringifyGuid project.ProjectGuid)
 
             yield "\tProjectSection(ProjectDependencies) = postProject"
@@ -108,7 +108,7 @@ let rec private ComputePaths (findParents : ProjectRef -> Project seq) (goal : P
                             |> Seq.toList
         paths
 
-let ComputeProjectSelectionClosure (allProjects : Project set) (filters : RepositoryRef seq) =
+let ComputeProjectSelectionClosure (allProjects : Project set) (filters : RepositoryName seq) =
     let goal = allProjects |> Seq.filter (fun x -> Seq.contains x.Repository filters) 
                            |> Seq.map ProjectRef.Bind
                            |> Seq.toList
@@ -125,7 +125,7 @@ let FindViewProjects (viewName : string) =
     let viewDir = WorkspaceViewFolder ()
 
     let viewFile = viewDir |> GetFile (AddExt viewName View)
-    let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map (fun x -> RepositoryName x |> RepositoryRef.Bind)
+    let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map (fun x -> RepositoryName.Bind x)
     let projectRefs = ComputeProjectSelectionClosure antho.Projects repos |> set
     let projects = antho.Projects |> Seq.filter (fun x -> projectRefs.Contains(ProjectRef.Bind(x)))
     projects
@@ -183,16 +183,16 @@ let GraphNodes (antho : Anthology) (projects : Project set) =
                 XAttribute(NsNone + "Group", "Expanded"))
 
         for project in projects do
-            yield GenerateNode (project.ProjectGuid.ToString("D")) (project.Output.Print()) "Project"
+            yield GenerateNode (project.ProjectGuid.ToString("D")) (project.Output.Value) "Project"
 
         for project in importedProjects do
-            yield GenerateNode (project.ProjectGuid.ToString("D")) (project.Output.Print()) "ProjectImport"
+            yield GenerateNode (project.ProjectGuid.ToString("D")) (project.Output.Value) "ProjectImport"
 
         for package in allPackageReferences do
             yield GenerateNode (package.Value) (package.Value) "Package"
 
         for assembly in allAssemblies do
-            yield GenerateNode (assembly.Print()) (assembly.Print()) "Assembly"
+            yield GenerateNode (assembly.Value) (assembly.Value) "Assembly"
     }
 
 let GraphLinks (antho : Anthology) (projects : Project set) =
@@ -213,7 +213,7 @@ let GraphLinks (antho : Anthology) (projects : Project set) =
 
         for project in projects do
             for assembly in project.AssemblyReferences do
-                yield GenerateLink (project.ProjectGuid.ToString("D")) (assembly.Print()) "AssemblyRef"
+                yield GenerateLink (project.ProjectGuid.ToString("D")) (assembly.Value) "AssemblyRef"
 
         for project in projects do
                 yield GenerateLink "Projects" (project.ProjectGuid.ToString("D")) "Contains"
@@ -227,7 +227,7 @@ let GraphLinks (antho : Anthology) (projects : Project set) =
 
         for project in projects do
             for assembly in project.AssemblyReferences do
-                yield GenerateLink "Assemblies" (assembly.Print()) "Contains"
+                yield GenerateLink "Assemblies" (assembly.Value) "Contains"
 
     }
 
@@ -279,8 +279,8 @@ let Graph (viewName : string) =
 
 let Create (viewName : string) (filters : RepositoryName list) =
     let repos = filters |> Repo.FilterRepos 
-                        |> Seq.map RepositoryRef.Bind
-                        |> Seq.map (fun x -> x.Print())
+                        |> Seq.map (fun x -> x.Name)
+                        |> Seq.map (fun x -> x.Value)
     let vwDir = WorkspaceViewFolder ()
     let vwFile = vwDir |> GetFile (AddExt viewName View)
     File.WriteAllLines (vwFile.FullName, repos)
