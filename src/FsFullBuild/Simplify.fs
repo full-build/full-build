@@ -3,7 +3,7 @@ open Anthology
 open NuGets
 open Collections
 
-let AssociatePackage2Projects (file2package : Map<AssemblyRef, PackageRef>) (projects : Project seq) =
+let AssociatePackage2Projects (file2package : Map<AssemblyRef, PackageId>) (projects : Project seq) =
     let outputs = projects |> Seq.map (fun x -> x.Output) |> Set
     let res = file2package |> Seq.filter (fun x -> outputs |> Set.contains x.Key)
                            |> Seq.map (fun x -> (x.Value, x.Key))
@@ -15,11 +15,11 @@ let (|MatchProject|_|) (projects : Project set) (assName : AssemblyRef) =
     | Some x -> Some (ProjectRef.Bind x)
     | _ -> None
 
-let (|MatchPackage|_|) (file2package : Map<AssemblyRef, PackageRef>) (assName : AssemblyRef) =
+let (|MatchPackage|_|) (file2package : Map<AssemblyRef, PackageId>) (assName : AssemblyRef) =
     let replacementPackage = file2package.TryFind assName
     replacementPackage
 
-let SimplifyAssemblies (projects : Project set) (package2files : Map<PackageRef, AssemblyRef set>) : Project set =
+let SimplifyAssemblies (projects : Project set) (package2files : Map<PackageId, AssemblyRef set>) : Project set =
     let file2package = package2files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
                                      |> Map.toSeq
                                      |> Seq.map (fun (id, nugetFiles) -> (nugetFiles |> Seq.head, id))
@@ -42,7 +42,7 @@ let SimplifyAssemblies (projects : Project set) (package2files : Map<PackageRef,
     newProjects
 
 
-let SimplifyPackages (projects : Project set) (package2packages : Map<PackageRef, PackageRef set>) (package2files : Map<PackageRef, AssemblyRef set>) =
+let SimplifyPackages (projects : Project set) (package2packages : Map<PackageId, PackageId set>) (package2files : Map<PackageId, AssemblyRef set>) =
 
     let file2package = package2files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
                                      |> Map.toSeq
@@ -50,7 +50,7 @@ let SimplifyPackages (projects : Project set) (package2packages : Map<PackageRef
                                      |> Map
 
     // convert assemblies to 
-    let rec convertPackageFiles (file2packageScoped : Map<AssemblyRef, PackageRef>) (newProjects : ProjectRef set) (newPackages : PackageRef set) (files : AssemblyRef list) =
+    let rec convertPackageFiles (file2packageScoped : Map<AssemblyRef, PackageId>) (newProjects : ProjectRef set) (newPackages : PackageId set) (files : AssemblyRef list) =
         match files with
         | assName::tail -> match assName with
                            | MatchProject projects newProjectRef -> convertPackageFiles file2packageScoped (newProjects |> Set.add newProjectRef) newPackages tail
@@ -58,7 +58,7 @@ let SimplifyPackages (projects : Project set) (package2packages : Map<PackageRef
                            | _ -> None
         | [] -> Some (newProjects, newPackages)
 
-    let rec convertPackage (package : PackageRef) : (ProjectRef set * PackageRef set) option =
+    let rec convertPackage (package : PackageId) : (ProjectRef set * PackageId set) option =
         let file2packageScoped = file2package |> Map.filter (fun _ x -> x <> package)
         let fileConversion = convertPackageFiles file2packageScoped Set.empty Set.empty (package2files.[package] |> Set.toList)
         match fileConversion with
@@ -97,7 +97,7 @@ let SimplifyPackages (projects : Project set) (package2packages : Map<PackageRef
     simplifiedProjects |> Set
 
 
-let SimplifyAnthology (antho : Anthology) (package2files : Map<PackageRef, AssemblyRef set>) (package2packages : Map<PackageRef, PackageRef set>) =
+let SimplifyAnthology (antho : Anthology) (package2files : Map<PackageId, AssemblyRef set>) (package2packages : Map<PackageId, PackageId set>) =
     let simplifiedProjectsWithAssemblies = SimplifyAssemblies antho.Projects package2files
     let simplifiedProjectsWithPackages = SimplifyPackages simplifiedProjectsWithAssemblies package2packages package2files
 

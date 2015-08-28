@@ -29,13 +29,13 @@ let CheckCastString () =
 
 [<Test>]
 let CheckBasicParsingCSharp () =
-    let expectedPackages = [ { Id=PackageRef.Bind "FSharp.Data"; Version=PackageVersion "2.2.5" }
-                             { Id=PackageRef.Bind "FsUnit"; Version=PackageVersion "1.3.0.1" }
-                             { Id=PackageRef.Bind "Mini"; Version=PackageVersion "0.4.2.0" }
-                             { Id=PackageRef.Bind "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
-                             { Id=PackageRef.Bind "NLog"; Version=PackageVersion "4.0.1" }
-                             { Id=PackageRef.Bind "NUnit"; Version=PackageVersion "2.6.3" }
-                             { Id=PackageRef.Bind "xunit"; Version=PackageVersion "1.9.1" } ]
+    let expectedPackages = [ { Id=PackageId "FSharp.Data"; Version=PackageVersion "2.2.5" }
+                             { Id=PackageId "FsUnit"; Version=PackageVersion "1.3.0.1" }
+                             { Id=PackageId "Mini"; Version=PackageVersion "0.4.2.0" }
+                             { Id=PackageId "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
+                             { Id=PackageId "NLog"; Version=PackageVersion "4.0.1" }
+                             { Id=PackageId "NUnit"; Version=PackageVersion "2.6.3" }
+                             { Id=PackageId "xunit"; Version=PackageVersion "1.9.1" } ]
     
     let file = FileInfo ("./CSharpProjectSample1.xml")
     let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryRef.Bind(RepositoryName "Test")) file
@@ -57,17 +57,17 @@ let CheckParseVirginProject () =
 
 [<Test>]
 let CheckParseConvertedProject () =
-    let expectedPackages = [ { Id=PackageRef.Bind "Rx-Core"; Version=PackageVersion "" }
-                             { Id=PackageRef.Bind "Rx-Interfaces"; Version=PackageVersion "" }
-                             { Id=PackageRef.Bind "Rx-Linq"; Version=PackageVersion "" }
-                             { Id=PackageRef.Bind "Rx-PlatformServices"; Version=PackageVersion "" }
-                             { Id=PackageRef.Bind "FSharp.Data"; Version=PackageVersion "2.2.5" }
-                             { Id=PackageRef.Bind "FsUnit"; Version=PackageVersion "1.3.0.1" }
-                             { Id=PackageRef.Bind "Mini"; Version=PackageVersion "0.4.2.0" }
-                             { Id=PackageRef.Bind "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
-                             { Id=PackageRef.Bind "NLog"; Version=PackageVersion "4.0.1" }
-                             { Id=PackageRef.Bind "NUnit"; Version=PackageVersion "2.6.3" }
-                             { Id=PackageRef.Bind "xunit"; Version=PackageVersion "1.9.1" } ]
+    let expectedPackages = [ { Id=PackageId "Rx-Core"; Version=PackageVersion "" }
+                             { Id=PackageId "Rx-Interfaces"; Version=PackageVersion "" }
+                             { Id=PackageId "Rx-Linq"; Version=PackageVersion "" }
+                             { Id=PackageId "Rx-PlatformServices"; Version=PackageVersion "" }
+                             { Id=PackageId "FSharp.Data"; Version=PackageVersion "2.2.5" }
+                             { Id=PackageId "FsUnit"; Version=PackageVersion "1.3.0.1" }
+                             { Id=PackageId "Mini"; Version=PackageVersion "0.4.2.0" }
+                             { Id=PackageId "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
+                             { Id=PackageId "NLog"; Version=PackageVersion "4.0.1" }
+                             { Id=PackageId "NUnit"; Version=PackageVersion "2.6.3" }
+                             { Id=PackageId "xunit"; Version=PackageVersion "1.9.1" } ]
 
     let file = FileInfo ("./ConvertedProject.xml")
     let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryRef.Bind(RepositoryName "Test")) file

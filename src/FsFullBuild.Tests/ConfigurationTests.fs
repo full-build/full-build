@@ -11,7 +11,7 @@ open StringHelpers
 let CheckRoundtripAnthology () =
     let expected = {
         Applications = Set.empty
-        Bookmarks = [ { Name = "cassandra-sharp"; Version = "b62e33a6ba39f987c91fdde11472f42b2a4acd94" }; { Name = "cassandra-sharp-contrib"; Version = "e0089100b3c5ca520e831c5443ad9dc8ab176052" } ] |> set
+        Bookmarks = [ { Name = BookmarkName "cassandra-sharp"; Version = BookmarkVersion "b62e33a6ba39f987c91fdde11472f42b2a4acd94" }; { Name = BookmarkName "cassandra-sharp-contrib"; Version = BookmarkVersion "e0089100b3c5ca520e831c5443ad9dc8ab176052" } ] |> set
         Repositories = [ { Vcs = VcsType.Git; Name = RepositoryName "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
                          { Vcs = VcsType.Git; Name = RepositoryName "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
         Projects = [ { Output = AssemblyRef.Bind "cqlplus"

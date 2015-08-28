@@ -78,12 +78,6 @@
     <Compile Include="TemporaryDirectory.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FullBuild\FullBuild.csproj">
-      <Project>{3af55cc8-9998-4039-bc31-54ecbfc91396}</Project>
-      <Name>FullBuild</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
