@@ -80,13 +80,11 @@ let ParseNuGetPackage (pkgRef : XElement) : Package =
     let pkgFx = !> pkgRef.Attribute(XNamespace.None + "targetFramework") : string
 
     { Id = PackageRef.Bind pkgId
-      Version = pkgVer
-      TargetFramework = pkgFx }
+      Version = PackageVersion pkgVer }
 
 let ParseFullBuildPackage (fileName : string) : Package =
     { Id=PackageRef.Bind (Path.GetFileNameWithoutExtension(fileName))
-      Version = String.Empty
-      TargetFramework = String.Empty }
+      Version = PackageVersion String.Empty }
 
 let GetPackages (prjDoc : XDocument) (nugetDoc : XDocument) =
     let nugetPkgs = nugetDoc.Descendants(XNamespace.None + "package") |> Seq.map ParseNuGetPackage 
