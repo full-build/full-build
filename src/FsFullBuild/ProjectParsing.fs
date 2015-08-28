@@ -95,7 +95,7 @@ let GetPackages (prjDoc : XDocument) (nugetDoc : XDocument) =
                  |> Seq.map ParseFullBuildPackage
     nugetPkgs |> Seq.append fbPkgs |> Seq.toList
 
-let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryRef) (file : FileInfo) =
+let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryName) (file : FileInfo) =
     let relativeProjectFile = IoHelpers.ComputeRelativePath repoDir file
     let xprj = match xdocLoader file with
                | Some x -> x
@@ -137,5 +137,5 @@ let XDocumentLoader (f : FileInfo) : XDocument option =
     if f.Exists then Some (XDocument.Load (f.FullName))
     else None
 
-let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryRef) (file : FileInfo) : ProjectDescriptor = 
+let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryName) (file : FileInfo) : ProjectDescriptor = 
     ParseProjectContent XDocumentLoader repoDir repoRef file

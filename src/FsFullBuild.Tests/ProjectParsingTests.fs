@@ -38,20 +38,20 @@ let CheckBasicParsingCSharp () =
                              { Id=PackageId "xunit"; Version=PackageVersion "1.9.1" } ]
     
     let file = FileInfo ("./CSharpProjectSample1.xml")
-    let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryRef.Bind(RepositoryName "Test")) file
+    let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryName.Bind "Test") file
     prjDescriptor.Project.ProjectGuid |> should equal (ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396")
     prjDescriptor.Packages |> should equal expectedPackages
 
 [<Test>]
 let CheckBasicParsingFSharp () =
     let file = FileInfo ("./FSharpProjectSample1.xml")
-    let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryRef.Bind(RepositoryName "Test")) file
+    let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryName.Bind "Test") file
     prjDescriptor.Project.ProjectGuid |> should equal (ParseGuid "5fde3939-c144-4287-bc57-a96ec2d1a9da")
 
 [<Test>]
 let CheckParseVirginProject () =
     let file = FileInfo ("./VirginProject.xml")
-    let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryRef.Bind(RepositoryName "Test")) file
+    let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryName.Bind "Test") file
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectRef.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d")]
 
 
@@ -70,6 +70,6 @@ let CheckParseConvertedProject () =
                              { Id=PackageId "xunit"; Version=PackageVersion "1.9.1" } ]
 
     let file = FileInfo ("./ConvertedProject.xml")
-    let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryRef.Bind(RepositoryName "Test")) file
+    let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryName.Bind "Test") file
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectRef.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")]
     prjDescriptor.Packages |> should equal expectedPackages

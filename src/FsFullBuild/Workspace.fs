@@ -43,14 +43,14 @@ let private FindKnownProjects (repoDir : DirectoryInfo) =
      AddExt "*" FsProj] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
                         |> Seq.concat
 
-let private ParseRepositoryProjects (parser) (repoRef : RepositoryRef) (repoDir : DirectoryInfo) =
+let private ParseRepositoryProjects (parser) (repoRef : RepositoryName) (repoDir : DirectoryInfo) =
     repoDir |> FindKnownProjects 
             |> Seq.map (parser repoDir repoRef)
 
 let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) = 
     repos |> Seq.map (fun x -> GetSubDirectory x.Name.Value wsDir) 
           |> Seq.filter (fun x -> x.Exists) 
-          |> Seq.map (fun x -> ParseRepositoryProjects parser (RepositoryRef.Bind(RepositoryName x.Name)) x)
+          |> Seq.map (fun x -> ParseRepositoryProjects parser (RepositoryName.Bind(x.Name)) x)
           |> Seq.concat
 
 let Init(path : string) = 
@@ -116,8 +116,8 @@ let GenerateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
-    let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.Print()) project.RelativeProjectFile
-    let binFile = sprintf "%s/%s/%s%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT (project.Output.Print ()) <| StringifyOutputType project.OutputType
+    let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.Value) project.RelativeProjectFile
+    let binFile = sprintf "%s/%s/%s%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT (project.Output.Value) <| StringifyOutputType project.OutputType
 
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -132,9 +132,9 @@ let GenerateProjectTarget (project : Project) =
                     XAttribute (NsNone + "Include", projectFile),
                     XAttribute (NsNone + "Condition", srcCondition),
                     XElement (NsMsBuild + "Project", StringifyGuid project.ProjectGuid),
-                    XElement (NsMsBuild + "Name", project.Output.Print())),
+                    XElement (NsMsBuild + "Name", project.Output.Value)),
                 XElement (NsMsBuild + "Reference",
-                    XAttribute (NsNone + "Include", project.Output.Print()),
+                    XAttribute (NsNone + "Include", project.Output.Value),
                     XAttribute (NsNone + "Condition", binCondition),
                     XElement (NsMsBuild + "HintPath", binFile),
                     XElement (NsMsBuild + "Private", "true")))))
@@ -238,7 +238,7 @@ let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files
 let ConvertProjects (antho : Anthology) (package2Files : Map<PackageId, Set<AssemblyRef>>) xdocLoader xdocSaver =
     let wsDir = WorkspaceFolder ()
     for project in antho.Projects do
-        let repoDir = wsDir |> GetSubDirectory (project.Repository.Print())
+        let repoDir = wsDir |> GetSubDirectory (project.Repository.Value)
         let projFile = repoDir |> GetFile project.RelativeProjectFile 
         printfn "Converting %A" projFile.FullName
         let xproj = xdocLoader projFile
