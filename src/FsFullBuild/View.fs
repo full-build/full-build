@@ -144,13 +144,13 @@ let Generate (viewName : string) =
     slnDefines.Save (slnDefineFile.FullName)
 
 
-let GenerateNode source label category =
+let GenerateNode (source : string) (label : string) (category : string) =
     XElement(NsDgml + "Node",
         XAttribute(NsNone + "Id", source),
         XAttribute(NsNone + "Label", label),
         XAttribute(NsNone + "Category", category))
 
-let GenerateLink source target category =
+let GenerateLink (source : string) (target : string) (category : string) =
     XElement(NsDgml + "Link",
         XAttribute(NsNone + "Source", source),
         XAttribute(NsNone + "Target", target),
@@ -183,13 +183,13 @@ let GraphNodes (antho : Anthology) (projects : Project set) =
                 XAttribute(NsNone + "Group", "Expanded"))
 
         for project in projects do
-            yield GenerateNode project.ProjectGuid (project.Output.Print()) "Project"
+            yield GenerateNode (project.ProjectGuid.ToString("D")) (project.Output.Print()) "Project"
 
         for project in importedProjects do
-            yield GenerateNode project.ProjectGuid (project.Output.Print()) "ProjectImport"
+            yield GenerateNode (project.ProjectGuid.ToString("D")) (project.Output.Print()) "ProjectImport"
 
         for package in allPackageReferences do
-            yield GenerateNode (package.Print()) (package.Print()) "Package"
+            yield GenerateNode (package.Value) (package.Value) "Package"
 
         for assembly in allAssemblies do
             yield GenerateNode (assembly.Print()) (assembly.Print()) "Assembly"
@@ -205,25 +205,25 @@ let GraphLinks (antho : Anthology) (projects : Project set) =
     seq {
         for project in projects do
             for projectRef in project.ProjectReferences do
-                yield GenerateLink (project.ProjectGuid) (projectRef.Print()) "ProjectRef"
+                yield GenerateLink (project.ProjectGuid.ToString("D")) (projectRef.Print()) "ProjectRef"
 
         for project in projects do
             for package in project.PackageReferences do
-                yield GenerateLink (project.ProjectGuid) (package.Print()) "PackageRef"
+                yield GenerateLink (project.ProjectGuid.ToString("D")) (package.Value) "PackageRef"
 
         for project in projects do
             for assembly in project.AssemblyReferences do
-                yield GenerateLink (project.ProjectGuid) (assembly.Print()) "AssemblyRef"
+                yield GenerateLink (project.ProjectGuid.ToString("D")) (assembly.Print()) "AssemblyRef"
 
         for project in projects do
-                yield GenerateLink "Projects" (project.ProjectGuid) "Contains"
+                yield GenerateLink "Projects" (project.ProjectGuid.ToString("D")) "Contains"
 
         for project in importedProjects do
-                yield GenerateLink "Projects" (project.ProjectGuid) "Contains"
+                yield GenerateLink "Projects" (project.ProjectGuid.ToString("D")) "Contains"
 
         for project in projects do
             for package in project.PackageReferences do
-                yield GenerateLink "Packages" (package.Print()) "Contains"
+                yield GenerateLink "Packages" (package.Value) "Contains"
 
         for project in projects do
             for assembly in project.AssemblyReferences do

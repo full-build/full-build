@@ -25,15 +25,13 @@
 module Anthology
 
 open System
-open Newtonsoft.Json
 open System.IO
 open Collections
 open System.Reflection
 
-[<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
 type OutputType = 
-    | Exe = 0
-    | Dll = 1
+    | Exe
+    | Dll
 
 type ApplicationName = ApplicationName of string
 type ProjectGuid = ProjectGuid of Guid
@@ -51,10 +49,13 @@ with
     static member Bind(file : FileInfo) =  AssemblyRef.Bind (Path.GetFileNameWithoutExtension(file.Name))
     member this.Print () = this.Target
 
+type BookmarkName = BookmarkName of string
+
+type BookmarkVersion = BookmarkVersion of string
 
 type Bookmark = 
-    { Name : string
-      Version : string }
+    { Name : BookmarkName
+      Version : BookmarkVersion }
 
 type PackageVersion = PackageVersion of string
 with
@@ -64,21 +65,18 @@ type PackageFramework = PackageFramework of string
 with
     member this.Value = (fun (PackageFramework x) -> x)this
 
+type PackageId = PackageId of string
+with
+    member this.Value= (fun (PackageId x) -> x)this
 
 type Package = 
-    { Id : PackageRef
+    { Id : PackageId
       Version : PackageVersion }
-and PackageRef = 
-    { Target : string }
-with
-    static member Bind(id : string) : PackageRef = { Target = id.ToLowerInvariant() }
-    member this.Print () = this.Target
 
 
-[<JsonConverter(typeof<Newtonsoft.Json.Converters.StringEnumConverter>)>]
 type VcsType = 
-    | Git = 0
-    | Hg = 1
+    | Git
+    | Hg
 
 type RepositoryName = RepositoryName of string
 with
@@ -117,7 +115,7 @@ type Project =
       OutputType : OutputType
       FxTarget : string
       AssemblyReferences : AssemblyRef set
-      PackageReferences : PackageRef set
+      PackageReferences : PackageId set
       ProjectReferences : ProjectRef set }
 and ProjectRef = 
     { Target : Guid }

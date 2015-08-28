@@ -26,8 +26,8 @@ let CheckGenerateSolution () =
                        OutputType=OutputType.Dll
                        FxTarget="v4.5"   
                        AssemblyReferences = [ AssemblyRef.Bind "System" ] |> set
-                       PackageReferences = [ PackageRef.Bind "log4net"
-                                             PackageRef.Bind "Rx-Core"; PackageRef.Bind "Rx-Interfaces"; PackageRef.Bind "Rx-Linq"; PackageRef.Bind "Rx-Main"; PackageRef.Bind "Rx-PlatformServices" ] |> set
+                       PackageReferences = [ PackageId "log4net"
+                                             PackageId "Rx-Core"; PackageId "Rx-Interfaces"; PackageId "Rx-Linq"; PackageId "Rx-Main"; PackageId "Rx-PlatformServices" ] |> set
                        ProjectReferences = [ProjectRef.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")] |> set}
                      { Repository = RepositoryRef.Bind(RepositoryName "cassandra-sharp-contrib")
                        RelativeProjectFile = "CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"
@@ -36,8 +36,8 @@ let CheckGenerateSolution () =
                        OutputType = OutputType.Dll
                        FxTarget = "v4.5"
                        AssemblyReferences = [AssemblyRef.Bind "System"; AssemblyRef.Bind "System.Core"] |> set
-                       PackageReferences = [ PackageRef.Bind "log4net" 
-                                             PackageRef.Bind "NUnit"; PackageRef.Bind "Rx-Core"; PackageRef.Bind "Rx-Interfaces"; PackageRef.Bind "Rx-Linq"; PackageRef.Bind "Rx-Main"; PackageRef.Bind "Rx-PlatformServices" ] |> set
+                       PackageReferences = [ PackageId "log4net" 
+                                             PackageId "NUnit"; PackageId "Rx-Core"; PackageId "Rx-Interfaces"; PackageId "Rx-Linq"; PackageId "Rx-Main"; PackageId "Rx-PlatformServices" ] |> set
                        ProjectReferences = [ ProjectRef.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectRef.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectRef.Bind (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4") ] |> set } ]
 
     let content = GenerateSolutionContent projects
