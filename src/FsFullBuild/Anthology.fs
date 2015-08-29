@@ -33,7 +33,6 @@ type OutputType =
     | Exe
     | Dll
 
-
 type AssemblyRef = private AssemblyRef of string
 with
     member this.Value = (fun (AssemblyRef x) -> x)this
@@ -42,10 +41,12 @@ with
     static member Bind (file : FileInfo) =  AssemblyRef.Bind (Path.GetFileNameWithoutExtension(file.Name))
 
 type BookmarkName = BookmarkName of string
+
 type BookmarkVersion = BookmarkVersion of string
 
-type Bookmark = { Name : BookmarkName
-                  Version : BookmarkVersion }
+type Bookmark = 
+    { Name : BookmarkName
+      Version : BookmarkVersion }
 
 type PackageVersion = PackageVersion of string
 with
@@ -64,22 +65,23 @@ type Package =
     { Id : PackageId
       Version : PackageVersion }
 
-
 type VcsType = 
     | Git
     | Hg
+
+type RepositoryName = private RepositoryName of string
+with
+    member this.Value = (fun (RepositoryName x) -> x)this
+    static member Bind(name : string) = RepositoryName (name.ToLowerInvariant())
+
+type RepositoryUrl = RepositoryUrl of string
+with
+    member this.Value = (fun (RepositoryUrl x) -> x)this
 
 type Repository = 
     { Name : RepositoryName
       Vcs : VcsType
       Url : RepositoryUrl }
-and RepositoryName = private RepositoryName of string
-with
-    member this.Value = (fun (RepositoryName x) -> x)this
-    static member Bind(name : string) = RepositoryName (name.ToLowerInvariant())
-and RepositoryUrl = RepositoryUrl of string
-with
-    member this.Value = (fun (RepositoryUrl x) -> x)this
 
 type ProjectRelativeFile = ProjectRelativeFile of string
 with
@@ -88,6 +90,11 @@ with
 type FrameworkVersion = FrameworkVersion of string
 with
     member this.Value = (fun (FrameworkVersion x) -> x)this
+
+type ProjectRef = ProjectRef of Guid
+with
+    member this.Value = (fun (ProjectRef x) -> x)this
+    static member Bind(guid : Guid) = ProjectRef guid
 
 type Project = 
     { Repository : RepositoryName
@@ -99,16 +106,12 @@ type Project =
       AssemblyReferences : AssemblyRef set
       PackageReferences : PackageId set
       ProjectReferences : ProjectRef set }
-and ProjectRef = ProjectRef of Guid
-with
-    member this.Value = (fun (ProjectRef x) -> x)this
-    static member Bind(guid : Guid) = ProjectRef guid
 
 type ApplicationName = ApplicationName of string
 
-type Application = { Name : ApplicationName
-                     Projects : ProjectRef set }
-
+type Application = 
+    { Name : ApplicationName
+      Projects : ProjectRef set }
 
 type Anthology = 
     { Applications : Application set
