@@ -97,7 +97,7 @@ let Index () =
     // merge projects
     let foundProjects = projects |> Seq.map (fun x -> x.Project)
     let newProjects = antho.Projects |> Seq.append foundProjects 
-                                     |> Seq.distinctBy ProjectRef.Bind 
+                                     |> Seq.distinctBy (fun x -> x.ProjectGuid)
                                      |> set
 
     let newAntho = { antho 
@@ -116,7 +116,7 @@ let GenerateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
-    let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.Value) project.RelativeProjectFile
+    let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.Value) project.RelativeProjectFile.Value
     let binFile = sprintf "%s/%s/%s%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT (project.Output.Value) <| StringifyOutputType project.OutputType
 
     // This is the import targets that will be Import'ed inside a proj file.
@@ -131,7 +131,7 @@ let GenerateProjectTarget (project : Project) =
                 XElement(NsMsBuild + "ProjectReference",
                     XAttribute (NsNone + "Include", projectFile),
                     XAttribute (NsNone + "Condition", srcCondition),
-                    XElement (NsMsBuild + "Project", StringifyGuid project.ProjectGuid),
+                    XElement (NsMsBuild + "Project", StringifyGuid project.ProjectGuid.Value),
                     XElement (NsMsBuild + "Name", project.Output.Value)),
                 XElement (NsMsBuild + "Reference",
                     XAttribute (NsNone + "Include", project.Output.Value),
@@ -143,7 +143,7 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
     let prjDir = WorkspaceProjectFolder ()
     for project in projects do
         let content = GenerateProjectTarget project
-        let projectFile = prjDir |> GetFile (AddExt (project.ProjectGuid.ToString("D")) Targets)
+        let projectFile = prjDir |> GetFile (AddExt (project.ProjectGuid.Value.ToString("D")) Targets)
         xdocSaver projectFile content
 
 let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<AssemblyRef>) =
@@ -167,7 +167,7 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<Ass
         let inc = !> xel.Attribute(XNamespace.None + "Include") : string
         let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
         let assRef = AssemblyRef.Bind (System.Reflection.AssemblyName(assName))
-        nugetFiles |> Set.contains assRef
+        not <| Set.contains assRef assFiles
 
     let hasNoChild (xel : XElement) =
         not <| xel.DescendantNodes().Any()
@@ -185,8 +185,7 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<Ass
     cproj.Descendants(NsMsBuild + "ProjectReference").Remove()
     
     // remove file references (assemblies & nuget)
-    let filesToRemove = nugetFiles |> Set.union project.AssemblyReferences
-//    cproj.Descendants(NsMsBuild + "Reference").Where(filterNuget nugetFiles).Remove()
+    let filesToRemove = project.AssemblyReferences |> Set.union nugetFiles
     cproj.Descendants(NsMsBuild + "Reference").Where(filterAssemblies filesToRemove).Remove()
 
     // remove full-build imports
@@ -207,7 +206,7 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<Ass
     // add project refereces
     let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     for projectReference in project.ProjectReferences do
-        let prjRef = projectReference.Print()
+        let prjRef = projectReference.Value.ToString("D")
         let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER prjRef
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
@@ -239,7 +238,7 @@ let ConvertProjects (antho : Anthology) (package2Files : Map<PackageId, Set<Asse
     let wsDir = WorkspaceFolder ()
     for project in antho.Projects do
         let repoDir = wsDir |> GetSubDirectory (project.Repository.Value)
-        let projFile = repoDir |> GetFile project.RelativeProjectFile 
+        let projFile = repoDir |> GetFile project.RelativeProjectFile.Value 
         printfn "Converting %A" projFile.FullName
         let xproj = xdocLoader projFile
         let convxproj = ConvertProjectContent xproj project package2Files

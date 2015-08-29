@@ -79,11 +79,11 @@ let ParseNuGetPackage (pkgRef : XElement) : Package =
     let pkgVer = !> pkgRef.Attribute(XNamespace.None + "version") : string
     let pkgFx = !> pkgRef.Attribute(XNamespace.None + "targetFramework") : string
 
-    { Id = PackageId pkgId
+    { Id = PackageId.Bind pkgId
       Version = PackageVersion pkgVer }
 
 let ParseFullBuildPackage (fileName : string) : Package =
-    { Id=PackageId (Path.GetFileNameWithoutExtension(fileName))
+    { Id=PackageId.Bind (Path.GetFileNameWithoutExtension(fileName))
       Version = PackageVersion String.Empty }
 
 let GetPackages (prjDoc : XDocument) (nugetDoc : XDocument) =
@@ -124,11 +124,11 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     { Assemblies = assemblies
       Packages = packages
       Project = { Repository = repoRef
-                  RelativeProjectFile = relativeProjectFile
-                  ProjectGuid = guid
+                  RelativeProjectFile = ProjectRelativeFile relativeProjectFile
+                  ProjectGuid = ProjectRef.Bind guid
                   Output = assemblyRef
                   OutputType = extension
-                  FxTarget = fxTarget
+                  FxTarget = FrameworkVersion fxTarget
                   AssemblyReferences = assemblyRefs
                   PackageReferences = pkgRefs
                   ProjectReferences = prjRefs } }

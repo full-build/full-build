@@ -39,7 +39,7 @@ let ReplaceInvalidChars (s : string) =
     s.Replace('-', '_').Replace('.', '_')
 
 let ProjectPropertyName (project : Project) =
-    let prjGuid = project.ProjectGuid.ToString("D") |> ReplaceInvalidChars
+    let prjGuid = project.ProjectGuid.Value.ToString("D") |> ReplaceInvalidChars
     let prjProp = sprintf "Prj_%s" prjGuid
     prjProp
 
