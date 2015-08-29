@@ -29,7 +29,7 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>view graph csc</StartArguments>
+    <StartArguments>workspace index</StartArguments>
     <StartWorkingDirectory>C:\src\full-build\tests\cs-do</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />

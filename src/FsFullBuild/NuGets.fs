@@ -37,3 +37,9 @@ let ComputePackagesRoots (package2packages : Map<PackageId, PackageId set>) =
                                  |> Seq.map fst
                                  |> Set
     roots
+
+let ComputeTransitivePackageDependencies (packages : PackageId seq) =
+    let allPackages = BuildPackageDependencies packages
+    let ids = allPackages |> Seq.map (fun x -> x.Key) |> Set
+    ids
+
