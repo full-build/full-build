@@ -29,24 +29,24 @@ let CheckCastString () =
 
 [<Test>]
 let CheckBasicParsingCSharp () =
-    let expectedPackages = [ { Id=PackageId "FSharp.Data"; Version=PackageVersion "2.2.5" }
-                             { Id=PackageId "FsUnit"; Version=PackageVersion "1.3.0.1" }
-                             { Id=PackageId "Mini"; Version=PackageVersion "0.4.2.0" }
-                             { Id=PackageId "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
-                             { Id=PackageId "NLog"; Version=PackageVersion "4.0.1" }
-                             { Id=PackageId "NUnit"; Version=PackageVersion "2.6.3" }
-                             { Id=PackageId "xunit"; Version=PackageVersion "1.9.1" } ]
+    let expectedPackages = [ { Id=PackageId.Bind "FSharp.Data"; Version=PackageVersion "2.2.5" }
+                             { Id=PackageId.Bind "FsUnit"; Version=PackageVersion "1.3.0.1" }
+                             { Id=PackageId.Bind "Mini"; Version=PackageVersion "0.4.2.0" }
+                             { Id=PackageId.Bind "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
+                             { Id=PackageId.Bind "NLog"; Version=PackageVersion "4.0.1" }
+                             { Id=PackageId.Bind "NUnit"; Version=PackageVersion "2.6.3" }
+                             { Id=PackageId.Bind "xunit"; Version=PackageVersion "1.9.1" } ]
     
     let file = FileInfo ("./CSharpProjectSample1.xml")
     let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryName.Bind "Test") file
-    prjDescriptor.Project.ProjectGuid |> should equal (ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396")
+    prjDescriptor.Project.ProjectGuid |> should equal (ProjectRef (ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396"))
     prjDescriptor.Packages |> should equal expectedPackages
 
 [<Test>]
 let CheckBasicParsingFSharp () =
     let file = FileInfo ("./FSharpProjectSample1.xml")
     let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryName.Bind "Test") file
-    prjDescriptor.Project.ProjectGuid |> should equal (ParseGuid "5fde3939-c144-4287-bc57-a96ec2d1a9da")
+    prjDescriptor.Project.ProjectGuid |> should equal (ProjectRef (ParseGuid "5fde3939-c144-4287-bc57-a96ec2d1a9da"))
 
 [<Test>]
 let CheckParseVirginProject () =
@@ -57,17 +57,17 @@ let CheckParseVirginProject () =
 
 [<Test>]
 let CheckParseConvertedProject () =
-    let expectedPackages = [ { Id=PackageId "Rx-Core"; Version=PackageVersion "" }
-                             { Id=PackageId "Rx-Interfaces"; Version=PackageVersion "" }
-                             { Id=PackageId "Rx-Linq"; Version=PackageVersion "" }
-                             { Id=PackageId "Rx-PlatformServices"; Version=PackageVersion "" }
-                             { Id=PackageId "FSharp.Data"; Version=PackageVersion "2.2.5" }
-                             { Id=PackageId "FsUnit"; Version=PackageVersion "1.3.0.1" }
-                             { Id=PackageId "Mini"; Version=PackageVersion "0.4.2.0" }
-                             { Id=PackageId "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
-                             { Id=PackageId "NLog"; Version=PackageVersion "4.0.1" }
-                             { Id=PackageId "NUnit"; Version=PackageVersion "2.6.3" }
-                             { Id=PackageId "xunit"; Version=PackageVersion "1.9.1" } ]
+    let expectedPackages = [ { Id=PackageId.Bind "Rx-Core"; Version=PackageVersion "" }
+                             { Id=PackageId.Bind "Rx-Interfaces"; Version=PackageVersion "" }
+                             { Id=PackageId.Bind "Rx-Linq"; Version=PackageVersion "" }
+                             { Id=PackageId.Bind "Rx-PlatformServices"; Version=PackageVersion "" }
+                             { Id=PackageId.Bind "FSharp.Data"; Version=PackageVersion "2.2.5" }
+                             { Id=PackageId.Bind "FsUnit"; Version=PackageVersion "1.3.0.1" }
+                             { Id=PackageId.Bind "Mini"; Version=PackageVersion "0.4.2.0" }
+                             { Id=PackageId.Bind "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
+                             { Id=PackageId.Bind "NLog"; Version=PackageVersion "4.0.1" }
+                             { Id=PackageId.Bind "NUnit"; Version=PackageVersion "2.6.3" }
+                             { Id=PackageId.Bind "xunit"; Version=PackageVersion "1.9.1" } ]
 
     let file = FileInfo ("./ConvertedProject.xml")
     let prjDescriptor = ProjectParsing.ParseProjectContent XDocumentLoader file.Directory (RepositoryName.Bind "Test") file

@@ -7,18 +7,13 @@ open StringHelpers
 open System.IO
 
 
-let (|Odd|Even|) v =
-    if v % 2 = 1 then Odd
-    else Even
-
-
 [<Test>]
 let CheckSimplifyAssemblies () =
     let anthology = Configuration.LoadAnthologyFromFile (FileInfo("anthology.json"))
 
     let package2Files = Map.empty
 
-    let lognetunittestsRef = ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571"
+    let lognetunittestsRef = ProjectRef (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
     let cassandraSharpAssName = AssemblyRef.Bind "cassandrasharp"
     let cassandraSharpItfAssName = AssemblyRef.Bind "cassandrasharp.interfaces"
     let cassandraSharpPrjRef = ProjectRef.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")

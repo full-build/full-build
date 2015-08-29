@@ -59,9 +59,9 @@ let GenerateSolutionContent (projects : Project seq) =
 
         for project in projects do
             yield sprintf @"Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""%s"", ""%s"", ""%s""" 
-                  (Path.GetFileNameWithoutExtension (project.RelativeProjectFile))
-                  (sprintf "%s/%s" (project.Repository.Value) project.RelativeProjectFile)
-                  (StringifyGuid project.ProjectGuid)
+                  (Path.GetFileNameWithoutExtension (project.RelativeProjectFile.Value))
+                  (sprintf "%s/%s" (project.Repository.Value) project.RelativeProjectFile.Value)
+                  (StringifyGuid project.ProjectGuid.Value)
 
             yield "\tProjectSection(ProjectDependencies) = postProject"
 //            for dependency in project.ProjectReferences do
@@ -79,7 +79,7 @@ let GenerateSolutionContent (projects : Project seq) =
         yield "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution"
 
         for project in projects do
-            let guid = StringifyGuid project.ProjectGuid
+            let guid = StringifyGuid project.ProjectGuid.Value
             yield sprintf "\t\t%s.Debug|Any CPU.ActiveCfg = Debug|Any CPU" guid
             yield sprintf "\t\t%s.Debug|Any CPU.Build.0 = Debug|Any CPU" guid
             yield sprintf "\t\t%s.Release|Any CPU.ActiveCfg = Release|Any CPU" guid
@@ -103,14 +103,14 @@ let private ReferencingProjects (projects : Project set) (current : ProjectRef) 
 let rec private ComputePaths (findParents : ProjectRef -> Project seq) (goal : ProjectRef list) (path : ProjectRef list) (current : ProjectRef) =
     if Seq.contains current goal then current::path
     else
-        let parents = findParents current |> Seq.map ProjectRef.Bind
+        let parents = findParents current |> Seq.map (fun x -> x.ProjectGuid)
         let paths = parents |> Seq.collect (ComputePaths findParents goal (current::path))
                             |> Seq.toList
         paths
 
 let ComputeProjectSelectionClosure (allProjects : Project set) (filters : RepositoryName seq) =
     let goal = allProjects |> Seq.filter (fun x -> Seq.contains x.Repository filters) 
-                           |> Seq.map ProjectRef.Bind
+                           |> Seq.map (fun x -> x.ProjectGuid)
                            |> Seq.toList
 
     let findParents = ReferencingProjects allProjects
@@ -126,8 +126,8 @@ let FindViewProjects (viewName : string) =
 
     let viewFile = viewDir |> GetFile (AddExt viewName View)
     let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map (fun x -> RepositoryName.Bind x)
-    let projectRefs = ComputeProjectSelectionClosure antho.Projects repos |> set
-    let projects = antho.Projects |> Seq.filter (fun x -> projectRefs.Contains(ProjectRef.Bind(x)))
+    let projectRefs = ComputeProjectSelectionClosure antho.Projects repos |> Set
+    let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectGuid)
     projects
 
 let Generate (viewName : string) =
@@ -157,15 +157,14 @@ let GenerateLink (source : string) (target : string) (category : string) =
         XAttribute(NsNone + "Category", category))
 
 let GraphNodes (antho : Anthology) (projects : Project set) =
-    let allReferencedProjects = projects |> Seq.map (fun x -> x.ProjectReferences)
-                                         |> Seq.concat
-                                         |> Seq.map (fun x -> antho.Projects |> Seq.find (fun y -> ProjectRef.Bind y = x))
-                                         |> Set
+    let allReferencedProjects = projects |> Set.map (fun x -> x.ProjectReferences)
+                                         |> Set.unionMany
+                                         |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectGuid = x))
     let importedProjects = Set.difference allReferencedProjects projects
     let allPackageReferences = projects |> Seq.map (fun x -> x.PackageReferences)
                                         |> Seq.concat
     let allAssemblies = projects |> Seq.map (fun x -> x.AssemblyReferences)
-                                |> Seq.concat
+                                 |> Seq.concat
     seq {
         yield XElement(NsDgml + "Node",
                 XAttribute(NsNone + "Id", "Projects"),
@@ -183,10 +182,10 @@ let GraphNodes (antho : Anthology) (projects : Project set) =
                 XAttribute(NsNone + "Group", "Expanded"))
 
         for project in projects do
-            yield GenerateNode (project.ProjectGuid.ToString("D")) (project.Output.Value) "Project"
+            yield GenerateNode (project.ProjectGuid.Value.ToString("D")) (project.Output.Value) "Project"
 
         for project in importedProjects do
-            yield GenerateNode (project.ProjectGuid.ToString("D")) (project.Output.Value) "ProjectImport"
+            yield GenerateNode (project.ProjectGuid.Value.ToString("D")) (project.Output.Value) "ProjectImport"
 
         for package in allPackageReferences do
             yield GenerateNode (package.Value) (package.Value) "Package"
@@ -196,30 +195,29 @@ let GraphNodes (antho : Anthology) (projects : Project set) =
     }
 
 let GraphLinks (antho : Anthology) (projects : Project set) =
-    let allReferencedProjects = projects |> Seq.map (fun x -> x.ProjectReferences)
-                                         |> Seq.concat
-                                         |> Seq.map (fun x -> antho.Projects |> Seq.find (fun y -> ProjectRef.Bind y = x))
-                                         |> Set
+    let allReferencedProjects = projects |> Set.map (fun x -> x.ProjectReferences)
+                                         |> Set.unionMany
+                                         |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectGuid = x))
     let importedProjects = Set.difference allReferencedProjects projects
 
     seq {
         for project in projects do
             for projectRef in project.ProjectReferences do
-                yield GenerateLink (project.ProjectGuid.ToString("D")) (projectRef.Print()) "ProjectRef"
+                yield GenerateLink (project.ProjectGuid.Value.ToString("D")) (projectRef.Value.ToString("D")) "ProjectRef"
 
         for project in projects do
             for package in project.PackageReferences do
-                yield GenerateLink (project.ProjectGuid.ToString("D")) (package.Value) "PackageRef"
+                yield GenerateLink (project.ProjectGuid.Value.ToString("D")) (package.Value) "PackageRef"
 
         for project in projects do
             for assembly in project.AssemblyReferences do
-                yield GenerateLink (project.ProjectGuid.ToString("D")) (assembly.Value) "AssemblyRef"
+                yield GenerateLink (project.ProjectGuid.Value.ToString("D")) (assembly.Value) "AssemblyRef"
 
         for project in projects do
-                yield GenerateLink "Projects" (project.ProjectGuid.ToString("D")) "Contains"
+                yield GenerateLink "Projects" (project.ProjectGuid.Value.ToString("D")) "Contains"
 
         for project in importedProjects do
-                yield GenerateLink "Projects" (project.ProjectGuid.ToString("D")) "Contains"
+                yield GenerateLink "Projects" (project.ProjectGuid.Value.ToString("D")) "Contains"
 
         for project in projects do
             for package in project.PackageReferences do

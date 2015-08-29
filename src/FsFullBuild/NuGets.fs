@@ -12,7 +12,7 @@ open Collections
 let GetPackageDependencies (xnuspec : XDocument) =
     xnuspec.Descendants().Where(fun x -> x.Name.LocalName = "dependency") 
         |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
-        |> Seq.map PackageId
+        |> Seq.map PackageId.Bind
         |> set
 
 let rec BuildPackageDependencies (packages : PackageId seq) =
