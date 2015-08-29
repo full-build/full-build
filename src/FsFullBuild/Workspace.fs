@@ -104,6 +104,11 @@ let Index () =
                      with Projects = newProjects }
     SaveAnthology newAntho
 
+    // TODO:
+    // - install packages
+    // - remove assemblies used in packages and projects
+
+
 let StringifyOutputType (outputType : OutputType) =
     match outputType with
     | OutputType.Exe -> ".exe"
@@ -166,7 +171,6 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<Ass
         let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
         let assRef = AssemblyRef.Bind (System.Reflection.AssemblyName(assName))
         let res = Set.contains assRef assFiles
-        if res then printfn "REMOVING ASSEMBLY %A" assName
         res
 
     let hasNoChild (xel : XElement) =
@@ -234,12 +238,6 @@ let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files
     let projectFiles = usedProjectFiles |> Seq.map (fun x -> x.Value)
                                         |> Set
 
-    printfn "PACKAGE %A use following nugets" project.Output.Value
-    transitiveUsedPackages |> Seq.iter (fun x -> printfn "--- %A" x.Value)
-
-    printfn "PACKAGE %A use following nuget assemblies" project.Output.Value
-    nugetFiles |> Seq.iter (fun x -> printfn "--- %A" x.Value)
-
     let convxproj = ConvertProject xproj project nugetFiles projectFiles
     convxproj
 
@@ -248,7 +246,6 @@ let ConvertProjects (antho : Anthology) (package2files : Map<PackageId, Set<Asse
     for project in antho.Projects do
         let repoDir = wsDir |> GetSubDirectory (project.Repository.Value)
         let projFile = repoDir |> GetFile project.RelativeProjectFile.Value 
-        printfn "Converting %A" projFile.FullName
         let xproj = xdocLoader projFile
         let convxproj = ConvertProjectContent xproj project package2files project2files
 
