@@ -102,9 +102,7 @@ let Index () =
 
     let newAntho = { antho 
                      with Projects = newProjects }
-
     SaveAnthology newAntho
-
 
 let StringifyOutputType (outputType : OutputType) =
     match outputType with
