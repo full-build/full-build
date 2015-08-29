@@ -83,17 +83,23 @@ let ParseNuGetPackage (pkgRef : XElement) : Package =
       Version = PackageVersion pkgVer }
 
 let ParseFullBuildPackage (fileName : string) : Package =
-    { Id=PackageId.Bind (Path.GetFileNameWithoutExtension(fileName))
+    let fi = FileInfo (fileName)
+    let fo = fi.Directory.Name
+
+    { Id = PackageId.Bind fo
       Version = PackageVersion String.Empty }
 
-let GetPackages (prjDoc : XDocument) (nugetDoc : XDocument) =
+let GetNuGetPackages (nugetDoc : XDocument) =
     let nugetPkgs = nugetDoc.Descendants(XNamespace.None + "package") |> Seq.map ParseNuGetPackage 
                                                                       |> Seq.toList
+    nugetPkgs
+
+let GetFullBuildPackages (prjDoc : XDocument)  =
     let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER))
                  |> Seq.map ParseFullBuildPackage
-    nugetPkgs |> Seq.append fbPkgs |> Seq.toList
+    fbPkgs |> Seq.toList
 
 let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryName) (file : FileInfo) =
     let relativeProjectFile = IoHelpers.ComputeRelativePath repoDir file
@@ -116,9 +122,11 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let assemblies = GetBinaries xprj |> Seq.toList
     let assemblyRefs = assemblies |> set
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
-    let packages = match xdocLoader pkgFile with
-                   | Some xnuget -> GetPackages xprj xnuget
-                   | _ -> [] 
+    let nugetPackages = match xdocLoader pkgFile with
+                        | Some xnuget -> GetNuGetPackages xnuget
+                        | _ -> []
+    let fbPackages = GetFullBuildPackages xprj
+    let packages = nugetPackages |> List.append fbPackages
     let pkgRefs = packages |> List.map (fun x -> x.Id) |> set
 
     { Assemblies = assemblies

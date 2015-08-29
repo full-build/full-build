@@ -146,7 +146,7 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
         let projectFile = prjDir |> GetFile (AddExt (project.ProjectGuid.Value.ToString("D")) Targets)
         xdocSaver projectFile content
 
-let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<AssemblyRef>) =
+let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<AssemblyRef>) (projectFiles : Set<AssemblyRef>) =
     let filterProject (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
@@ -167,7 +167,9 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<Ass
         let inc = !> xel.Attribute(XNamespace.None + "Include") : string
         let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
         let assRef = AssemblyRef.Bind (System.Reflection.AssemblyName(assName))
-        not <| Set.contains assRef assFiles
+        let res = Set.contains assRef assFiles
+        if res then printfn "REMOVING ASSEMBLY %A" assName
+        res
 
     let hasNoChild (xel : XElement) =
         not <| xel.DescendantNodes().Any()
@@ -185,8 +187,8 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<Ass
     cproj.Descendants(NsMsBuild + "ProjectReference").Remove()
     
     // remove file references (assemblies & nuget)
-    let filesToRemove = project.AssemblyReferences |> Set.union nugetFiles
-    cproj.Descendants(NsMsBuild + "Reference").Where(filterAssemblies filesToRemove).Remove()
+    let assToRemove = nugetFiles |> Set.union projectFiles
+    cproj.Descendants(NsMsBuild + "Reference").Where(filterAssemblies assToRemove).Remove()
 
     // remove full-build imports
     cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
@@ -224,24 +226,33 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<Ass
         afterItemGroup.AddAfterSelf (import)
     cproj
 
-let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files : Map<PackageId, Set<AssemblyRef>>) =
-    let usedPackage2Files = package2Files |> Map.filter (fun id _ -> project.PackageReferences |> Set.contains id)
-    let nugetFiles = usedPackage2Files |> Map.toSeq
-                                       |> Seq.map (fun (id, files) -> files)
-                                       |> Seq.concat
-                                       |> Set
+let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files : Map<PackageId, Set<AssemblyRef>>) (project2files : Map<ProjectRef, AssemblyRef>) =
+    let transitiveUsedPackages = NuGets.ComputeTransitivePackageDependencies project.PackageReferences
+    let usedPackage2Files = package2Files |> Map.filter (fun id _ -> transitiveUsedPackages |> Set.contains id)
+    let usedProjectFiles = project2files |> Map.filter (fun id _ -> project.ProjectReferences |> Set.contains id)
 
-    let convxproj = ConvertProject xproj project nugetFiles
+    let nugetFiles = usedPackage2Files |> Seq.map (fun x -> x.Value)
+                                       |> Set.unionMany
+    let projectFiles = usedProjectFiles |> Seq.map (fun x -> x.Value)
+                                        |> Set
+
+    printfn "PACKAGE %A use following nugets" project.Output.Value
+    transitiveUsedPackages |> Seq.iter (fun x -> printfn "--- %A" x.Value)
+
+    printfn "PACKAGE %A use following nuget assemblies" project.Output.Value
+    nugetFiles |> Seq.iter (fun x -> printfn "--- %A" x.Value)
+
+    let convxproj = ConvertProject xproj project nugetFiles projectFiles
     convxproj
 
-let ConvertProjects (antho : Anthology) (package2Files : Map<PackageId, Set<AssemblyRef>>) xdocLoader xdocSaver =
+let ConvertProjects (antho : Anthology) (package2files : Map<PackageId, Set<AssemblyRef>>) (project2files : Map<ProjectRef, AssemblyRef>) xdocLoader xdocSaver =
     let wsDir = WorkspaceFolder ()
     for project in antho.Projects do
         let repoDir = wsDir |> GetSubDirectory (project.Repository.Value)
         let projFile = repoDir |> GetFile project.RelativeProjectFile.Value 
         printfn "Converting %A" projFile.FullName
         let xproj = xdocLoader projFile
-        let convxproj = ConvertProjectContent xproj project package2Files
+        let convxproj = ConvertProjectContent xproj project package2files project2files
 
         xdocSaver projFile convxproj
 
@@ -249,9 +260,9 @@ let RemoveUselessStuff (antho : Anthology) =
     let wsDir = WorkspaceFolder ()
     for repo in antho.Repositories do
         let repoDir = wsDir |> GetSubDirectory (repo.Name.Value)
-        repoDir.EnumerateFiles("*.sln") |> Seq.iter (fun x -> x.Delete())
-        repoDir.EnumerateFiles("packages.config") |> Seq.iter (fun x -> x.Delete())
-        repoDir.EnumerateDirectories("packages") |> Seq.iter (fun x -> x.Delete(true))
+        repoDir.EnumerateFiles("*.sln", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
+        repoDir.EnumerateFiles("packages.config", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
+        repoDir.EnumerateDirectories("packages", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete(true))
 
 let XDocumentLoader (fileName : FileInfo) =
     XDocument.Load fileName.FullName
@@ -270,12 +281,14 @@ let Convert () =
 
     // for each package, get all assemblies
     let packageRefs = antho.Projects |> Seq.map (fun x -> x.PackageReferences)
-                                     |> Seq.concat
-                                     |> Set
+                                     |> Set.unionMany
+                                     |> NuGets.ComputeTransitivePackageDependencies
     let package2Files = packageRefs 
                         |> Seq.map (fun x -> (x, Package.GatherAllAssemblies x))
                         |> Map
+    let project2file = antho.Projects |> Seq.map (fun x -> (x.ProjectGuid, x.Output))
+                                      |> Map
 
-    ConvertProjects antho package2Files XDocumentLoader XDocumentSaver
+    ConvertProjects antho package2Files project2file XDocumentLoader XDocumentSaver
     RemoveUselessStuff antho
 
