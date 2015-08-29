@@ -20,6 +20,11 @@ let (|MatchPackage|_|) (file2package : Map<AssemblyRef, PackageId>) (assName : A
     replacementPackage
 
 let SimplifyAssemblies (projects : Project set) (package2files : Map<PackageId, AssemblyRef set>) : Project set =
+    let allAssembliesFromPackages = package2files |> Seq.map (fun x -> x.Value)
+                                                  |> Set.unionMany
+    let projectOutputs = projects |> Set.map (fun x -> x.Output)
+    let assembliesToRemove = Set.union allAssembliesFromPackages projectOutputs
+
     let file2package = package2files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
                                      |> Map.toSeq
                                      |> Seq.map (fun (id, nugetFiles) -> (nugetFiles |> Seq.head, id))
@@ -38,12 +43,16 @@ let SimplifyAssemblies (projects : Project set) (package2files : Map<PackageId, 
                            | _ -> nextConversion project
         | [] -> project
 
-    let newProjects = projects |> Set.map (fun x -> convertAssemblies projects (x.AssemblyReferences |> Set.toList) x)
-    newProjects
+    let removeAssembliesFromPackages (assembliesToRemove : AssemblyRef set) (project : Project) =
+        { project
+          with AssemblyReferences = Set.difference project.AssemblyReferences assembliesToRemove }
+
+    let rewriteToProjectOrPackage = projects |> Set.map (fun x -> convertAssemblies projects (x.AssemblyReferences |> Set.toList) x)
+    let removedFromPackages = rewriteToProjectOrPackage |> Set.map (removeAssembliesFromPackages assembliesToRemove)
+    removedFromPackages
 
 
 let SimplifyPackages (projects : Project set) (package2packages : Map<PackageId, PackageId set>) (package2files : Map<PackageId, AssemblyRef set>) =
-
     let file2package = package2files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
                                      |> Map.toSeq
                                      |> Seq.map (fun (id, nugetFiles) -> (nugetFiles |> Seq.head, id))
