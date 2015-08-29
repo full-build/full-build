@@ -66,7 +66,7 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
             |> Seq.map ProjectRef.Bind
             |> set
 
-let GetBinaries(xdoc : XDocument) : AssemblyRef set = 
+let GetAssemblies(xdoc : XDocument) : AssemblyRef set = 
     let res = seq { 
         for binRef in xdoc.Descendants(NsMsBuild + "Reference") do
             let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
@@ -122,7 +122,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let fxTarget = "v4.5"
     let prjRefs = GetProjectReferences file.Directory xprj
     
-    let assemblies = GetBinaries xprj
+    let assemblies = GetAssemblies xprj
     let assemblyRefs = assemblies |> set
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
     let nugetPackages = match xdocLoader pkgFile with
