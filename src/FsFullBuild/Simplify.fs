@@ -12,7 +12,7 @@ let AssociatePackage2Projects (file2package : Map<AssemblyRef, PackageId>) (proj
 let (|MatchProject|_|) (projects : Project set) (assName : AssemblyRef) = 
     let replacementProject = projects |> Seq.tryFind (fun x -> x.Output = assName)
     match replacementProject with
-    | Some x -> Some (ProjectRef.Bind x)
+    | Some x -> Some x.ProjectGuid
     | _ -> None
 
 let (|MatchPackage|_|) (file2package : Map<AssemblyRef, PackageId>) (assName : AssemblyRef) =
