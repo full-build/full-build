@@ -32,10 +32,11 @@ open Anthology
 open StringHelpers
 open MsBuildHelpers
 open Env
+open Collections
 
 type ProjectDescriptor = 
-    { Assemblies : AssemblyRef list
-      Packages : Package list
+    { Assemblies : AssemblyRef set
+      Packages : Package set
       Project : Project }
 
 let ExtractGuid(xdoc : XDocument) = 
@@ -65,14 +66,15 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
             |> Seq.map ProjectRef.Bind
             |> set
 
-let GetBinaries(xdoc : XDocument) : AssemblyRef seq = 
-    seq { 
+let GetBinaries(xdoc : XDocument) : AssemblyRef set = 
+    let res = seq { 
         for binRef in xdoc.Descendants(NsMsBuild + "Reference") do
             let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
             let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
             let assRef = AssemblyRef.Bind (System.Reflection.AssemblyName(assName))
             yield assRef
     }
+    res |> Set.ofSeq
 
 let ParseNuGetPackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "id")
@@ -91,7 +93,7 @@ let ParseFullBuildPackage (fileName : string) : Package =
 
 let GetNuGetPackages (nugetDoc : XDocument) =
     let nugetPkgs = nugetDoc.Descendants(XNamespace.None + "package") |> Seq.map ParseNuGetPackage 
-                                                                      |> Seq.toList
+                                                                      |> Set
     nugetPkgs
 
 let GetFullBuildPackages (prjDoc : XDocument)  =
@@ -99,7 +101,8 @@ let GetFullBuildPackages (prjDoc : XDocument)  =
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER))
                  |> Seq.map ParseFullBuildPackage
-    fbPkgs |> Seq.toList
+                 |> Set
+    fbPkgs
 
 let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryName) (file : FileInfo) =
     let relativeProjectFile = IoHelpers.ComputeRelativePath repoDir file
@@ -119,15 +122,15 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let fxTarget = "v4.5"
     let prjRefs = GetProjectReferences file.Directory xprj
     
-    let assemblies = GetBinaries xprj |> Seq.toList
+    let assemblies = GetBinaries xprj
     let assemblyRefs = assemblies |> set
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
     let nugetPackages = match xdocLoader pkgFile with
                         | Some xnuget -> GetNuGetPackages xnuget
-                        | _ -> []
+                        | _ -> Set.empty
     let fbPackages = GetFullBuildPackages xprj
-    let packages = nugetPackages |> List.append fbPackages
-    let pkgRefs = packages |> List.map (fun x -> x.Id) |> set
+    let packages = Set.union fbPackages nugetPackages
+    let pkgRefs = packages |> Set.map (fun x -> x.Id)
 
     { Assemblies = assemblies
       Packages = packages
