@@ -33,13 +33,6 @@ type OutputType =
     | Exe
     | Dll
 
-type ApplicationName = ApplicationName of string
-type ProjectGuid = ProjectGuid of Guid
-
-
-type Application = 
-    { Name : ApplicationName
-      Projects : ProjectGuid set }
 
 type AssemblyRef = private AssemblyRef of string
 with
@@ -49,12 +42,10 @@ with
     static member Bind (file : FileInfo) =  AssemblyRef.Bind (Path.GetFileNameWithoutExtension(file.Name))
 
 type BookmarkName = BookmarkName of string
-
 type BookmarkVersion = BookmarkVersion of string
 
-type Bookmark = 
-    { Name : BookmarkName
-      Version : BookmarkVersion }
+type Bookmark = { Name : BookmarkName
+                  Version : BookmarkVersion }
 
 type PackageVersion = PackageVersion of string
 with
@@ -64,9 +55,10 @@ type PackageFramework = PackageFramework of string
 with
     member this.Value = (fun (PackageFramework x) -> x)this
 
-type PackageId = PackageId of string
+type PackageId = private PackageId of string
 with
     member this.Value = (fun (PackageId x) -> x)this
+    static member Bind (id : string) = PackageId (id.ToLowerInvariant())
 
 type Package = 
     { Id : PackageId
@@ -81,7 +73,7 @@ type Repository =
     { Name : RepositoryName
       Vcs : VcsType
       Url : RepositoryUrl }
-and RepositoryName = RepositoryName of string
+and RepositoryName = private RepositoryName of string
 with
     member this.Value = (fun (RepositoryName x) -> x)this
     static member Bind(name : string) = RepositoryName (name.ToLowerInvariant())
@@ -89,24 +81,34 @@ and RepositoryUrl = RepositoryUrl of string
 with
     member this.Value = (fun (RepositoryUrl x) -> x)this
 
+type ProjectRelativeFile = ProjectRelativeFile of string
+with
+    member this.Value = (fun (ProjectRelativeFile x) -> x)this
 
+type FrameworkVersion = FrameworkVersion of string
+with
+    member this.Value = (fun (FrameworkVersion x) -> x)this
 
 type Project = 
     { Repository : RepositoryName
-      RelativeProjectFile : string
-      ProjectGuid : Guid
+      RelativeProjectFile : ProjectRelativeFile
+      ProjectGuid : ProjectRef
       Output : AssemblyRef
       OutputType : OutputType
-      FxTarget : string
+      FxTarget : FrameworkVersion
       AssemblyReferences : AssemblyRef set
       PackageReferences : PackageId set
       ProjectReferences : ProjectRef set }
-and ProjectRef = 
-    { Target : Guid }
+and ProjectRef = ProjectRef of Guid
 with
-    static member Bind(guid : Guid) : ProjectRef = { Target = guid }
-    static member Bind(prj : Project) : ProjectRef = ProjectRef.Bind(prj.ProjectGuid)
-    member this.Print () = this.Target.ToString("D")
+    member this.Value = (fun (ProjectRef x) -> x)this
+    static member Bind(guid : Guid) = ProjectRef guid
+
+type ApplicationName = ApplicationName of string
+
+type Application = { Name : ApplicationName
+                     Projects : ProjectRef set }
+
 
 type Anthology = 
     { Applications : Application set

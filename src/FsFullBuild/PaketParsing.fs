@@ -12,7 +12,7 @@ let ParseContent (lines : string seq) =
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
             match items.[0] with
-            | "nuget" -> yield (PackageId items.[1])
+            | "nuget" -> yield (PackageId.Bind items.[1])
             | _ -> ()
     }
 
@@ -65,7 +65,7 @@ let RemoveDependenciesContent (lines : string seq) (packages : Set<PackageId>) =
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
             match items.[0] with
-            | "nuget" -> if Set.contains (PackageId items.[1]) packages then ()
+            | "nuget" -> if Set.contains (PackageId.Bind items.[1]) packages then ()
                          else yield line
             | _ -> yield line
     }
