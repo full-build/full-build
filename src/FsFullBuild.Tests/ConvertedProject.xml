@@ -45,10 +45,10 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <Import Project="$(SolutionDir)/.full-build/projects/6f6eb447-9569-406a-a23b-c09b6dbdbe10.targets" />
-  <Import Project="$(SolutionDir)/.full-build/packages/Rx-Core.targets" />
-  <Import Project="$(SolutionDir)/.full-build/packages/Rx-Interfaces.targets" />
-  <Import Project="$(SolutionDir)/.full-build/packages/Rx-Linq.targets" />
-  <Import Project="$(SolutionDir)/.full-build/packages/Rx-PlatformServices.targets" />
+  <Import Project="$(SolutionDir)/.full-build/packages/Rx-Core/package.targets" />
+  <Import Project="$(SolutionDir)/.full-build/packages/Rx-Interfaces/package.targets" />
+  <Import Project="$(SolutionDir)/.full-build/packages/Rx-Linq/package.targets" />
+  <Import Project="$(SolutionDir)/.full-build/packages/Rx-PlatformServices/package.targets" />
   <ItemGroup>
     <Compile Include="..\cassandra-sharp-version.cs">
       <Link>Properties\cassandra-sharp-version.cs</Link>
