@@ -104,9 +104,7 @@ let Index () =
                      with Projects = newProjects }
     SaveAnthology newAntho
 
-    // TODO:
-    // - install packages
-    // - remove assemblies used in packages and projects
+    Package.Simplify ()
 
 
 let StringifyOutputType (outputType : OutputType) =
