@@ -5,65 +5,29 @@ open FsUnit
 open Anthology
 open StringHelpers
 
-//[<Test>]
-//let CheckReferences () =
-    // AssemblyRef
-//    AssemblyRef.Bind ({ Assembly.AssemblyName="badaboum" })
-//        |> should equal 
-//        <| AssemblyRef.Bind ({ Assembly.AssemblyName="BADABOUM" })
+[<Test>]
+let CheckReferences () =
+    AssemblyId.Bind "badaboum" |> should equal <| AssemblyId.Bind "BADABOUM"
 
-    // PackageRef
-//    PackageRef.Bind "bAdAboum"
-//             |> should equal 
-//             <| PackageRef.Bind { Id=PackageRef.Bind "BADABOUM"; Version="Version"; TargetFramework="TargetFramework" } 
+    PackageId.Bind "badaboum" |> should equal <| PackageId.Bind "BADABOUM"
 
-    // AssemblyRef
-// FIXME
-//    ProjectRef.Bind { Output = AssemblyRef.Bind "cqlplus"
-//                      OutputType = OutputType.Exe
-//                      ProjectGuid = ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59"
-//                      RelativeProjectFile = "cqlplus/cqlplus-net45.csproj"
-//                      FxTarget = "v4.5"
-//                      ProjectReferences = [ ProjectRef.Bind(ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectRef.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set
-//                      AssemblyReferences = [ AssemblyRef.Bind("System") ; AssemblyRef.Bind("System.Data"); AssemblyRef.Bind("System.Xml")] |> set
-//                      PackageReferences = Set.empty
-//                      Repository = RepositoryName.Bind "cassandra-sharp" }
-//        |> should equal 
-//        <| ProjectRef.Bind { Output = AssemblyRef.Bind "cqlplus2"
-//                             OutputType = OutputType.Dll
-//                             ProjectGuid = ParseGuid "{0a06398e-69be-487b-a011-4c0be6619b59}"
-//                             RelativeProjectFile = "cqlplus2/cqlplus-net45.csproj"
-//                             FxTarget = "v4.0"
-//                             ProjectReferences = [ ProjectRef.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set
-//                             AssemblyReferences = [ AssemblyRef.Bind("System") ; AssemblyRef.Bind("System.Xml")] |> set
-//                             PackageReferences = [ PackageId.Bind "NUnit" ] |> set
-//                             Repository = RepositoryName.Bind "cassandra-sharp2" }
+    RepositoryId.Bind "badaboum" |> should equal <| RepositoryId.Bind "BADABOUM"
 
-//    // RepositoryRef
-// FIXME
-//    RepositoryRef.Bind { Vcs = VcsType.Git
-//                         Name = RepositoryName "Cassandra-Sharp"
-//                         Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
-//        |> should equal 
-//        <| RepositoryRef.Bind { Vcs = VcsType.Hg
-//                                Name = RepositoryName "Cassandra-Sharp"
-//                                Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp2" }
+[<Test>]
+let CheckToRepository () =
+    let (ToRepository repoGit) = ("git", "https://github.com/pchalamet/cassandra-sharp", "cassandra-sharp")
+    repoGit |> should equal { Vcs = VcsType.Git
+                              Name = RepositoryId.Bind "cassandra-sharp"
+                              Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } 
 
-//[<Test>]
-//let CheckToRepository () =
-//    let (ToRepository repoGit) = ("git", "https://github.com/pchalamet/cassandra-sharp", "cassandra-sharp")
-//    repoGit |> should equal { Vcs = VcsType.Git
-//                              Name = RepositoryName.Bind "cassandra-sharp"
-//                              Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } 
-//
-//    let (ToRepository repoHg) = ("hg", "https://github.com/pchalamet/cassandra-sharp", "cassandra-sharp")
-//    repoHg |> should equal { Vcs = VcsType.Hg
-//                             Name = RepositoryName.Bind "cassandra-sharp"
-//                             Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } 
-//
-//    (fun () -> let (ToRepository repo) = ("pouet", "https://github.com/pchalamet/cassandra-sharp", "cassandra-sharp")
-//               ())
-//        |> should throw typeof<System.Exception>
+    let (ToRepository repoHg) = ("hg", "https://github.com/pchalamet/cassandra-sharp", "cassandra-sharp")
+    repoHg |> should equal { Vcs = VcsType.Hg
+                             Name = RepositoryId.Bind "cassandra-sharp"
+                             Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } 
+
+    (fun () -> let (ToRepository repo) = ("pouet", "https://github.com/pchalamet/cassandra-sharp", "cassandra-sharp")
+               ())
+        |> should throw typeof<System.Exception>
 
 [<Test>]
 let CheckEqualityWithPermutation () =
