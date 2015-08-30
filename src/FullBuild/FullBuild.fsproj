@@ -9,13 +9,13 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>FsFullBuild</RootNamespace>
     <AssemblyName>FullBuild</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <Name>FullBuild</Name>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+<!--    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <TargetFrameworkProfile />
+    <TargetFrameworkProfile /> -->
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -88,6 +88,7 @@
   </ItemGroup>
   <Import Project="$(SolutionDir)/.full-build/packages/mini/package.targets" Condition="'$(FullBuild_mini_Pkg)' == ''" />
   <Import Project="$(SolutionDir)/.full-build/packages/fspickler.json/package.targets" Condition="'$(FullBuild_fspickler_json_Pkg)' == ''" />
+  <!-- <Import Project="$(SolutionDir)/.full-build/packages/fsharp.core/package.targets" Condition="'$(FullBuild_fsharp_core_Pkg)' == ''" /> -->
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
