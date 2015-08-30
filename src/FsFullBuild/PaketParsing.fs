@@ -27,7 +27,7 @@ open System
 open Anthology
 open System.IO
 open IoHelpers
-
+open Collections
 
 
 
@@ -84,7 +84,7 @@ let AppendDependencies (packages : Package seq) =
     let content = GenerateDependenciesContent packages
     File.AppendAllLines (paketDep.FullName, content)
 
-let RemoveDependenciesContent (lines : string seq) (packages : Set<PackageId>) =
+let RemoveDependenciesContent (lines : string seq) (packages : PackageId set) =
     seq {
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
@@ -94,7 +94,7 @@ let RemoveDependenciesContent (lines : string seq) (packages : Set<PackageId>) =
             | _ -> yield line
     }
 
-let RemoveDependencies (packages : Set<PackageId>) =
+let RemoveDependencies (packages : PackageId set) =
     let confDir = Env.WorkspaceConfigFolder ()
     let paketDep = confDir |> GetFile "paket.dependencies" 
     let content = File.ReadAllLines (paketDep.FullName)
