@@ -77,6 +77,7 @@ let CheckParseConvertedProject () =
     let expectedProject = { Repository = RepositoryId.Bind "Test"
                             RelativeProjectFile = ProjectRelativeFile "ConvertedProject.xml"
                             ProjectGuid = ProjectId.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d") 
+                            ProjectType = ProjectType (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
                             Output = AssemblyId.Bind "CassandraSharp"
                             OutputType = OutputType.Dll
                             FxTarget = FrameworkVersion "v4.5"

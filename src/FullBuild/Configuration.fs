@@ -39,7 +39,6 @@ let private jsonSerializer = FsPickler.Json.FsPickler.CreateJsonSerializer(inden
 type GlobalConfiguration = 
     { BinRepo : string
       Repository : Repository
-      PackageGlobalCache : string
       NuGets : string list }
 
 type WorkspaceConfiguration = 
@@ -59,7 +58,6 @@ let GlobalConfigurationFromFile file =
     let binRepo = fbSection.["BinRepo"].Value
     let repoType = fbSection.["RepoType"].Value
     let repoUrl = fbSection.["RepoUrl"].Value
-    let packageGlobalCache = fbSection.["PackageGlobalCache"].Value
     let (ToRepository repo) = (repoType, repoUrl, ".full-build")
     let ngSection = ini.["NuGet"]
     
@@ -67,12 +65,18 @@ let GlobalConfigurationFromFile file =
                            |> Seq.toList
     { BinRepo = binRepo
       Repository = repo
-      PackageGlobalCache = packageGlobalCache
       NuGets = nugets }
 
 let GlobalConfig : GlobalConfiguration = 
     let filename = DefaultGlobalIniFilename ()
-    GlobalConfigurationFromFile filename
+    if filename.Exists then GlobalConfigurationFromFile filename
+    else 
+        let (ToRepository repo) = ("git", String.Empty, ".full-build")
+        {
+            BinRepo = String.Empty
+            Repository = repo
+            NuGets = List.empty
+        }
 
 let LoadAnthologyFromFile(anthoFn : FileInfo) : Anthology = 
     use file = anthoFn.OpenText()

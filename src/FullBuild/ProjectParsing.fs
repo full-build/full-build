@@ -130,10 +130,16 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let packages = Set.union fbPackages nugetPackages
     let pkgRefs = packages |> Set.map (fun x -> x.Id)
 
+    let ext2projType = Map [ (".csproj", ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
+                             (".fsproj", ParseGuid "F2A71F9B-5D33-465A-A702-920D77279786")
+                             (".vbproj", ParseGuid "F184B08F-C81C-45F6-A57F-5ABD9991F28F") ]
+    let prjType = ext2projType.[file.Extension]
+
     { Packages = packages
       Project = { Repository = repoRef
                   RelativeProjectFile = ProjectRelativeFile relativeProjectFile
                   ProjectGuid = ProjectId.Bind guid
+                  ProjectType = ProjectType.Bind prjType
                   Output = assemblyRef
                   OutputType = extension
                   FxTarget = FrameworkVersion fxTarget
