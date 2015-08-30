@@ -58,7 +58,8 @@ let GenerateSolutionContent (projects : Project seq) =
         yield "# Visual Studio 2013"
 
         for project in projects do
-            yield sprintf @"Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""%s"", ""%s"", ""%s""" 
+            yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""%s""" 
+                  (project.ProjectType.Value.ToString("D"))
                   (Path.GetFileNameWithoutExtension (project.RelativeProjectFile.Value))
                   (sprintf "%s/%s" (project.Repository.Value) project.RelativeProjectFile.Value)
                   (StringifyGuid project.ProjectGuid.Value)

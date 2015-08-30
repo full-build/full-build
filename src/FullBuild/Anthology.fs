@@ -96,10 +96,17 @@ with
     member this.Value = (fun (ProjectId x) -> x)this
     static member Bind(guid : Guid) = ProjectId guid
 
+type ProjectType = ProjectType of Guid
+with
+    member this.Value = (fun (ProjectType x) -> x)this
+    static member Bind(guid : Guid) = ProjectType guid
+
+
 type Project = 
     { Repository : RepositoryId
       RelativeProjectFile : ProjectRelativeFile
       ProjectGuid : ProjectId
+      ProjectType : ProjectType
       Output : AssemblyId
       OutputType : OutputType
       FxTarget : FrameworkVersion
