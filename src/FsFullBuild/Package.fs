@@ -192,7 +192,6 @@ let RemoveUnusedPackages (antho : Anthology) =
     let packages = PaketParsing.ParsePaketDependencies ()
     let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
                                       |> Set.unionMany
-
     let packagesToRemove = packages |> Set.filter (fun x -> (not << Set.contains x) usedPackages)
     PaketParsing.RemoveDependencies packagesToRemove
 

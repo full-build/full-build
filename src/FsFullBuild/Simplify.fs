@@ -27,12 +27,6 @@ open Anthology
 open NuGets
 open Collections
 
-let MapPackage2Projects (file2package : Map<AssemblyId, PackageId>) (projects : Project seq) =
-    let outputs = projects |> Seq.map (fun x -> x.Output) |> Set
-    let res = file2package |> Seq.filter (fun x -> outputs |> Set.contains x.Key)
-                           |> Seq.map (fun x -> (x.Value, x.Key))
-    res
-
 let (|MatchProject|_|) (projects : Project set) (assName : AssemblyId) = 
     let replacementProject = projects |> Seq.tryFind (fun x -> x.Output = assName)
     match replacementProject with
