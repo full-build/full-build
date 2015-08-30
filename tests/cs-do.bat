@@ -10,7 +10,7 @@ robocopy cs-init cs-do /MIR
 pushd cs-do
 rem robocopy c:\src\Paket\bin .paket /MIR
 
-%FULLBUILD% workspace index || goto :ko
+rem %FULLBUILD% workspace index || goto :ko
 rem %FULLBUILD% package install || goto :ko
 rem %FULLBUILD% package simplify || goto :ko
 %FULLBUILD% workspace convert || goto :ko
@@ -21,6 +21,8 @@ rem %FULLBUILD% package simplify || goto :ko
 %FULLBUILD% view describe cs || goto :ko
 %FULLBUILD% view describe csc || goto :ko
 %FULLBUILD% view describe all || goto :ko
+%FULLBUILD% view graph cs || goto :ko
+%FULLBUILD% view graph csc || goto :ko
 %FULLBUILD% view graph all || goto :ko
 
 

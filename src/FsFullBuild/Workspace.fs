@@ -107,8 +107,6 @@ let Index () =
     let config = Configuration.GlobalConfig
     PaketParsing.UpdateSources config.NuGets
 
-    Package.Simplify ()
-
 
 let StringifyOutputType (outputType : OutputType) =
     match outputType with
@@ -257,8 +255,8 @@ let XDocumentSaver (fileName : FileInfo) (xdoc : XDocument) =
     xdoc.Save (fileName.FullName)
 
 let Convert () = 
-    // generate paket.dependencies and install packages
-    Package.Install ()
+    Index ()
+    Package.Simplify ()
 
     // generate project targets
     let antho = LoadAnthology ()
