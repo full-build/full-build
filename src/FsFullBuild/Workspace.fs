@@ -43,14 +43,14 @@ let private FindKnownProjects (repoDir : DirectoryInfo) =
      AddExt "*" FsProj] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
                         |> Seq.concat
 
-let private ParseRepositoryProjects (parser) (repoRef : RepositoryName) (repoDir : DirectoryInfo) =
+let private ParseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) =
     repoDir |> FindKnownProjects 
             |> Seq.map (parser repoDir repoRef)
 
 let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) = 
     repos |> Seq.map (fun x -> GetSubDirectory x.Name.Value wsDir) 
           |> Seq.filter (fun x -> x.Exists) 
-          |> Seq.map (fun x -> ParseRepositoryProjects parser (RepositoryName.Bind(x.Name)) x)
+          |> Seq.map (fun x -> ParseRepositoryProjects parser (RepositoryId.Bind(x.Name)) x)
           |> Seq.concat
 
 let Init(path : string) = 
@@ -104,6 +104,9 @@ let Index () =
                      with Projects = newProjects }
     SaveAnthology newAntho
 
+    let config = Configuration.GlobalConfig
+    PaketParsing.UpdateSources config.NuGets
+
     Package.Simplify ()
 
 
@@ -147,7 +150,7 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
         let projectFile = prjDir |> GetFile (AddExt (project.ProjectGuid.Value.ToString("D")) Targets)
         xdocSaver projectFile content
 
-let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<AssemblyRef>) (projectFiles : Set<AssemblyRef>) =
+let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : AssemblyId set) (projectFiles : AssemblyId set) =
     let filterProject (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
@@ -167,7 +170,7 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<Ass
     let filterAssemblies (assFiles) (xel : XElement) =
         let inc = !> xel.Attribute(XNamespace.None + "Include") : string
         let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
-        let assRef = AssemblyRef.Bind (System.Reflection.AssemblyName(assName))
+        let assRef = AssemblyId.Bind (System.Reflection.AssemblyName(assName))
         let res = Set.contains assRef assFiles
         res
 
@@ -226,7 +229,7 @@ let ConvertProject (xproj : XDocument) (project : Project) (nugetFiles : Set<Ass
         afterItemGroup.AddAfterSelf (import)
     cproj
 
-let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files : Map<PackageId, Set<AssemblyRef>>) (project2files : Map<ProjectRef, AssemblyRef>) =
+let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files : Map<PackageId, AssemblyId set>) (project2files : Map<ProjectId, AssemblyId>) =
     let transitiveUsedPackages = NuGets.ComputeTransitivePackageDependencies project.PackageReferences
     let usedPackage2Files = package2Files |> Map.filter (fun id _ -> transitiveUsedPackages |> Set.contains id)
     let usedProjectFiles = project2files |> Map.filter (fun id _ -> project.ProjectReferences |> Set.contains id)
@@ -239,7 +242,7 @@ let ConvertProjectContent (xproj : XDocument) (project : Project) (package2Files
     let convxproj = ConvertProject xproj project nugetFiles projectFiles
     convxproj
 
-let ConvertProjects (antho : Anthology) (package2files : Map<PackageId, Set<AssemblyRef>>) (project2files : Map<ProjectRef, AssemblyRef>) xdocLoader xdocSaver =
+let ConvertProjects (antho : Anthology) (package2files : Map<PackageId, AssemblyId set>) (project2files : Map<ProjectId, AssemblyId>) xdocLoader xdocSaver =
     let wsDir = WorkspaceFolder ()
     for project in antho.Projects do
         let repoDir = wsDir |> GetSubDirectory (project.Repository.Value)

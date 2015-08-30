@@ -57,8 +57,7 @@ let rec BuildPackageDependencies (packages : PackageId seq) =
 
 let ComputePackagesRoots (package2packages : Map<PackageId, PackageId set>) =
     let roots = package2packages |> Map.filter (fun pkg _ -> not <| Map.exists (fun _ files -> files |> Set.contains pkg) package2packages)
-                                 |> Map.toSeq
-                                 |> Seq.map fst
+                                 |> Seq.map (fun x -> x.Key)
                                  |> Set
     roots
 

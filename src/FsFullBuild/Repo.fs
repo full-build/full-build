@@ -33,17 +33,17 @@ let List() =
     let antho = LoadAnthology()
     antho.Repositories |> Seq.iter (fun x -> printfn "%s : %s [%A]" x.Name.Value x.Url.Value x.Vcs)
 
-let MatchRepo (repo : Repository seq) (filter : RepositoryName) = 
+let MatchRepo (repo : Repository seq) (filter : RepositoryId) = 
     repo |> Seq.filter (fun x -> Match x.Name.Value filter.Value)
          |> Seq.distinct
 
-let FilterRepos (filters : RepositoryName seq) = 
+let FilterRepos (filters : RepositoryId seq) = 
     let antho = LoadAnthology()
     filters |> Seq.map (MatchRepo antho.Repositories)
             |> Seq.concat
             |> Seq.distinct
 
-let Clone (filters : RepositoryName list) = 
+let Clone (filters : RepositoryId list) = 
     let wsDir = WorkspaceFolder()
     FilterRepos filters |> Seq.iter (Vcs.VcsCloneRepo wsDir)
 

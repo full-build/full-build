@@ -27,29 +27,29 @@ open Anthology
 open NuGets
 open Collections
 
-let MapPackage2Projects (file2package : Map<AssemblyRef, PackageId>) (projects : Project seq) =
+let MapPackage2Projects (file2package : Map<AssemblyId, PackageId>) (projects : Project seq) =
     let outputs = projects |> Seq.map (fun x -> x.Output) |> Set
     let res = file2package |> Seq.filter (fun x -> outputs |> Set.contains x.Key)
                            |> Seq.map (fun x -> (x.Value, x.Key))
     res
 
-let (|MatchProject|_|) (projects : Project set) (assName : AssemblyRef) = 
+let (|MatchProject|_|) (projects : Project set) (assName : AssemblyId) = 
     let replacementProject = projects |> Seq.tryFind (fun x -> x.Output = assName)
     match replacementProject with
     | Some x -> Some x.ProjectGuid
     | _ -> None
 
-let (|MatchPackage|_|) (file2package : Map<AssemblyRef, PackageId>) (assName : AssemblyRef) =
+let (|MatchPackage|_|) (file2package : Map<AssemblyId, PackageId>) (assName : AssemblyId) =
     let replacementPackage = file2package.TryFind assName
     replacementPackage
 
-let RemoveAssembliesFromPackagesOrProjects (package2files : Map<PackageId, AssemblyRef set>) (projects : Project set) : Project set =
+let RemoveAssembliesFromPackagesOrProjects (package2files : Map<PackageId, AssemblyId set>) (projects : Project set) : Project set =
     let projectOutputs = projects |> Set.map (fun x -> x.Output)
     let allAssembliesFromPackages = package2files |> Seq.map (fun x -> x.Value)
                                                   |> Set.unionMany
     let assembliesToRemove = Set.union allAssembliesFromPackages projectOutputs
 
-    let removeAssembliesFromPackages (assembliesToRemove : AssemblyRef set) (project : Project) =
+    let removeAssembliesFromPackages (assembliesToRemove : AssemblyId set) (project : Project) =
         { project
           with AssemblyReferences = Set.difference project.AssemblyReferences assembliesToRemove }
 
@@ -57,13 +57,13 @@ let RemoveAssembliesFromPackagesOrProjects (package2files : Map<PackageId, Assem
     newProjects
 
 
-let TransformSingleAssemblyToProjectOrPackage (package2files : Map<PackageId, AssemblyRef set>) (projects : Project set) : Project set =
+let TransformSingleAssemblyToProjectOrPackage (package2files : Map<PackageId, AssemblyId set>) (projects : Project set) : Project set =
     let file2package = package2files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
                                      |> Map.toSeq
                                      |> Seq.map (fun (id, nugetFiles) -> (nugetFiles |> Seq.head, id))
                                      |> Map
 
-    let rec convertAssemblies (projects : Project set) (assemblies : AssemblyRef list) (project : Project) : Project =
+    let rec convertAssemblies (projects : Project set) (assemblies : AssemblyId list) (project : Project) : Project =
         match assemblies with 
         | assName::tail -> let nextConversion = convertAssemblies projects tail
                            match assName with
@@ -80,14 +80,14 @@ let TransformSingleAssemblyToProjectOrPackage (package2files : Map<PackageId, As
     newProjects
 
 
-let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, PackageId set>) (package2files : Map<PackageId, AssemblyRef set>) (projects : Project set) =
+let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, PackageId set>) (package2files : Map<PackageId, AssemblyId set>) (projects : Project set) =
     let file2package = package2files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
                                      |> Map.toSeq
                                      |> Seq.map (fun (id, nugetFiles) -> (nugetFiles |> Seq.head, id))
                                      |> Map
 
     // convert assemblies to 
-    let rec convertPackageFiles (file2packageScoped : Map<AssemblyRef, PackageId>) (newProjects : ProjectRef set) (newPackages : PackageId set) (files : AssemblyRef list) =
+    let rec convertPackageFiles (file2packageScoped : Map<AssemblyId, PackageId>) (newProjects : ProjectId set) (newPackages : PackageId set) (files : AssemblyId list) =
         match files with
         | assName::tail -> match assName with
                            | MatchProject projects newProjectRef -> convertPackageFiles file2packageScoped (newProjects |> Set.add newProjectRef) newPackages tail
@@ -95,7 +95,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
                            | _ -> None
         | [] -> Some (newProjects, newPackages)
 
-    let rec convertPackage (package : PackageId) : (ProjectRef set * PackageId set) option =
+    let rec convertPackage (package : PackageId) : (ProjectId set * PackageId set) option =
         let file2packageScoped = file2package |> Map.filter (fun _ x -> x <> package)
         let fileConversion = convertPackageFiles file2packageScoped Set.empty Set.empty (package2files.[package] |> Set.toList)
         match fileConversion with
@@ -134,7 +134,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
     simplifiedProjects |> Set
 
 
-let SimplifyAnthology (antho : Anthology) (package2files : Map<PackageId, AssemblyRef set>) (package2packages : Map<PackageId, PackageId set>) =
+let SimplifyAnthology (antho : Anthology) (package2files : Map<PackageId, AssemblyId set>) (package2packages : Map<PackageId, PackageId set>) =
     let newProjects = antho.Projects |> TransformSingleAssemblyToProjectOrPackage  package2files
                                      |> RemoveAssembliesFromPackagesOrProjects package2files
                                      |> TransformPackagesToProjectsAndPackages package2packages package2files

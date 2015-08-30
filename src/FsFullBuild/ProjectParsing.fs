@@ -35,7 +35,7 @@ open Env
 open Collections
 
 type ProjectDescriptor = 
-    { Assemblies : AssemblyRef set
+    { Assemblies : AssemblyId set
       Packages : Package set
       Project : Project }
 
@@ -63,15 +63,15 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     
     prjRefs |> Seq.append fbRefs
             |> Seq.distinct
-            |> Seq.map ProjectRef.Bind
+            |> Seq.map ProjectId.Bind
             |> set
 
-let GetAssemblies(xdoc : XDocument) : AssemblyRef set = 
+let GetAssemblies(xdoc : XDocument) : AssemblyId set = 
     let res = seq { 
         for binRef in xdoc.Descendants(NsMsBuild + "Reference") do
             let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
             let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
-            let assRef = AssemblyRef.Bind (System.Reflection.AssemblyName(assName))
+            let assRef = AssemblyId.Bind (System.Reflection.AssemblyName(assName))
             yield assRef
     }
     res |> Set.ofSeq
@@ -104,7 +104,7 @@ let GetFullBuildPackages (prjDoc : XDocument)  =
                  |> Set
     fbPkgs
 
-let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryName) (file : FileInfo) =
+let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryId) (file : FileInfo) =
     let relativeProjectFile = IoHelpers.ComputeRelativePath repoDir file
     let xprj = match xdocLoader file with
                | Some x -> x
@@ -112,7 +112,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let xguid = !> xprj.Descendants(NsMsBuild + "ProjectGuid").Single() : string
     let guid = ParseGuid xguid
     let assemblyName = !> xprj.Descendants(NsMsBuild + "AssemblyName").Single() : string
-    let assemblyRef = AssemblyRef.Bind (assemblyName)
+    let assemblyRef = AssemblyId.Bind (assemblyName)
     
     let extension =  match !> xprj.Descendants(NsMsBuild + "OutputType").Single() : string with
                      | "Library" -> OutputType.Dll
@@ -136,7 +136,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
       Packages = packages
       Project = { Repository = repoRef
                   RelativeProjectFile = ProjectRelativeFile relativeProjectFile
-                  ProjectGuid = ProjectRef.Bind guid
+                  ProjectGuid = ProjectId.Bind guid
                   Output = assemblyRef
                   OutputType = extension
                   FxTarget = FrameworkVersion fxTarget
@@ -148,5 +148,5 @@ let XDocumentLoader (f : FileInfo) : XDocument option =
     if f.Exists then Some (XDocument.Load (f.FullName))
     else None
 
-let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryName) (file : FileInfo) : ProjectDescriptor = 
+let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (file : FileInfo) : ProjectDescriptor = 
     ParseProjectContent XDocumentLoader repoDir repoRef file

@@ -83,6 +83,18 @@
     <None Include="GlobalConfig.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="anthology-indexed.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="anthology-simplified.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="paket-simplified.dependencies">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="paket-indexed.dependencies">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="anthology.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
