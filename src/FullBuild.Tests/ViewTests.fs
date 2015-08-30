@@ -22,6 +22,7 @@ let CheckGenerateSolution () =
     let projects = [ { Repository = RepositoryId.Bind "cassandra-sharp-contrib"
                        RelativeProjectFile = ProjectRelativeFile "CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj"
                        ProjectGuid = ProjectId (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
+                       ProjectType = ProjectType (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
                        Output = AssemblyId.Bind "CassandraSharp.Contrib.log4net"
                        OutputType = OutputType.Dll
                        FxTarget = FrameworkVersion "v4.5"   
@@ -32,6 +33,7 @@ let CheckGenerateSolution () =
                      { Repository = RepositoryId.Bind "cassandra-sharp-contrib"
                        RelativeProjectFile = ProjectRelativeFile "CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"
                        ProjectGuid = ProjectId (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
+                       ProjectType = ProjectType (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
                        Output = AssemblyId.Bind "CassandraSharp.Contrib.log4netUnitTests"
                        OutputType = OutputType.Dll
                        FxTarget = FrameworkVersion "v4.5"
