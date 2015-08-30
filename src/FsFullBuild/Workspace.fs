@@ -257,15 +257,12 @@ let XDocumentSaver (fileName : FileInfo) (xdoc : XDocument) =
     xdoc.Save (fileName.FullName)
 
 let Convert () = 
-    let antho = LoadAnthology ()
-
-    // generate project targets
-    GenerateProjects antho.Projects XDocumentSaver
-
     // generate paket.dependencies and install packages
     Package.Install ()
 
+    // generate project targets
+    let antho = LoadAnthology ()
+    GenerateProjects antho.Projects XDocumentSaver
     ConvertProjects antho XDocumentLoader XDocumentSaver
-
     RemoveUselessStuff antho
 
