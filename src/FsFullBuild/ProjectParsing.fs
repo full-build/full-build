@@ -35,8 +35,7 @@ open Env
 open Collections
 
 type ProjectDescriptor = 
-    { Assemblies : AssemblyId set
-      Packages : Package set
+    { Packages : Package set
       Project : Project }
 
 let ExtractGuid(xdoc : XDocument) = 
@@ -123,7 +122,6 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let prjRefs = GetProjectReferences file.Directory xprj
     
     let assemblies = GetAssemblies xprj
-    let assemblyRefs = assemblies |> set
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
     let nugetPackages = match xdocLoader pkgFile with
                         | Some xnuget -> GetNuGetPackages xnuget
@@ -132,15 +130,14 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let packages = Set.union fbPackages nugetPackages
     let pkgRefs = packages |> Set.map (fun x -> x.Id)
 
-    { Assemblies = assemblies
-      Packages = packages
+    { Packages = packages
       Project = { Repository = repoRef
                   RelativeProjectFile = ProjectRelativeFile relativeProjectFile
                   ProjectGuid = ProjectId.Bind guid
                   Output = assemblyRef
                   OutputType = extension
                   FxTarget = FrameworkVersion fxTarget
-                  AssemblyReferences = assemblyRefs
+                  AssemblyReferences = assemblies
                   PackageReferences = pkgRefs
                   ProjectReferences = prjRefs } }
 
