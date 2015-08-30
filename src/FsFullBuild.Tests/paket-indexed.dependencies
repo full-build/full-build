@@ -1,0 +1,13 @@
+﻿source https://www.nuget.org/api/v2/
+source C:\src\full-build\tests\cs-init\packages
+nuget cassandra-sharp ~> 3.3.0
+nuget cassandra-sharp-core ~> 3.3.0
+nuget cassandra-sharp-interfaces ~> 3.3.0
+nuget log4net ~> 2.0.0
+nuget moq ~> 4.2.1408.0717
+nuget nunit ~> 2.6.3
+nuget rx-core ~> 2.2.5
+nuget rx-interfaces ~> 2.2.5
+nuget rx-linq ~> 2.2.5
+nuget rx-main ~> 2.2.5
+nuget rx-platformservices ~> 2.2.5

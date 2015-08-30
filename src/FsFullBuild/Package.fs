@@ -31,7 +31,6 @@ open System.Linq
 open MsBuildHelpers
 open Env
 open Collections
-open NuGets
 open Simplify
 
 let FxVersion2Folder =
@@ -138,7 +137,7 @@ let GenerateTargetForPackage (package : PackageId) =
     
     let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.Value) NuSpec)
     let xnuspec = XDocument.Load (nuspecFile.FullName)
-    let dependencies = GetPackageDependencies xnuspec
+    let dependencies = NuGets.GetPackageDependencies xnuspec
 
     let imports = GenerateDependenciesContent dependencies
     let choose = GenerateChooseContent libDir
@@ -147,13 +146,13 @@ let GenerateTargetForPackage (package : PackageId) =
     let targetFile = pkgDir |> GetFile "package.targets" 
     project.Save (targetFile.FullName)
 
-let GatherAllAssemblies (package : PackageId) : AssemblyRef set =
+let GatherAllAssemblies (package : PackageId) : AssemblyId set =
     let pkgsDir = Env.WorkspacePackageFolder ()
     let pkgDir = pkgsDir |> GetSubDirectory (package.Value)
     let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
     let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
     let files = Seq.append dlls exes
-    files |> Seq.map (fun x -> AssemblyRef.Bind x) 
+    files |> Seq.map (fun x -> AssemblyId.Bind x) 
           |> set
 
 let Install () =
@@ -166,7 +165,7 @@ let Install () =
     let confDir = Env.WorkspaceConfigFolder ()
     Exec.Exec "paket.exe" "install" confDir.FullName
 
-    let allPackages = BuildPackageDependencies (PaketParsing.ParsePaketDependencies ())
+    let allPackages = NuGets.BuildPackageDependencies (PaketParsing.ParsePaketDependencies ())
                       |> Map.toList
                       |> Seq.map (fun (k, v) -> k)
     allPackages |> Seq.iter GenerateTargetForPackage
@@ -175,7 +174,7 @@ let Update () =
     let confDir = Env.WorkspaceConfigFolder ()
     Exec.Exec "paket.exe" "update" confDir.FullName
     
-    let allPackages = BuildPackageDependencies (PaketParsing.ParsePaketDependencies ())
+    let allPackages = NuGets.BuildPackageDependencies (PaketParsing.ParsePaketDependencies ())
                       |> Map.toList
                       |> Seq.map (fun (k, v) -> k)
     allPackages |> Seq.iter GenerateTargetForPackage
@@ -192,21 +191,19 @@ let List () =
 let RemoveUnusedPackages (antho : Anthology) =
     let packages = PaketParsing.ParsePaketDependencies ()
     let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
-                                      |> Seq.concat
-                                      |> set
+                                      |> Set.unionMany
 
-    let packagesToRemove = packages |> Set.filter (fun x -> not <| Set.contains x usedPackages)
+    let packagesToRemove = packages |> Set.filter (fun x -> (not << Set.contains x) usedPackages)
     PaketParsing.RemoveDependencies packagesToRemove
 
 let SimplifyAnthology (antho) =
-    let packageRefs = antho.Projects |> Seq.map (fun x -> x.PackageReferences)
-                                     |> Seq.concat
-                                     |> Set
-    let package2packages = BuildPackageDependencies packageRefs
-    let allPackages = package2packages |> Map.toSeq 
-                                       |> Seq.map fst 
-    let package2Files = allPackages |> Seq.map (fun x -> (x, GatherAllAssemblies x)) |> Map
-    let newAntho = SimplifyAnthology antho package2Files package2packages
+    let packages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
+                                  |> Set.unionMany
+    let package2packages = NuGets.BuildPackageDependencies packages
+    let allPackages = package2packages |> Seq.map (fun x -> x.Key) 
+    let package2files = allPackages |> Seq.map (fun x -> (x, GatherAllAssemblies x)) 
+                                    |> Map
+    let newAntho = SimplifyAnthology antho package2files package2packages
     RemoveUnusedPackages newAntho
     newAntho
 
