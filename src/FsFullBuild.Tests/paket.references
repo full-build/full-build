@@ -1,0 +1,10 @@
+FSharp.Core
+FsPickler
+FsPickler.CSharp
+FsPickler.Json
+FsUnit
+Mini
+Newtonsoft.Json
+NLog
+NUnit
+xunit
