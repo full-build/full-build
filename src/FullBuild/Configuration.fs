@@ -75,7 +75,7 @@ let GlobalConfig : GlobalConfiguration =
         {
             BinRepo = String.Empty
             Repository = repo
-            NuGets = List.empty
+            NuGets = ["https://www.nuget.org/api/v2/"]
         }
 
 let LoadAnthologyFromFile(anthoFn : FileInfo) : Anthology = 
