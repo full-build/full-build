@@ -97,10 +97,10 @@ let GenerateSolutionDefines (projects : Project seq) =
 
 
 // find all referencing projects of a project
-let private ReferencingProjects (projects : Project set) (current : ProjectRef) =
+let private ReferencingProjects (projects : Project set) (current : ProjectId) =
     projects |> Seq.filter (fun x -> x.ProjectReferences |> Set.contains current)
 
-let rec private ComputePaths (findParents : ProjectRef -> Project seq) (goal : ProjectRef list) (path : ProjectRef list) (current : ProjectRef) =
+let rec private ComputePaths (findParents : ProjectId -> Project seq) (goal : ProjectId list) (path : ProjectId list) (current : ProjectId) =
     if Seq.contains current goal then current::path
     else
         let parents = findParents current |> Seq.map (fun x -> x.ProjectGuid)
@@ -108,7 +108,7 @@ let rec private ComputePaths (findParents : ProjectRef -> Project seq) (goal : P
                             |> Seq.toList
         paths
 
-let ComputeProjectSelectionClosure (allProjects : Project set) (filters : RepositoryName seq) =
+let ComputeProjectSelectionClosure (allProjects : Project set) (filters : RepositoryId seq) =
     let goal = allProjects |> Seq.filter (fun x -> Seq.contains x.Repository filters) 
                            |> Seq.map (fun x -> x.ProjectGuid)
                            |> Seq.toList
@@ -125,7 +125,7 @@ let FindViewProjects (viewName : string) =
     let viewDir = WorkspaceViewFolder ()
 
     let viewFile = viewDir |> GetFile (AddExt viewName View)
-    let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map (fun x -> RepositoryName.Bind x)
+    let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map (fun x -> RepositoryId.Bind x)
     let projectRefs = ComputeProjectSelectionClosure antho.Projects repos |> Set
     let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectGuid)
     projects
@@ -275,7 +275,7 @@ let Graph (viewName : string) =
     let graphFile = wsDir |> GetSubDirectory (AddExt viewName Dgml)
     graph.Save graphFile.FullName
 
-let Create (viewName : string) (filters : RepositoryName list) =
+let Create (viewName : string) (filters : RepositoryId list) =
     let repos = filters |> Repo.FilterRepos 
                         |> Seq.map (fun x -> x.Name)
                         |> Seq.map (fun x -> x.Value)

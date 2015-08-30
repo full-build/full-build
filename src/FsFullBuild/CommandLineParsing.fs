@@ -34,14 +34,14 @@ type CheckoutWorkspace =
     { Version : string }
 
 type CloneRepositories = 
-    { Filters : RepositoryName list }
+    { Filters : RepositoryId list }
 
 type NuGetUrl = 
     { Url : string }
 
 type CreateView = 
     { Name : string
-      Filters : RepositoryName list }
+      Filters : RepositoryId list }
 
 type ViewName = 
     { Name : string }
@@ -97,10 +97,10 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Repo) :: Token(Token.Add) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
                                                                            AddRepository(repo)
     | Token(Token.Repo) :: Token(Token.List) :: [] -> ListRepositories
-    | Token(Token.Repo) :: Token(Token.Clone) :: filters -> let repoFilters = filters |> List.map RepositoryName.Bind
+    | Token(Token.Repo) :: Token(Token.Clone) :: filters -> let repoFilters = filters |> List.map RepositoryId.Bind
                                                             CloneRepositories { Filters = repoFilters }
 
-    | Token(Token.View) :: Token(Token.Create) :: name :: Token(Token.Using) :: filters -> let repoFilters = filters |> List.map RepositoryName.Bind
+    | Token(Token.View) :: Token(Token.Create) :: name :: Token(Token.Using) :: filters -> let repoFilters = filters |> List.map RepositoryId.Bind
                                                                                            Command.CreateView { Name = name; Filters = repoFilters }
     | Token(Token.View) :: Token(Token.Drop) :: name :: [] -> Command.DropView { Name = name }
     | Token(Token.View) :: Token(Token.List) :: [] -> Command.ListViews

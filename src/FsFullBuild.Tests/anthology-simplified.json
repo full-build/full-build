@@ -1,0 +1,595 @@
+﻿{
+  "FsPickler": "1.2.0",
+  "type": "Anthology+Anthology",
+  "value": {
+    "Applications": {
+      "count": 0,
+      "elements": []
+    },
+    "Repositories": {
+      "count": 2,
+      "elements": [
+        {
+          "Name": {
+            "Case": "RepositoryId",
+            "Item": "cassandra-sharp"
+          },
+          "Vcs": {
+            "Case": "Git"
+          },
+          "Url": {
+            "Case": "RepositoryUrl",
+            "Item": "https://github.com/pchalamet/cassandra-sharp"
+          }
+        },
+        {
+          "Name": {
+            "Case": "RepositoryId",
+            "Item": "cassandra-sharp-contrib"
+          },
+          "Vcs": {
+            "Case": "Git"
+          },
+          "Url": {
+            "Case": "RepositoryUrl",
+            "Item": "https://github.com/pchalamet/cassandra-sharp-contrib"
+          }
+        }
+      ]
+    },
+    "Bookmarks": {
+      "count": 0,
+      "elements": []
+    },
+    "Projects": {
+      "count": 9,
+      "elements": [
+        {
+          "Repository": {
+            "Case": "RepositoryId",
+            "Item": "cassandra-sharp"
+          },
+          "RelativeProjectFile": {
+            "Case": "ProjectRelativeFile",
+            "Item": "Apache.Cassandra/Apache.Cassandra-net45.csproj"
+          },
+          "ProjectGuid": {
+            "Case": "ProjectId",
+            "Item": "984a4b04-c71a-4550-9193-817cfacba30a"
+          },
+          "Output": {
+            "Case": "AssemblyId",
+            "Item": "apache.cassandra"
+          },
+          "OutputType": {
+            "Case": "Dll"
+          },
+          "FxTarget": {
+            "Case": "FrameworkVersion",
+            "Item": "v4.5"
+          },
+          "AssemblyReferences": {
+            "count": 1,
+            "elements": [
+              {
+                "Case": "AssemblyId",
+                "Item": "system"
+              }
+            ]
+          },
+          "PackageReferences": {
+            "count": 0,
+            "elements": []
+          },
+          "ProjectReferences": {
+            "count": 1,
+            "elements": [
+              {
+                "Case": "ProjectId",
+                "Item": "499eb63c-d74c-47e8-ae48-a2fc94538e9d"
+              }
+            ]
+          }
+        },
+        {
+          "Repository": {
+            "Case": "RepositoryId",
+            "Item": "cassandra-sharp"
+          },
+          "RelativeProjectFile": {
+            "Case": "ProjectRelativeFile",
+            "Item": "CassandraSharp.Interfaces/CassandraSharp.Interfaces-net45.csproj"
+          },
+          "ProjectGuid": {
+            "Case": "ProjectId",
+            "Item": "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+          },
+          "Output": {
+            "Case": "AssemblyId",
+            "Item": "cassandrasharp.interfaces"
+          },
+          "OutputType": {
+            "Case": "Dll"
+          },
+          "FxTarget": {
+            "Case": "FrameworkVersion",
+            "Item": "v4.5"
+          },
+          "AssemblyReferences": {
+            "count": 5,
+            "elements": [
+              {
+                "Case": "AssemblyId",
+                "Item": "system"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.configuration"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.core"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.numerics"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.xml"
+              }
+            ]
+          },
+          "PackageReferences": {
+            "count": 0,
+            "elements": []
+          },
+          "ProjectReferences": {
+            "count": 0,
+            "elements": []
+          }
+        },
+        {
+          "Repository": {
+            "Case": "RepositoryId",
+            "Item": "cassandra-sharp"
+          },
+          "RelativeProjectFile": {
+            "Case": "ProjectRelativeFile",
+            "Item": "CassandraSharp/CassandraSharp-net45.csproj"
+          },
+          "ProjectGuid": {
+            "Case": "ProjectId",
+            "Item": "c1d252b7-d766-4c28-9c46-0696f896846c"
+          },
+          "Output": {
+            "Case": "AssemblyId",
+            "Item": "cassandrasharp"
+          },
+          "OutputType": {
+            "Case": "Dll"
+          },
+          "FxTarget": {
+            "Case": "FrameworkVersion",
+            "Item": "v4.5"
+          },
+          "AssemblyReferences": {
+            "count": 4,
+            "elements": [
+              {
+                "Case": "AssemblyId",
+                "Item": "system"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.configuration"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.numerics"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.xml"
+              }
+            ]
+          },
+          "PackageReferences": {
+            "count": 1,
+            "elements": [
+              {
+                "Case": "PackageId",
+                "Item": "rx-main"
+              }
+            ]
+          },
+          "ProjectReferences": {
+            "count": 1,
+            "elements": [
+              {
+                "Case": "ProjectId",
+                "Item": "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+              }
+            ]
+          }
+        },
+        {
+          "Repository": {
+            "Case": "RepositoryId",
+            "Item": "cassandra-sharp"
+          },
+          "RelativeProjectFile": {
+            "Case": "ProjectRelativeFile",
+            "Item": "CassandraSharpUnitTests/CassandraSharpUnitTests-net45.csproj"
+          },
+          "ProjectGuid": {
+            "Case": "ProjectId",
+            "Item": "22d4356f-bc92-4399-a92c-c1f9ef6ecc73"
+          },
+          "Output": {
+            "Case": "AssemblyId",
+            "Item": "cassandrasharpunittests"
+          },
+          "OutputType": {
+            "Case": "Dll"
+          },
+          "FxTarget": {
+            "Case": "FrameworkVersion",
+            "Item": "v4.5"
+          },
+          "AssemblyReferences": {
+            "count": 5,
+            "elements": [
+              {
+                "Case": "AssemblyId",
+                "Item": "system"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.configuration"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.core"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.numerics"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.xml"
+              }
+            ]
+          },
+          "PackageReferences": {
+            "count": 3,
+            "elements": [
+              {
+                "Case": "PackageId",
+                "Item": "moq"
+              },
+              {
+                "Case": "PackageId",
+                "Item": "nunit"
+              },
+              {
+                "Case": "PackageId",
+                "Item": "rx-main"
+              }
+            ]
+          },
+          "ProjectReferences": {
+            "count": 4,
+            "elements": [
+              {
+                "Case": "ProjectId",
+                "Item": "499eb63c-d74c-47e8-ae48-a2fc94538e9d"
+              },
+              {
+                "Case": "ProjectId",
+                "Item": "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+              },
+              {
+                "Case": "ProjectId",
+                "Item": "984a4b04-c71a-4550-9193-817cfacba30a"
+              },
+              {
+                "Case": "ProjectId",
+                "Item": "c1d252b7-d766-4c28-9c46-0696f896846c"
+              }
+            ]
+          }
+        },
+        {
+          "Repository": {
+            "Case": "RepositoryId",
+            "Item": "cassandra-sharp"
+          },
+          "RelativeProjectFile": {
+            "Case": "ProjectRelativeFile",
+            "Item": "Samples/Samples-net45.csproj"
+          },
+          "ProjectGuid": {
+            "Case": "ProjectId",
+            "Item": "8b2359b2-4a73-4a49-8e1e-646014a768a4"
+          },
+          "Output": {
+            "Case": "AssemblyId",
+            "Item": "samples"
+          },
+          "OutputType": {
+            "Case": "Exe"
+          },
+          "FxTarget": {
+            "Case": "FrameworkVersion",
+            "Item": "v4.5"
+          },
+          "AssemblyReferences": {
+            "count": 2,
+            "elements": [
+              {
+                "Case": "AssemblyId",
+                "Item": "system"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.core"
+              }
+            ]
+          },
+          "PackageReferences": {
+            "count": 0,
+            "elements": []
+          },
+          "ProjectReferences": {
+            "count": 2,
+            "elements": [
+              {
+                "Case": "ProjectId",
+                "Item": "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+              },
+              {
+                "Case": "ProjectId",
+                "Item": "c1d252b7-d766-4c28-9c46-0696f896846c"
+              }
+            ]
+          }
+        },
+        {
+          "Repository": {
+            "Case": "RepositoryId",
+            "Item": "cassandra-sharp"
+          },
+          "RelativeProjectFile": {
+            "Case": "ProjectRelativeFile",
+            "Item": "Thrift/Thrift-net45.csproj"
+          },
+          "ProjectGuid": {
+            "Case": "ProjectId",
+            "Item": "499eb63c-d74c-47e8-ae48-a2fc94538e9d"
+          },
+          "Output": {
+            "Case": "AssemblyId",
+            "Item": "thrift"
+          },
+          "OutputType": {
+            "Case": "Dll"
+          },
+          "FxTarget": {
+            "Case": "FrameworkVersion",
+            "Item": "v4.5"
+          },
+          "AssemblyReferences": {
+            "count": 3,
+            "elements": [
+              {
+                "Case": "AssemblyId",
+                "Item": "system"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.core"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.web"
+              }
+            ]
+          },
+          "PackageReferences": {
+            "count": 0,
+            "elements": []
+          },
+          "ProjectReferences": {
+            "count": 0,
+            "elements": []
+          }
+        },
+        {
+          "Repository": {
+            "Case": "RepositoryId",
+            "Item": "cassandra-sharp"
+          },
+          "RelativeProjectFile": {
+            "Case": "ProjectRelativeFile",
+            "Item": "cqlplus/cqlplus-net45.csproj"
+          },
+          "ProjectGuid": {
+            "Case": "ProjectId",
+            "Item": "0a06398e-69be-487b-a011-4c0be6619b59"
+          },
+          "Output": {
+            "Case": "AssemblyId",
+            "Item": "cqlplus"
+          },
+          "OutputType": {
+            "Case": "Exe"
+          },
+          "FxTarget": {
+            "Case": "FrameworkVersion",
+            "Item": "v4.5"
+          },
+          "AssemblyReferences": {
+            "count": 3,
+            "elements": [
+              {
+                "Case": "AssemblyId",
+                "Item": "system"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.data"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.xml"
+              }
+            ]
+          },
+          "PackageReferences": {
+            "count": 0,
+            "elements": []
+          },
+          "ProjectReferences": {
+            "count": 2,
+            "elements": [
+              {
+                "Case": "ProjectId",
+                "Item": "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+              },
+              {
+                "Case": "ProjectId",
+                "Item": "c1d252b7-d766-4c28-9c46-0696f896846c"
+              }
+            ]
+          }
+        },
+        {
+          "Repository": {
+            "Case": "RepositoryId",
+            "Item": "cassandra-sharp-contrib"
+          },
+          "RelativeProjectFile": {
+            "Case": "ProjectRelativeFile",
+            "Item": "CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj"
+          },
+          "ProjectGuid": {
+            "Case": "ProjectId",
+            "Item": "925833ed-8653-4e90-9c37-b5b6cb693cf4"
+          },
+          "Output": {
+            "Case": "AssemblyId",
+            "Item": "cassandrasharp.contrib.log4net"
+          },
+          "OutputType": {
+            "Case": "Dll"
+          },
+          "FxTarget": {
+            "Case": "FrameworkVersion",
+            "Item": "v4.5"
+          },
+          "AssemblyReferences": {
+            "count": 1,
+            "elements": [
+              {
+                "Case": "AssemblyId",
+                "Item": "system"
+              }
+            ]
+          },
+          "PackageReferences": {
+            "count": 2,
+            "elements": [
+              {
+                "Case": "PackageId",
+                "Item": "log4net"
+              },
+              {
+                "Case": "PackageId",
+                "Item": "rx-main"
+              }
+            ]
+          },
+          "ProjectReferences": {
+            "count": 1,
+            "elements": [
+              {
+                "Case": "ProjectId",
+                "Item": "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+              }
+            ]
+          }
+        },
+        {
+          "Repository": {
+            "Case": "RepositoryId",
+            "Item": "cassandra-sharp-contrib"
+          },
+          "RelativeProjectFile": {
+            "Case": "ProjectRelativeFile",
+            "Item": "CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"
+          },
+          "ProjectGuid": {
+            "Case": "ProjectId",
+            "Item": "9e8648a4-d25a-4cfa-aaee-20d9d63ff571"
+          },
+          "Output": {
+            "Case": "AssemblyId",
+            "Item": "cassandrasharp.contrib.log4netunittests"
+          },
+          "OutputType": {
+            "Case": "Dll"
+          },
+          "FxTarget": {
+            "Case": "FrameworkVersion",
+            "Item": "v4.5"
+          },
+          "AssemblyReferences": {
+            "count": 2,
+            "elements": [
+              {
+                "Case": "AssemblyId",
+                "Item": "system"
+              },
+              {
+                "Case": "AssemblyId",
+                "Item": "system.core"
+              }
+            ]
+          },
+          "PackageReferences": {
+            "count": 3,
+            "elements": [
+              {
+                "Case": "PackageId",
+                "Item": "log4net"
+              },
+              {
+                "Case": "PackageId",
+                "Item": "nunit"
+              },
+              {
+                "Case": "PackageId",
+                "Item": "rx-main"
+              }
+            ]
+          },
+          "ProjectReferences": {
+            "count": 2,
+            "elements": [
+              {
+                "Case": "ProjectId",
+                "Item": "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+              },
+              {
+                "Case": "ProjectId",
+                "Item": "c1d252b7-d766-4c28-9c46-0696f896846c"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

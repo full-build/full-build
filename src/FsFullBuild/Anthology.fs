@@ -33,12 +33,12 @@ type OutputType =
     | Exe
     | Dll
 
-type AssemblyRef = private AssemblyRef of string
+type AssemblyId = private AssemblyId of string
 with
-    member this.Value = (fun (AssemblyRef x) -> x)this
-    static member Bind (name : string) = AssemblyRef (name.ToLowerInvariant())
-    static member Bind (assName : AssemblyName) = AssemblyRef.Bind (assName.Name)
-    static member Bind (file : FileInfo) =  AssemblyRef.Bind (Path.GetFileNameWithoutExtension(file.Name))
+    member this.Value = (fun (AssemblyId x) -> x)this
+    static member Bind (name : string) = AssemblyId (name.ToLowerInvariant())
+    static member Bind (assName : AssemblyName) = AssemblyId.Bind (assName.Name)
+    static member Bind (file : FileInfo) =  AssemblyId.Bind (Path.GetFileNameWithoutExtension(file.Name))
 
 type BookmarkName = BookmarkName of string
 
@@ -69,17 +69,17 @@ type VcsType =
     | Git
     | Hg
 
-type RepositoryName = private RepositoryName of string
+type RepositoryId = private RepositoryId of string
 with
-    member this.Value = (fun (RepositoryName x) -> x)this
-    static member Bind(name : string) = RepositoryName (name.ToLowerInvariant())
+    member this.Value = (fun (RepositoryId x) -> x)this
+    static member Bind(name : string) = RepositoryId (name.ToLowerInvariant())
 
 type RepositoryUrl = RepositoryUrl of string
 with
     member this.Value = (fun (RepositoryUrl x) -> x)this
 
 type Repository = 
-    { Name : RepositoryName
+    { Name : RepositoryId
       Vcs : VcsType
       Url : RepositoryUrl }
 
@@ -91,27 +91,27 @@ type FrameworkVersion = FrameworkVersion of string
 with
     member this.Value = (fun (FrameworkVersion x) -> x)this
 
-type ProjectRef = ProjectRef of Guid
+type ProjectId = ProjectId of Guid
 with
-    member this.Value = (fun (ProjectRef x) -> x)this
-    static member Bind(guid : Guid) = ProjectRef guid
+    member this.Value = (fun (ProjectId x) -> x)this
+    static member Bind(guid : Guid) = ProjectId guid
 
 type Project = 
-    { Repository : RepositoryName
+    { Repository : RepositoryId
       RelativeProjectFile : ProjectRelativeFile
-      ProjectGuid : ProjectRef
-      Output : AssemblyRef
+      ProjectGuid : ProjectId
+      Output : AssemblyId
       OutputType : OutputType
       FxTarget : FrameworkVersion
-      AssemblyReferences : AssemblyRef set
+      AssemblyReferences : AssemblyId set
       PackageReferences : PackageId set
-      ProjectReferences : ProjectRef set }
+      ProjectReferences : ProjectId set }
 
-type ApplicationName = ApplicationName of string
+type ApplicationId = ApplicationId of string
 
 type Application = 
-    { Name : ApplicationName
-      Projects : ProjectRef set }
+    { Name : ApplicationId
+      Projects : ProjectId set }
 
 type Anthology = 
     { Applications : Application set
@@ -128,5 +128,5 @@ let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) =
               | "hg" -> VcsType.Hg
               | _ -> failwithf "Unknown vcs type %A" vcsType
     { Vcs = vcs
-      Name = RepositoryName vcsName
+      Name = RepositoryId.Bind vcsName
       Url = RepositoryUrl vcsUrl }
