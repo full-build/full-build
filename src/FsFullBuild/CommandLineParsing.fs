@@ -91,7 +91,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Help) :: [] -> Command.Usage
     | Token(Create) :: path :: [] -> Command.CreateWorkspace { Path = path }
     | Token(Token.Workspace) :: Token(Init) :: path :: [] -> Command.InitWorkspace { Path = path }
-    | Token(Token.Workspace) :: Token(Index) :: [] -> Command.IndexWorkspace
+    | Token(Token.Debug) :: Token(Token.Workspace) :: Token(Index) :: [] -> Command.IndexWorkspace
     | Token(Token.Workspace) :: Token(Convert) :: [] -> Command.ConvertWorkspace
 
     | Token(Token.Repo) :: Token(Token.Add) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
@@ -110,34 +110,40 @@ let ParseCommandLine(args : string list) : Command =
 //    | Token(Token.View) :: Token(Token.Build) :: name :: [] -> Command.BuildView { Name = name }
 
     | Token(Token.Package) :: Token(Token.Install) :: [] -> Command.InstallPackages
-    | Token(Token.Package) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
+    | Token(Token.Debug) :: Token(Token.Package) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
     | Token(Token.Package) :: Token(Token.Update) :: [] -> Command.UpdatePackages
     | Token(Token.Package) :: Token(Token.Outdated) :: [] -> Command.OutdatedPackages
     | Token(Token.Package) :: Token(Token.List) :: [] -> Command.ListPackages
 
     | _ -> Command.Error
 
+let UsageContent() =
+    seq {
+        yield "Usage:"
+        yield "  help : display help"
+        yield "  create <path> : create a new environment in given path"
+        yield "  workspace init <path> : initialize a new workspace in givne path"
+        yield "  workspace convert : adapt projects in workspace"
+        yield ""
+        yield "  repo clone <wildcards> : clone repositories using provided wildcards"
+        yield "  repo add <git|hg> <name> <uri> : declare a new repository"
+        yield "  repo list : list repositories"
+        yield ""
+        yield "  view create <name> using <wildcards> : create a new view using provided repository wildcards"
+        yield "  view drop <name> : drop a view"
+        yield "  view list : list views"
+        yield "  view describe <name> : describe view content"
+        yield "  view generate <name> : generate sln file for view"
+        yield "  view graph <name> : graph view content (project, packages, assemblies)"
+        yield ""
+        yield "  package install : install packages as defined in anthology"
+        yield "  package update : update packages"
+        yield "  package outdated : display outdated packages"
+        yield "  package list : list installed packages"
+        yield ""
+        yield "  debug workspace index : synchronize anthology with projects"    
+        yield "  debug package simplify : simplify package graph, promote assemblies or packages to project where permitted"
+    }
+
 let DisplayUsage() = 
-    printfn "Usage:"
-    printfn "  help : display help"
-    printfn "  create <path> : create a new environment in given path"
-    printfn "  workspace init <path> : initialize a new workspace in givne path"
-    printfn "  workspace index : synchronize anthology with projects"
-    printfn "  workspace convert : adapt projects in workspace"
-    printfn ""
-    printfn "  repo clone <wildcards> : clone repositories using provided wildcards"
-    printfn "  repo add <git|hg> <name> <uri> : declare a new repository"
-    printfn "  repo list : list repositories"
-    printfn ""
-    printfn "  view create <name> using <wildcards> : create a new view using provided repository wildcards"
-    printfn "  view drop <name> : drop a view"
-    printfn "  view list : list views"
-    printfn "  view describe <name> : describe view content"
-    printfn "  view generate <name> : generate sln file for view"
-    printfn "  view graph <name> : graph view content (project, packages, assemblies)"
-    printfn ""
-    printfn "  package install : install packages as defined in anthology"
-    printfn "  package simplify : simplify package graph, promote assemblies or packages to project where permitted"
-    printfn "  package update : update packages"
-    printfn "  package outdated : display outdated packages"
-    printfn "  package list : list installed packages"
+    UsageContent() |> Seq.iter (fun x -> printfn "%s" x)

@@ -51,6 +51,7 @@ type Token =
     | Install
     | Simplify
     | Outdated
+    | Debug
     | Unknown
 
 let (|Token|) (token : string) = 
@@ -81,5 +82,6 @@ let (|Token|) (token : string) =
     | "install" -> Install
     | "simplify" -> Simplify
     | "outdated" -> Outdated
+    | "debug" -> Debug
     | _ -> Unknown
 
