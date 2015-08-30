@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{60EA8038-C308-4B8F-AB1E-72A5BD6A3803}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{688BC193-C65E-4754-A490-5D32ACD3EB08}"
 	ProjectSection(SolutionItems) = preProject
-		paket.dependencies = paket.dependencies
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsFullBuild", "FsFullBuild\FsFullBuild.fsproj", "{5FDE3939-C144-4287-BC57-A96EC2D1A9DA}"
