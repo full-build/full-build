@@ -1,0 +1,36 @@
+{
+  "FsPickler": "1.2.0",
+  "type": "Anthology+Anthology",
+  "value": {
+    "Applications": {
+      "count": 0,
+      "elements": []
+    },
+    "Repositories": {
+      "count": 1,
+      "elements": [
+        {
+          "Name": {
+            "Case": "RepositoryId",
+            "Item": "src"
+          },
+          "Vcs": {
+            "Case": "Git"
+          },
+          "Url": {
+            "Case": "RepositoryUrl",
+            "Item": "https://github.com/pchalamet/full-build"
+          }
+        },
+      ]
+    },
+    "Bookmarks": {
+      "count": 0,
+      "elements": []
+    },
+    "Projects": {
+      "count": 0,
+      "elements": []
+    }
+  }
+}
