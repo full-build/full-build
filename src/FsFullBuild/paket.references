@@ -1,0 +1,8 @@
+FSharp.Core
+FsPickler
+FsPickler.CSharp
+FsPickler.Json
+Mini
+Newtonsoft.Json
+NLog
+semver
