@@ -25,7 +25,7 @@ let CheckSimplifyAssemblies () =
     lognetunittests.ProjectReferences |> should not' (contain cassandraSharpPrjRef)
     lognetunittests.ProjectReferences |> should not' (contain cassandraSharpItfPrjRef)
 
-    let simplifedProjects = Simplify.SimplifyAssemblies anthology.Projects package2Files
+    let simplifedProjects = Simplify.TransformSingleAssemblyToProjectOrPackage package2Files anthology.Projects
     let simplifiedlognetunittests = simplifedProjects |> Seq.find (fun x -> x.ProjectGuid = lognetunittestsRef)
 
     simplifiedlognetunittests.AssemblyReferences |> should not' (contain cassandraSharpAssName)
