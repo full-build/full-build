@@ -1,5 +1,5 @@
-copy bin\*.dll bootstrap\fullbuild || goto :ko
-copy bin\*.exe bootstrap\fullbuild || goto :ko
+copy bin\*.dll bootstrap\ || goto :ko
+copy bin\*.exe bootstrap\ || goto :ko
 
 :ok
 exit /b 0

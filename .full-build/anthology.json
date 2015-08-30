@@ -44,6 +44,10 @@
             "Case": "ProjectId",
             "Item": "faaf3b40-ea78-4eaf-9859-863ff16f6058"
           },
+          "ProjectType": {
+            "Case": "ProjectType",
+            "Item": "F2A71F9B-5D33-465A-A702-920D77279786"
+          },
           "Output": {
             "Case": "AssemblyId",
             "Item": "fullbuild.tests"
@@ -127,6 +131,10 @@
           "ProjectGuid": {
             "Case": "ProjectId",
             "Item": "5fde3939-c144-4287-bc57-a96ec2d1a9da"
+          },
+          "ProjectType": {
+            "Case": "ProjectType",
+            "Item": "F2A71F9B-5D33-465A-A702-920D77279786"
           },
           "Output": {
             "Case": "AssemblyId",
