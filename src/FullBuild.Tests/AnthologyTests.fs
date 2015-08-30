@@ -39,6 +39,7 @@ let CheckEqualityWithPermutation () =
         Projects = [ { Output = AssemblyId.Bind "cqlplus"
                        OutputType = OutputType.Exe
                        ProjectGuid = ProjectId (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+                       ProjectType = ProjectType (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
                        RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                        FxTarget = FrameworkVersion "v4.5"
                        ProjectReferences = [ ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectId.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set
@@ -54,6 +55,7 @@ let CheckEqualityWithPermutation () =
         Projects = [ { Output = AssemblyId.Bind "cqlplus"
                        OutputType = OutputType.Exe
                        ProjectGuid = ProjectId (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+                       ProjectType = ProjectType (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
                        RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                        FxTarget = FrameworkVersion "v4.5"
                        ProjectReferences = [ ProjectId.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set

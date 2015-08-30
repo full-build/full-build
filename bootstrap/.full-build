@@ -1,0 +1,8 @@
+
+[FullBuild]
+RepoType=git
+RepoUrl=https://github.com/pchalamet/full-build
+BinRepo=C:\Binaries
+
+[NuGet]
+default=https://www.nuget.org/api/v2/
