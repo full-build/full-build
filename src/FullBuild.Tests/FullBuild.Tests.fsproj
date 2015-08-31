@@ -13,7 +13,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <Name>FullBuild.Tests</Name>
-<!--    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <!--    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile /> -->
   </PropertyGroup>
@@ -95,18 +95,18 @@
     <Content Include="packages.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="CSharpProjectSample1.xml">
+    <None Include="CSharpProjectSample1.csproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="FSharpProjectSample1.xml">
+    </None>
+    <None Include="FSharpProjectSample1.fsproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ConvertedProject.xml">
+    </None>
+    <None Include="ConvertedProject.csproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="VirginProject.xml">
+    </None>
+    <None Include="VirginProject.csproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
   <Import Project="$(SolutionDir)/.full-build/packages/mini/package.targets" Condition="'$(FullBuild_mini_Pkg)' == ''" />
   <Import Project="$(SolutionDir)/.full-build/packages/fsunit/package.targets" Condition="'$(FullBuild_fsunit_Pkg)' == ''" />
