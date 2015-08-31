@@ -71,6 +71,7 @@
     <Compile Include="NuGetTests.fs" />
     <Compile Include="SimplifyTests.fs" />
     <None Include="app.config" />
+    <None Include="ProjectWithInvalidRefs.fsproj" />
     <None Include="WorkspaceConfig.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -98,13 +99,13 @@
     <None Include="CSharpProjectSample1.csproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="FSharpProjectSample1.fsproj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="ConvertedProject.csproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="VirginProject.csproj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="FSharpProjectSample1.fsproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
