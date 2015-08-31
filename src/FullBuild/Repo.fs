@@ -28,6 +28,7 @@ open Anthology
 open PatternMatching
 open Env
 open Configuration
+open Collections
 
 let List() = 
     let antho = LoadAnthology()
@@ -43,7 +44,7 @@ let FilterRepos (filters : RepositoryId seq) =
             |> Seq.concat
             |> Seq.distinct
 
-let Clone (filters : RepositoryId list) = 
+let Clone (filters : RepositoryId set) = 
     let wsDir = WorkspaceFolder()
     FilterRepos filters |> Seq.iter (Vcs.VcsCloneRepo wsDir)
 

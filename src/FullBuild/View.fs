@@ -276,10 +276,9 @@ let Graph (viewName : string) =
     let graphFile = wsDir |> GetSubDirectory (AddExt viewName Dgml)
     graph.Save graphFile.FullName
 
-let Create (viewName : string) (filters : RepositoryId list) =
+let Create (viewName : string) (filters : RepositoryId set) =
     let repos = filters |> Repo.FilterRepos 
-                        |> Seq.map (fun x -> x.Name)
-                        |> Seq.map (fun x -> x.Value)
+                        |> Seq.map (fun x -> x.Name.Value)
     let vwDir = WorkspaceViewFolder ()
     let vwFile = vwDir |> GetFile (AddExt viewName View)
     File.WriteAllLines (vwFile.FullName, repos)
