@@ -205,6 +205,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "BaseIntermediateOutputPath").Remove()
     cproj.Descendants(NsMsBuild + "SolutionDir").Remove()
     cproj.Descendants(NsMsBuild + "RestorePackages").Remove()
+    cproj.Descendants(NsMsBuild + "NuGetPackageImportStamp").Remove()
     cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
 
     // add project refereces
