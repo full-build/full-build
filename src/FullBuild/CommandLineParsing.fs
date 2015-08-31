@@ -26,6 +26,7 @@ module CommandLineParsing
 
 open Anthology
 open CommandLineToken
+open Collections
 
 type CreateWorkspace = 
     { Path : string }
@@ -34,17 +35,20 @@ type CheckoutWorkspace =
     { Version : string }
 
 type CloneRepositories = 
-    { Filters : RepositoryId list }
+    { Filters : RepositoryId set }
 
 type NuGetUrl = 
     { Url : string }
 
 type CreateView = 
     { Name : string
-      Filters : RepositoryId list }
+      Filters : RepositoryId set }
 
 type ViewName = 
     { Name : string }
+
+type DeployApplications = 
+    { Names : ApplicationId set }
 
 type Command = 
     | Usage
@@ -74,6 +78,10 @@ type Command =
     | OutdatedPackages
     | ListPackages
 
+    // applications
+    | DeployApplications of DeployApplications
+    | ListApplications
+
     // env
 //    | RefreshWorkspace
 //    | BookmarkWorkspace
@@ -97,10 +105,10 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Repo) :: Token(Token.Add) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
                                                                            AddRepository(repo)
     | Token(Token.Repo) :: Token(Token.List) :: [] -> ListRepositories
-    | Token(Token.Repo) :: Token(Token.Clone) :: filters -> let repoFilters = filters |> List.map RepositoryId.Bind
+    | Token(Token.Repo) :: Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
                                                             CloneRepositories { Filters = repoFilters }
 
-    | Token(Token.View) :: Token(Token.Create) :: name :: Token(Token.Using) :: filters -> let repoFilters = filters |> List.map RepositoryId.Bind
+    | Token(Token.View) :: Token(Token.Create) :: name :: Token(Token.Using) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
                                                                                            Command.CreateView { Name = name; Filters = repoFilters }
     | Token(Token.View) :: Token(Token.Drop) :: name :: [] -> Command.DropView { Name = name }
     | Token(Token.View) :: Token(Token.List) :: [] -> Command.ListViews
@@ -114,6 +122,10 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Package) :: Token(Token.Update) :: [] -> Command.UpdatePackages
     | Token(Token.Package) :: Token(Token.Outdated) :: [] -> Command.OutdatedPackages
     | Token(Token.Package) :: Token(Token.List) :: [] -> Command.ListPackages
+
+    | Token(Token.Application) :: Token(Token.List) :: [] -> ListApplications
+    | Token(Token.Application) :: Token(Token.Deploy) :: names -> let appNames = names |> Seq.map ApplicationId.Bind |> Set
+                                                                  DeployApplications {Names = appNames }
 
     | _ -> Command.Error
 
