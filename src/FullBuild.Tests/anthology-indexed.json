@@ -57,6 +57,10 @@
             "Case": "ProjectId",
             "Item": "984a4b04-c71a-4550-9193-817cfacba30a"
           },
+          "ProjectType": {
+            "Case": "ProjectType",
+            "Item": "fae04ec0-301f-11d3-bf4b-00c04f79efbc"
+          },
           "Output": {
             "Case": "AssemblyId",
             "Item": "apache.cassandra"
@@ -103,6 +107,10 @@
           "ProjectGuid": {
             "Case": "ProjectId",
             "Item": "6f6eb447-9569-406a-a23b-c09b6dbdbe10"
+          },
+          "ProjectType": {
+            "Case": "ProjectType",
+            "Item": "fae04ec0-301f-11d3-bf4b-00c04f79efbc"
           },
           "Output": {
             "Case": "AssemblyId",
@@ -161,6 +169,10 @@
           "ProjectGuid": {
             "Case": "ProjectId",
             "Item": "c1d252b7-d766-4c28-9c46-0696f896846c"
+          },
+          "ProjectType": {
+            "Case": "ProjectType",
+            "Item": "fae04ec0-301f-11d3-bf4b-00c04f79efbc"
           },
           "Output": {
             "Case": "AssemblyId",
@@ -257,6 +269,10 @@
           "ProjectGuid": {
             "Case": "ProjectId",
             "Item": "22d4356f-bc92-4399-a92c-c1f9ef6ecc73"
+          },
+          "ProjectType": {
+            "Case": "ProjectType",
+            "Item": "fae04ec0-301f-11d3-bf4b-00c04f79efbc"
           },
           "Output": {
             "Case": "AssemblyId",
@@ -386,6 +402,10 @@
             "Case": "ProjectId",
             "Item": "8b2359b2-4a73-4a49-8e1e-646014a768a4"
           },
+          "ProjectType": {
+            "Case": "ProjectType",
+            "Item": "fae04ec0-301f-11d3-bf4b-00c04f79efbc"
+          },
           "Output": {
             "Case": "AssemblyId",
             "Item": "samples"
@@ -441,6 +461,10 @@
             "Case": "ProjectId",
             "Item": "499eb63c-d74c-47e8-ae48-a2fc94538e9d"
           },
+          "ProjectType": {
+            "Case": "ProjectType",
+            "Item": "fae04ec0-301f-11d3-bf4b-00c04f79efbc"
+          },
           "Output": {
             "Case": "AssemblyId",
             "Item": "thrift"
@@ -490,6 +514,10 @@
           "ProjectGuid": {
             "Case": "ProjectId",
             "Item": "0a06398e-69be-487b-a011-4c0be6619b59"
+          },
+          "ProjectType": {
+            "Case": "ProjectType",
+            "Item": "fae04ec0-301f-11d3-bf4b-00c04f79efbc"
           },
           "Output": {
             "Case": "AssemblyId",
@@ -549,6 +577,10 @@
           "ProjectGuid": {
             "Case": "ProjectId",
             "Item": "925833ed-8653-4e90-9c37-b5b6cb693cf4"
+          },
+          "ProjectType": {
+            "Case": "ProjectType",
+            "Item": "fae04ec0-301f-11d3-bf4b-00c04f79efbc"
           },
           "Output": {
             "Case": "AssemblyId",
@@ -644,6 +676,10 @@
           "ProjectGuid": {
             "Case": "ProjectId",
             "Item": "9e8648a4-d25a-4cfa-aaee-20d9d63ff571"
+          },
+          "ProjectType": {
+            "Case": "ProjectType",
+            "Item": "fae04ec0-301f-11d3-bf4b-00c04f79efbc"
           },
           "Output": {
             "Case": "AssemblyId",
