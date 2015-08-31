@@ -115,6 +115,9 @@ type Project =
       ProjectReferences : ProjectId set }
 
 type ApplicationId = ApplicationId of string
+with
+    member this.Value = (fun (ApplicationId x) -> x)this
+    static member Bind(name : string) = ApplicationId (name.ToLowerInvariant())
 
 type Application = 
     { Name : ApplicationId

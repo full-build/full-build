@@ -56,6 +56,10 @@ let main argv =
     | OutdatedPackages -> Package.Outdated ()
     | ListPackages -> Package.List ()
 
+    // applications
+    | ListApplications -> Application.List ()
+    | DeployApplications { Names = x } -> Application.Deploy x
+
     // misc
     | Usage -> DisplayUsage ()
     | Error -> DisplayUsage ()
