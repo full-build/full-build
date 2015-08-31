@@ -73,7 +73,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="./ConvertedProject.xml">
+    <ProjectReference Include="./ConvertedProject.csproj">
       <Project>{6F6EB447-9569-406A-A23B-C09B6DBDBE10}</Project>
       <Name>CassandraSharp.Interfaces-net45</Name>
     </ProjectReference>
