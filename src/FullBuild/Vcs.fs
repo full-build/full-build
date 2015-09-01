@@ -25,18 +25,28 @@
 module Vcs
 
 open System
-open System.IO
 open Exec
 open IoHelpers
 open Anthology
+open System.IO
+
+let private GitTip (repoDir : DirectoryInfo) =
+    let args = @"log -1 --format=""%H"""
+    Exec "git" args repoDir
+
+let private HgTip (repoDir : DirectoryInfo) =
+    let args = @"id -i"
+    Exec "hg" args repoDir
 
 let private GitCloneRepo (url : string) (target : DirectoryInfo) = 
     let args = sprintf "clone %A %A" url target.FullName
-    Exec "git" args Environment.CurrentDirectory
+    let currDir = DirectoryInfo(Environment.CurrentDirectory)
+    Exec "git" args currDir
 
 let private HgCloneRepo (url : string) (target : DirectoryInfo) = 
     let args = sprintf "clone %A %A" url target.FullName
-    Exec "hg" args Environment.CurrentDirectory
+    let currDir = DirectoryInfo(Environment.CurrentDirectory)
+    Exec "hg" args currDir
 
 let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) = 
     let checkoutDir = wsDir |> GetSubDirectory repo.Name.Value
@@ -47,3 +57,11 @@ let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) =
         | VcsType.Hg -> HgCloneRepo
     cloneRepo repo.Url.Value checkoutDir
 
+let VcsTip (wsDir : DirectoryInfo) (repo : Repository) = 
+    let checkoutDir = wsDir |> GetSubDirectory repo.Name.Value
+    
+    let tipRepo = 
+        match repo.Vcs with
+        | VcsType.Git -> GitTip
+        | VcsType.Hg -> HgTip
+    tipRepo checkoutDir
