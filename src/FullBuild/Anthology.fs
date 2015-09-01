@@ -40,14 +40,6 @@ with
     static member Bind (assName : AssemblyName) = AssemblyId.Bind (assName.Name)
     static member Bind (file : FileInfo) =  AssemblyId.Bind (Path.GetFileNameWithoutExtension(file.Name))
 
-type BookmarkName = BookmarkName of string
-
-type BookmarkVersion = BookmarkVersion of string
-
-type Bookmark = 
-    { Name : BookmarkName
-      Version : BookmarkVersion }
-
 type PackageVersion = PackageVersion of string
 with
     member this.Value = (fun (PackageVersion x) -> x)this
@@ -83,6 +75,14 @@ type Repository =
       Vcs : VcsType
       Url : RepositoryUrl }
 
+type BookmarkVersion = BookmarkVersion of string
+with
+    member this.Value = (fun (BookmarkVersion x) -> x)this
+
+type Bookmark = 
+    { Repository : RepositoryId
+      Version : BookmarkVersion }
+
 type ProjectRelativeFile = ProjectRelativeFile of string
 with
     member this.Value = (fun (ProjectRelativeFile x) -> x)this
@@ -114,7 +114,7 @@ type Project =
       PackageReferences : PackageId set
       ProjectReferences : ProjectId set }
 
-type ApplicationId = ApplicationId of string
+type ApplicationId = private ApplicationId of string
 with
     member this.Value = (fun (ApplicationId x) -> x)this
     static member Bind(name : string) = ApplicationId (name.ToLowerInvariant())
