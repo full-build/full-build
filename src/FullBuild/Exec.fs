@@ -25,9 +25,10 @@
 module Exec
 
 open System.Diagnostics
+open System.IO
 
-let Exec (command : string) (args : string) (dir : string) = 
-    let psi = ProcessStartInfo (FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir)
+let Exec (command : string) (args : string) (dir : DirectoryInfo) = 
+    let psi = ProcessStartInfo (FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir.FullName)
     use proc = Process.Start (psi)
     if proc = null then failwith "Failed to start process"
     proc.WaitForExit()

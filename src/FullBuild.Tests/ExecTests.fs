@@ -4,12 +4,15 @@ open NUnit.Framework
 open FsUnit
 open Exec
 open System
+open System.IO
 
 [<Test>]
 let CheckExecOk () =
-    Exec "cmd" "/c dir" Environment.CurrentDirectory
+    let currDir = DirectoryInfo(Environment.CurrentDirectory)
+    Exec "cmd" "/c dir" currDir
 
 [<Test>]
 let CheckExecFailure () =
-    (fun () -> Exec "gloubiboulga" "" System.Environment.CurrentDirectory |> ignore) |> should throw typeof<System.ComponentModel.Win32Exception>
+    let currDir = DirectoryInfo(Environment.CurrentDirectory)
+    (fun () -> Exec "gloubiboulga" "" currDir |> ignore) |> should throw typeof<System.ComponentModel.Win32Exception>
 
