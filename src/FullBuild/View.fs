@@ -67,7 +67,7 @@ let GenerateSolutionContent (projects : Project seq) =
             yield "\tProjectSection(ProjectDependencies) = postProject"
 //            for dependency in project.ProjectReferences do
 //                if projects |> Seq.exists (fun x -> x.ProjectGuid = dependency) then
-//                    let dependencyName = StringifyGuid dependency
+//                    let dependencyName = StringifyGuid dependency.Value
 //                    yield sprintf "\t\t%s = %s" dependencyName dependencyName
             yield "\tEndProjectSection"
             yield "EndProject"
