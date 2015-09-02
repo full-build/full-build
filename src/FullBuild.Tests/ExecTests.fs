@@ -9,7 +9,8 @@ open System.IO
 [<Test>]
 let CheckExecOk () =
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
-    Exec "cmd" "/c dir" currDir
+    Exec "cmd" "/c dir" currDir |> ignore
+
 
 [<Test>]
 let CheckExecFailure () =
