@@ -267,3 +267,31 @@ let Convert () =
     ConvertProjects antho XDocumentLoader XDocumentSaver
     RemoveUselessStuff antho
 
+let CollectRepoHash wsDir (repo : Repository set) =
+    let getRepoHash (repo : Repository) =
+        let tip = Vcs.VcsTip wsDir repo
+        { Repository = repo.Name; Version = tip}
+
+    repo |> Set.map getRepoHash
+
+let Bookmark () = 
+    let antho = Configuration.LoadAnthology ()
+    let wsDir = Env.WorkspaceFolder ()
+    let bookmarks = CollectRepoHash wsDir antho.Repositories
+    let newAntho = { antho
+                     with Bookmarks = bookmarks }
+    Configuration.SaveAnthology newAntho
+
+let Checkout (version : BookmarkVersion) =
+    let wsDir = Env.WorkspaceFolder ()
+    let config = Configuration.GlobalConfig
+    let mainRepo = config.Repository
+    Vcs.VcsCheckout wsDir mainRepo version
+
+    let antho = Configuration.LoadAnthology ()
+
+    for version in antho.Bookmarks do
+        let repo = antho.Repositories |> Seq.tryFind (fun x -> x.Name = version.Repository)
+        match repo with 
+        | Some x -> Vcs.VcsCheckout wsDir x version.Version
+        | None -> ()

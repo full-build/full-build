@@ -50,6 +50,11 @@ type ViewName =
 type DeployApplications = 
     { Names : ApplicationId set }
 
+type CheckoutVersion =
+    {
+        Version : BookmarkVersion
+    }
+
 type Command = 
     | Usage
     | Error
@@ -59,6 +64,8 @@ type Command =
     | InitWorkspace of CreateWorkspace
     | IndexWorkspace
     | ConvertWorkspace
+    | BookmarkWorkspace
+    | CheckoutWorkspace of CheckoutVersion
     // repository
     | AddRepository of Repository
     | CloneRepositories of CloneRepositories
@@ -101,6 +108,8 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Workspace) :: Token(Init) :: path :: [] -> Command.InitWorkspace { Path = path }
     | Token(Token.Debug) :: Token(Token.Workspace) :: Token(Index) :: [] -> Command.IndexWorkspace
     | Token(Token.Workspace) :: Token(Convert) :: [] -> Command.ConvertWorkspace
+    | Token(Token.Workspace) :: Token(Token.Bookmark) :: [] -> Command.BookmarkWorkspace
+    | Token(Token.Workspace) :: Token(Token.Checkout) :: version :: [] -> Command.CheckoutWorkspace {Version = BookmarkVersion version}
 
     | Token(Token.Repo) :: Token(Token.Add) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
                                                                            AddRepository(repo)
