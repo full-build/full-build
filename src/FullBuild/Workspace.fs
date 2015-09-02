@@ -286,12 +286,12 @@ let Checkout (version : BookmarkVersion) =
     let wsDir = Env.WorkspaceFolder ()
     let config = Configuration.GlobalConfig
     let mainRepo = config.Repository
-    Vcs.VcsCheckout wsDir mainRepo version
+    Vcs.VcsCheckout wsDir mainRepo (Some version)
 
     let antho = Configuration.LoadAnthology ()
 
-    for version in antho.Bookmarks do
-        let repo = antho.Repositories |> Seq.tryFind (fun x -> x.Name = version.Repository)
-        match repo with 
-        | Some x -> Vcs.VcsCheckout wsDir x version.Version
-        | None -> ()
+    for repo in antho.Repositories do
+        let version = antho.Bookmarks |> Seq.tryFind (fun x -> x.Repository = repo.Name)
+        match version with
+        | Some x -> Vcs.VcsCheckout wsDir repo (Some x.Version)
+        | None -> Vcs.VcsCheckout wsDir repo None
