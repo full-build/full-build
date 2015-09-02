@@ -53,7 +53,7 @@ let private HgClone (url : string) (target : DirectoryInfo) =
 let private GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) = 
     let rev = match version with
               | Some x -> x.Value
-              | None -> "HEAD"
+              | None -> "master"
 
     let args = sprintf "checkout %A" rev
     Exec "git" args repoDir |> ignore
@@ -66,30 +66,52 @@ let private HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion opti
     let args = sprintf "update -r %A" rev
     Exec "hg" args repoDir |> ignore
 
+let private GitIgnore (repoDir : DirectoryInfo) =
+    let content = seq {
+        yield "packages"
+        yield "views"
+    }
+    let gitIgnoreFile = repoDir |> GetFile ".gitignore"
+    File.WriteAllLines (gitIgnoreFile.FullName, content)
+
+let private HgIgnore (repoDir : DirectoryInfo) =
+    ()
+
+
 let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) = 
-    let checkoutDir = wsDir |> GetSubDirectory repo.Name.Value
+    let repoDir = wsDir |> GetSubDirectory repo.Name.Value
     
     let cloneRepo = 
         match repo.Vcs with
         | VcsType.Git -> GitClone
         | VcsType.Hg -> HgClone
-    cloneRepo repo.Url.Value checkoutDir
+    cloneRepo repo.Url.Value repoDir
 
 let VcsTip (wsDir : DirectoryInfo) (repo : Repository) : BookmarkVersion = 
-    let checkoutDir = wsDir |> GetSubDirectory repo.Name.Value
+    let repoDir = wsDir |> GetSubDirectory repo.Name.Value
     
     let tipRepo = 
         match repo.Vcs with
         | VcsType.Git -> GitTip
         | VcsType.Hg -> HgTip
-    let tip = tipRepo checkoutDir
+    let tip = tipRepo repoDir
     BookmarkVersion tip
 
 let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion option) = 
-    let checkoutDir = wsDir |> GetSubDirectory repo.Name.Value
+    let repoDir = wsDir |> GetSubDirectory repo.Name.Value
     
     let checkoutRepo = 
         match repo.Vcs with
         | VcsType.Git -> GitCheckout
         | VcsType.Hg -> HgCheckout
-    checkoutRepo checkoutDir version
+    checkoutRepo repoDir version
+
+let VcsIgnore (wsDir : DirectoryInfo) (repo : Repository) =
+    let repoDir = wsDir |> GetSubDirectory repo.Name.Value
+
+    let ignoreRepo = 
+        match repo.Vcs with
+        | VcsType.Git -> GitIgnore
+        | VcsType.Hg -> HgIgnore
+    ignoreRepo repoDir
+
