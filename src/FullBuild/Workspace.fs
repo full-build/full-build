@@ -71,12 +71,7 @@ let Create(path : string) =
     let confDir = wsDir |> GetSubDirectory ".full-build"
     let anthoFile = confDir |> GetFile "anthology.json"
     Configuration.SaveAnthologyToFile anthoFile antho
-
-    // FIXME
-    //  create git repo in .full-build
-    //       generate .gitignore
-    //       add content of .full-build to git repo
-    //       commit
+    Vcs.VcsIgnore wsDir GlobalConfig.Repository
 
 let Index () = 
     let wsDir = WorkspaceFolder()
