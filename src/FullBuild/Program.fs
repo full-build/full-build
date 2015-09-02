@@ -35,6 +35,8 @@ let main argv =
     | InitWorkspace wsInfo -> Workspace.Init wsInfo.Path
     | IndexWorkspace -> Workspace.Index ()
     | ConvertWorkspace -> Workspace.Convert ()
+    | BookmarkWorkspace -> Workspace.Bookmark ()
+    | CheckoutWorkspace version -> Workspace.Checkout version.Version
 
     // repository
     | AddRepository repo -> Repo.Add repo
