@@ -24,6 +24,8 @@ rem %FULLBUILD% package simplify || goto :ko
 %FULLBUILD% view graph cs || goto :ko
 %FULLBUILD% view graph csc || goto :ko
 %FULLBUILD% view graph all || goto :ko
+%FULLBUILD% workspace bookmark || goto :ko
+
 
 
 
