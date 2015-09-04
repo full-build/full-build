@@ -32,23 +32,23 @@ open System.IO
 
 let private GitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=""%H"""
-    let res = Exec "git" args repoDir
+    let res = ExecOutput "git" args repoDir
     res
 
 let private HgTip (repoDir : DirectoryInfo) =
     let args = @"id -i"
-    let res = Exec "hg" args repoDir
+    let res = ExecOutput "hg" args repoDir
     res
 
 let private GitClone (url : string) (target : DirectoryInfo) = 
     let args = sprintf "clone %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
-    Exec "git" args currDir |> ignore
+    Exec "git" args currDir
 
 let private HgClone (url : string) (target : DirectoryInfo) = 
     let args = sprintf "clone %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
-    Exec "hg" args currDir |> ignore    
+    Exec "hg" args currDir    
 
 let private GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) = 
     let rev = match version with
@@ -56,7 +56,7 @@ let private GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion opt
               | None -> "master"
 
     let args = sprintf "checkout %A" rev
-    Exec "git" args repoDir |> ignore
+    Exec "git" args repoDir
 
 let private HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) = 
     let rev = match version with
@@ -64,7 +64,7 @@ let private HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion opti
               | None -> "tip"
 
     let args = sprintf "update -r %A" rev
-    Exec "hg" args repoDir |> ignore
+    Exec "hg" args repoDir
 
 let private GitIgnore (repoDir : DirectoryInfo) =
     let content = seq {
