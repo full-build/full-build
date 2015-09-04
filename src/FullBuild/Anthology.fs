@@ -126,11 +126,10 @@ type Application =
 type Anthology = 
     { Applications : Application set
       Repositories : Repository set
-      Bookmarks : Bookmark set 
       Projects : Project set }
 
-    
-
+type Baseline = 
+    { Bookmarks : Bookmark set  }
 
 let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) = 
     let vcs = match vcsType with

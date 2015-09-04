@@ -37,31 +37,6 @@
         }
       ]
     },
-    "Bookmarks": {
-      "count": 2,
-      "elements": [
-        {
-          "Name": {
-            "Case": "BookmarkName",
-            "Item": "cassandra-sharp"
-          },
-          "Version": {
-            "Case": "BookmarkVersion",
-            "Item": "b62e33a6ba39f987c91fdde11472f42b2a4acd94"
-          }
-        },
-        {
-          "Name": {
-            "Case": "BookmarkName",
-            "Item": "cassandra-sharp-contrib"
-          },
-          "Version": {
-            "Case": "BookmarkVersion",
-            "Item": "e0089100b3c5ca520e831c5443ad9dc8ab176052"
-          }
-        }
-      ]
-    },
     "Projects": {
       "count": 1,
       "elements": [
