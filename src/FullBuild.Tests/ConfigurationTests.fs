@@ -11,8 +11,6 @@ open StringHelpers
 let CheckRoundtripAnthology () =
     let expected = {
         Applications = Set.empty
-        Bookmarks = [ { Repository = RepositoryId.Bind "cassandra-sharp"; Version = BookmarkVersion "b62e33a6ba39f987c91fdde11472f42b2a4acd94" }
-                      { Repository = RepositoryId.Bind "cassandra-sharp-contrib"; Version = BookmarkVersion "e0089100b3c5ca520e831c5443ad9dc8ab176052" } ] |> set
         Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.Bind "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
                          { Vcs = VcsType.Git; Name = RepositoryId.Bind "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
         Projects = [ { Output = AssemblyId.Bind "cqlplus"
@@ -29,9 +27,22 @@ let CheckRoundtripAnthology () =
     let file = FileInfo (Path.GetRandomFileName())
     printfn "Temporary file is %A" file.FullName
 
-    SaveAnthologyToFile file expected
+    SaveToJSonFile file expected
 
-    let antho = LoadAnthologyFromFile file
+    let antho = LoadFromJSonFile<Anthology> file
+    antho |> should equal expected
+
+[<Test>]
+let CheckRoundtripBaseline () =
+    let expected = {  Bookmarks = [ { Repository = RepositoryId.Bind "cassandra-sharp"; Version = BookmarkVersion "b62e33a6ba39f987c91fdde11472f42b2a4acd94" }
+                                    { Repository = RepositoryId.Bind "cassandra-sharp-contrib"; Version = BookmarkVersion "e0089100b3c5ca520e831c5443ad9dc8ab176052" } ] |> set }
+
+    let file = FileInfo (Path.GetRandomFileName())
+    printfn "Temporary file is %A" file.FullName
+
+    SaveToJSonFile file expected
+
+    let antho = LoadFromJSonFile<Baseline> file
     antho |> should equal expected
 
 [<Test>]

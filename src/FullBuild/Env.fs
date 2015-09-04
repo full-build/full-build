@@ -34,6 +34,7 @@ let private PROJECT_FOLDER = "projects"
 let private PACKAGE_FOLDER = "packages"
 let private ASSEMBLY_FOLDER = "assemblies"
 let private ANTHOLOGY_FILENAME = "anthology.json"
+let private BASELINE_FILENAME = "baseline.json"
 let MSBUILD_SOLUTION_DIR = "$(SolutionDir)"
 let MSBUILD_BIN_OUTPUT = "bin"
 let MSBUILD_PROJECT_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR CONFIG_FOLDER PROJECT_FOLDER
@@ -87,4 +88,8 @@ let WorkspacePackageFolder() : DirectoryInfo =
 let GetAnthologyFileName() = 
     let fbDir = WorkspaceConfigFolder()
     fbDir |> GetFile ANTHOLOGY_FILENAME
+
+let GetBaselineFileName() = 
+    let fbDir = WorkspaceConfigFolder()
+    fbDir |> GetFile BASELINE_FILENAME
 

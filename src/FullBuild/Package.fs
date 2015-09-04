@@ -163,7 +163,7 @@ let Install () =
     PaketParsing.UpdateSources config.NuGets
 
     let confDir = Env.WorkspaceConfigFolder ()
-    Exec.Exec "paket.exe" "install" confDir |> ignore
+    Exec.Exec "paket.exe" "install" confDir
 
     let allPackages = NuGets.BuildPackageDependencies (PaketParsing.ParsePaketDependencies ())
                       |> Map.toList
@@ -172,7 +172,7 @@ let Install () =
 
 let Update () =
     let confDir = Env.WorkspaceConfigFolder ()
-    Exec.Exec "paket.exe" "update" confDir |> ignore
+    Exec.Exec "paket.exe" "update" confDir
     
     let allPackages = NuGets.BuildPackageDependencies (PaketParsing.ParsePaketDependencies ())
                       |> Map.toList
@@ -181,11 +181,11 @@ let Update () =
 
 let Outdated () =
     let confDir = Env.WorkspaceConfigFolder ()
-    Exec.Exec "paket.exe" "outdated" confDir |> ignore
+    Exec.Exec "paket.exe" "outdated" confDir
 
 let List () =
     let confDir = Env.WorkspaceConfigFolder ()
-    Exec.Exec "paket.exe" "show-installed-packages" confDir |> ignore
+    Exec.Exec "paket.exe" "show-installed-packages" confDir
 
 
 let RemoveUnusedPackages (antho : Anthology) =

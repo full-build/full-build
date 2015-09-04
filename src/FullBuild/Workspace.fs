@@ -65,12 +65,16 @@ let Create(path : string) =
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
     VcsCloneRepo wsDir GlobalConfig.Repository
     let antho = { Applications = Set.empty
-                  Bookmarks = Set.empty
                   Repositories = Set.empty
                   Projects = Set.empty }
     let confDir = wsDir |> GetSubDirectory ".full-build"
     let anthoFile = confDir |> GetFile "anthology.json"
-    Configuration.SaveAnthologyToFile anthoFile antho
+    Configuration.SaveToJSonFile anthoFile antho
+
+    let baseline = { Bookmarks = Set.empty }
+    let baselineFile = confDir |> GetFile "baseline.json"
+    Configuration.SaveToJSonFile baselineFile baseline
+
     Vcs.VcsIgnore wsDir GlobalConfig.Repository
 
 let Index () = 
@@ -273,9 +277,8 @@ let Bookmark () =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.WorkspaceFolder ()
     let bookmarks = CollectRepoHash wsDir antho.Repositories
-    let newAntho = { antho
-                     with Bookmarks = bookmarks }
-    Configuration.SaveAnthology newAntho
+    let baseline = { Bookmarks = bookmarks }
+    Configuration.SaveBaseline baseline
 
 let Checkout (version : BookmarkVersion) =
     let wsDir = Env.WorkspaceFolder ()
@@ -284,9 +287,10 @@ let Checkout (version : BookmarkVersion) =
     Vcs.VcsCheckout wsDir mainRepo (Some version)
 
     let antho = Configuration.LoadAnthology ()
+    let baseline = Configuration.LoadBaseline ()
 
     for repo in antho.Repositories do
-        let version = antho.Bookmarks |> Seq.tryFind (fun x -> x.Repository = repo.Name)
+        let version = baseline.Bookmarks |> Seq.tryFind (fun x -> x.Repository = repo.Name)
         match version with
         | Some x -> Vcs.VcsCheckout wsDir repo (Some x.Version)
         | None -> Vcs.VcsCheckout wsDir repo None
