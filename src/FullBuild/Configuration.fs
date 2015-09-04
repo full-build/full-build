@@ -78,19 +78,27 @@ let GlobalConfig : GlobalConfiguration =
             NuGets = ["https://www.nuget.org/api/v2/"]
         }
 
-let LoadAnthologyFromFile(anthoFn : FileInfo) : Anthology = 
-    use file = anthoFn.OpenText()
-    let antho = jsonSerializer.Deserialize(file)
-    antho
+let LoadFromJSonFile<'T> (jsonFile : FileInfo) : 'T = 
+    use file = jsonFile.OpenText()
+    let data = jsonSerializer.Deserialize(file)
+    data
 
-let SaveAnthologyToFile (anthoFn : FileInfo) (anthology : Anthology) = 
+let SaveToJSonFile<'T> (anthoFn : FileInfo) (data : 'T) = 
     use file = anthoFn.CreateText()
-    jsonSerializer.Serialize(file, anthology)
+    jsonSerializer.Serialize(file, data)
 
 let LoadAnthology() : Anthology = 
     let anthoFn = GetAnthologyFileName ()
-    LoadAnthologyFromFile anthoFn
+    LoadFromJSonFile<Anthology> anthoFn
 
 let SaveAnthology(anthology : Anthology) = 
     let anthoFn = GetAnthologyFileName ()
-    SaveAnthologyToFile anthoFn anthology
+    SaveToJSonFile anthoFn anthology
+
+let LoadBaseline() : Baseline =
+    let baselineFile = GetBaselineFileName ()
+    LoadFromJSonFile<Baseline> baselineFile
+
+let SaveBaseline (baseline : Baseline) =
+    let baselineFile = GetBaselineFileName ()
+    SaveToJSonFile baselineFile baseline
