@@ -25,7 +25,7 @@ let CheckUsageInvoked () =
 
 [<Test>]
 let CheckWorkspaceIndex () =
-    let result = ParseCommandLine [ "debug"; "workspace"; "index" ]
+    let result = ParseCommandLine [ "debug"; "index"; "workspace" ]
     let expected = Command.IndexWorkspace
     result |> should equal expected
 
