@@ -85,7 +85,7 @@ let (|Token|) (token : string) =
     | "simplify" -> Simplify
     | "outdated" -> Outdated
     | "debug" -> Debug
-    | "application" -> Application
+    | "app" -> Application
     | "deploy" -> Deploy
     | _ -> Unknown
 

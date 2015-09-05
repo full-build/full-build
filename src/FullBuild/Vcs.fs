@@ -32,12 +32,12 @@ open System.IO
 
 let private GitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=""%H"""
-    let res = ExecOutput "git" args repoDir
+    let res = ExecReadLine "git" args repoDir
     res
 
 let private HgTip (repoDir : DirectoryInfo) =
     let args = @"id -i"
-    let res = ExecOutput "hg" args repoDir
+    let res = ExecReadLine "hg" args repoDir
     res
 
 let private GitClone (url : string) (target : DirectoryInfo) = 

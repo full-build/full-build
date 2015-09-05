@@ -13,17 +13,17 @@ rem robocopy c:\src\Paket\bin .paket /MIR
 rem %FULLBUILD% workspace index || goto :ko
 rem %FULLBUILD% package install || goto :ko
 rem %FULLBUILD% package simplify || goto :ko
-%FULLBUILD% workspace convert || goto :ko
-%FULLBUILD% view create cs using cassandra-sharp || goto :ko
-%FULLBUILD% view create csc using cassandra-sharp-contrib || goto :ko
-%FULLBUILD% view create all using * || goto :ko
-%FULLBUILD% view list || goto :ko
-%FULLBUILD% view describe cs || goto :ko
-%FULLBUILD% view describe csc || goto :ko
-%FULLBUILD% view describe all || goto :ko
-%FULLBUILD% view graph cs || goto :ko
-%FULLBUILD% view graph csc || goto :ko
-%FULLBUILD% view graph all || goto :ko
+%FULLBUILD% convert || goto :ko
+%FULLBUILD% add view cs using cassandra-sharp || goto :ko
+%FULLBUILD% add view csc using cassandra-sharp-contrib || goto :ko
+%FULLBUILD% add view all using * || goto :ko
+%FULLBUILD% list view || goto :ko
+%FULLBUILD% describe view cs || goto :ko
+%FULLBUILD% describe view csc || goto :ko
+%FULLBUILD% describe view all || goto :ko
+%FULLBUILD% graph cs || goto :ko
+%FULLBUILD% graph csc || goto :ko
+%FULLBUILD% graph all || goto :ko
 %FULLBUILD% bookmark || goto :ko
 
 

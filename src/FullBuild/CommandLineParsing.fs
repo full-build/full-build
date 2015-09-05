@@ -105,37 +105,38 @@ let ParseCommandLine(args : string list) : Command =
     match args with
     | Token(Token.Help) :: [] -> Command.Usage
     | Token(Create) :: path :: [] -> Command.CreateWorkspace { Path = path }
-    | Token(Token.Workspace) :: Token(Init) :: path :: [] -> Command.InitWorkspace { Path = path }
-    | Token(Token.Debug) :: Token(Token.Workspace) :: Token(Index) :: [] -> Command.IndexWorkspace
-    | Token(Token.Workspace) :: Token(Convert) :: [] -> Command.ConvertWorkspace
+    | Token(Init) :: path :: [] -> Command.InitWorkspace { Path = path }
+    | Token(Convert) :: [] -> Command.ConvertWorkspace
     | Token(Token.Bookmark) :: [] -> Command.BookmarkWorkspace
     | Token(Token.Checkout) :: version :: [] -> Command.CheckoutWorkspace {Version = BookmarkVersion version}
+    | Token(Token.Update) :: [] -> Command.UpdatePackages
+    | Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = name }
+    | Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
+                                       CloneRepositories { Filters = repoFilters }
+    | Token(Token.Deploy) ::names -> let appNames = names |> Seq.map ApplicationId.Bind |> Set
+                                     DeployApplications {Names = appNames }
+    | Token(Token.Install) :: [] -> Command.InstallPackages
+    | Token(Token.Outdated) :: [] -> Command.OutdatedPackages
 
-    | Token(Token.Repo) :: Token(Token.Add) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
+    | Token(Token.Add) :: Token(Token.Repo) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
                                                                            AddRepository(repo)
-    | Token(Token.Repo) :: Token(Token.List) :: [] -> ListRepositories
-    | Token(Token.Repo) :: Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
-                                                            CloneRepositories { Filters = repoFilters }
+    | Token(Token.Add) :: Token(Token.View) :: name :: Token(Token.Using) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
+                                                                                        Command.CreateView { Name = name; Filters = repoFilters }
 
-    | Token(Token.View) :: Token(Token.Create) :: name :: Token(Token.Using) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
-                                                                                           Command.CreateView { Name = name; Filters = repoFilters }
-    | Token(Token.View) :: Token(Token.Drop) :: name :: [] -> Command.DropView { Name = name }
-    | Token(Token.View) :: Token(Token.List) :: [] -> Command.ListViews
-    | Token(Token.View) :: Token(Token.Describe) :: name :: [] -> Command.DescribeView { Name = name }
-    | Token(Token.View) :: Token(Token.Generate) :: name :: [] -> Command.GenerateView { Name = name }
-    | Token(Token.View) :: Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = name }
+    | Token(Token.List) :: Token(Token.Repo) :: [] -> ListRepositories
+    | Token(Token.List) :: Token(Token.View) :: [] -> Command.ListViews
+    | Token(Token.List) :: Token(Token.Package) :: [] -> Command.ListPackages
+    | Token(Token.List) :: Token(Token.Application) :: [] -> ListApplications
+
+    | Token(Token.Drop) :: Token(Token.View) :: name :: [] -> Command.DropView { Name = name }
+//    | Token(Token.Drop) :: Token(Token.Repo) :: name :: [] -> Command.DropRepo { Name = name }
+
+    | Token(Token.Describe) :: Token(Token.View) :: name :: [] -> Command.DescribeView { Name = name }
 //    | Token(Token.View) :: Token(Token.Build) :: name :: [] -> Command.BuildView { Name = name }
 
-    | Token(Token.Package) :: Token(Token.Install) :: [] -> Command.InstallPackages
-    | Token(Token.Debug) :: Token(Token.Package) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
-    | Token(Token.Package) :: Token(Token.Update) :: [] -> Command.UpdatePackages
-    | Token(Token.Package) :: Token(Token.Outdated) :: [] -> Command.OutdatedPackages
-    | Token(Token.Package) :: Token(Token.List) :: [] -> Command.ListPackages
-
-    | Token(Token.Application) :: Token(Token.List) :: [] -> ListApplications
-    | Token(Token.Application) :: Token(Token.Deploy) :: names -> let appNames = names |> Seq.map ApplicationId.Bind |> Set
-                                                                  DeployApplications {Names = appNames }
-
+    | Token(Token.Debug) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
+    | Token(Token.Debug) :: Token(Index) :: [] -> Command.IndexWorkspace
+    | Token(Token.Debug) :: Token(Token.Generate) :: name :: [] -> Command.GenerateView { Name = name }
     | _ -> Command.Error
 
 let UsageContent() =
@@ -143,27 +144,24 @@ let UsageContent() =
         yield "Usage:"
         yield "  help : display help"
         yield "  create <path> : create a new environment in given path"
-        yield "  workspace init <path> : initialize a new workspace in givne path"
-        yield "  workspace convert : adapt projects in workspace"
+        yield "  init <path> : initialize a new workspace in given path"
+        yield "  convert : adapt projects in workspace"
+        yield "  clone <wildcards> : clone repositories using provided wildcards"
+        yield "  install : install packages declared in anthology"
+        yield "  outdated : display outdated packages"
+        yield "  graph <name> : graph view content (project, packages, assemblies)"
+        yield "  deploy <name> : deploy application"
         yield ""
-        yield "  repo clone <wildcards> : clone repositories using provided wildcards"
-        yield "  repo add <git|hg> <name> <uri> : declare a new repository"
-        yield "  repo list : list repositories"
+        yield "  add repo <git|hg> <name> <uri> : declare a new repository"
+        yield "  add view <name> using <wildcards> : create a new view using provided repository wildcards"
+        yield "  drop <repo|view> <name> : drop a view or repository"
+        yield "  list <repo|view|package|app> : list objects"
+        yield "  describe <repo|view> <name> : describe view or repository"
         yield ""
-        yield "  view create <name> using <wildcards> : create a new view using provided repository wildcards"
-        yield "  view drop <name> : drop a view"
-        yield "  view list : list views"
-        yield "  view describe <name> : describe view content"
-        yield "  view generate <name> : generate sln file for view"
-        yield "  view graph <name> : graph view content (project, packages, assemblies)"
+        yield "  debug index : synchronize anthology with projects"    
+        yield "  debug simplify : simplify packages graph, promote assemblies or packages to project where permitted"
+        yield "  debug generate <name> : generate sln file for view"
         yield ""
-        yield "  package install : install packages as defined in anthology"
-        yield "  package update : update packages"
-        yield "  package outdated : display outdated packages"
-        yield "  package list : list installed packages"
-        yield ""
-        yield "  debug workspace index : synchronize anthology with projects"    
-        yield "  debug package simplify : simplify package graph, promote assemblies or packages to project where permitted"
     }
 
 let DisplayUsage() = 
