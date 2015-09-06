@@ -1,7 +1,7 @@
 set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
 
-bootstrap\fullbuild package install
-bootstrap\fullbuild view create all using *
+bootstrap\fullbuild install
+bootstrap\fullbuild create view all using *
 msbuild /p:Configuration=Release all.sln || goto :ko
 
 :ok
