@@ -108,6 +108,9 @@
     <None Include="FSharpProjectSample1.fsproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Paket.fsproj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(SolutionDir)/.full-build/packages/mini/package.targets" Condition="'$(FullBuild_mini_Pkg)' == ''" />
   <Import Project="$(SolutionDir)/.full-build/packages/fsunit/package.targets" Condition="'$(FullBuild_fsunit_Pkg)' == ''" />
