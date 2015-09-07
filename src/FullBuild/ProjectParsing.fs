@@ -53,18 +53,17 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     // VS project references
     let prjRefs = xdoc.Descendants(NsMsBuild + "ProjectReference")
                   |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
-                  |> Seq.map (GetProjectGuid prjDir)
+                  |> Seq.map (ProjectId.Bind << GetProjectGuid prjDir)
+                  |> Set
     
     // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER))
-                 |> Seq.map (ParseGuid << Path.GetFileNameWithoutExtension)
+                 |> Seq.map (ProjectId.Bind << ParseGuid << Path.GetFileNameWithoutExtension)
+                 |> Set
     
-    prjRefs |> Seq.append fbRefs
-            |> Seq.distinct
-            |> Seq.map ProjectId.Bind
-            |> set
+    prjRefs |> Set.union fbRefs
 
 let GetAssemblies(xdoc : XDocument) : AssemblyId set = 
     let res = seq { 
@@ -74,13 +73,11 @@ let GetAssemblies(xdoc : XDocument) : AssemblyId set =
             let assRef = AssemblyId.Bind (System.Reflection.AssemblyName(assName))
             yield assRef
     }
-    res |> Set.ofSeq
+    res |> Set
 
 let ParseNuGetPackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "id")
     let pkgVer = !> pkgRef.Attribute(XNamespace.None + "version") : string
-    let pkgFx = !> pkgRef.Attribute(XNamespace.None + "targetFramework") : string
-
     { Id = PackageId.Bind pkgId
       Version = PackageVersion pkgVer }
 
