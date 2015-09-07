@@ -104,15 +104,16 @@ let (|MatchPackage|_|) hintpath =
     if m.Success then Some (m.Groups.["Package"].Value)
     else None
 
-let GetPackageFromPaketRefence (xel : XElement) =
+let GetPackageFromPaketReference (xel : XElement) =
     let xhintPath = xel.Descendants(NsMsBuild + "HintPath") |> Seq.head
     let hintPath = !> xhintPath : string
     match hintPath with
-    | MatchPackage pkg -> pkg
+    | MatchPackage pkg -> { Id = PackageId.Bind pkg
+                            Version = PackageVersion String.Empty }
     | _ -> failwith "Failed to find package"
 
 let GetFullBuildPackages (prjDoc : XDocument)  =
-    let fbPkgs = prjDoc.Descendants(NsMsBuild + "Reference")
+    let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER))
                  |> Seq.map ParseFullBuildPackage
@@ -120,9 +121,9 @@ let GetFullBuildPackages (prjDoc : XDocument)  =
     fbPkgs
 
 let GetPaketPackages (prjDoc : XDocument)  =
-    let paketPkgs = prjDoc.Descendants(NsMsBuild + "Import")
+    let paketPkgs = prjDoc.Descendants(NsMsBuild + "Reference")
                     |> Seq.filter IsPaketReference
-                    |> Seq.map GetPackageFromPaketRefence
+                    |> Seq.map GetPackageFromPaketReference
                     |> Set
     paketPkgs
 
@@ -151,7 +152,8 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                         | _ -> Set.empty
     let fbPackages = GetFullBuildPackages xprj
     let paketPackages = GetPaketPackages xprj
-    let packages = Set.union fbPackages nugetPackages
+    let packages = nugetPackages |> Set.union fbPackages 
+                                 |> Set.union paketPackages
     let pkgRefs = packages |> Set.map (fun x -> x.Id)
 
     let ext2projType = Map [ (".csproj", ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
