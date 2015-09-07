@@ -156,9 +156,6 @@ let GatherAllAssemblies (package : PackageId) : AssemblyId set =
           |> set
 
 let Install () =
-    let pkgDir = Env.WorkspacePackageFolder ()
-    pkgDir.Delete (true)
-
     let config = Configuration.GlobalConfig
     PaketParsing.UpdateSources config.NuGets
 
