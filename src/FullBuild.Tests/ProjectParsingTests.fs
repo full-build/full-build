@@ -35,13 +35,13 @@ let CheckCastString () =
 
 [<Test>]
 let CheckBasicParsingCSharp () =
-    let expectedPackages = [ { Id=PackageId.Bind "FSharp.Data"; Version=PackageVersion "2.2.5" }
-                             { Id=PackageId.Bind "FsUnit"; Version=PackageVersion "1.3.0.1" }
-                             { Id=PackageId.Bind "Mini"; Version=PackageVersion "0.4.2.0" }
-                             { Id=PackageId.Bind "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
-                             { Id=PackageId.Bind "NLog"; Version=PackageVersion "4.0.1" }
-                             { Id=PackageId.Bind "NUnit"; Version=PackageVersion "2.6.3" }
-                             { Id=PackageId.Bind "xunit"; Version=PackageVersion "1.9.1" } ]
+    let expectedPackages = Set [ { Id=PackageId.Bind "FSharp.Data"; Version=PackageVersion "2.2.5" }
+                                 { Id=PackageId.Bind "FsUnit"; Version=PackageVersion "1.3.0.1" }
+                                 { Id=PackageId.Bind "Mini"; Version=PackageVersion "0.4.2.0" }
+                                 { Id=PackageId.Bind "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
+                                 { Id=PackageId.Bind "NLog"; Version=PackageVersion "4.0.1" }
+                                 { Id=PackageId.Bind "NUnit"; Version=PackageVersion "2.6.3" }
+                                 { Id=PackageId.Bind "xunit"; Version=PackageVersion "1.9.1" } ]
     
     let file = FileInfo ("./CSharpProjectSample1.csproj")
     let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.Bind "Test") file
@@ -74,10 +74,10 @@ let CheckParseConvertedProject () =
                                    AssemblyId.Bind "System.Xml"
                                    AssemblyId.Bind "System.Configuration" ]
 
-    let expectedPackages = Set [ { Id=PackageId.Bind "Rx-Core"; Version=PackageVersion "" }
-                                 { Id=PackageId.Bind "Rx-Interfaces"; Version=PackageVersion "" }
-                                 { Id=PackageId.Bind "Rx-Linq"; Version=PackageVersion "" }
-                                 { Id=PackageId.Bind "Rx-PlatformServices"; Version=PackageVersion "" }
+    let expectedPackages = Set [ { Id=PackageId.Bind "Rx-Core"; Version=Unspecified }
+                                 { Id=PackageId.Bind "Rx-Interfaces"; Version=Unspecified }
+                                 { Id=PackageId.Bind "Rx-Linq"; Version=Unspecified }
+                                 { Id=PackageId.Bind "Rx-PlatformServices"; Version=Unspecified }
                                  { Id=PackageId.Bind "FSharp.Data"; Version=PackageVersion "2.2.5" }
                                  { Id=PackageId.Bind "FsUnit"; Version=PackageVersion "1.3.0.1" }
                                  { Id=PackageId.Bind "Mini"; Version=PackageVersion "0.4.2.0" }
@@ -128,10 +128,10 @@ let CheckParseConvertedProjectWithoutPackagesConfig () =
                                    AssemblyId.Bind "System.Xml"
                                    AssemblyId.Bind "System.Configuration" ]
 
-    let expectedPackages = Set [ { Id=PackageId.Bind "Rx-Core"; Version=PackageVersion "" }
-                                 { Id=PackageId.Bind "Rx-Interfaces"; Version=PackageVersion "" }
-                                 { Id=PackageId.Bind "Rx-Linq"; Version=PackageVersion "" }
-                                 { Id=PackageId.Bind "Rx-PlatformServices"; Version=PackageVersion "" } ]
+    let expectedPackages = Set [ { Id=PackageId.Bind "Rx-Core"; Version=Unspecified }
+                                 { Id=PackageId.Bind "Rx-Interfaces"; Version=Unspecified }
+                                 { Id=PackageId.Bind "Rx-Linq"; Version=Unspecified }
+                                 { Id=PackageId.Bind "Rx-PlatformServices"; Version=Unspecified } ]
 
     let expectedProject = { Repository = RepositoryId.Bind "Test"
                             RelativeProjectFile = ProjectRelativeFile "ConvertedProject.csproj"
