@@ -19,6 +19,13 @@ let XDocumentLoader (loadPackagesConfig : bool) (fi : FileInfo) : XDocument opti
            else None
 
 [<Test>]
+let CheckMatchPaketReference () =
+    let ref = @"..\..\packages\FSharp.Core\lib\portable-net45+netcore45+wpa81+wp8\FSharp.Core.dll"
+    match ref with
+    | MatchPackage x -> x |> should equal "FSharp.Core"
+    | _ -> failwith "Parsing error"
+
+[<Test>]
 let CheckCastString () =
     let x = XElement (XNamespace.None + "Test", "42")
     let xs : string = !> x

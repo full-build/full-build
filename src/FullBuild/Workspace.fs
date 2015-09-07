@@ -164,6 +164,17 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         let attr = !> (xel.Attribute (NsNone + "Name")) : string
         String.Equals(attr, "EnsureNuGetPackageBuildImports", StringComparison.CurrentCultureIgnoreCase)
 
+    let filterPaketReference (xel : XElement) =
+        let attr = !> (xel.Attribute (NsNone + "Include")) : string
+        attr.StartsWith("paket.references", StringComparison.CurrentCultureIgnoreCase)
+
+    let filterPaketTarget (xel : XElement) =
+        let attr = !> (xel.Attribute (NsNone + "Project")) : string
+        attr.StartsWith("$(SolutionDir)\.paket\paket.targets", StringComparison.CurrentCultureIgnoreCase)
+
+    let filterPaket (xel : XElement) =
+        xel.Descendants(NsMsBuild + "Paket").Any ()
+
     let filterAssemblies (assFiles) (xel : XElement) =
         let inc = !> xel.Attribute(XNamespace.None + "Include") : string
         let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
@@ -207,6 +218,11 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "NuGetPackageImportStamp").Remove()
     cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
 
+    // paket
+    cproj.Descendants(NsMsBuild + "None").Where(filterPaketReference).Remove()
+    cproj.Descendants(NsMsBuild + "Import").Where(filterPaketTarget).Remove()
+    cproj.Descendants(NsMsBuild + "Choose").Where(filterPaket).Remove()
+
     // add project refereces
     let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     for projectReference in project.ProjectReferences do
@@ -248,7 +264,11 @@ let RemoveUselessStuff (antho : Anthology) =
         let repoDir = wsDir |> GetSubDirectory (repo.Name.Value)
         repoDir.EnumerateFiles("*.sln", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
         repoDir.EnumerateFiles("packages.config", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
+        repoDir.EnumerateFiles("paket.dependencies", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
+        repoDir.EnumerateFiles("paket.lock", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
+        repoDir.EnumerateFiles("paket.references", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
         repoDir.EnumerateDirectories("packages", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete(true))
+        repoDir.EnumerateDirectories(".paket", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete(true))
 
 let XDocumentLoader (fileName : FileInfo) =
     XDocument.Load fileName.FullName
