@@ -50,6 +50,7 @@ let main argv =
     | DescribeView viewInfo -> View.Describe viewInfo.Name
     | GenerateView viewInfo -> View.Generate viewInfo.Name
     | GraphView viewInfo -> View.Graph viewInfo.Name
+    | BuildView viewInfo -> View.Build viewInfo.Name
 
     // package
     | InstallPackages -> Package.Install ()
