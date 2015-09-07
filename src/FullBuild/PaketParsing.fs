@@ -73,7 +73,9 @@ let ParsePaketDependencies () =
 let GenerateDependenciesContent (packages : Package seq) =
     seq {
         for package in packages do
-            yield sprintf "nuget %s ~> %s" (package.Id.Value) package.Version.Value
+            match package.Version with
+            | PackageVersion x -> yield sprintf "nuget %s ~> %s" (package.Id.Value) x
+            | Unspecified -> yield sprintf "nuget %s" (package.Id.Value)
     }
 
 let AppendDependencies (packages : Package seq) = 

@@ -86,7 +86,7 @@ let ParseFullBuildPackage (fileName : string) : Package =
     let fo = fi.Directory.Name
 
     { Id = PackageId.Bind fo
-      Version = PackageVersion String.Empty }
+      Version = Unspecified }
 
 let GetNuGetPackages (nugetDoc : XDocument) =
     let nugetPkgs = nugetDoc.Descendants(XNamespace.None + "package") |> Seq.map ParseNuGetPackage 
@@ -106,7 +106,7 @@ let GetPackageFromPaketReference (xel : XElement) =
     let hintPath = !> xhintPath : string
     match hintPath with
     | MatchPackage pkg -> { Id = PackageId.Bind pkg
-                            Version = PackageVersion String.Empty }
+                            Version = Unspecified }
     | _ -> failwith "Failed to find package"
 
 let GetFullBuildPackages (prjDoc : XDocument)  =
