@@ -46,7 +46,6 @@ type Token =
     | Graph
     | Check
     | Describe
-    | Using
     | Generate
     | Install
     | Simplify
@@ -79,7 +78,6 @@ let (|Token|) (token : string) =
     | "graph" -> Graph
     | "check" -> Check
     | "describe" -> Describe
-    | "using" -> Using
     | "generate" -> Generate
     | "install" -> Install
     | "simplify" -> Simplify

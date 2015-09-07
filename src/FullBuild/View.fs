@@ -33,21 +33,21 @@ open MsBuildHelpers
 open Configuration
 open Collections
 
-let Drop (viewName : string) =
+let Drop (viewName : ViewId) =
     let vwDir = WorkspaceViewFolder ()
-    let vwFile = vwDir |> GetFile (AddExt viewName View)
+    let vwFile = vwDir |> GetFile (AddExt viewName.Value View)
     File.Delete (vwFile.FullName)
 
-    let vwDefineFile = vwDir |> GetFile (AddExt viewName Targets)
+    let vwDefineFile = vwDir |> GetFile (AddExt viewName.Value Targets)
     File.Delete (vwDefineFile.FullName)
 
 let List () =
     let vwDir = WorkspaceViewFolder ()
     vwDir.EnumerateFiles (AddExt "*" View) |> Seq.iter (fun x -> printfn "%s" (Path.GetFileNameWithoutExtension (x.Name)))
 
-let Describe (viewName : string) =
+let Describe (viewName : ViewId) =
     let vwDir = WorkspaceViewFolder ()
-    let vwFile = vwDir |> GetFile (AddExt viewName View)
+    let vwFile = vwDir |> GetFile (AddExt viewName.Value View)
     File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
 
 
@@ -121,27 +121,27 @@ let ComputeProjectSelectionClosure (allProjects : Project set) (filters : Reposi
                                  |> Seq.distinct
     transitiveClosure
 
-let FindViewProjects (viewName : string) =
+let FindViewProjects (viewName : ViewId) =
     let antho = LoadAnthology ()
     let viewDir = WorkspaceViewFolder ()
 
-    let viewFile = viewDir |> GetFile (AddExt viewName View)
+    let viewFile = viewDir |> GetFile (AddExt viewName.Value View)
     let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map (fun x -> RepositoryId.Bind x)
     let projectRefs = ComputeProjectSelectionClosure antho.Projects repos |> Set
     let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectGuid)
     projects
 
-let Generate (viewName : string) =
+let Generate (viewName : ViewId) =
     let projects = FindViewProjects viewName
 
     let wsDir = WorkspaceFolder ()
-    let slnFile = wsDir |> GetFile (AddExt viewName Solution)
+    let slnFile = wsDir |> GetFile (AddExt viewName.Value Solution)
     let slnContent = GenerateSolutionContent projects
     File.WriteAllLines (slnFile.FullName, slnContent)
 
     let slnDefines = GenerateSolutionDefines projects
     let viewDir = WorkspaceViewFolder ()
-    let slnDefineFile = viewDir |> GetFile (AddExt viewName Targets)
+    let slnDefineFile = viewDir |> GetFile (AddExt viewName.Value Targets)
     slnDefines.Save (slnDefineFile.FullName)
 
 
@@ -258,7 +258,7 @@ let GraphCategories () =
                 XAttribute(NsNone + "OutgoingActionLabel", "Contains"))
     }
 
-let GraphContent (antho : Anthology) (viewName : string) =
+let GraphContent (antho : Anthology) (viewName : ViewId) =
     let projects = FindViewProjects viewName |> Set
     let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho projects)
     let xLinks = XElement(NsDgml+"Links", GraphLinks antho projects)
@@ -268,19 +268,26 @@ let GraphContent (antho : Anthology) (viewName : string) =
     XDocument(
         XElement(NsDgml + "DirectedGraph", xLayout, xGraphDir, xNodes, xLinks, xCategories))
 
-let Graph (viewName : string) =
+let Graph (viewName : ViewId) =
     let antho = Configuration.LoadAnthology ()
     let graph = GraphContent antho viewName
 
     let wsDir = Env.WorkspaceFolder ()
-    let graphFile = wsDir |> GetSubDirectory (AddExt viewName Dgml)
+    let graphFile = wsDir |> GetSubDirectory (AddExt viewName.Value Dgml)
     graph.Save graphFile.FullName
 
-let Create (viewName : string) (filters : RepositoryId set) =
+let Create (viewName : ViewId) (filters : RepositoryId set) =
     let repos = filters |> Repo.FilterRepos 
                         |> Seq.map (fun x -> x.Name.Value)
     let vwDir = WorkspaceViewFolder ()
-    let vwFile = vwDir |> GetFile (AddExt viewName View)
+    let vwFile = vwDir |> GetFile (AddExt viewName.Value View)
     File.WriteAllLines (vwFile.FullName, repos)
 
     Generate viewName
+
+let Build (viewName : ViewId) =
+    let wsDir = Env.WorkspaceFolder ()
+    let viewFile = AddExt viewName.Value Solution
+    let args = sprintf "/p:Configuration=Release %A" viewFile
+
+    Exec.Exec "msbuild" args wsDir

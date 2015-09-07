@@ -41,11 +41,11 @@ type NuGetUrl =
     { Url : string }
 
 type CreateView = 
-    { Name : string
+    { Name : ViewId
       Filters : RepositoryId set }
 
 type ViewName = 
-    { Name : string }
+    { Name : ViewId }
 
 type DeployApplications = 
     { Names : ApplicationId set }
@@ -77,6 +77,7 @@ type Command =
     | DescribeView of ViewName
     | GenerateView of ViewName
     | GraphView of ViewName
+    | BuildView of ViewName
 
     // package
     | InstallPackages
@@ -110,7 +111,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Bookmark) :: [] -> Command.BookmarkWorkspace
     | Token(Token.Checkout) :: version :: [] -> Command.CheckoutWorkspace {Version = BookmarkVersion version}
     | Token(Token.Update) :: [] -> Command.UpdatePackages
-    | Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = name }
+    | Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = ViewId name }
     | Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
                                        CloneRepositories { Filters = repoFilters }
     | Token(Token.Deploy) ::names -> let appNames = names |> Seq.map ApplicationId.Bind |> Set
@@ -120,23 +121,24 @@ let ParseCommandLine(args : string list) : Command =
 
     | Token(Token.Add) :: Token(Token.Repo) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
                                                                            AddRepository(repo)
-    | Token(Token.Add) :: Token(Token.View) :: name :: Token(Token.Using) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
-                                                                                        Command.CreateView { Name = name; Filters = repoFilters }
+    | Token(Token.Add) :: Token(Token.View) :: name :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
+                                                                  Command.CreateView { Name = ViewId name; Filters = repoFilters }
 
     | Token(Token.List) :: Token(Token.Repo) :: [] -> ListRepositories
     | Token(Token.List) :: Token(Token.View) :: [] -> Command.ListViews
+    | Token(Token.Build) :: name :: [] -> Command.BuildView { Name = ViewId name }
     | Token(Token.List) :: Token(Token.Package) :: [] -> Command.ListPackages
     | Token(Token.List) :: Token(Token.Application) :: [] -> ListApplications
 
-    | Token(Token.Drop) :: Token(Token.View) :: name :: [] -> Command.DropView { Name = name }
+    | Token(Token.Drop) :: Token(Token.View) :: name :: [] -> Command.DropView { Name = ViewId name }
 //    | Token(Token.Drop) :: Token(Token.Repo) :: name :: [] -> Command.DropRepo { Name = name }
 
-    | Token(Token.Describe) :: Token(Token.View) :: name :: [] -> Command.DescribeView { Name = name }
+    | Token(Token.Describe) :: Token(Token.View) :: name :: [] -> Command.DescribeView { Name = ViewId name }
 //    | Token(Token.View) :: Token(Token.Build) :: name :: [] -> Command.BuildView { Name = name }
 
     | Token(Token.Debug) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
     | Token(Token.Debug) :: Token(Index) :: [] -> Command.IndexWorkspace
-    | Token(Token.Debug) :: Token(Token.Generate) :: name :: [] -> Command.GenerateView { Name = name }
+    | Token(Token.Debug) :: Token(Token.Generate) :: name :: [] -> Command.GenerateView { Name = ViewId name }
     | _ -> Command.Error
 
 let UsageContent() =
@@ -153,8 +155,8 @@ let UsageContent() =
         yield "  deploy <name> : deploy application"
         yield ""
         yield "  add repo <git|hg> <name> <uri> : declare a new repository"
-        yield "  add view <name> using <wildcards> : create a new view using provided repository wildcards"
-        yield "  drop <repo|view> <name> : drop a view or repository"
+        yield "  add view <name> <wildcards> : add repositories to view"
+        yield "  drop <repo|view|package|app> <name> : drop object"
         yield "  list <repo|view|package|app> : list objects"
         yield "  describe <repo|view> <name> : describe view or repository"
         yield ""
