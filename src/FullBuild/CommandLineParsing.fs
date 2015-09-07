@@ -153,6 +153,7 @@ let UsageContent() =
         yield "  outdated : display outdated packages"
         yield "  graph <name> : graph view content (project, packages, assemblies)"
         yield "  deploy <name> : deploy application"
+        yield "  build <name> : build view"
         yield ""
         yield "  add repo <git|hg> <name> <uri> : declare a new repository"
         yield "  add view <name> <wildcards> : add repositories to view"
