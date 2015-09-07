@@ -58,7 +58,7 @@ let GlobalConfigurationFromFile file =
     let binRepo = fbSection.["BinRepo"].Value
     let repoType = fbSection.["RepoType"].Value
     let repoUrl = fbSection.["RepoUrl"].Value
-    let (ToRepository repo) = (repoType, repoUrl, ".full-build")
+    let (ToRepository repo) = (repoType, ".full-build", repoUrl)
     let ngSection = ini.["NuGet"]
     
     let nugets = ngSection |> Seq.map (fun x -> x.Value)
@@ -71,7 +71,7 @@ let GlobalConfig : GlobalConfiguration =
     let filename = DefaultGlobalIniFilename ()
     if filename.Exists then GlobalConfigurationFromFile filename
     else 
-        let (ToRepository repo) = ("git", String.Empty, ".full-build")
+        let (ToRepository repo) = ("git", ".full-build", String.Empty)
         {
             BinRepo = String.Empty
             Repository = repo

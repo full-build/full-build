@@ -45,9 +45,13 @@ with
     static member Bind (assName : AssemblyName) = AssemblyId.Bind (assName.Name)
     static member Bind (file : FileInfo) =  AssemblyId.Bind (Path.GetFileNameWithoutExtension(file.Name))
 
-type PackageVersion = PackageVersion of string
+type PackageVersion = 
+    | PackageVersion of string
+    | Unspecified
 with
-    member this.Value = (fun (PackageVersion x) -> x)this
+    member this.Value = match this with
+                        | PackageVersion x -> x
+                        | Unspecified -> "<unspecified>"
 
 type PackageFramework = PackageFramework of string
 with
@@ -136,7 +140,7 @@ type Anthology =
 type Baseline = 
     { Bookmarks : Bookmark set  }
 
-let (|ToRepository|) (vcsType : string, vcsUrl : string, vcsName : string) = 
+let (|ToRepository|) (vcsType : string, vcsName : string, vcsUrl : string) = 
     let vcs = match vcsType with
               | "git" -> VcsType.Git
               | "hg" -> VcsType.Hg

@@ -194,6 +194,11 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     // cleanup everything that will be modified
     let cproj = XDocument (xproj)
 
+    // paket
+    cproj.Descendants(NsMsBuild + "None").Where(filterPaketReference).Remove()
+    cproj.Descendants(NsMsBuild + "Import").Where(filterPaketTarget).Remove()
+    cproj.Descendants(NsMsBuild + "Choose").Where(filterPaket).Remove()
+
     // remove project references
     cproj.Descendants(NsMsBuild + "ProjectReference").Remove()
     
@@ -217,11 +222,6 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "RestorePackages").Remove()
     cproj.Descendants(NsMsBuild + "NuGetPackageImportStamp").Remove()
     cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
-
-    // paket
-    cproj.Descendants(NsMsBuild + "None").Where(filterPaketReference).Remove()
-    cproj.Descendants(NsMsBuild + "Import").Where(filterPaketTarget).Remove()
-    cproj.Descendants(NsMsBuild + "Choose").Where(filterPaket).Remove()
 
     // add project refereces
     let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
