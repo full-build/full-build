@@ -33,6 +33,7 @@ open StringHelpers
 open MsBuildHelpers
 open Env
 open Collections
+open System.Text.RegularExpressions
 
 type ProjectDescriptor = 
     { Packages : Package set
@@ -95,13 +96,35 @@ let GetNuGetPackages (nugetDoc : XDocument) =
                                                                       |> Set
     nugetPkgs
 
+let IsPaketReference (xel : XElement) =
+    xel.Descendants(NsMsBuild + "Paket").Any()
+
+let (|MatchPackage|_|) hintpath =
+    let m = Regex.Match (hintpath, @".*\\packages\\(?<Package>[^\\]*).*")
+    if m.Success then Some (m.Groups.["Package"].Value)
+    else None
+
+let GetPackageFromPaketRefence (xel : XElement) =
+    let xhintPath = xel.Descendants(NsMsBuild + "HintPath") |> Seq.head
+    let hintPath = !> xhintPath : string
+    match hintPath with
+    | MatchPackage pkg -> pkg
+    | _ -> failwith "Failed to find package"
+
 let GetFullBuildPackages (prjDoc : XDocument)  =
-    let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
+    let fbPkgs = prjDoc.Descendants(NsMsBuild + "Reference")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER))
                  |> Seq.map ParseFullBuildPackage
                  |> Set
     fbPkgs
+
+let GetPaketPackages (prjDoc : XDocument)  =
+    let paketPkgs = prjDoc.Descendants(NsMsBuild + "Import")
+                    |> Seq.filter IsPaketReference
+                    |> Seq.map GetPackageFromPaketRefence
+                    |> Set
+    paketPkgs
 
 let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryId) (file : FileInfo) =
     let relativeProjectFile = IoHelpers.ComputeRelativePath repoDir file
@@ -127,6 +150,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                         | Some xnuget -> GetNuGetPackages xnuget
                         | _ -> Set.empty
     let fbPackages = GetFullBuildPackages xprj
+    let paketPackages = GetPaketPackages xprj
     let packages = Set.union fbPackages nugetPackages
     let pkgRefs = packages |> Set.map (fun x -> x.Id)
 
