@@ -29,6 +29,7 @@ open PatternMatching
 open Env
 open Configuration
 open Collections
+open IoHelpers
 
 let List() = 
     let antho = LoadAnthology()
@@ -46,7 +47,9 @@ let FilterRepos (filters : RepositoryId seq) =
 
 let Clone (filters : RepositoryId set) = 
     let wsDir = WorkspaceFolder()
-    FilterRepos filters |> Seq.iter (Vcs.VcsCloneRepo wsDir)
+    FilterRepos filters |> Seq.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Name.Value
+                                                not <| subDir.Exists)
+                        |> Seq.iter (Vcs.VcsCloneRepo wsDir)
 
 let Add (repo : Repository) =
     let antho = LoadAnthology ()
