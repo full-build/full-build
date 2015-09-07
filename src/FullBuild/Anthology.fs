@@ -29,6 +29,11 @@ open System.IO
 open Collections
 open System.Reflection
 
+type ViewId = ViewId of string
+with
+    member this.Value = (fun (ViewId x) -> x)this
+
+
 type OutputType = 
     | Exe
     | Dll
