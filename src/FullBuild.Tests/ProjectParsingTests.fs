@@ -60,6 +60,12 @@ let CheckParseVirginProject () =
     let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.Bind "Test") file
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d")]
 
+[<Test>]
+let CheckParsePaketizedProject () =
+    let file = FileInfo ("./Paket.fsproj")
+    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader false) file.Directory (RepositoryId.Bind "Test") file
+    prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c")]
+    prjDescriptor.Project.PackageReferences |> should equal (Set [ PackageId.Bind "FSharp.Core"; PackageId.Bind "UnionArgParser" ])
 
 [<Test>]
 let CheckParseConvertedProject () =
