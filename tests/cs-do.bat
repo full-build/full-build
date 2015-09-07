@@ -13,6 +13,7 @@ rem robocopy c:\src\Paket\bin .paket /MIR
 rem %FULLBUILD% workspace index || goto :ko
 rem %FULLBUILD% package install || goto :ko
 rem %FULLBUILD% package simplify || goto :ko
+%FULLBUILD% clone * || goto :ko
 %FULLBUILD% convert || goto :ko
 %FULLBUILD% add view cs using cassandra-sharp || goto :ko
 %FULLBUILD% add view csc using cassandra-sharp-contrib || goto :ko
