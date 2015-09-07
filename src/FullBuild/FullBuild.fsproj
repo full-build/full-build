@@ -30,8 +30,8 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>workspace index</StartArguments>
-    <StartWorkingDirectory>C:\src\full-build\tests\cs-do</StartWorkingDirectory>
+    <StartArguments>clone paket</StartArguments>
+    <StartWorkingDirectory>C:\src\full-build\tests\paket-do\</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>0077</NoWarn>

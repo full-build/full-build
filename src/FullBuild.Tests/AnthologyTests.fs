@@ -15,17 +15,17 @@ let CheckReferences () =
 
 [<Test>]
 let CheckToRepository () =
-    let (ToRepository repoGit) = ("git", "https://github.com/pchalamet/cassandra-sharp", "cassandra-sharp")
+    let (ToRepository repoGit) = ("git", "cassandra-sharp", "https://github.com/pchalamet/cassandra-sharp")
     repoGit |> should equal { Vcs = VcsType.Git
                               Name = RepositoryId.Bind "cassandra-sharp"
                               Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } 
 
-    let (ToRepository repoHg) = ("hg", "https://github.com/pchalamet/cassandra-sharp", "cassandra-sharp")
+    let (ToRepository repoHg) = ("hg", "cassandra-sharp", "https://github.com/pchalamet/cassandra-sharp")
     repoHg |> should equal { Vcs = VcsType.Hg
                              Name = RepositoryId.Bind "cassandra-sharp"
                              Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } 
 
-    (fun () -> let (ToRepository repo) = ("pouet", "https://github.com/pchalamet/cassandra-sharp", "cassandra-sharp")
+    (fun () -> let (ToRepository repo) = ("pouet", "cassandra-sharp", "https://github.com/pchalamet/cassandra-sharp")
                ())
         |> should throw typeof<System.Exception>
 
