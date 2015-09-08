@@ -35,27 +35,26 @@ let List() =
     let antho = LoadAnthology()
     antho.Repositories |> Seq.iter (fun x -> printfn "%s : %s [%A]" x.Name.Value x.Url.Value x.Vcs)
 
-let MatchRepo (repo : Repository seq) (filter : RepositoryId) = 
-    repo |> Seq.filter (fun x -> Match x.Name.Value filter.Value)
-         |> Seq.distinct
+let MatchRepo (repo : Repository set) (filter : RepositoryId) = 
+    repo |> Set.filter (fun x -> Match x.Name.Value filter.Value)
 
-let FilterRepos (filters : RepositoryId seq) = 
+let FilterRepos (filters : RepositoryId set) = 
     let antho = LoadAnthology()
     filters |> Seq.map (MatchRepo antho.Repositories)
             |> Seq.concat
-            |> Seq.distinct
+            |> Set
 
 let Clone (filters : RepositoryId set) = 
     let wsDir = WorkspaceFolder()
-    FilterRepos filters |> Seq.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Name.Value
+    FilterRepos filters |> Set.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Name.Value
                                                 not <| subDir.Exists)
-                        |> Seq.iter (Vcs.VcsCloneRepo wsDir)
+                        |> Set.iter (Vcs.VcsCloneRepo wsDir)
 
 let Add (repo : Repository) =
     let antho = LoadAnthology ()
     let repos = antho.Repositories |> Set.add repo
                                    |> Seq.distinctBy (fun x -> x.Name)
-                                   |> set
+                                   |> Set
     let newAntho = {antho 
                     with Repositories = repos}
     SaveAnthology newAntho
