@@ -84,10 +84,10 @@ type Repository =
       Vcs : VcsType
       Url : RepositoryUrl }
 
-type BookmarkVersion = BookmarkVersion of string
-with
-    member this.Value = (fun (BookmarkVersion x) -> x)this
-
+type BookmarkVersion = 
+    | BookmarkVersion of string
+    | Master
+                       
 type Bookmark = 
     { Repository : RepositoryId
       Version : BookmarkVersion }

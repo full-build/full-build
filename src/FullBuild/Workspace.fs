@@ -289,7 +289,7 @@ let Convert () =
 let CollectRepoHash wsDir (repo : Repository set) =
     let getRepoHash (repo : Repository) =
         let tip = Vcs.VcsTip wsDir repo
-        { Repository = repo.Name; Version = tip}
+        { Repository = repo.Name; Version = BookmarkVersion tip}
 
     repo |> Set.map getRepoHash
 
@@ -300,17 +300,44 @@ let Bookmark () =
     let baseline = { Bookmarks = bookmarks }
     Configuration.SaveBaseline baseline
 
+    // copy bin content
+    let config = Configuration.GlobalConfig
+    let mainRepo = config.Repository
+
+    let hash = Vcs.VcsTip wsDir mainRepo
+    let binDir = Env.WorkspaceBinFolder ()
+    let versionDir = DirectoryInfo(config.BinRepo) |> GetSubDirectory hash
+    IoHelpers.CopyFolder binDir versionDir
+    printfn "%s" hash
+
+    // commit
+    let configFolder = Env.WorkspaceConfigFolder()
+    Exec.Exec "git" "add --all" configFolder
+    Exec.Exec "git" @"commit -am ""bookmark""" configFolder
+    //Exec.Exec "git" "push" configFolder
+
+
 let Checkout (version : BookmarkVersion) =
     let wsDir = Env.WorkspaceFolder ()
     let config = Configuration.GlobalConfig
     let mainRepo = config.Repository
-    Vcs.VcsCheckout wsDir mainRepo (Some version)
+    Vcs.VcsCheckout wsDir mainRepo version
 
+    // checkout repositories
     let antho = Configuration.LoadAnthology ()
     let baseline = Configuration.LoadBaseline ()
-
     for repo in antho.Repositories do
-        let version = baseline.Bookmarks |> Seq.tryFind (fun x -> x.Repository = repo.Name)
-        match version with
-        | Some x -> Vcs.VcsCheckout wsDir repo (Some x.Version)
-        | None -> Vcs.VcsCheckout wsDir repo None
+        let repoVersion = baseline.Bookmarks |> Seq.tryFind (fun x -> x.Repository = repo.Name)
+        match repoVersion with
+        | Some x -> Vcs.VcsCheckout wsDir repo x.Version
+        | None -> Vcs.VcsCheckout wsDir repo Master
+
+    // copy binaries from version
+    let hash = match version with
+               | BookmarkVersion x -> x
+               | Master -> Vcs.VcsTip wsDir mainRepo
+
+    let binDir = Env.WorkspaceBinFolder ()
+    let versionDir = DirectoryInfo(config.BinRepo) |> GetSubDirectory hash
+    IoHelpers.CopyFolder versionDir binDir
+
