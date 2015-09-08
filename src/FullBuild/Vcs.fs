@@ -50,18 +50,18 @@ let private HgClone (url : string) (target : DirectoryInfo) =
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
     Exec "hg" args currDir    
 
-let private GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) = 
+let private GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
     let rev = match version with
-              | Some x -> x.Value
-              | None -> "master"
+              | BookmarkVersion x -> x
+              | Master -> "master"
 
     let args = sprintf "checkout %A" rev
     Exec "git" args repoDir
 
-let private HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) = 
+let private HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
     let rev = match version with
-              | Some x -> x.Value
-              | None -> "tip"
+              | BookmarkVersion x -> x
+              | Master -> "tip"
 
     let args = sprintf "update -r %A" rev
     Exec "hg" args repoDir
@@ -87,7 +87,7 @@ let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) =
         | VcsType.Hg -> HgClone
     cloneRepo repo.Url.Value repoDir
 
-let VcsTip (wsDir : DirectoryInfo) (repo : Repository) : BookmarkVersion = 
+let VcsTip (wsDir : DirectoryInfo) (repo : Repository) = 
     let repoDir = wsDir |> GetSubDirectory repo.Name.Value
     
     let tipRepo = 
@@ -95,9 +95,9 @@ let VcsTip (wsDir : DirectoryInfo) (repo : Repository) : BookmarkVersion =
         | VcsType.Git -> GitTip
         | VcsType.Hg -> HgTip
     let tip = tipRepo repoDir
-    BookmarkVersion tip
+    tip
 
-let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion option) = 
+let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion) = 
     let repoDir = wsDir |> GetSubDirectory repo.Name.Value
     
     let checkoutRepo = 
