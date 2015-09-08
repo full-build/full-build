@@ -15,19 +15,23 @@ rem %FULLBUILD% package install || goto :ko
 rem %FULLBUILD% package simplify || goto :ko
 %FULLBUILD% clone * || goto :ko
 %FULLBUILD% convert || goto :ko
-%FULLBUILD% add view cs using cassandra-sharp || goto :ko
-%FULLBUILD% add view csc using cassandra-sharp-contrib || goto :ko
 %FULLBUILD% add view all using * || goto :ko
 %FULLBUILD% list view || goto :ko
-%FULLBUILD% describe view cs || goto :ko
-%FULLBUILD% describe view csc || goto :ko
 %FULLBUILD% describe view all || goto :ko
-%FULLBUILD% graph cs || goto :ko
-%FULLBUILD% graph csc || goto :ko
 %FULLBUILD% graph all || goto :ko
+%FULLBUILD% build all || goto :ko
+
+pushd cassandra-sharp
+git add --all
+git commit -am "after conversion"
+popd
+
+pushd cassandra-sharp-contrib
+git add --all
+git commit -am "after conversion"
+popd
+
 %FULLBUILD% bookmark || goto :ko
-
-
 
 
 

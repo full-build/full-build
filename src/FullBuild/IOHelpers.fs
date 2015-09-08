@@ -75,3 +75,21 @@ let rec private ComputeRelativePathInc (topDir : DirectoryInfo) (childDir : Dire
 let ComputeRelativePath (dir : DirectoryInfo) (file : FileInfo) : string = 
     let path = file.Name
     ComputeRelativePathInc dir file.Directory path
+
+
+let rec private CopyFolderContent (source : DirectoryInfo) (target : DirectoryInfo) =
+    target.Create ()
+
+    for sourceFile in source.EnumerateFiles() do
+        let targetFile = target |> GetFile sourceFile.Name
+        sourceFile.CopyTo(targetFile.FullName, true) |> ignore
+
+    for sourceFolder in source.EnumerateDirectories() do
+        let targetFolder = target |> GetSubDirectory sourceFolder.Name
+        CopyFolderContent sourceFolder targetFolder
+
+let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) =
+    if target.Exists then
+        target.Delete(true)
+
+    if source.Exists then CopyFolderContent source target

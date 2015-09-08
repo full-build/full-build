@@ -29,6 +29,7 @@ open System.IO
 open IoHelpers
 
 let private CONFIG_FOLDER = ".full-build"
+let private BIN_FOLDER = "bin"
 let private VIEW_FOLDER = "views"
 let private PROJECT_FOLDER = "projects"
 let private PACKAGE_FOLDER = "packages"
@@ -59,6 +60,11 @@ let private CurrentFolder() : DirectoryInfo =
 let WorkspaceFolder() : DirectoryInfo = 
     let currDir = CurrentFolder()
     WorkspaceFolderSearch currDir
+
+// $/bin
+let WorkspaceBinFolder() : DirectoryInfo = 
+    let wsDir = WorkspaceFolder()
+    CreateSubDirectory wsDir BIN_FOLDER
 
 // $/.full-build/views
 let WorkspaceConfigFolder() : DirectoryInfo = 
