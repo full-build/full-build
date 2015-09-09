@@ -100,12 +100,12 @@ type FrameworkVersion = FrameworkVersion of string
 with
     member this.Value = (fun (FrameworkVersion x) -> x)this
 
-type ProjectId = ProjectId of Guid
+type ProjectId = private ProjectId of Guid
 with
     member this.Value = (fun (ProjectId x) -> x)this
     static member Bind(guid : Guid) = ProjectId guid
 
-type ProjectType = ProjectType of Guid
+type ProjectType = private ProjectType of Guid
 with
     member this.Value = (fun (ProjectType x) -> x)this
     static member Bind(guid : Guid) = ProjectType guid
