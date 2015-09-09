@@ -45,14 +45,14 @@ let CheckBasicParsingCSharp () =
     
     let file = FileInfo ("./CSharpProjectSample1.csproj")
     let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.Bind "Test") file
-    prjDescriptor.Project.ProjectGuid |> should equal (ProjectId (ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396"))
+    prjDescriptor.Project.ProjectGuid |> should equal (ProjectId.Bind (ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396"))
     prjDescriptor.Packages |> should equal expectedPackages
 
 [<Test>]
 let CheckBasicParsingFSharp () =
     let file = FileInfo ("./FSharpProjectSample1.fsproj")
     let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.Bind "Test") file
-    prjDescriptor.Project.ProjectGuid |> should equal (ProjectId (ParseGuid "5fde3939-c144-4287-bc57-a96ec2d1a9da"))
+    prjDescriptor.Project.ProjectGuid |> should equal (ProjectId.Bind (ParseGuid "5fde3939-c144-4287-bc57-a96ec2d1a9da"))
 
 [<Test>]
 let CheckParseVirginProject () =
@@ -89,7 +89,7 @@ let CheckParseConvertedProject () =
     let expectedProject = { Repository = RepositoryId.Bind "Test"
                             RelativeProjectFile = ProjectRelativeFile "ConvertedProject.csproj"
                             ProjectGuid = ProjectId.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d") 
-                            ProjectType = ProjectType (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
+                            ProjectType = ProjectType.Bind (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
                             Output = AssemblyId.Bind "CassandraSharp"
                             OutputType = OutputType.Dll
                             FxTarget = FrameworkVersion "v4.5"
@@ -136,7 +136,7 @@ let CheckParseConvertedProjectWithoutPackagesConfig () =
     let expectedProject = { Repository = RepositoryId.Bind "Test"
                             RelativeProjectFile = ProjectRelativeFile "ConvertedProject.csproj"
                             ProjectGuid = ProjectId.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d") 
-                            ProjectType = ProjectType (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
+                            ProjectType = ProjectType.Bind (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
                             Output = AssemblyId.Bind "CassandraSharp"
                             OutputType = OutputType.Dll
                             FxTarget = FrameworkVersion "v4.5"
