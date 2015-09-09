@@ -22,3 +22,6 @@ Following steps must be orchestrated on CI:
 * clone required repositories (fullbuild clone <repoName>)
 * build a view with all sources (fullbuild add view partial *)
 * build all sources (fullbuild build partial)
+
+# Optimization
+Eventually, consider cleaning the work folder using full-build (fullbuild rebase)

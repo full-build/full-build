@@ -66,10 +66,13 @@ type Command =
     | ConvertWorkspace
     | BookmarkWorkspace
     | CheckoutWorkspace of CheckoutVersion
+    | RebaseWorkspace
+
     // repository
     | AddRepository of Repository
     | CloneRepositories of CloneRepositories
     | ListRepositories
+
     // view
     | CreateView of CreateView
     | DropView of ViewName
@@ -90,54 +93,39 @@ type Command =
     | DeployApplications of DeployApplications
     | ListApplications
 
-    // env
-//    | RefreshWorkspace
-//    | BookmarkWorkspace
-//    | CheckoutWorkspace of CheckoutWorkspace
-//    | AddNuGet of NuGetUrl
-//    | ListNuGets
-//    | UsePackage of Package
-//    | CheckPackages
-//    | BuildView of ViewName
-//    | RefreshSources
-//    | ListBinaries
-
 let ParseCommandLine(args : string list) : Command = 
     match args with
     | Token(Token.Help) :: [] -> Command.Usage
+
     | Token(Create) :: path :: [] -> Command.CreateWorkspace { Path = path }
     | Token(Init) :: path :: [] -> Command.InitWorkspace { Path = path }
     | Token(Convert) :: [] -> Command.ConvertWorkspace
-    | Token(Token.Bookmark) :: [] -> Command.BookmarkWorkspace
-    | Token(Token.Checkout) :: version :: [] -> Command.CheckoutWorkspace {Version = BookmarkVersion version}
-    | Token(Token.Update) :: [] -> Command.UpdatePackages
-    | Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = ViewId name }
     | Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
                                        CloneRepositories { Filters = repoFilters }
+    | Token(Token.Install) :: [] -> Command.InstallPackages
+    | Token(Token.Update) :: [] -> Command.UpdatePackages
+    | Token(Token.Outdated) :: [] -> Command.OutdatedPackages
+    | Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = ViewId name }
     | Token(Token.Deploy) ::names -> let appNames = names |> Seq.map ApplicationId.Bind |> Set
                                      DeployApplications {Names = appNames }
-    | Token(Token.Install) :: [] -> Command.InstallPackages
-    | Token(Token.Outdated) :: [] -> Command.OutdatedPackages
+    | Token(Token.Build) :: name :: [] -> Command.BuildView { Name = ViewId name }
+    | Token(Token.Checkout) :: version :: [] -> Command.CheckoutWorkspace {Version = BookmarkVersion version}
+    | Token(Token.Bookmark) :: [] -> Command.BookmarkWorkspace
+    | Token(Token.Rebase) :: [] -> Command.RebaseWorkspace
 
     | Token(Token.Add) :: Token(Token.Repo) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
                                                                            AddRepository(repo)
     | Token(Token.Add) :: Token(Token.View) :: name :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
                                                                   Command.CreateView { Name = ViewId name; Filters = repoFilters }
-
+    | Token(Token.Drop) :: Token(Token.View) :: name :: [] -> Command.DropView { Name = ViewId name }
     | Token(Token.List) :: Token(Token.Repo) :: [] -> ListRepositories
     | Token(Token.List) :: Token(Token.View) :: [] -> Command.ListViews
-    | Token(Token.Build) :: name :: [] -> Command.BuildView { Name = ViewId name }
     | Token(Token.List) :: Token(Token.Package) :: [] -> Command.ListPackages
     | Token(Token.List) :: Token(Token.Application) :: [] -> ListApplications
-
-    | Token(Token.Drop) :: Token(Token.View) :: name :: [] -> Command.DropView { Name = ViewId name }
-//    | Token(Token.Drop) :: Token(Token.Repo) :: name :: [] -> Command.DropRepo { Name = name }
-
     | Token(Token.Describe) :: Token(Token.View) :: name :: [] -> Command.DescribeView { Name = ViewId name }
-//    | Token(Token.View) :: Token(Token.Build) :: name :: [] -> Command.BuildView { Name = name }
 
-    | Token(Token.Debug) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
     | Token(Token.Debug) :: Token(Index) :: [] -> Command.IndexWorkspace
+    | Token(Token.Debug) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
     | Token(Token.Debug) :: Token(Token.Generate) :: name :: [] -> Command.GenerateView { Name = ViewId name }
     | _ -> Command.Error
 
@@ -157,10 +145,11 @@ let UsageContent() =
         yield "  build <name> : build view"
         yield "  checkout <version|head> : checkout workspace to version"
         yield "  bookmark : bookmark current repositories version"
+        yield "  rebase : cleanup workspace and update to latest version"
         yield ""
         yield "  add repo <git|hg> <name> <uri> : declare a new repository"
         yield "  add view <name> <wildcards> : add repositories to view"
-        yield "  drop <repo|view|package|app> <name> : drop object"
+        yield "  drop <view> <name> : drop object"
         yield "  list <repo|view|package|app> : list objects"
         yield "  describe <repo|view> <name> : describe view or repository"
         yield ""
