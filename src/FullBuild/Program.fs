@@ -37,6 +37,7 @@ let main argv =
     | ConvertWorkspace -> Workspace.Convert ()
     | BookmarkWorkspace -> Workspace.Bookmark ()
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
+    | RebaseWorkspace -> Workspace.Rebase ()
 
     // repository
     | AddRepository repo -> Repo.Add repo
