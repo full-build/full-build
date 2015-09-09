@@ -13,7 +13,7 @@ let CheckSimplifyAssemblies () =
 
     let package2Files = Map.empty
 
-    let lognetunittestsRef = ProjectId (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
+    let lognetunittestsRef = ProjectId.Bind (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
     let cassandraSharpAssName = AssemblyId.Bind "cassandrasharp"
     let cassandraSharpItfAssName = AssemblyId.Bind "cassandrasharp.interfaces"
     let cassandraSharpPrjRef = ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")
