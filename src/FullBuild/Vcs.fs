@@ -30,6 +30,16 @@ open IoHelpers
 open Anthology
 open System.IO
 
+
+let private GitRebase (repoDir : DirectoryInfo) =
+    Exec "git" "clean -fxd" repoDir
+    Exec "git" "pull --rebase" repoDir
+
+let private HgRebase (repoDir : DirectoryInfo) =
+    Exec "hg" "purge" repoDir
+    Exec "hg" "pull -u" repoDir
+
+
 let private GitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=""%H"""
     let res = ExecReadLine "git" args repoDir
@@ -39,6 +49,9 @@ let private HgTip (repoDir : DirectoryInfo) =
     let args = @"id -i"
     let res = ExecReadLine "hg" args repoDir
     res
+
+
+
 
 let private GitClone (url : string) (target : DirectoryInfo) = 
     let args = sprintf "clone %A %A" url target.FullName
@@ -99,7 +112,7 @@ let VcsTip (wsDir : DirectoryInfo) (repo : Repository) =
 
 let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion) = 
     let repoDir = wsDir |> GetSubDirectory repo.Name.Value
-    
+
     let checkoutRepo = 
         match repo.Vcs with
         | VcsType.Git -> GitCheckout
@@ -115,3 +128,11 @@ let VcsIgnore (wsDir : DirectoryInfo) (repo : Repository) =
         | VcsType.Hg -> HgIgnore
     ignoreRepo repoDir
 
+let VcsRebase (wsDir : DirectoryInfo) (repo : Repository) =
+    let repoDir = wsDir |> GetSubDirectory repo.Name.Value
+
+    let rebaseRepo = 
+        match repo.Vcs with
+        | VcsType.Git -> GitRebase
+        | VcsType.Hg -> HgRebase
+    rebaseRepo repoDir
