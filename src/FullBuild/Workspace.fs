@@ -286,17 +286,22 @@ let Convert () =
     ConvertProjects antho XDocumentLoader XDocumentSaver
     RemoveUselessStuff antho
 
-let CollectRepoHash wsDir (repo : Repository set) =
+let ClonedRepositories (wsDir : DirectoryInfo) (repos : Repository set) =
+    repos |> Set.filter (fun x -> let repoDir = wsDir |> GetSubDirectory x.Name.Value
+                                  repoDir.Exists)
+
+let CollectRepoHash wsDir (repos : Repository set) =
     let getRepoHash (repo : Repository) =
         let tip = Vcs.VcsTip wsDir repo
         { Repository = repo.Name; Version = BookmarkVersion tip}
 
-    repo |> Set.map getRepoHash
+    repos |> Set.map getRepoHash
 
 let Bookmark () = 
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.WorkspaceFolder ()
-    let bookmarks = CollectRepoHash wsDir antho.Repositories
+    let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
+    let bookmarks = CollectRepoHash wsDir clonedRepos
     let baseline = { Bookmarks = bookmarks }
     Configuration.SaveBaseline baseline
 
@@ -326,7 +331,8 @@ let Checkout (version : BookmarkVersion) =
     // checkout repositories
     let antho = Configuration.LoadAnthology ()
     let baseline = Configuration.LoadBaseline ()
-    for repo in antho.Repositories do
+    let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
+    for repo in clonedRepos do
         let repoVersion = baseline.Bookmarks |> Seq.tryFind (fun x -> x.Repository = repo.Name)
         match repoVersion with
         | Some x -> Vcs.VcsCheckout wsDir repo x.Version
@@ -341,3 +347,13 @@ let Checkout (version : BookmarkVersion) =
     let versionDir = DirectoryInfo(config.BinRepo) |> GetSubDirectory hash
     IoHelpers.CopyFolder versionDir binDir
 
+let Rebase () =
+    let wsDir = Env.WorkspaceFolder ()
+    let config = Configuration.GlobalConfig
+    let mainRepo = config.Repository
+    Vcs.VcsRebase wsDir mainRepo
+
+    let antho = Configuration.LoadAnthology ()
+    let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
+    for repo in clonedRepos do
+        Vcs.VcsRebase wsDir repo
