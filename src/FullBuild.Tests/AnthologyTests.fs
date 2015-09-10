@@ -62,3 +62,35 @@ let CheckEqualityWithPermutation () =
                        Repository = RepositoryId.Bind "cassandra-sharp" } ] |> set }
         
     antho1 |> should equal antho2
+
+
+
+[<Test>]
+let CheckCustomPickler () =
+    let jsonSerializer = Nessos.FsPickler.Json.FsPickler.CreateJsonSerializer(indent = true)
+    use txtWriter = new System.IO.StringWriter()
+
+    let antho1 = {
+        Applications = Set.empty
+        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.Bind "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
+                         { Vcs = VcsType.Git; Name = RepositoryId.Bind "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
+        Projects = [ { Output = AssemblyId.Bind "cqlplus"
+                       OutputType = OutputType.Exe
+                       ProjectGuid = ProjectId.Bind (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+                       ProjectType = ProjectType.Bind (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
+                       RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
+                       FxTarget = FrameworkVersion "v4.5"
+                       ProjectReferences = [ ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectId.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set
+                       AssemblyReferences = [ AssemblyId.Bind "System" ; AssemblyId.Bind "System.Data"; AssemblyId.Bind "System.Xml"] |> set
+                       PackageReferences = Set.empty
+                       Repository = RepositoryId.Bind "cassandra-sharp" } ] |> set }
+
+    let repo = { Vcs = VcsType.Git; Name = RepositoryId.Bind "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
+
+
+    let res = Yaml.dump<Repository> repo
+    printfn "%s" res
+
+//    jsonSerializer.Serialize(txtWriter, antho1)
+//    printfn "%s" (txtWriter.ToString())
+    
