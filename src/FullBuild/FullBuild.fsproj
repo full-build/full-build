@@ -27,8 +27,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile></DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>clone paket</StartArguments>
     <StartWorkingDirectory>C:\src\full-build\tests\paket-do\</StartWorkingDirectory>
@@ -63,8 +62,6 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <Import Project="$(SolutionDir)/.full-build/packages/mini/package.targets" Condition="'$(FullBuild_mini_Pkg)' == ''" />
-  <Import Project="$(SolutionDir)/.full-build/packages/fspickler.json/package.targets" Condition="'$(FullBuild_fspickler_json_Pkg)' == ''" />
   <ItemGroup>
     <Compile Include="Collections.fs" />
     <Compile Include="StringHelpers.fs" />
@@ -92,6 +89,8 @@
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>
+  <Import Project="$(SolutionDir)/.full-build/packages/mini/package.targets" Condition="'$(FullBuild_mini_Pkg)' == ''" />
+  <Import Project="$(SolutionDir)/.full-build/packages/fspickler.json/package.targets" Condition="'$(FullBuild_fspickler_json_Pkg)' == ''" />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />

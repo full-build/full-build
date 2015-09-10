@@ -42,7 +42,7 @@
           },
           "ProjectType": {
             "Case": "ProjectType",
-            "Item": "F2A71F9B-5D33-465A-A702-920D77279786"
+            "Item": "f2a71f9b-5d33-465a-a702-920d77279786"
           },
           "Output": {
             "Case": "AssemblyId",
@@ -56,8 +56,12 @@
             "Item": "v4.5"
           },
           "AssemblyReferences": {
-            "count": 6,
+            "count": 7,
             "elements": [
+              {
+                "Case": "AssemblyId",
+                "Item": "fsharp.core"
+              },
               {
                 "Case": "AssemblyId",
                 "Item": "system"
@@ -85,12 +89,8 @@
             ]
           },
           "PackageReferences": {
-            "count": 4,
+            "count": 3,
             "elements": [
-              {
-                "Case": "PackageId",
-                "Item": "fsharp.core"
-              },
               {
                 "Case": "PackageId",
                 "Item": "fspickler.json"
@@ -130,7 +130,7 @@
           },
           "ProjectType": {
             "Case": "ProjectType",
-            "Item": "F2A71F9B-5D33-465A-A702-920D77279786"
+            "Item": "f2a71f9b-5d33-465a-a702-920d77279786"
           },
           "Output": {
             "Case": "AssemblyId",
@@ -144,8 +144,12 @@
             "Item": "v4.5"
           },
           "AssemblyReferences": {
-            "count": 6,
+            "count": 7,
             "elements": [
+              {
+                "Case": "AssemblyId",
+                "Item": "fsharp.core"
+              },
               {
                 "Case": "AssemblyId",
                 "Item": "system"
@@ -173,12 +177,8 @@
             ]
           },
           "PackageReferences": {
-            "count": 3,
+            "count": 2,
             "elements": [
-              {
-                "Case": "PackageId",
-                "Item": "fsharp.core"
-              },
               {
                 "Case": "PackageId",
                 "Item": "fspickler.json"
