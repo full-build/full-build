@@ -46,11 +46,9 @@ let private FindKnownProjects (repoDir : DirectoryInfo) =
 let private ProjectCanBeProcessed (fileName : FileInfo) =
     let xdoc = XDocument.Load (fileName.FullName)
     let fbIgnore = !> xdoc.Descendants(NsMsBuild + "FullBuildIgnore").FirstOrDefault() : string
-    if fbIgnore = null then true
-    else
-        match bool.TryParse(fbIgnore) with
-        | (true, x) -> x
-        | _ -> true
+    match bool.TryParse(fbIgnore) with
+    | (true, x) -> not <| x
+    | _ -> true
 
 let private ParseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) =
     repoDir |> FindKnownProjects 
