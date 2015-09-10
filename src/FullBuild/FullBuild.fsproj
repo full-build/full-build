@@ -63,9 +63,11 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
+    <None Include="Baseline.yaml" />
     <Compile Include="Collections.fs" />
     <Compile Include="StringHelpers.fs" />
     <Compile Include="IoHelpers.fs" />
+    <Compile Include="Sscanf.fs" />
     <Compile Include="PatternMatching.fs" />
     <Compile Include="Env.fs" />
     <Compile Include="Exec.fs" />
@@ -88,9 +90,11 @@
     <Compile Include="Application.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
+    <Content Include="packages.config" />
   </ItemGroup>
   <Import Project="$(SolutionDir)/.full-build/packages/mini/package.targets" Condition="'$(FullBuild_mini_Pkg)' == ''" />
   <Import Project="$(SolutionDir)/.full-build/packages/fspickler.json/package.targets" Condition="'$(FullBuild_fspickler_json_Pkg)' == ''" />
+  <Import Project="$(SolutionDir)/.full-build/packages/fsharp.configuration/package.targets" Condition="'$(FullBuild_fsharp_configuration_Pkg)' == ''" />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
