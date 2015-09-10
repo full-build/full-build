@@ -40,7 +40,7 @@ type Token =
     | Convert
     | Add
     | List
-    | Bookmark
+    | Baseline
     | Checkout
     | NuGet
     | Graph
@@ -73,7 +73,7 @@ let (|Token|) (token : string) =
     | "convert" -> Convert
     | "add" -> Add
     | "list" -> List
-    | "bookmark" -> Bookmark
+    | "baseline" -> Baseline
     | "checkout" -> Checkout
     | "nuget" -> NuGet
     | "graph" -> Graph
