@@ -97,8 +97,8 @@ let SaveAnthology(anthology : Anthology) =
 
 let LoadBaseline() : Baseline =
     let baselineFile = GetBaselineFileName ()
-    LoadFromJSonFile<Baseline> baselineFile
+    BaselineSerializer.Load baselineFile
 
 let SaveBaseline (baseline : Baseline) =
     let baselineFile = GetBaselineFileName ()
-    SaveToJSonFile baselineFile baseline
+    BaselineSerializer.Save baselineFile baseline
