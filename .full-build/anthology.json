@@ -89,8 +89,12 @@
             ]
           },
           "PackageReferences": {
-            "count": 3,
+            "count": 4,
             "elements": [
+              {
+                "Case": "PackageId",
+                "Item": "fsharp.configuration"
+              },
               {
                 "Case": "PackageId",
                 "Item": "fspickler.json"
@@ -177,8 +181,12 @@
             ]
           },
           "PackageReferences": {
-            "count": 2,
+            "count": 3,
             "elements": [
+              {
+                "Case": "PackageId",
+                "Item": "fsharp.configuration"
+              },
               {
                 "Case": "PackageId",
                 "Item": "fspickler.json"

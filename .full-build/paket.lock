@@ -1,6 +1,7 @@
 NUGET
   remote: https://www.nuget.org/api/v2
   specs:
+    FSharp.Configuration (0.5.3)
     FsPickler (1.3.7)
     FsPickler.Json (1.3.7)
       FsPickler (1.3.7)
