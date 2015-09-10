@@ -64,7 +64,7 @@ type Command =
     | InitWorkspace of CreateWorkspace
     | IndexWorkspace
     | ConvertWorkspace
-    | BookmarkWorkspace
+    | BaselineWorkspace
     | CheckoutWorkspace of CheckoutVersion
     | RebaseWorkspace
 
@@ -110,7 +110,7 @@ let ParseCommandLine(args : string list) : Command =
                                      DeployApplications {Names = appNames }
     | Token(Token.Build) :: name :: [] -> Command.BuildView { Name = ViewId name }
     | Token(Token.Checkout) :: version :: [] -> Command.CheckoutWorkspace {Version = BookmarkVersion version}
-    | Token(Token.Bookmark) :: [] -> Command.BookmarkWorkspace
+    | Token(Token.Baseline) :: [] -> Command.BaselineWorkspace
     | Token(Token.Rebase) :: [] -> Command.RebaseWorkspace
 
     | Token(Token.Add) :: Token(Token.Repo) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
@@ -144,7 +144,7 @@ let UsageContent() =
         yield "  deploy <name> : deploy application"
         yield "  build <name> : build view"
         yield "  checkout <version|head> : checkout workspace to version"
-        yield "  bookmark : bookmark current repositories version"
+        yield "  baseline : create a baseline from current repositories version"
         yield "  rebase : cleanup workspace and update to latest version"
         yield ""
         yield "  add repo <git|hg> <name> <uri> : declare a new repository"
