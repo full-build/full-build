@@ -1,8 +1,12 @@
 *.user
 *.suo
 *.cache
+*.sln
+*.ncrunchsolution
+*.dgml
 bin
 obj
+tests
 packages
 .vs
 *~
