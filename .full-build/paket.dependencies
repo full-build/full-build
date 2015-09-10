@@ -3,3 +3,4 @@ source C:\src\full-build-packages
 nuget fspickler.json ~> 1.3.7
 nuget fsunit ~> 1.3.1.0
 nuget mini ~> 0.4.2.0
+nuget fsharp.configuration ~> 0.5.3
