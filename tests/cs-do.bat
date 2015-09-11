@@ -31,7 +31,7 @@ git add --all
 git commit -am "after conversion"
 popd
 
-%FULLBUILD% bookmark || goto :ko
+%FULLBUILD% baseline || goto :ko
 
 
 
