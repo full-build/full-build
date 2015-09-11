@@ -172,6 +172,10 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         let attr = !> (xel.Attribute (NsNone + "Name")) : string
         String.Equals(attr, "EnsureNuGetPackageBuildImports", StringComparison.CurrentCultureIgnoreCase)
 
+    let filterNugetPackage (xel : XElement) =
+        let attr = !> (xel.Attribute (NsNone + "Include")) : string
+        String.Equals(attr, "packages.config", StringComparison.CurrentCultureIgnoreCase)
+
     let filterPaketReference (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Include")) : string
         attr.StartsWith("paket.references", StringComparison.CurrentCultureIgnoreCase)
@@ -220,6 +224,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     // remove nuget stuff
     cproj.Descendants(NsMsBuild + "Import").Where(filterNuget).Remove()
     cproj.Descendants(NsMsBuild + "Target").Where(filterNugetTarget).Remove()
+    cproj.Descendants(NsMsBuild + "Content").Where(filterNugetPackage).Remove();
 
     // set OutputPath
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
