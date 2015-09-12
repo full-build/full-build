@@ -6,7 +6,6 @@ anthology:
   projects:
     - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
       repo: src
-      type: f2a71f9b-5d33-465a-a702-920d77279786
       file: FullBuild.Tests/FullBuild.Tests.fsproj
       pe: Dll
       out: fullbuild.tests
@@ -26,7 +25,6 @@ anthology:
         - project: 5fde3939-c144-4287-bc57-a96ec2d1a9da
     - guid: 5fde3939-c144-4287-bc57-a96ec2d1a9da
       repo: src
-      type: f2a71f9b-5d33-465a-a702-920d77279786
       file: FullBuild/FullBuild.fsproj
       pe: Exe
       out: fullbuild

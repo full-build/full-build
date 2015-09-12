@@ -51,6 +51,14 @@ let Describe (viewName : ViewId) =
     File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
 
 
+let ProjectToProjectType (filename : string) =
+    let file = FileInfo(filename)
+    let ext2projType = Map [ (".csproj", "fae04ec0-301f-11d3-bf4b-00c04f79efbc")
+                             (".fsproj", "f2a71f9b-5d33-465a-a702-920d77279786")
+                             (".vbproj", "f184b08f-c81c-45f6-a57f-5abd9991f28f") ]
+    let prjType = ext2projType.[file.Extension]
+    prjType
+
 let GenerateSolutionContent (projects : Project seq) =
     seq {
         yield ""
@@ -59,7 +67,7 @@ let GenerateSolutionContent (projects : Project seq) =
 
         for project in projects do
             yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""{%s}""" 
-                  (project.ProjectType.toString)
+                  (ProjectToProjectType (project.RelativeProjectFile.toString))
                   (Path.GetFileNameWithoutExtension (project.RelativeProjectFile.toString))
                   (sprintf "%s/%s" (project.Repository.toString) project.RelativeProjectFile.toString)
                   (project.ProjectGuid.toString)

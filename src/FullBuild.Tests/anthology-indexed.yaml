@@ -9,7 +9,6 @@ anthology:
   projects:
     - guid: 984a4b04-c71a-4550-9193-817cfacba30a
       repo: cassandra-sharp
-      type: fae04ec0-301f-11d3-bf4b-00c04f79efbc
       file: Apache.Cassandra/Apache.Cassandra-net45.csproj
       pe: Dll
       out: apache.cassandra
@@ -21,7 +20,6 @@ anthology:
         - project: 499eb63c-d74c-47e8-ae48-a2fc94538e9d
     - guid: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
       repo: cassandra-sharp
-      type: fae04ec0-301f-11d3-bf4b-00c04f79efbc
       file: CassandraSharp.Interfaces/CassandraSharp.Interfaces-net45.csproj
       pe: Dll
       out: cassandrasharp.interfaces
@@ -36,7 +34,6 @@ anthology:
       projects: []
     - guid: c1d252b7-d766-4c28-9c46-0696f896846c
       repo: cassandra-sharp
-      type: fae04ec0-301f-11d3-bf4b-00c04f79efbc
       file: CassandraSharp/CassandraSharp-net45.csproj
       pe: Dll
       out: cassandrasharp
@@ -60,7 +57,6 @@ anthology:
         - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
     - guid: 22d4356f-bc92-4399-a92c-c1f9ef6ecc73
       repo: cassandra-sharp
-      type: fae04ec0-301f-11d3-bf4b-00c04f79efbc
       file: CassandraSharpUnitTests/CassandraSharpUnitTests-net45.csproj
       pe: Dll
       out: cassandrasharpunittests
@@ -92,7 +88,6 @@ anthology:
         - project: c1d252b7-d766-4c28-9c46-0696f896846c
     - guid: 8b2359b2-4a73-4a49-8e1e-646014a768a4
       repo: cassandra-sharp
-      type: fae04ec0-301f-11d3-bf4b-00c04f79efbc
       file: Samples/Samples-net45.csproj
       pe: Exe
       out: samples
@@ -106,7 +101,6 @@ anthology:
         - project: c1d252b7-d766-4c28-9c46-0696f896846c
     - guid: 499eb63c-d74c-47e8-ae48-a2fc94538e9d
       repo: cassandra-sharp
-      type: fae04ec0-301f-11d3-bf4b-00c04f79efbc
       file: Thrift/Thrift-net45.csproj
       pe: Dll
       out: thrift
@@ -119,7 +113,6 @@ anthology:
       projects: []
     - guid: 0a06398e-69be-487b-a011-4c0be6619b59
       repo: cassandra-sharp
-      type: fae04ec0-301f-11d3-bf4b-00c04f79efbc
       file: cqlplus/cqlplus-net45.csproj
       pe: Exe
       out: cqlplus
@@ -134,7 +127,6 @@ anthology:
         - project: c1d252b7-d766-4c28-9c46-0696f896846c
     - guid: 925833ed-8653-4e90-9c37-b5b6cb693cf4
       repo: cassandra-sharp-contrib
-      type: fae04ec0-301f-11d3-bf4b-00c04f79efbc
       file: CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj
       pe: Dll
       out: cassandrasharp.contrib.log4net
@@ -158,7 +150,6 @@ anthology:
       projects: []
     - guid: 9e8648a4-d25a-4cfa-aaee-20d9d63ff571
       repo: cassandra-sharp-contrib
-      type: fae04ec0-301f-11d3-bf4b-00c04f79efbc
       file: CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj
       pe: Dll
       out: cassandrasharp.contrib.log4netunittests
