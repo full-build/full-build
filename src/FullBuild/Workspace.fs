@@ -33,7 +33,6 @@ open Anthology
 open MsBuildHelpers
 open System.Linq
 open System.Xml.Linq
-open StringHelpers
 open Collections
 open System
 
@@ -200,9 +199,6 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     let setOutputPath (xel : XElement) =
         xel.Value <- MSBUILD_BIN_FOLDER
 
-    let stringifyGuid (guid : System.Guid) =
-        guid.ToString("D")
-
     // cleanup everything that will be modified
     let cproj = XDocument (xproj)
 
@@ -228,6 +224,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
 
     // set OutputPath
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
+    cproj.Descendants(NsMsBuild + "TargetFrameworkVersion") |> Seq.iter (fun x -> x.Value <- project.FxTarget.toString)
 
     // cleanup project
     cproj.Descendants(NsMsBuild + "BaseIntermediateOutputPath").Remove()
@@ -236,9 +233,8 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "NuGetPackageImportStamp").Remove()
     cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
 
-    // add project refereces
+    // add project references
     let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").Last()
-
     for projectReference in project.ProjectReferences do
         let prjRef = projectReference.toString
         let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER prjRef
