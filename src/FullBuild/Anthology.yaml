@@ -7,7 +7,6 @@
         - guid: id2
           repo: id1
           file: Project.csproj
-          pe: dll
           out: fullbuild.tests
           fx: ver
           assemblies:
