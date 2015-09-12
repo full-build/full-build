@@ -7,8 +7,7 @@ anthology:
     - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
       repo: src
       file: FullBuild.Tests/FullBuild.Tests.fsproj
-      pe: Dll
-      out: fullbuild.tests
+      out: fullbuild.tests.dll
       fx: v4.5.2
       assemblies:
         - assembly: fsharp.core
@@ -26,8 +25,7 @@ anthology:
     - guid: 5fde3939-c144-4287-bc57-a96ec2d1a9da
       repo: src
       file: FullBuild/FullBuild.fsproj
-      pe: Exe
-      out: fullbuild
+      out: fullbuild.exe
       fx: v4.5.2
       assemblies:
         - assembly: fsharp.core

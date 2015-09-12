@@ -25,8 +25,7 @@ let Serialize (antho : Anthology) =
         let cproject = AnthologyConfig.anthology_Type.projects_Item_Type()
         cproject.guid <- project.ProjectGuid.toString
         cproject.fx <- project.FxTarget.toString
-        cproject.pe <- project.OutputType.toString
-        cproject.out <- project.Output.toString
+        cproject.out <- sprintf "%s.%s" project.Output.toString project.OutputType.toString
         cproject.file <- project.RelativeProjectFile.toString
         cproject.repo <- project.Repository.toString
         cproject.assemblies.Clear ()
@@ -72,11 +71,13 @@ let Deserialize (content) =
     let rec convertToProjects (items : AnthologyConfig.anthology_Type.projects_Item_Type list) =
         match items with
         | [] -> Set.empty
-        | x :: tail -> convertToProjects tail |> Set.add  { Repository = RepositoryId.from x.repo
+        | x :: tail -> let ext = (Path.GetExtension (x.out)).Replace(".", "")
+                       let out = Path.GetFileNameWithoutExtension(x.out)
+                       convertToProjects tail |> Set.add  { Repository = RepositoryId.from x.repo
                                                             RelativeProjectFile = ProjectRelativeFile x.file
                                                             ProjectGuid = ProjectId.from  (ParseGuid x.guid)
-                                                            Output = AssemblyId.from x.out
-                                                            OutputType = OutputType.from x.pe
+                                                            Output = AssemblyId.from out
+                                                            OutputType = OutputType.from ext
                                                             FxTarget = FrameworkVersion x.fx
                                                             AssemblyReferences = convertToAssemblies (x.assemblies |> List.ofSeq)
                                                             PackageReferences = convertToPackages (x.packages |> List.ofSeq)
