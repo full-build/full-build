@@ -13,34 +13,34 @@ let CheckSelectProject () =
     let file = FileInfo ("anthology-indexed.json")
     let antho = LoadFromJSonFile file
     
-    let projects = ComputeProjectSelectionClosure antho.Projects [RepositoryId.Bind "cassandra-sharp-contrib"] |> Seq.toList
-    projects |> should equal [ ProjectId.Bind (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
-                               ProjectId.Bind (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571") ]
+    let projects = ComputeProjectSelectionClosure antho.Projects [RepositoryId.from "cassandra-sharp-contrib"] |> Seq.toList
+    projects |> should equal [ ProjectId.from (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
+                               ProjectId.from (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571") ]
 
 [<Test>]
 let CheckGenerateSolution () =
-    let projects = [ { Repository = RepositoryId.Bind "cassandra-sharp-contrib"
+    let projects = [ { Repository = RepositoryId.from "cassandra-sharp-contrib"
                        RelativeProjectFile = ProjectRelativeFile "CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj"
-                       ProjectGuid = ProjectId.Bind (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
-                       ProjectType = ProjectType.Bind (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
-                       Output = AssemblyId.Bind "CassandraSharp.Contrib.log4net"
+                       ProjectGuid = ProjectId.from (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
+                       ProjectType = ProjectType.from (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
+                       Output = AssemblyId.from "CassandraSharp.Contrib.log4net"
                        OutputType = OutputType.Dll
                        FxTarget = FrameworkVersion "v4.5"   
-                       AssemblyReferences = [ AssemblyId.Bind "System" ] |> set
-                       PackageReferences = [ PackageId.Bind "log4net"
-                                             PackageId.Bind "Rx-Core"; PackageId.Bind "Rx-Interfaces"; PackageId.Bind "Rx-Linq"; PackageId.Bind "Rx-Main"; PackageId.Bind "Rx-PlatformServices" ] |> set
-                       ProjectReferences = [ ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set}
-                     { Repository = RepositoryId.Bind "cassandra-sharp-contrib"
+                       AssemblyReferences = [ AssemblyId.from "System" ] |> set
+                       PackageReferences = [ PackageId.from "log4net"
+                                             PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"; PackageId.from "Rx-Linq"; PackageId.from "Rx-Main"; PackageId.from "Rx-PlatformServices" ] |> set
+                       ProjectReferences = [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set}
+                     { Repository = RepositoryId.from "cassandra-sharp-contrib"
                        RelativeProjectFile = ProjectRelativeFile "CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"
-                       ProjectGuid = ProjectId.Bind (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
-                       ProjectType = ProjectType.Bind (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
-                       Output = AssemblyId.Bind "CassandraSharp.Contrib.log4netUnitTests"
+                       ProjectGuid = ProjectId.from (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
+                       ProjectType = ProjectType.from (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
+                       Output = AssemblyId.from "CassandraSharp.Contrib.log4netUnitTests"
                        OutputType = OutputType.Dll
                        FxTarget = FrameworkVersion "v4.5"
-                       AssemblyReferences = [ AssemblyId.Bind "System"; AssemblyId.Bind "System.Core" ] |> set
-                       PackageReferences = [ PackageId.Bind "log4net" 
-                                             PackageId.Bind "NUnit"; PackageId.Bind "Rx-Core"; PackageId.Bind "Rx-Interfaces"; PackageId.Bind "Rx-Linq"; PackageId.Bind "Rx-Main"; PackageId.Bind "Rx-PlatformServices" ] |> set
-                       ProjectReferences = [ ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectId.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.Bind (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4") ] |> set } ]
+                       AssemblyReferences = [ AssemblyId.from "System"; AssemblyId.from "System.Core" ] |> set
+                       PackageReferences = [ PackageId.from "log4net" 
+                                             PackageId.from "NUnit"; PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"; PackageId.from "Rx-Linq"; PackageId.from "Rx-Main"; PackageId.from "Rx-PlatformServices" ] |> set
+                       ProjectReferences = [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectId.from (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4") ] |> set } ]
 
     let content = GenerateSolutionContent projects
 

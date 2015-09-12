@@ -34,7 +34,7 @@ let Deploy (names : ApplicationId set) =
 let ListApplicationsContent (apps : Application seq) =
     seq {
         for app in apps do
-            yield sprintf "%s" app.Name.Value
+            yield sprintf "%s" app.Name.toString
     }
 
 let List () =

@@ -100,13 +100,13 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Create) :: path :: [] -> Command.CreateWorkspace { Path = path }
     | Token(Init) :: path :: [] -> Command.InitWorkspace { Path = path }
     | Token(Convert) :: [] -> Command.ConvertWorkspace
-    | Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
+    | Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                                        CloneRepositories { Filters = repoFilters }
     | Token(Token.Install) :: [] -> Command.InstallPackages
     | Token(Token.Update) :: [] -> Command.UpdatePackages
     | Token(Token.Outdated) :: [] -> Command.OutdatedPackages
     | Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = ViewId name }
-    | Token(Token.Deploy) ::names -> let appNames = names |> Seq.map ApplicationId.Bind |> Set
+    | Token(Token.Deploy) ::names -> let appNames = names |> Seq.map ApplicationId.from |> Set
                                      DeployApplications {Names = appNames }
     | Token(Token.Build) :: name :: [] -> Command.BuildView { Name = ViewId name }
     | Token(Token.Checkout) :: version :: [] -> Command.CheckoutWorkspace {Version = BookmarkVersion version}
@@ -115,7 +115,7 @@ let ParseCommandLine(args : string list) : Command =
 
     | Token(Token.Add) :: Token(Token.Repo) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
                                                                            AddRepository(repo)
-    | Token(Token.Add) :: Token(Token.View) :: name :: filters -> let repoFilters = filters |> Seq.map RepositoryId.Bind |> Set
+    | Token(Token.Add) :: Token(Token.View) :: name :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                                                                   Command.CreateView { Name = ViewId name; Filters = repoFilters }
     | Token(Token.Drop) :: Token(Token.View) :: name :: [] -> Command.DropView { Name = ViewId name }
     | Token(Token.List) :: Token(Token.Repo) :: [] -> ListRepositories

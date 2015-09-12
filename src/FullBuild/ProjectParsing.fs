@@ -53,14 +53,14 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     // VS project references
     let prjRefs = xdoc.Descendants(NsMsBuild + "ProjectReference")
                   |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
-                  |> Seq.map (ProjectId.Bind << GetProjectGuid prjDir)
+                  |> Seq.map (ProjectId.from << GetProjectGuid prjDir)
                   |> Set
     
     // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER))
-                 |> Seq.map (ProjectId.Bind << ParseGuid << Path.GetFileNameWithoutExtension)
+                 |> Seq.map (ProjectId.from << ParseGuid << Path.GetFileNameWithoutExtension)
                  |> Set
     
     prjRefs |> Set.union fbRefs
@@ -70,7 +70,7 @@ let GetAssemblies(xdoc : XDocument) : AssemblyId set =
         for binRef in xdoc.Descendants(NsMsBuild + "Reference") do
             let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
             let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
-            let assRef = AssemblyId.Bind (System.Reflection.AssemblyName(assName))
+            let assRef = AssemblyId.from (System.Reflection.AssemblyName(assName))
             yield assRef
     }
     res |> Set
@@ -78,14 +78,14 @@ let GetAssemblies(xdoc : XDocument) : AssemblyId set =
 let ParseNuGetPackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "id")
     let pkgVer = !> pkgRef.Attribute(XNamespace.None + "version") : string
-    { Id = PackageId.Bind pkgId
+    { Id = PackageId.from pkgId
       Version = PackageVersion pkgVer }
 
 let ParseFullBuildPackage (fileName : string) : Package =
     let fi = FileInfo (fileName)
     let fo = fi.Directory.Name
 
-    { Id = PackageId.Bind fo
+    { Id = PackageId.from fo
       Version = Unspecified }
 
 let GetNuGetPackages (nugetDoc : XDocument) =
@@ -105,7 +105,7 @@ let GetPackageFromPaketReference (xel : XElement) =
     let xhintPath = xel.Descendants(NsMsBuild + "HintPath") |> Seq.head
     let hintPath = !> xhintPath : string
     match hintPath with
-    | MatchPackage pkg -> { Id = PackageId.Bind pkg
+    | MatchPackage pkg -> { Id = PackageId.from pkg
                             Version = Unspecified }
     | _ -> failwith "Failed to find package"
 
@@ -132,7 +132,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let xguid = !> xprj.Descendants(NsMsBuild + "ProjectGuid").Single() : string
     let guid = ParseGuid xguid
     let assemblyName = !> xprj.Descendants(NsMsBuild + "AssemblyName").Single() : string
-    let assemblyRef = AssemblyId.Bind (assemblyName)
+    let assemblyRef = AssemblyId.from (assemblyName)
     
     let extension =  match !> xprj.Descendants(NsMsBuild + "OutputType").Single() : string with
                      | "Library" -> OutputType.Dll
@@ -161,8 +161,8 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     { Packages = packages
       Project = { Repository = repoRef
                   RelativeProjectFile = ProjectRelativeFile relativeProjectFile
-                  ProjectGuid = ProjectId.Bind guid
-                  ProjectType = ProjectType.Bind prjType
+                  ProjectGuid = ProjectId.from guid
+                  ProjectType = ProjectType.from prjType
                   Output = assemblyRef
                   OutputType = extension
                   FxTarget = FrameworkVersion fxTarget
