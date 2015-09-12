@@ -24,7 +24,6 @@ let Serialize (antho : Anthology) =
     for project in antho.Projects do
         let cproject = AnthologyConfig.anthology_Type.projects_Item_Type()
         cproject.guid <- project.ProjectGuid.toString
-        cproject.``type`` <- project.ProjectType.toString
         cproject.fx <- project.FxTarget.toString
         cproject.pe <- project.OutputType.toString
         cproject.out <- project.Output.toString
@@ -76,7 +75,6 @@ let Deserialize (content) =
         | x :: tail -> convertToProjects tail |> Set.add  { Repository = RepositoryId.from x.repo
                                                             RelativeProjectFile = ProjectRelativeFile x.file
                                                             ProjectGuid = ProjectId.from  (ParseGuid x.guid)
-                                                            ProjectType = ProjectType.from (ParseGuid x.``type``)
                                                             Output = AssemblyId.from x.out
                                                             OutputType = OutputType.from x.pe
                                                             FxTarget = FrameworkVersion x.fx
