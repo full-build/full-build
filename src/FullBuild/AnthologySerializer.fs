@@ -26,8 +26,7 @@ let Serialize (antho : Anthology) =
         cproject.guid <- project.ProjectGuid.toString
         cproject.fx <- project.FxTarget.toString
         cproject.out <- sprintf "%s.%s" project.Output.toString project.OutputType.toString
-        cproject.file <- project.RelativeProjectFile.toString
-        cproject.repo <- project.Repository.toString
+        cproject.file <- sprintf "%s/%s" project.Repository.toString project.RelativeProjectFile.toString
         cproject.assemblies.Clear ()
         for assembly in project.AssemblyReferences do
             let cass = AnthologyConfig.anthology_Type.projects_Item_Type.assemblies_Item_Type()
@@ -71,10 +70,12 @@ let Deserialize (content) =
     let rec convertToProjects (items : AnthologyConfig.anthology_Type.projects_Item_Type list) =
         match items with
         | [] -> Set.empty
-        | x :: tail -> let ext = (Path.GetExtension (x.out)).Replace(".", "")
+        | x :: tail -> let ext = IoHelpers.GetExtension (FileInfo(x.out))
                        let out = Path.GetFileNameWithoutExtension(x.out)
-                       convertToProjects tail |> Set.add  { Repository = RepositoryId.from x.repo
-                                                            RelativeProjectFile = ProjectRelativeFile x.file
+                       let repo = IoHelpers.GetRootDirectory (x.file)
+                       let file = IoHelpers.GetFilewithoutRootDirectory (x.file)
+                       convertToProjects tail |> Set.add  { Repository = RepositoryId.from repo
+                                                            RelativeProjectFile = ProjectRelativeFile file
                                                             ProjectGuid = ProjectId.from  (ParseGuid x.guid)
                                                             Output = AssemblyId.from out
                                                             OutputType = OutputType.from ext

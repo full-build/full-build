@@ -5,8 +5,7 @@
           uri: http://www.google.com
     projects:
         - guid: id2
-          repo: id1
-          file: Project.csproj
+          file: src/Project.csproj
           out: fullbuild.tests
           fx: ver
           assemblies:

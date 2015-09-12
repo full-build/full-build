@@ -5,8 +5,7 @@ anthology:
       uri: https://github.com/pchalamet/full-build
   projects:
     - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
-      repo: src
-      file: FullBuild.Tests/FullBuild.Tests.fsproj
+      file: src/FullBuild.Tests/FullBuild.Tests.fsproj
       out: fullbuild.tests.dll
       fx: v4.5.2
       assemblies:
@@ -23,8 +22,7 @@ anthology:
       projects:
         - project: 5fde3939-c144-4287-bc57-a96ec2d1a9da
     - guid: 5fde3939-c144-4287-bc57-a96ec2d1a9da
-      repo: src
-      file: FullBuild/FullBuild.fsproj
+      file: src/FullBuild/FullBuild.fsproj
       out: fullbuild.exe
       fx: v4.5.2
       assemblies:
