@@ -1,4 +1,4 @@
-﻿module BaseSerializerTests
+﻿module BaselineSerializerTests
 
 open BaselineSerializer
 open FsUnit

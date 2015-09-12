@@ -27,11 +27,10 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile></DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>clone paket</StartArguments>
-    <StartWorkingDirectory>C:\src\full-build\tests\paket-do\</StartWorkingDirectory>
+    <StartArguments>debug migrate anthology-simplified.json</StartArguments>
+    <StartWorkingDirectory>C:\src\full-build\src\FullBuild.Tests\</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>0077</NoWarn>
@@ -63,9 +62,6 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <Import Project="$(SolutionDir)/.full-build/packages/mini/package.targets" Condition="'$(FullBuild_mini_Pkg)' == ''" />
-  <Import Project="$(SolutionDir)/.full-build/packages/fspickler.json/package.targets" Condition="'$(FullBuild_fspickler_json_Pkg)' == ''" />
-  <Import Project="$(SolutionDir)/.full-build/packages/fsharp.configuration/package.targets" Condition="'$(FullBuild_fsharp_configuration_Pkg)' == ''" />
   <ItemGroup>
     <Compile Include="Collections.fs" />
     <Compile Include="StringHelpers.fs" />
@@ -75,6 +71,7 @@
     <Compile Include="Env.fs" />
     <Compile Include="Exec.fs" />
     <Compile Include="Anthology.fs" />
+    <Compile Include="ConfigurationSerializer.fs" />
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="BaselineSerializer.fs" />
     <Compile Include="MsBuildHelpers.fs" />
@@ -93,9 +90,11 @@
     <Compile Include="Application.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
+    <None Include="configuration.yaml" />
     <None Include="baseline.yaml" />
     <None Include="anthology.yaml" />
   </ItemGroup>
+  <Import Project="$(SolutionDir)/.full-build/packages/fsharp.configuration/package.targets" Condition="'$(FullBuild_fsharp_configuration_Pkg)' == ''" />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
