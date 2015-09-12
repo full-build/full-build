@@ -1,0 +1,48 @@
+anthology:
+  repositories:
+    - repo: src
+      type: Git
+      uri: https://github.com/pchalamet/full-build
+  projects:
+    - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
+      repo: src
+      type: f2a71f9b-5d33-465a-a702-920d77279786
+      file: FullBuild.Tests/FullBuild.Tests.fsproj
+      pe: Dll
+      out: fullbuild.tests
+      fx: v4.5
+      assemblies:
+        - assembly: fsharp.core
+        - assembly: system
+        - assembly: system.core
+        - assembly: system.numerics
+        - assembly: system.runtime.serialization
+        - assembly: system.xml
+        - assembly: system.xml.linq
+      packages:
+        - package: fsharp.configuration
+        - package: fspickler.json
+        - package: fsunit
+        - package: mini
+      projects:
+        - project: 5fde3939-c144-4287-bc57-a96ec2d1a9da
+    - guid: 5fde3939-c144-4287-bc57-a96ec2d1a9da
+      repo: src
+      type: f2a71f9b-5d33-465a-a702-920d77279786
+      file: FullBuild/FullBuild.fsproj
+      pe: Exe
+      out: fullbuild
+      fx: v4.5
+      assemblies:
+        - assembly: fsharp.core
+        - assembly: system
+        - assembly: system.core
+        - assembly: system.numerics
+        - assembly: system.runtime.serialization
+        - assembly: system.xml
+        - assembly: system.xml.linq
+      packages:
+        - package: fsharp.configuration
+        - package: fspickler.json
+        - package: mini
+      projects: []
