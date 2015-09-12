@@ -133,20 +133,20 @@ let GenerateProjectTarget (project : Project) =
     // Then we end up either importing output assembly or project depending on view configuration
     XDocument (
         XElement(NsMsBuild + "Project", 
-            XElement (NsMsBuild + "Import",
-                XAttribute (NsNone + "Project", "$(SolutionDir)/.full-build/views/$(SolutionName).targets"),
-                XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
-            XElement (NsMsBuild + "ItemGroup",
+//            XElement (NsMsBuild + "Import",
+//                XAttribute (NsNone + "Project", "$(SolutionDir)/.full-build/views/$(SolutionName).targets"),
+//                XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
+//            XElement (NsMsBuild + "ItemGroup",
                 XElement(NsMsBuild + "ProjectReference",
                     XAttribute (NsNone + "Include", projectFile),
                     XAttribute (NsNone + "Condition", srcCondition),
-                    XElement (NsMsBuild + "Project", project.ProjectGuid.toString),
+                    XElement (NsMsBuild + "Project", sprintf "{%s}" project.ProjectGuid.toString),
                     XElement (NsMsBuild + "Name", project.Output.toString)),
                 XElement (NsMsBuild + "Reference",
                     XAttribute (NsNone + "Include", project.Output.toString),
                     XAttribute (NsNone + "Condition", binCondition),
                     XElement (NsMsBuild + "HintPath", binFile),
-                    XElement (NsMsBuild + "Private", "true")))))
+                    XElement (NsMsBuild + "Private", "true")))) //)
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let prjDir = WorkspaceProjectFolder ()
@@ -237,13 +237,21 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
 
     // add project refereces
-    let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
+    let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").Last()
+    let insertGroup = XElement (NsMsBuild + "ItemGroup")
+    afterItemGroup.AddAfterSelf (insertGroup)
+
+    let importView = XElement (NsMsBuild + "Import",
+                        XAttribute (NsNone + "Project", "$(SolutionDir)/.full-build/views/$(SolutionName).targets"),
+                        XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''"))
+    insertGroup.Add (importView)
+
     for projectReference in project.ProjectReferences do
         let prjRef = projectReference.toString
         let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER prjRef
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
-        afterItemGroup.AddAfterSelf (import)
+        insertGroup.Add (import)
 
     // add nuget references
     for packageReference in project.PackageReferences do
@@ -254,7 +262,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile),
                         XAttribute(NsNone + "Condition", condition))
-        afterItemGroup.AddAfterSelf (import)
+        insertGroup.Add (import)
     cproj
 
 let ConvertProjectContent (xproj : XDocument) (project : Project) =
