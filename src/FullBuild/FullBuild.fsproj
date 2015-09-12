@@ -14,9 +14,6 @@
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <Name>FullBuild</Name>
     <TargetFrameworkProfile />
-    <!--    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <TargetFrameworkProfile /> -->
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -66,7 +63,6 @@
     <Compile Include="Collections.fs" />
     <Compile Include="StringHelpers.fs" />
     <Compile Include="IoHelpers.fs" />
-    <Compile Include="Sscanf.fs" />
     <Compile Include="PatternMatching.fs" />
     <Compile Include="Env.fs" />
     <Compile Include="Exec.fs" />
