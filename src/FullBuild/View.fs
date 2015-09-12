@@ -58,7 +58,7 @@ let GenerateSolutionContent (projects : Project seq) =
         yield "# Visual Studio 2013"
 
         for project in projects do
-            yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""%s""" 
+            yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""{%s}""" 
                   (project.ProjectType.toString)
                   (Path.GetFileNameWithoutExtension (project.RelativeProjectFile.toString))
                   (sprintf "%s/%s" (project.Repository.toString) project.RelativeProjectFile.toString)
@@ -81,10 +81,10 @@ let GenerateSolutionContent (projects : Project seq) =
 
         for project in projects do
             let guid = project.ProjectGuid.toString
-            yield sprintf "\t\t%s.Debug|Any CPU.ActiveCfg = Debug|Any CPU" guid
-            yield sprintf "\t\t%s.Debug|Any CPU.Build.0 = Debug|Any CPU" guid
-            yield sprintf "\t\t%s.Release|Any CPU.ActiveCfg = Release|Any CPU" guid
-            yield sprintf "\t\t%s.Release|Any CPU.Build.0 = Release|Any CPU" guid
+            yield sprintf "\t\t{%s}.Debug|Any CPU.ActiveCfg = Debug|Any CPU" guid
+            yield sprintf "\t\t{%s}.Debug|Any CPU.Build.0 = Debug|Any CPU" guid
+            yield sprintf "\t\t{%s}.Release|Any CPU.ActiveCfg = Release|Any CPU" guid
+            yield sprintf "\t\t{%s}.Release|Any CPU.Build.0 = Release|Any CPU" guid
 
         yield "\tEndGlobalSection"
         yield "EndGlobal"

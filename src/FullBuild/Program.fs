@@ -25,6 +25,7 @@
 module Main
 
 open CommandLineParsing
+open Configuration
 
 [<EntryPoint>]
 let main argv = 
@@ -67,6 +68,7 @@ let main argv =
     // misc
     | Usage -> DisplayUsage ()
     | Error -> DisplayUsage ()
+    | Migrate -> Configuration.Migrate ()
 //    | BookmarkWorkspace -> FullBuild.Commands.Workspace.Workspace.Bookmark ()
 //    | CheckoutWorkspace {Version=wsVersion} -> FullBuild.Commands.Workspace.Workspace.CheckoutBookmark (wsVersion)
 //    | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()

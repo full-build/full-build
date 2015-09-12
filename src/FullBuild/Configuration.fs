@@ -89,18 +89,19 @@ let SaveToJSonFile<'T> (anthoFn : FileInfo) (data : 'T) =
 
 let LoadAnthology() : Anthology = 
     let anthoFn = GetAnthologyFileName ()
-    LoadFromJSonFile<Anthology> anthoFn
+    AnthologySerializer.Load anthoFn
 
 let SaveAnthology(anthology : Anthology) = 
     let anthoFn = GetAnthologyFileName ()
-    SaveToJSonFile anthoFn anthology
+    AnthologySerializer.Save anthoFn anthology
 
 let LoadBaseline() : Baseline =
     let baselineFile = GetBaselineFileName ()
-    LoadFromJSonFile<Baseline> baselineFile
-    //BaselineSerializer.Load baselineFile
+    BaselineSerializer.Load baselineFile
 
 let SaveBaseline (baseline : Baseline) =
     let baselineFile = GetBaselineFileName ()
-    SaveToJSonFile baselineFile baseline
-    //BaselineSerializer.Save baselineFile baseline
+    BaselineSerializer.Save baselineFile baseline
+
+let Migrate () =
+    ()

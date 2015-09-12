@@ -5,208 +5,98 @@ open System.IO
 open System
 open Collections
 open System.Text
+open StringHelpers
 
-//
-// file format:
-//
-// version 1
-// repo <id>
-//   type <type>
-//   url url
-// ...
-// project <guid>
-//   repo <id>
-//   type dll/exe
-//   out <assemblyName>
-//   fx <id>
-//   file <file>
-//   assembly <id>
-//   ...
-//   package <id1>
-//   ...
-//   project <id1>
-//   ...
-// ...
+type private AnthologyConfig = FSharp.Configuration.YamlConfig<"anthology.yaml">
 
 
+let Serialize (antho : Anthology) =
+    let config = new AnthologyConfig()
 
-let SerializeAnthology (antho : Anthology) =
-    seq {
-        yield "version 1"
+    config.anthology.repositories.Clear()
+    for repo in antho.Repositories do
+        let crepo = AnthologyConfig.anthology_Type.repositories_Item_Type()
+        crepo.repo <- repo.Name.toString
+        crepo.``type`` <- repo.Vcs.toString
+        crepo.uri <- Uri (repo.Url.toString)
+        config.anthology.repositories.Add crepo
 
-        for repo in antho.Repositories do
-            yield sprintf "repo %s" repo.Name.toString
-            yield sprintf "  type %s" repo.Vcs.toString
-            yield sprintf "  url %s" repo.Url.toString
-        
-        for project in antho.Projects do
-            yield sprintf "project %s" project.ProjectGuid.toString
-            yield sprintf "  repo %s" project.Repository.toString
-            yield sprintf "  type %s" project.ProjectType.toString
-            yield sprintf "  pe %s" project.OutputType.toString
-            yield sprintf "  out %s" project.Output.toString
-            yield sprintf "  fx %s" project.FxTarget.toString
-            yield sprintf "  file %s" project.RelativeProjectFile.toString
-            for ass in project.AssemblyReferences do
-                yield sprintf "  assembly %s" ass.toString
-            for pkg in project.PackageReferences do
-                yield sprintf "  package %s" pkg.toString
-            for prj in project.ProjectReferences do
-                yield sprintf "  project %s" (prj.toString)
-    }
+    config.anthology.projects.Clear()
+    for project in antho.Projects do
+        let cproject = AnthologyConfig.anthology_Type.projects_Item_Type()
+        cproject.guid <- project.ProjectGuid.toString
+        cproject.``type`` <- project.ProjectType.toString
+        cproject.fx <- project.FxTarget.toString
+        cproject.pe <- project.OutputType.toString
+        cproject.out <- project.Output.toString
+        cproject.file <- project.RelativeProjectFile.toString
+        cproject.repo <- project.Repository.toString
+        cproject.assemblies.Clear ()
+        for assembly in project.AssemblyReferences do
+            let cass = AnthologyConfig.anthology_Type.projects_Item_Type.assemblies_Item_Type()
+            cass.assembly <- assembly.toString
+            cproject.assemblies.Add (cass)
+        cproject.packages.Clear ()
+        for package in project.PackageReferences do
+            let cpackage = AnthologyConfig.anthology_Type.projects_Item_Type.packages_Item_Type()
+            cpackage.package <- package.toString
+            cproject.packages.Add (cpackage)
+        cproject.projects.Clear ()
+        for project in project.ProjectReferences do
+            let cprojectref = AnthologyConfig.anthology_Type.projects_Item_Type.projects_Item_Type()
+            cprojectref.project <- project.toString
+            cproject.projects.Add (cprojectref)
+        config.anthology.projects.Add cproject
 
+    config.ToString()
 
-let Try<'T> (f : Unit -> 'T) : 'T option =
-    try
-        Some (f())
-    with 
-        _ -> None
+let Deserialize (content) =
+    let rec convertToRepositories (items : AnthologyConfig.anthology_Type.repositories_Item_Type list) =
+        match items with
+        | [] -> Set.empty
+        | x :: tail -> convertToRepositories tail |> Set.add { Name=RepositoryId.from x.repo; Vcs=VcsType.from x.``type``; Url=RepositoryUrl (x.uri.ToString())}
 
-let (|MatchFileVersion|_|) (line : string) =
-    let f () = let (version) = Sscanf.sscanf "version %d" line
-               version
-    Try f
+    let rec convertToAssemblies (items : AnthologyConfig.anthology_Type.projects_Item_Type.assemblies_Item_Type list) =
+        match items with
+        | [] -> Set.empty
+        | x :: tail -> convertToAssemblies tail |> Set.add (AssemblyId.from x.assembly)
 
-let (|MatchRepository|_|) (line : string) =
-    let f () = let (repo) = Sscanf.sscanf "repo %s" line
-               RepositoryId.from repo
-    Try f
+    let rec convertToPackages (items : AnthologyConfig.anthology_Type.projects_Item_Type.packages_Item_Type list) =
+        match items with
+        | [] -> Set.empty
+        | x :: tail -> convertToPackages tail |> Set.add (PackageId.from x.package)
 
-let (|MatchRepositoryType|_|) (line : string) =
-    let f () = let (vcsType) = Sscanf.sscanf "  type %s" line
-               VcsType.from vcsType
-    Try f
+    let rec convertToProjectRefs (items : AnthologyConfig.anthology_Type.projects_Item_Type.projects_Item_Type list) =
+        match items with
+        | [] -> Set.empty
+        | x :: tail -> convertToProjectRefs tail |> Set.add (ProjectId.from (ParseGuid x.project))
 
-let (|MatchRepositoryUrl|_|) (line : string) =
-    let f () = let (repoUrl) = Sscanf.sscanf "  url %s" line
-               RepositoryUrl repoUrl
-    Try f
+    let rec convertToProjects (items : AnthologyConfig.anthology_Type.projects_Item_Type list) =
+        match items with
+        | [] -> Set.empty
+        | x :: tail -> convertToProjects tail |> Set.add  { Repository = RepositoryId.from x.repo
+                                                            RelativeProjectFile = ProjectRelativeFile x.file
+                                                            ProjectGuid = ProjectId.from  (ParseGuid x.guid)
+                                                            ProjectType = ProjectType.from (ParseGuid x.``type``)
+                                                            Output = AssemblyId.from x.out
+                                                            OutputType = OutputType.from x.pe
+                                                            FxTarget = FrameworkVersion x.fx
+                                                            AssemblyReferences = convertToAssemblies (x.assemblies |> List.ofSeq)
+                                                            PackageReferences = convertToPackages (x.packages |> List.ofSeq)
+                                                            ProjectReferences = convertToProjectRefs (x.projects |> List.ofSeq) }
 
-let (|MatchProject|_|) (line : string) =
-    let f () = let (sguid) = Sscanf.sscanf "project %s" line
-               ProjectId.from (StringHelpers.ParseGuid sguid)
-    Try f
-
-let (|MatchProjectRepo|_|) (line : string) =
-    let f () = let (repo) = Sscanf.sscanf "  repo %s" line
-               RepositoryId.from repo
-    Try f
-
-let (|MatchProjectType|_|) (line : string) =
-    let f () = let (sguid) = Sscanf.sscanf "  type %s" line
-               ProjectType.from (StringHelpers.ParseGuid sguid)
-    Try f
-
-let (|MatchProjectOutType|_|) (line : string) =
-    let f () = let (outType) = Sscanf.sscanf "  pe %s" line
-               OutputType.from outType
-    Try f
-
-let (|MatchProjectOut|_|) (line : string) =
-    let f () = let (projectOut) = Sscanf.sscanf "  out %s" line
-               AssemblyId.from projectOut
-    Try f
-
-let (|MatchProjectFx|_|) (line : string) =
-    let f () = let (fx) = Sscanf.sscanf "  fx %s" line
-               FrameworkVersion fx
-    Try f
-
-let (|MatchProjectFile|_|) (line : string) =
-    let f () = let (file) = Sscanf.sscanf "  file %s" line
-               ProjectRelativeFile file
-    Try f
-
-let (|MatchProjectAssembly|_|) (line : string) =
-    let f () = let (name) = Sscanf.sscanf "  assembly %s" line
-               AssemblyId.from name
-    Try f
-
-let (|MatchProjectPackage|_|) (line : string) =
-    let f () = let (name) = Sscanf.sscanf "  package %s" line
-               PackageId.from name
-    Try f
-
-let (|MatchProjectRef|_|) (line : string) =
-    let f () = let (sguid) = Sscanf.sscanf "  project %s" line
-               ProjectId.from (StringHelpers.ParseGuid sguid)
-    Try f
-
-
-let rec deserializeAssemblies (lines : string list) =
-    match lines with
-    | (MatchProjectAssembly ass) :: tail -> let res = deserializeAssemblies tail 
-                                            (res |> fst |> Set.add ass, res |> snd)
-    | x -> (Set.empty, x)
-
-let rec deserializePackages (lines : string list) =
-    match lines with
-    | (MatchProjectPackage pkg) :: tail -> let res = deserializePackages tail 
-                                           (res |> fst |> Set.add pkg, res |> snd)
-    | x -> (Set.empty, x)
-
-let rec deserializeProjectRefs (lines : string list) =
-    match lines with
-    | (MatchProjectRef prj) :: tail -> let res = deserializeProjectRefs tail 
-                                       (res |> fst |> Set.add prj, res |> snd)
-    | x -> (Set.empty, x)
-
-let rec deserializeRepositories (lines : string list) =
-    match lines with
-    | (MatchRepository name) 
-        :: (MatchRepositoryType repoType) 
-        :: (MatchRepositoryUrl url) 
-        :: tail -> let res = deserializeRepositories tail
-                   let repo = { Name=name; Vcs=repoType; Url=url }
-                   (res |> fst |> Set.add repo, res |> snd)
-    | x -> (Set.empty, x)
-
-let rec deserializeProjects (lines : string list) =
-    match lines with
-    | (MatchProject prj)
-        :: (MatchProjectRepo repo)
-        :: (MatchProjectType prjType)
-        :: (MatchProjectOutType outType)
-        :: (MatchProjectOut prjOut)
-        :: (MatchProjectFx fx)
-        :: (MatchProjectFile file) :: tail -> let assemblies = deserializeAssemblies tail
-                                              let packages = deserializePackages (assemblies |> snd)
-                                              let projectRefs = deserializeProjectRefs (packages |> snd)
-                                              let project =  { Repository=repo
-                                                               RelativeProjectFile=file
-                                                               ProjectGuid=prj
-                                                               ProjectType=prjType
-                                                               Output=prjOut
-                                                               OutputType=outType
-                                                               FxTarget=fx
-                                                               AssemblyReferences=assemblies |> fst
-                                                               PackageReferences=packages |> fst
-                                                               ProjectReferences=projectRefs |> fst }
-                                              let res = deserializeProjects (projectRefs |> snd)
-                                              (res |> fst |> Set.add project, res |> snd)
-    | x -> (Set.empty, x)
-    
-
-let rec DeserializeAnthologyV1 (lines : string list) : Anthology =
-    let repos = deserializeRepositories lines
-    let projects = deserializeProjects (repos |> snd)
-    if List.empty <> (projects |> snd) then failwithf "Failed to parse %A" (projects |> snd)
+    let config = new AnthologyConfig()
+    config.LoadText content
     { Applications = Set.empty
-      Repositories = repos |> fst
-      Projects = projects |> fst }
+      Repositories = convertToRepositories (config.anthology.repositories |> List.ofSeq)
+      Projects = convertToProjects (config.anthology.projects |> List.ofSeq) }
 
-let DeserializeAnthology (lines : string list) : Anthology =
-    match lines with
-    | (MatchFileVersion version) :: tail -> match version with
-                                            | 1 -> DeserializeAnthologyV1 tail
-                                            | x -> failwithf "Unknown file version %d" x
-    | _ -> failwith "Unknown file format"
 
-    
+
 let Save (filename : FileInfo) (antho : Anthology) =
-    let content = SerializeAnthology antho
-    File.WriteAllLines(filename.FullName, content)
+    let content = Serialize antho
+    File.WriteAllText(filename.FullName, content)
 
 let Load (filename : FileInfo) : Anthology =
-    let content = File.ReadAllLines (filename.FullName) |> Seq.toList
-    DeserializeAnthology content
+    let content = File.ReadAllText (filename.FullName)
+    Deserialize content

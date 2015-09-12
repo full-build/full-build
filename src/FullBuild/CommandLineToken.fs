@@ -54,6 +54,7 @@ type Token =
     | Application
     | Deploy
     | Rebase
+    | Migrate
     | Unknown
 
 let (|Token|) (token : string) = 
@@ -87,5 +88,6 @@ let (|Token|) (token : string) =
     | "app" -> Application
     | "deploy" -> Deploy
     | "rebase" -> Rebase
+    | "migrate" -> Migrate
     | _ -> Unknown
 
