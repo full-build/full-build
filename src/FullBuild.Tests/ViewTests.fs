@@ -11,7 +11,7 @@ open Configuration
 [<Test>]
 let CheckSelectProject () =
     let file = FileInfo ("anthology-indexed.json")
-    let antho = LoadFromJSonFile file
+    let antho = AnthologySerializer.Load file
     
     let projects = ComputeProjectSelectionClosure antho.Projects [RepositoryId.from "cassandra-sharp-contrib"] |> Seq.toList
     projects |> should equal [ ProjectId.from (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")

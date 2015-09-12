@@ -39,6 +39,7 @@ let main argv =
     | BaselineWorkspace -> Workspace.Bookmark ()
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
     | RebaseWorkspace -> Workspace.Rebase ()
+    | TransformWorkspace -> Workspace.TransformProjects ()
 
     // repository
     | AddRepository repo -> Repo.Add repo
@@ -68,7 +69,7 @@ let main argv =
     // misc
     | Usage -> DisplayUsage ()
     | Error -> DisplayUsage ()
-    | Migrate -> Configuration.Migrate ()
+    | Migrate name -> Configuration.Migrate name
 //    | BookmarkWorkspace -> FullBuild.Commands.Workspace.Workspace.Bookmark ()
 //    | CheckoutWorkspace {Version=wsVersion} -> FullBuild.Commands.Workspace.Workspace.CheckoutBookmark (wsVersion)
 //    | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()

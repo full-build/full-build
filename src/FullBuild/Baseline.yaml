@@ -1,3 +1,3 @@
 ﻿baseline:
-  - repo: !!str id1
-    version: !!str hash01x
+  - repo: id1
+    version: hash01x

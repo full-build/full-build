@@ -65,25 +65,25 @@ let Init(path : string) =
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
-    VcsCloneRepo wsDir GlobalConfig.Repository
+    VcsCloneRepo wsDir (GlobalConfig().Repository)
 
 let Create(path : string) = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
-    VcsCloneRepo wsDir GlobalConfig.Repository
+    VcsCloneRepo wsDir (GlobalConfig().Repository)
     let antho = { Applications = Set.empty
                   Repositories = Set.empty
                   Projects = Set.empty }
     let confDir = wsDir |> GetSubDirectory ".full-build"
-    let anthoFile = confDir |> GetFile "anthology.json"
-    Configuration.SaveToJSonFile anthoFile antho
+    let anthoFile = confDir |> GetFile "anthology"
+    AnthologySerializer.Save anthoFile antho
 
     let baseline = { Bookmarks = Set.empty }
-    let baselineFile = confDir |> GetFile "baseline.json"
-    Configuration.SaveToJSonFile baselineFile baseline
+    let baselineFile = confDir |> GetFile "baseline"
+    BaselineSerializer.Save baselineFile baseline
 
-    Vcs.VcsIgnore wsDir GlobalConfig.Repository
+    Vcs.VcsIgnore wsDir (GlobalConfig().Repository)
 
 let Index () = 
     let wsDir = WorkspaceFolder()
@@ -111,7 +111,7 @@ let Index () =
                      with Projects = newProjects }
     SaveAnthology newAntho
 
-    let config = Configuration.GlobalConfig
+    let config = Configuration.GlobalConfig()
     PaketParsing.UpdateSources config.NuGets
 
 
@@ -271,7 +271,8 @@ let ConvertProjects (antho : Anthology) xdocLoader xdocSaver =
 
         xdocSaver projFile convxproj
 
-let RemoveUselessStuff (antho : Anthology) =
+let RemoveUselessStuff () =
+    let antho = LoadAnthology ()
     let wsDir = WorkspaceFolder ()
     for repo in antho.Repositories do
         let repoDir = wsDir |> GetSubDirectory (repo.Name.toString)
@@ -289,15 +290,17 @@ let XDocumentLoader (fileName : FileInfo) =
 let XDocumentSaver (fileName : FileInfo) (xdoc : XDocument) =
     xdoc.Save (fileName.FullName)
 
-let Convert () = 
-    Index ()
-    Package.Simplify ()
-
-    // generate project targets
+let TransformProjects () =
     let antho = LoadAnthology ()
     GenerateProjects antho.Projects XDocumentSaver
     ConvertProjects antho XDocumentLoader XDocumentSaver
-    RemoveUselessStuff antho
+
+
+let Convert () = 
+    Index ()
+    Package.Simplify ()
+    TransformProjects()
+    RemoveUselessStuff ()
 
 let ClonedRepositories (wsDir : DirectoryInfo) (repos : Repository set) =
     repos |> Set.filter (fun x -> let repoDir = wsDir |> GetSubDirectory x.Name.toString
@@ -319,7 +322,7 @@ let Bookmark () =
     Configuration.SaveBaseline baseline
 
     // copy bin content
-    let config = Configuration.GlobalConfig
+    let config = Configuration.GlobalConfig()
     let mainRepo = config.Repository
 
     let hash = Vcs.VcsTip wsDir mainRepo
@@ -337,7 +340,7 @@ let Bookmark () =
 
 let Checkout (version : BookmarkVersion) =
     let wsDir = Env.WorkspaceFolder ()
-    let config = Configuration.GlobalConfig
+    let config = Configuration.GlobalConfig()
     let mainRepo = config.Repository
     Vcs.VcsCheckout wsDir mainRepo version
 
@@ -362,7 +365,7 @@ let Checkout (version : BookmarkVersion) =
 
 let Rebase () =
     let wsDir = Env.WorkspaceFolder ()
-    let config = Configuration.GlobalConfig
+    let config = Configuration.GlobalConfig()
     let mainRepo = config.Repository
     Vcs.VcsRebase wsDir mainRepo
 

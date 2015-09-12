@@ -29,47 +29,20 @@ open System.IO
 open IoHelpers
 open Anthology
 open Env
-open Nessos
 
 let private WORKSPACE_CONFIG_FILE = ".full-build"
 
-let private jsonSerializer = FsPickler.Json.FsPickler.CreateJsonSerializer(indent = true)
-
-
-type GlobalConfiguration = 
-    { BinRepo : string
-      Repository : Repository
-      NuGets : string list }
-
 type WorkspaceConfiguration = 
     { Repositories : Repository list }
-
-let IniDocFromFile(configFile : FileInfo) = 
-    Mini.IniDocument (configFile.FullName)
 
 let DefaultGlobalIniFilename() = 
     let userProfileDir = DirectoryInfo (Environment.GetFolderPath (Environment.SpecialFolder.UserProfile))
     let configFile = userProfileDir |> GetFile WORKSPACE_CONFIG_FILE
     configFile
 
-let GlobalConfigurationFromFile file = 
-    let ini = IniDocFromFile file
-    let fbSection = ini.["FullBuild"]
-    let binRepo = fbSection.["BinRepo"].Value
-    let repoType = fbSection.["RepoType"].Value
-    let repoUrl = fbSection.["RepoUrl"].Value
-    let (ToRepository repo) = (repoType, ".full-build", repoUrl)
-    let ngSection = ini.["NuGet"]
-    
-    let nugets = ngSection |> Seq.map (fun x -> x.Value)
-                           |> Seq.toList
-    { BinRepo = binRepo
-      Repository = repo
-      NuGets = nugets }
-
-let GlobalConfig : GlobalConfiguration = 
+let GlobalConfig () : GlobalConfiguration = 
     let filename = DefaultGlobalIniFilename ()
-    if filename.Exists then GlobalConfigurationFromFile filename
+    if filename.Exists then ConfigurationSerializer.Load filename
     else 
         let (ToRepository repo) = ("git", ".full-build", String.Empty)
         {
@@ -77,15 +50,6 @@ let GlobalConfig : GlobalConfiguration =
             Repository = repo
             NuGets = ["https://www.nuget.org/api/v2/"]
         }
-
-let LoadFromJSonFile<'T> (jsonFile : FileInfo) : 'T = 
-    use file = jsonFile.OpenText()
-    let data = jsonSerializer.Deserialize(file)
-    data
-
-let SaveToJSonFile<'T> (anthoFn : FileInfo) (data : 'T) = 
-    use file = anthoFn.CreateText()
-    jsonSerializer.Serialize(file, data)
 
 let LoadAnthology() : Anthology = 
     let anthoFn = GetAnthologyFileName ()
@@ -103,5 +67,6 @@ let SaveBaseline (baseline : Baseline) =
     let baselineFile = GetBaselineFileName ()
     BaselineSerializer.Save baselineFile baseline
 
-let Migrate () =
+
+let Migrate (file : string) =
     ()

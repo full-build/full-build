@@ -158,3 +158,9 @@ let (|ToRepository|) (vcsType : string, vcsName : string, vcsUrl : string) =
     { Vcs = vcs
       Name = RepositoryId.from vcsName
       Url = RepositoryUrl vcsUrl }
+
+
+type GlobalConfiguration = 
+    { BinRepo : string
+      Repository : Repository
+      NuGets : string list }

@@ -52,7 +52,7 @@ let UpdateSourceContent (lines : string seq) (sources : string seq) =
             | _ -> yield line
     }
 
-let UpdateSources (sources : string list) =
+let UpdateSources (sources : string seq) =
     let confDir = Env.WorkspaceConfigFolder ()
     let paketDep = confDir |> GetFile "paket.dependencies" 
     let oldContent = if paketDep.Exists then File.ReadAllLines (paketDep.FullName) |> Array.toSeq
