@@ -8,8 +8,7 @@ anthology:
       uri: https://github.com/pchalamet/cassandra-sharp-contrib
   projects:
     - guid: 984a4b04-c71a-4550-9193-817cfacba30a
-      repo: cassandra-sharp
-      file: Apache.Cassandra/Apache.Cassandra-net45.csproj
+      file: cassandra-sharp/Apache.Cassandra/Apache.Cassandra-net45.csproj
       out: apache.cassandra.dll
       fx: v4.5
       assemblies:
@@ -18,8 +17,7 @@ anthology:
       projects:
         - project: 499eb63c-d74c-47e8-ae48-a2fc94538e9d
     - guid: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
-      repo: cassandra-sharp
-      file: CassandraSharp.Interfaces/CassandraSharp.Interfaces-net45.csproj
+      file: cassandra-sharp/CassandraSharp.Interfaces/CassandraSharp.Interfaces-net45.csproj
       out: cassandrasharp.interfaces.dll
       fx: v4.5
       assemblies:
@@ -31,8 +29,7 @@ anthology:
       packages: []
       projects: []
     - guid: c1d252b7-d766-4c28-9c46-0696f896846c
-      repo: cassandra-sharp
-      file: CassandraSharp/CassandraSharp-net45.csproj
+      file: cassandra-sharp/CassandraSharp/CassandraSharp-net45.csproj
       out: cassandrasharp.dll
       fx: v4.5
       assemblies:
@@ -53,8 +50,7 @@ anthology:
       projects:
         - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
     - guid: 22d4356f-bc92-4399-a92c-c1f9ef6ecc73
-      repo: cassandra-sharp
-      file: CassandraSharpUnitTests/CassandraSharpUnitTests-net45.csproj
+      file: cassandra-sharp/CassandraSharpUnitTests/CassandraSharpUnitTests-net45.csproj
       out: cassandrasharpunittests.dll
       fx: v4.5
       assemblies:
@@ -83,8 +79,7 @@ anthology:
         - project: 984a4b04-c71a-4550-9193-817cfacba30a
         - project: c1d252b7-d766-4c28-9c46-0696f896846c
     - guid: 8b2359b2-4a73-4a49-8e1e-646014a768a4
-      repo: cassandra-sharp
-      file: Samples/Samples-net45.csproj
+      file: cassandra-sharp/Samples/Samples-net45.csproj
       out: samples.exe
       fx: v4.5
       assemblies:
@@ -95,8 +90,7 @@ anthology:
         - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
         - project: c1d252b7-d766-4c28-9c46-0696f896846c
     - guid: 499eb63c-d74c-47e8-ae48-a2fc94538e9d
-      repo: cassandra-sharp
-      file: Thrift/Thrift-net45.csproj
+      file: cassandra-sharp/Thrift/Thrift-net45.csproj
       out: thrift.dll
       fx: v4.5
       assemblies:
@@ -106,8 +100,7 @@ anthology:
       packages: []
       projects: []
     - guid: 0a06398e-69be-487b-a011-4c0be6619b59
-      repo: cassandra-sharp
-      file: cqlplus/cqlplus-net45.csproj
+      file: cassandra-sharp/cqlplus/cqlplus-net45.csproj
       out: cqlplus.exe
       fx: v4.5
       assemblies:
@@ -119,8 +112,7 @@ anthology:
         - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
         - project: c1d252b7-d766-4c28-9c46-0696f896846c
     - guid: 925833ed-8653-4e90-9c37-b5b6cb693cf4
-      repo: cassandra-sharp-contrib
-      file: CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj
+      file: cassandra-sharp-contrib/CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj
       out: cassandrasharp.contrib.log4net.dll
       fx: v4.5
       assemblies:
@@ -141,8 +133,7 @@ anthology:
         - package: rx-platformservices
       projects: []
     - guid: 9e8648a4-d25a-4cfa-aaee-20d9d63ff571
-      repo: cassandra-sharp-contrib
-      file: CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj
+      file: cassandra-sharp-contrib/CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj
       out: cassandrasharp.contrib.log4netunittests.dll
       fx: v4.5
       assemblies:

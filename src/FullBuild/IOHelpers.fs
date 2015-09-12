@@ -93,3 +93,15 @@ let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) =
         target.Delete(true)
 
     if source.Exists then CopyFolderContent source target
+
+let GetExtension (file : FileInfo) =
+    file.Extension.Replace(".", "")
+
+let GetRootDirectory (file : string) =
+    let idx = file.IndexOf('/')
+    file.Substring(0, idx)
+
+let GetFilewithoutRootDirectory (file : string) =
+    let idx = file.IndexOf('/')
+    file.Substring(idx+1)
+   
