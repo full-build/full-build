@@ -36,7 +36,7 @@ let inline (!>) (x : ^a) : ^b = (((^a or ^b) : (static member op_Explicit : ^a -
 
 
 let ReplaceInvalidChars (s : string) =
-    s.Replace('-', '_').Replace('.', '_')
+    s.Replace('-', '_').Replace('.', '_').Replace("{", "").Replace("}", "")
 
 let ProjectPropertyName (project : Project) =
     let prjGuid = project.ProjectGuid.toString |> ReplaceInvalidChars

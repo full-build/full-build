@@ -1,7 +1,3 @@
-﻿Baseline:
-  - Commit:
-    Repository: toto
-    Version: 01234abc
-  - Commit:
-    Repository: titi
-    Version: jnh89s
+﻿baseline:
+  - repo: !!str id1
+    version: !!str hash01x
