@@ -3,7 +3,7 @@
   <Import Project="$(SolutionDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)/src/FullBuild.Tests/FullBuild.Tests.fsproj" Condition="'$(Prj_faaf3b40_ea78_4eaf_9859_863ff16f6058)' != ''">
-      <Project>faaf3b40-ea78-4eaf-9859-863ff16f6058</Project>
+      <Project>{faaf3b40-ea78-4eaf-9859-863ff16f6058}</Project>
       <Name>fullbuild.tests</Name>
     </ProjectReference>
     <Reference Include="fullbuild.tests" Condition="'$(Prj_faaf3b40_ea78_4eaf_9859_863ff16f6058)' == ''">
