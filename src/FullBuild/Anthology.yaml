@@ -6,7 +6,6 @@
     projects:
         - guid: id2
           repo: id1
-          type: f2a71f9b-5d33-465a-a702-920d77279786
           file: Project.csproj
           pe: dll
           out: fullbuild.tests

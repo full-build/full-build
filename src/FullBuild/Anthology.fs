@@ -125,7 +125,6 @@ type Project =
     { Repository : RepositoryId
       RelativeProjectFile : ProjectRelativeFile
       ProjectGuid : ProjectId
-      ProjectType : ProjectType
       Output : AssemblyId
       OutputType : OutputType
       FxTarget : FrameworkVersion
