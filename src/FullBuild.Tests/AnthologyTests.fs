@@ -7,22 +7,22 @@ open StringHelpers
 
 [<Test>]
 let CheckReferences () =
-    AssemblyId.Bind "badaboum" |> should equal <| AssemblyId.Bind "BADABOUM"
+    AssemblyId.from "badaboum" |> should equal <| AssemblyId.from "BADABOUM"
 
-    PackageId.Bind "badaboum" |> should equal <| PackageId.Bind "BADABOUM"
+    PackageId.from "badaboum" |> should equal <| PackageId.from "BADABOUM"
 
-    RepositoryId.Bind "badaboum" |> should equal <| RepositoryId.Bind "BADABOUM"
+    RepositoryId.from "badaboum" |> should equal <| RepositoryId.from "BADABOUM"
 
 [<Test>]
 let CheckToRepository () =
     let (ToRepository repoGit) = ("git", "cassandra-sharp", "https://github.com/pchalamet/cassandra-sharp")
     repoGit |> should equal { Vcs = VcsType.Git
-                              Name = RepositoryId.Bind "cassandra-sharp"
+                              Name = RepositoryId.from "cassandra-sharp"
                               Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } 
 
     let (ToRepository repoHg) = ("hg", "cassandra-sharp", "https://github.com/pchalamet/cassandra-sharp")
     repoHg |> should equal { Vcs = VcsType.Hg
-                             Name = RepositoryId.Bind "cassandra-sharp"
+                             Name = RepositoryId.from "cassandra-sharp"
                              Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } 
 
     (fun () -> let (ToRepository repo) = ("pouet", "cassandra-sharp", "https://github.com/pchalamet/cassandra-sharp")
@@ -33,64 +33,71 @@ let CheckToRepository () =
 let CheckEqualityWithPermutation () =
     let antho1 = {
         Applications = Set.empty
-        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.Bind "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
-                         { Vcs = VcsType.Git; Name = RepositoryId.Bind "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
-        Projects = [ { Output = AssemblyId.Bind "cqlplus"
+        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
+                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
+        Projects = [ { Output = AssemblyId.from "cqlplus"
                        OutputType = OutputType.Exe
-                       ProjectGuid = ProjectId.Bind (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
-                       ProjectType = ProjectType.Bind (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
+                       ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+                       ProjectType = ProjectType.from (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
                        RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                        FxTarget = FrameworkVersion "v4.5"
-                       ProjectReferences = [ ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectId.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set
-                       AssemblyReferences = [ AssemblyId.Bind "System" ; AssemblyId.Bind "System.Data"; AssemblyId.Bind "System.Xml"] |> set
+                       ProjectReferences = [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set
+                       AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Data"; AssemblyId.from "System.Xml"] |> set
                        PackageReferences = Set.empty
-                       Repository = RepositoryId.Bind "cassandra-sharp" } ] |> set }
+                       Repository = RepositoryId.from "cassandra-sharp" } ] |> set }
 
     let antho2 = {
         Applications = Set.empty
-        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.Bind "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } 
-                         { Vcs = VcsType.Git; Name = RepositoryId.Bind "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } ] |> set
-        Projects = [ { Output = AssemblyId.Bind "cqlplus"
+        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } 
+                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } ] |> set
+        Projects = [ { Output = AssemblyId.from "cqlplus"
                        OutputType = OutputType.Exe
-                       ProjectGuid = ProjectId.Bind (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
-                       ProjectType = ProjectType.Bind (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
+                       ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+                       ProjectType = ProjectType.from (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
                        RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                        FxTarget = FrameworkVersion "v4.5"
-                       ProjectReferences = [ ProjectId.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
-                       AssemblyReferences = [ AssemblyId.Bind "System" ; AssemblyId.Bind "System.Xml"; AssemblyId.Bind "System.Data" ] |> set
+                       ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+                       AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                        PackageReferences = Set.empty
-                       Repository = RepositoryId.Bind "cassandra-sharp" } ] |> set }
+                       Repository = RepositoryId.from "cassandra-sharp" } ] |> set }
         
     antho1 |> should equal antho2
 
-//
-//
-//[<Test>]
-//let CheckCustomPickler () =
-//    let jsonSerializer = Nessos.FsPickler.Json.FsPickler.CreateJsonSerializer(indent = true)
-//    use txtWriter = new System.IO.StringWriter()
-//
-//    let antho1 = {
-//        Applications = Set.empty
-//        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.Bind "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
-//                         { Vcs = VcsType.Git; Name = RepositoryId.Bind "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
-//        Projects = [ { Output = AssemblyId.Bind "cqlplus"
-//                       OutputType = OutputType.Exe
-//                       ProjectGuid = ProjectId.Bind (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
-//                       ProjectType = ProjectType.Bind (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
-//                       RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
-//                       FxTarget = FrameworkVersion "v4.5"
-//                       ProjectReferences = [ ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectId.Bind(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set
-//                       AssemblyReferences = [ AssemblyId.Bind "System" ; AssemblyId.Bind "System.Data"; AssemblyId.Bind "System.Xml"] |> set
-//                       PackageReferences = Set.empty
-//                       Repository = RepositoryId.Bind "cassandra-sharp" } ] |> set }
-//
-//    let repo = { Vcs = VcsType.Git; Name = RepositoryId.Bind "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
-//
-//
-//    let res = Yaml.dump<Repository> repo
-//    printfn "%s" res
-//
-////    jsonSerializer.Serialize(txtWriter, antho1)
-////    printfn "%s" (txtWriter.ToString())
-//    
+
+
+[<Test>]
+let CheckSaveLoadAnthology () =
+    let antho1 = {
+        Applications = Set.empty
+        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
+                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
+        Projects = [ { Output = AssemblyId.from "cqlplus"
+                       OutputType = OutputType.Exe
+                       ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+                       ProjectType = ProjectType.from (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
+                       RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
+                       FxTarget = FrameworkVersion "v4.5"
+                       ProjectReferences = [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set
+                       AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Data"; AssemblyId.from "System.Xml"] |> set
+                       PackageReferences = Set.empty
+                       Repository = RepositoryId.from "cassandra-sharp" } ] |> set }
+
+    let res = AnthologySerializer.SerializeAnthology antho1 |> List.ofSeq
+    for r in res do
+        printfn "%s" r
+
+    let antho2 = AnthologySerializer.DeserializeAnthology res
+    antho2 |> should equal antho1
+
+
+[<Test>]
+let CheckSaveLoadBaseline () =
+    let baseline1 = { Bookmarks = Set [{ Repository = RepositoryId.from "cassandra-sharp"; Version=BookmarkVersion "1234"}
+                                       { Repository = RepositoryId.from "cassandra-sharp-contrib"; Version=BookmarkVersion "5678"}] }
+
+    let res = BaselineSerializer.SerializeBaseline baseline1 |> List.ofSeq
+    for r in res do
+        printfn "%s" r
+
+    let baseline2 = BaselineSerializer.DeserializeBaseline res
+    baseline2 |> should equal baseline1

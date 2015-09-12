@@ -14,13 +14,13 @@ let CheckCreateDependencies () =
     //       \ /
     //        D
 
-    let A = PackageId.Bind "A"
-    let B = PackageId.Bind "B"
-    let C = PackageId.Bind "C"
-    let D = PackageId.Bind "D"
-    let E = PackageId.Bind "E"
-    let F = PackageId.Bind "F"
-    let G = PackageId.Bind "G"
+    let A = PackageId.from "A"
+    let B = PackageId.from "B"
+    let C = PackageId.from "C"
+    let D = PackageId.from "D"
+    let E = PackageId.from "E"
+    let F = PackageId.from "F"
+    let G = PackageId.from "G"
 
     let dependencies = [ (A, Set [B; C]) 
                          (B, Set.empty)

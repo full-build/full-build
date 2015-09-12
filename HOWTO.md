@@ -24,4 +24,7 @@ Following steps must be orchestrated on CI:
 * build all sources (fullbuild build partial)
 
 # Optimization
-Eventually, consider cleaning the work folder using full-build (fullbuild rebase)
+Eventually, consider cleaning the work folder using full-build (fullbuild rebase).
+Warning, this is a destructive operation:
+* cleanup each repositories (.full-build & sources)
+* fast-forward to master

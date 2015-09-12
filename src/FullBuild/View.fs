@@ -35,10 +35,10 @@ open Collections
 
 let Drop (viewName : ViewId) =
     let vwDir = WorkspaceViewFolder ()
-    let vwFile = vwDir |> GetFile (AddExt viewName.Value View)
+    let vwFile = vwDir |> GetFile (AddExt viewName.toString View)
     File.Delete (vwFile.FullName)
 
-    let vwDefineFile = vwDir |> GetFile (AddExt viewName.Value Targets)
+    let vwDefineFile = vwDir |> GetFile (AddExt viewName.toString Targets)
     File.Delete (vwDefineFile.FullName)
 
 let List () =
@@ -47,7 +47,7 @@ let List () =
 
 let Describe (viewName : ViewId) =
     let vwDir = WorkspaceViewFolder ()
-    let vwFile = vwDir |> GetFile (AddExt viewName.Value View)
+    let vwFile = vwDir |> GetFile (AddExt viewName.toString View)
     File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
 
 
@@ -59,10 +59,10 @@ let GenerateSolutionContent (projects : Project seq) =
 
         for project in projects do
             yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""%s""" 
-                  (project.ProjectType.Value.ToString("D"))
-                  (Path.GetFileNameWithoutExtension (project.RelativeProjectFile.Value))
-                  (sprintf "%s/%s" (project.Repository.Value) project.RelativeProjectFile.Value)
-                  (StringifyGuid project.ProjectGuid.Value)
+                  (project.ProjectType.toString)
+                  (Path.GetFileNameWithoutExtension (project.RelativeProjectFile.toString))
+                  (sprintf "%s/%s" (project.Repository.toString) project.RelativeProjectFile.toString)
+                  (project.ProjectGuid.toString)
 
             yield "\tProjectSection(ProjectDependencies) = postProject"
 //            for dependency in project.ProjectReferences do
@@ -80,7 +80,7 @@ let GenerateSolutionContent (projects : Project seq) =
         yield "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution"
 
         for project in projects do
-            let guid = StringifyGuid project.ProjectGuid.Value
+            let guid = project.ProjectGuid.toString
             yield sprintf "\t\t%s.Debug|Any CPU.ActiveCfg = Debug|Any CPU" guid
             yield sprintf "\t\t%s.Debug|Any CPU.Build.0 = Debug|Any CPU" guid
             yield sprintf "\t\t%s.Release|Any CPU.ActiveCfg = Release|Any CPU" guid
@@ -125,8 +125,8 @@ let FindViewProjects (viewName : ViewId) =
     let antho = LoadAnthology ()
     let viewDir = WorkspaceViewFolder ()
 
-    let viewFile = viewDir |> GetFile (AddExt viewName.Value View)
-    let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map (fun x -> RepositoryId.Bind x)
+    let viewFile = viewDir |> GetFile (AddExt viewName.toString View)
+    let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map (fun x -> RepositoryId.from x)
     let projectRefs = ComputeProjectSelectionClosure antho.Projects repos |> Set
     let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectGuid)
     projects
@@ -135,13 +135,13 @@ let Generate (viewName : ViewId) =
     let projects = FindViewProjects viewName
 
     let wsDir = WorkspaceFolder ()
-    let slnFile = wsDir |> GetFile (AddExt viewName.Value Solution)
+    let slnFile = wsDir |> GetFile (AddExt viewName.toString Solution)
     let slnContent = GenerateSolutionContent projects
     File.WriteAllLines (slnFile.FullName, slnContent)
 
     let slnDefines = GenerateSolutionDefines projects
     let viewDir = WorkspaceViewFolder ()
-    let slnDefineFile = viewDir |> GetFile (AddExt viewName.Value Targets)
+    let slnDefineFile = viewDir |> GetFile (AddExt viewName.toString Targets)
     slnDefines.Save (slnDefineFile.FullName)
 
 
@@ -183,16 +183,16 @@ let GraphNodes (antho : Anthology) (projects : Project set) =
                 XAttribute(NsNone + "Group", "Expanded"))
 
         for project in projects do
-            yield GenerateNode (project.ProjectGuid.Value.ToString("D")) (project.Output.Value) "Project"
+            yield GenerateNode (project.ProjectGuid.toString) (project.Output.toString) "Project"
 
         for project in importedProjects do
-            yield GenerateNode (project.ProjectGuid.Value.ToString("D")) (project.Output.Value) "ProjectImport"
+            yield GenerateNode (project.ProjectGuid.toString) (project.Output.toString) "ProjectImport"
 
         for package in allPackageReferences do
-            yield GenerateNode (package.Value) (package.Value) "Package"
+            yield GenerateNode (package.toString) (package.toString) "Package"
 
         for assembly in allAssemblies do
-            yield GenerateNode (assembly.Value) (assembly.Value) "Assembly"
+            yield GenerateNode (assembly.toString) (assembly.toString) "Assembly"
     }
 
 let GraphLinks (antho : Anthology) (projects : Project set) =
@@ -204,29 +204,29 @@ let GraphLinks (antho : Anthology) (projects : Project set) =
     seq {
         for project in projects do
             for projectRef in project.ProjectReferences do
-                yield GenerateLink (project.ProjectGuid.Value.ToString("D")) (projectRef.Value.ToString("D")) "ProjectRef"
+                yield GenerateLink (project.ProjectGuid.toString) (projectRef.toString) "ProjectRef"
 
         for project in projects do
             for package in project.PackageReferences do
-                yield GenerateLink (project.ProjectGuid.Value.ToString("D")) (package.Value) "PackageRef"
+                yield GenerateLink (project.ProjectGuid.toString) (package.toString) "PackageRef"
 
         for project in projects do
             for assembly in project.AssemblyReferences do
-                yield GenerateLink (project.ProjectGuid.Value.ToString("D")) (assembly.Value) "AssemblyRef"
+                yield GenerateLink (project.ProjectGuid.toString) (assembly.toString) "AssemblyRef"
 
         for project in projects do
-                yield GenerateLink "Projects" (project.ProjectGuid.Value.ToString("D")) "Contains"
+                yield GenerateLink "Projects" (project.ProjectGuid.toString) "Contains"
 
         for project in importedProjects do
-                yield GenerateLink "Projects" (project.ProjectGuid.Value.ToString("D")) "Contains"
+                yield GenerateLink "Projects" (project.ProjectGuid.toString) "Contains"
 
         for project in projects do
             for package in project.PackageReferences do
-                yield GenerateLink "Packages" (package.Value) "Contains"
+                yield GenerateLink "Packages" (package.toString) "Contains"
 
         for project in projects do
             for assembly in project.AssemblyReferences do
-                yield GenerateLink "Assemblies" (assembly.Value) "Contains"
+                yield GenerateLink "Assemblies" (assembly.toString) "Contains"
 
     }
 
@@ -273,21 +273,21 @@ let Graph (viewName : ViewId) =
     let graph = GraphContent antho viewName
 
     let wsDir = Env.WorkspaceFolder ()
-    let graphFile = wsDir |> GetSubDirectory (AddExt viewName.Value Dgml)
+    let graphFile = wsDir |> GetSubDirectory (AddExt viewName.toString Dgml)
     graph.Save graphFile.FullName
 
 let Create (viewName : ViewId) (filters : RepositoryId set) =
     let repos = filters |> Repo.FilterRepos 
-                        |> Seq.map (fun x -> x.Name.Value)
+                        |> Seq.map (fun x -> x.Name.toString)
     let vwDir = WorkspaceViewFolder ()
-    let vwFile = vwDir |> GetFile (AddExt viewName.Value View)
+    let vwFile = vwDir |> GetFile (AddExt viewName.toString View)
     File.WriteAllLines (vwFile.FullName, repos)
 
     Generate viewName
 
 let Build (viewName : ViewId) =
     let wsDir = Env.WorkspaceFolder ()
-    let viewFile = AddExt viewName.Value Solution
+    let viewFile = AddExt viewName.toString Solution
     let args = sprintf "/p:Configuration=Release %A" viewFile
 
     Exec.Exec "msbuild" args wsDir
