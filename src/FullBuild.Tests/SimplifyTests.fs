@@ -9,7 +9,8 @@ open System.IO
 
 [<Test>]
 let CheckSimplifyAssemblies () =
-    let anthology = Configuration.LoadFromJSonFile (FileInfo("anthology-indexed.json"))
+    let file = FileInfo("anthology-indexed.json")
+    let anthology = AnthologySerializer.Load file
 
     let package2Files = Map.empty
 
@@ -35,8 +36,11 @@ let CheckSimplifyAssemblies () =
 
 [<Test>]
 let CheckSimplifyAnthology () =
-    let anthology = Configuration.LoadFromJSonFile<Anthology> (FileInfo("anthology-indexed.json"))
-    let expectedAnthology = Configuration.LoadFromJSonFile<Anthology> (FileInfo("anthology-simplified.json"))
+    let fileIndexed = FileInfo("anthology-indexed.json")
+    let anthology = AnthologySerializer.Load fileIndexed
+
+    let fileSimplified = FileInfo("anthology-simplified.json")
+    let expectedAnthology = AnthologySerializer.Load fileSimplified
 
     let package2files = Map [ (PackageId.from "log4net", Set [AssemblyId.from "log4net"])
                               (PackageId.from "Moq", Set [AssemblyId.from "moq"; AssemblyId.from "Moq.Silverlight" ])
@@ -67,6 +71,6 @@ let CheckSimplifyAnthology () =
     let file = FileInfo (Path.GetRandomFileName())
     printfn "Temporary file is %A" file.FullName
 
-    Configuration.SaveToJSonFile<Anthology> file newAnthology
+    AnthologySerializer.Save file newAnthology
 
     newAnthology |> should equal expectedAnthology

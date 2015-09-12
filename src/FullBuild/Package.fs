@@ -156,7 +156,7 @@ let GatherAllAssemblies (package : PackageId) : AssemblyId set =
           |> set
 
 let Install () =
-    let config = Configuration.GlobalConfig
+    let config = Configuration.GlobalConfig ()
     PaketParsing.UpdateSources config.NuGets
 
     let confDir = Env.WorkspaceConfigFolder ()
