@@ -92,16 +92,16 @@ let private HgIgnore (repoDir : DirectoryInfo) =
 
 
 let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) = 
-    let repoDir = wsDir |> GetSubDirectory repo.Name.Value
+    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
     
     let cloneRepo = 
         match repo.Vcs with
         | VcsType.Git -> GitClone
         | VcsType.Hg -> HgClone
-    cloneRepo repo.Url.Value repoDir
+    cloneRepo repo.Url.toString repoDir
 
 let VcsTip (wsDir : DirectoryInfo) (repo : Repository) = 
-    let repoDir = wsDir |> GetSubDirectory repo.Name.Value
+    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
     
     let tipRepo = 
         match repo.Vcs with
@@ -111,7 +111,7 @@ let VcsTip (wsDir : DirectoryInfo) (repo : Repository) =
     tip
 
 let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion) = 
-    let repoDir = wsDir |> GetSubDirectory repo.Name.Value
+    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
 
     let checkoutRepo = 
         match repo.Vcs with
@@ -120,7 +120,7 @@ let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkV
     checkoutRepo repoDir version
 
 let VcsIgnore (wsDir : DirectoryInfo) (repo : Repository) =
-    let repoDir = wsDir |> GetSubDirectory repo.Name.Value
+    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
 
     let ignoreRepo = 
         match repo.Vcs with
@@ -129,7 +129,7 @@ let VcsIgnore (wsDir : DirectoryInfo) (repo : Repository) =
     ignoreRepo repoDir
 
 let VcsRebase (wsDir : DirectoryInfo) (repo : Repository) =
-    let repoDir = wsDir |> GetSubDirectory repo.Name.Value
+    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
 
     let rebaseRepo = 
         match repo.Vcs with

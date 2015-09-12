@@ -108,7 +108,7 @@ let GenerateChooseContent (libDir : DirectoryInfo) =
 let GenerateDependenciesContent (dependencies : PackageId seq) =
     seq {
         for dependency in dependencies do
-            let depId = dependency.Value
+            let depId = dependency.toString
             let dependencyTargets = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER depId
             let pkgProperty = PackagePropertyName depId
             let condition = sprintf "'$(%s)' == ''" pkgProperty
@@ -119,7 +119,7 @@ let GenerateDependenciesContent (dependencies : PackageId seq) =
     }
 
 let GenerateProjectContent (package : PackageId) (imports : XElement seq) (choose : XElement) =
-    let defineName = PackagePropertyName (package.Value)
+    let defineName = PackagePropertyName (package.toString)
     let propCondition = sprintf "'$(%s)' == ''" defineName
     let project = XElement (NsMsBuild + "Project",
                     XAttribute (NsNone + "Condition", propCondition),
@@ -132,10 +132,10 @@ let GenerateProjectContent (package : PackageId) (imports : XElement seq) (choos
 
 let GenerateTargetForPackage (package : PackageId) =
     let pkgsDir = Env.WorkspacePackageFolder ()
-    let pkgDir = pkgsDir |> GetSubDirectory (package.Value)
+    let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
     let libDir = pkgDir |> GetSubDirectory "lib" 
     
-    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.Value) NuSpec)
+    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.toString) NuSpec)
     let xnuspec = XDocument.Load (nuspecFile.FullName)
     let dependencies = NuGets.GetPackageDependencies xnuspec
 
@@ -148,11 +148,11 @@ let GenerateTargetForPackage (package : PackageId) =
 
 let GatherAllAssemblies (package : PackageId) : AssemblyId set =
     let pkgsDir = Env.WorkspacePackageFolder ()
-    let pkgDir = pkgsDir |> GetSubDirectory (package.Value)
+    let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
     let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
     let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
     let files = Seq.append dlls exes
-    files |> Seq.map (fun x -> AssemblyId.Bind x) 
+    files |> Seq.map (fun x -> AssemblyId.from x) 
           |> set
 
 let Install () =

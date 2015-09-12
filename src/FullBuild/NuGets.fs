@@ -36,7 +36,7 @@ open Collections
 let GetPackageDependencies (xnuspec : XDocument) =
     xnuspec.Descendants().Where(fun x -> x.Name.LocalName = "dependency") 
         |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
-        |> Seq.map PackageId.Bind
+        |> Seq.map PackageId.from
         |> set
 
 let rec BuildPackageDependencies (packages : PackageId seq) =
@@ -44,8 +44,8 @@ let rec BuildPackageDependencies (packages : PackageId seq) =
 
     let rec buildDependencies (packages : PackageId seq) = seq {
         for package in packages do    
-            let pkgDir = pkgsDir |> GetSubDirectory (package.Value)
-            let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.Value) NuSpec)
+            let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
+            let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.toString) NuSpec)
             let xnuspec = XDocument.Load (nuspecFile.FullName)
             let dependencies = GetPackageDependencies xnuspec
             yield (package, dependencies)

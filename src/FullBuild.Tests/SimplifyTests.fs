@@ -13,11 +13,11 @@ let CheckSimplifyAssemblies () =
 
     let package2Files = Map.empty
 
-    let lognetunittestsRef = ProjectId.Bind (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
-    let cassandraSharpAssName = AssemblyId.Bind "cassandrasharp"
-    let cassandraSharpItfAssName = AssemblyId.Bind "cassandrasharp.interfaces"
-    let cassandraSharpPrjRef = ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")
-    let cassandraSharpItfPrjRef = ProjectId.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c")
+    let lognetunittestsRef = ProjectId.from (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
+    let cassandraSharpAssName = AssemblyId.from "cassandrasharp"
+    let cassandraSharpItfAssName = AssemblyId.from "cassandrasharp.interfaces"
+    let cassandraSharpPrjRef = ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")
+    let cassandraSharpItfPrjRef = ProjectId.from (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c")
 
     let lognetunittests = anthology.Projects |> Seq.find (fun x -> x.ProjectGuid = lognetunittestsRef)
     lognetunittests.AssemblyReferences |> should contain cassandraSharpAssName
@@ -38,30 +38,30 @@ let CheckSimplifyAnthology () =
     let anthology = Configuration.LoadFromJSonFile<Anthology> (FileInfo("anthology-indexed.json"))
     let expectedAnthology = Configuration.LoadFromJSonFile<Anthology> (FileInfo("anthology-simplified.json"))
 
-    let package2files = Map [ (PackageId.Bind "log4net", Set [AssemblyId.Bind "log4net"])
-                              (PackageId.Bind "Moq", Set [AssemblyId.Bind "moq"; AssemblyId.Bind "Moq.Silverlight" ])
-                              (PackageId.Bind "Nunit", Set [AssemblyId.Bind "nunit.framework"])
-                              (PackageId.Bind "Rx-Core", Set [AssemblyId.Bind "System.Reactive.Core"])
-                              (PackageId.Bind "Rx-Interfaces", Set [AssemblyId.Bind "System.Reactive.Interfaces"])
-                              (PackageId.Bind "Rx-Linq", Set [AssemblyId.Bind "System.Reactive.Linq"])
-                              (PackageId.Bind "Rx-Main", Set.empty)
-                              (PackageId.Bind "Rx-PlatformServices", Set [AssemblyId.Bind "System.Reactive.PlatformServices"])
-                              (PackageId.Bind "cassandra-sharp", Set.empty)
-                              (PackageId.Bind "cassandra-sharp-core", Set [AssemblyId.Bind "CassandraSharp"])
-                              (PackageId.Bind "cassandra-sharp-interfaces", Set [AssemblyId.Bind "CassandraSharp.Interfaces"]) ]
+    let package2files = Map [ (PackageId.from "log4net", Set [AssemblyId.from "log4net"])
+                              (PackageId.from "Moq", Set [AssemblyId.from "moq"; AssemblyId.from "Moq.Silverlight" ])
+                              (PackageId.from "Nunit", Set [AssemblyId.from "nunit.framework"])
+                              (PackageId.from "Rx-Core", Set [AssemblyId.from "System.Reactive.Core"])
+                              (PackageId.from "Rx-Interfaces", Set [AssemblyId.from "System.Reactive.Interfaces"])
+                              (PackageId.from "Rx-Linq", Set [AssemblyId.from "System.Reactive.Linq"])
+                              (PackageId.from "Rx-Main", Set.empty)
+                              (PackageId.from "Rx-PlatformServices", Set [AssemblyId.from "System.Reactive.PlatformServices"])
+                              (PackageId.from "cassandra-sharp", Set.empty)
+                              (PackageId.from "cassandra-sharp-core", Set [AssemblyId.from "CassandraSharp"])
+                              (PackageId.from "cassandra-sharp-interfaces", Set [AssemblyId.from "CassandraSharp.Interfaces"]) ]
 
-    let package2packages = Map [ (PackageId.Bind "log4net", Set.empty)
-                                 (PackageId.Bind "Moq", Set.empty)
-                                 (PackageId.Bind "Nunit", Set.empty)
-                                 (PackageId.Bind "Rx-Core", Set [PackageId.Bind "Rx-Interfaces"])
-                                 (PackageId.Bind "Rx-Interfaces", Set.empty)
-                                 (PackageId.Bind "Rx-Linq", Set [PackageId.Bind "Rx-Core"; PackageId.Bind "Rx-Interfaces"])
-                                 (PackageId.Bind "Rx-Main", Set [PackageId.Bind "Rx-Core"; PackageId.Bind "Rx-Interfaces"; 
-                                                                 PackageId.Bind "Rx-Linq"; PackageId.Bind "Rx-PlatformServices"])
-                                 (PackageId.Bind "Rx-PlatformServices", Set [PackageId.Bind "Rx-Core"; PackageId.Bind "Rx-Interfaces"])
-                                 (PackageId.Bind "cassandra-sharp", Set [PackageId.Bind "cassandra-sharp-core"; PackageId.Bind "cassandra-sharp-interfaces"])
-                                 (PackageId.Bind "cassandra-sharp-core", Set [PackageId.Bind "Rx-Main"])
-                                 (PackageId.Bind "cassandra-sharp-interfaces", Set.empty) ]
+    let package2packages = Map [ (PackageId.from "log4net", Set.empty)
+                                 (PackageId.from "Moq", Set.empty)
+                                 (PackageId.from "Nunit", Set.empty)
+                                 (PackageId.from "Rx-Core", Set [PackageId.from "Rx-Interfaces"])
+                                 (PackageId.from "Rx-Interfaces", Set.empty)
+                                 (PackageId.from "Rx-Linq", Set [PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"])
+                                 (PackageId.from "Rx-Main", Set [PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"; 
+                                                                 PackageId.from "Rx-Linq"; PackageId.from "Rx-PlatformServices"])
+                                 (PackageId.from "Rx-PlatformServices", Set [PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"])
+                                 (PackageId.from "cassandra-sharp", Set [PackageId.from "cassandra-sharp-core"; PackageId.from "cassandra-sharp-interfaces"])
+                                 (PackageId.from "cassandra-sharp-core", Set [PackageId.from "Rx-Main"])
+                                 (PackageId.from "cassandra-sharp-interfaces", Set.empty) ]
 
     let newAnthology = Simplify.SimplifyAnthology anthology package2files package2packages
     let file = FileInfo (Path.GetRandomFileName())

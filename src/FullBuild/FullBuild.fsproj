@@ -90,7 +90,6 @@
     <Compile Include="Application.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
-    <Content Include="packages.config" />
   </ItemGroup>
   <Import Project="$(SolutionDir)/.full-build/packages/mini/package.targets" Condition="'$(FullBuild_mini_Pkg)' == ''" />
   <Import Project="$(SolutionDir)/.full-build/packages/fspickler.json/package.targets" Condition="'$(FullBuild_fspickler_json_Pkg)' == ''" />
