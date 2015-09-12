@@ -92,7 +92,8 @@ type Command =
     // applications
     | DeployApplications of DeployApplications
     | ListApplications
-    | Migrate
+    | Migrate of string
+    | TransformWorkspace
 
 let ParseCommandLine(args : string list) : Command = 
     match args with
@@ -127,8 +128,9 @@ let ParseCommandLine(args : string list) : Command =
 
     | Token(Token.Debug) :: Token(Index) :: [] -> Command.IndexWorkspace
     | Token(Token.Debug) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
+    | Token(Token.Debug) :: Token(Token.Transform) :: [] -> Command.TransformWorkspace
     | Token(Token.Debug) :: Token(Token.Generate) :: name :: [] -> Command.GenerateView { Name = ViewId name }
-    | Token(Token.Debug) :: Token(Token.Migrate) :: [] -> Command.Migrate
+    | Token(Token.Debug) :: Token(Token.Migrate) :: name :: [] -> Command.Migrate name
     | _ -> Command.Error
 
 let UsageContent() =

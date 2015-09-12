@@ -4,7 +4,6 @@ open Anthology
 open System.IO
 open System
 open Collections
-open System.Text
 open StringHelpers
 
 type private AnthologyConfig = FSharp.Configuration.YamlConfig<"anthology.yaml">

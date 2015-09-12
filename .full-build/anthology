@@ -21,9 +21,7 @@ anthology:
         - assembly: system.xml.linq
       packages:
         - package: fsharp.configuration
-        - package: fspickler.json
         - package: fsunit
-        - package: mini
       projects:
         - project: 5fde3939-c144-4287-bc57-a96ec2d1a9da
     - guid: 5fde3939-c144-4287-bc57-a96ec2d1a9da
@@ -43,6 +41,4 @@ anthology:
         - assembly: system.xml.linq
       packages:
         - package: fsharp.configuration
-        - package: fspickler.json
-        - package: mini
       projects: []
