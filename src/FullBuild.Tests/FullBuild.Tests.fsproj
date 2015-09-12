@@ -13,9 +13,6 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <Name>FullBuild.Tests</Name>
-    <!--    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <TargetFrameworkProfile /> -->
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -113,10 +110,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <Import Project="$(SolutionDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <Import Project="$(SolutionDir)/.full-build/packages/fsunit/package.targets" Condition="'$(FullBuild_fsunit_Pkg)' == ''" />
   <Import Project="$(SolutionDir)/.full-build/packages/fsharp.configuration/package.targets" Condition="'$(FullBuild_fsharp_configuration_Pkg)' == ''" />
   <Import Project="$(SolutionDir)/.full-build/projects/5fde3939-c144-4287-bc57-a96ec2d1a9da.targets" />
-  <!-- <Import Project="$(SolutionDir)/.full-build/packages/fsharp.core/package.targets" Condition="'$(FullBuild_fsharp_core_Pkg)' == ''" /> -->
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
