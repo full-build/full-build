@@ -21,7 +21,7 @@
 // LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 module Anthology
 
 open System
@@ -82,11 +82,12 @@ with
 type RepositoryId = private RepositoryId of string
 with
     member this.toString = (fun (RepositoryId x) -> x)this
-    static member from(name : string) = RepositoryId (name.ToLowerInvariant())
+    static member from (name : string) = RepositoryId (name.ToLowerInvariant())
 
 type RepositoryUrl = RepositoryUrl of string
 with
     member this.toString = (fun (RepositoryUrl x) -> x)this
+//    static member from (uri : string) = RepositoryUrl 
 
 type Repository = 
     { Name : RepositoryId
