@@ -138,8 +138,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                      | "Library" -> OutputType.Dll
                      | _ -> OutputType.Exe
     
-    // FIXME
-    let fxTarget = "v4.5"
+    let fxTarget = !> xprj.Descendants(NsMsBuild + "TargetFrameworkVersion").Single() : string
     let prjRefs = GetProjectReferences file.Directory xprj
     
     let assemblies = GetAssemblies xprj
