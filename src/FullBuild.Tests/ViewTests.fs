@@ -6,11 +6,10 @@ open FsUnit
 open Anthology
 open View
 open StringHelpers
-open Configuration
 
 [<Test>]
 let CheckSelectProject () =
-    let file = FileInfo ("anthology-indexed.json")
+    let file = FileInfo ("anthology-indexed.yaml")
     let antho = AnthologySerializer.Load file
     
     let projects = ComputeProjectSelectionClosure antho.Projects [RepositoryId.from "cassandra-sharp-contrib"] |> Seq.toList
@@ -22,7 +21,6 @@ let CheckGenerateSolution () =
     let projects = [ { Repository = RepositoryId.from "cassandra-sharp-contrib"
                        RelativeProjectFile = ProjectRelativeFile "CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj"
                        ProjectGuid = ProjectId.from (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
-                       ProjectType = ProjectType.from (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
                        Output = AssemblyId.from "CassandraSharp.Contrib.log4net"
                        OutputType = OutputType.Dll
                        FxTarget = FrameworkVersion "v4.5"   
@@ -33,7 +31,6 @@ let CheckGenerateSolution () =
                      { Repository = RepositoryId.from "cassandra-sharp-contrib"
                        RelativeProjectFile = ProjectRelativeFile "CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"
                        ProjectGuid = ProjectId.from (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
-                       ProjectType = ProjectType.from (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
                        Output = AssemblyId.from "CassandraSharp.Contrib.log4netUnitTests"
                        OutputType = OutputType.Dll
                        FxTarget = FrameworkVersion "v4.5"

@@ -9,7 +9,7 @@ open System.IO
 
 [<Test>]
 let CheckSimplifyAssemblies () =
-    let file = FileInfo("anthology-indexed.json")
+    let file = FileInfo("anthology-indexed.yaml")
     let anthology = AnthologySerializer.Load file
 
     let package2Files = Map.empty
@@ -36,10 +36,10 @@ let CheckSimplifyAssemblies () =
 
 [<Test>]
 let CheckSimplifyAnthology () =
-    let fileIndexed = FileInfo("anthology-indexed.json")
+    let fileIndexed = FileInfo("anthology-indexed.yaml")
     let anthology = AnthologySerializer.Load fileIndexed
 
-    let fileSimplified = FileInfo("anthology-simplified.json")
+    let fileSimplified = FileInfo("anthology-simplified.yaml")
     let expectedAnthology = AnthologySerializer.Load fileSimplified
 
     let package2files = Map [ (PackageId.from "log4net", Set [AssemblyId.from "log4net"])
