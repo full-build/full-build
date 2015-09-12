@@ -10,7 +10,7 @@ anthology:
       file: FullBuild.Tests/FullBuild.Tests.fsproj
       pe: Dll
       out: fullbuild.tests
-      fx: v4.5
+      fx: v4.5.2
       assemblies:
         - assembly: fsharp.core
         - assembly: system
@@ -30,7 +30,7 @@ anthology:
       file: FullBuild/FullBuild.fsproj
       pe: Exe
       out: fullbuild
-      fx: v4.5
+      fx: v4.5.2
       assemblies:
         - assembly: fsharp.core
         - assembly: system
