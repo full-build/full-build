@@ -36,7 +36,7 @@ let ParseContent (lines : string seq) =
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
             match items.[0] with
-            | "nuget" -> yield (PackageId.Bind items.[1])
+            | "nuget" -> yield (PackageId.from items.[1])
             | _ -> ()
     }
 
@@ -74,8 +74,8 @@ let GenerateDependenciesContent (packages : Package seq) =
     seq {
         for package in packages do
             match package.Version with
-            | PackageVersion x -> yield sprintf "nuget %s ~> %s" (package.Id.Value) x
-            | Unspecified -> yield sprintf "nuget %s" (package.Id.Value)
+            | PackageVersion x -> yield sprintf "nuget %s ~> %s" (package.Id.toString) x
+            | Unspecified -> yield sprintf "nuget %s" (package.Id.toString)
     }
 
 let AppendDependencies (packages : Package seq) = 
@@ -91,7 +91,7 @@ let RemoveDependenciesContent (lines : string seq) (packages : PackageId set) =
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
             match items.[0] with
-            | "nuget" -> if Set.contains (PackageId.Bind items.[1]) packages then ()
+            | "nuget" -> if Set.contains (PackageId.from items.[1]) packages then ()
                          else yield line
             | _ -> yield line
     }

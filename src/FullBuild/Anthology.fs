@@ -28,39 +28,44 @@ open System
 open System.IO
 open Collections
 open System.Reflection
+open StringHelpers
+
 
 type ViewId = ViewId of string
 with
-    member this.Value = (fun (ViewId x) -> x)this
+    member this.toString = (fun (ViewId x) -> x)this
 
 
 type OutputType = 
     | Exe
     | Dll
+with
+     member this.toString = toString this
+     static member from s = fromString<OutputType> s
 
 type AssemblyId = private AssemblyId of string
 with
-    member this.Value = (fun (AssemblyId x) -> x)this
-    static member Bind (name : string) = AssemblyId (name.ToLowerInvariant())
-    static member Bind (assName : AssemblyName) = AssemblyId.Bind (assName.Name)
-    static member Bind (file : FileInfo) =  AssemblyId.Bind (Path.GetFileNameWithoutExtension(file.Name))
+    member this.toString = (fun (AssemblyId x) -> x)this
+    static member from (name : string) = AssemblyId (name.ToLowerInvariant())
+    static member from (assName : AssemblyName) = AssemblyId.from (assName.Name)
+    static member from (file : FileInfo) =  AssemblyId.from (Path.GetFileNameWithoutExtension(file.Name))
 
 type PackageVersion = 
     | PackageVersion of string
     | Unspecified
 with
-    member this.Value = match this with
-                        | PackageVersion x -> x
-                        | Unspecified -> "<unspecified>"
+    member this.toString = match this with
+                           | PackageVersion x -> x
+                           | Unspecified -> "<unspecified>"
 
 type PackageFramework = PackageFramework of string
 with
-    member this.Value = (fun (PackageFramework x) -> x)this
+    member this.toString = (fun (PackageFramework x) -> x)this
 
 type PackageId = private PackageId of string
 with
-    member this.Value = (fun (PackageId x) -> x)this
-    static member Bind (id : string) = PackageId (id.ToLowerInvariant())
+    member this.toString = (fun (PackageId x) -> x)this
+    static member from (id : string) = PackageId (id.ToLowerInvariant())
 
 type Package = 
     { Id : PackageId
@@ -69,15 +74,19 @@ type Package =
 type VcsType = 
     | Git
     | Hg
+with
+     member this.toString = toString this
+     static member from s = fromString<VcsType> s
+
 
 type RepositoryId = private RepositoryId of string
 with
-    member this.Value = (fun (RepositoryId x) -> x)this
-    static member Bind(name : string) = RepositoryId (name.ToLowerInvariant())
+    member this.toString = (fun (RepositoryId x) -> x)this
+    static member from(name : string) = RepositoryId (name.ToLowerInvariant())
 
 type RepositoryUrl = RepositoryUrl of string
 with
-    member this.Value = (fun (RepositoryUrl x) -> x)this
+    member this.toString = (fun (RepositoryUrl x) -> x)this
 
 type Repository = 
     { Name : RepositoryId
@@ -94,21 +103,21 @@ type Bookmark =
 
 type ProjectRelativeFile = ProjectRelativeFile of string
 with
-    member this.Value = (fun (ProjectRelativeFile x) -> x)this
+    member this.toString = (fun (ProjectRelativeFile x) -> x)this
 
 type FrameworkVersion = FrameworkVersion of string
 with
-    member this.Value = (fun (FrameworkVersion x) -> x)this
+    member this.toString = (fun (FrameworkVersion x) -> x)this
 
 type ProjectId = private ProjectId of Guid
 with
-    member this.Value = (fun (ProjectId x) -> x)this
-    static member Bind(guid : Guid) = ProjectId guid
+    member this.toString = StringifyGuid( (fun (ProjectId x) -> x)this)
+    static member from (guid : Guid) = ProjectId guid
 
 type ProjectType = private ProjectType of Guid
 with
-    member this.Value = (fun (ProjectType x) -> x)this
-    static member Bind(guid : Guid) = ProjectType guid
+    member this.toString = StringifyGuid ((fun (ProjectType x) -> x)this)
+    static member from (guid : Guid) = ProjectType guid
 
 
 type Project = 
@@ -125,8 +134,8 @@ type Project =
 
 type ApplicationId = private ApplicationId of string
 with
-    member this.Value = (fun (ApplicationId x) -> x)this
-    static member Bind(name : string) = ApplicationId (name.ToLowerInvariant())
+    member this.toString = (fun (ApplicationId x) -> x)this
+    static member from (name : string) = ApplicationId (name.ToLowerInvariant())
 
 type Application = 
     { Name : ApplicationId
@@ -146,5 +155,5 @@ let (|ToRepository|) (vcsType : string, vcsName : string, vcsUrl : string) =
               | "hg" -> VcsType.Hg
               | _ -> failwithf "Unknown vcs type %A" vcsType
     { Vcs = vcs
-      Name = RepositoryId.Bind vcsName
+      Name = RepositoryId.from vcsName
       Url = RepositoryUrl vcsUrl }

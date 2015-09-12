@@ -35,128 +35,128 @@ let CheckCastString () =
 
 [<Test>]
 let CheckBasicParsingCSharp () =
-    let expectedPackages = Set [ { Id=PackageId.Bind "FSharp.Data"; Version=PackageVersion "2.2.5" }
-                                 { Id=PackageId.Bind "FsUnit"; Version=PackageVersion "1.3.0.1" }
-                                 { Id=PackageId.Bind "Mini"; Version=PackageVersion "0.4.2.0" }
-                                 { Id=PackageId.Bind "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
-                                 { Id=PackageId.Bind "NLog"; Version=PackageVersion "4.0.1" }
-                                 { Id=PackageId.Bind "NUnit"; Version=PackageVersion "2.6.3" }
-                                 { Id=PackageId.Bind "xunit"; Version=PackageVersion "1.9.1" } ]
+    let expectedPackages = Set [ { Id=PackageId.from "FSharp.Data"; Version=PackageVersion "2.2.5" }
+                                 { Id=PackageId.from "FsUnit"; Version=PackageVersion "1.3.0.1" }
+                                 { Id=PackageId.from "Mini"; Version=PackageVersion "0.4.2.0" }
+                                 { Id=PackageId.from "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
+                                 { Id=PackageId.from "NLog"; Version=PackageVersion "4.0.1" }
+                                 { Id=PackageId.from "NUnit"; Version=PackageVersion "2.6.3" }
+                                 { Id=PackageId.from "xunit"; Version=PackageVersion "1.9.1" } ]
     
     let file = FileInfo ("./CSharpProjectSample1.csproj")
-    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.Bind "Test") file
-    prjDescriptor.Project.ProjectGuid |> should equal (ProjectId.Bind (ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396"))
+    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
+    prjDescriptor.Project.ProjectGuid |> should equal (ProjectId.from (ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396"))
     prjDescriptor.Packages |> should equal expectedPackages
 
 [<Test>]
 let CheckBasicParsingFSharp () =
     let file = FileInfo ("./FSharpProjectSample1.fsproj")
-    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.Bind "Test") file
-    prjDescriptor.Project.ProjectGuid |> should equal (ProjectId.Bind (ParseGuid "5fde3939-c144-4287-bc57-a96ec2d1a9da"))
+    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
+    prjDescriptor.Project.ProjectGuid |> should equal (ProjectId.from (ParseGuid "5fde3939-c144-4287-bc57-a96ec2d1a9da"))
 
 [<Test>]
 let CheckParseVirginProject () =
     let file = FileInfo ("./VirginProject.csproj")
-    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.Bind "Test") file
-    prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d")]
+    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
+    prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d")]
 
 [<Test>]
 let CheckParsePaketizedProject () =
     let file = FileInfo ("./Paket.fsproj")
-    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader false) file.Directory (RepositoryId.Bind "Test") file
-    prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c")]
-    prjDescriptor.Project.PackageReferences |> should equal (Set [ PackageId.Bind "FSharp.Core"; PackageId.Bind "UnionArgParser" ])
+    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader false) file.Directory (RepositoryId.from "Test") file
+    prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c")]
+    prjDescriptor.Project.PackageReferences |> should equal (Set [ PackageId.from "FSharp.Core"; PackageId.from "UnionArgParser" ])
 
 [<Test>]
 let CheckParseConvertedProject () =
-    let expectedAssemblies = Set [ AssemblyId.Bind "System"
-                                   AssemblyId.Bind "System.Numerics"
-                                   AssemblyId.Bind "System.Xml"
-                                   AssemblyId.Bind "System.Configuration" ]
+    let expectedAssemblies = Set [ AssemblyId.from "System"
+                                   AssemblyId.from "System.Numerics"
+                                   AssemblyId.from "System.Xml"
+                                   AssemblyId.from "System.Configuration" ]
 
-    let expectedPackages = Set [ { Id=PackageId.Bind "Rx-Core"; Version=Unspecified }
-                                 { Id=PackageId.Bind "Rx-Interfaces"; Version=Unspecified }
-                                 { Id=PackageId.Bind "Rx-Linq"; Version=Unspecified }
-                                 { Id=PackageId.Bind "Rx-PlatformServices"; Version=Unspecified }
-                                 { Id=PackageId.Bind "FSharp.Data"; Version=PackageVersion "2.2.5" }
-                                 { Id=PackageId.Bind "FsUnit"; Version=PackageVersion "1.3.0.1" }
-                                 { Id=PackageId.Bind "Mini"; Version=PackageVersion "0.4.2.0" }
-                                 { Id=PackageId.Bind "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
-                                 { Id=PackageId.Bind "NLog"; Version=PackageVersion "4.0.1" }
-                                 { Id=PackageId.Bind "NUnit"; Version=PackageVersion "2.6.3" }
-                                 { Id=PackageId.Bind "xunit"; Version=PackageVersion "1.9.1" } ]
+    let expectedPackages = Set [ { Id=PackageId.from "Rx-Core"; Version=Unspecified }
+                                 { Id=PackageId.from "Rx-Interfaces"; Version=Unspecified }
+                                 { Id=PackageId.from "Rx-Linq"; Version=Unspecified }
+                                 { Id=PackageId.from "Rx-PlatformServices"; Version=Unspecified }
+                                 { Id=PackageId.from "FSharp.Data"; Version=PackageVersion "2.2.5" }
+                                 { Id=PackageId.from "FsUnit"; Version=PackageVersion "1.3.0.1" }
+                                 { Id=PackageId.from "Mini"; Version=PackageVersion "0.4.2.0" }
+                                 { Id=PackageId.from "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
+                                 { Id=PackageId.from "NLog"; Version=PackageVersion "4.0.1" }
+                                 { Id=PackageId.from "NUnit"; Version=PackageVersion "2.6.3" }
+                                 { Id=PackageId.from "xunit"; Version=PackageVersion "1.9.1" } ]
 
-    let expectedProject = { Repository = RepositoryId.Bind "Test"
+    let expectedProject = { Repository = RepositoryId.from "Test"
                             RelativeProjectFile = ProjectRelativeFile "ConvertedProject.csproj"
-                            ProjectGuid = ProjectId.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d") 
-                            ProjectType = ProjectType.Bind (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
-                            Output = AssemblyId.Bind "CassandraSharp"
+                            ProjectGuid = ProjectId.from (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d") 
+                            ProjectType = ProjectType.from (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
+                            Output = AssemblyId.from "CassandraSharp"
                             OutputType = OutputType.Dll
                             FxTarget = FrameworkVersion "v4.5"
-                            AssemblyReferences = Set [ AssemblyId.Bind "System"
-                                                       AssemblyId.Bind "System.Numerics"
-                                                       AssemblyId.Bind "System.Xml"
-                                                       AssemblyId.Bind "System.Configuration" ]
-                            PackageReferences = Set [ PackageId.Bind "Rx-Core"
-                                                      PackageId.Bind "Rx-Interfaces"
-                                                      PackageId.Bind "Rx-Linq"
-                                                      PackageId.Bind "Rx-PlatformServices"
-                                                      PackageId.Bind "FSharp.Data"
-                                                      PackageId.Bind "FsUnit"
-                                                      PackageId.Bind "Mini"
-                                                      PackageId.Bind "Newtonsoft.Json"
-                                                      PackageId.Bind "NLog"
-                                                      PackageId.Bind "NUnit"
-                                                      PackageId.Bind "xunit" ]
-                            ProjectReferences = Set [ ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] }
+                            AssemblyReferences = Set [ AssemblyId.from "System"
+                                                       AssemblyId.from "System.Numerics"
+                                                       AssemblyId.from "System.Xml"
+                                                       AssemblyId.from "System.Configuration" ]
+                            PackageReferences = Set [ PackageId.from "Rx-Core"
+                                                      PackageId.from "Rx-Interfaces"
+                                                      PackageId.from "Rx-Linq"
+                                                      PackageId.from "Rx-PlatformServices"
+                                                      PackageId.from "FSharp.Data"
+                                                      PackageId.from "FsUnit"
+                                                      PackageId.from "Mini"
+                                                      PackageId.from "Newtonsoft.Json"
+                                                      PackageId.from "NLog"
+                                                      PackageId.from "NUnit"
+                                                      PackageId.from "xunit" ]
+                            ProjectReferences = Set [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] }
 
-    let expectedProjects = Set [ ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ]
+    let expectedProjects = Set [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ]
 
     let projectFile = FileInfo ("./ConvertedProject.csproj")
-    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) projectFile.Directory (RepositoryId.Bind "Test") projectFile
-    prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")]
+    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) projectFile.Directory (RepositoryId.from "Test") projectFile
+    prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")]
 
-    prjDescriptor.Packages |> Seq.iter (fun x -> printfn "%A" x.Id.Value)
+    prjDescriptor.Packages |> Seq.iter (fun x -> printfn "%A" x.Id.toString)
 
     prjDescriptor.Packages |> should equal expectedPackages
     prjDescriptor.Project |> should equal expectedProject
 
 [<Test>]
 let CheckParseConvertedProjectWithoutPackagesConfig () =
-    let expectedAssemblies = Set [ AssemblyId.Bind "System"
-                                   AssemblyId.Bind "System.Numerics"
-                                   AssemblyId.Bind "System.Xml"
-                                   AssemblyId.Bind "System.Configuration" ]
+    let expectedAssemblies = Set [ AssemblyId.from "System"
+                                   AssemblyId.from "System.Numerics"
+                                   AssemblyId.from "System.Xml"
+                                   AssemblyId.from "System.Configuration" ]
 
-    let expectedPackages = Set [ { Id=PackageId.Bind "Rx-Core"; Version=Unspecified }
-                                 { Id=PackageId.Bind "Rx-Interfaces"; Version=Unspecified }
-                                 { Id=PackageId.Bind "Rx-Linq"; Version=Unspecified }
-                                 { Id=PackageId.Bind "Rx-PlatformServices"; Version=Unspecified } ]
+    let expectedPackages = Set [ { Id=PackageId.from "Rx-Core"; Version=Unspecified }
+                                 { Id=PackageId.from "Rx-Interfaces"; Version=Unspecified }
+                                 { Id=PackageId.from "Rx-Linq"; Version=Unspecified }
+                                 { Id=PackageId.from "Rx-PlatformServices"; Version=Unspecified } ]
 
-    let expectedProject = { Repository = RepositoryId.Bind "Test"
+    let expectedProject = { Repository = RepositoryId.from "Test"
                             RelativeProjectFile = ProjectRelativeFile "ConvertedProject.csproj"
-                            ProjectGuid = ProjectId.Bind (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d") 
-                            ProjectType = ProjectType.Bind (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
-                            Output = AssemblyId.Bind "CassandraSharp"
+                            ProjectGuid = ProjectId.from (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d") 
+                            ProjectType = ProjectType.from (ParseGuid "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
+                            Output = AssemblyId.from "CassandraSharp"
                             OutputType = OutputType.Dll
                             FxTarget = FrameworkVersion "v4.5"
-                            AssemblyReferences = Set [ AssemblyId.Bind "System"
-                                                       AssemblyId.Bind "System.Numerics"
-                                                       AssemblyId.Bind "System.Xml"
-                                                       AssemblyId.Bind "System.Configuration" ]
-                            PackageReferences = Set [ PackageId.Bind "Rx-Core"
-                                                      PackageId.Bind "Rx-Interfaces"
-                                                      PackageId.Bind "Rx-Linq"
-                                                      PackageId.Bind "Rx-PlatformServices" ]
-                            ProjectReferences = Set [ ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] }
+                            AssemblyReferences = Set [ AssemblyId.from "System"
+                                                       AssemblyId.from "System.Numerics"
+                                                       AssemblyId.from "System.Xml"
+                                                       AssemblyId.from "System.Configuration" ]
+                            PackageReferences = Set [ PackageId.from "Rx-Core"
+                                                      PackageId.from "Rx-Interfaces"
+                                                      PackageId.from "Rx-Linq"
+                                                      PackageId.from "Rx-PlatformServices" ]
+                            ProjectReferences = Set [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] }
 
-    let expectedProjects = Set [ ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ]
+    let expectedProjects = Set [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ]
 
     let projectFile = FileInfo ("./ConvertedProject.csproj")
-    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader false) projectFile.Directory (RepositoryId.Bind "Test") projectFile
-    prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.Bind (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")]
+    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader false) projectFile.Directory (RepositoryId.from "Test") projectFile
+    prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")]
 
-    prjDescriptor.Packages |> Seq.iter (fun x -> printfn "%A" x.Id.Value)
+    prjDescriptor.Packages |> Seq.iter (fun x -> printfn "%A" x.Id.toString)
 
     prjDescriptor.Packages |> should equal expectedPackages
     prjDescriptor.Project |> should equal expectedProject
@@ -164,5 +164,5 @@ let CheckParseConvertedProjectWithoutPackagesConfig () =
 [<Test>]
 let CheckParseInvalidProject () =
     let projectFile = FileInfo ("./ProjectWithInvalidRefs.csproj")
-    let getPrjDescriptor = (fun () -> ProjectParsing.ParseProjectContent (XDocumentLoader true) projectFile.Directory (RepositoryId.Bind "Test") projectFile |> ignore)
+    let getPrjDescriptor = (fun () -> ProjectParsing.ParseProjectContent (XDocumentLoader true) projectFile.Directory (RepositoryId.from "Test") projectFile |> ignore)
     getPrjDescriptor |> should throw typeof<System.Exception>

@@ -56,9 +56,9 @@ let private ParseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir :
             |> Seq.map (parser repoDir repoRef)
 
 let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) = 
-    repos |> Seq.map (fun x -> GetSubDirectory x.Name.Value wsDir) 
+    repos |> Seq.map (fun x -> GetSubDirectory x.Name.toString wsDir) 
           |> Seq.filter (fun x -> x.Exists) 
-          |> Seq.map (fun x -> ParseRepositoryProjects parser (RepositoryId.Bind(x.Name)) x)
+          |> Seq.map (fun x -> ParseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
           |> Seq.concat
 
 let Init(path : string) = 
@@ -125,8 +125,8 @@ let GenerateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
-    let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.Value) project.RelativeProjectFile.Value
-    let binFile = sprintf "%s/%s/%s%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT (project.Output.Value) <| StringifyOutputType project.OutputType
+    let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.toString) project.RelativeProjectFile.toString
+    let binFile = sprintf "%s/%s/%s%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT (project.Output.toString) <| StringifyOutputType project.OutputType
 
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -140,10 +140,10 @@ let GenerateProjectTarget (project : Project) =
                 XElement(NsMsBuild + "ProjectReference",
                     XAttribute (NsNone + "Include", projectFile),
                     XAttribute (NsNone + "Condition", srcCondition),
-                    XElement (NsMsBuild + "Project", StringifyGuid project.ProjectGuid.Value),
-                    XElement (NsMsBuild + "Name", project.Output.Value)),
+                    XElement (NsMsBuild + "Project", project.ProjectGuid.toString),
+                    XElement (NsMsBuild + "Name", project.Output.toString)),
                 XElement (NsMsBuild + "Reference",
-                    XAttribute (NsNone + "Include", project.Output.Value),
+                    XAttribute (NsNone + "Include", project.Output.toString),
                     XAttribute (NsNone + "Condition", binCondition),
                     XElement (NsMsBuild + "HintPath", binFile),
                     XElement (NsMsBuild + "Private", "true")))))
@@ -152,7 +152,7 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
     let prjDir = WorkspaceProjectFolder ()
     for project in projects do
         let content = GenerateProjectTarget project
-        let projectFile = prjDir |> GetFile (AddExt (project.ProjectGuid.Value.ToString("D")) Targets)
+        let projectFile = prjDir |> GetFile (AddExt (project.ProjectGuid.toString) Targets)
         xdocSaver projectFile content
 
 let ConvertProject (xproj : XDocument) (project : Project) =
@@ -190,7 +190,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     let filterAssemblies (assFiles) (xel : XElement) =
         let inc = !> xel.Attribute(XNamespace.None + "Include") : string
         let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
-        let assRef = AssemblyId.Bind (System.Reflection.AssemblyName(assName))
+        let assRef = AssemblyId.from (System.Reflection.AssemblyName(assName))
         let res = Set.contains assRef assFiles
         not res
 
@@ -239,7 +239,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     // add project refereces
     let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     for projectReference in project.ProjectReferences do
-        let prjRef = projectReference.Value.ToString("D")
+        let prjRef = projectReference.toString
         let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER prjRef
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
@@ -247,7 +247,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
 
     // add nuget references
     for packageReference in project.PackageReferences do
-        let pkgId = packageReference.Value
+        let pkgId = packageReference.toString
         let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER pkgId
         let pkgProperty = PackagePropertyName pkgId
         let condition = sprintf "'$(%s)' == ''" pkgProperty
@@ -264,8 +264,8 @@ let ConvertProjectContent (xproj : XDocument) (project : Project) =
 let ConvertProjects (antho : Anthology) xdocLoader xdocSaver =
     let wsDir = WorkspaceFolder ()
     for project in antho.Projects do
-        let repoDir = wsDir |> GetSubDirectory (project.Repository.Value)
-        let projFile = repoDir |> GetFile project.RelativeProjectFile.Value 
+        let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
+        let projFile = repoDir |> GetFile project.RelativeProjectFile.toString 
         let xproj = xdocLoader projFile
         let convxproj = ConvertProjectContent xproj project
 
@@ -274,7 +274,7 @@ let ConvertProjects (antho : Anthology) xdocLoader xdocSaver =
 let RemoveUselessStuff (antho : Anthology) =
     let wsDir = WorkspaceFolder ()
     for repo in antho.Repositories do
-        let repoDir = wsDir |> GetSubDirectory (repo.Name.Value)
+        let repoDir = wsDir |> GetSubDirectory (repo.Name.toString)
         repoDir.EnumerateFiles("*.sln", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
         repoDir.EnumerateFiles("packages.config", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
         repoDir.EnumerateFiles("paket.dependencies", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
@@ -300,7 +300,7 @@ let Convert () =
     RemoveUselessStuff antho
 
 let ClonedRepositories (wsDir : DirectoryInfo) (repos : Repository set) =
-    repos |> Set.filter (fun x -> let repoDir = wsDir |> GetSubDirectory x.Name.Value
+    repos |> Set.filter (fun x -> let repoDir = wsDir |> GetSubDirectory x.Name.toString
                                   repoDir.Exists)
 
 let CollectRepoHash wsDir (repos : Repository set) =

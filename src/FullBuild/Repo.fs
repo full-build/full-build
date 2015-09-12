@@ -33,10 +33,10 @@ open IoHelpers
 
 let List() = 
     let antho = LoadAnthology()
-    antho.Repositories |> Seq.iter (fun x -> printfn "%s : %s [%A]" x.Name.Value x.Url.Value x.Vcs)
+    antho.Repositories |> Seq.iter (fun x -> printfn "%s : %s [%A]" x.Name.toString x.Url.toString x.Vcs)
 
 let MatchRepo (repo : Repository set) (filter : RepositoryId) = 
-    repo |> Set.filter (fun x -> Match x.Name.Value filter.Value)
+    repo |> Set.filter (fun x -> Match x.Name.toString filter.toString)
 
 let FilterRepos (filters : RepositoryId set) = 
     let antho = LoadAnthology()
@@ -46,7 +46,7 @@ let FilterRepos (filters : RepositoryId set) =
 
 let Clone (filters : RepositoryId set) = 
     let wsDir = WorkspaceFolder()
-    FilterRepos filters |> Set.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Name.Value
+    FilterRepos filters |> Set.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Name.toString
                                                 not <| subDir.Exists)
                         |> Set.iter (Vcs.VcsCloneRepo wsDir)
 
