@@ -44,12 +44,17 @@ open Microsoft.FSharp.Reflection
 
 let toString (x:'a) = 
     match FSharpValue.GetUnionFields(x, typeof<'a>) with
-    | case, _ -> case.Name
+    | case, _ -> case.Name.ToLowerInvariant()
 
 let fromString<'a> (s:string) =
-    match FSharpType.GetUnionCases typeof<'a> |> Array.filter (fun case -> case.Name = s) with
-    |[|case|] -> FSharpValue.MakeUnion(case,[||]) :?> 'a
-    |_ -> failwith "failed to parse"
+    let union = FSharpType.GetUnionCases typeof<'a> |> Seq.tryFind(fun x -> String.Equals(x.Name, s, StringComparison.InvariantCultureIgnoreCase))
+    match union with
+    | Some x -> FSharpValue.MakeUnion(x,[||]) :?> 'a
+    | _ -> failwithf "failed to parse %s as %A" s typeof<'a>
+
+//    match FSharpType.GetUnionCases typeof<'a> |> Array.filter (fun case -> String.Equals(case.Name, s, StringComparison.InvariantCultureIgnoreCase)) with
+//    |[|case|] -> FSharpValue.MakeUnion(case,[||]) :?> 'a
+//    |_ -> failwith "failed to parse"
 
 // Usage:
 // type A = X|Y|Z with
