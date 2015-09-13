@@ -31,12 +31,16 @@ open Anthology
 open System.IO
 
 
-let private GitRebase (repoDir : DirectoryInfo) =
+let private GitClean (repoDir : DirectoryInfo) =
     Exec "git" "clean -fxd" repoDir
+
+let private HgClean (repoDir : DirectoryInfo) =
+    Exec "hg" "purge" repoDir
+
+let private GitPull (repoDir : DirectoryInfo) =
     Exec "git" "pull --rebase" repoDir
 
-let private HgRebase (repoDir : DirectoryInfo) =
-    Exec "hg" "purge" repoDir
+let private HgPull (repoDir : DirectoryInfo) =
     Exec "hg" "pull -u" repoDir
 
 
@@ -128,11 +132,20 @@ let VcsIgnore (wsDir : DirectoryInfo) (repo : Repository) =
         | VcsType.Hg -> HgIgnore
     ignoreRepo repoDir
 
-let VcsRebase (wsDir : DirectoryInfo) (repo : Repository) =
+let VcsClean (wsDir : DirectoryInfo) (repo : Repository) =
     let repoDir = wsDir |> GetSubDirectory repo.Name.toString
 
-    let rebaseRepo = 
+    let cleanRepo = 
         match repo.Vcs with
-        | VcsType.Git -> GitRebase
-        | VcsType.Hg -> HgRebase
-    rebaseRepo repoDir
+        | VcsType.Git -> GitClean
+        | VcsType.Hg -> HgClean
+    cleanRepo repoDir
+
+let VcsPull (wsDir : DirectoryInfo) (repo : Repository) =
+    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+
+    let pullRepo = 
+        match repo.Vcs with
+        | VcsType.Git -> GitPull
+        | VcsType.Hg -> HgPull
+    pullRepo repoDir
