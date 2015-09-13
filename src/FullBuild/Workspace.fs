@@ -359,13 +359,24 @@ let Checkout (version : BookmarkVersion) =
     let versionDir = DirectoryInfo(config.BinRepo) |> GetSubDirectory hash
     IoHelpers.CopyFolder versionDir binDir
 
-let Pull () =
+let Clean () =
     let wsDir = Env.WorkspaceFolder ()
     let config = Configuration.GlobalConfig()
     let mainRepo = config.Repository
-    Vcs.VcsRebase wsDir mainRepo
+    Vcs.VcsClean wsDir mainRepo
 
     let antho = Configuration.LoadAnthology ()
     let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
     for repo in clonedRepos do
-        Vcs.VcsRebase wsDir repo
+        Vcs.VcsClean wsDir repo
+
+let Pull () =
+    let wsDir = Env.WorkspaceFolder ()
+    let config = Configuration.GlobalConfig()
+    let mainRepo = config.Repository
+    Vcs.VcsPull wsDir mainRepo
+
+    let antho = Configuration.LoadAnthology ()
+    let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
+    for repo in clonedRepos do
+        Vcs.VcsPull wsDir repo

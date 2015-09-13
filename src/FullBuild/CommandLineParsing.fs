@@ -66,6 +66,7 @@ type Command =
     | ConvertWorkspace
     | PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
+    | CleanWorkspace
     | PullWorkspace
 
     // repository
@@ -118,6 +119,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Build) :: (MatchViewId name) :: [] -> Command.BuildView { Name = name }
     | Token(Token.Checkout) :: (MatchBookmarkVersion version) :: [] -> Command.CheckoutWorkspace {Version = version}
     | Token(Token.Push) :: [] -> Command.PushWorkspace
+    | Token(Token.Clean) :: [] -> Command.CleanWorkspace
     | Token(Token.Pull) :: [] -> Command.PullWorkspace
 
     | Token(Token.Install) :: [] -> Command.InstallPackages
@@ -157,7 +159,8 @@ let UsageContent() =
         yield ""
         yield "  checkout <version|master> : checkout workspace to version"
         yield "  push : push a baseline from current repositories version"
-        yield "  rebase : cleanup workspace and update to latest version (DANGER !)"
+        yield "  clean : cleanup workspace (DANGER !)"
+        yield "  pull : update to latest version"
         yield "  package update : update packages"
         yield "  package outdated : display outdated packages"
         yield ""
