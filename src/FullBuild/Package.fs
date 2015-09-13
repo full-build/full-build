@@ -56,7 +56,7 @@ let GenerateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo seq) =
             yield XElement(NsMsBuild + "Reference",
                     XAttribute(NsNone + "Include", assemblyName),
                     XElement(NsMsBuild + "HintPath", hintPath),
-                    XElement(NsMsBuild + "Private", "true"))
+                    XElement(NsMsBuild + "Private", "false"))
     }
 
 let GenerateItemGroup (fxLibs : DirectoryInfo) =
