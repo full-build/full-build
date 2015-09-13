@@ -102,8 +102,6 @@
     </Reference>
   </ItemGroup>
   <Import Project="$(SolutionDir)/.full-build/packages/fsharp.configuration/package.targets" Condition="'$(FullBuild_fsharp_configuration_Pkg)' == ''" />
-  <Import Project="$(SolutionDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
-  <Import Project="$(SolutionDir)/.full-build/views/$(SolutionName).targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
