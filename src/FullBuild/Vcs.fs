@@ -57,12 +57,12 @@ let private HgTip (repoDir : DirectoryInfo) =
 
 
 
-let private GitClone (url : string) (target : DirectoryInfo) = 
+let private GitClone (target : DirectoryInfo) (url : string) = 
     let args = sprintf "clone %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
     Exec "git" args currDir
 
-let private HgClone (url : string) (target : DirectoryInfo) = 
+let private HgClone (target : DirectoryInfo) (url : string) = 
     let args = sprintf "clone %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
     Exec "hg" args currDir    
@@ -95,44 +95,27 @@ let private HgIgnore (repoDir : DirectoryInfo) =
     ()
 
 
-let ChooseVcs (repo : Repository) gitFun hgFun =
-    match repo.Vcs with
-    | VcsType.Git -> gitFun
-    | VcsType.Hg -> hgFun
+let ApplyVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
+    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+    let f = match repo.Vcs with
+            | VcsType.Git -> gitFun
+            | VcsType.Hg -> hgFun
+    f repoDir
 
 let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) = 
-    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
-    
-    let cloneRepo = ChooseVcs repo GitClone HgClone
-    cloneRepo repo.Url.toString repoDir
+    ApplyVcs wsDir repo GitClone HgClone repo.Url.toString
 
 let VcsTip (wsDir : DirectoryInfo) (repo : Repository) = 
-    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
-    
-    let tipRepo = ChooseVcs repo GitTip HgTip
-    let tip = tipRepo repoDir
-    tip
+    ApplyVcs wsDir repo GitTip HgTip
 
 let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion) = 
-    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
-
-    let checkoutRepo = ChooseVcs repo GitCheckout HgCheckout
-    checkoutRepo repoDir version
+    ApplyVcs wsDir repo GitCheckout HgCheckout version
 
 let VcsIgnore (wsDir : DirectoryInfo) (repo : Repository) =
-    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
-
-    let ignoreRepo = ChooseVcs repo GitIgnore HgIgnore
-    ignoreRepo repoDir
+    ApplyVcs wsDir repo GitIgnore HgIgnore
 
 let VcsClean (wsDir : DirectoryInfo) (repo : Repository) =
-    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
-
-    let cleanRepo = ChooseVcs repo GitClean HgClean
-    cleanRepo repoDir
+    ApplyVcs wsDir repo GitClean HgClean
 
 let VcsPull (wsDir : DirectoryInfo) (repo : Repository) =
-    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
-
-    let pullRepo = ChooseVcs repo GitPull HgPull
-    pullRepo repoDir
+    ApplyVcs wsDir repo GitPull HgPull
