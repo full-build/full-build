@@ -64,7 +64,7 @@ type Command =
     | InitWorkspace of CreateWorkspace
     | IndexWorkspace
     | ConvertWorkspace
-    | BaselineWorkspace
+    | PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
     | RebaseWorkspace
 
@@ -95,6 +95,14 @@ type Command =
     | Migrate of string
     | TransformWorkspace
 
+let (|MatchBookmarkVersion|) version =
+    match version with
+    | "master" -> Master
+    | x -> BookmarkVersion x
+
+let (|MatchViewId|) view =
+    ViewId view
+
 let ParseCommandLine(args : string list) : Command = 
     match args with
     | Token(Token.Help) :: [] -> Command.Usage
@@ -104,32 +112,33 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Convert) :: [] -> Command.ConvertWorkspace
     | Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                                        CloneRepositories { Filters = repoFilters }
-    | Token(Token.Install) :: [] -> Command.InstallPackages
-    | Token(Token.Update) :: [] -> Command.UpdatePackages
-    | Token(Token.Outdated) :: [] -> Command.OutdatedPackages
-    | Token(Token.Graph) :: name :: [] -> Command.GraphView { Name = ViewId name }
-    | Token(Token.Deploy) ::names -> let appNames = names |> Seq.map ApplicationId.from |> Set
-                                     DeployApplications {Names = appNames }
-    | Token(Token.Build) :: name :: [] -> Command.BuildView { Name = ViewId name }
-    | Token(Token.Checkout) :: version :: [] -> Command.CheckoutWorkspace {Version = BookmarkVersion version}
-    | Token(Token.Baseline) :: [] -> Command.BaselineWorkspace
+    | Token(Token.Graph) :: (MatchViewId name) :: [] -> Command.GraphView { Name = name }
+    | Token(Token.Deploy) :: names -> let appNames = names |> Seq.map ApplicationId.from |> Set
+                                      DeployApplications {Names = appNames }
+    | Token(Token.Build) :: (MatchViewId name) :: [] -> Command.BuildView { Name = name }
+    | Token(Token.Checkout) :: (MatchBookmarkVersion version) :: [] -> Command.CheckoutWorkspace {Version = version}
+    | Token(Token.Push) :: [] -> Command.PushWorkspace
     | Token(Token.Rebase) :: [] -> Command.RebaseWorkspace
+
+    | Token(Token.Install) :: [] -> Command.InstallPackages
+    | Token(Token.Package) ::Token(Token.Update) :: [] -> Command.UpdatePackages
+    | Token(Token.Package) ::Token(Token.Outdated) :: [] -> Command.OutdatedPackages
 
     | Token(Token.Add) :: Token(Token.Repo) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
                                                                            AddRepository(repo)
-    | Token(Token.Add) :: Token(Token.View) :: name :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                                                                  Command.CreateView { Name = ViewId name; Filters = repoFilters }
-    | Token(Token.Drop) :: Token(Token.View) :: name :: [] -> Command.DropView { Name = ViewId name }
+    | Token(Token.Add) :: Token(Token.View) :: (MatchViewId name) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
+                                                                                Command.CreateView { Name = name; Filters = repoFilters }
+    | Token(Token.Drop) :: Token(Token.View) :: (MatchViewId name) :: [] -> Command.DropView { Name = name }
     | Token(Token.List) :: Token(Token.Repo) :: [] -> ListRepositories
     | Token(Token.List) :: Token(Token.View) :: [] -> Command.ListViews
     | Token(Token.List) :: Token(Token.Package) :: [] -> Command.ListPackages
     | Token(Token.List) :: Token(Token.Application) :: [] -> ListApplications
-    | Token(Token.Describe) :: Token(Token.View) :: name :: [] -> Command.DescribeView { Name = ViewId name }
+    | Token(Token.Describe) :: Token(Token.View) :: (MatchViewId name) :: [] -> Command.DescribeView { Name = name }
 
     | Token(Token.Debug) :: Token(Index) :: [] -> Command.IndexWorkspace
     | Token(Token.Debug) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
     | Token(Token.Debug) :: Token(Token.Transform) :: [] -> Command.TransformWorkspace
-    | Token(Token.Debug) :: Token(Token.Generate) :: name :: [] -> Command.GenerateView { Name = ViewId name }
+    | Token(Token.Debug) :: Token(Token.Generate) :: (MatchViewId name) :: [] -> Command.GenerateView { Name = name }
     | Token(Token.Debug) :: Token(Token.Migrate) :: name :: [] -> Command.Migrate name
     | _ -> Command.Error
 
@@ -139,17 +148,18 @@ let UsageContent() =
         yield "  help : display help"
         yield "  create <path> : create a new environment in given path"
         yield "  init <path> : initialize a new workspace in given path"
-        yield "  convert : adapt projects in workspace"
-        yield "  clone <wildcards> : clone repositories using provided wildcards"
         yield "  install : install packages declared in anthology"
-        yield "  update : update workspace with latest sources and binaries"
-        yield "  outdated : display outdated packages"
-        yield "  graph <name> : graph view content (project, packages, assemblies)"
-        yield "  deploy <name> : deploy application"
+        yield "  clone <wildcards> : clone repositories using provided wildcards"
+        yield "  convert : adapt projects in workspace"
         yield "  build <name> : build view"
-        yield "  checkout <version|head> : checkout workspace to version"
-        yield "  baseline : create a baseline from current repositories version"
-        yield "  rebase : cleanup workspace and update to latest version"
+        yield "  deploy <name> : deploy application"
+        yield "  graph <name> : graph view content (project, packages, assemblies)"
+        yield ""
+        yield "  checkout <version|master> : checkout workspace to version"
+        yield "  push : push a baseline from current repositories version"
+        yield "  rebase : cleanup workspace and update to latest version (DANGER !)"
+        yield "  package update : update packages"
+        yield "  package outdated : display outdated packages"
         yield ""
         yield "  add repo <git|hg> <name> <uri> : declare a new repository"
         yield "  add view <name> <wildcards> : add repositories to view"

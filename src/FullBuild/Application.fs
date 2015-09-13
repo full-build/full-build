@@ -25,20 +25,13 @@
 module Application
 open Anthology
 open Collections
-
+open System.IO
+open Env
+open IoHelpers
 
 let Deploy (names : ApplicationId set) =
     ()
 
-
-let ListApplicationsContent (apps : Application seq) =
-    seq {
-        for app in apps do
-            yield sprintf "%s" app.Name.toString
-    }
-
 let List () =
-    let antho = Configuration.LoadAnthology ()
-
-    let content = ListApplicationsContent antho.Applications 
-    content |> Seq.iter (fun x -> printfn "%s" x)
+    let appDir = WorkspaceAppFolder ()
+    appDir.EnumerateFiles (AddExt "*" App) |> Seq.iter (fun x -> printfn "%s" (Path.GetFileNameWithoutExtension (x.Name)))
