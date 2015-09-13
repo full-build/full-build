@@ -95,57 +95,44 @@ let private HgIgnore (repoDir : DirectoryInfo) =
     ()
 
 
+let ChooseVcs (repo : Repository) gitFun hgFun =
+    match repo.Vcs with
+    | VcsType.Git -> gitFun
+    | VcsType.Hg -> hgFun
+
 let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) = 
     let repoDir = wsDir |> GetSubDirectory repo.Name.toString
     
-    let cloneRepo = 
-        match repo.Vcs with
-        | VcsType.Git -> GitClone
-        | VcsType.Hg -> HgClone
+    let cloneRepo = ChooseVcs repo GitClone HgClone
     cloneRepo repo.Url.toString repoDir
 
 let VcsTip (wsDir : DirectoryInfo) (repo : Repository) = 
     let repoDir = wsDir |> GetSubDirectory repo.Name.toString
     
-    let tipRepo = 
-        match repo.Vcs with
-        | VcsType.Git -> GitTip
-        | VcsType.Hg -> HgTip
+    let tipRepo = ChooseVcs repo GitTip HgTip
     let tip = tipRepo repoDir
     tip
 
 let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion) = 
     let repoDir = wsDir |> GetSubDirectory repo.Name.toString
 
-    let checkoutRepo = 
-        match repo.Vcs with
-        | VcsType.Git -> GitCheckout
-        | VcsType.Hg -> HgCheckout
+    let checkoutRepo = ChooseVcs repo GitCheckout HgCheckout
     checkoutRepo repoDir version
 
 let VcsIgnore (wsDir : DirectoryInfo) (repo : Repository) =
     let repoDir = wsDir |> GetSubDirectory repo.Name.toString
 
-    let ignoreRepo = 
-        match repo.Vcs with
-        | VcsType.Git -> GitIgnore
-        | VcsType.Hg -> HgIgnore
+    let ignoreRepo = ChooseVcs repo GitIgnore HgIgnore
     ignoreRepo repoDir
 
 let VcsClean (wsDir : DirectoryInfo) (repo : Repository) =
     let repoDir = wsDir |> GetSubDirectory repo.Name.toString
 
-    let cleanRepo = 
-        match repo.Vcs with
-        | VcsType.Git -> GitClean
-        | VcsType.Hg -> HgClean
+    let cleanRepo = ChooseVcs repo GitClean HgClean
     cleanRepo repoDir
 
 let VcsPull (wsDir : DirectoryInfo) (repo : Repository) =
     let repoDir = wsDir |> GetSubDirectory repo.Name.toString
 
-    let pullRepo = 
-        match repo.Vcs with
-        | VcsType.Git -> GitPull
-        | VcsType.Hg -> HgPull
+    let pullRepo = ChooseVcs repo GitPull HgPull
     pullRepo repoDir
