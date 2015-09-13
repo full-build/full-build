@@ -31,7 +31,7 @@ git add --all
 git commit -am "after conversion"
 popd
 
-%FULLBUILD% baseline || goto :ko
+%FULLBUILD% push || goto :ko
 
 
 
