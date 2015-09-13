@@ -36,9 +36,9 @@ let main argv =
     | InitWorkspace wsInfo -> Workspace.Init wsInfo.Path
     | IndexWorkspace -> Workspace.Index ()
     | ConvertWorkspace -> Workspace.Convert ()
-    | PushWorkspace -> Workspace.Bookmark ()
+    | PushWorkspace -> Workspace.Push ()
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
-    | RebaseWorkspace -> Workspace.Rebase ()
+    | PullWorkspace -> Workspace.Pull ()
     | TransformWorkspace -> Workspace.TransformProjects ()
 
     // repository
