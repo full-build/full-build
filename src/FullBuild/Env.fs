@@ -32,6 +32,7 @@ let private CONFIG_FOLDER = ".full-build"
 let private BIN_FOLDER = "bin"
 let private VIEW_FOLDER = "views"
 let private PROJECT_FOLDER = "projects"
+let private APP_FOLDER = "apps"
 let private PACKAGE_FOLDER = "packages"
 let private ASSEMBLY_FOLDER = "assemblies"
 let private ANTHOLOGY_FILENAME = "anthology"
@@ -75,6 +76,11 @@ let WorkspaceConfigFolder() : DirectoryInfo =
 let WorkspaceViewFolder() : DirectoryInfo =
     let wsDir = WorkspaceConfigFolder()
     CreateSubDirectory wsDir VIEW_FOLDER
+
+// $/.full-build/apps
+let WorkspaceAppFolder() : DirectoryInfo =
+    let wsDir = WorkspaceConfigFolder()
+    CreateSubDirectory wsDir APP_FOLDER
 
 // $/.full-build/projects
 let WorkspaceProjectFolder() : DirectoryInfo =

@@ -32,7 +32,6 @@ let CheckToRepository () =
 [<Test>]
 let CheckEqualityWithPermutation () =
     let antho1 = {
-        Applications = Set.empty
         Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
                          { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
         Projects = [ { Output = AssemblyId.from "cqlplus"
@@ -46,7 +45,6 @@ let CheckEqualityWithPermutation () =
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set }
 
     let antho2 = {
-        Applications = Set.empty
         Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } 
                          { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } ] |> set
         Projects = [ { Output = AssemblyId.from "cqlplus"
