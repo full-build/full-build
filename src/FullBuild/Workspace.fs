@@ -71,8 +71,7 @@ let Create(path : string) =
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
     VcsCloneRepo wsDir (GlobalConfig().Repository)
-    let antho = { Applications = Set.empty
-                  Repositories = Set.empty
+    let antho = { Repositories = Set.empty
                   Projects = Set.empty }
     let confDir = wsDir |> GetSubDirectory ".full-build"
     let anthoFile = confDir |> GetFile "anthology"
