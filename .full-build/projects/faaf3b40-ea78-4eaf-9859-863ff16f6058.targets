@@ -8,7 +8,7 @@
     </ProjectReference>
     <Reference Include="fullbuild.tests" Condition="'$(Prj_faaf3b40_ea78_4eaf_9859_863ff16f6058)' == ''">
       <HintPath>$(SolutionDir)/bin/fullbuild.tests.dll</HintPath>
-      <Private>false</Private>
+      <Private>true</Private>
     </Reference>
   </ItemGroup>
 </Project>
