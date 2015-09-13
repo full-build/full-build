@@ -309,7 +309,7 @@ let CollectRepoHash wsDir (repos : Repository set) =
 
     repos |> Set.map getRepoHash
 
-let Bookmark () = 
+let Push () = 
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.WorkspaceFolder ()
     let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
@@ -359,7 +359,7 @@ let Checkout (version : BookmarkVersion) =
     let versionDir = DirectoryInfo(config.BinRepo) |> GetSubDirectory hash
     IoHelpers.CopyFolder versionDir binDir
 
-let Rebase () =
+let Pull () =
     let wsDir = Env.WorkspaceFolder ()
     let config = Configuration.GlobalConfig()
     let mainRepo = config.Repository

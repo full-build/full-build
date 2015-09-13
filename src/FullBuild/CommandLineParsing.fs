@@ -66,7 +66,7 @@ type Command =
     | ConvertWorkspace
     | PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
-    | RebaseWorkspace
+    | PullWorkspace
 
     // repository
     | AddRepository of Repository
@@ -118,7 +118,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Build) :: (MatchViewId name) :: [] -> Command.BuildView { Name = name }
     | Token(Token.Checkout) :: (MatchBookmarkVersion version) :: [] -> Command.CheckoutWorkspace {Version = version}
     | Token(Token.Push) :: [] -> Command.PushWorkspace
-    | Token(Token.Rebase) :: [] -> Command.RebaseWorkspace
+    | Token(Token.Pull) :: [] -> Command.PullWorkspace
 
     | Token(Token.Install) :: [] -> Command.InstallPackages
     | Token(Token.Package) ::Token(Token.Update) :: [] -> Command.UpdatePackages
