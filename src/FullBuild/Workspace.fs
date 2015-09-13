@@ -145,7 +145,7 @@ let GenerateProjectTarget (project : Project) =
                     XAttribute (NsNone + "Include", project.Output.toString),
                     XAttribute (NsNone + "Condition", binCondition),
                     XElement (NsMsBuild + "HintPath", binFile),
-                    XElement (NsMsBuild + "Private", "true")))))
+                    XElement (NsMsBuild + "Private", "false")))))
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let prjDir = WorkspaceProjectFolder ()
