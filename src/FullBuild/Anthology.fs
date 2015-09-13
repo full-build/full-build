@@ -139,11 +139,11 @@ with
 
 type Application = 
     { Name : ApplicationId
-      Projects : ProjectId set }
+      Projects : ProjectId set 
+      NuGets : PackageId set }
 
 type Anthology = 
-    { Applications : Application set
-      Repositories : Repository set
+    { Repositories : Repository set
       Projects : Project set }
 
 type Baseline = 

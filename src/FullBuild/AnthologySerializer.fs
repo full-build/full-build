@@ -86,8 +86,7 @@ let Deserialize (content) =
 
     let config = new AnthologyConfig()
     config.LoadText content
-    { Applications = Set.empty
-      Repositories = convertToRepositories (config.anthology.repositories |> List.ofSeq)
+    { Repositories = convertToRepositories (config.anthology.repositories |> List.ofSeq)
       Projects = convertToProjects (config.anthology.projects |> List.ofSeq) }
 
 

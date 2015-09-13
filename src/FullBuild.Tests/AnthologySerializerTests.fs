@@ -9,7 +9,6 @@ open StringHelpers
 [<Test>]
 let CheckSaveLoadAnthology () =
     let antho1 = {
-        Applications = Set.empty
         Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
                          { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
         Projects = [ { Output = AssemblyId.from "cqlplus"
