@@ -1,7 +1,7 @@
 anthology:
   repositories:
     - repo: src
-      type: Git
+      type: git
       uri: https://github.com/pchalamet/full-build
   projects:
     - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
