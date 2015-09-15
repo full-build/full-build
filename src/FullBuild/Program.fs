@@ -27,8 +27,7 @@ module Main
 open CommandLineParsing
 open Configuration
 
-[<EntryPoint>]
-let main argv = 
+let tryMain argv = 
     let cmd = ParseCommandLine (argv |> Seq.toList)
     match cmd with
     // workspace
@@ -71,10 +70,18 @@ let main argv =
     | Usage -> DisplayUsage ()
     | Error -> DisplayUsage ()
     | Migrate name -> Configuration.Migrate name
-//    | BookmarkWorkspace -> FullBuild.Commands.Workspace.Workspace.Bookmark ()
-//    | CheckoutWorkspace {Version=wsVersion} -> FullBuild.Commands.Workspace.Workspace.CheckoutBookmark (wsVersion)
-//    | RefreshWorkspace -> FullBuild.Commands.Workspace.Workspace.RefreshWorkspace ()
 
     let retCode = if cmd = Error then 5
                   else 0
     retCode
+
+[<EntryPoint>]
+let main argv = 
+    try
+        tryMain argv
+    with
+        x -> printfn "---------------------------------------------------"
+             printfn "Unexpected error:"
+             printfn "%A" x
+             printfn "---------------------------------------------------"
+             5
