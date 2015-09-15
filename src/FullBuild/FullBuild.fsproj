@@ -24,7 +24,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile></DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>debug migrate anthology-simplified.yaml</StartArguments>
     <StartWorkingDirectory>C:\src\full-build\src\FullBuild.Tests\</StartWorkingDirectory>
@@ -60,6 +61,7 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Collections.fs" />
     <Compile Include="StringHelpers.fs" />
     <Compile Include="IoHelpers.fs" />
