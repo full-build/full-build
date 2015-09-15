@@ -27,4 +27,4 @@ deploy_script:
   
 artifacts:
   path: bin/
-  name: $(CONFIGURATION)
+  name: FullBuild
