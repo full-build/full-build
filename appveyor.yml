@@ -26,5 +26,5 @@ deploy_script:
   -cmd: push-release.bat
   
 artifacts:
-  path: src/bin/$(CONFIGURATION)
+  path: bin/$(CONFIGURATION)
   name: $(CONFIGURATION)
