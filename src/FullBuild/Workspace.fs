@@ -328,10 +328,8 @@ let Push () =
     printfn "%s" hash
 
     // commit
-    let configFolder = Env.WorkspaceConfigFolder()
-    Exec.Exec "git" "add --all" configFolder
-    Exec.Exec "git" @"commit -am ""bookmark""" configFolder
-    //Exec.Exec "git" "push" configFolder
+    Vcs.VcsCommit wsDir mainRepo "bookmark"
+    Vcs.VcsPush wsDir mainRepo
 
 
 let Checkout (version : BookmarkVersion) =

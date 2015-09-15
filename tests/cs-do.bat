@@ -20,19 +20,7 @@ rem %FULLBUILD% package simplify || goto :ko
 %FULLBUILD% describe view all || goto :ko
 %FULLBUILD% graph all || goto :ko
 %FULLBUILD% build all || goto :ko
-
-pushd cassandra-sharp
-git add --all
-git commit -am "after conversion"
-popd
-
-pushd cassandra-sharp-contrib
-git add --all
-git commit -am "after conversion"
-popd
-
 %FULLBUILD% push || goto :ko
-
 
 
 rem msbuild csc.sln

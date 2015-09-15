@@ -28,7 +28,7 @@ type Token =
     | Workspace
     | View
     | Help
-    | Create
+    | Setup
     | Init
     | Clone
     | Repo
@@ -64,7 +64,7 @@ let (|Token|) (token : string) =
     | "workspace" -> Workspace
     | "view" -> View
     | "help" -> Help
-    | "create" -> Create
+    | "setup" -> Setup
     | "init" -> Init
     | "clone" -> Clone
     | "repo" -> Repo
