@@ -31,11 +31,28 @@ open Anthology
 open System.IO
 
 
+let private GitCommit (repoDir : DirectoryInfo) (comment : string) =
+    Exec "git" "add --all" repoDir
+    let args = sprintf @"commit -m ""%s""" comment
+    Exec "git" args repoDir
+
+let private HgCommit (repoDir : DirectoryInfo) (comment : string) =
+    Exec "git" "add -S *" repoDir
+    let args = sprintf @"commit -A -m ""%s" comment
+    Exec "hg" args repoDir
+
+let private GitPush (repoDir : DirectoryInfo) =
+    Exec "git" "push" repoDir
+
+let private HgPush (repoDir : DirectoryInfo) =
+    Exec "hg" "push" repoDir
+    
 let private GitClean (repoDir : DirectoryInfo) =
     Exec "git" "clean -fxd" repoDir
 
 let private HgClean (repoDir : DirectoryInfo) =
     Exec "hg" "purge" repoDir
+
 
 let private GitPull (repoDir : DirectoryInfo) =
     Exec "git" "pull --rebase" repoDir
@@ -84,14 +101,12 @@ let private HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) =
     Exec "hg" args repoDir
 
 let private GitIgnore (repoDir : DirectoryInfo) =
-    let content = seq {
-        yield "packages"
-        yield "views"
-    }
+    let content = ["packages"; "views"]
     let gitIgnoreFile = repoDir |> GetFile ".gitignore"
     File.WriteAllLines (gitIgnoreFile.FullName, content)
 
 let private HgIgnore (repoDir : DirectoryInfo) =
+    // FIXME
     ()
 
 
@@ -103,13 +118,13 @@ let ApplyVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
     f repoDir
 
 let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) = 
-    ApplyVcs wsDir repo GitClone HgClone repo.Url.toString
+    (ApplyVcs wsDir repo GitClone HgClone) repo.Url.toString
 
 let VcsTip (wsDir : DirectoryInfo) (repo : Repository) = 
     ApplyVcs wsDir repo GitTip HgTip
 
 let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion) = 
-    ApplyVcs wsDir repo GitCheckout HgCheckout version
+    (ApplyVcs wsDir repo GitCheckout HgCheckout) version
 
 let VcsIgnore (wsDir : DirectoryInfo) (repo : Repository) =
     ApplyVcs wsDir repo GitIgnore HgIgnore
@@ -119,3 +134,9 @@ let VcsClean (wsDir : DirectoryInfo) (repo : Repository) =
 
 let VcsPull (wsDir : DirectoryInfo) (repo : Repository) =
     ApplyVcs wsDir repo GitPull HgPull
+
+let VcsCommit (wsDir : DirectoryInfo) (repo : Repository) (comment : string) =
+    (ApplyVcs wsDir repo GitCommit HgCommit) comment
+
+let VcsPush (wsDir : DirectoryInfo) (repo : Repository) =
+    (ApplyVcs wsDir repo GitPush HgPush)

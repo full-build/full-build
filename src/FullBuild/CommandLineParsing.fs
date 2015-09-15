@@ -108,7 +108,7 @@ let ParseCommandLine(args : string list) : Command =
     match args with
     | Token(Token.Help) :: [] -> Command.Usage
 
-    | Token(Create) :: path :: [] -> Command.CreateWorkspace { Path = path }
+    | Token(Setup) :: path :: [] -> Command.CreateWorkspace { Path = path }
     | Token(Init) :: path :: [] -> Command.InitWorkspace { Path = path }
     | Token(Convert) :: [] -> Command.ConvertWorkspace
     | Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
@@ -145,36 +145,36 @@ let ParseCommandLine(args : string list) : Command =
     | _ -> Command.Error
 
 let UsageContent() =
-    seq {
-        yield "Usage:"
-        yield "  help : display help"
-        yield "  create <path> : create a new environment in given path"
-        yield "  init <path> : initialize a new workspace in given path"
-        yield "  install : install packages declared in anthology"
-        yield "  clone <wildcards> : clone repositories using provided wildcards"
-        yield "  convert : adapt projects in workspace"
-        yield "  build <name> : build view"
-        yield "  deploy <name> : deploy application"
-        yield "  graph <name> : graph view content (project, packages, assemblies)"
-        yield ""
-        yield "  checkout <version|master> : checkout workspace to version"
-        yield "  push : push a baseline from current repositories version"
-        yield "  clean : cleanup workspace (DANGER !)"
-        yield "  pull : update to latest version"
-        yield "  package update : update packages"
-        yield "  package outdated : display outdated packages"
-        yield ""
-        yield "  add repo <git|hg> <name> <uri> : declare a new repository"
-        yield "  add view <name> <wildcards> : add repositories to view"
-        yield "  drop <view> <name> : drop object"
-        yield "  list <repo|view|package|app> : list objects"
-        yield "  describe <repo|view> <name> : describe view or repository"
-        yield ""
-        yield "  debug index : synchronize anthology with projects"    
-        yield "  debug simplify : simplify packages graph, promote assemblies or packages to project where permitted"
-        yield "  debug generate <name> : generate sln file for view"
-        yield ""
-    }
+    let content = [
+        "Usage:"
+        "  help : display help"
+        "  setup <path> : setup a new environment in given path"
+        "  init <path> : initialize a new workspace in given path"
+        "  install : install packages declared in anthology"
+        "  clone <wildcards> : clone repositories using provided wildcards"
+        "  convert : adapt projects in workspace"
+        "  build <name> : build view"
+        "  deploy <name> : deploy application"
+        "  graph <name> : graph view content (project, packages, assemblies)"
+        ""
+        "  checkout <version|master> : checkout workspace to version"
+        "  push : push a baseline from current repositories version"
+        "  clean : cleanup workspace (DANGER !)"
+        "  pull : update to latest version"
+        "  package update : update packages"
+        "  package outdated : display outdated packages"
+        ""
+        "  add repo <git|hg> <name> <uri> : declare a new repository"
+        "  add view <name> <wildcards> : add repositories to view"
+        "  drop <view> <name> : drop object"
+        "  list <repo|view|package|app> : list objects"
+        "  describe <repo|view> <name> : describe view or repository"
+        ""
+        "  debug index : synchronize anthology with projects"    
+        "  debug simplify : simplify packages graph, promote assemblies or packages to project where permitted"
+        "  debug generate <name> : generate sln file for view"
+        "" ]
+    content
 
 let DisplayUsage() = 
     UsageContent() |> Seq.iter (fun x -> printfn "%s" x)
