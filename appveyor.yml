@@ -17,11 +17,6 @@ assembly_info:
 build_script:
   -cmd: build-release.bat
   
-platform: Any CPU
-configuration: Release
-build:
-  project: src/full-build.sln
-
 test:
   categories:
     except:
