@@ -15,15 +15,17 @@ assembly_info:
   assembly_informational_version: "{version}"
 
 build_script:
-  -cmd: build-release.bat
+        -cmd: build-release.bat && update-bootstrap.bat
   
 test:
+  assemblies:
+   - bin\*.tests.dll
   categories:
     except:
       - integration
   
 deploy_script:
-  -cmd: update-bootstrap.bat && push-release.bat
+  -cmd: push-release.bat
   
 artifacts:
   path: bootstrap/
