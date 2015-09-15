@@ -16,6 +16,7 @@ assembly_info:
 
 build_script:
   -cmd: build-release.bat
+  -cmd: update-bootstrap.bat
   
 test:
   categories:
@@ -26,5 +27,5 @@ deploy_script:
   -cmd: push-release.bat
   
 artifacts:
-  path: bin/
+  path: bootstrap/
   name: FullBuild
