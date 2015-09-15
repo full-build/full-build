@@ -9,7 +9,7 @@ echo APPVEYOR_REPO_COMMIT %APPVEYOR_REPO_COMMIT%
 echo APPVEYOR_REPO_COMMIT_MESSAGE  %APPVEYOR_REPO_COMMIT_MESSAGE% 
 echo APPVEYOR_BUILD_NUMBER  %APPVEYOR_BUILD_NUMBER% 
 
-7z a %HERE%%CONFIGURATION%.zip %HERE%\src\bin\*
+7z a %HERE%%CONFIGURATION%.zip %HERE%\bin\*
 
 %HERE%tools/github-release.exe release ^
                          --user pchalamet ^
