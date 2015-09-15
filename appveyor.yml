@@ -23,8 +23,7 @@ test:
       - integration
   
 deploy_script:
-  -cmd: update-bootstrap.bat
-  -cmd: push-release.bat
+  -cmd: update-bootstrap.bat && push-release.bat
   
 artifacts:
   path: bootstrap/
