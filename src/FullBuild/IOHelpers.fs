@@ -59,7 +59,7 @@ let GetSubDirectory (subDir : string) (dir : DirectoryInfo) : DirectoryInfo =
     let newPath = Path.Combine(dir.FullName, subDir)
     DirectoryInfo (newPath)
 
-let CreateSubDirectory (parentDir : DirectoryInfo) (dirName : string) : DirectoryInfo =
+let CreateSubDirectory (dirName : string) (parentDir : DirectoryInfo) : DirectoryInfo =
     let dir = parentDir |> GetSubDirectory dirName
     dir.Create ()
     dir

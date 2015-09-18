@@ -34,7 +34,7 @@ open Configuration
 open Collections
 
 let Drop (viewName : ViewId) =
-    let vwDir = WorkspaceViewFolder ()
+    let vwDir = GetFolder Env.View
     let vwFile = vwDir |> GetFile (AddExt viewName.toString View)
     File.Delete (vwFile.FullName)
 
@@ -42,11 +42,11 @@ let Drop (viewName : ViewId) =
     File.Delete (vwDefineFile.FullName)
 
 let List () =
-    let vwDir = WorkspaceViewFolder ()
+    let vwDir = GetFolder Env.View
     vwDir.EnumerateFiles (AddExt "*" View) |> Seq.iter (fun x -> printfn "%s" (Path.GetFileNameWithoutExtension (x.Name)))
 
 let Describe (viewName : ViewId) =
-    let vwDir = WorkspaceViewFolder ()
+    let vwDir = GetFolder Env.View
     let vwFile = vwDir |> GetFile (AddExt viewName.toString View)
     File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
 
@@ -131,7 +131,7 @@ let ComputeProjectSelectionClosure (allProjects : Project set) (filters : Reposi
 
 let FindViewProjects (viewName : ViewId) =
     let antho = LoadAnthology ()
-    let viewDir = WorkspaceViewFolder ()
+    let viewDir = GetFolder Env.View
 
     let viewFile = viewDir |> GetFile (AddExt viewName.toString View)
     let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map (fun x -> RepositoryId.from x)
@@ -142,13 +142,13 @@ let FindViewProjects (viewName : ViewId) =
 let Generate (viewName : ViewId) =
     let projects = FindViewProjects viewName
 
-    let wsDir = WorkspaceFolder ()
+    let wsDir = GetFolder Env.Workspace
     let slnFile = wsDir |> GetFile (AddExt viewName.toString Solution)
     let slnContent = GenerateSolutionContent projects
     File.WriteAllLines (slnFile.FullName, slnContent)
 
     let slnDefines = GenerateSolutionDefines projects
-    let viewDir = WorkspaceViewFolder ()
+    let viewDir = GetFolder Env.View
     let slnDefineFile = viewDir |> GetFile (AddExt viewName.toString Targets)
     slnDefines.Save (slnDefineFile.FullName)
 
@@ -280,21 +280,21 @@ let Graph (viewName : ViewId) =
     let antho = Configuration.LoadAnthology ()
     let graph = GraphContent antho viewName
 
-    let wsDir = Env.WorkspaceFolder ()
+    let wsDir = Env.GetFolder Env.Workspace
     let graphFile = wsDir |> GetSubDirectory (AddExt viewName.toString Dgml)
     graph.Save graphFile.FullName
 
 let Create (viewName : ViewId) (filters : RepositoryId set) =
     let repos = filters |> Repo.FilterRepos 
                         |> Seq.map (fun x -> x.Name.toString)
-    let vwDir = WorkspaceViewFolder ()
+    let vwDir = Env.GetFolder Env.View
     let vwFile = vwDir |> GetFile (AddExt viewName.toString View)
     File.WriteAllLines (vwFile.FullName, repos)
 
     Generate viewName
 
 let Build (viewName : ViewId) =
-    let wsDir = Env.WorkspaceFolder ()
+    let wsDir = Env.GetFolder Env.Workspace
     let viewFile = AddExt viewName.toString Solution
     let args = sprintf "/m /p:Configuration=Release %A" viewFile
 
