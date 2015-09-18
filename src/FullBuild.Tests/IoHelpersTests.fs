@@ -16,7 +16,7 @@ let CheckGetSubDirectory () =
 let CheckCreateSubDirectory () =
     let tmpDir = DirectoryInfo (Path.GetTempPath())
     let dirName = Guid.NewGuid().ToString("D")
-    let dir = CreateSubDirectory tmpDir dirName
+    let dir = tmpDir |> CreateSubDirectory dirName
     dir.Exists |> should equal true
 
 [<Test>]

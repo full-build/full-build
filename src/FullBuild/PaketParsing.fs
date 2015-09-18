@@ -53,7 +53,7 @@ let UpdateSourceContent (lines : string seq) (sources : string seq) =
     }
 
 let UpdateSources (sources : string seq) =
-    let confDir = Env.WorkspaceConfigFolder ()
+    let confDir = Env.GetFolder Env.Config
     let paketDep = confDir |> GetFile "paket.dependencies" 
     let oldContent = if paketDep.Exists then File.ReadAllLines (paketDep.FullName) |> Array.toSeq
                      else Seq.empty
@@ -61,7 +61,7 @@ let UpdateSources (sources : string seq) =
     File.WriteAllLines (paketDep.FullName, content)
 
 let ParsePaketDependencies () =
-    let confDir = Env.WorkspaceConfigFolder ()
+    let confDir = Env.GetFolder Env.Config
     let paketDep = confDir |> GetFile "paket.dependencies" 
     if paketDep.Exists then
         let lines = File.ReadAllLines (paketDep.FullName)
@@ -79,7 +79,7 @@ let GenerateDependenciesContent (packages : Package seq) =
     }
 
 let AppendDependencies (packages : Package seq) = 
-    let confDir = Env.WorkspaceConfigFolder ()
+    let confDir = Env.GetFolder Env.Config
     let paketDep = confDir |> GetFile "paket.dependencies" 
 
 
@@ -97,7 +97,7 @@ let RemoveDependenciesContent (lines : string seq) (packages : PackageId set) =
     }
 
 let RemoveDependencies (packages : PackageId set) =
-    let confDir = Env.WorkspaceConfigFolder ()
+    let confDir = Env.GetFolder Env.Config
     let paketDep = confDir |> GetFile "paket.dependencies" 
     let content = File.ReadAllLines (paketDep.FullName)
     let newContent = RemoveDependenciesContent content packages
