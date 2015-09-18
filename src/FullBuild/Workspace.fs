@@ -84,7 +84,7 @@ let Create(path : string) =
     Vcs.VcsIgnore wsDir (GlobalConfig().Repository)
 
 let Index () = 
-    let wsDir = WorkspaceFolder()
+    let wsDir = Env.GetFolder Env.Workspace
     let antho = LoadAnthology()
     let projects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir antho.Repositories
 
@@ -147,7 +147,7 @@ let GenerateProjectTarget (project : Project) =
                     XElement (NsMsBuild + "Private", "true")))))
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
-    let prjDir = WorkspaceProjectFolder ()
+    let prjDir = Env.GetFolder Env.Project
     for project in projects do
         let content = GenerateProjectTarget project
         let projectFile = prjDir |> GetFile (AddExt (project.ProjectGuid.toString) Targets)
@@ -258,7 +258,7 @@ let ConvertProjectContent (xproj : XDocument) (project : Project) =
     convxproj
 
 let ConvertProjects (antho : Anthology) xdocLoader xdocSaver =
-    let wsDir = WorkspaceFolder ()
+    let wsDir = Env.GetFolder Env.Workspace
     for project in antho.Projects do
         let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
         let projFile = repoDir |> GetFile project.RelativeProjectFile.toString 
@@ -269,7 +269,7 @@ let ConvertProjects (antho : Anthology) xdocLoader xdocSaver =
 
 let RemoveUselessStuff () =
     let antho = LoadAnthology ()
-    let wsDir = WorkspaceFolder ()
+    let wsDir = Env.GetFolder Env.Workspace
     for repo in antho.Repositories do
         let repoDir = wsDir |> GetSubDirectory (repo.Name.toString)
         repoDir.EnumerateFiles("*.sln", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
@@ -311,7 +311,7 @@ let CollectRepoHash wsDir (repos : Repository set) =
 
 let Push () = 
     let antho = Configuration.LoadAnthology ()
-    let wsDir = Env.WorkspaceFolder ()
+    let wsDir = Env.GetFolder Env.Workspace
     let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
     let bookmarks = CollectRepoHash wsDir clonedRepos
     let baseline = { Bookmarks = bookmarks }
@@ -322,7 +322,7 @@ let Push () =
     let mainRepo = config.Repository
 
     let hash = Vcs.VcsTip wsDir mainRepo
-    let binDir = Env.WorkspaceBinFolder ()
+    let binDir = Env.GetFolder Env.Bin
     let versionDir = DirectoryInfo(config.BinRepo) |> GetSubDirectory hash
     IoHelpers.CopyFolder binDir versionDir
     printfn "%s" hash
@@ -333,7 +333,7 @@ let Push () =
 
 
 let Checkout (version : BookmarkVersion) =
-    let wsDir = Env.WorkspaceFolder ()
+    let wsDir = Env.GetFolder Env.Workspace
     let config = Configuration.GlobalConfig()
     let mainRepo = config.Repository
     Vcs.VcsCheckout wsDir mainRepo version
@@ -353,12 +353,12 @@ let Checkout (version : BookmarkVersion) =
                | BookmarkVersion x -> x
                | Master -> Vcs.VcsTip wsDir mainRepo
 
-    let binDir = Env.WorkspaceBinFolder ()
+    let binDir = Env.GetFolder Env.Bin
     let versionDir = DirectoryInfo(config.BinRepo) |> GetSubDirectory hash
     IoHelpers.CopyFolder versionDir binDir
 
 let Clean () =
-    let wsDir = Env.WorkspaceFolder ()
+    let wsDir = Env.GetFolder Env.Workspace
     let config = Configuration.GlobalConfig()
     let mainRepo = config.Repository
     Vcs.VcsClean wsDir mainRepo
@@ -369,7 +369,7 @@ let Clean () =
         Vcs.VcsClean wsDir repo
 
 let Pull () =
-    let wsDir = Env.WorkspaceFolder ()
+    let wsDir = Env.GetFolder Env.Workspace
     let config = Configuration.GlobalConfig()
     let mainRepo = config.Repository
     Vcs.VcsPull wsDir mainRepo

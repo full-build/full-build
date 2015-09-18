@@ -45,7 +45,7 @@ let FilterRepos (filters : RepositoryId set) =
             |> Set
 
 let Clone (filters : RepositoryId set) = 
-    let wsDir = WorkspaceFolder()
+    let wsDir = Env.GetFolder Env.Workspace
     FilterRepos filters |> Set.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Name.toString
                                                 not <| subDir.Exists)
                         |> Set.iter (Vcs.VcsCloneRepo wsDir)
