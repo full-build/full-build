@@ -60,7 +60,7 @@ let GenerateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo seq) =
     }
 
 let GenerateItemGroup (fxLibs : DirectoryInfo) =
-    let pkgDir = WorkspacePackageFolder ()
+    let pkgDir = Env.GetFolder Env.Package
     let dlls = fxLibs.EnumerateFiles("*.dll")
     let exes = fxLibs.EnumerateFiles("*.exes")
     let files = Seq.append dlls exes
@@ -131,7 +131,7 @@ let GenerateProjectContent (package : PackageId) (imports : XElement seq) (choos
 
 
 let GenerateTargetForPackage (package : PackageId) =
-    let pkgsDir = Env.WorkspacePackageFolder ()
+    let pkgsDir = Env.GetFolder Env.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
     let libDir = pkgDir |> GetSubDirectory "lib" 
     
@@ -147,7 +147,7 @@ let GenerateTargetForPackage (package : PackageId) =
     project.Save (targetFile.FullName)
 
 let GatherAllAssemblies (package : PackageId) : AssemblyId set =
-    let pkgsDir = Env.WorkspacePackageFolder ()
+    let pkgsDir = Env.GetFolder Env.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
     let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
     let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
@@ -159,7 +159,7 @@ let Install () =
     let config = Configuration.GlobalConfig ()
     PaketParsing.UpdateSources config.NuGets
 
-    let confDir = Env.WorkspaceConfigFolder ()
+    let confDir = Env.GetFolder Env.Config
     Exec.Exec "paket.exe" "install" confDir
 
     let allPackages = NuGets.BuildPackageDependencies (PaketParsing.ParsePaketDependencies ())
@@ -168,7 +168,7 @@ let Install () =
     allPackages |> Seq.iter GenerateTargetForPackage
 
 let Update () =
-    let confDir = Env.WorkspaceConfigFolder ()
+    let confDir = Env.GetFolder Env.Config
     Exec.Exec "paket.exe" "update" confDir
     
     let allPackages = NuGets.BuildPackageDependencies (PaketParsing.ParsePaketDependencies ())
@@ -177,11 +177,11 @@ let Update () =
     allPackages |> Seq.iter GenerateTargetForPackage
 
 let Outdated () =
-    let confDir = Env.WorkspaceConfigFolder ()
+    let confDir = Env.GetFolder Env.Config
     Exec.Exec "paket.exe" "outdated" confDir
 
 let List () =
-    let confDir = Env.WorkspaceConfigFolder ()
+    let confDir = Env.GetFolder Env.Config
     Exec.Exec "paket.exe" "show-installed-packages" confDir
 
 

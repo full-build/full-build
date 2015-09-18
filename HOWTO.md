@@ -5,6 +5,10 @@
   * CI must be able to write to this share and is the only trusted client
   * Developers should have only readonly access to binary share                                                   
 
+# Before going on
+It is useful to recall full-build does use a central binary repository to allow partial builds.
+This puts some contraints on the way you build your projects. There are two point of attention as everything ends up in the same folder (more precisely workspace/bin) you have to ensure copy'ed files do not get overriden accross project.
+
 # Configure from scratch
 ## central repository
 First of all, create an empty repository (either GIT or Mercurial). This will be the central repository.

@@ -40,7 +40,7 @@ let GetPackageDependencies (xnuspec : XDocument) =
         |> set
 
 let rec BuildPackageDependencies (packages : PackageId seq) =
-    let pkgsDir = Env.WorkspacePackageFolder ()
+    let pkgsDir = Env.GetFolder Env.Package
 
     let rec buildDependencies (packages : PackageId seq) = seq {
         for package in packages do    

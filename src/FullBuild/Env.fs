@@ -34,14 +34,12 @@ let private VIEW_FOLDER = "views"
 let private PROJECT_FOLDER = "projects"
 let private APP_FOLDER = "apps"
 let private PACKAGE_FOLDER = "packages"
-let private ASSEMBLY_FOLDER = "assemblies"
 let private ANTHOLOGY_FILENAME = "anthology"
 let private BASELINE_FILENAME = "baseline"
 let MSBUILD_SOLUTION_DIR = "$(SolutionDir)"
 let MSBUILD_BIN_OUTPUT = "bin"
 let MSBUILD_PROJECT_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR CONFIG_FOLDER PROJECT_FOLDER
 let MSBUILD_PACKAGE_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR CONFIG_FOLDER PACKAGE_FOLDER
-let MSBUILD_ASSEMBLY_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR CONFIG_FOLDER ASSEMBLY_FOLDER
 let MSBUILD_BIN_FOLDER = sprintf "%s/%s/" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT
 let MSBUILD_NUGET_FOLDER = sprintf "../%s/" PACKAGE_FOLDER
 
@@ -57,51 +55,31 @@ let rec private WorkspaceFolderSearch(dir : DirectoryInfo) =
 let private CurrentFolder() : DirectoryInfo = 
     DirectoryInfo(Environment.CurrentDirectory)
 
-// $
-let WorkspaceFolder() : DirectoryInfo = 
-    let currDir = CurrentFolder()
-    WorkspaceFolderSearch currDir
 
-// $/bin
-let WorkspaceBinFolder() : DirectoryInfo = 
-    let wsDir = WorkspaceFolder()
-    CreateSubDirectory wsDir BIN_FOLDER
+type Folder = 
+       | Workspace
+       | Bin
+       | Config
+       | View
+       | App
+       | Project
+       | Package
 
-// $/.full-build/views
-let WorkspaceConfigFolder() : DirectoryInfo = 
-    let wsDir = WorkspaceFolder()
-    CreateSubDirectory wsDir CONFIG_FOLDER
 
-// $/.full-build/views
-let WorkspaceViewFolder() : DirectoryInfo =
-    let wsDir = WorkspaceConfigFolder()
-    CreateSubDirectory wsDir VIEW_FOLDER
+let rec GetFolder folder =
+    match folder with
+    | Workspace -> CurrentFolder() |> WorkspaceFolderSearch 
+    | Bin -> GetFolder Workspace |> CreateSubDirectory BIN_FOLDER
+    | Config -> GetFolder Workspace |> CreateSubDirectory CONFIG_FOLDER
+    | View -> GetFolder Config |> CreateSubDirectory VIEW_FOLDER
+    | App -> GetFolder Config |> CreateSubDirectory APP_FOLDER
+    | Project -> GetFolder Config |> CreateSubDirectory PROJECT_FOLDER
+    | Package -> GetFolder Config |> CreateSubDirectory PACKAGE_FOLDER
 
-// $/.full-build/apps
-let WorkspaceAppFolder() : DirectoryInfo =
-    let wsDir = WorkspaceConfigFolder()
-    CreateSubDirectory wsDir APP_FOLDER
-
-// $/.full-build/projects
-let WorkspaceProjectFolder() : DirectoryInfo =
-    let wsDir = WorkspaceConfigFolder()
-    CreateSubDirectory wsDir PROJECT_FOLDER
-
-// $/.full-build/projects
-let WorkspaceAssemblyFolder() : DirectoryInfo =
-    let wsDir = WorkspaceConfigFolder()
-    CreateSubDirectory wsDir ASSEMBLY_FOLDER
-
-// $/.full-build/packages
-let WorkspacePackageFolder() : DirectoryInfo =
-    let wsDir = WorkspaceConfigFolder()
-    CreateSubDirectory wsDir PACKAGE_FOLDER
 
 let GetAnthologyFileName() = 
-    let fbDir = WorkspaceConfigFolder()
-    fbDir |> GetFile ANTHOLOGY_FILENAME
+    GetFolder Config |> GetFile ANTHOLOGY_FILENAME
 
 let GetBaselineFileName() = 
-    let fbDir = WorkspaceConfigFolder()
-    fbDir |> GetFile BASELINE_FILENAME
+    GetFolder Config  |> GetFile BASELINE_FILENAME
 
