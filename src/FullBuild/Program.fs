@@ -37,7 +37,6 @@ let tryMain argv =
     | ConvertWorkspace -> Workspace.Convert ()
     | PushWorkspace -> Workspace.Push ()
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
-    | CleanWorkspace -> Workspace.Clean ()
     | PullWorkspace -> Workspace.Pull ()
     | TransformWorkspace -> Workspace.TransformProjects ()
 

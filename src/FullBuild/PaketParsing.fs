@@ -40,10 +40,14 @@ let ParseContent (lines : string seq) =
             | _ -> ()
     }
 
-let UpdateSourceContent (lines : string seq) (sources : string seq) =
+let UpdateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
     seq {
         for source in sources do
-            yield sprintf "source %s" source
+            let uri = Uri(source.toString)
+            let sourceUri = match uri.Scheme with
+                            | x when x = Uri.UriSchemeFile -> uri.LocalPath
+                            | _ -> uri.ToString()
+            yield sprintf "source %s" sourceUri
 
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
@@ -52,7 +56,7 @@ let UpdateSourceContent (lines : string seq) (sources : string seq) =
             | _ -> yield line
     }
 
-let UpdateSources (sources : string seq) =
+let UpdateSources (sources : RepositoryUrl seq) =
     let confDir = Env.GetFolder Env.Config
     let paketDep = confDir |> GetFile "paket.dependencies" 
     let oldContent = if paketDep.Exists then File.ReadAllLines (paketDep.FullName) |> Array.toSeq
