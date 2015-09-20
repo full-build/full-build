@@ -18,12 +18,12 @@ let CheckToRepository () =
     let (ToRepository repoGit) = ("git", "cassandra-sharp", "https://github.com/pchalamet/cassandra-sharp")
     repoGit |> should equal { Vcs = VcsType.Git
                               Name = RepositoryId.from "cassandra-sharp"
-                              Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } 
+                              Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" } 
 
     let (ToRepository repoHg) = ("hg", "cassandra-sharp", "https://github.com/pchalamet/cassandra-sharp")
     repoHg |> should equal { Vcs = VcsType.Hg
                              Name = RepositoryId.from "cassandra-sharp"
-                             Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } 
+                             Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" } 
 
     (fun () -> let (ToRepository repo) = ("pouet", "cassandra-sharp", "https://github.com/pchalamet/cassandra-sharp")
                ())
@@ -32,8 +32,8 @@ let CheckToRepository () =
 [<Test>]
 let CheckEqualityWithPermutation () =
     let antho1 = {
-        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" }
-                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
+        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" }
+                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
         Projects = [ { Output = AssemblyId.from "cqlplus"
                        OutputType = OutputType.Exe
                        ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
@@ -45,8 +45,8 @@ let CheckEqualityWithPermutation () =
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set }
 
     let antho2 = {
-        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp-contrib" } 
-                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl "https://github.com/pchalamet/cassandra-sharp" } ] |> set
+        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" } 
+                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" } ] |> set
         Projects = [ { Output = AssemblyId.from "cqlplus"
                        OutputType = OutputType.Exe
                        ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")

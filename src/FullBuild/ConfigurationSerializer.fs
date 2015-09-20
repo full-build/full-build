@@ -16,7 +16,7 @@ let SerializeConfiguration (globalConfig : GlobalConfiguration) =
     config.configuration.nugets.Clear()
     for nuget in globalConfig.NuGets do
         let cnuget = ConfigurationConfig.configuration_Type.nugets_Item_Type()
-        cnuget.nuget <- Uri(nuget)
+        cnuget.nuget <- Uri(nuget.toString)
         config.configuration.nugets.Add (cnuget)
     config.ToString()
 
@@ -24,10 +24,10 @@ let DeserializeConfiguration (content : string) =
     let rec convertToNuGets (items : ConfigurationConfig.configuration_Type.nugets_Item_Type list) =
         match items with
         | [] -> List.empty
-        | x :: tail -> (x.nuget.ToString()) :: convertToNuGets tail
+        | x :: tail -> (RepositoryUrl.from (x.nuget)) :: convertToNuGets tail
     
     let convertToRepository (item : ConfigurationConfig.configuration_Type) =
-        { Name = RepositoryId.from ".full-build"; Vcs=VcsType.from item.``type``; Url=RepositoryUrl (item.uri.ToString())}
+        { Name = RepositoryId.from ".full-build"; Vcs=VcsType.from item.``type``; Url=RepositoryUrl.from (item.uri) }
 
     let config = ConfigurationConfig()
     config.LoadText content
