@@ -41,18 +41,13 @@ let private HgCommit (repoDir : DirectoryInfo) (comment : string) =
     let args = sprintf @"commit -A -m ""%s" comment
     Exec "hg" args repoDir
 
+
 let private GitPush (repoDir : DirectoryInfo) =
     Exec "git" "push" repoDir
 
 let private HgPush (repoDir : DirectoryInfo) =
     Exec "hg" "push" repoDir
     
-let private GitClean (repoDir : DirectoryInfo) =
-    Exec "git" "clean -fxd" repoDir
-
-let private HgClean (repoDir : DirectoryInfo) =
-    Exec "hg" "purge" repoDir
-
 
 let private GitPull (repoDir : DirectoryInfo) =
     Exec "git" "pull --rebase" repoDir
@@ -72,10 +67,8 @@ let private HgTip (repoDir : DirectoryInfo) =
     res
 
 
-
-
 let private GitClone (target : DirectoryInfo) (url : string) = 
-    let args = sprintf "clone %A %A" url target.FullName
+    let args = sprintf "clone --depth=1 %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
     Exec "git" args currDir
 
@@ -83,6 +76,7 @@ let private HgClone (target : DirectoryInfo) (url : string) =
     let args = sprintf "clone %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
     Exec "hg" args currDir    
+
 
 let private GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
     let rev = match version with
@@ -99,6 +93,7 @@ let private HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) =
 
     let args = sprintf "update -r %A" rev
     Exec "hg" args repoDir
+
 
 let private GitIgnore (repoDir : DirectoryInfo) =
     let content = ["packages"; "views"]
@@ -117,6 +112,7 @@ let ApplyVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
             | VcsType.Hg -> hgFun
     f repoDir
 
+
 let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) = 
     (ApplyVcs wsDir repo GitClone HgClone) repo.Url.toString
 
@@ -128,9 +124,6 @@ let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkV
 
 let VcsIgnore (wsDir : DirectoryInfo) (repo : Repository) =
     ApplyVcs wsDir repo GitIgnore HgIgnore
-
-let VcsClean (wsDir : DirectoryInfo) (repo : Repository) =
-    ApplyVcs wsDir repo GitClean HgClean
 
 let VcsPull (wsDir : DirectoryInfo) (repo : Repository) =
     ApplyVcs wsDir repo GitPull HgPull

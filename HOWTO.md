@@ -79,10 +79,3 @@ Developer environment or CI partial build
 * build a view with all sources (fullbuild add view mypartialview *)
 * build all sources (fullbuild build mypartialview)
 
-# Optimization
-Eventually, consider cleaning the work folder using full-build.
-Warning, this is a destructive operation that should be used with care:
-* cleanup each repositories (fullbuild clean)
-* fast-forward to master (fullbuild pull)
-NOTE: pull is implemented as pull and merge (aka rebase)
-
