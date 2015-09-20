@@ -40,7 +40,6 @@ type Token =
     | Convert
     | Add
     | List
-    | Clean
     | Push
     | Checkout
     | NuGet
@@ -76,7 +75,6 @@ let (|Token|) (token : string) =
     | "convert" -> Convert
     | "add" -> Add
     | "list" -> List
-    | "clean" -> Clean
     | "push" -> Push
     | "checkout" -> Checkout
     | "nuget" -> NuGet

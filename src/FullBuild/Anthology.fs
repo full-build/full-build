@@ -84,10 +84,13 @@ with
     member this.toString = (fun (RepositoryId x) -> x)this
     static member from (name : string) = RepositoryId (name.ToLowerInvariant())
 
-type RepositoryUrl = RepositoryUrl of string
+type RepositoryUrl = private RepositoryUrl of string
 with
     member this.toString = (fun (RepositoryUrl x) -> x)this
-//    static member from (uri : string) = RepositoryUrl 
+    static member from (maybeUri : Uri) = RepositoryUrl.from (maybeUri.ToString())
+    static member from (maybeUri : string) = let uri = Uri(maybeUri.ToLowerInvariant())
+                                             if uri.IsWellFormedOriginalString() then RepositoryUrl (maybeUri.ToLowerInvariant())
+                                             else failwithf "Invalid uri %A" uri
 
 type Repository = 
     { Name : RepositoryId
@@ -162,4 +165,4 @@ let (|ToRepository|) (vcsType : string, vcsName : string, vcsUrl : string) =
 type GlobalConfiguration = 
     { BinRepo : string
       Repository : Repository
-      NuGets : string list }
+      NuGets : RepositoryUrl list }
