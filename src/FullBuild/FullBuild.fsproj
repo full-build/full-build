@@ -27,8 +27,8 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>debug migrate anthology-simplified.yaml</StartArguments>
-    <StartWorkingDirectory>C:\src\full-build\src\FullBuild.Tests\</StartWorkingDirectory>
+    <StartArguments>install</StartArguments>
+    <StartWorkingDirectory>C:\src\full-build\</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>0077</NoWarn>
