@@ -1,2 +1,4 @@
 source https://www.nuget.org/api/v2/
 source c:\src\full-build-packages\
+nuget FSharp.Configuration
+nuget FsUnit
