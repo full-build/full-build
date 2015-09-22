@@ -66,3 +66,10 @@ let ComputeTransitivePackageDependencies (packages : PackageId seq) =
     let ids = allPackages |> Seq.map (fun x -> x.Key) |> Set
     ids
 
+
+let Add (url : RepositoryUrl) =
+    let antho = Configuration.LoadAnthology ()
+    let newAntho = { antho
+                     with
+                        NuGets = antho.NuGets |> Set.add url }
+    Configuration.SaveAnthology newAntho
