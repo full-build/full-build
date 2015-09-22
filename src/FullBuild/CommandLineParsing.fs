@@ -88,6 +88,9 @@ type Command =
     | GraphView of ViewName
     | BuildView of ViewName
 
+    // nuget
+    | AddNuGet of RepositoryUrl
+
     // package
     | InstallPackages
     | SimplifyPackages
@@ -134,6 +137,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Package) ::Token(Token.Outdated) :: [] -> Command.OutdatedPackages
 
     | Token(Token.Add) :: Token(Token.Repo) :: name :: url :: [] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
+    | Token(Token.Add) :: Token(Token.NuGet) :: uri :: [] -> Command.AddNuGet (RepositoryUrl.from uri)
     | Token(Token.Add) :: Token(Token.View) :: (MatchViewId name) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                                                                                 Command.CreateView { Name = name; Filters = repoFilters }
     | Token(Token.Drop) :: Token(Token.View) :: (MatchViewId name) :: [] -> Command.DropView { Name = name }
@@ -170,6 +174,7 @@ let UsageContent() =
         "  package outdated : display outdated packages"
         ""
         "  add repo <name> <uri> : declare a new repository (git or hg supported)"
+        "  add nuget <uri> : add nuget uri"
         "  add view <name> <wildcards> : add repositories to view"
         "  drop <view> <name> : drop object"
         "  list <repo|view|package|app> : list objects"
