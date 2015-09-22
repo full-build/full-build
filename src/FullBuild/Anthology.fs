@@ -154,10 +154,9 @@ type Application =
 type Anthology = 
     { Artifacts : string
       NuGets : RepositoryUrl set 
+      MasterRepository : Repository
       Repositories : Repository set
       Projects : Project set }
-with
-    member this.mainRepository = this.Repositories |> Seq.find (fun x -> x.Name = RepositoryId.from ".full-build")
 
 type Baseline = 
     { Bookmarks : Bookmark set  }
