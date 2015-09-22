@@ -77,7 +77,7 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
     VcsCloneRepo wsDir repo
 
     let antho = { Artifacts = bin
-                  NuGets = []
+                  NuGets = Set.empty
                   Repositories = Set [repo]
                   Projects = Set.empty }
     let confDir = wsDir |> GetSubDirectory ".full-build"
