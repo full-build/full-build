@@ -87,6 +87,12 @@ with
 type RepositoryUrl = private RepositoryUrl of string
 with
     member this.toString = (fun (RepositoryUrl x) -> x)this
+    member this.toLocalOrUrl = let uri = Uri(this.toString)
+                               let sourceUri = match uri.Scheme with
+                                               | x when x = Uri.UriSchemeFile -> uri.LocalPath
+                                               | _ -> uri.ToString()
+                               sourceUri
+
     static member from (maybeUri : Uri) = RepositoryUrl.from (maybeUri.ToString())
     static member from (maybeUri : string) = let uri = Uri(maybeUri.ToLowerInvariant())
                                              if uri.IsWellFormedOriginalString() then RepositoryUrl (maybeUri.ToLowerInvariant())
@@ -152,14 +158,14 @@ type Anthology =
 type Baseline = 
     { Bookmarks : Bookmark set  }
 
-let (|ToRepository|) (vcsType : string, vcsName : string, vcsUrl : string) = 
-    let vcs = match vcsType with
-              | "git" -> VcsType.Git
-              | "hg" -> VcsType.Hg
-              | _ -> failwithf "Unknown vcs type %A" vcsType
-    { Vcs = vcs
-      Name = RepositoryId.from vcsName
-      Url = RepositoryUrl vcsUrl }
+//let (|ToRepository|) (vcsType : string, vcsName : string, vcsUrl : string) = 
+//    let vcs = match vcsType with
+//              | "git" -> VcsType.Git
+//              | "hg" -> VcsType.Hg
+//              | _ -> failwithf "Unknown vcs type %A" vcsType
+//    { Vcs = vcs
+//      Name = RepositoryId.from vcsName
+//      Url = RepositoryUrl vcsUrl }
 
 
 type GlobalConfiguration = 

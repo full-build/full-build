@@ -13,21 +13,17 @@ let CheckReferences () =
 
     RepositoryId.from "badaboum" |> should equal <| RepositoryId.from "BADABOUM"
 
-[<Test>]
 let CheckToRepository () =
-    let (ToRepository repoGit) = ("git", "cassandra-sharp", "https://github.com/pchalamet/cassandra-sharp")
+    let repoGit = { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" }
     repoGit |> should equal { Vcs = VcsType.Git
                               Name = RepositoryId.from "cassandra-sharp"
                               Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" } 
 
-    let (ToRepository repoHg) = ("hg", "cassandra-sharp", "https://github.com/pchalamet/cassandra-sharp")
+    let repoHg = { Vcs = VcsType.Hg; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" }
     repoHg |> should equal { Vcs = VcsType.Hg
                              Name = RepositoryId.from "cassandra-sharp"
                              Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" } 
 
-    (fun () -> let (ToRepository repo) = ("pouet", "cassandra-sharp", "https://github.com/pchalamet/cassandra-sharp")
-               ())
-        |> should throw typeof<System.Exception>
 
 [<Test>]
 let CheckEqualityWithPermutation () =

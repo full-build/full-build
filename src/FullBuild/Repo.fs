@@ -50,8 +50,10 @@ let Clone (filters : RepositoryId set) =
                                                 not <| subDir.Exists)
                         |> Set.iter (Vcs.VcsCloneRepo wsDir)
 
-let Add (repo : Repository) =
+let Add (name : RepositoryId) (url : RepositoryUrl) =
     let antho = LoadAnthology ()
+    let vcsType = Vcs.VcsDetermineType url
+    let repo = { Name = name; Url = url; Vcs = vcsType }
     let repos = antho.Repositories |> Set.add repo
                                    |> Seq.distinctBy (fun x -> x.Name)
                                    |> Set

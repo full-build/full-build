@@ -43,10 +43,7 @@ let ParseContent (lines : string seq) =
 let UpdateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
     seq {
         for source in sources do
-            let uri = Uri(source.toString)
-            let sourceUri = match uri.Scheme with
-                            | x when x = Uri.UriSchemeFile -> uri.LocalPath
-                            | _ -> uri.ToString()
+            let sourceUri = source.toLocalOrUrl
             yield sprintf "source %s" sourceUri
 
         for line in lines do

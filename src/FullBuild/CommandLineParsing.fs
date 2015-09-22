@@ -69,7 +69,7 @@ type Command =
     | PullWorkspace
 
     // repository
-    | AddRepository of Repository
+    | AddRepository of RepositoryId * RepositoryUrl
     | CloneRepositories of CloneRepositories
     | ListRepositories
 
@@ -124,8 +124,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Package) ::Token(Token.Update) :: [] -> Command.UpdatePackages
     | Token(Token.Package) ::Token(Token.Outdated) :: [] -> Command.OutdatedPackages
 
-    | Token(Token.Add) :: Token(Token.Repo) :: vcs :: name :: url :: [] -> let (ToRepository repo) = (vcs, name, url)
-                                                                           AddRepository(repo)
+    | Token(Token.Add) :: Token(Token.Repo) :: name :: url :: [] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
     | Token(Token.Add) :: Token(Token.View) :: (MatchViewId name) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                                                                                 Command.CreateView { Name = name; Filters = repoFilters }
     | Token(Token.Drop) :: Token(Token.View) :: (MatchViewId name) :: [] -> Command.DropView { Name = name }
@@ -161,7 +160,7 @@ let UsageContent() =
         "  package update : update packages"
         "  package outdated : display outdated packages"
         ""
-        "  add repo <git|hg> <name> <uri> : declare a new repository"
+        "  add repo <name> <uri> : declare a new repository (git or hg supported)"
         "  add view <name> <wildcards> : add repositories to view"
         "  drop <view> <name> : drop object"
         "  list <repo|view|package|app> : list objects"
