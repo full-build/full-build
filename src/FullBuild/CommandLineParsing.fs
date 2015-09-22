@@ -28,8 +28,14 @@ open Anthology
 open CommandLineToken
 open Collections
 
-type CreateWorkspace = 
-    { Path : string }
+type SetupWorkspace = 
+    { MasterRepository : RepositoryUrl
+      MasterArtifacts : string
+      Path : string }
+
+type InitWorkspace = 
+    { MasterRepository : RepositoryUrl
+      Path : string }
 
 type CheckoutWorkspace = 
     { Version : string }
@@ -60,8 +66,8 @@ type Command =
     | Error
 
     // workspace
-    | CreateWorkspace of CreateWorkspace
-    | InitWorkspace of CreateWorkspace
+    | SetupWorkspace of SetupWorkspace
+    | InitWorkspace of InitWorkspace
     | IndexWorkspace
     | ConvertWorkspace
     | PushWorkspace
@@ -107,8 +113,11 @@ let ParseCommandLine(args : string list) : Command =
     match args with
     | Token(Token.Help) :: [] -> Command.Usage
 
-    | Token(Setup) :: path :: [] -> Command.CreateWorkspace { Path = path }
-    | Token(Init) :: path :: [] -> Command.InitWorkspace { Path = path }
+    | Token(Setup) :: masterRepository :: masterArtifacts :: path :: [] -> Command.SetupWorkspace { MasterRepository=RepositoryUrl.from masterRepository
+                                                                                                    MasterArtifacts=masterArtifacts
+                                                                                                    Path = path }
+    | Token(Init) :: masterRepository:: path :: [] -> Command.InitWorkspace { MasterRepository=RepositoryUrl.from masterRepository
+                                                                              Path = path }
     | Token(Convert) :: [] -> Command.ConvertWorkspace
     | Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                                        CloneRepositories { Filters = repoFilters }
@@ -145,8 +154,8 @@ let UsageContent() =
     let content = [
         "Usage:"
         "  help : display help"
-        "  setup <path> : setup a new environment in given path"
-        "  init <path> : initialize a new workspace in given path"
+        "  setup <master-repository> <master-artifacts> <path> : setup a new environment in given path"
+        "  init <master-repository> <path> : initialize a new workspace in given path"
         "  install : install packages declared in anthology"
         "  clone <wildcards> : clone repositories using provided wildcards"
         "  convert : adapt projects in workspace"

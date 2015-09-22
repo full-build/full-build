@@ -156,8 +156,8 @@ let GatherAllAssemblies (package : PackageId) : AssemblyId set =
           |> set
 
 let Install () =
-    let config = Configuration.GlobalConfig ()
-    PaketParsing.UpdateSources config.NuGets
+    let antho = Configuration.LoadAnthology ()
+    PaketParsing.UpdateSources antho.NuGets
 
     let confDir = Env.GetFolder Env.Config
     Exec.Exec "paket.exe" "install" confDir

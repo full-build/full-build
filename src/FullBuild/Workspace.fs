@@ -60,18 +60,25 @@ let private ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Rep
           |> Seq.map (fun x -> ParseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
           |> Seq.concat
 
-let Init(path : string) = 
+let Init (path : string) (uri : RepositoryUrl) = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
-    VcsCloneRepo wsDir (GlobalConfig().Repository)
+    let vcsType = Vcs.VcsDetermineType uri
+    let repo = { Name = RepositoryId.from ".full-build"; Url = uri; Vcs=vcsType}
+    VcsCloneRepo wsDir repo
 
-let Create(path : string) = 
+let Create (path : string) (uri : RepositoryUrl) (bin : string) = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
-    VcsCloneRepo wsDir (GlobalConfig().Repository)
-    let antho = { Repositories = Set.empty
+    let vcsType = Vcs.VcsDetermineType uri
+    let repo = { Name = RepositoryId.from ".full-build"; Url = uri; Vcs=vcsType}
+    VcsCloneRepo wsDir repo
+
+    let antho = { Artifacts = bin
+                  NuGets = []
+                  Repositories = Set [repo]
                   Projects = Set.empty }
     let confDir = wsDir |> GetSubDirectory ".full-build"
     let anthoFile = confDir |> GetFile "anthology"
@@ -81,7 +88,7 @@ let Create(path : string) =
     let baselineFile = confDir |> GetFile "baseline"
     BaselineSerializer.Save baselineFile baseline
 
-    Vcs.VcsIgnore wsDir (GlobalConfig().Repository)
+    Vcs.VcsIgnore wsDir repo
 
 let Index () = 
     let wsDir = Env.GetFolder Env.Workspace
@@ -109,8 +116,7 @@ let Index () =
                      with Projects = newProjects }
     SaveAnthology newAntho
 
-    let config = Configuration.GlobalConfig()
-    PaketParsing.UpdateSources config.NuGets
+    PaketParsing.UpdateSources antho.NuGets
 
 
 let StringifyOutputType (outputType : OutputType) =
@@ -318,12 +324,10 @@ let Push () =
     Configuration.SaveBaseline baseline
 
     // copy bin content
-    let config = Configuration.GlobalConfig()
-    let mainRepo = config.Repository
-
+    let mainRepo = antho.mainRepository
     let hash = Vcs.VcsTip wsDir mainRepo
     let binDir = Env.GetFolder Env.Bin
-    let versionDir = DirectoryInfo(config.BinRepo) |> GetSubDirectory hash
+    let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
     IoHelpers.CopyFolder binDir versionDir
     printfn "%s" hash
 
@@ -333,9 +337,9 @@ let Push () =
 
 
 let Checkout (version : BookmarkVersion) =
+    let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
-    let config = Configuration.GlobalConfig()
-    let mainRepo = config.Repository
+    let mainRepo = antho.mainRepository
     Vcs.VcsCheckout wsDir mainRepo version
 
     // checkout repositories
@@ -354,13 +358,13 @@ let Checkout (version : BookmarkVersion) =
                | Master -> Vcs.VcsTip wsDir mainRepo
 
     let binDir = Env.GetFolder Env.Bin
-    let versionDir = DirectoryInfo(config.BinRepo) |> GetSubDirectory hash
+    let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
     IoHelpers.CopyFolder versionDir binDir
 
 let Pull () =
+    let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
-    let config = Configuration.GlobalConfig()
-    let mainRepo = config.Repository
+    let mainRepo = antho.mainRepository
     Vcs.VcsPull wsDir mainRepo
 
     let antho = Configuration.LoadAnthology ()
