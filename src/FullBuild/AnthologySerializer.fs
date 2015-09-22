@@ -99,7 +99,7 @@ let Deserialize (content) =
     let config = new AnthologyConfig()
     config.LoadText content
     { Artifacts = config.anthology.artifacts
-      NuGets = convertToNuGets (config.anthology.nugets |> List.ofSeq)
+      NuGets = convertToNuGets (config.anthology.nugets |> List.ofSeq) |> Set.ofList
       Repositories = convertToRepositories (config.anthology.repositories |> List.ofSeq)
       Projects = convertToProjects (config.anthology.projects |> List.ofSeq) }
 
