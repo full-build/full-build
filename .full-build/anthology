@@ -15,7 +15,9 @@ anthology:
       out: fullbuild.tests.dll
       fx: v4.5.2
       assemblies:
+        - assembly: fsharp.configuration
         - assembly: fsharp.core
+        - assembly: sharpyaml
         - assembly: system
         - assembly: system.core
         - assembly: system.numerics
@@ -23,7 +25,6 @@ anthology:
         - assembly: system.xml
         - assembly: system.xml.linq
       packages:
-        - package: fsharp.configuration
         - package: fsunit
       projects:
         - project: 5fde3939-c144-4287-bc57-a96ec2d1a9da
@@ -32,13 +33,14 @@ anthology:
       out: fullbuild.exe
       fx: v4.5.2
       assemblies:
+        - assembly: fsharp.configuration
         - assembly: fsharp.core
+        - assembly: sharpyaml
         - assembly: system
         - assembly: system.core
         - assembly: system.numerics
         - assembly: system.runtime.serialization
         - assembly: system.xml
         - assembly: system.xml.linq
-      packages:
-        - package: fsharp.configuration
+      packages: []
       projects: []
