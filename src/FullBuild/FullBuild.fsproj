@@ -91,6 +91,12 @@
     <None Include="anthology.yaml" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Configuration">
+      <HintPath>C:\src\full-build\lib\FSharp.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpYaml">
+      <HintPath>C:\src\full-build\lib\SharpYaml.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -101,7 +107,6 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
-  <Import Project="$(SolutionDir)/.full-build/packages/fsharp.configuration/package.targets" Condition="'$(FullBuild_fsharp_configuration_Pkg)' == ''" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
