@@ -67,6 +67,27 @@ let private HgTip (repoDir : DirectoryInfo) =
     res
 
 
+let private GitIs (uri : RepositoryUrl) =
+    try
+        let wsDir = Env.GetFolder Env.Workspace
+        let args = sprintf @"ls-remote -h %s" uri.toLocalOrUrl
+        ExecReadLine "git" args wsDir |> ignore
+        true
+    with
+        _ -> false
+
+let private HgIs (uri : RepositoryUrl) =
+    try
+        let wsDir = Env.GetFolder Env.Workspace
+        let args = sprintf @"id -i -R %s" uri.toLocalOrUrl
+        ExecReadLine "hg" args wsDir |> ignore
+        true
+    with
+        _ -> false
+
+
+
+
 let private GitClone (target : DirectoryInfo) (url : string) = 
     let args = sprintf "clone --depth=1 %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
@@ -133,3 +154,8 @@ let VcsCommit (wsDir : DirectoryInfo) (repo : Repository) (comment : string) =
 
 let VcsPush (wsDir : DirectoryInfo) (repo : Repository) =
     (ApplyVcs wsDir repo GitPush HgPush)
+
+let VcsDetermineType (url : RepositoryUrl) =
+    if GitIs url then VcsType.Git
+    else if HgIs url then VcsType.Hg
+    else failwithf "Failed to determine type of repository %A" url.toLocalOrUrl

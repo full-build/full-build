@@ -44,7 +44,7 @@ let GlobalConfig () : GlobalConfiguration =
     let filename = DefaultGlobalIniFilename ()
     if filename.Exists then ConfigurationSerializer.Load filename
     else 
-        let (ToRepository repo) = ("git", ".full-build", String.Empty)
+        let repo = {Name = RepositoryId.from ".full-build" ; Url = RepositoryUrl.from String.Empty ; Vcs = VcsType.Git }
         {
             BinRepo = String.Empty
             Repository = repo

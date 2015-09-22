@@ -41,7 +41,7 @@ let tryMain argv =
     | TransformWorkspace -> Workspace.TransformProjects ()
 
     // repository
-    | AddRepository repo -> Repo.Add repo
+    | AddRepository (name, url) -> Repo.Add name url
     | CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters
     | ListRepositories -> Repo.List ()
 
