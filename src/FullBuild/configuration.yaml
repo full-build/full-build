@@ -1,7 +1,0 @@
-﻿configuration:
-    type: Git
-    uri: http://github.com/pchalamet/cassandra-sharp-full-build 
-    bin: C:\Binaries
-    nugets:
-      - nuget: https://www.nuget.org/api/v2/
-//      - nuget: file:///C:/src/full-build-packages
