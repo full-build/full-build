@@ -152,23 +152,13 @@ type Application =
       NuGets : PackageId set }
 
 type Anthology = 
-    { Repositories : Repository set
+    { Artifacts : string
+      NuGets : RepositoryUrl list 
+      Repositories : Repository set
       Projects : Project set }
+with
+    member this.mainRepository = this.Repositories |> Seq.find (fun x -> x.Name = RepositoryId.from ".full-build")
 
 type Baseline = 
     { Bookmarks : Bookmark set  }
 
-//let (|ToRepository|) (vcsType : string, vcsName : string, vcsUrl : string) = 
-//    let vcs = match vcsType with
-//              | "git" -> VcsType.Git
-//              | "hg" -> VcsType.Hg
-//              | _ -> failwithf "Unknown vcs type %A" vcsType
-//    { Vcs = vcs
-//      Name = RepositoryId.from vcsName
-//      Url = RepositoryUrl vcsUrl }
-
-
-type GlobalConfiguration = 
-    { BinRepo : string
-      Repository : Repository
-      NuGets : RepositoryUrl list }

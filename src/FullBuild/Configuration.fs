@@ -30,26 +30,8 @@ open IoHelpers
 open Anthology
 open Env
 
-let private WORKSPACE_CONFIG_FILE = ".full-build"
-
 type WorkspaceConfiguration = 
     { Repositories : Repository list }
-
-let DefaultGlobalIniFilename() = 
-    let userProfileDir = DirectoryInfo (Environment.GetFolderPath (Environment.SpecialFolder.UserProfile))
-    let configFile = userProfileDir |> GetFile WORKSPACE_CONFIG_FILE
-    configFile
-
-let GlobalConfig () : GlobalConfiguration = 
-    let filename = DefaultGlobalIniFilename ()
-    if filename.Exists then ConfigurationSerializer.Load filename
-    else 
-        let repo = {Name = RepositoryId.from ".full-build" ; Url = RepositoryUrl.from String.Empty ; Vcs = VcsType.Git }
-        {
-            BinRepo = String.Empty
-            Repository = repo
-            NuGets = [RepositoryUrl.from "https://www.nuget.org/api/v2/"]
-        }
 
 let LoadAnthology() : Anthology = 
     let anthoFn = GetAnthologyFileName ()
