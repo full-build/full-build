@@ -54,6 +54,9 @@ let tryMain argv =
     | GraphView viewInfo -> View.Graph viewInfo.Name
     | BuildView viewInfo -> View.Build viewInfo.Name
 
+    // nuget
+    | AddNuGet url -> NuGets.Add url
+
     // package
     | InstallPackages -> Package.Install ()
     | SimplifyPackages -> Package.Simplify ()
