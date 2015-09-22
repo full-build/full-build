@@ -1,4 +1,7 @@
 anthology:
+  artifacts: C:\Binaries
+  nugets:
+    - nuget: https://www.nuget.org/api/v2/
   repositories:
     - repo: cassandra-sharp
       type: Git
