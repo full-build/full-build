@@ -78,7 +78,8 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
 
     let antho = { Artifacts = bin
                   NuGets = Set.empty
-                  Repositories = Set [repo]
+                  MasterRepository = repo
+                  Repositories = Set.empty
                   Projects = Set.empty }
     let confDir = wsDir |> GetSubDirectory ".full-build"
     let anthoFile = confDir |> GetFile "anthology"
@@ -324,7 +325,7 @@ let Push () =
     Configuration.SaveBaseline baseline
 
     // copy bin content
-    let mainRepo = antho.mainRepository
+    let mainRepo = antho.MasterRepository
     let hash = Vcs.VcsTip wsDir mainRepo
     let binDir = Env.GetFolder Env.Bin
     let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
@@ -339,7 +340,7 @@ let Push () =
 let Checkout (version : BookmarkVersion) =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
-    let mainRepo = antho.mainRepository
+    let mainRepo = antho.MasterRepository
     Vcs.VcsCheckout wsDir mainRepo version
 
     // checkout repositories
@@ -364,7 +365,7 @@ let Checkout (version : BookmarkVersion) =
 let Pull () =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
-    let mainRepo = antho.mainRepository
+    let mainRepo = antho.MasterRepository
     Vcs.VcsPull wsDir mainRepo
 
     let antho = Configuration.LoadAnthology ()
