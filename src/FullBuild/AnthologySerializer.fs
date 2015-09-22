@@ -11,6 +11,13 @@ type private AnthologyConfig = FSharp.Configuration.YamlConfig<"anthology.yaml">
 
 let Serialize (antho : Anthology) =
     let config = new AnthologyConfig()
+    config.anthology.artifacts <- antho.Artifacts
+
+    config.anthology.nugets.Clear()
+    for nuget in antho.NuGets do
+        let cnuget = AnthologyConfig.anthology_Type.nugets_Item_Type()
+        cnuget.nuget <- Uri(nuget.toString)
+        config.anthology.nugets.Add (cnuget)
 
     config.anthology.repositories.Clear()
     for repo in antho.Repositories do
@@ -47,6 +54,11 @@ let Serialize (antho : Anthology) =
     config.ToString()
 
 let Deserialize (content) =
+    let rec convertToNuGets (items : AnthologyConfig.anthology_Type.nugets_Item_Type list) =
+        match items with
+        | [] -> List.empty
+        | x :: tail -> (RepositoryUrl.from (x.nuget)) :: convertToNuGets tail
+
     let rec convertToRepositories (items : AnthologyConfig.anthology_Type.repositories_Item_Type list) =
         match items with
         | [] -> Set.empty
@@ -86,9 +98,10 @@ let Deserialize (content) =
 
     let config = new AnthologyConfig()
     config.LoadText content
-    { Repositories = convertToRepositories (config.anthology.repositories |> List.ofSeq)
+    { Artifacts = config.anthology.artifacts
+      NuGets = convertToNuGets (config.anthology.nugets |> List.ofSeq)
+      Repositories = convertToRepositories (config.anthology.repositories |> List.ofSeq)
       Projects = convertToProjects (config.anthology.projects |> List.ofSeq) }
-
 
 
 let Save (filename : FileInfo) (antho : Anthology) =

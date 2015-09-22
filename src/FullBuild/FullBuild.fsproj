@@ -24,7 +24,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile></DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>install</StartArguments>
     <StartWorkingDirectory>C:\src\full-build\</StartWorkingDirectory>
@@ -68,7 +69,6 @@
     <Compile Include="Env.fs" />
     <Compile Include="Exec.fs" />
     <Compile Include="Anthology.fs" />
-    <Compile Include="ConfigurationSerializer.fs" />
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="BaselineSerializer.fs" />
     <Compile Include="MsBuildHelpers.fs" />
@@ -87,7 +87,6 @@
     <Compile Include="Application.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
-    <None Include="configuration.yaml" />
     <None Include="baseline.yaml" />
     <None Include="anthology.yaml" />
   </ItemGroup>
