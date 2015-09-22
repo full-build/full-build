@@ -10,45 +10,35 @@ It is useful to recall full-build does use a central binary repository to allow 
 This puts some contraints on the way you build your projects. There are two point of attention as everything ends up in the same folder (more precisely workspace/bin) you have to ensure copy'ed files do not get overriden accross project.
 
 # Configure from scratch
-## central repository
-First of all, create an empty repository (either GIT or Mercurial). This will be the central repository.
+## master repository
+First of all, create an empty repository (either Git or Mercurial). This will be the master repository.
 Ensure developpers have read access. Allow write access to people in charge of configuration.
 
-## central artifact share
-Then create a public share. Full build artifacts will be pushed there.
+## master artifacts
+Then create a public share. Full build artifacts will be pushed there and should be available to anyone.
 Ensure developpers have read access. Allow write access to people in charge of configuration (including CI).
-
-## user configuration
-For each users, ensure full-build configuration is stored in home folder. File is named ".full-build".
-This file must contains:
-
-configuration:
-    type: Git
-    uri: <central repository url>
-    bin: <central artifacts share>
-    nugets:
-      - nuget: https://www.nuget.org/api/v2/
 
 ## anthology configuration
 An anthology is the term used in full-build to describe the universe of projects, nugets and assemblies. full-build tracks everything is order to allow you to create smaller build based on the full build.
 
 Create a new workspace using command:
-  fullbuild setup <local folder>
+  fullbuild setup <local folder> <master repository> <master artifacts>
 
 Under <local folder>, full-build has initialized everything to start a new anthology configuration from scratch.
 Now, you can start adding external repositories. They have to be converted later to be compatible with full-build.
 
 Add a new repository using command:
-  fullbuild add repo <git|hg> <name> <url>
+  fullbuild add repo <name> <url>
 
-full-build support git as well hg. Choose the type of repository you are using.
 <name> is the nickname you want to set for your repository.
 <url> is where your repository can be found
 
 Now clone your repository before converting:
   fullbuild clone <name>
 
-After a few moment, all sources are cloned. It is time to convert to full-build using command:
+<name> is a wildcard (* supported)
+
+A moment later, all sources are cloned. It is time to convert to full-build using command:
   fullbuild convert
 
 If everything is ok, you have now successfuly added projects to the anthology.
@@ -63,7 +53,7 @@ Eventually commit & push everything:
 CI role is to build all sources.
 
 Following steps must be orchestrated on CI:
-* clone master repository (fullbuild init <folder>)
+* clone master repository (fullbuild init <folder> <master repository>)
 * cd <folder>
 * clone all respositories using full-build (fullbuild clone *)
 * generate a view with all sources (fullbuild add view all *)
@@ -73,7 +63,7 @@ Following steps must be orchestrated on CI:
 # Partial build
 Developer environment or CI partial build
 
-* clone master repository (fullbuild init <folder>)
+* clone master repository (fullbuild init <folder> <master repository>)
 * cd <folder>
 * clone required repositories (fullbuild clone <repoName>)
 * build a view with all sources (fullbuild add view mypartialview *)
