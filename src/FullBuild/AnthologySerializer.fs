@@ -20,7 +20,8 @@ let Serialize (antho : Anthology) =
         config.anthology.nugets.Add (cnuget)
 
     config.anthology.repositories.Clear()
-    for repo in antho.Repositories do
+    let repos = antho.Repositories |> Set.add antho.MasterRepository
+    for repo in repos do
         let crepo = AnthologyConfig.anthology_Type.repositories_Item_Type()
         crepo.repo <- repo.Name.toString
         crepo.``type`` <- repo.Vcs.toString
@@ -98,9 +99,14 @@ let Deserialize (content) =
 
     let config = new AnthologyConfig()
     config.LoadText content
+
+    let repos = convertToRepositories (config.anthology.repositories |> List.ofSeq)
+    let masterRepo = repos |> Seq.find (fun x -> x.Name = RepositoryId.from ".full-build")
+    let otherRepos = Set.remove masterRepo repos
     { Artifacts = config.anthology.artifacts
       NuGets = convertToNuGets (config.anthology.nugets |> List.ofSeq) |> Set.ofList
-      Repositories = convertToRepositories (config.anthology.repositories |> List.ofSeq)
+      MasterRepository = masterRepo
+      Repositories = otherRepos
       Projects = convertToProjects (config.anthology.projects |> List.ofSeq) }
 
 

@@ -3,6 +3,9 @@ anthology:
   nugets:
     - nuget: https://www.nuget.org/api/v2/
   repositories:
+    - repo: .full-build
+      type: Git
+      uri: https://github.com/pchalamet/cassandra-sharp-full-build
     - repo: cassandra-sharp
       type: Git
       uri: https://github.com/pchalamet/cassandra-sharp
