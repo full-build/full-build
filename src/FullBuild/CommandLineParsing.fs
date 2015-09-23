@@ -159,7 +159,7 @@ let UsageContent() =
         "  build <view-name> : build view"
         "  deploy <view-name> : deploy application"
         "  graph <view-name> : graph view content (project, packages, assemblies)"
-        "  exec <cmd> : execute command for each repository (vars FB_NAME, FB_PATH, FB_URL available)"
+        "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
         ""
         "  checkout <version|master> : checkout workspace to version"
         "  push : push a baseline from current repositories version and display version"
