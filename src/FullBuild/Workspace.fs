@@ -77,7 +77,7 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
     VcsCloneRepo wsDir repo
 
     let antho = { Artifacts = bin
-                  NuGets = Set.empty
+                  NuGets = []
                   MasterRepository = repo
                   Repositories = Set.empty
                   Projects = Set.empty }

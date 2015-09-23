@@ -104,7 +104,7 @@ let Deserialize (content) =
     let masterRepo = repos |> Seq.find (fun x -> x.Name = RepositoryId.from Env.MASTER_REPO)
     let otherRepos = Set.remove masterRepo repos
     { Artifacts = config.anthology.artifacts
-      NuGets = convertToNuGets (config.anthology.nugets |> List.ofSeq) |> Set.ofList
+      NuGets = convertToNuGets (config.anthology.nugets |> List.ofSeq)
       MasterRepository = masterRepo
       Repositories = otherRepos
       Projects = convertToProjects (config.anthology.projects |> List.ofSeq) }
