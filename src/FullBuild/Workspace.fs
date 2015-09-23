@@ -90,6 +90,7 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
     BaselineSerializer.Save baselineFile baseline
 
     Vcs.VcsIgnore wsDir repo
+    Vcs.VcsCommit wsDir repo "setup"
 
 let Index () = 
     let wsDir = Env.GetFolder Env.Workspace
@@ -324,10 +325,8 @@ let Push () =
     let baseline = { Bookmarks = bookmarks }
     Configuration.SaveBaseline baseline
 
-    let mainRepo = antho.MasterRepository
-    Vcs.VcsCommit wsDir mainRepo "before bookmark"
-
     // copy bin content
+    let mainRepo = antho.MasterRepository
     let hash = Vcs.VcsTip wsDir mainRepo
     let binDir = Env.GetFolder Env.Bin
     let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
