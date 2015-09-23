@@ -25,6 +25,7 @@
 module StringHelpers
 
 open System
+open Microsoft.FSharp.Reflection
 
 let ParseGuid(s : string) = 
     match Guid.TryParseExact(s, "B") with // C# guid
@@ -37,11 +38,6 @@ let StringifyGuid (guid : Guid) =
     guid.ToString("D")
 
 
-
-
-
-open Microsoft.FSharp.Reflection
-
 let toString (x:'a) = 
     match FSharpValue.GetUnionFields(x, typeof<'a>) with
     | case, _ -> case.Name.ToLowerInvariant()
@@ -51,27 +47,3 @@ let fromString<'a> (s:string) =
     match union with
     | Some x -> FSharpValue.MakeUnion(x,[||]) :?> 'a
     | _ -> failwithf "failed to parse %s as %A" s typeof<'a>
-
-//    match FSharpType.GetUnionCases typeof<'a> |> Array.filter (fun case -> String.Equals(case.Name, s, StringComparison.InvariantCultureIgnoreCase)) with
-//    |[|case|] -> FSharpValue.MakeUnion(case,[||]) :?> 'a
-//    |_ -> failwith "failed to parse"
-
-// Usage:
-// type A = X|Y|Z with
-//     member this.toString = toString this
-//     static member fromString s = fromString<A> s
-
-// > X.toString;;
-// val it : string = "X"
-
-// > A.fromString "X";;
-// val it : A option = Some X
-
-// > A.fromString "W";;
-// val it : A option = None
-
-// > toString X;;
-// val it : string = "X"
-
-// > fromString<A> "X";;
-// val it : A option = Some X

@@ -28,23 +28,23 @@ open System
 open System.IO
 open IoHelpers
 
-let private CONFIG_FOLDER = ".full-build"
 let private BIN_FOLDER = "bin"
 let private VIEW_FOLDER = "views"
 let private PROJECT_FOLDER = "projects"
 let private APP_FOLDER = "apps"
 let private PACKAGE_FOLDER = "packages"
-let private ANTHOLOGY_FILENAME = "anthology"
-let private BASELINE_FILENAME = "baseline"
+let ANTHOLOGY_FILENAME = "anthology"
+let BASELINE_FILENAME = "baseline"
+let MASTER_REPO = ".full-build"
 let MSBUILD_SOLUTION_DIR = "$(SolutionDir)"
 let MSBUILD_BIN_OUTPUT = "bin"
-let MSBUILD_PROJECT_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR CONFIG_FOLDER PROJECT_FOLDER
-let MSBUILD_PACKAGE_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR CONFIG_FOLDER PACKAGE_FOLDER
+let MSBUILD_PROJECT_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR MASTER_REPO PROJECT_FOLDER
+let MSBUILD_PACKAGE_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR MASTER_REPO PACKAGE_FOLDER
 let MSBUILD_BIN_FOLDER = sprintf "%s/%s/" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT
 let MSBUILD_NUGET_FOLDER = sprintf "../%s/" PACKAGE_FOLDER
 
 let IsWorkspaceFolder(wsDir : DirectoryInfo) = 
-    let subDir = wsDir |> GetSubDirectory CONFIG_FOLDER
+    let subDir = wsDir |> GetSubDirectory MASTER_REPO
     subDir.Exists
 
 let rec private WorkspaceFolderSearch(dir : DirectoryInfo) = 
@@ -70,7 +70,7 @@ let rec GetFolder folder =
     match folder with
     | Workspace -> CurrentFolder() |> WorkspaceFolderSearch 
     | Bin -> GetFolder Workspace |> CreateSubDirectory BIN_FOLDER
-    | Config -> GetFolder Workspace |> CreateSubDirectory CONFIG_FOLDER
+    | Config -> GetFolder Workspace |> CreateSubDirectory MASTER_REPO
     | View -> GetFolder Config |> CreateSubDirectory VIEW_FOLDER
     | App -> GetFolder Config |> CreateSubDirectory APP_FOLDER
     | Project -> GetFolder Config |> CreateSubDirectory PROJECT_FOLDER
