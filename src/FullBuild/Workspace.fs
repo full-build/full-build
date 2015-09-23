@@ -379,9 +379,9 @@ let Exec cmd =
     let wsDir = Env.GetFolder Env.Workspace
     for repo in antho.Repositories do
         let repoDir = wsDir |> GetSubDirectory repo.Name.toString
-        let vars = [ ("FULLBUILD_REPO", repo.Name.toString)
-                     ("FULLBUILD_REPO_PATH", repoDir.FullName)
-                     ("FULLBUILD_REPO_URL", repo.Url.toLocalOrUrl) ] |> Map.ofSeq
+        let vars = [ ("FB_NAME", repo.Name.toString)
+                     ("FB_PATH", repoDir.FullName)
+                     ("FB_URL", repo.Url.toLocalOrUrl) ] |> Map.ofSeq
         let args = sprintf @"/c ""%s""" cmd
 
         try
