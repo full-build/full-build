@@ -70,7 +70,7 @@ let private HgTip (repoDir : DirectoryInfo) =
 let private GitIs (uri : RepositoryUrl) =
     try
         let currDir = Env.CurrentFolder()
-        let args = sprintf @"ls-remote -h %s" uri.toLocalOrUrl
+        let args = sprintf @"ls-remote -h %s" uri.toString
         ExecReadLine "git" args currDir |> ignore
         true
     with
