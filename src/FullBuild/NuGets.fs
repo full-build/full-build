@@ -73,3 +73,8 @@ let Add (url : RepositoryUrl) =
                      with
                         NuGets = antho.NuGets |> Set.add url }
     Configuration.SaveAnthology newAntho
+
+let List () =
+    let antho = Configuration.LoadAnthology()
+    for nuget in antho.NuGets do
+        printfn "%s" nuget.toLocalOrUrl
