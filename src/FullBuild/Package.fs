@@ -209,4 +209,3 @@ let Simplify () =
     let antho = Configuration.LoadAnthology ()
     let newAntho = SimplifyAnthology antho
     Configuration.SaveAnthology newAntho
-

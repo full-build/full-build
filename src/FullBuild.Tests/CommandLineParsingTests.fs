@@ -17,21 +17,8 @@ let CheckUsageInvoked () =
     result |> should equal expected
 
 
-//[<Test>]
-//let CheckWorkspaceCreate () =
-//    let result = ParseCommandLine [ "workspace"; "checkout"; "1234" ]
-//    let expected = Command.CheckoutWorkspace {Version="1234"}
-//    result |> should equal expected
-
 [<Test>]
-let CheckWorkspaceIndex () =
-    let result = ParseCommandLine [ "debug"; "index" ]
-    let expected = Command.IndexWorkspace
+let CheckWorkspaceConvert () =
+    let result = ParseCommandLine [ "convert" ]
+    let expected = Command.ConvertWorkspace
     result |> should equal expected
-
-    
-//[<Test>]
-//let CheckWorkspaceUpdate () =
-//    let result = ParseCommandLine [ "workspace"; "update" ]
-//    let expected = Command.RefreshWorkspace
-//    result |> should equal expected

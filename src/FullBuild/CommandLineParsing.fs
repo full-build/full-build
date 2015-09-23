@@ -46,7 +46,7 @@ type CloneRepositories =
 type NuGetUrl = 
     { Url : string }
 
-type CreateView = 
+type AddView = 
     { Name : ViewId
       Filters : RepositoryId set }
 
@@ -68,23 +68,21 @@ type Command =
     // workspace
     | SetupWorkspace of SetupWorkspace
     | InitWorkspace of InitWorkspace
-    | IndexWorkspace
     | ConvertWorkspace
     | PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
     | PullWorkspace
 
     // repository
+    | ListRepositories
     | AddRepository of RepositoryId * RepositoryUrl
     | CloneRepositories of CloneRepositories
-    | ListRepositories
 
     // view
-    | CreateView of CreateView
-    | DropView of ViewName
     | ListViews
+    | AddView of AddView
+    | DropView of ViewName
     | DescribeView of ViewName
-    | GenerateView of ViewName
     | GraphView of ViewName
     | BuildView of ViewName
 
@@ -92,16 +90,15 @@ type Command =
     | AddNuGet of RepositoryUrl
 
     // package
+    | ListPackages
     | InstallPackages
     | SimplifyPackages
     | UpdatePackages
     | OutdatedPackages
-    | ListPackages
 
     // applications
-    | DeployApplications of DeployApplications
     | ListApplications
-    | TransformWorkspace
+    | DeployApplications of DeployApplications
 
 let (|MatchBookmarkVersion|) version =
     match version with
@@ -138,7 +135,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Add) :: Token(Token.Repo) :: name :: url :: [] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
     | Token(Token.Add) :: Token(Token.NuGet) :: uri :: [] -> Command.AddNuGet (RepositoryUrl.from uri)
     | Token(Token.Add) :: Token(Token.View) :: (MatchViewId name) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                                                                                Command.CreateView { Name = name; Filters = repoFilters }
+                                                                                Command.AddView { Name = name; Filters = repoFilters }
     | Token(Token.Drop) :: Token(Token.View) :: (MatchViewId name) :: [] -> Command.DropView { Name = name }
     | Token(Token.List) :: Token(Token.Repo) :: [] -> ListRepositories
     | Token(Token.List) :: Token(Token.View) :: [] -> Command.ListViews
@@ -146,10 +143,6 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.List) :: Token(Token.Application) :: [] -> ListApplications
     | Token(Token.Describe) :: Token(Token.View) :: (MatchViewId name) :: [] -> Command.DescribeView { Name = name }
 
-    | Token(Token.Debug) :: Token(Index) :: [] -> Command.IndexWorkspace
-    | Token(Token.Debug) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
-    | Token(Token.Debug) :: Token(Token.Transform) :: [] -> Command.TransformWorkspace
-    | Token(Token.Debug) :: Token(Token.Generate) :: (MatchViewId name) :: [] -> Command.GenerateView { Name = name }
     | _ -> Command.Error
 
 let UsageContent() =
