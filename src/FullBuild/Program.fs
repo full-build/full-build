@@ -48,7 +48,6 @@ let tryMain argv =
     | DropView viewInfo -> View.Drop viewInfo.Name
     | ListViews -> View.List ()
     | DescribeView viewInfo -> View.Describe viewInfo.Name
-    | GenerateView viewInfo -> View.Generate viewInfo.Name
     | GraphView viewInfo -> View.Graph viewInfo.Name
     | BuildView viewInfo -> View.Build viewInfo.Name
 
