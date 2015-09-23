@@ -69,9 +69,10 @@ let ComputeTransitivePackageDependencies (packages : PackageId seq) =
 
 let Add (url : RepositoryUrl) =
     let antho = Configuration.LoadAnthology ()
+    let nugets = antho.NuGets @ [url] |> List.distinct
     let newAntho = { antho
                      with
-                        NuGets = antho.NuGets |> Set.add url }
+                        NuGets = nugets }
     Configuration.SaveAnthology newAntho
 
 let List () =
