@@ -33,12 +33,10 @@ let tryMain argv =
     // workspace
     | SetupWorkspace wsInfo -> Workspace.Create wsInfo.Path wsInfo.MasterRepository wsInfo.MasterArtifacts
     | InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository
-    | IndexWorkspace -> Workspace.Index ()
     | ConvertWorkspace -> Workspace.Convert ()
     | PushWorkspace -> Workspace.Push ()
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
     | PullWorkspace -> Workspace.Pull ()
-    | TransformWorkspace -> Workspace.TransformProjects ()
 
     // repository
     | AddRepository (name, url) -> Repo.Add name url
@@ -46,7 +44,7 @@ let tryMain argv =
     | ListRepositories -> Repo.List ()
 
     // view
-    | CreateView viewInfo -> View.Create viewInfo.Name viewInfo.Filters
+    | AddView viewInfo -> View.Create viewInfo.Name viewInfo.Filters
     | DropView viewInfo -> View.Drop viewInfo.Name
     | ListViews -> View.List ()
     | DescribeView viewInfo -> View.Describe viewInfo.Name

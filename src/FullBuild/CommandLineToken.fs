@@ -34,28 +34,22 @@ type Token =
     | Repo
     | Package
     | Update
-    | Index
     | Drop
     | Build
     | Convert
     | Add
     | List
     | Push
-    | Checkout
     | NuGet
     | Graph
-    | Check
     | Describe
-    | Generate
     | Install
     | Simplify
     | Outdated
-    | Debug
     | Application
     | Deploy
     | Pull
-    | Migrate
-    | Transform
+    | Checkout
     | Unknown
 
 let (|Token|) (token : string) = 
@@ -69,27 +63,21 @@ let (|Token|) (token : string) =
     | "repo" -> Repo
     | "package" -> Package
     | "update" -> Update
-    | "index" -> Index
     | "drop" -> Drop
     | "build" -> Build
     | "convert" -> Convert
     | "add" -> Add
     | "list" -> List
     | "push" -> Push
-    | "checkout" -> Checkout
     | "nuget" -> NuGet
     | "graph" -> Graph
-    | "check" -> Check
     | "describe" -> Describe
-    | "generate" -> Generate
     | "install" -> Install
     | "simplify" -> Simplify
     | "outdated" -> Outdated
-    | "debug" -> Debug
     | "app" -> Application
     | "deploy" -> Deploy
     | "pull" -> Pull
-    | "migrate" -> Migrate
-    | "transform" -> Transform
+    | "checkout" -> Checkout
     | _ -> Unknown
 
