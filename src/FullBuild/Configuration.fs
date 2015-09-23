@@ -48,7 +48,3 @@ let LoadBaseline() : Baseline =
 let SaveBaseline (baseline : Baseline) =
     let baselineFile = GetBaselineFileName ()
     BaselineSerializer.Save baselineFile baseline
-
-
-let Migrate (file : string) =
-    ()

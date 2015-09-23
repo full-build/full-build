@@ -71,7 +71,6 @@ let tryMain argv =
     // misc
     | Usage -> DisplayUsage ()
     | Error -> DisplayUsage ()
-    | Migrate name -> Configuration.Migrate name
 
     let retCode = if cmd = Error then 5
                   else 0
