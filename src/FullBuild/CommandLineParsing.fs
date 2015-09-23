@@ -72,6 +72,7 @@ type Command =
     | PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
     | PullWorkspace
+    | Exec of string
 
     // repository
     | ListRepositories
@@ -112,12 +113,13 @@ let ParseCommandLine(args : string list) : Command =
     match args with
     | Token(Token.Help) :: [] -> Command.Usage
 
-    | Token(Setup) :: masterRepository :: masterArtifacts :: path :: [] -> Command.SetupWorkspace { MasterRepository=RepositoryUrl.from masterRepository
-                                                                                                    MasterArtifacts=masterArtifacts
-                                                                                                    Path = path }
-    | Token(Init) :: masterRepository:: path :: [] -> Command.InitWorkspace { MasterRepository=RepositoryUrl.from masterRepository
-                                                                              Path = path }
-    | Token(Convert) :: [] -> Command.ConvertWorkspace
+    | Token(Token.Setup) :: masterRepository :: masterArtifacts :: path :: [] -> Command.SetupWorkspace { MasterRepository=RepositoryUrl.from masterRepository
+                                                                                                          MasterArtifacts=masterArtifacts
+                                                                                                          Path = path }
+    | Token(Token.Init) :: masterRepository:: path :: [] -> Command.InitWorkspace { MasterRepository=RepositoryUrl.from masterRepository
+                                                                                    Path = path }
+    | Token(Token.Exec) :: cmd :: [] -> Command.Exec cmd
+    | Token(Token.Convert) :: [] -> Command.ConvertWorkspace
     | Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                                        CloneRepositories { Filters = repoFilters }
     | Token(Token.Graph) :: (MatchViewId name) :: [] -> Command.GraphView { Name = name }
@@ -157,6 +159,7 @@ let UsageContent() =
         "  build <view-name> : build view"
         "  deploy <view-name> : deploy application"
         "  graph <view-name> : graph view content (project, packages, assemblies)"
+        "  exec <cmd> : execute command for each repository"
         ""
         "  checkout <version|master> : checkout workspace to version"
         "  push : push a baseline from current repositories version and display version"
