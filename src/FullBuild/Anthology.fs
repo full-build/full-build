@@ -153,7 +153,7 @@ type Application =
 
 type Anthology = 
     { Artifacts : string
-      NuGets : RepositoryUrl set 
+      NuGets : RepositoryUrl list 
       MasterRepository : Repository
       Repositories : Repository set
       Projects : Project set }
