@@ -89,6 +89,7 @@ type Command =
 
     // nuget
     | AddNuGet of RepositoryUrl
+    | ListNuGets
 
     // package
     | ListPackages
@@ -141,6 +142,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Drop) :: Token(Token.View) :: (MatchViewId name) :: [] -> Command.DropView { Name = name }
     | Token(Token.List) :: Token(Token.Repo) :: [] -> ListRepositories
     | Token(Token.List) :: Token(Token.View) :: [] -> Command.ListViews
+    | Token(Token.List) :: Token(Token.NuGet) :: [] -> Command.ListNuGets
     | Token(Token.List) :: Token(Token.Package) :: [] -> Command.ListPackages
     | Token(Token.List) :: Token(Token.Application) :: [] -> ListApplications
     | Token(Token.Describe) :: Token(Token.View) :: (MatchViewId name) :: [] -> Command.DescribeView { Name = name }
@@ -171,7 +173,7 @@ let UsageContent() =
         "  add nuget <nuget-uri> : add nuget uri"
         "  add view <view-name> <view-wildcards ...> : add repositories to view"
         "  drop view <view-name> : drop object"
-        "  list <repo|view|package|app> : list objects"
+        "  list <repo|view|nuget|package> : list objects"
         "  describe <repo|view> <name> : describe view or repository" ]
     content
 
