@@ -381,4 +381,6 @@ let Exec cmd =
         let repoDir = wsDir |> GetSubDirectory repo.Name.toString
         let vars = [("FULLBUILD_REPO", repo.Name.toString); ("FULLBUILD_REPO_PATH", repoDir.FullName); ("FULLBUILD_REPO_URL", repo.Url.toLocalOrUrl) ] |> Map.ofSeq
         let args = sprintf @"/c ""%s""" cmd
-        Exec.ExecWithArgs "cmd" args repoDir vars
+        try
+            Exec.ExecWithArgs "cmd" args repoDir vars
+        with _ -> printfn "*** execution failed"
