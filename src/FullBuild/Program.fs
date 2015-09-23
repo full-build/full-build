@@ -54,6 +54,7 @@ let tryMain argv =
 
     // nuget
     | AddNuGet url -> NuGets.Add url
+    | ListNuGets -> NuGets.List ()
 
     // package
     | InstallPackages -> Package.Install ()
