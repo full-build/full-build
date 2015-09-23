@@ -324,8 +324,10 @@ let Push () =
     let baseline = { Bookmarks = bookmarks }
     Configuration.SaveBaseline baseline
 
-    // copy bin content
     let mainRepo = antho.MasterRepository
+    Vcs.VcsCommit wsDir mainRepo "before bookmark"
+
+    // copy bin content
     let hash = Vcs.VcsTip wsDir mainRepo
     let binDir = Env.GetFolder Env.Bin
     let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
