@@ -173,10 +173,6 @@ let UsageContent() =
         "  drop view <view-name> : drop object"
         "  list <repo|view|package|app> : list objects"
         "  describe <repo|view> <name> : describe view or repository"
-        ""
-        "  debug index : synchronize anthology with projects"    
-        "  debug simplify : simplify packages graph, promote assemblies or packages to project where permitted"
-        "  debug generate <view-name> : generate sln file for view"
         "" ]
     content
 
