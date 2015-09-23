@@ -24,9 +24,6 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module Configuration
 
-open System
-open System.IO
-open IoHelpers
 open Anthology
 open Env
 
