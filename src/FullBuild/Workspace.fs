@@ -65,7 +65,7 @@ let Init (path : string) (uri : RepositoryUrl) =
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
     let vcsType = Vcs.VcsDetermineType uri
-    let repo = { Name = RepositoryId.from ".full-build"; Url = uri; Vcs=vcsType}
+    let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType}
     VcsCloneRepo wsDir repo
 
 let Create (path : string) (uri : RepositoryUrl) (bin : string) = 
@@ -73,7 +73,7 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
     let vcsType = Vcs.VcsDetermineType uri
-    let repo = { Name = RepositoryId.from ".full-build"; Url = uri; Vcs=vcsType}
+    let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType}
     VcsCloneRepo wsDir repo
 
     let antho = { Artifacts = bin
@@ -81,12 +81,12 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
                   MasterRepository = repo
                   Repositories = Set.empty
                   Projects = Set.empty }
-    let confDir = wsDir |> GetSubDirectory ".full-build"
-    let anthoFile = confDir |> GetFile "anthology"
+    let confDir = wsDir |> GetSubDirectory Env.MASTER_REPO
+    let anthoFile = confDir |> GetFile Env.ANTHOLOGY_FILENAME
     AnthologySerializer.Save anthoFile antho
 
     let baseline = { Bookmarks = Set.empty }
-    let baselineFile = confDir |> GetFile "baseline"
+    let baselineFile = confDir |> GetFile Env.BASELINE_FILENAME
     BaselineSerializer.Save baselineFile baseline
 
     Vcs.VcsIgnore wsDir repo
