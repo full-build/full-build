@@ -38,13 +38,8 @@ let ExecWithArgs (command : string) (args : string) (dir : DirectoryInfo) (vars 
     proc.WaitForExit()
     if proc.ExitCode <> 0 then failwithf "Process failed with error %d" proc.ExitCode
 
-
 let Exec (command : string) (args : string) (dir : DirectoryInfo) = 
-    let psi = ProcessStartInfo (FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir.FullName)
-    use proc = Process.Start (psi)
-    if proc = null then failwith "Failed to start process"
-    proc.WaitForExit()
-    if proc.ExitCode <> 0 then failwithf "Process failed with error %d" proc.ExitCode
+    ExecWithArgs command args dir Map.empty
 
 let ExecReadLine (command : string) (args : string) (dir : DirectoryInfo) = 
     let psi = ProcessStartInfo (FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir.FullName, RedirectStandardOutput = true)
