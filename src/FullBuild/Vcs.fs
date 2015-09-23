@@ -69,18 +69,18 @@ let private HgTip (repoDir : DirectoryInfo) =
 
 let private GitIs (uri : RepositoryUrl) =
     try
-        let wsDir = Env.GetFolder Env.Workspace
+        let currDir = Env.CurrentFolder()
         let args = sprintf @"ls-remote -h %s" uri.toLocalOrUrl
-        ExecReadLine "git" args wsDir |> ignore
+        ExecReadLine "git" args currDir |> ignore
         true
     with
         _ -> false
 
 let private HgIs (uri : RepositoryUrl) =
     try
-        let wsDir = Env.GetFolder Env.Workspace
+        let currDir = Env.CurrentFolder()
         let args = sprintf @"id -i -R %s" uri.toLocalOrUrl
-        ExecReadLine "hg" args wsDir |> ignore
+        ExecReadLine "hg" args currDir |> ignore
         true
     with
         _ -> false
