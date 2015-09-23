@@ -50,6 +50,7 @@ type Token =
     | Deploy
     | Pull
     | Checkout
+    | Exec
     | Unknown
 
 let (|Token|) (token : string) = 
@@ -79,5 +80,6 @@ let (|Token|) (token : string) =
     | "deploy" -> Deploy
     | "pull" -> Pull
     | "checkout" -> Checkout
+    | "exec" -> Exec
     | _ -> Unknown
 

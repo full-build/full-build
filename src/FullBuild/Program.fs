@@ -37,6 +37,7 @@ let tryMain argv =
     | PushWorkspace -> Workspace.Push ()
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
     | PullWorkspace -> Workspace.Pull ()
+    | Exec cmd -> Workspace.Exec cmd
 
     // repository
     | AddRepository (name, url) -> Repo.Add name url

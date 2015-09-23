@@ -27,6 +27,18 @@ module Exec
 open System.Diagnostics
 open System.IO
 
+let ExecWithArgs (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) = 
+    let psi = ProcessStartInfo (FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir.FullName)
+
+    for var in vars do
+        psi.EnvironmentVariables.Add (var.Key, var.Value)
+
+    use proc = Process.Start (psi)
+    if proc = null then failwith "Failed to start process"
+    proc.WaitForExit()
+    if proc.ExitCode <> 0 then failwithf "Process failed with error %d" proc.ExitCode
+
+
 let Exec (command : string) (args : string) (dir : DirectoryInfo) = 
     let psi = ProcessStartInfo (FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir.FullName)
     use proc = Process.Start (psi)
@@ -42,3 +54,4 @@ let ExecReadLine (command : string) (args : string) (dir : DirectoryInfo) =
     if proc.ExitCode <> 0 then failwithf "Process failed with error %d" proc.ExitCode
     use stm = proc.StandardOutput
     stm.ReadLine ()
+
