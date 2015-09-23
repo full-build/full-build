@@ -379,8 +379,11 @@ let Exec cmd =
     let wsDir = Env.GetFolder Env.Workspace
     for repo in antho.Repositories do
         let repoDir = wsDir |> GetSubDirectory repo.Name.toString
-        let vars = [("FULLBUILD_REPO", repo.Name.toString); ("FULLBUILD_REPO_PATH", repoDir.FullName); ("FULLBUILD_REPO_URL", repo.Url.toLocalOrUrl) ] |> Map.ofSeq
+        let vars = [ ("FULLBUILD_REPO", repo.Name.toString)
+                     ("FULLBUILD_REPO_PATH", repoDir.FullName)
+                     ("FULLBUILD_REPO_URL", repo.Url.toLocalOrUrl) ] |> Map.ofSeq
         let args = sprintf @"/c ""%s""" cmd
+
         try
             Exec.ExecWithArgs "cmd" args repoDir vars
-        with _ -> printfn "*** execution failed"
+        with e -> printfn "*** %s" e.Message
