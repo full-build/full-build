@@ -172,8 +172,7 @@ let UsageContent() =
         "  add view <view-name> <view-wildcards ...> : add repositories to view"
         "  drop view <view-name> : drop object"
         "  list <repo|view|package|app> : list objects"
-        "  describe <repo|view> <name> : describe view or repository"
-        "" ]
+        "  describe <repo|view> <name> : describe view or repository" ]
     content
 
 let DisplayUsage() = 
