@@ -373,3 +373,12 @@ let Pull () =
     let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
     for repo in clonedRepos do
         Vcs.VcsPull wsDir repo
+
+let Exec cmd =
+    let antho = Configuration.LoadAnthology()
+    let wsDir = Env.GetFolder Env.Workspace
+    for repo in antho.Repositories do
+        let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+        let vars = [("FULLBUILD_REPO", repo.Name.toString); ("FULLBUILD_REPO_PATH", repoDir.FullName); ("FULLBUILD_REPO_URL", repo.Url.toLocalOrUrl) ] |> Map.ofSeq
+        let args = sprintf @"/c ""%s""" cmd
+        Exec.ExecWithArgs "cmd" args repoDir vars
