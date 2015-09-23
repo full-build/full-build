@@ -135,7 +135,7 @@ let ApplyVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
 
 
 let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) = 
-    (ApplyVcs wsDir repo GitClone HgClone) repo.Url.toLocalOrUrl
+    (ApplyVcs wsDir repo GitClone HgClone) repo.Url.toString
 
 let VcsTip (wsDir : DirectoryInfo) (repo : Repository) = 
     ApplyVcs wsDir repo GitTip HgTip
