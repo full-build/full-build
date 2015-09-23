@@ -101,7 +101,6 @@ type Command =
     // applications
     | DeployApplications of DeployApplications
     | ListApplications
-    | Migrate of string
     | TransformWorkspace
 
 let (|MatchBookmarkVersion|) version =
@@ -151,7 +150,6 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Debug) :: Token(Token.Simplify) :: [] -> Command.SimplifyPackages
     | Token(Token.Debug) :: Token(Token.Transform) :: [] -> Command.TransformWorkspace
     | Token(Token.Debug) :: Token(Token.Generate) :: (MatchViewId name) :: [] -> Command.GenerateView { Name = name }
-    | Token(Token.Debug) :: Token(Token.Migrate) :: name :: [] -> Command.Migrate name
     | _ -> Command.Error
 
 let UsageContent() =
