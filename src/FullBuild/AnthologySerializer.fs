@@ -101,7 +101,7 @@ let Deserialize (content) =
     config.LoadText content
 
     let repos = convertToRepositories (config.anthology.repositories |> List.ofSeq)
-    let masterRepo = repos |> Seq.find (fun x -> x.Name = RepositoryId.from ".full-build")
+    let masterRepo = repos |> Seq.find (fun x -> x.Name = RepositoryId.from Env.MASTER_REPO)
     let otherRepos = Set.remove masterRepo repos
     { Artifacts = config.anthology.artifacts
       NuGets = convertToNuGets (config.anthology.nugets |> List.ofSeq) |> Set.ofList
