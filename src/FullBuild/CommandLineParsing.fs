@@ -150,7 +150,11 @@ let ParseCommandLine(args : string list) : Command =
     | _ -> Command.Error
 
 let UsageContent() =
+    let version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version
+    let fbVersion = sprintf "full-build %s" (version.ToString())
+
     let content = [
+        fbVersion
         "Usage:"
         "  help : display help"
         "  setup <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
