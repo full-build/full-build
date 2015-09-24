@@ -11,7 +11,8 @@ let CheckReferences () =
 
     PackageId.from "badaboum" |> should equal <| PackageId.from "BADABOUM"
 
-    RepositoryId.from "badaboum" |> should equal <| RepositoryId.from "BADABOUM"
+    RepositoryId.from "badaboum" |> should equal <| RepositoryId.from "badaboum"
+    RepositoryId.from "badaboum" |> should not' (equal <| RepositoryId.from "BADABOUM")
 
 let CheckToRepository () =
     let repoGit = { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" }
