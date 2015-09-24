@@ -44,7 +44,7 @@ anthology:
         - assembly: system.numerics
         - assembly: system.xml
       packages:
-        - package: rx-main
+        - package: Rx-Main
       projects:
         - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
     - guid: 22d4356f-bc92-4399-a92c-c1f9ef6ecc73
@@ -58,9 +58,9 @@ anthology:
         - assembly: system.numerics
         - assembly: system.xml
       packages:
-        - package: moq
-        - package: nunit
-        - package: rx-main
+        - package: Moq
+        - package: Nunit
+        - package: Rx-Main
       projects:
         - project: 499eb63c-d74c-47e8-ae48-a2fc94538e9d
         - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
@@ -107,7 +107,7 @@ anthology:
         - assembly: system
       packages:
         - package: log4net
-        - package: rx-main
+        - package: Rx-Main
       projects:
         - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
     - guid: 9e8648a4-d25a-4cfa-aaee-20d9d63ff571
@@ -119,8 +119,8 @@ anthology:
         - assembly: system.core
       packages:
         - package: log4net
-        - package: nunit
-        - package: rx-main
+        - package: Nunit
+        - package: Rx-Main
       projects:
         - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
         - project: c1d252b7-d766-4c28-9c46-0696f896846c
