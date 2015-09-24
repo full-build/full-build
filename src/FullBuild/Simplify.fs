@@ -136,3 +136,28 @@ let SimplifyAnthology (antho : Anthology) (package2files : Map<PackageId, Assemb
     let newAntho = { antho
                      with Projects = newProjects }
     newAntho
+
+
+
+type ConflictType =
+    | SameGuid of Project*Project
+    | SameOutput of Project*Project
+
+
+let FindConflictsForProject (project1 : Project) (otherProjects : Project list) =
+    seq {
+        for project2 in otherProjects do
+            if project1 <> project2 then
+                if project1.ProjectGuid = project2.ProjectGuid && (project1.Repository <> project2.Repository || project1.RelativeProjectFile <> project2.RelativeProjectFile) then
+                    yield SameGuid (project1, project2)
+                else if project1.ProjectGuid <> project2.ProjectGuid && project1.Output = project2.Output then
+                    yield SameOutput (project1, project2)
+    }        
+
+let rec FindConflicts (projects : Project list) =
+    seq {
+        match projects with
+        | h :: t -> yield! FindConflictsForProject h t
+                    yield! FindConflicts t
+        | _ -> ()
+    }
