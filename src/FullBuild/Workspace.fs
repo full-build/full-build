@@ -92,12 +92,40 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
     Vcs.VcsIgnore wsDir repo
     Vcs.VcsCommit wsDir repo "setup"
 
+
+
+type ConflictType =
+    | SameGuid of Project*Project
+    | SameOutput of Project*Project
+
+let FindConflicts (projects : Project seq) =
+    seq {
+        for project1 in projects do
+            for project2 in projects do
+                if project1.ProjectGuid = project2.ProjectGuid && (project1.Repository <> project2.Repository || project1.RelativeProjectFile <> project2.RelativeProjectFile) then
+                    yield SameGuid (project1, project2)
+                else if project1.ProjectGuid <> project2.ProjectGuid && project1.Output = project2.Output then
+                    yield SameOutput (project1, project2)
+    }
+
+let rec DisplayConflicts (conflicts : ConflictType list) =
+    let displayConflict (p1 : Project) (p2 : Project) (msg : string) =
+        printfn "Conflict : projects %s/%s and %s/%s %s" p1.Repository.toString p1.RelativeProjectFile.toString 
+                                                         p2.Repository.toString p2.RelativeProjectFile.toString
+                                                         msg
+
+    match conflicts with
+    | SameGuid (p1, p2) :: tail -> displayConflict p1 p2 "have same guid"
+                                   DisplayConflicts tail
+
+    | SameOutput (p1, p2) :: tail -> displayConflict p1 p2 "have same output"
+                                     DisplayConflicts tail
+    | [] -> ()
+
 let Index () = 
     let wsDir = Env.GetFolder Env.Workspace
     let antho = LoadAnthology()
     let projects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir antho.Repositories
-
-    // FIXME: before merging, it would be better to tell about conflicts
 
     // merge packages
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
@@ -110,9 +138,15 @@ let Index () =
 
     // merge projects
     let foundProjects = projects |> Seq.map (fun x -> x.Project)
-    let newProjects = antho.Projects |> Seq.append foundProjects 
-                                     |> Seq.distinctBy (fun x -> x.ProjectGuid)
-                                     |> set
+    let allProjects = antho.Projects |> Seq.append foundProjects 
+
+    let conflicts = FindConflicts allProjects |> List.ofSeq
+    if conflicts <> [] then
+        DisplayConflicts conflicts
+        failwith "Conflict(s) detected"
+
+    let newProjects = allProjects |> Seq.distinctBy (fun x -> x.ProjectGuid)
+                                  |> Set
 
     let newAntho = { antho 
                      with Projects = newProjects }
