@@ -65,7 +65,7 @@ with
 type PackageId = private PackageId of string
 with
     member this.toString = (fun (PackageId x) -> x)this
-    static member from (id : string) = PackageId (id.ToLowerInvariant())
+    static member from (id : string) = PackageId (id)
 
 type Package = 
     { Id : PackageId
@@ -82,7 +82,7 @@ with
 type RepositoryId = private RepositoryId of string
 with
     member this.toString = (fun (RepositoryId x) -> x)this
-    static member from (name : string) = RepositoryId (name)
+    static member from (name : string) = RepositoryId (name.ToLowerInvariant())
 
 type RepositoryUrl = private RepositoryUrl of string
 with

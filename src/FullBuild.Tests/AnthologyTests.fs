@@ -9,10 +9,10 @@ open StringHelpers
 let CheckReferences () =
     AssemblyId.from "badaboum" |> should equal <| AssemblyId.from "BADABOUM"
 
-    PackageId.from "badaboum" |> should equal <| PackageId.from "BADABOUM"
+    PackageId.from "badaboum" |> should not' (equal <| PackageId.from "BADABOUM")
+    PackageId.from "badaboum" |> should equal <| PackageId.from "badaboum"
 
-    RepositoryId.from "badaboum" |> should equal <| RepositoryId.from "badaboum"
-    RepositoryId.from "badaboum" |> should not' (equal <| RepositoryId.from "BADABOUM")
+    RepositoryId.from "badaboum" |> should equal <| RepositoryId.from "BADABOUM"
 
 let CheckToRepository () =
     let repoGit = { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" }
