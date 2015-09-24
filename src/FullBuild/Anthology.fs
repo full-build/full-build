@@ -82,7 +82,7 @@ with
 type RepositoryId = private RepositoryId of string
 with
     member this.toString = (fun (RepositoryId x) -> x)this
-    static member from (name : string) = RepositoryId (name.ToLowerInvariant())
+    static member from (name : string) = RepositoryId (name)
 
 type RepositoryUrl = private RepositoryUrl of string
 with
