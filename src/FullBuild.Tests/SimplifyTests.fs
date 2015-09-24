@@ -74,3 +74,78 @@ let CheckSimplifyAnthology () =
     AnthologySerializer.Save file newAnthology
 
     newAnthology |> should equal expectedAnthology
+
+[<Test>]
+let CheckConflictsWithSameGuid () =
+    let p1 = { Output = AssemblyId.from "cqlplus"
+               OutputType = OutputType.Exe
+               ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+               RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
+               FxTarget = FrameworkVersion "v4.5"
+               ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+               AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
+               PackageReferences = Set.empty
+               Repository = RepositoryId.from "cassandra-sharp" } 
+
+    let p2 = { Output = AssemblyId.from "cqlplus2"
+               OutputType = OutputType.Exe
+               ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+               RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
+               FxTarget = FrameworkVersion "v4.5"
+               ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+               AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
+               PackageReferences = Set.empty
+               Repository = RepositoryId.from "cassandra-sharp2" }
+
+    let conflictsSameGuid = Simplify.FindConflicts [p1; p2] |> List.ofSeq
+    conflictsSameGuid |> should equal [Simplify.SameGuid (p1, p2)]
+
+[<Test>]
+let CheckConflictsWithSameOutput () =
+    let p1 = { Output = AssemblyId.from "cqlplus"
+               OutputType = OutputType.Exe
+               ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+               RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
+               FxTarget = FrameworkVersion "v4.5"
+               ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+               AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
+               PackageReferences = Set.empty
+               Repository = RepositoryId.from "cassandra-sharp" } 
+
+    let p2 = { Output = AssemblyId.from "cqlplus"
+               OutputType = OutputType.Exe
+               ProjectGuid = ProjectId.from (ParseGuid "39787692-f8f8-408d-9557-0c40547c1563")
+               RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
+               FxTarget = FrameworkVersion "v4.5"
+               ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+               AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
+               PackageReferences = Set.empty
+               Repository = RepositoryId.from "cassandra-sharp2" }
+
+    let conflictsSameGuid = Simplify.FindConflicts [p1; p2] |> List.ofSeq
+    conflictsSameGuid |> should equal [Simplify.SameOutput (p1, p2)]
+
+[<Test>]
+let CheckNoConflictsSameProjectName () =
+    let p1 = { Output = AssemblyId.from "cqlplus"
+               OutputType = OutputType.Exe
+               ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+               RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
+               FxTarget = FrameworkVersion "v4.5"
+               ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+               AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
+               PackageReferences = Set.empty
+               Repository = RepositoryId.from "cassandra-sharp" } 
+
+    let p2 = { Output = AssemblyId.from "cqlplus2"
+               OutputType = OutputType.Exe
+               ProjectGuid = ProjectId.from (ParseGuid "39787692-f8f8-408d-9557-0c40547c1563")
+               RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
+               FxTarget = FrameworkVersion "v4.5"
+               ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+               AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
+               PackageReferences = Set.empty
+               Repository = RepositoryId.from "cassandra-sharp2" }
+
+    let conflictsSameGuid = Simplify.FindConflicts [p1; p2] |> List.ofSeq
+    conflictsSameGuid |> should equal []
