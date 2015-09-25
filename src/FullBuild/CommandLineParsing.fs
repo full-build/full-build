@@ -94,7 +94,6 @@ type Command =
     // package
     | ListPackages
     | InstallPackages
-    | SimplifyPackages
     | UpdatePackages
     | OutdatedPackages
 
