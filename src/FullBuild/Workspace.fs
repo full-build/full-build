@@ -262,13 +262,12 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
 
     // add project references
-    let afterItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").Last()
     for projectReference in project.ProjectReferences do
         let prjRef = projectReference.toString
         let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER prjRef
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
-        afterItemGroup.AddAfterSelf (import)
+        cproj.Root.LastNode.AddAfterSelf (import)
 
     // add nuget references
     for packageReference in project.PackageReferences do
@@ -279,7 +278,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile),
                         XAttribute(NsNone + "Condition", condition))
-        afterItemGroup.AddAfterSelf (import)
+        cproj.Root.LastNode.AddAfterSelf (import)
     cproj
 
 let ConvertProjectContent (xproj : XDocument) (project : Project) =
