@@ -392,18 +392,34 @@ let Pull () =
     let antho = Configuration.LoadAnthology ()
     let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
     for repo in clonedRepos do
-        Vcs.VcsPull wsDir repo
+        let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+        if repoDir.Exists then
+            Vcs.VcsPull wsDir repo
 
 let Exec cmd =
     let antho = Configuration.LoadAnthology()
     let wsDir = Env.GetFolder Env.Workspace
     for repo in antho.Repositories do
         let repoDir = wsDir |> GetSubDirectory repo.Name.toString
-        let vars = [ ("FB_NAME", repo.Name.toString)
-                     ("FB_PATH", repoDir.FullName)
-                     ("FB_URL", repo.Url.toLocalOrUrl) ] |> Map.ofSeq
-        let args = sprintf @"/c ""%s""" cmd
+        if repoDir.Exists then
+            let vars = [ ("FB_NAME", repo.Name.toString)
+                         ("FB_PATH", repoDir.FullName)
+                         ("FB_URL", repo.Url.toLocalOrUrl) ] |> Map.ofSeq
+            let args = sprintf @"/c ""%s""" cmd
 
-        try
-            Exec.ExecWithArgs "cmd" args repoDir vars
-        with e -> printfn "*** %s" e.Message
+            try
+                Exec.ExecWithArgs "cmd" args repoDir vars
+            with e -> printfn "*** %s" e.Message
+
+let Clean () =
+    printfn "DANGER ! You will lose all uncommitted changes. Do you want to continue [Yes to confirm] ?"
+    let res = Console.ReadLine()
+    if res = "Yes" then
+        let antho = Configuration.LoadAnthology ()
+        let wsDir = Env.GetFolder Env.Workspace
+        Vcs.VcsClean wsDir antho.MasterRepository
+    
+        for repo in antho.Repositories do
+            let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+            if repoDir.Exists then
+                Vcs.VcsClean wsDir repo
