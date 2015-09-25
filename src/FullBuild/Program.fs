@@ -58,7 +58,6 @@ let tryMain argv =
 
     // package
     | InstallPackages -> Package.Install ()
-    | SimplifyPackages -> Package.Simplify ()
     | UpdatePackages -> Package.Update ()
     | OutdatedPackages -> Package.Outdated ()
     | ListPackages -> Package.List ()

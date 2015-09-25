@@ -203,9 +203,9 @@ let SimplifyAnthology (antho) =
     RemoveUnusedPackages newAntho
     newAntho
 
-let Simplify () =
+let Simplify (antho : Anthology) =
+    PaketParsing.UpdateSources antho.NuGets
     Install ()
     
-    let antho = Configuration.LoadAnthology ()
     let newAntho = SimplifyAnthology antho
-    Configuration.SaveAnthology newAntho
+    newAntho

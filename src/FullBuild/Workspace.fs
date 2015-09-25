@@ -139,9 +139,7 @@ let Index () =
 
     let newAntho = { antho 
                      with Projects = allProjects |> Set.ofList }
-    SaveAnthology newAntho
-
-    PaketParsing.UpdateSources antho.NuGets
+    newAntho
 
 
 let StringifyOutputType (outputType : OutputType) =
@@ -298,18 +296,18 @@ let ConvertProjects (antho : Anthology) xdocLoader xdocSaver =
 
             xdocSaver projFile convxproj
 
-let RemoveUselessStuff () =
-    let antho = LoadAnthology ()
+let RemoveUselessStuff (antho : Anthology) =
     let wsDir = Env.GetFolder Env.Workspace
     for repo in antho.Repositories do
         let repoDir = wsDir |> GetSubDirectory (repo.Name.toString)
-        repoDir.EnumerateFiles("*.sln", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
-        repoDir.EnumerateFiles("packages.config", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
-        repoDir.EnumerateFiles("paket.dependencies", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
-        repoDir.EnumerateFiles("paket.lock", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
-        repoDir.EnumerateFiles("paket.references", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
-        repoDir.EnumerateDirectories("packages", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete(true))
-        repoDir.EnumerateDirectories(".paket", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete(true))
+        if repoDir.Exists then
+            repoDir.EnumerateFiles("*.sln", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
+            repoDir.EnumerateFiles("packages.config", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
+            repoDir.EnumerateFiles("paket.dependencies", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
+            repoDir.EnumerateFiles("paket.lock", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
+            repoDir.EnumerateFiles("paket.references", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
+            repoDir.EnumerateDirectories("packages", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete(true))
+            repoDir.EnumerateDirectories(".paket", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete(true))
 
 let XDocumentLoader (fileName : FileInfo) =
     XDocument.Load fileName.FullName
@@ -317,17 +315,16 @@ let XDocumentLoader (fileName : FileInfo) =
 let XDocumentSaver (fileName : FileInfo) (xdoc : XDocument) =
     xdoc.Save (fileName.FullName)
 
-let TransformProjects () =
-    let antho = LoadAnthology ()
+let TransformProjects (antho : Anthology) =
     GenerateProjects antho.Projects XDocumentSaver
     ConvertProjects antho XDocumentLoader XDocumentSaver
 
 
 let Convert () = 
-    Index ()
-    Package.Simplify ()
-    TransformProjects()
-    RemoveUselessStuff ()
+    let newAntho = Index () |> Package.Simplify
+    TransformProjects newAntho
+    RemoveUselessStuff newAntho
+    Configuration.SaveAnthology newAntho
 
 let ClonedRepositories (wsDir : DirectoryInfo) (repos : Repository set) =
     repos |> Set.filter (fun x -> let repoDir = wsDir |> GetSubDirectory x.Name.toString
