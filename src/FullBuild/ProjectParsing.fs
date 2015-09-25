@@ -168,4 +168,7 @@ let XDocumentLoader (f : FileInfo) : XDocument option =
     else None
 
 let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (file : FileInfo) : ProjectDescriptor = 
-    ParseProjectContent XDocumentLoader repoDir repoRef file
+    try
+        ParseProjectContent XDocumentLoader repoDir repoRef file
+    with 
+        e -> exn(sprintf "Failed to parse project %A" (file.FullName), e) |> raise
