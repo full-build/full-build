@@ -285,6 +285,9 @@ let Graph (viewName : ViewId) =
     graph.Save graphFile.FullName
 
 let Create (viewName : ViewId) (filters : RepositoryId set) =
+    if filters.Count = 0 then
+        failwith "Expecting at least one filter"
+
     let repos = filters |> Repo.FilterRepos 
                         |> Seq.map (fun x -> x.Name.toString)
     let vwDir = Env.GetFolder Env.View
