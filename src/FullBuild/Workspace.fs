@@ -322,9 +322,9 @@ let TransformProjects (antho : Anthology) =
 
 let Convert () = 
     let newAntho = Index () |> Package.Simplify
+    Configuration.SaveAnthology newAntho
     TransformProjects newAntho
     RemoveUselessStuff newAntho
-    Configuration.SaveAnthology newAntho
 
 let ClonedRepositories (wsDir : DirectoryInfo) (repos : Repository set) =
     repos |> Set.filter (fun x -> let repoDir = wsDir |> GetSubDirectory x.Name.toString
