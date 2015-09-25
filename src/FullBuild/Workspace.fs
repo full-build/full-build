@@ -417,9 +417,11 @@ let Clean () =
     if res = "Yes" then
         let antho = Configuration.LoadAnthology ()
         let wsDir = Env.GetFolder Env.Workspace
-        Vcs.VcsClean wsDir antho.MasterRepository
     
         for repo in antho.Repositories do
             let repoDir = wsDir |> GetSubDirectory repo.Name.toString
             if repoDir.Exists then
                 Vcs.VcsClean wsDir repo
+            else
+                repoDir.Delete(true)
+        Vcs.VcsClean wsDir antho.MasterRepository
