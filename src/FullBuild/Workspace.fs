@@ -289,11 +289,12 @@ let ConvertProjects (antho : Anthology) xdocLoader xdocSaver =
     let wsDir = Env.GetFolder Env.Workspace
     for project in antho.Projects do
         let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
-        let projFile = repoDir |> GetFile project.RelativeProjectFile.toString 
-        let xproj = xdocLoader projFile
-        let convxproj = ConvertProjectContent xproj project
+        if repoDir.Exists then
+            let projFile = repoDir |> GetFile project.RelativeProjectFile.toString 
+            let xproj = xdocLoader projFile
+            let convxproj = ConvertProjectContent xproj project
 
-        xdocSaver projFile convxproj
+            xdocSaver projFile convxproj
 
 let RemoveUselessStuff () =
     let antho = LoadAnthology ()
