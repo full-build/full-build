@@ -94,7 +94,9 @@ let GetNuGetPackages (nugetDoc : XDocument) =
     nugetPkgs
 
 let IsPaketReference (xel : XElement) =
-    xel.Descendants(NsMsBuild + "Paket").Any()
+    let hasPaket = xel.Descendants(NsMsBuild + "Paket").Any() 
+    let hasHintPath = xel.Descendants(NsMsBuild + "HintPath").Any() 
+    hasPaket && hasHintPath
 
 let (|MatchPackage|_|) hintpath =
     let m = Regex.Match (hintpath, @".*\\packages\\(?<Package>[^\\]*).*")
