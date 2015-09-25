@@ -25,7 +25,6 @@
 module Main
 
 open CommandLineParsing
-open Configuration
 
 let tryMain argv = 
     let cmd = ParseCommandLine (argv |> Seq.toList)
@@ -38,6 +37,7 @@ let tryMain argv =
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
     | PullWorkspace -> Workspace.Pull ()
     | Exec cmd -> Workspace.Exec cmd
+    | CleanWorkspace -> Workspace.Clean ()
 
     // repository
     | AddRepository (name, url) -> Repo.Add name url

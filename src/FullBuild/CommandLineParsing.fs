@@ -73,6 +73,7 @@ type Command =
     | CheckoutWorkspace of CheckoutVersion
     | PullWorkspace
     | Exec of string
+    | CleanWorkspace
 
     // repository
     | ListRepositories
@@ -129,6 +130,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Checkout) :: (MatchBookmarkVersion version) :: [] -> Command.CheckoutWorkspace {Version = version}
     | Token(Token.Push) :: [] -> Command.PushWorkspace
     | Token(Token.Pull) :: [] -> Command.PullWorkspace
+    | Token(Token.Clean) :: [] -> Command.CleanWorkspace
 
     | Token(Token.Install) :: [] -> Command.InstallPackages
     | Token(Token.Package) ::Token(Token.Update) :: [] -> Command.UpdatePackages
@@ -165,6 +167,7 @@ let UsageContent() =
         "  deploy <view-name> : deploy application"
         "  graph <view-name> : graph view content (project, packages, assemblies)"
         "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
+        "  clean : reset and clean workspace (interactive command ! DANGER !)"
         ""
         "  checkout <version|master> : checkout workspace to version"
         "  push : push a baseline from current repositories version and display version"
