@@ -67,6 +67,14 @@ let private HgTip (repoDir : DirectoryInfo) =
     res
 
 
+let private GitClean (repoDir : DirectoryInfo) =
+    Exec "git" "reset --hard" repoDir
+    Exec "git" "clean -fxd" repoDir
+
+let private HgClean (repoDir : DirectoryInfo) =
+    Exec "hg" "purge" repoDir
+
+
 let private GitIs (uri : RepositoryUrl) =
     try
         let currDir = Env.CurrentFolder()
@@ -154,6 +162,9 @@ let VcsCommit (wsDir : DirectoryInfo) (repo : Repository) (comment : string) =
 
 let VcsPush (wsDir : DirectoryInfo) (repo : Repository) =
     (ApplyVcs wsDir repo GitPush HgPush)
+
+let VcsClean (wsDir : DirectoryInfo) (repo : Repository) =
+    (ApplyVcs wsDir repo GitClean HgClean)
 
 let VcsDetermineType (url : RepositoryUrl) =
     if GitIs url then VcsType.Git
