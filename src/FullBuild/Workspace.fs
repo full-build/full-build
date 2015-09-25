@@ -118,25 +118,27 @@ let Index () =
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
                                  |> Seq.concat
     let existingPackages = PaketParsing.ParsePaketDependencies ()
-    let packagesToAdd = foundPackages |> Seq.filter (fun x -> not <| Set.contains x.Id existingPackages)
+    let packagesToAdd = foundPackages |> Seq.filter (fun x -> Set.contains x.Id existingPackages |> not)
                                       |> Seq.distinctBy (fun x -> x.Id)
                                       |> Set
     PaketParsing.AppendDependencies packagesToAdd
 
     // merge projects
-    let foundProjects = projects |> Seq.map (fun x -> x.Project)
-    let allProjects = antho.Projects |> Seq.append foundProjects  |> List.ofSeq
+    let foundProjects = projects |> Seq.map (fun x -> x.Project) 
+                                 |> Set
+    let foundProjectGuids = foundProjects |> Set.map (fun x -> x.ProjectGuid)
+
+    let allProjects = antho.Projects |> Set.filter (fun x -> foundProjectGuids |> Set.contains (x.ProjectGuid) |> not)
+                                     |> Set.union foundProjects
+                                     |> List.ofSeq
 
     let conflicts = Simplify.FindConflicts allProjects |> List.ofSeq
     if conflicts <> [] then
         DisplayConflicts conflicts
         failwith "Conflict(s) detected"
 
-    let newProjects = allProjects |> Seq.distinctBy (fun x -> x.ProjectGuid)
-                                  |> Set
-
     let newAntho = { antho 
-                     with Projects = newProjects }
+                     with Projects = allProjects |> Set.ofList }
     SaveAnthology newAntho
 
     PaketParsing.UpdateSources antho.NuGets
