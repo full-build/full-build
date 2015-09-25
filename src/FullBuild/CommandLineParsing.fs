@@ -160,7 +160,7 @@ let UsageContent() =
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
         "  install : install packages declared in anthology"
         "  clone <selection-wildcards ...> : clone repositories using provided wildcards"
-        "  convert : adapt projects in workspace"
+        "  convert : index and convert projects in workspace"
         "  build <view-name> : build view"
         "  deploy <view-name> : deploy application"
         "  graph <view-name> : graph view content (project, packages, assemblies)"
