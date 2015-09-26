@@ -415,11 +415,15 @@ let Clean () =
     printfn "DANGER ! You will lose all uncommitted changes. Do you want to continue [Yes to confirm] ?"
     let res = Console.ReadLine()
     if res = "Yes" then
+        // rollback master repository but save back the old anthology
+        // if the cleanup fails we can still continue again this operation
+        // master repository will be cleaned again as final step
         let oldAntho = Configuration.LoadAnthology ()
         let wsDir = Env.GetFolder Env.Workspace
         Vcs.VcsClean wsDir oldAntho.MasterRepository
         let newAntho = Configuration.LoadAnthology()
-       
+        Configuration.SaveAnthology oldAntho
+         
        // remove repositories
         let reposToRemove = Set.difference oldAntho.Repositories newAntho.Repositories
         for repo in reposToRemove do
@@ -431,3 +435,5 @@ let Clean () =
             let repoDir = wsDir |> GetSubDirectory repo.Name.toString
             if repoDir.Exists then
                 Vcs.VcsClean wsDir repo
+
+        Vcs.VcsClean wsDir newAntho.MasterRepository
