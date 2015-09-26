@@ -88,7 +88,9 @@ let rec GenerateWhenContent (fxFolders : DirectoryInfo seq) (fxVersion : string)
                                             else
                                                 null
 
-let GenerateChooseContent (libDir : DirectoryInfo) =
+let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
+    let pkgProp = PackagePropertyName package.toString
+    let packageWarnProp = sprintf "%s_Warning" pkgProp
     let whens = seq {
             if libDir.Exists then
                 let fxFolders = libDir.EnumerateDirectories()
@@ -101,9 +103,24 @@ let GenerateChooseContent (libDir : DirectoryInfo) =
                     match fxWhen with
                     | Some x -> yield x
                     | None -> ()
+
+                yield XElement(NsMsBuild + "Otherwise",
+                        new XElement(NsMsBuild + "PropertyGroup",
+                            new XElement(NsMsBuild + packageWarnProp, "Y")))
         }
-    if whens.Any() then XElement (NsMsBuild + "Choose", whens)
-    else null
+    
+    seq {
+        if whens.Any() then
+            let targetName = sprintf "%s_Check" pkgProp
+            yield XElement (NsMsBuild + "PropertyGroup",
+                        XElement(NsMsBuild + "CompileDependsOn", sprintf "%s; $(CompileDependsOn)" targetName))
+            yield XElement (NsMsBuild + "Choose", whens)
+            yield XElement (NsMsBuild + "Target", 
+                        XAttribute (NsNone + "Name", targetName),
+                        XElement (NsMsBuild + "Error",
+                            XAttribute(NsNone + "Text", sprintf "Warning! Can't find compatible package %A for requested FrameworkVersion $(FrameworkVersion)" package.toString),
+                            XAttribute(NsNone + "Condition", sprintf "'$(%s)' != ''" packageWarnProp)))
+    }
     
 let GenerateDependenciesContent (dependencies : PackageId seq) =
     seq {
@@ -118,7 +135,7 @@ let GenerateDependenciesContent (dependencies : PackageId seq) =
                       XAttribute(NsNone + "Condition", condition))
     }
 
-let GenerateProjectContent (package : PackageId) (imports : XElement seq) (choose : XElement) =
+let GenerateProjectContent (package : PackageId) (imports : XElement seq) (choose : XElement seq) =
     let defineName = PackagePropertyName (package.toString)
     let propCondition = sprintf "'$(%s)' == ''" defineName
     let project = XElement (NsMsBuild + "Project",
@@ -140,7 +157,7 @@ let GenerateTargetForPackage (package : PackageId) =
     let dependencies = NuGets.GetPackageDependencies xnuspec
 
     let imports = GenerateDependenciesContent dependencies
-    let choose = GenerateChooseContent libDir
+    let choose = GenerateChooseContent libDir package
     let project = GenerateProjectContent package imports choose
 
     let targetFile = pkgDir |> GetFile "package.targets" 
