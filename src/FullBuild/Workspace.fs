@@ -415,13 +415,19 @@ let Clean () =
     printfn "DANGER ! You will lose all uncommitted changes. Do you want to continue [Yes to confirm] ?"
     let res = Console.ReadLine()
     if res = "Yes" then
-        let antho = Configuration.LoadAnthology ()
+        let oldAntho = Configuration.LoadAnthology ()
         let wsDir = Env.GetFolder Env.Workspace
-    
-        for repo in antho.Repositories do
+        Vcs.VcsClean wsDir oldAntho.MasterRepository
+        let newAntho = Configuration.LoadAnthology()
+       
+       // remove repositories
+        let reposToRemove = Set.difference oldAntho.Repositories newAntho.Repositories
+        for repo in reposToRemove do
+            let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+            if repoDir.Exists then repoDir.Delete(true)
+
+        // clean existing repositories
+        for repo in newAntho.Repositories do
             let repoDir = wsDir |> GetSubDirectory repo.Name.toString
             if repoDir.Exists then
                 Vcs.VcsClean wsDir repo
-            else
-                repoDir.Delete(true)
-        Vcs.VcsClean wsDir antho.MasterRepository
