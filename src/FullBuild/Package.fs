@@ -70,7 +70,7 @@ let rec GenerateWhenContent (fxFolders : DirectoryInfo seq) (fxVersion : string)
     let matchLibfolder (fx : string) (dir : DirectoryInfo) =
         if fx = "" then true
         else
-            let dirNames = dir.Name.Replace("portable-", "").Split('+')
+            let dirNames = dir.Name.Replace("portable-", "").Split('+') |> Seq.map (fun x -> x.ToLowerInvariant())
             dirNames |> Seq.contains fx
 
     match nugetFolderAliases with
