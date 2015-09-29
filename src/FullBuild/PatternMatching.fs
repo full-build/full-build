@@ -43,7 +43,7 @@ let rec private MatchRec (content : char list) (pattern : char list) =
     
     match pattern with
     | [] -> content = []
-    | MatchZeroOrMore(_) :: tail -> matchZeroOrMore tail
+    | MatchZeroOrMore _ :: tail -> matchZeroOrMore tail
     | head :: tail -> matchChar head tail
 
 let Match (content : string) (pattern : string) = 
