@@ -24,7 +24,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile></DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>install</StartArguments>
     <StartWorkingDirectory>C:\src\full-build\</StartWorkingDirectory>
@@ -82,6 +83,7 @@
     <Compile Include="NuGets.fs" />
     <Compile Include="Simplify.fs" />
     <Compile Include="Package.fs" />
+    <Compile Include="Indexation.fs" />
     <Compile Include="Workspace.fs" />
     <Compile Include="Application.fs" />
     <Compile Include="Program.fs" />
