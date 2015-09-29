@@ -172,9 +172,9 @@ let GatherAllAssemblies (package : PackageId) : AssemblyId set =
     files |> Seq.map (fun x -> AssemblyId.from x) 
           |> set
 
-let Install () =
-    let antho = Configuration.LoadAnthology ()
-    PaketParsing.UpdateSources antho.NuGets
+
+let InstallPackages (nugets : RepositoryUrl list) =
+    PaketParsing.UpdateSources nugets
 
     let confDir = Env.GetFolder Env.Config
     Exec.Exec "paket.exe" "install" confDir
@@ -183,6 +183,10 @@ let Install () =
                       |> Map.toList
                       |> Seq.map (fun (k, v) -> k)
     allPackages |> Seq.iter GenerateTargetForPackage
+
+let Install () =
+    let antho = Configuration.LoadAnthology ()
+    InstallPackages antho.NuGets
 
 let Update () =
     let confDir = Env.GetFolder Env.Config
@@ -221,8 +225,7 @@ let SimplifyAnthology (antho) =
     newAntho
 
 let Simplify (antho : Anthology) =
-    PaketParsing.UpdateSources antho.NuGets
-    Install ()
+    InstallPackages antho.NuGets
     
     let newAntho = SimplifyAnthology antho
     newAntho
