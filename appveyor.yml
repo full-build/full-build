@@ -15,7 +15,7 @@ assembly_info:
   assembly_informational_version: "{version}"
 
 build_script:
-        -cmd: build-update.bat
+        - cmd: build-update.bat
   
 test:
   assemblies:
@@ -25,7 +25,7 @@ test:
       - integration
   
 deploy_script:
-  -cmd: push-release.bat
+  - cmd: push-release.bat
   
 artifacts:
   path: bootstrap/
