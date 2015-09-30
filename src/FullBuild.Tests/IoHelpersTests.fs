@@ -27,5 +27,5 @@ let CheckGetFile () =
 
 [<Test>]
 let CheckAddExt () =
-    let file = AddExt "toto" Targets
+    let file = AddExt Targets "toto"
     file |> should equal "toto.targets"

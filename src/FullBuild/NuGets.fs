@@ -45,7 +45,7 @@ let rec BuildPackageDependencies (packages : PackageId seq) =
     let rec buildDependencies (packages : PackageId seq) = seq {
         for package in packages do    
             let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
-            let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.toString) NuSpec)
+            let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))
             let xnuspec = XDocument.Load (nuspecFile.FullName)
             let dependencies = GetPackageDependencies xnuspec
             yield (package, dependencies)

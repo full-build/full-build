@@ -152,7 +152,7 @@ let GenerateTargetForPackage (package : PackageId) =
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
     let libDir = pkgDir |> GetSubDirectory "lib" 
     
-    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt (package.toString) NuSpec)
+    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))
     let xnuspec = XDocument.Load (nuspecFile.FullName)
     let dependencies = NuGets.GetPackageDependencies xnuspec
 
