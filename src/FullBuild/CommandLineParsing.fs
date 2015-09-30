@@ -74,6 +74,7 @@ type Command =
     | PullWorkspace
     | Exec of string
     | CleanWorkspace
+    | UpdateGuids of RepositoryId
 
     // repository
     | ListRepositories
@@ -131,6 +132,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Push) :: [] -> Command.PushWorkspace
     | Token(Token.Pull) :: [] -> Command.PullWorkspace
     | Token(Token.Clean) :: [] -> Command.CleanWorkspace
+    | Token(Token.UpdateGuids) :: name :: [] -> Command.UpdateGuids (RepositoryId.from name)
 
     | Token(Token.Install) :: [] -> Command.InstallPackages
     | Token(Token.Package) ::Token(Token.Update) :: [] -> Command.UpdatePackages
@@ -167,7 +169,6 @@ let UsageContent() =
         "  deploy <view-name> : deploy application"
         "  graph <view-name> : graph view content (project, packages, assemblies)"
         "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
-        "  clean : reset and clean workspace (interactive command ! DANGER !)"
         ""
         "  checkout <version|master> : checkout workspace to version"
         "  push : push a baseline from current repositories version and display version"
@@ -180,7 +181,12 @@ let UsageContent() =
         "  add view <view-name> <view-wildcards ...> : add repositories to view"
         "  drop view <view-name> : drop object"
         "  list <repo|view|nuget|package> : list objects"
-        "  describe <repo|view> <name> : describe view or repository" ]
+        "  describe <repo|view> <name> : describe view or repository"
+        ""
+        "DANGER ZONE!"
+        "  clean : reset and clean workspace (interactive command)"
+        "  update-guids : change guids of all projects in given repository (interactive command)" ]
+
     content
 
 let DisplayUsage() = 

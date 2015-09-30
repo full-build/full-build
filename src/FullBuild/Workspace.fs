@@ -414,3 +414,17 @@ let Clean () =
                 Vcs.VcsClean wsDir repo
 
         Vcs.VcsClean wsDir newAntho.MasterRepository
+
+let UpdateGuid (repo : RepositoryId) =
+    printfn "DANGER ! You will lose all uncommitted changes. Do you want to continue [Yes to confirm] ?"
+    let res = Console.ReadLine()
+    if res = "Yes" then
+        let antho = Configuration.LoadAnthology ()
+        let wsDir = Env.GetFolder Env.Workspace
+        let repoDir = wsDir |> GetSubDirectory repo.toString
+        let projects = Indexation.FindKnownProjects repoDir
+        for project in projects do
+            let xdoc = XDocument.Load(project.FullName)
+            let guid = xdoc.Descendants(NsMsBuild + "ProjectGuid").Single()
+            guid.Value <- Guid.NewGuid().ToString("B")
+            xdoc.Save(project.FullName)

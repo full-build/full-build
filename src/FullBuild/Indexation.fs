@@ -6,7 +6,7 @@ open System.Xml.Linq
 open MsBuildHelpers
 open Anthology
 
-let private FindKnownProjects (repoDir : DirectoryInfo) =
+let FindKnownProjects (repoDir : DirectoryInfo) =
     [AddExt CsProj "*"
      AddExt VbProj "*"
      AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
