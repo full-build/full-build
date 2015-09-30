@@ -35,19 +35,19 @@ open Collections
 
 let Drop (viewName : ViewId) =
     let vwDir = GetFolder Env.View
-    let vwFile = vwDir |> GetFile (AddExt viewName.toString View)
+    let vwFile = GetFile (AddExt View viewName.toString) vwDir
     File.Delete (vwFile.FullName)
 
-    let vwDefineFile = vwDir |> GetFile (AddExt viewName.toString Targets)
+    let vwDefineFile = GetFile (AddExt Targets viewName.toString) vwDir
     File.Delete (vwDefineFile.FullName)
 
 let List () =
     let vwDir = GetFolder Env.View
-    vwDir.EnumerateFiles (AddExt "*" View) |> Seq.iter (fun x -> printfn "%s" (Path.GetFileNameWithoutExtension (x.Name)))
+    vwDir.EnumerateFiles (AddExt  View "*") |> Seq.iter (fun x -> printfn "%s" (Path.GetFileNameWithoutExtension (x.Name)))
 
 let Describe (viewName : ViewId) =
     let vwDir = GetFolder Env.View
-    let vwFile = vwDir |> GetFile (AddExt viewName.toString View)
+    let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
     File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
 
 
@@ -133,7 +133,7 @@ let FindViewProjects (viewName : ViewId) =
     let antho = LoadAnthology ()
     let viewDir = GetFolder Env.View
 
-    let viewFile = viewDir |> GetFile (AddExt viewName.toString View)
+    let viewFile = viewDir |> GetFile (AddExt View viewName.toString)
     let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map (fun x -> RepositoryId.from x)
     let projectRefs = ComputeProjectSelectionClosure antho.Projects repos |> Set
     let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectGuid)
@@ -143,13 +143,13 @@ let Generate (viewName : ViewId) =
     let projects = FindViewProjects viewName
 
     let wsDir = GetFolder Env.Workspace
-    let slnFile = wsDir |> GetFile (AddExt viewName.toString Solution)
+    let slnFile = wsDir |> GetFile (AddExt Solution viewName.toString)
     let slnContent = GenerateSolutionContent projects
     File.WriteAllLines (slnFile.FullName, slnContent)
 
     let slnDefines = GenerateSolutionDefines projects
     let viewDir = GetFolder Env.View
-    let slnDefineFile = viewDir |> GetFile (AddExt viewName.toString Targets)
+    let slnDefineFile = viewDir |> GetFile (AddExt Targets viewName.toString)
     slnDefines.Save (slnDefineFile.FullName)
 
 
@@ -281,7 +281,7 @@ let Graph (viewName : ViewId) =
     let graph = GraphContent antho viewName
 
     let wsDir = Env.GetFolder Env.Workspace
-    let graphFile = wsDir |> GetSubDirectory (AddExt viewName.toString Dgml)
+    let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewName.toString)
     graph.Save graphFile.FullName
 
 let Create (viewName : ViewId) (filters : RepositoryId set) =
@@ -291,14 +291,14 @@ let Create (viewName : ViewId) (filters : RepositoryId set) =
     let repos = filters |> Repo.FilterRepos 
                         |> Seq.map (fun x -> x.Name.toString)
     let vwDir = Env.GetFolder Env.View
-    let vwFile = vwDir |> GetFile (AddExt viewName.toString View)
+    let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
     File.WriteAllLines (vwFile.FullName, repos)
 
     Generate viewName
 
 let Build (viewName : ViewId) =
     let wsDir = Env.GetFolder Env.Workspace
-    let viewFile = AddExt viewName.toString Solution
+    let viewFile = AddExt Solution viewName.toString
     let args = sprintf "/m /p:Configuration=Release %A" viewFile
 
     Exec.Exec "msbuild" args wsDir

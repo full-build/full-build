@@ -34,4 +34,4 @@ let Deploy (names : ApplicationId set) =
 
 let List () =
     let appDir = GetFolder Env.App
-    appDir.EnumerateFiles (AddExt "*" App) |> Seq.iter (fun x -> printfn "%s" (Path.GetFileNameWithoutExtension (x.Name)))
+    appDir.EnumerateFiles (AddExt App "*") |> Seq.iter (fun x -> printfn "%s" (Path.GetFileNameWithoutExtension (x.Name)))
