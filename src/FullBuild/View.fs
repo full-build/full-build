@@ -299,6 +299,6 @@ let Create (viewName : ViewId) (filters : RepositoryId set) =
 let Build (viewName : ViewId) =
     let wsDir = Env.GetFolder Env.Workspace
     let viewFile = AddExt Solution viewName.toString
-    let args = sprintf "/m /p:Configuration=Release %A" viewFile
+    let args = sprintf "/verbosity:m /p:Configuration=Release %A" viewFile
 
     Exec.Exec "msbuild" args wsDir
