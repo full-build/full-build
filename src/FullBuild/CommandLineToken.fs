@@ -52,6 +52,7 @@ type Token =
     | Checkout
     | Exec
     | Clean
+    | UpdateGuids
     | Unknown
 
 let (|Token|) (token : string) = 
@@ -83,5 +84,6 @@ let (|Token|) (token : string) =
     | "checkout" -> Checkout
     | "exec" -> Exec
     | "clean" -> Clean
+    | "update-guids" -> UpdateGuids
     | _ -> Unknown
 
