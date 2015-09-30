@@ -71,18 +71,18 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
 
 
 
-let rec DisplayConflicts (conflicts : Simplify.ConflictType list) =
+let rec DisplayConflicts (conflicts : Indexation.ConflictType list) =
     let displayConflict (p1 : Project) (p2 : Project) (msg : string) =
         printfn "Conflict : projects %s/%s and %s/%s %s" p1.Repository.toString p1.RelativeProjectFile.toString 
                                                          p2.Repository.toString p2.RelativeProjectFile.toString
                                                          msg
 
     match conflicts with
-    | Simplify.SameGuid (p1, p2) :: tail -> displayConflict p1 p2 "have same guid"
-                                            DisplayConflicts tail
-
-    | Simplify.SameOutput (p1, p2) :: tail -> displayConflict p1 p2 "have same output"
+    | Indexation.SameGuid (p1, p2) :: tail -> displayConflict p1 p2 "have same guid"
                                               DisplayConflicts tail
+
+    | Indexation.SameOutput (p1, p2) :: tail -> displayConflict p1 p2 "have same output"
+                                                DisplayConflicts tail
     | [] -> ()
 
 
@@ -111,7 +111,7 @@ let Index () =
                                      |> Set.union foundProjects
                                      |> List.ofSeq
 
-    let conflicts = Simplify.FindConflicts allProjects |> List.ofSeq
+    let conflicts = Indexation.FindConflicts allProjects |> List.ofSeq
     if conflicts <> [] then
         DisplayConflicts conflicts
         failwith "Conflict(s) detected"

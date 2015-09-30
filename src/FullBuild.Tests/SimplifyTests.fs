@@ -97,8 +97,8 @@ let CheckConflictsWithSameGuid () =
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }
 
-    let conflictsSameGuid = Simplify.FindConflicts [p1; p2] |> List.ofSeq
-    conflictsSameGuid |> should equal [Simplify.SameGuid (p1, p2)]
+    let conflictsSameGuid = Indexation.FindConflicts [p1; p2] |> List.ofSeq
+    conflictsSameGuid |> should equal [Indexation.SameGuid (p1, p2)]
 
 [<Test>]
 let CheckConflictsWithSameOutput () =
@@ -122,8 +122,8 @@ let CheckConflictsWithSameOutput () =
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }
 
-    let conflictsSameGuid = Simplify.FindConflicts [p1; p2] |> List.ofSeq
-    conflictsSameGuid |> should equal [Simplify.SameOutput (p1, p2)]
+    let conflictsSameGuid = Indexation.FindConflicts [p1; p2] |> List.ofSeq
+    conflictsSameGuid |> should equal [Indexation.SameOutput (p1, p2)]
 
 [<Test>]
 let CheckNoConflictsSameProjectName () =
@@ -147,5 +147,5 @@ let CheckNoConflictsSameProjectName () =
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }
 
-    let conflictsSameGuid = Simplify.FindConflicts [p1; p2] |> List.ofSeq
+    let conflictsSameGuid = Indexation.FindConflicts [p1; p2] |> List.ofSeq
     conflictsSameGuid |> should equal []
