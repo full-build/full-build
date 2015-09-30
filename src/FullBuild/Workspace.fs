@@ -120,20 +120,18 @@ let Index () =
                      with Projects = allProjects |> Set.ofList }
     newAntho
 
-
-let StringifyOutputType (outputType : OutputType) =
-    match outputType with
-    | OutputType.Exe -> ".exe"
-    | OutputType.Dll -> ".dll"
-
-
 let GenerateProjectTarget (project : Project) =
+    let extension = match project.OutputType with
+                    | OutputType.Dll -> IoHelpers.Dll
+                    | OutputType.Exe -> IoHelpers.Exe
+
     let projectProperty = ProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.toString) project.RelativeProjectFile.toString
-    let binFile = sprintf "%s/%s/%s%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT (project.Output.toString) <| StringifyOutputType project.OutputType
-
+    let binFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT (project.Output.toString) 
+                  |> IoHelpers.AddExt extension
+    
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
     // Then we end up either importing output assembly or project depending on view configuration
@@ -158,7 +156,7 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
     let prjDir = Env.GetFolder Env.Project
     for project in projects do
         let content = GenerateProjectTarget project
-        let projectFile = prjDir |> GetFile (AddExt (project.ProjectGuid.toString) Targets)
+        let projectFile = prjDir |> GetFile (AddExt Targets (project.ProjectGuid.toString))
         xdocSaver projectFile content
 
 let ConvertProject (xproj : XDocument) (project : Project) =
