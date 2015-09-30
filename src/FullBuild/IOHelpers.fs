@@ -37,8 +37,10 @@ type Extension =
     | NuSpec
     | Dgml
     | App
+    | Exe
+    | Dll
 
-let AddExt (fileName : string) (ext : Extension) : string =
+let AddExt (ext : Extension) (fileName : string) : string =
     let sext = match ext with 
                | View -> "view"
                | Solution -> "sln"
@@ -49,6 +51,8 @@ let AddExt (fileName : string) (ext : Extension) : string =
                | NuSpec -> "nuspec"
                | Dgml -> "dgml"
                | App -> "app"
+               | Exe -> "exe"
+               | Dll -> "dll"
     sprintf "%s.%s" fileName sext
 
 let ToUnix (f : string) : string =

@@ -7,9 +7,9 @@ open MsBuildHelpers
 open Anthology
 
 let private FindKnownProjects (repoDir : DirectoryInfo) =
-    [AddExt "*" CsProj
-     AddExt "*" VbProj
-     AddExt "*" FsProj] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
+    [AddExt CsProj "*"
+     AddExt VbProj "*"
+     AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
                         |> Seq.concat
 
 let private ProjectCanBeProcessed (fileName : FileInfo) =
