@@ -96,11 +96,11 @@ let Index () =
     // merge packages
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
                                  |> Seq.concat
-    let existingPackages = PaketInterface.ParsePaketDependencies ()
+    let existingPackages = Paket.ParsePaketDependencies ()
     let packagesToAdd = foundPackages |> Seq.filter (fun x -> Set.contains x.Id existingPackages |> not)
                                       |> Seq.distinctBy (fun x -> x.Id)
                                       |> Set
-    PaketInterface.AppendDependencies packagesToAdd
+    Paket.AppendDependencies packagesToAdd
 
     // merge projects
     let foundProjects = projects |> Seq.map (fun x -> x.Project) 

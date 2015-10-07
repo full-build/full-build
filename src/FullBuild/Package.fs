@@ -174,10 +174,10 @@ let GatherAllAssemblies (package : PackageId) : AssemblyId set =
 
 
 let InstallPackages (nugets : RepositoryUrl list) =
-    PaketInterface.UpdateSources nugets
-    PaketInterface.PaketInstall ()
+    Paket.UpdateSources nugets
+    Paket.PaketInstall ()
 
-    let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
+    let allPackages = NuGets.BuildPackageDependencies (Paket.ParsePaketDependencies ())
                       |> Map.toList
                       |> Seq.map fst
     allPackages |> Seq.iter GenerateTargetForPackage
@@ -187,25 +187,25 @@ let Install () =
     InstallPackages antho.NuGets
 
 let Update () =
-    PaketInterface.PaketUpdate ()
+    Paket.PaketUpdate ()
     
-    let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
+    let allPackages = NuGets.BuildPackageDependencies (Paket.ParsePaketDependencies ())
                       |> Map.toList
                       |> Seq.map fst
     allPackages |> Seq.iter GenerateTargetForPackage
 
 let Outdated () =
-    PaketInterface.PaketOutdated ()
+    Paket.PaketOutdated ()
 
 let List () =
-    PaketInterface.PaketInstalled ()
+    Paket.PaketInstalled ()
 
 let RemoveUnusedPackages (antho : Anthology) =
-    let packages = PaketInterface.ParsePaketDependencies ()
+    let packages = Paket.ParsePaketDependencies ()
     let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
                                       |> Set.unionMany
     let packagesToRemove = packages |> Set.filter (fun x -> (not << Set.contains x) usedPackages)
-    PaketInterface.RemoveDependencies packagesToRemove
+    Paket.RemoveDependencies packagesToRemove
 
 let SimplifyAnthology (antho) =
     let packages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
