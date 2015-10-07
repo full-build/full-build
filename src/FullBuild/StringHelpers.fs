@@ -34,10 +34,6 @@ let ParseGuid(s : string) =
             | true, value -> value
             | _ -> failwithf "string %A is not a Guid" s
 
-let StringifyGuid (guid : Guid) =
-    guid.ToString("D")
-
-
 let toString (x:'a) = 
     match FSharpValue.GetUnionFields(x, typeof<'a>) with
     | case, _ -> case.Name.ToLowerInvariant()

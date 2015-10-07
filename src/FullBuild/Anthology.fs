@@ -121,12 +121,12 @@ with
 
 type ProjectId = private ProjectId of Guid
 with
-    member this.toString = StringifyGuid( (fun (ProjectId x) -> x)this)
+    member this.toString = (fun (ProjectId x) -> x.ToString("D")) this
     static member from (guid : Guid) = ProjectId guid
 
 type ProjectType = private ProjectType of Guid
 with
-    member this.toString = StringifyGuid ((fun (ProjectType x) -> x)this)
+    member this.toString = (fun (ProjectType x) -> x.ToString("D")) this
     static member from (guid : Guid) = ProjectType guid
 
 
