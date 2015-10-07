@@ -24,8 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile></DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>install</StartArguments>
     <StartWorkingDirectory>C:\src\full-build\</StartWorkingDirectory>
@@ -72,8 +71,8 @@
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="BaselineSerializer.fs" />
     <Compile Include="MsBuildHelpers.fs" />
-      <Compile Include="PaketInterface.fs" />
-      <Compile Include="ProjectParsing.fs" />
+    <Compile Include="PaketInterface.fs" />
+    <Compile Include="ProjectParsing.fs" />
     <Compile Include="Vcs.fs" />
     <Compile Include="CommandLineToken.fs" />
     <Compile Include="CommandLineParsing.fs" />
@@ -94,9 +93,6 @@
   <ItemGroup>
     <Reference Include="FSharp.Configuration">
       <HintPath>$(SolutionDir)\lib\FSharp.Configuration.dll</HintPath>
-    </Reference>
-    <Reference Include="Paket.Core">
-      <HintPath>C:\src\full-build\lib\Paket.Core.dll</HintPath>
     </Reference>
     <Reference Include="SharpYaml">
       <HintPath>$(SolutionDir)\lib\SharpYaml.dll</HintPath>
