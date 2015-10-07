@@ -179,7 +179,7 @@ let InstallPackages (nugets : RepositoryUrl list) =
 
     let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
                       |> Map.toList
-                      |> Seq.map (fun (k, v) -> k)
+                      |> Seq.map fst
     allPackages |> Seq.iter GenerateTargetForPackage
 
 let Install () =
@@ -191,7 +191,7 @@ let Update () =
     
     let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
                       |> Map.toList
-                      |> Seq.map (fun (k, v) -> k)
+                      |> Seq.map fst
     allPackages |> Seq.iter GenerateTargetForPackage
 
 let Outdated () =
