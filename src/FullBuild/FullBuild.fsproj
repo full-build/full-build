@@ -72,8 +72,8 @@
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="BaselineSerializer.fs" />
     <Compile Include="MsBuildHelpers.fs" />
-    <Compile Include="PaketParsing.fs" />
-    <Compile Include="ProjectParsing.fs" />
+      <Compile Include="PaketInterface.fs" />
+      <Compile Include="ProjectParsing.fs" />
     <Compile Include="Vcs.fs" />
     <Compile Include="CommandLineToken.fs" />
     <Compile Include="CommandLineParsing.fs" />
@@ -94,6 +94,9 @@
   <ItemGroup>
     <Reference Include="FSharp.Configuration">
       <HintPath>$(SolutionDir)\lib\FSharp.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Paket.Core">
+      <HintPath>C:\src\full-build\lib\Paket.Core.dll</HintPath>
     </Reference>
     <Reference Include="SharpYaml">
       <HintPath>$(SolutionDir)\lib\SharpYaml.dll</HintPath>
