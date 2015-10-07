@@ -174,12 +174,10 @@ let GatherAllAssemblies (package : PackageId) : AssemblyId set =
 
 
 let InstallPackages (nugets : RepositoryUrl list) =
-    PaketParsing.UpdateSources nugets
+    PaketInterface.UpdateSources nugets
+    PaketInterface.PaketInstall ()
 
-    let confDir = Env.GetFolder Env.Config
-    Exec.Exec "paket.exe" "install" confDir
-
-    let allPackages = NuGets.BuildPackageDependencies (PaketParsing.ParsePaketDependencies ())
+    let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
                       |> Map.toList
                       |> Seq.map (fun (k, v) -> k)
     allPackages |> Seq.iter GenerateTargetForPackage
@@ -189,29 +187,25 @@ let Install () =
     InstallPackages antho.NuGets
 
 let Update () =
-    let confDir = Env.GetFolder Env.Config
-    Exec.Exec "paket.exe" "update" confDir
+    PaketInterface.PaketUpdate ()
     
-    let allPackages = NuGets.BuildPackageDependencies (PaketParsing.ParsePaketDependencies ())
+    let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
                       |> Map.toList
                       |> Seq.map (fun (k, v) -> k)
     allPackages |> Seq.iter GenerateTargetForPackage
 
 let Outdated () =
-    let confDir = Env.GetFolder Env.Config
-    Exec.Exec "paket.exe" "outdated" confDir
+    PaketInterface.PaketOutdated ()
 
 let List () =
-    let confDir = Env.GetFolder Env.Config
-    Exec.Exec "paket.exe" "show-installed-packages" confDir
-
+    PaketInterface.PaketInstalled ()
 
 let RemoveUnusedPackages (antho : Anthology) =
-    let packages = PaketParsing.ParsePaketDependencies ()
+    let packages = PaketInterface.ParsePaketDependencies ()
     let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
                                       |> Set.unionMany
     let packagesToRemove = packages |> Set.filter (fun x -> (not << Set.contains x) usedPackages)
-    PaketParsing.RemoveDependencies packagesToRemove
+    PaketInterface.RemoveDependencies packagesToRemove
 
 let SimplifyAnthology (antho) =
     let packages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
