@@ -107,39 +107,18 @@ let RemoveDependencies (packages : PackageId set) =
 
 
 
-let ExecutePaketCommand action =
-    let currDir = Environment.CurrentDirectory
+let ExecutePaketCommand cmd =
     let confDir = Env.GetFolder Env.Config
-    try
-        Environment.CurrentDirectory <- confDir.FullName
-        let dependencies = Paket.Dependencies.Locate()
-        action dependencies
-
-    finally
-        Environment.CurrentDirectory <- currDir
-
-
-let DoPaketInstall (deps : Paket.Dependencies) =
-    deps.Install (false, false)
-
-let DoPaketUpdate (deps : Paket.Dependencies) =
-    deps.Update (false, false)
-
-let DoPaketOutdated (deps : Paket.Dependencies) =
-    deps.ShowOutdated (true, false)
-
-let DoPaketInstalled (deps : Paket.Dependencies) =
-    let res = deps.GetInstalledPackages ()
-    res |> Seq.iter (fun (x, y) -> printfn "%s -> %s" x y)
+    Exec.Exec "paket.exe" cmd confDir
 
 let PaketInstall () =
-    ExecutePaketCommand DoPaketInstall
+    ExecutePaketCommand "install"    
 
 let PaketUpdate () =
-    ExecutePaketCommand DoPaketUpdate
+    ExecutePaketCommand "update"
 
 let PaketOutdated () =
-    ExecutePaketCommand DoPaketOutdated
+    ExecutePaketCommand "outdated"
 
 let PaketInstalled () =
-    ExecutePaketCommand DoPaketInstalled
+    ExecutePaketCommand "show-installed-packages"
