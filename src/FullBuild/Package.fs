@@ -93,7 +93,8 @@ let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
     let packageWarnProp = sprintf "%s_Warning" pkgProp
     let whens = seq {
             if libDir.Exists then
-                let fxFolders = libDir.EnumerateDirectories()
+                let fxFolders = libDir.EnumerateDirectories() |> List.ofSeq
+                                                              |> List.sortBy (fun x -> x.FullName.Length)
                 for (fxName, _) in FxVersion2Folder do
                     let fxWhens = FxVersion2Folder |> Seq.skipWhile (fun (fx, _) -> fx <> fxName)
                                                    |> Seq.map (fun (_, folders) -> GenerateWhenContent fxFolders fxName folders)
