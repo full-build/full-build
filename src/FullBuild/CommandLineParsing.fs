@@ -135,8 +135,8 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.UpdateGuids) :: name :: [] -> Command.UpdateGuids (RepositoryId.from name)
 
     | Token(Token.Install) :: [] -> Command.InstallPackages
-    | Token(Token.Package) ::Token(Token.Update) :: [] -> Command.UpdatePackages
-    | Token(Token.Package) ::Token(Token.Outdated) :: [] -> Command.OutdatedPackages
+    | Token(Token.Update) :: [] -> Command.UpdatePackages
+    | Token(Token.Outdated) :: [] -> Command.OutdatedPackages
 
     | Token(Token.Add) :: Token(Token.Repo) :: name :: url :: [] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
     | Token(Token.Add) :: Token(Token.NuGet) :: uri :: [] -> Command.AddNuGet (RepositoryUrl.from uri)
@@ -157,35 +157,34 @@ let UsageContent() =
     let fbVersion = sprintf "full-build %s" (version.ToString())
 
     let content = [
-        fbVersion
-        "Usage:"
-        "  help : display help"
-        "  setup <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
-        "  init <master-repository> <local-path> : initialize a new workspace in given path"
+        "  help : display this help"
         "  install : install packages declared in anthology"
         "  clone <selection-wildcards ...> : clone repositories using provided wildcards"
-        "  convert : index and convert projects in workspace"
-        "  build <view-name> : build view"
-        "  deploy <view-name> : deploy application"
-        "  graph <view-name> : graph view content (project, packages, assemblies)"
-        "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
-        ""
-        "  checkout <version|master> : checkout workspace to version"
-        "  push : push a baseline from current repositories version and display version"
-        "  pull : update to latest version"
-        "  package update : update packages"
-        "  package outdated : display outdated packages"
-        ""
-        "  add repo <repo-name> <repo-uri> : declare a new repository (git or hg supported)"
-        "  add nuget <nuget-uri> : add nuget uri"
         "  add view <view-name> <view-wildcards ...> : add repositories to view"
         "  drop view <view-name> : drop object"
+        "  deploy <view-name> : deploy application"
+        "  build <view-name> : build view"
+        "  graph <view-name> : graph view content (project, packages, assemblies)"
         "  list <repo|view|nuget|package> : list objects"
         "  describe <repo|view> <name> : describe view or repository"
+        "  checkout <version|master> : checkout workspace to version"
+        "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
+        "  pull : update to latest version"
+        ""
+        "  setup <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
+        "  init <master-repository> <local-path> : initialize a new workspace in given path"
+        "  add repo <repo-name> <repo-uri> : declare a new repository (git or hg supported)"
+        "  add nuget <nuget-uri> : add nuget uri"
+        "  convert : index and convert projects in workspace"
+        "  update : update packages"
+        "  outdated : display outdated packages"
+        "  push : push a baseline from current repositories version and display version"
         ""
         "DANGER ZONE!"
         "  clean : reset and clean workspace (interactive command)"
-        "  update-guids : change guids of all projects in given repository (interactive command)" ]
+        "  update-guids : change guids of all projects in given repository (interactive command)" 
+        ""
+        fbVersion ]
 
     content
 
