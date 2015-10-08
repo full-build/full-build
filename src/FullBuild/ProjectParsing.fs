@@ -140,7 +140,10 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                      | "Library" -> OutputType.Dll
                      | _ -> OutputType.Exe
     
-    let fxTarget = !> xprj.Descendants(NsMsBuild + "TargetFrameworkVersion").Single() : string
+    let sfxTarget = !> xprj.Descendants(NsMsBuild + "TargetFrameworkVersion").SingleOrDefault() : string
+    let fxTarget = if sfxTarget <> null then sfxTarget
+                   else "v4.5"
+
     let prjRefs = GetProjectReferences file.Directory xprj
     
     let assemblies = GetAssemblies xprj
