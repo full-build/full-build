@@ -59,34 +59,31 @@ let GenerateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo seq) =
                     XElement(NsMsBuild + "Private", "true"))
     }
 
-let GenerateItemGroup (fxLibs : DirectoryInfo) =
+let GenerateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
     let pkgDir = Env.GetFolder Env.Package
     let dlls = fxLibs.EnumerateFiles("*.dll")
     let exes = fxLibs.EnumerateFiles("*.exes")
     let files = Seq.append dlls exes
-    GenerateItemGroupContent pkgDir files
+    let itemGroup = GenerateItemGroupContent pkgDir files
+    XElement(NsMsBuild + "When",
+        XAttribute(NsNone + "Condition", condition),
+            XElement(NsMsBuild + "ItemGroup", 
+                itemGroup))
 
 let rec GenerateWhenContent (fxFolders : DirectoryInfo seq) (fxVersion : string) (nugetFolderAliases : string list) =
     let matchLibfolder (fx : string) (dir : DirectoryInfo) =
         if fx = "" then true
         else
-            let dirNames = dir.Name.Replace("portable-", "").Split('+') |> Seq.map (fun x -> x.ToLowerInvariant())
-            dirNames |> Seq.contains fx
+            let dirName = dir.Name.ToLowerInvariant()
+            dirName = fx
 
     match nugetFolderAliases with
-    | [] -> null
+    | [] -> None
     | fxFolder::tail -> let libDir = fxFolders |> Seq.tryFind (matchLibfolder fxFolder)
                         match libDir with
                         | None -> GenerateWhenContent fxFolders fxVersion tail
-                        | Some libFolder -> let itemGroup = GenerateItemGroup libFolder
-                                            if itemGroup.Any() then
-                                                let condition = sprintf "'$(TargetFrameworkVersion)' == '%s'" fxVersion
-                                                XElement(NsMsBuild + "When",
-                                                    XAttribute(NsNone + "Condition", condition),
-                                                    XElement(NsMsBuild + "ItemGroup", 
-                                                        itemGroup))
-                                            else
-                                                null
+                        | Some libFolder -> let condition = sprintf "('$(TargetFrameworkVersion)' == '%s') And ('$(TargetFrameworkProfile)' == '')" fxVersion
+                                            Some (GenerateItemGroup libFolder condition)
 
 let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
     let pkgProp = PackagePropertyName package.toString
@@ -94,16 +91,16 @@ let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
     let whens = seq {
             if libDir.Exists then
                 let fxFolders = libDir.EnumerateDirectories() |> List.ofSeq
-                                                              |> List.sortBy (fun x -> x.FullName.Length)
-                for (fxName, _) in FxVersion2Folder do
-                    let fxWhens = FxVersion2Folder |> Seq.skipWhile (fun (fx, _) -> fx <> fxName)
-                                                   |> Seq.map (fun (_, folders) -> GenerateWhenContent fxFolders fxName folders)
-                    let fxDefaultWhen = [ [""] ] |> Seq.map (fun folders -> GenerateWhenContent [libDir] fxName folders)
-                    let fxWhen = Seq.append fxWhens fxDefaultWhen |> Seq.tryFind (fun x -> x <> null)
-
-                    match fxWhen with
-                    | Some x -> yield x
-                    | None -> ()
+                if fxFolders.Length = 0 then 
+                    yield (GenerateItemGroup libDir "True")
+                else
+                    for (fxName, _) in FxVersion2Folder do
+                        let folders = FxVersion2Folder |> List.skipWhile (fun (fx, _) -> fx <> fxName)
+                                                       |> List.collect (fun (_, folders) -> folders)
+                        let fxWhen = GenerateWhenContent fxFolders fxName folders
+                        match fxWhen with
+                        | Some x -> yield x
+                        | None -> ()
 
                 yield XElement(NsMsBuild + "Otherwise",
                         new XElement(NsMsBuild + "PropertyGroup",
