@@ -33,19 +33,6 @@ open Env
 open Collections
 open Simplify
 
-let FxVersion2Folder =
-    [ ("v4.6", ["net46"]) 
-      ("v4.5.4", ["net454"])
-      ("v4.5.3", ["net453"])
-      ("v4.5.2", ["net452"])
-      ("v4.5.1", ["net451"])
-      ("v4.5", ["45"; "net45"; "net45-full"])
-      ("v4.0", ["40"; "net4"; "net40"; "net40-full"; "net40-client"])
-      ("v3.5", ["35"; "net35"; "net35-full"])
-      ("v2.0", ["20"; "net20"; "net20-full"; "net"])
-      ("v1.1", ["11"; "net11"])    
-      ("v1.0", ["10"]) ] 
-
 
 let GenerateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo seq) =
     seq {
@@ -70,43 +57,28 @@ let GenerateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
             XElement(NsMsBuild + "ItemGroup", 
                 itemGroup))
 
-let rec GenerateWhenContent (fxFolders : DirectoryInfo seq) (fxVersion : string) (nugetFolderAliases : string list) =
-    let matchLibfolder (fx : string) (dir : DirectoryInfo) =
-        if fx = "" then true
-        else
-            let dirName = dir.Name.ToLowerInvariant()
-            dirName = fx
-
-    match nugetFolderAliases with
-    | [] -> None
-    | fxFolder::tail -> let libDir = fxFolders |> Seq.tryFind (matchLibfolder fxFolder)
-                        match libDir with
-                        | None -> GenerateWhenContent fxFolders fxVersion tail
-                        | Some libFolder -> let condition = sprintf "('$(TargetFrameworkVersion)' == '%s') And ('$(TargetFrameworkProfile)' == '')" fxVersion
-                                            Some (GenerateItemGroup libFolder condition)
-
 let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
     let pkgProp = PackagePropertyName package.toString
     let packageWarnProp = sprintf "%s_Warning" pkgProp
-    let whens = seq {
-            if libDir.Exists then
-                let fxFolders = libDir.EnumerateDirectories() |> List.ofSeq
-                if fxFolders.Length = 0 then 
-                    yield (GenerateItemGroup libDir "True")
-                else
-                    for (fxName, _) in FxVersion2Folder do
-                        let folders = FxVersion2Folder |> List.skipWhile (fun (fx, _) -> fx <> fxName)
-                                                       |> List.collect (fun (_, folders) -> folders)
-                        let fxWhen = GenerateWhenContent fxFolders fxName folders
-                        match fxWhen with
-                        | Some x -> yield x
-                        | None -> ()
 
-                yield XElement(NsMsBuild + "Otherwise",
-                        new XElement(NsMsBuild + "PropertyGroup",
-                            new XElement(NsMsBuild + packageWarnProp, "Y")))
-        }
-    
+    let whens = seq {    
+        if libDir.Exists then
+            let dirs = libDir.EnumerateDirectories() |> Seq.map (fun x -> x.Name) |> List.ofSeq
+            let path2platforms = if dirs.Length = 0 then Paket.PlatformMatching.getSupportedTargetProfiles [""]
+                                 else Paket.PlatformMatching.getSupportedTargetProfiles dirs
+
+            for path2pf in path2platforms do
+                let pathLib = libDir |> IoHelpers.GetSubDirectory path2pf.Key
+                let condition = Paket.PlatformMatching.getCondition None path2pf.Value
+                let whenCondition = if condition = "$(TargetFrameworkIdentifier) == 'true'" then "True"
+                                    else condition
+                yield GenerateItemGroup pathLib whenCondition
+
+            yield XElement(NsMsBuild + "Otherwise",
+                    new XElement(NsMsBuild + "PropertyGroup",
+                        new XElement(NsMsBuild + packageWarnProp, "Y")))
+    }
+
     seq {
         if whens.Any() then
             let targetName = sprintf "%s_Check" pkgProp
@@ -145,6 +117,9 @@ let GenerateProjectContent (package : PackageId) (imports : XElement seq) (choos
     project
 
 
+
+
+
 let GenerateTargetForPackage (package : PackageId) =
     let pkgsDir = Env.GetFolder Env.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
@@ -172,10 +147,10 @@ let GatherAllAssemblies (package : PackageId) : AssemblyId set =
 
 
 let InstallPackages (nugets : RepositoryUrl list) =
-    Paket.UpdateSources nugets
-    Paket.PaketInstall ()
+    PaketInterface.UpdateSources nugets
+    PaketInterface.PaketInstall ()
 
-    let allPackages = NuGets.BuildPackageDependencies (Paket.ParsePaketDependencies ())
+    let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
                       |> Map.toList
                       |> Seq.map fst
     allPackages |> Seq.iter GenerateTargetForPackage
@@ -185,25 +160,25 @@ let Install () =
     InstallPackages antho.NuGets
 
 let Update () =
-    Paket.PaketUpdate ()
+    PaketInterface.PaketUpdate ()
     
-    let allPackages = NuGets.BuildPackageDependencies (Paket.ParsePaketDependencies ())
+    let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
                       |> Map.toList
                       |> Seq.map fst
     allPackages |> Seq.iter GenerateTargetForPackage
 
 let Outdated () =
-    Paket.PaketOutdated ()
+    PaketInterface.PaketOutdated ()
 
 let List () =
-    Paket.PaketInstalled ()
+    PaketInterface.PaketInstalled ()
 
 let RemoveUnusedPackages (antho : Anthology) =
-    let packages = Paket.ParsePaketDependencies ()
+    let packages = PaketInterface.ParsePaketDependencies ()
     let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
                                       |> Set.unionMany
     let packagesToRemove = packages |> Set.filter (fun x -> (not << Set.contains x) usedPackages)
-    Paket.RemoveDependencies packagesToRemove
+    PaketInterface.RemoveDependencies packagesToRemove
 
 let SimplifyAnthology (antho) =
     let packages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
