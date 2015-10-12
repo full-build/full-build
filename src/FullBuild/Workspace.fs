@@ -88,7 +88,8 @@ let rec DisplayConflicts (conflicts : Indexation.ConflictType list) =
 
 // this function has 2 side effects:
 // * update paket.dependencies (both sources and packages)
-let Index () = 
+// * anthology
+let IndexWorkspace () = 
     let wsDir = Env.GetFolder Env.Workspace
     let antho = LoadAnthology()
     let projects = Indexation.ParseWorkspaceProjects ProjectParsing.ParseProject wsDir antho.Repositories
@@ -118,7 +119,9 @@ let Index () =
 
     let newAntho = { antho 
                      with Projects = allProjects |> Set.ofList }
-    newAntho
+    let simplifiedAntho = Simplify.SimplifyAnthologyWithoutPackage newAntho
+    Configuration.SaveAnthology simplifiedAntho
+    simplifiedAntho
 
 let GenerateProjectTarget (project : Project) =
     let extension = match project.OutputType with
@@ -297,11 +300,14 @@ let TransformProjects (antho : Anthology) =
     ConvertProjects antho XDocumentLoader XDocumentSaver
 
 
-let Convert () = 
-    let newAntho = Index () |> Package.Simplify
+let Index () =
+    let newAntho = IndexWorkspace () |> Package.Simplify
     Configuration.SaveAnthology newAntho
-    TransformProjects newAntho
-    RemoveUselessStuff newAntho
+
+let Convert () = 
+    let antho = Configuration.LoadAnthology ()
+    TransformProjects antho
+    RemoveUselessStuff antho
 
 let ClonedRepositories (wsDir : DirectoryInfo) (repos : Repository set) =
     repos |> Set.filter (fun x -> let repoDir = wsDir |> GetSubDirectory x.Name.toString

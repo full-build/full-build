@@ -68,6 +68,7 @@ type Command =
     // workspace
     | SetupWorkspace of SetupWorkspace
     | InitWorkspace of InitWorkspace
+    | IndexWorkspace
     | ConvertWorkspace
     | PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
@@ -121,6 +122,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Init) :: masterRepository:: path :: [] -> Command.InitWorkspace { MasterRepository=RepositoryUrl.from masterRepository
                                                                                     Path = path }
     | Token(Token.Exec) :: cmd :: [] -> Command.Exec cmd
+    | Token(Token.Index) :: [] -> Command.IndexWorkspace
     | Token(Token.Convert) :: [] -> Command.ConvertWorkspace
     | Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                                        CloneRepositories { Filters = repoFilters }
@@ -175,7 +177,8 @@ let UsageContent() =
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
         "  add repo <repo-name> <repo-uri> : declare a new repository (git or hg supported)"
         "  add nuget <nuget-uri> : add nuget uri"
-        "  convert : index and convert projects in workspace"
+        "  index : index workspace"
+        "  convert : convert projects in workspace"
         "  update : update packages"
         "  outdated : display outdated packages"
         "  push : push a baseline from current repositories version and display version"

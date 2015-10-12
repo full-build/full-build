@@ -67,7 +67,7 @@ let CheckSimplifyAnthology () =
                                  (PackageId.from "cassandra-sharp-core", Set [PackageId.from "Rx-Main"])
                                  (PackageId.from "cassandra-sharp-interfaces", Set.empty) ]
 
-    let newAnthology = Simplify.SimplifyAnthology anthology package2files package2packages
+    let newAnthology = Simplify.SimplifyAnthologyWithPackages anthology package2files package2packages
     let file = FileInfo (Path.GetRandomFileName())
     printfn "Temporary file is %A" file.FullName
 
