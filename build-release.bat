@@ -1,4 +1,5 @@
 echo on
+setlocal
 set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
 
 bootstrap\fullbuild install || goto :ko

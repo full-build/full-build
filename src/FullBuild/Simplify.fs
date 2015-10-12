@@ -74,8 +74,8 @@ let TransformSingleAssemblyToProjectOrPackage (package2files : Map<PackageId, As
     newProjects
 
 
-let TransformPackageToProject (package2files : Map<PackageId, AssemblyId set>) (projects : Project set) : Project set =
-    let packages = package2files |> Seq.map (fun x -> x.Key) |> Set
+let TransformPackageToProject (projects : Project set) : Project set =
+    let packages = projects |> Seq.collect (fun x -> x.PackageReferences) |> Set
 
     let pkg2prj = Map.ofSeq <| seq {
         for package in packages do
@@ -145,20 +145,31 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
                 | None -> newPackages <- newPackages |> Set.add package
                 | Some (prjs, pkgs) -> newProjects <- newProjects |> Set.union prjs
                                        newPackages <- newPackages |> Set.union pkgs
-            let simplifiedUsedPackages = package2packages |> Map.filter (fun k v -> newPackages |> Set.contains k)
+            let simplifiedUsedPackages = package2packages |> Map.filter (fun k _ -> newPackages |> Set.contains k)
             let simplifiedPackagesRoot = ComputePackagesRoots simplifiedUsedPackages
+            let removeAssemblies = projects |> Seq.filter (fun x -> newProjects |> Set.contains x.ProjectGuid)
+                                            |> Seq.map (fun x -> x.Output)
+                                            |> Set
             let newProject = { project
                                with PackageReferences = simplifiedPackagesRoot 
+                                    AssemblyReferences = Set.difference project.AssemblyReferences removeAssemblies
                                     ProjectReferences = Set.union project.ProjectReferences newProjects }
             yield newProject
     }
     simplifiedProjects |> Set
 
 
-let SimplifyAnthology (antho : Anthology) (package2files : Map<PackageId, AssemblyId set>) (package2packages : Map<PackageId, PackageId set>) =
+let SimplifyAnthologyWithoutPackage (antho : Anthology) =
+    let newProjects = antho.Projects |> TransformPackageToProject
+
+    let newAntho = { antho
+                     with Projects = newProjects }
+    newAntho
+
+let SimplifyAnthologyWithPackages (antho : Anthology) (package2files : Map<PackageId, AssemblyId set>) (package2packages : Map<PackageId, PackageId set>) =
     let newProjects = antho.Projects |> TransformSingleAssemblyToProjectOrPackage  package2files
-                                     |> TransformPackageToProject package2files
-                                     |> RemoveAssembliesFromPackagesOrProjects package2files
+                                     |> TransformPackageToProject
+                                     //|> RemoveAssembliesFromPackagesOrProjects package2files
                                      |> TransformPackagesToProjectsAndPackages package2packages package2files
 
     let newAntho = { antho
