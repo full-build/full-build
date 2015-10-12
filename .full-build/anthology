@@ -42,5 +42,6 @@ anthology:
         - assembly: system.runtime.serialization
         - assembly: system.xml
         - assembly: system.xml.linq
-      packages: []
+      packages:
+        - package: Newtonsoft.Json
       projects: []
