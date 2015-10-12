@@ -4,13 +4,13 @@ anthology:
     - nuget: https://www.nuget.org/api/v2/
   repositories:
     - repo: .full-build
-      type: Git
+      type: git
       uri: https://github.com/pchalamet/cassandra-sharp-full-build
     - repo: cassandra-sharp
-      type: Git
+      type: git
       uri: https://github.com/pchalamet/cassandra-sharp
     - repo: cassandra-sharp-contrib
-      type: Git
+      type: git
       uri: https://github.com/pchalamet/cassandra-sharp-contrib
   projects:
     - guid: 984a4b04-c71a-4550-9193-817cfacba30a
@@ -52,6 +52,7 @@ anthology:
       out: cassandrasharpunittests.dll
       fx: v4.5
       assemblies:
+        - assembly: moq
         - assembly: system
         - assembly: system.configuration
         - assembly: system.core
@@ -106,8 +107,8 @@ anthology:
       assemblies:
         - assembly: system
       packages:
-        - package: log4net
         - package: Rx-Main
+        - package: log4net
       projects:
         - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
     - guid: 9e8648a4-d25a-4cfa-aaee-20d9d63ff571
@@ -118,9 +119,9 @@ anthology:
         - assembly: system
         - assembly: system.core
       packages:
-        - package: log4net
         - package: Nunit
         - package: Rx-Main
+        - package: log4net
       projects:
         - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
         - project: c1d252b7-d766-4c28-9c46-0696f896846c
