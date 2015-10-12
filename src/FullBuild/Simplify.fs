@@ -74,6 +74,33 @@ let TransformSingleAssemblyToProjectOrPackage (package2files : Map<PackageId, As
     newProjects
 
 
+let TransformPackageToProject (package2files : Map<PackageId, AssemblyId set>) (projects : Project set) : Project set =
+    let packages = package2files |> Seq.map (fun x -> x.Key) |> Set
+
+    let pkg2prj = Map.ofSeq <| seq {
+        for package in packages do
+            let assId = AssemblyId.from package.toString
+            let project = projects |> Seq.tryFind (fun x -> x.Output = assId)
+            match project with
+            | Some x -> yield (package, x.ProjectGuid)
+            | _ -> ()
+    }
+
+    let res = seq {
+        for project in projects do
+            let selection = pkg2prj |> Seq.filter (fun x ->project.PackageReferences |> Set.contains x.Key)
+            let removeAssembly = selection |> Seq.map (fun x -> AssemblyId.from x.Key.toString) |> Set
+            let removePackage = selection |> Seq.map (fun x -> x.Key) |> Set
+            let addProject = selection |> Seq.map (fun x -> x.Value) |> Set
+            let newProject = { project
+                               with AssemblyReferences = Set.difference project.AssemblyReferences removeAssembly
+                                    PackageReferences = Set.difference project.PackageReferences removePackage
+                                    ProjectReferences = Set.union project.ProjectReferences addProject }
+            yield newProject
+    }
+
+    res |> Set.ofSeq
+
 let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, PackageId set>) (package2files : Map<PackageId, AssemblyId set>) (projects : Project set) =
     let file2package = package2files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
                                      |> Map.toSeq
@@ -130,6 +157,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
 
 let SimplifyAnthology (antho : Anthology) (package2files : Map<PackageId, AssemblyId set>) (package2packages : Map<PackageId, PackageId set>) =
     let newProjects = antho.Projects |> TransformSingleAssemblyToProjectOrPackage  package2files
+                                     |> TransformPackageToProject package2files
                                      |> RemoveAssembliesFromPackagesOrProjects package2files
                                      |> TransformPackagesToProjectsAndPackages package2packages package2files
 
