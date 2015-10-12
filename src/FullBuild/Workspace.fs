@@ -320,6 +320,12 @@ let CollectRepoHash wsDir (repos : Repository set) =
 
     repos |> Set.map getRepoHash
 
+let Try action =
+    try
+        action()
+    with
+        _ -> ()
+
 let Push () = 
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
@@ -328,18 +334,18 @@ let Push () =
     let baseline = { Bookmarks = bookmarks }
     Configuration.SaveBaseline baseline
 
-    // copy bin content
     let mainRepo = antho.MasterRepository
+
+    // commit
+    Try (fun () -> Vcs.VcsCommit wsDir mainRepo "bookmark")
+    Try (fun () -> Vcs.VcsPush wsDir mainRepo)
+
+    // copy bin content
     let hash = Vcs.VcsTip wsDir mainRepo
     let binDir = Env.GetFolder Env.Bin
     let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
     IoHelpers.CopyFolder binDir versionDir
     printfn "%s" hash
-
-    // commit
-    Vcs.VcsCommit wsDir mainRepo "bookmark"
-    Vcs.VcsPush wsDir mainRepo
-
 
 let Checkout (version : BookmarkVersion) =
     let antho = Configuration.LoadAnthology ()
