@@ -191,7 +191,9 @@ let GraphNodes (antho : Anthology) (projects : Project set) =
                 XAttribute(NsNone + "Group", "Expanded"))
 
         for project in projects do
-            yield GenerateNode (project.ProjectGuid.toString) (project.Output.toString) "Project"
+            if project.RelativeProjectFile.toString.Contains(".Test.") || project.RelativeProjectFile.toString.Contains(".Tests.") then
+                yield GenerateNode (project.ProjectGuid.toString) (project.Output.toString) "TestProject"
+            else yield GenerateNode (project.ProjectGuid.toString) (project.Output.toString) "Project"
 
         for project in importedProjects do
             yield GenerateNode (project.ProjectGuid.toString) (project.Output.toString) "ProjectImport"
@@ -223,10 +225,10 @@ let GraphLinks (antho : Anthology) (projects : Project set) =
                 yield GenerateLink (project.ProjectGuid.toString) (assembly.toString) "AssemblyRef"
 
         for project in projects do
-                yield GenerateLink "Projects" (project.ProjectGuid.toString) "Contains"
+            yield GenerateLink "Projects" (project.ProjectGuid.toString) "Contains"
 
         for project in importedProjects do
-                yield GenerateLink "Projects" (project.ProjectGuid.toString) "Contains"
+            yield GenerateLink "Projects" (project.ProjectGuid.toString) "Contains"
 
         for project in projects do
             for package in project.PackageReferences do
@@ -240,6 +242,7 @@ let GraphLinks (antho : Anthology) (projects : Project set) =
 
 let GraphCategories () =
     let allCategories = [ ("Project", "Green")
+                          ("TestProject", "Purple")
                           ("ProjectImport", "Navy")
                           ("Package", "Orange")
                           ("Assembly", "Red")       
