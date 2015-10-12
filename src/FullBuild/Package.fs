@@ -180,19 +180,21 @@ let RemoveUnusedPackages (antho : Anthology) =
     let packagesToRemove = packages |> Set.filter (fun x -> (not << Set.contains x) usedPackages)
     PaketInterface.RemoveDependencies packagesToRemove
 
-let SimplifyAnthology (antho) =
-    let packages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
-                                  |> Set.unionMany
+let simplifyAnthologyWithPackages (antho) =
+    let promotedPackageAntho = SimplifyAnthologyWithoutPackage antho
+
+    let packages = promotedPackageAntho.Projects |> Set.map (fun x -> x.PackageReferences)
+                                                 |> Set.unionMany
     let package2packages = NuGets.BuildPackageDependencies packages
     let allPackages = package2packages |> Seq.map (fun x -> x.Key) 
     let package2files = allPackages |> Seq.map (fun x -> (x, GatherAllAssemblies x)) 
                                     |> Map
-    let newAntho = SimplifyAnthology antho package2files package2packages
+    let newAntho = SimplifyAnthologyWithPackages antho package2files package2packages
     RemoveUnusedPackages newAntho
     newAntho
 
 let Simplify (antho : Anthology) =
     InstallPackages antho.NuGets
     
-    let newAntho = SimplifyAnthology antho
+    let newAntho = simplifyAnthologyWithPackages antho
     newAntho
