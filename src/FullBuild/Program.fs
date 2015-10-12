@@ -32,6 +32,7 @@ let tryMain argv =
     // workspace
     | SetupWorkspace wsInfo -> Workspace.Create wsInfo.Path wsInfo.MasterRepository wsInfo.MasterArtifacts
     | InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository
+    | IndexWorkspace -> Workspace.Index ()
     | ConvertWorkspace -> Workspace.Convert ()
     | PushWorkspace -> Workspace.Push ()
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
