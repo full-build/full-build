@@ -94,7 +94,7 @@ let IndexWorkspace () =
     let antho = LoadAnthology()
     let projects = Indexation.ParseWorkspaceProjects ProjectParsing.ParseProject wsDir antho.Repositories
 
-    // merge packages
+    // add new packages (with correct version requirement)
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
                                  |> Seq.concat
     let existingPackages = PaketInterface.ParsePaketDependencies ()
@@ -117,10 +117,18 @@ let IndexWorkspace () =
         DisplayConflicts conflicts
         failwith "Conflict(s) detected"
 
+    // automaticaly migrate packages to project - this will avoid retrieving them
     let newAntho = { antho 
                      with Projects = allProjects |> Set.ofList }
     let simplifiedAntho = Simplify.SimplifyAnthologyWithoutPackage newAntho
     Configuration.SaveAnthology simplifiedAntho
+
+    // remove unused packages now
+    let allPackages = PaketInterface.ParsePaketDependencies ()
+    let usedPackages = simplifiedAntho.Projects |> Seq.collect (fun x -> x.PackageReferences) |> Set
+    let unusedPackages = Set.difference allPackages usedPackages
+    PaketInterface.RemoveDependencies unusedPackages       
+
     simplifiedAntho
 
 let GenerateProjectTarget (project : Project) =
