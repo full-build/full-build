@@ -153,6 +153,19 @@ let Generate (viewName : ViewId) =
     slnDefines.Save (slnDefineFile.FullName)
 
 
+let GenerateProjectNode (project : Project) =
+    let isTest = project.RelativeProjectFile.toString.Contains(".Test.") || project.RelativeProjectFile.toString.Contains(".Tests.")
+    let cat = if isTest then "TestProject"
+              else "Project"
+
+    XElement(NsDgml + "Node",
+        XAttribute(NsNone + "Id", project.ProjectGuid.toString),
+        XAttribute(NsNone + "Label", project.Output.toString),
+        XAttribute(NsNone + "Category", cat),
+        XAttribute(NsNone + "Fx", project.FxTarget.toString),
+        XAttribute(NsNone + "Guid", project.ProjectGuid.toString),
+        XAttribute(NsNone + "IsTest", isTest))
+
 let GenerateNode (source : string) (label : string) (category : string) =
     XElement(NsDgml + "Node",
         XAttribute(NsNone + "Id", source),
@@ -191,9 +204,7 @@ let GraphNodes (antho : Anthology) (projects : Project set) =
                 XAttribute(NsNone + "Group", "Expanded"))
 
         for project in projects do
-            if project.RelativeProjectFile.toString.Contains(".Test.") || project.RelativeProjectFile.toString.Contains(".Tests.") then
-                yield GenerateNode (project.ProjectGuid.toString) (project.Output.toString) "TestProject"
-            else yield GenerateNode (project.ProjectGuid.toString) (project.Output.toString) "Project"
+            yield GenerateProjectNode project
 
         for project in importedProjects do
             yield GenerateNode (project.ProjectGuid.toString) (project.Output.toString) "ProjectImport"
@@ -269,15 +280,38 @@ let GraphCategories () =
                 XAttribute(NsNone + "OutgoingActionLabel", "Contains"))
     }
 
+let GraphProperties () =
+    let allProperties = [ ("Fx", "Target Framework Version", "System.String")
+                          ("Guid", "Project Guid", "System.Guid") 
+                          ("IsTest", "Test Project", "System.Boolean")]
+
+    let generateProperty (prop) =
+        let (id, label, dataType) = prop
+        XElement(NsDgml + "Property", 
+            XAttribute(NsNone + "Id", id), 
+            XAttribute(NsNone + "Label", label),
+            XAttribute(NsNone + "DataType", dataType))
+
+    allProperties |> Seq.map generateProperty
+
+let GraphStyles () =
+    XElement(NsDgml + "Styles")
+//        XElement(NsDgml + "Style",
+//            XAttribute(NsNone + "TargetType", "Node"), XAttribute(NsNone + "GroupLabel", "IsTest"), XAttribute(NsNone + "ValueLabel", "Test Project"),
+//            XElement(NsDgml + "Condition", XAttribute(NsNone + "Expression", "IsTest='true'")),
+//            XElement(NsDgml + "Setter", XAttribute(NsNone + "Property", "Background"), XAttribute(NsNone + "Value", "Purple"))))
+
 let GraphContent (antho : Anthology) (viewName : ViewId) =
     let projects = FindViewProjects viewName |> Set
     let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho projects)
     let xLinks = XElement(NsDgml+"Links", GraphLinks antho projects)
     let xCategories = XElement(NsDgml + "Categories", GraphCategories ())
+    let xProperties = XElement(NsDgml + "Properties", GraphProperties ())
+    let xStyles = GraphStyles ()
     let xGraphDir = XAttribute(NsNone + "GraphDirection", "LeftToRight")
     let xLayout = XAttribute(NsNone + "Layout", "Sugiyama")
     XDocument(
-        XElement(NsDgml + "DirectedGraph", xLayout, xGraphDir, xNodes, xLinks, xCategories))
+        XElement(NsDgml + "DirectedGraph", xLayout, xGraphDir, xNodes, xLinks, xCategories, xProperties, xStyles))
 
 let Graph (viewName : ViewId) =
     let antho = Configuration.LoadAnthology ()
