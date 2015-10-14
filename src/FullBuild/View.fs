@@ -267,7 +267,7 @@ let GraphCategories () =
                           ("TestProject", "Purple")
                           ("ProjectImport", "Navy")
                           ("Package", "Orange")
-                          ("Assembly", "Red")       
+                          ("Assembly", "Red")
                           ("ProjectRef", "Green")
                           ("PackageRef", "Orange")
                           ("AssemblyRef", "Red") ]
@@ -344,6 +344,9 @@ let Create (viewName : ViewId) (filters : string list) =
     let vwDir = Env.GetFolder Env.View 
     let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
     File.WriteAllLines (vwFile.FullName, filters)
+
+    Graph viewName
+    Generate viewName
 
 
 let Build (viewName : ViewId) =
