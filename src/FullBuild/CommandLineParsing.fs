@@ -48,7 +48,7 @@ type NuGetUrl =
 
 type AddView = 
     { Name : ViewId
-      Filters : RepositoryId set }
+      Filters : string list }
 
 type ViewName = 
     { Name : ViewId }
@@ -142,8 +142,7 @@ let ParseCommandLine(args : string list) : Command =
 
     | Token(Token.Add) :: Token(Token.Repo) :: name :: url :: [] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
     | Token(Token.Add) :: Token(Token.NuGet) :: uri :: [] -> Command.AddNuGet (RepositoryUrl.from uri)
-    | Token(Token.Add) :: Token(Token.View) :: (MatchViewId name) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                                                                                Command.AddView { Name = name; Filters = repoFilters }
+    | Token(Token.Add) :: Token(Token.View) :: (MatchViewId name) :: filters -> Command.AddView { Name = name; Filters = filters }
     | Token(Token.Drop) :: Token(Token.View) :: (MatchViewId name) :: [] -> Command.DropView { Name = name }
     | Token(Token.List) :: Token(Token.Repo) :: [] -> ListRepositories
     | Token(Token.List) :: Token(Token.View) :: [] -> Command.ListViews
