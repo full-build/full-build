@@ -81,6 +81,7 @@ type Command =
     | ListRepositories
     | AddRepository of RepositoryId * RepositoryUrl
     | CloneRepositories of CloneRepositories
+    | DropRepository of RepositoryId
 
     // view
     | ListViews
@@ -111,6 +112,9 @@ let (|MatchBookmarkVersion|) version =
 
 let (|MatchViewId|) view =
     ViewId view
+
+let (|MatchRepositoryId|) repo =
+    RepositoryId.from repo
 
 let ParseCommandLine(args : string list) : Command = 
     match args with
@@ -144,6 +148,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Add) :: Token(Token.NuGet) :: uri :: [] -> Command.AddNuGet (RepositoryUrl.from uri)
     | Token(Token.Add) :: Token(Token.View) :: (MatchViewId name) :: filters -> Command.AddView { Name = name; Filters = filters }
     | Token(Token.Drop) :: Token(Token.View) :: (MatchViewId name) :: [] -> Command.DropView { Name = name }
+    | Token(Token.Drop) :: Token(Token.Repo) :: (MatchRepositoryId repo) :: [] -> Command.DropRepository repo
     | Token(Token.List) :: Token(Token.Repo) :: [] -> ListRepositories
     | Token(Token.List) :: Token(Token.View) :: [] -> Command.ListViews
     | Token(Token.List) :: Token(Token.NuGet) :: [] -> Command.ListNuGets
