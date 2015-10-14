@@ -73,15 +73,15 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
 
 let rec DisplayConflicts (conflicts : Indexation.ConflictType list) =
     let displayConflict (p1 : Project) (p2 : Project) (msg : string) =
-        printfn "Conflict : projects %s/%s and %s/%s %s" p1.Repository.toString p1.RelativeProjectFile.toString 
-                                                         p2.Repository.toString p2.RelativeProjectFile.toString
-                                                         msg
+        printfn "Conflict detected between projects (%s) : " msg
+        printfn " - %s/%s" p1.Repository.toString p1.RelativeProjectFile.toString 
+        printfn " - %s/%s" p2.Repository.toString p2.RelativeProjectFile.toString
 
     match conflicts with
-    | Indexation.SameGuid (p1, p2) :: tail -> displayConflict p1 p2 "have same guid"
+    | Indexation.SameGuid (p1, p2) :: tail -> displayConflict p1 p2 "same guid"
                                               DisplayConflicts tail
 
-    | Indexation.SameOutput (p1, p2) :: tail -> displayConflict p1 p2 "have same output"
+    | Indexation.SameOutput (p1, p2) :: tail -> displayConflict p1 p2 "same output"
                                                 DisplayConflicts tail
     | [] -> ()
 
