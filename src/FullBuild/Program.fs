@@ -45,6 +45,7 @@ let tryMain argv =
     | AddRepository (name, url) -> Repo.Add name url
     | CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters
     | ListRepositories -> Repo.List ()
+    | DropRepository repo -> Repo.Drop repo
 
     // view
     | AddView viewInfo -> View.Create viewInfo.Name viewInfo.Filters
