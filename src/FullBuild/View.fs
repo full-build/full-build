@@ -36,10 +36,14 @@ open Collections
 let Drop (viewName : ViewId) =
     let vwDir = GetFolder Env.View
     let vwFile = GetFile (AddExt View viewName.toString) vwDir
-    File.Delete (vwFile.FullName)
+    vwFile.Delete()
 
     let vwDefineFile = GetFile (AddExt Targets viewName.toString) vwDir
-    File.Delete (vwDefineFile.FullName)
+    vwDefineFile.Delete()
+
+    let wsDir = Env.GetFolder Env.Workspace
+    let viewFile = GetFile (AddExt Solution viewName.toString) wsDir
+    viewFile.Delete ()
 
 let List () =
     let vwDir = GetFolder Env.View
@@ -130,11 +134,17 @@ let ComputeProjectSelectionClosure (allProjects : Project set) (filters : Reposi
     transitiveClosure
 
 let FindViewProjects (viewName : ViewId) =
-    let antho = LoadAnthology ()
-    let viewDir = GetFolder Env.View
+    // load back filter & generate view accordingly
+    let vwDir = Env.GetFolder Env.View 
+    let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
+    let filters = File.ReadAllLines(vwFile.FullName)
 
-    let viewFile = viewDir |> GetFile (AddExt View viewName.toString)
-    let repos = File.ReadAllLines (viewFile.FullName) |> Seq.map (fun x -> RepositoryId.from x)
+    let repoFilters = filters |> Seq.map RepositoryId.from |> Set
+    let repos = repoFilters |> Repo.FilterRepos 
+                            |> Seq.map (fun x -> x.Name)
+
+    // find projects
+    let antho = Configuration.LoadAnthology ()
     let projectRefs = ComputeProjectSelectionClosure antho.Projects repos |> Set
     let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectGuid)
     projects
@@ -142,16 +152,17 @@ let FindViewProjects (viewName : ViewId) =
 let Generate (viewName : ViewId) =
     let projects = FindViewProjects viewName
 
-    let wsDir = GetFolder Env.Workspace
-    let slnFile = wsDir |> GetFile (AddExt Solution viewName.toString)
-    let slnContent = GenerateSolutionContent projects
-    File.WriteAllLines (slnFile.FullName, slnContent)
-
+    // generate solution defines
     let slnDefines = GenerateSolutionDefines projects
     let viewDir = GetFolder Env.View
     let slnDefineFile = viewDir |> GetFile (AddExt Targets viewName.toString)
     slnDefines.Save (slnDefineFile.FullName)
 
+    // generate solution file
+    let wsDir = GetFolder Env.Workspace
+    let slnFile = wsDir |> GetFile (AddExt Solution viewName.toString)
+    let slnContent = GenerateSolutionContent projects
+    File.WriteAllLines (slnFile.FullName, slnContent)
 
 let GenerateProjectNode (project : Project) =
     let isTest = project.RelativeProjectFile.toString.Contains(".Test.") || project.RelativeProjectFile.toString.Contains(".Tests.")
@@ -326,21 +337,20 @@ let Graph (viewName : ViewId) =
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewName.toString)
     graph.Save graphFile.FullName
 
-let Create (viewName : ViewId) (filters : RepositoryId set) =
-    if filters.Count = 0 then
+let Create (viewName : ViewId) (filters : string list) =
+    if filters.Length = 0 then
         failwith "Expecting at least one filter"
 
-    let repos = filters |> Repo.FilterRepos 
-                        |> Seq.map (fun x -> x.Name.toString)
-    let vwDir = Env.GetFolder Env.View
+    let vwDir = Env.GetFolder Env.View 
     let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
-    File.WriteAllLines (vwFile.FullName, repos)
+    File.WriteAllLines (vwFile.FullName, filters)
 
-    Generate viewName
 
 let Build (viewName : ViewId) =
+    Generate viewName
+
+    // build
     let wsDir = Env.GetFolder Env.Workspace
     let viewFile = AddExt Solution viewName.toString
     let args = sprintf "/p:Configuration=Release %A" viewFile
-
     Exec.Exec "msbuild" args wsDir
