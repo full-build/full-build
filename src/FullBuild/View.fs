@@ -295,11 +295,16 @@ let GraphProperties () =
     allProperties |> Seq.map generateProperty
 
 let GraphStyles () =
-    XElement(NsDgml + "Styles")
-//        XElement(NsDgml + "Style",
-//            XAttribute(NsNone + "TargetType", "Node"), XAttribute(NsNone + "GroupLabel", "IsTest"), XAttribute(NsNone + "ValueLabel", "Test Project"),
-//            XElement(NsDgml + "Condition", XAttribute(NsNone + "Expression", "IsTest='true'")),
-//            XElement(NsDgml + "Setter", XAttribute(NsNone + "Property", "Background"), XAttribute(NsNone + "Value", "Purple"))))
+    XElement(NsDgml + "Styles",
+        XElement(NsDgml + "Style",
+            XAttribute(NsNone + "TargetType", "Node"), XAttribute(NsNone + "GroupLabel", "Test Project"), XAttribute(NsNone + "ValueLabel", "True"),
+            XElement(NsDgml + "Condition", XAttribute(NsNone + "Expression", "IsTest = 'True'")),
+            XElement(NsDgml + "Setter", XAttribute(NsNone + "Property", "Icon"), XAttribute(NsNone + "Value", "CodeSchema_Event"))),
+        XElement(NsDgml + "Style",
+            XAttribute(NsNone + "TargetType", "Node"), XAttribute(NsNone + "GroupLabel", "Test Project"), XAttribute(NsNone + "ValueLabel", "False"),
+            XElement(NsDgml + "Condition", XAttribute(NsNone + "Expression", "IsTest = 'False'")),
+            XElement(NsDgml + "Setter", XAttribute(NsNone + "Property", "Icon"), XAttribute(NsNone + "Value", "CodeSchema_Method"))))
+
 
 let GraphContent (antho : Anthology) (viewName : ViewId) =
     let projects = FindViewProjects viewName |> Set
