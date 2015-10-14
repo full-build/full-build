@@ -324,7 +324,7 @@ let GraphContent (antho : Anthology) (viewName : ViewId) =
     let xCategories = XElement(NsDgml + "Categories", GraphCategories ())
     let xProperties = XElement(NsDgml + "Properties", GraphProperties ())
     let xStyles = GraphStyles ()
-    let xGraphDir = XAttribute(NsNone + "GraphDirection", "LeftToRight")
+    let xGraphDir = XAttribute(NsNone + "GraphDirection", "TopToBottom")
     let xLayout = XAttribute(NsNone + "Layout", "Sugiyama")
     XDocument(
         XElement(NsDgml + "DirectedGraph", xLayout, xGraphDir, xNodes, xLinks, xCategories, xProperties, xStyles))
