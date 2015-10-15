@@ -6,10 +6,7 @@
 *.dgml
 bin
 obj
-tests/cs-init
-tests/cs-do
-tests/paket-do
-tests/fclp-do
+tests/*
 packages
 .vs
 *~
