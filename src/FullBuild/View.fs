@@ -327,7 +327,14 @@ let GraphContent (antho : Anthology) (viewName : ViewId) =
     let xGraphDir = XAttribute(NsNone + "GraphDirection", "TopToBottom")
     let xLayout = XAttribute(NsNone + "Layout", "Sugiyama")
     XDocument(
-        XElement(NsDgml + "DirectedGraph", xLayout, xGraphDir, xNodes, xLinks, xCategories, xProperties, xStyles))
+        XElement(NsDgml + "DirectedGraph", 
+            xLayout, 
+            xGraphDir, 
+            xNodes, 
+            xLinks, 
+            xCategories, 
+            xProperties, 
+            xStyles))
 
 let Graph (viewName : ViewId) =
     let antho = Configuration.LoadAnthology ()
@@ -345,7 +352,6 @@ let Create (viewName : ViewId) (filters : string list) =
     let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
     File.WriteAllLines (vwFile.FullName, filters)
 
-    Graph viewName
     Generate viewName
 
 
