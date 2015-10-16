@@ -355,11 +355,17 @@ let Create (viewName : ViewId) (filters : string list) =
     Generate viewName
 
 
-let Build (viewName : ViewId) =
-    Generate viewName
 
-    // build
+
+// ---------------------------------------------------------------------------------------
+
+let ExternalBuild (config : string) (name : ViewId) =
     let wsDir = Env.GetFolder Env.Workspace
-    let viewFile = AddExt Solution viewName.toString
-    let args = sprintf "/p:Configuration=Release %A" viewFile
+    let viewFile = AddExt Solution name.toString
+
+    let args = sprintf "/p:Configuration=%s %A" config viewFile
     Exec.Exec "msbuild" args wsDir
+
+let Build (name : ViewId) (config : string) =
+    name |> Generate
+    name |> ExternalBuild config

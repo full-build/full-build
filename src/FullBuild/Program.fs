@@ -53,7 +53,7 @@ let tryMain argv =
     | ListViews -> View.List ()
     | DescribeView viewInfo -> View.Describe viewInfo.Name
     | GraphView viewInfo -> View.Graph viewInfo.Name
-    | BuildView viewInfo -> View.Build viewInfo.Name
+    | BuildView viewInfo -> View.Build viewInfo.Name "Release"
 
     // nuget
     | AddNuGet url -> NuGets.Add url
