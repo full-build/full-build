@@ -84,3 +84,7 @@ let GetAnthologyFileName() =
 let GetBaselineFileName() = 
     GetFolder Config  |> GetFile BASELINE_FILENAME
 
+
+let IsMono () =
+    let monoRuntime = System.Type.GetType ("Mono.Runtime") 
+    monoRuntime <> null

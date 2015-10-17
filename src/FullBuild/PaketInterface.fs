@@ -109,10 +109,11 @@ let RemoveDependencies (packages : PackageId set) =
 
 let ExecutePaketCommand cmd =
     let confDir = Env.GetFolder Env.Config
-    Exec.Exec "paket.exe" cmd confDir
+    if Env.IsMono() then Exec.Exec "mono" ("paket.exe " + cmd) confDir
+    else Exec.Exec "paket.exe" cmd confDir
 
 let PaketInstall () =
-    ExecutePaketCommand "install"    
+    ExecutePaketCommand "install"
 
 let PaketUpdate () =
     ExecutePaketCommand "update"
