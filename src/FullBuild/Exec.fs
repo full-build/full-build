@@ -39,7 +39,6 @@ let ExecWithArgs (command : string) (args : string) (dir : DirectoryInfo) (vars 
     if proc.ExitCode <> 0 then failwithf "Process failed with error %d" proc.ExitCode
 
 let Exec (command : string) (args : string) (dir : DirectoryInfo) = 
-    printfn "Exec : %s - %s" command args
     ExecWithArgs command args dir Map.empty
 
 let ExecReadLine (command : string) (args : string) (dir : DirectoryInfo) = 
