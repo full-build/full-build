@@ -363,7 +363,7 @@ let ExternalBuild (config : string) (name : ViewId) =
     let wsDir = Env.GetFolder Env.Workspace
     let viewFile = AddExt Solution name.toString
 
-    let args = sprintf "/p:Configuration=%s %A" config viewFile
+    let args = sprintf "/p:Configuration=%s /v:m %A" config viewFile
     Exec.Exec "msbuild" args wsDir
 
 let Build (name : ViewId) (config : string) =
