@@ -405,7 +405,8 @@ let Exec cmd =
             let args = sprintf @"/c ""%s""" cmd
 
             try
-                Exec.ExecWithArgs "cmd" args repoDir vars
+                if Env.IsMono () then Exec.ExecWithArgs "sh" ("-c " + args) repoDir vars
+                else Exec.ExecWithArgs "cmd" args repoDir vars
             with e -> printfn "*** %s" e.Message
 
 let Clean () =
