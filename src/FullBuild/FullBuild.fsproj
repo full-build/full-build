@@ -117,16 +117,11 @@
   </Target>
   -->
   <Import Project="$(SolutionDir)/.full-build/packages/Newtonsoft.Json/package.targets" Condition="'$(FullBuild_Newtonsoft_Json_Pkg)' == ''" />
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(MSBuildToolsVersion)\WebApplications\Microsoft.WebApplication.targets" />
-  
-  <Target Name="FullBuildPublish">
+  <Import Project="$(MSBuildExtensionsPath)/Microsoft/VisualStudio/v$(MSBuildToolsVersion)/WebApplications/Microsoft.WebApplication.targets" />
+  <Target Name="Publish">
     <PropertyGroup>
       <AppDir>$(SolutionDir)/apps/$(AppName)</AppDir>
     </PropertyGroup>
-    <RemoveDir Directories="$(AppDir)"
-               ContinueOnError="true" />
-    <MSBuild Projects="$(ProjectPath)"
-             Targets="ResolveReferences;_CopyWebApplication"
-             Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
+    <MSBuild Projects="$(ProjectPath)" Targets="ResolveReferences;_CopyWebApplication" Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
   </Target>
 </Project>

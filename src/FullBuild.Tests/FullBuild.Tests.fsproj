@@ -69,12 +69,6 @@
     <Compile Include="SimplifyTests.fs" />
     <None Include="app.config" />
     <None Include="ProjectWithInvalidRefs.fsproj" />
-    <None Include="WorkspaceConfig.ini">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="GlobalConfig.ini">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="anthology-indexed.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -90,9 +84,9 @@
     <None Include="anthology.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <Content Include="packages.xml">
+    <None Include="packages.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
     <None Include="CSharpProjectSample1.csproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -133,6 +127,20 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Target Name="FullBuildPublish">
+    <PropertyGroup>
+      <AppDir>$(SolutionDir)/apps/$(AppName)</AppDir>
+    </PropertyGroup>
+    <RemoveDir Directories="$(AppDir)" />
+    <MSBuild Projects="$(ProjectPath)" Targets="ResolveReferences;_CopyWebApplication" Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
+  </Target>
   <Import Project="$(SolutionDir)/.full-build/projects/5fde3939-c144-4287-bc57-a96ec2d1a9da.targets" />
   <Import Project="$(SolutionDir)/.full-build/packages/fsunit/package.targets" Condition="'$(FullBuild_fsunit_Pkg)' == ''" />
+  <Import Project="$(MSBuildExtensionsPath)/Microsoft/VisualStudio/v$(MSBuildToolsVersion)/WebApplications/Microsoft.WebApplication.targets" />
+  <Target Name="Publish">
+    <PropertyGroup>
+      <AppDir>$(SolutionDir)/apps/$(AppName)</AppDir>
+    </PropertyGroup>
+    <MSBuild Projects="$(ProjectPath)" Targets="ResolveReferences;_CopyWebApplication" Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
+  </Target>
 </Project>
