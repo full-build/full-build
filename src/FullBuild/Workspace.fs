@@ -179,6 +179,14 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_PACKAGE_FOLDER, StringComparison.CurrentCultureIgnoreCase)
 
+    let filterPublishImport (xel : XElement) =
+        let attr = !> (xel.Attribute (NsNone + "Project")) : string
+        attr.EndsWith("Microsoft.WebApplication.targets", StringComparison.CurrentCultureIgnoreCase)
+
+    let filterPublishTarget (xel : XElement) =
+        let attr = !> (xel.Attribute (NsNone + "Name")) : string
+        String.Equals(attr, "FullBuildPublish", StringComparison.CurrentCultureIgnoreCase)
+
     let filterNuget (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith("$(SolutionDir)\.nuget\NuGet.targets", StringComparison.CurrentCultureIgnoreCase)
@@ -232,6 +240,8 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     // remove full-build imports
     cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
     cproj.Descendants(NsMsBuild + "Import").Where(filterPackage).Remove()
+    cproj.Descendants(NsMsBuild + "Import").Where(filterPublishImport).Remove()
+    cproj.Descendants(NsMsBuild + "Target").Where(filterPublishTarget).Remove()
 
     // remove nuget stuff
     cproj.Descendants(NsMsBuild + "Import").Where(filterNuget).Remove()
@@ -267,6 +277,21 @@ let ConvertProject (xproj : XDocument) (project : Project) =
                         XAttribute (NsNone + "Project", importFile),
                         XAttribute(NsNone + "Condition", condition))
         cproj.Root.LastNode.AddAfterSelf (import)
+
+    // add publish
+    let importPublish = XElement(NsMsBuild + "Import",
+                            XAttribute (NsNone + "Project", "$(MSBuildExtensionsPath)/Microsoft/VisualStudio/v$(MSBuildToolsVersion)/WebApplications/Microsoft.WebApplication.targets"))
+    cproj.Root.LastNode.AddAfterSelf (importPublish)
+
+    let taskPublish = XElement(NsMsBuild + "Target", XAttribute(NsNone+"Name", "FullBuildPublish"),
+                          XElement(NsMsBuild + "PropertyGroup",
+                            XElement(NsMsBuild + "AppDir", "$(SolutionDir)/apps/$(AppName)")),
+                          XElement(NsMsBuild + "RemoveDir", XAttribute(NsNone + "Directories", "$(AppDir)")),
+                          XElement(NsMsBuild + "MSBuild", XAttribute(NsNone + "Projects", "$(ProjectPath)"), 
+                                                          XAttribute(NsNone + "Targets", "ResolveReferences;_CopyWebApplication"),
+                                                          XAttribute(NsNone + "Properties", "WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)")))
+    cproj.Root.LastNode.AddAfterSelf (taskPublish)
+
     cproj
 
 let ConvertProjectContent (xproj : XDocument) (project : Project) =
