@@ -48,7 +48,7 @@ type Token =
     | Simplify
     | Outdated
     | Application
-    | Deploy
+    | Publish
     | Pull
     | Checkout
     | Exec
@@ -81,7 +81,7 @@ let (|Token|) (token : string) =
     | "simplify" -> Simplify
     | "outdated" -> Outdated
     | "app" -> Application
-    | "deploy" -> Deploy
+    | "publish" -> Publish
     | "pull" -> Pull
     | "checkout" -> Checkout
     | "exec" -> Exec

@@ -52,6 +52,17 @@ let Serialize (antho : Anthology) =
             cproject.projects.Add (cprojectref)
         config.anthology.projects.Add cproject
 
+    config.anthology.apps.Clear ()
+    for app in antho.Applications do
+        let capp = AnthologyConfig.anthology_Type.apps_Item_Type()
+        capp.name <- app.Name.toString
+        capp.projects.Clear ()
+        for project in app.Projects do
+            let cproject = AnthologyConfig.anthology_Type.apps_Item_Type.projects_Item_Type()
+            cproject.project <- project.toString
+            capp.projects.Add (cproject)
+        config.anthology.apps.Add (capp)
+
     config.ToString()
 
 let Deserialize (content) =
@@ -97,6 +108,20 @@ let Deserialize (content) =
                                                             PackageReferences = convertToPackages (x.packages |> List.ofSeq)
                                                             ProjectReferences = convertToProjectRefs (x.projects |> List.ofSeq) }
 
+    let rec convertToApplicationDependencies (items : AnthologyConfig.anthology_Type.apps_Item_Type.projects_Item_Type list) =
+        match items with
+        | [] -> Set.empty
+        | x :: tail -> let projectId = x.project |> ParseGuid |> ProjectId.from
+                       convertToApplicationDependencies tail |> Set.add projectId
+
+    let rec convertToApplications (items : AnthologyConfig.anthology_Type.apps_Item_Type list) =
+        match items with
+        | [] -> Set.empty
+        | x :: tail -> let appName = ApplicationId.from x.name
+                       let projects = convertToApplicationDependencies (x.projects |> List.ofSeq)
+                       let app = { Name = appName ; Projects = projects }
+                       convertToApplications tail |> Set.add app
+
     let config = new AnthologyConfig()
     config.LoadText content
 
@@ -107,7 +132,8 @@ let Deserialize (content) =
       NuGets = convertToNuGets (config.anthology.nugets |> List.ofSeq)
       MasterRepository = masterRepo
       Repositories = otherRepos
-      Projects = convertToProjects (config.anthology.projects |> List.ofSeq) }
+      Projects = convertToProjects (config.anthology.projects |> List.ofSeq) 
+      Applications = convertToApplications (config.anthology.apps |> List.ofSeq) }
 
 
 let Save (filename : FileInfo) (antho : Anthology) =

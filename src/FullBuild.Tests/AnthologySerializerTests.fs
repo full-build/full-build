@@ -21,8 +21,10 @@ let CheckSaveLoadAnthology () =
                        FxTarget = FrameworkVersion "v4.5"
                        ProjectReferences = [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set
                        AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Data"; AssemblyId.from "System.Xml"] |> set
-                       PackageReferences = Set.empty
-                       Repository = RepositoryId.from "cassandra-sharp" } ] |> set }
+                       PackageReferences = [ PackageId.from "NLog" ; PackageId.from "Rx-Main" ] |> Set
+                       Repository = RepositoryId.from "cassandra-sharp" } ] |> set 
+        Applications = [ { Name = ApplicationId.from "toto"
+                           Projects = [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set } ] |> Set }
 
     let res = AnthologySerializer.Serialize antho1
     printfn "%s" res
