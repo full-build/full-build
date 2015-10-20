@@ -24,7 +24,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile></DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>install</StartArguments>
     <StartWorkingDirectory>C:\src\full-build\tests\cs-di</StartWorkingDirectory>
@@ -78,6 +79,7 @@
     <Compile Include="CommandLineParsing.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Repo.fs" />
+    <Compile Include="Solution.fs" />
     <Compile Include="View.fs" />
     <Compile Include="NuGets.fs" />
     <Compile Include="Simplify.fs" />

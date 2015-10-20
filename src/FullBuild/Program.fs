@@ -67,7 +67,8 @@ let tryMain argv =
 
     // applications
     | ListApplications -> Application.List ()
-    | DeployApplications { Names = x } -> Application.Deploy x
+    | AddApplication appInfo -> Application.Add appInfo.Name appInfo.Projects
+    | PublishApplications { Names = x } -> Application.Deploy x
 
     // misc
     | Usage -> DisplayUsage ()

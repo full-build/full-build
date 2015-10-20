@@ -32,6 +32,7 @@ open System.Xml.Linq
 open MsBuildHelpers
 open Configuration
 open Collections
+open Solution
 
 let Drop (viewName : ViewId) =
     let vwDir = GetFolder Env.View
@@ -53,60 +54,6 @@ let Describe (viewName : ViewId) =
     let vwDir = GetFolder Env.View
     let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
     File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
-
-
-let ProjectToProjectType (filename : string) =
-    let file = FileInfo(filename)
-    let ext2projType = Map [ (".csproj", "fae04ec0-301f-11d3-bf4b-00c04f79efbc")
-                             (".fsproj", "f2a71f9b-5d33-465a-a702-920d77279786")
-                             (".vbproj", "f184b08f-c81c-45f6-a57f-5abd9991f28f") ]
-    let prjType = ext2projType.[file.Extension]
-    prjType
-
-let GenerateSolutionContent (projects : Project seq) =
-    seq {
-        yield ""
-        yield "Microsoft Visual Studio Solution File, Format Version 12.00"
-        yield "# Visual Studio 2013"
-
-        for project in projects do
-            yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""{%s}""" 
-                  (ProjectToProjectType (project.RelativeProjectFile.toString))
-                  (Path.GetFileNameWithoutExtension (project.RelativeProjectFile.toString))
-                  (sprintf "%s/%s" (project.Repository.toString) project.RelativeProjectFile.toString)
-                  (project.ProjectGuid.toString)
-
-            yield "\tProjectSection(ProjectDependencies) = postProject"
-//            for dependency in project.ProjectReferences do
-//                if projects |> Seq.exists (fun x -> x.ProjectGuid = dependency) then
-//                    let dependencyName = StringifyGuid dependency.Value
-//                    yield sprintf "\t\t%s = %s" dependencyName dependencyName
-            yield "\tEndProjectSection"
-            yield "EndProject"
-
-        yield "Global"
-        yield "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution"
-        yield "\t\tDebug|Any CPU = Debug|Any CPU"
-        yield "\t\tRelease|Any CPU = Release|Any CPU"
-        yield "\tEndGlobalSection"
-        yield "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution"
-
-        for project in projects do
-            let guid = project.ProjectGuid.toString
-            yield sprintf "\t\t{%s}.Debug|Any CPU.ActiveCfg = Debug|Any CPU" guid
-            yield sprintf "\t\t{%s}.Debug|Any CPU.Build.0 = Debug|Any CPU" guid
-            yield sprintf "\t\t{%s}.Release|Any CPU.ActiveCfg = Release|Any CPU" guid
-            yield sprintf "\t\t{%s}.Release|Any CPU.Build.0 = Release|Any CPU" guid
-
-        yield "\tEndGlobalSection"
-        yield "EndGlobal"
-    }
-
-let GenerateSolutionDefines (projects : Project seq) =
-    XElement (NsMsBuild + "Project",
-        XElement (NsMsBuild + "PropertyGroup",
-            XElement(NsMsBuild + "FullBuild_Config", "Y"),
-                projects |> Seq.map (fun x -> XElement (NsMsBuild + (ProjectPropertyName x), "Y") ) ) )
 
 
 // find all referencing projects of a project

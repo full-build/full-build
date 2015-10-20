@@ -27,6 +27,7 @@ module CommandLineParsing
 open Anthology
 open CommandLineToken
 open Collections
+open StringHelpers
 
 type SetupWorkspace = 
     { MasterRepository : RepositoryUrl
@@ -53,13 +54,15 @@ type AddView =
 type ViewName = 
     { Name : ViewId }
 
-type DeployApplications = 
+type PublishApplications = 
     { Names : ApplicationId set }
 
 type CheckoutVersion =
-    {
-        Version : BookmarkVersion
-    }
+    { Version : BookmarkVersion }
+
+type AddApplication =
+    { Name : ApplicationId
+      Projects : ProjectId set }
 
 type Command = 
     | Usage
@@ -103,7 +106,8 @@ type Command =
 
     // applications
     | ListApplications
-    | DeployApplications of DeployApplications
+    | AddApplication of AddApplication
+    | PublishApplications of PublishApplications
 
 let (|MatchBookmarkVersion|) version =
     match version with
@@ -115,6 +119,9 @@ let (|MatchViewId|) view =
 
 let (|MatchRepositoryId|) repo =
     RepositoryId.from repo
+
+let (|MatchApplicationId|) name =
+    ApplicationId.from name
 
 let ParseCommandLine(args : string list) : Command = 
     match args with
@@ -131,8 +138,8 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                                        CloneRepositories { Filters = repoFilters }
     | Token(Token.Graph) :: (MatchViewId name) :: [] -> Command.GraphView { Name = name }
-    | Token(Token.Deploy) :: names -> let appNames = names |> Seq.map ApplicationId.from |> Set
-                                      DeployApplications {Names = appNames }
+    | Token(Token.Publish) :: names -> let appNames = names |> Seq.map ApplicationId.from |> Set
+                                       PublishApplications {Names = appNames }
     | Token(Token.Build) :: (MatchViewId name) :: [] -> Command.BuildView { Name = name }
     | Token(Token.Checkout) :: (MatchBookmarkVersion version) :: [] -> Command.CheckoutWorkspace {Version = version}
     | Token(Token.Push) :: [] -> Command.PushWorkspace
@@ -147,6 +154,8 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Add) :: Token(Token.Repo) :: name :: url :: [] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
     | Token(Token.Add) :: Token(Token.NuGet) :: uri :: [] -> Command.AddNuGet (RepositoryUrl.from uri)
     | Token(Token.Add) :: Token(Token.View) :: (MatchViewId name) :: filters -> Command.AddView { Name = name; Filters = filters }
+    | Token(Token.Add) :: Token(Token.Application) :: (MatchApplicationId name) :: filters -> let projects = filters |> Seq.map (ProjectId.from << ParseGuid) |> Set
+                                                                                              Command.AddApplication { Name = name; Projects = projects }
     | Token(Token.Drop) :: Token(Token.View) :: (MatchViewId name) :: [] -> Command.DropView { Name = name }
     | Token(Token.Drop) :: Token(Token.Repo) :: (MatchRepositoryId repo) :: [] -> Command.DropRepository repo
     | Token(Token.List) :: Token(Token.Repo) :: [] -> ListRepositories

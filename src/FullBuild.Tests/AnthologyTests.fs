@@ -42,7 +42,8 @@ let CheckEqualityWithPermutation () =
                        ProjectReferences = [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c") ] |> set
                        AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Data"; AssemblyId.from "System.Xml"] |> set
                        PackageReferences = Set.empty
-                       Repository = RepositoryId.from "cassandra-sharp" } ] |> set }
+                       Repository = RepositoryId.from "cassandra-sharp" } ] |> set
+        Applications = Set.empty }
 
     let antho2 = {
         Artifacts = "c:\toto"
@@ -58,6 +59,7 @@ let CheckEqualityWithPermutation () =
                        ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
                        AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                        PackageReferences = Set.empty
-                       Repository = RepositoryId.from "cassandra-sharp" } ] |> set }
+                       Repository = RepositoryId.from "cassandra-sharp" } ] |> set 
+        Applications = Set.empty }
         
     antho1 |> should equal antho2
