@@ -148,15 +148,15 @@ with
 
 type Application = 
     { Name : ApplicationId
-      Projects : ProjectId set 
-      NuGets : PackageId set }
+      Projects : ProjectId set }
 
 type Anthology = 
     { Artifacts : string
       NuGets : RepositoryUrl list 
       MasterRepository : Repository
       Repositories : Repository set
-      Projects : Project set }
+      Projects : Project set 
+      Applications : Application set }
 
 type Baseline = 
     { Bookmarks : Bookmark set  }
