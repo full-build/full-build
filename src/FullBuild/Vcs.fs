@@ -125,7 +125,7 @@ let private HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) =
 
 
 let private GitIgnore (repoDir : DirectoryInfo) =
-    let content = ["packages"; "views"]
+    let content = ["packages"; "views"; "apps"]
     let gitIgnoreFile = repoDir |> GetFile ".gitignore"
     File.WriteAllLines (gitIgnoreFile.FullName, content)
 
