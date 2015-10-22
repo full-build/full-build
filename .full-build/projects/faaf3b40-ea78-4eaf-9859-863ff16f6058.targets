@@ -6,9 +6,8 @@
       <Project>{faaf3b40-ea78-4eaf-9859-863ff16f6058}</Project>
       <Name>fullbuild.tests</Name>
     </ProjectReference>
-    <Reference Include="fullbuild.tests" Condition="'$(Prj_faaf3b40_ea78_4eaf_9859_863ff16f6058)' == ''">
-      <HintPath>$(SolutionDir)/bin/fullbuild.tests.dll</HintPath>
-      <Private>true</Private>
+    <Reference Include="$(SolutionDir)/bin/fullbuild.tests/*.dll;$(SolutionDir)/bin/fullbuild.tests/*.exe" Condition="'$(Prj_faaf3b40_ea78_4eaf_9859_863ff16f6058)' == ''">
+      <Private>false</Private>
     </Reference>
   </ItemGroup>
 </Project>

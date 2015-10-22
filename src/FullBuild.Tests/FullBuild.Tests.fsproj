@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>$(SolutionDir)/bin/</OutputPath>
+    <OutputPath>$(SolutionDir)/bin/fullbuild.tests/</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile></DocumentationFile>
@@ -30,7 +30,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>$(SolutionDir)/bin/</OutputPath>
+    <OutputPath>$(SolutionDir)/bin/fullbuild.tests/</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\FsFullBuild.Tests.XML</DocumentationFile>
@@ -134,8 +134,6 @@
     <RemoveDir Directories="$(AppDir)" />
     <MSBuild Projects="$(ProjectPath)" Targets="ResolveReferences;_CopyWebApplication" Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
   </Target>
-  <Import Project="$(SolutionDir)/.full-build/projects/5fde3939-c144-4287-bc57-a96ec2d1a9da.targets" />
-  <Import Project="$(SolutionDir)/.full-build/packages/fsunit/package.targets" Condition="'$(FullBuild_fsunit_Pkg)' == ''" />
   <Import Project="$(MSBuildExtensionsPath)/Microsoft/VisualStudio/v$(MSBuildToolsVersion)/WebApplications/Microsoft.WebApplication.targets" />
   <Target Name="Publish">
     <PropertyGroup>
@@ -143,4 +141,6 @@
     </PropertyGroup>
     <MSBuild Projects="$(ProjectPath)" Targets="ResolveReferences;_CopyWebApplication" Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
   </Target>
+  <Import Project="$(SolutionDir)/.full-build/projects/5fde3939-c144-4287-bc57-a96ec2d1a9da.targets" />
+  <Import Project="$(SolutionDir)/.full-build/packages/fsunit/package.targets" Condition="'$(FullBuild_fsunit_Pkg)' == ''" />
 </Project>
