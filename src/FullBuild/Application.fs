@@ -28,13 +28,65 @@ open Collections
 open System.IO
 open Env
 open IoHelpers
+open System.Xml.Linq
+open MsBuildHelpers
 
-let Deploy (names : ApplicationId set) =
-    ()
+let rec ComputeProjectDependencies (antho : Anthology) (projectIds : ProjectId set) =
+    let projects = antho.Projects |> Set.filter (fun x -> projectIds |> Set.contains x.ProjectGuid)
+    let dependencies = projects |> Set.map (fun x -> x.ProjectReferences) 
+                                |> Set.unionMany
+
+    if dependencies = Set.empty then dependencies
+    else ComputeProjectDependencies antho dependencies |> Set.union projectIds
+
+
+let BuildDeployTargetContent (projects : Project set) =
+    let items = projects |> Seq.map (fun x -> sprintf "../../bin/%s/**/*.*" x.Output.toString)
+                         |> Seq.map (fun x -> XElement(NsMsBuild + "ProjectFiles", XAttribute(NsNone + "Include", x)))
+
+    XDocument (
+        XElement(NsMsBuild + "Project", XAttribute(NsNone + "DefaultTargets", "Publish"),
+            XElement(NsMsBuild + "Target", XAttribute (NsNone + "Name", "Publish"),
+                XElement(NsMsBuild + "ItemGroup", items),
+                XElement(NsMsBuild + "RemoveDir", XAttribute(NsNone + "Directories", "../../apps/$(MSBuildProjectName)")),
+                XElement(NsMsBuild + "Copy", XAttribute(NsNone + "SourceFiles", "@(ProjectFiles)"), XAttribute(NsNone + "DestinationFolder", "../../apps/$(MSBuildProjectName)")))))
+
+let Deploy (appNames : ApplicationId set) =
+    let antho = Configuration.LoadAnthology ()
+    let wsDir = GetFolder Env.Workspace
+    let appDir = GetFolder Env.App
+    for appName in appNames do
+        let app = antho.Applications |> Seq.find (fun x -> x.Name = appName)
+        let projectIds = app.Projects |> ComputeProjectDependencies antho
+        let projects = antho.Projects |> Set.filter (fun x -> projectIds |> Set.contains x.ProjectGuid)
+
+        let appFile = appDir |> GetFile (AddExt Targets (appName.toString))
+        let appContent = BuildDeployTargetContent projects
+        appContent.Save (appFile.FullName)
+
+        let args = sprintf "/nologo /v:m %A" appFile.FullName
+
+        if Env.IsMono () then Exec.Exec "xbuild" args wsDir
+        else Exec.Exec "msbuild" args wsDir
 
 let List () =
-    let appDir = GetFolder Env.App
-    appDir.EnumerateFiles (AddExt App "*") |> Seq.iter (fun x -> printfn "%s" (Path.GetFileNameWithoutExtension (x.Name)))
+    let antho = Configuration.LoadAnthology ()
+    antho.Applications |> Seq.iter (fun x -> printfn "%s" (x.Name.toString))
 
-let Add (id : ApplicationId) (projects : ProjectId set) =
-    ()
+let Add (appName : ApplicationId) (projects : ProjectId set) =
+    let antho = Configuration.LoadAnthology ()
+    let app = { Name = appName
+                Projects = projects }
+
+    let newAntho = { antho
+                     with Applications = antho.Applications |> Set.add app }
+
+    Configuration.SaveAnthology newAntho
+
+let Drop (appName : ApplicationId) =
+    let antho = Configuration.LoadAnthology ()
+
+    let newAntho = { antho
+                     with Applications = antho.Applications |> Set.filter (fun x -> x.Name <> appName) }
+
+    Configuration.SaveAnthology newAntho
