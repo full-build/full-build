@@ -310,7 +310,7 @@ let ExternalBuild (config : string) (name : ViewId) =
     let wsDir = Env.GetFolder Env.Workspace
     let viewFile = AddExt Solution name.toString
 
-    let args = sprintf "/p:Configuration=%s /v:m %A" config viewFile
+    let args = sprintf "/nologo /p:Configuration=%s /v:m %A" config viewFile
 
     if Env.IsMono () then Exec.Exec "xbuild" args wsDir
     else Exec.Exec "msbuild" args wsDir

@@ -133,16 +133,13 @@ let IndexWorkspace () =
     simplifiedAntho
 
 let GenerateProjectTarget (project : Project) =
-    let extension = match project.OutputType with
-                    | OutputType.Dll -> IoHelpers.Dll
-                    | OutputType.Exe -> IoHelpers.Exe
-
     let projectProperty = ProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.toString) project.RelativeProjectFile.toString
-    let binFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT (project.Output.toString) 
-                  |> IoHelpers.AddExt extension
+    let output = (project.Output.toString)
+    let dllFile = sprintf "%s/%s/*.dll" MSBUILD_BIN_FOLDER output
+    let exeFile = sprintf "%s/%s/*.exe" MSBUILD_BIN_FOLDER output
     
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -159,10 +156,9 @@ let GenerateProjectTarget (project : Project) =
                     XElement (NsMsBuild + "Project", sprintf "{%s}" project.ProjectGuid.toString),
                     XElement (NsMsBuild + "Name", project.Output.toString)),
                 XElement (NsMsBuild + "Reference",
-                    XAttribute (NsNone + "Include", project.Output.toString),
+                    XAttribute (NsNone + "Include", sprintf "%s;%s" dllFile exeFile),
                     XAttribute (NsNone + "Condition", binCondition),
-                    XElement (NsMsBuild + "HintPath", binFile),
-                    XElement (NsMsBuild + "Private", "true")))))
+                    XElement (NsMsBuild + "Private", "false")))))
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let prjDir = Env.GetFolder Env.Project
@@ -179,14 +175,6 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     let filterPackage (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_PACKAGE_FOLDER, StringComparison.CurrentCultureIgnoreCase)
-
-    let filterPublishImport (xel : XElement) =
-        let attr = !> (xel.Attribute (NsNone + "Project")) : string
-        attr.EndsWith("Microsoft.WebApplication.targets", StringComparison.CurrentCultureIgnoreCase)
-
-    let filterPublishTarget (xel : XElement) =
-        let attr = !> (xel.Attribute (NsNone + "Name")) : string
-        String.Equals(attr, "Publish", StringComparison.CurrentCultureIgnoreCase)
 
     let filterNuget (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
@@ -222,7 +210,8 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         not <| xel.DescendantNodes().Any()
 
     let setOutputPath (xel : XElement) =
-        xel.Value <- MSBUILD_BIN_FOLDER
+        let outputDir = sprintf "%s/%s/" MSBUILD_BIN_FOLDER project.Output.toString
+        xel.Value <- outputDir
 
     // cleanup everything that will be modified
     let cproj = XDocument (xproj)
@@ -241,8 +230,8 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     // remove full-build imports
     cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
     cproj.Descendants(NsMsBuild + "Import").Where(filterPackage).Remove()
-    cproj.Descendants(NsMsBuild + "Import").Where(filterPublishImport).Remove()
-    cproj.Descendants(NsMsBuild + "Target").Where(filterPublishTarget).Remove()
+//    cproj.Descendants(NsMsBuild + "Import").Where(filterPublishImport).Remove()
+//    cproj.Descendants(NsMsBuild + "Target").Where(filterPublishTarget).Remove()
 
     // remove nuget stuff
     cproj.Descendants(NsMsBuild + "Import").Where(filterNuget).Remove()
@@ -278,24 +267,9 @@ let ConvertProject (xproj : XDocument) (project : Project) =
                         XAttribute (NsNone + "Project", importFile),
                         XAttribute(NsNone + "Condition", condition))
         cproj.Root.LastNode.AddAfterSelf (import)
-
-    // add publish
-    let importPublish = XElement(NsMsBuild + "Import",
-                            XAttribute (NsNone + "Project", "$(MSBuildExtensionsPath)/Microsoft/VisualStudio/v$(MSBuildToolsVersion)/WebApplications/Microsoft.WebApplication.targets"))
-    cproj.Root.LastNode.AddAfterSelf (importPublish)
-
-    let taskPublish = XElement(NsMsBuild + "Target", XAttribute(NsNone+"Name", "Publish"),
-                          XElement(NsMsBuild + "PropertyGroup",
-                            XElement(NsMsBuild + "AppDir", "$(SolutionDir)/apps/$(AppName)")),
-                         // XElement(NsMsBuild + "RemoveDir", XAttribute(NsNone + "Directories", "$(AppDir)")),
-                          XElement(NsMsBuild + "MSBuild", XAttribute(NsNone + "Projects", "$(ProjectPath)"), 
-                                                          XAttribute(NsNone + "Targets", "ResolveReferences;_CopyWebApplication"),
-                                                          XAttribute(NsNone + "Properties", "WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)")))
-    cproj.Root.LastNode.AddAfterSelf (taskPublish)
-
     cproj
 
-let ConvertProjectContent (xproj : XDocument) (project : Project) =
+let ConvertProjectContent (xproj : XDocument) (project : Project) (antho : Anthology) =
     let convxproj = ConvertProject xproj project
     convxproj
 
@@ -306,7 +280,7 @@ let ConvertProjects (antho : Anthology) xdocLoader xdocSaver =
         if repoDir.Exists then
             let projFile = repoDir |> GetFile project.RelativeProjectFile.toString 
             let xproj = xdocLoader projFile
-            let convxproj = ConvertProjectContent xproj project
+            let convxproj = ConvertProjectContent xproj project antho
 
             xdocSaver projFile convxproj
 
