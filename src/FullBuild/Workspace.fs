@@ -72,66 +72,6 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
 
 
 
-let rec DisplayConflicts (conflicts : Indexation.ConflictType list) =
-    let displayConflict (p1 : Project) (p2 : Project) (msg : string) =
-        printfn "Conflict detected between projects (%s) : " msg
-        printfn " - %s/%s" p1.Repository.toString p1.RelativeProjectFile.toString 
-        printfn " - %s/%s" p2.Repository.toString p2.RelativeProjectFile.toString
-
-    match conflicts with
-    | Indexation.SameGuid (p1, p2) :: tail -> displayConflict p1 p2 "same guid"
-                                              DisplayConflicts tail
-
-    | Indexation.SameOutput (p1, p2) :: tail -> displayConflict p1 p2 "same output"
-                                                DisplayConflicts tail
-    | [] -> ()
-
-
-// this function has 2 side effects:
-// * update paket.dependencies (both sources and packages)
-// * anthology
-let IndexWorkspace () = 
-    let wsDir = Env.GetFolder Env.Workspace
-    let antho = LoadAnthology()
-    let projects = Indexation.ParseWorkspaceProjects ProjectParsing.ParseProject wsDir antho.Repositories
-
-    // add new packages (with correct version requirement)
-    let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
-                                 |> Seq.concat
-    let existingPackages = PaketInterface.ParsePaketDependencies ()
-    let packagesToAdd = foundPackages |> Seq.filter (fun x -> Set.contains x.Id existingPackages |> not)
-                                      |> Seq.distinctBy (fun x -> x.Id)
-                                      |> Set
-    PaketInterface.AppendDependencies packagesToAdd
-
-    // merge projects
-    let foundProjects = projects |> Seq.map (fun x -> x.Project) 
-                                 |> Set
-    let foundProjectGuids = foundProjects |> Set.map (fun x -> x.ProjectGuid)
-
-    let allProjects = antho.Projects |> Set.filter (fun x -> foundProjectGuids |> Set.contains (x.ProjectGuid) |> not)
-                                     |> Set.union foundProjects
-                                     |> List.ofSeq
-
-    let conflicts = Indexation.FindConflicts allProjects |> List.ofSeq
-    if conflicts <> [] then
-        DisplayConflicts conflicts
-        failwith "Conflict(s) detected"
-
-    // automaticaly migrate packages to project - this will avoid retrieving them
-    let newAntho = { antho 
-                     with Projects = allProjects |> Set.ofList }
-    let simplifiedAntho = Simplify.SimplifyAnthologyWithoutPackage newAntho
-    Configuration.SaveAnthology simplifiedAntho
-
-    // remove unused packages now
-    let allPackages = PaketInterface.ParsePaketDependencies ()
-    let usedPackages = simplifiedAntho.Projects |> Seq.collect (fun x -> x.PackageReferences) |> Set
-    let unusedPackages = Set.difference allPackages usedPackages
-    PaketInterface.RemoveDependencies unusedPackages       
-
-    simplifiedAntho
-
 let GenerateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
@@ -309,7 +249,7 @@ let TransformProjects (antho : Anthology) =
 
 
 let Index () =
-    let newAntho = IndexWorkspace () |> Package.Simplify
+    let newAntho = Indexation.IndexWorkspace () |> Package.Simplify
     Configuration.SaveAnthology newAntho
 
 let Convert () = 
