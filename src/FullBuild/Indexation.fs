@@ -5,6 +5,7 @@ open System.Linq
 open System.Xml.Linq
 open MsBuildHelpers
 open Anthology
+open Collections
 
 let FindKnownProjects (repoDir : DirectoryInfo) =
     [AddExt CsProj "*"
@@ -47,7 +48,7 @@ let FindConflictsForProject (project1 : Project) (otherProjects : Project list) 
                     yield SameGuid (project1, project2)
                 else if project1.ProjectGuid <> project2.ProjectGuid && project1.Output = project2.Output then
                     yield SameOutput (project1, project2)
-    }        
+    }      
 
 let rec FindConflicts (projects : Project list) =
     seq {
@@ -56,3 +57,86 @@ let rec FindConflicts (projects : Project list) =
                     yield! FindConflicts t
         | _ -> ()
     }
+
+
+
+
+
+
+let rec DisplayConflicts (conflicts : ConflictType list) =
+    let displayConflict (p1 : Project) (p2 : Project) (msg : string) =
+        printfn "Conflict detected between projects (%s) : " msg
+        printfn " - %s/%s" p1.Repository.toString p1.RelativeProjectFile.toString 
+        printfn " - %s/%s" p2.Repository.toString p2.RelativeProjectFile.toString
+
+    match conflicts with
+    | SameGuid (p1, p2) :: tail -> displayConflict p1 p2 "same guid"
+                                   DisplayConflicts tail
+
+    | SameOutput (p1, p2) :: tail -> displayConflict p1 p2 "same output"
+                                     DisplayConflicts tail
+    | [] -> ()
+
+
+
+let DetectNewDependencies (projects : ProjectParsing.ProjectDescriptor seq) =
+    // add new packages (with correct version requirement)
+    let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
+                                 |> Seq.concat
+    let existingPackages = PaketInterface.ParsePaketDependencies ()
+    let packagesToAdd = foundPackages |> Seq.filter (fun x -> Set.contains x.Id existingPackages |> not)
+                                      |> Seq.distinctBy (fun x -> x.Id)
+                                      |> Set
+    packagesToAdd
+
+
+
+let MergeProjects (projects : ProjectParsing.ProjectDescriptor seq) (existingProjects : Project set) =
+    // merge project
+    let foundProjects = projects |> Seq.map (fun x -> x.Project) 
+                                 |> Set
+
+    let foundProjectGuids = foundProjects |> Set.map (fun x -> x.ProjectGuid)
+
+    let allProjects = existingProjects |> Set.filter (fun x -> foundProjectGuids |> Set.contains (x.ProjectGuid) |> not)
+                                       |> Set.union foundProjects
+                                       |> List.ofSeq
+    allProjects
+
+
+
+
+// this function has 2 side effects:
+// * update paket.dependencies (both sources and packages)
+// * anthology
+let IndexWorkspace () = 
+    let wsDir = Env.GetFolder Env.Workspace
+    let antho = Configuration.LoadAnthology()
+    let projects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir antho.Repositories
+
+    let packagesToAdd = DetectNewDependencies projects
+    PaketInterface.AppendDependencies packagesToAdd
+
+    let allProjects = MergeProjects projects antho.Projects
+    let conflicts = FindConflicts allProjects |> List.ofSeq
+    if conflicts <> [] then
+        DisplayConflicts conflicts
+        failwith "Conflict(s) detected"
+
+    /// BEGIN HACK : here we optimize anthology and dependencies in order to speed up package retrieval after conversion
+    ///              warning: big side effect (anthology and paket.dependencies are modified)
+    // automaticaly migrate packages to project - this will avoid retrieving them
+    let newAntho = { antho 
+                     with Projects = allProjects |> Set.ofList }
+    let simplifiedAntho = Simplify.SimplifyAnthologyWithoutPackage newAntho
+    Configuration.SaveAnthology simplifiedAntho
+
+    // remove unused packages  - this will avoid downloading them for nothing
+    let allPackages = PaketInterface.ParsePaketDependencies ()
+    let usedPackages = simplifiedAntho.Projects |> Set.map (fun x -> x.PackageReferences)
+                                                |> Set.unionMany
+    let unusedPackages = Set.difference allPackages usedPackages
+    PaketInterface.RemoveDependencies unusedPackages
+    /// END HACK
+
+    simplifiedAntho
