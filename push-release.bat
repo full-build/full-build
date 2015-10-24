@@ -7,7 +7,7 @@ echo APPVEYOR_REPO_COMMIT %APPVEYOR_REPO_COMMIT%
 echo APPVEYOR_REPO_COMMIT_MESSAGE  %APPVEYOR_REPO_COMMIT_MESSAGE% 
 echo APPVEYOR_BUILD_NUMBER  %APPVEYOR_BUILD_NUMBER% 
 
-7z a %HERE%\FullBuild.zip %HERE%\bootstrap\*
+7z a %HERE%\full-build.zip %HERE%\apps\full-build\*
 
 %HERE%tools/github-release.exe release ^
                          --user pchalamet ^
@@ -22,7 +22,7 @@ echo APPVEYOR_BUILD_NUMBER  %APPVEYOR_BUILD_NUMBER%
 					 --repo full-build ^
                      --tag %APPVEYOR_BUILD_VERSION% ^
                      --name "%APPVEYOR_PROJECT_NAME%-net45-anycpu-%APPVEYOR_BUILD_NUMBER%.zip" ^
-                     --file %HERE%FullBuild.zip || goto :ko
+                     --file %HERE%full-build.zip || goto :ko
 
 :ok
 exit /b 0

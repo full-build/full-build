@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{5FDE3939-C144-4287-BC57-A96EC2D1A9DA}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>FsFullBuild</RootNamespace>
+    <RootNamespace>FullBuild</RootNamespace>
     <AssemblyName>FullBuild</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -24,10 +24,11 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile></DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>install</StartArguments>
-    <StartWorkingDirectory>C:\src\full-build\tests\cs-di</StartWorkingDirectory>
+    <StartArguments>publish full-build</StartArguments>
+    <StartWorkingDirectory>C:\src\full-build\</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>0077</NoWarn>
@@ -40,7 +41,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>..\bin\Release\FsFullBuild.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\FullBuild.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
@@ -97,6 +98,9 @@
   <ItemGroup>
     <Reference Include="FSharp.Configuration">
       <HintPath>$(SolutionDir)\lib\FSharp.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="paket">
+      <HintPath>C:\src\full-build\lib\paket.exe</HintPath>
     </Reference>
     <Reference Include="SharpYaml">
       <HintPath>$(SolutionDir)\lib\SharpYaml.dll</HintPath>
