@@ -9,9 +9,10 @@ robocopy cs-init cs-do /MIR
 
 pushd cs-do
 %FULLBUILD% clone * || goto :ko
+%FULLBUILD% index || goto :ko
 %FULLBUILD% convert || goto :ko
-%FULLBUILD% add view all using * || goto :ko
-%FULLBUILD% add view csc using cassandra-sharp-contrib || goto :ko
+%FULLBUILD% add view all * || goto :ko
+%FULLBUILD% add view csc cassandra-sharp-contrib/* || goto :ko
 %FULLBUILD% list view || goto :ko
 %FULLBUILD% describe view all || goto :ko
 %FULLBUILD% graph all || goto :ko
