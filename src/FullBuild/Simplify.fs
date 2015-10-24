@@ -169,8 +169,8 @@ let SimplifyAnthologyWithoutPackage (antho : Anthology) =
 let SimplifyAnthologyWithPackages (antho : Anthology) (package2files : Map<PackageId, AssemblyId set>) (package2packages : Map<PackageId, PackageId set>) =
     let newProjects = antho.Projects |> TransformSingleAssemblyToProjectOrPackage  package2files
                                      |> TransformPackageToProject
-                                     //|> RemoveAssembliesFromPackagesOrProjects package2files
                                      |> TransformPackagesToProjectsAndPackages package2packages package2files
+                                     |> RemoveAssembliesFromPackagesOrProjects package2files
 
     let newAntho = { antho
                      with Projects = newProjects }
