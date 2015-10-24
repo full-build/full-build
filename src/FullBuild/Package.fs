@@ -139,12 +139,16 @@ let GenerateTargetForPackage (package : PackageId) =
 let GatherAllAssemblies (package : PackageId) : AssemblyId set =
     let pkgsDir = Env.GetFolder Env.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
+
+    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))
+    let xnuspec = XDocument.Load (nuspecFile.FullName)
+    let fxDependencies = NuGets.GetFrameworkDependencies xnuspec
+
     let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
     let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
-    let files = Seq.append dlls exes
-    files |> Seq.map (fun x -> AssemblyId.from x) 
-          |> set
-
+    let files = Seq.append dlls exes |> Seq.map AssemblyId.from 
+                                     |> Set
+    Set.difference files fxDependencies
 
 let InstallPackages (nugets : RepositoryUrl list) =
     PaketInterface.UpdateSources nugets

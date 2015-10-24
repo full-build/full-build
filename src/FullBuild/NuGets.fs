@@ -32,6 +32,11 @@ open MsBuildHelpers
 open Collections
 
 
+let GetFrameworkDependencies (xnuspec : XDocument) =
+    xnuspec.Descendants().Where(fun x -> x.Name.LocalName = "frameworkAssembly") 
+        |> Seq.map (fun x -> !> x.Attribute(NsNone + "assemblyName") : string)
+        |> Seq.map AssemblyId.from
+        |> set
 
 let GetPackageDependencies (xnuspec : XDocument) =
     xnuspec.Descendants().Where(fun x -> x.Name.LocalName = "dependency") 
