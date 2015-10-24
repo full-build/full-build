@@ -57,27 +57,24 @@ let Describe (viewName : ViewId) =
 
 
 // find all referencing projects of a project
-let private ReferencingProjects (projects : Project set) (current : ProjectId) =
-    projects |> Seq.filter (fun x -> x.ProjectReferences |> Set.contains current)
+let private referencingProjects (projects : Project set) (current : ProjectId) =
+    projects |> Set.filter (fun x -> x.ProjectReferences |> Set.contains current)
 
-let rec private ComputePaths (findParents : ProjectId -> Project seq) (goal : ProjectId list) (path : ProjectId list) (current : ProjectId) =
-    if Seq.contains current goal then current::path
-    else
-        let parents = findParents current |> Seq.map (fun x -> x.ProjectGuid)
-        let paths = parents |> Seq.collect (ComputePaths findParents goal (current::path))
-                            |> Seq.toList
-        paths
+let rec private computePaths (findParents : ProjectId -> Project set) (goal : ProjectId set) (path : ProjectId set) (current : Project) =
+    let currentId = current.ProjectGuid
+    let parents = findParents currentId
+    let newPath = Set.add currentId path
+    let paths = parents |> Set.map (computePaths findParents goal (Set.add currentId path))
+                        |> Set.unionMany
+    if Set.contains currentId goal then Set.union newPath paths
+    else paths
 
-let ComputeProjectSelectionClosure (allProjects : Project set) (filters : RepositoryId seq) =
-    let goal = allProjects |> Seq.filter (fun x -> Seq.contains x.Repository filters) 
-                           |> Seq.map (fun x -> x.ProjectGuid)
-                           |> Seq.toList
+let ComputeProjectSelectionClosure (allProjects : Project set) (goal : ProjectId set) =
+    let findParents = referencingProjects allProjects
 
-    let findParents = ReferencingProjects allProjects
-
-    let transitiveClosure = goal |> Seq.map (ComputePaths findParents goal [])
-                                 |> Seq.concat
-                                 |> Seq.distinct
+    let seeds = allProjects |> Set.filter (fun x -> Set.contains x.ProjectGuid goal)
+    let transitiveClosure = seeds |> Set.map (computePaths findParents goal Set.empty)
+                                  |> Set.unionMany
     transitiveClosure
 
 let FindViewProjects (viewName : ViewId) =
@@ -86,13 +83,26 @@ let FindViewProjects (viewName : ViewId) =
     let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
     let filters = File.ReadAllLines(vwFile.FullName)
 
-    let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-    let repos = repoFilters |> Repo.FilterRepos 
-                            |> Seq.map (fun x -> x.Name)
+    let repoFilters = filters |> Set
+
+    // build: <repository>/<project>
+    let antho = Configuration.LoadAnthology ()
+    let projects = antho.Projects |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, x.ProjectGuid))
+                                  |> Map
+    let projectNames = projects |> Seq.map (fun x -> x.Key) |> Set
+
+    let matchRepoProject filter =
+        projectNames |> Set.filter (fun x -> PatternMatching.Match x filter)
+
+    let matches = repoFilters |> Set.map matchRepoProject
+                              |> Set.unionMany
+    let selectedProjectGuids = projects |> Map.filter (fun k v -> Set.contains k matches)
+                                        |> Seq.map (fun x -> x.Value)
+                                        |> Set
 
     // find projects
     let antho = Configuration.LoadAnthology ()
-    let projectRefs = ComputeProjectSelectionClosure antho.Projects repos |> Set
+    let projectRefs = ComputeProjectSelectionClosure antho.Projects selectedProjectGuids |> Set
     let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectGuid)
     projects
 
@@ -302,19 +312,23 @@ let Create (viewName : ViewId) (filters : string list) =
     Generate viewName
 
 
-
-
 // ---------------------------------------------------------------------------------------
 
-let ExternalBuild (config : string) (name : ViewId) =
+let ExternalBuild (config : string) (viewFile : FileInfo) =
     let wsDir = Env.GetFolder Env.Workspace
-    let viewFile = AddExt Solution name.toString
-
-    let args = sprintf "/nologo /p:Configuration=%s /v:m %A" config viewFile
+    let args = sprintf "/nologo /p:Configuration=%s /v:m %A" config viewFile.Name
 
     if Env.IsMono () then Exec.Exec "xbuild" args wsDir
     else Exec.Exec "msbuild" args wsDir
 
 let Build (name : ViewId) (config : string) =
-    name |> Generate
-    name |> ExternalBuild config
+    let vwDir = Env.GetFolder Env.View 
+    let vwFile = vwDir |> GetFile (AddExt View name.toString)
+    if vwFile.Exists |> not then failwithf "Unknown view name %A" name.toString
+
+    let wsDir = Env.GetFolder Env.Workspace
+    let viewFile = wsDir |> GetFile (AddExt Solution name.toString)
+    let shouldRefresh = viewFile.Exists || vwFile.CreationTime > viewFile.CreationTime
+    if shouldRefresh then name |> Generate
+
+    viewFile |> ExternalBuild config
