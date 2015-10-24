@@ -9,6 +9,10 @@ anthology:
     - repo: src
       type: git
       uri: https://github.com/pchalamet/full-build
+  apps:
+    - name: full-build
+      projects:
+        - project: 5fde3939-c144-4287-bc57-a96ec2d1a9da
   projects:
     - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
       file: src/FullBuild.Tests/FullBuild.Tests.fsproj
@@ -35,6 +39,7 @@ anthology:
       assemblies:
         - assembly: fsharp.configuration
         - assembly: fsharp.core
+        - assembly: paket
         - assembly: sharpyaml
         - assembly: system
         - assembly: system.core
