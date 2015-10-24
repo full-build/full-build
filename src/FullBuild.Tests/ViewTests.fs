@@ -10,12 +10,47 @@ open Solution
 
 [<Test>]
 let CheckSelectProject () =
-    let file = FileInfo ("anthology-indexed.yaml")
-    let antho = AnthologySerializer.Load file
+    // 
+    //      G
+    //     / \
+    //    E   F
+    //     \ /
+    //      C   D
+    //     / \ /
+    //    A   B
+    // 
+    let projectDefs = [ "A", "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6", [] 
+                        "B", "386c73d8-95dc-4684-ba6c-20f4cd63e42a", []
+                        "C", "2904bc7b-8b30-41f1-8160-02b5281704b4", ["4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6"; "386c73d8-95dc-4684-ba6c-20f4cd63e42a"]
+                        "D", "209eab33-f903-4195-bc2d-03d086129168", ["386c73d8-95dc-4684-ba6c-20f4cd63e42a"]
+                        "E", "d7b81c18-45df-44dc-853d-8cab07e1ad97", ["2904bc7b-8b30-41f1-8160-02b5281704b4"]
+                        "F", "78c2e0d4-b410-4702-af93-71db7db228d0", ["2904bc7b-8b30-41f1-8160-02b5281704b4"] 
+                        "G", "eb5c2f2b-d117-47b0-8067-305b4bae9aa2", ["d7b81c18-45df-44dc-853d-8cab07e1ad97"; "78c2e0d4-b410-4702-af93-71db7db228d0"] ]
+
+    let createProject (name,id,refs) = 
+        let refIds = refs |> Seq.map (ProjectId.from << ParseGuid) |> Set
+        { Repository = RepositoryId.from name
+          RelativeProjectFile = ProjectRelativeFile (sprintf "%s.csproj" name)
+          ProjectGuid = ProjectId.from (ParseGuid id)
+          Output = AssemblyId.from name
+          OutputType = OutputType.Dll
+          FxTarget = FrameworkVersion "v4.5"
+          AssemblyReferences = Set.empty
+          PackageReferences = Set.empty
+          ProjectReferences = refIds }
+
+    let projects = projectDefs |> Seq.map createProject |> Set
+    let goal = ["4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6" |> ParseGuid |> ProjectId.from
+                "eb5c2f2b-d117-47b0-8067-305b4bae9aa2" |> ParseGuid |> ProjectId.from ] |> Set
+    let projects = ComputeProjectSelectionClosure projects goal |> Set
+
+    projects |> Set.count |> should equal 5
+    projects |> should contain (ProjectId.from (ParseGuid "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6"))
+    projects |> should contain (ProjectId.from (ParseGuid "2904bc7b-8b30-41f1-8160-02b5281704b4"))
+    projects |> should contain (ProjectId.from (ParseGuid "d7b81c18-45df-44dc-853d-8cab07e1ad97"))
+    projects |> should contain (ProjectId.from (ParseGuid "78c2e0d4-b410-4702-af93-71db7db228d0"))
+    projects |> should contain (ProjectId.from (ParseGuid "eb5c2f2b-d117-47b0-8067-305b4bae9aa2"))
     
-    let projects = ComputeProjectSelectionClosure antho.Projects [RepositoryId.from "cassandra-sharp-contrib"] |> Seq.toList
-    projects |> should equal [ ProjectId.from (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
-                               ProjectId.from (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571") ]
 
 [<Test>]
 let CheckGenerateSolution () =
