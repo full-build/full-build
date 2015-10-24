@@ -1,8 +1,5 @@
-copy bin\fullbuild\FSharp.Configuration.dll bootstrap\ || goto :ko
-copy bin\fullbuild\FSharp.Core.dll bootstrap\ || goto :ko
-copy bin\fullbuild\SharpYaml.dll bootstrap\ || goto :ko
-copy bin\fullbuild\FullBuild.exe bootstrap\ || goto :ko
-copy bin\fullbuild\FullBuild.exe.config bootstrap\ || goto :ko
+bin\fullbuild\FullBuild.exe publish full-build || goto :ko
+robocopy apps\full-build bootstrap /MIR || goto :ko
 goto :ok
 
 :ok

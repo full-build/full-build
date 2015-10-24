@@ -36,7 +36,7 @@ let rec ComputeProjectDependencies (antho : Anthology) (projectIds : ProjectId s
     let dependencies = projects |> Set.map (fun x -> x.ProjectReferences) 
                                 |> Set.unionMany
 
-    if dependencies = Set.empty then dependencies
+    if dependencies = Set.empty then projectIds
     else ComputeProjectDependencies antho dependencies |> Set.union projectIds
 
 
@@ -51,7 +51,7 @@ let BuildDeployTargetContent (projects : Project set) =
                 XElement(NsMsBuild + "RemoveDir", XAttribute(NsNone + "Directories", "../../apps/$(MSBuildProjectName)")),
                 XElement(NsMsBuild + "Copy", XAttribute(NsNone + "SourceFiles", "@(ProjectFiles)"), XAttribute(NsNone + "DestinationFolder", "../../apps/$(MSBuildProjectName)")))))
 
-let Deploy (appNames : ApplicationId set) =
+let Publish (appNames : ApplicationId set) =
     let antho = Configuration.LoadAnthology ()
     let wsDir = GetFolder Env.Workspace
     let appDir = GetFolder Env.App

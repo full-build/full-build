@@ -69,7 +69,7 @@ let tryMain argv =
     | ListApplications -> Application.List ()
     | AddApplication appInfo -> Application.Add appInfo.Name appInfo.Projects
     | DropApplication name -> Application.Drop name
-    | PublishApplications { Names = x } -> Application.Deploy x
+    | PublishApplications { Names = x } -> Application.Publish x
 
     // misc
     | Usage -> DisplayUsage ()
