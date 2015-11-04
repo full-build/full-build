@@ -45,7 +45,7 @@ let GraphNodes (antho : Anthology) (projects : Project set) =
     let allAssemblies = projects |> Seq.map (fun x -> x.AssemblyReferences)
                                  |> Seq.concat
 
-    let repos = projects |> Set.map (fun x -> x.Repository)
+    let repos = allReferencedProjects |> Set.map (fun x -> x.Repository)
 
     seq {
         for repo in repos do
@@ -171,10 +171,12 @@ let GraphStyles () =
 
 
 let GraphContent (antho : Anthology) (allProjects : Project set) =
-    let projects = allProjects |> Set.filter (fun x -> (x.RelativeProjectFile.toString.Contains(".Test.") || x.RelativeProjectFile.toString.Contains(".Tests.")) |> not)
-    let repos = projects |> Set.map (fun x -> x.Repository)
-    let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho projects)
-    let xLinks = XElement(NsDgml+"Links", GraphLinks antho projects)
+    let repos = allProjects |> Set.map (fun x -> x.ProjectReferences)
+                               |> Set.unionMany
+                               |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectGuid = x))
+                               |> Set.map (fun x -> x.Repository)
+    let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho allProjects)
+    let xLinks = XElement(NsDgml+"Links", GraphLinks antho allProjects)
     let xCategories = XElement(NsDgml + "Categories", GraphCategories repos)
     let xProperties = XElement(NsDgml + "Properties", GraphProperties ())
     let xStyles = GraphStyles ()
