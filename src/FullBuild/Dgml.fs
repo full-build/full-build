@@ -172,9 +172,9 @@ let GraphStyles () =
 
 let GraphContent (antho : Anthology) (allProjects : Project set) =
     let repos = allProjects |> Set.map (fun x -> x.ProjectReferences)
-                               |> Set.unionMany
-                               |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectGuid = x))
-                               |> Set.map (fun x -> x.Repository)
+                            |> Set.unionMany
+                            |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectGuid = x))
+                            |> Set.map (fun x -> x.Repository)
     let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho allProjects)
     let xLinks = XElement(NsDgml+"Links", GraphLinks antho allProjects)
     let xCategories = XElement(NsDgml + "Categories", GraphCategories repos)
