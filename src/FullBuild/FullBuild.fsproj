@@ -80,6 +80,7 @@
     <Compile Include="Configuration.fs" />
     <Compile Include="Repo.fs" />
     <Compile Include="Solution.fs" />
+    <Compile Include="Dgml.fs" />
     <Compile Include="View.fs" />
     <Compile Include="NuGets.fs" />
     <Compile Include="Simplify.fs" />
