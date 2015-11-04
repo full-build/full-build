@@ -28,5 +28,5 @@ deploy_script:
   - cmd: push-release.bat
   
 artifacts:
-  path: bootstrap/
-  name: FullBuild
+  path: apps/full-build/
+  name: full-build
