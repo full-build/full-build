@@ -9,13 +9,19 @@ let GenerateProjectNode (project : Project) =
     let cat = if isTest then "TestProject"
               else "Project"
 
+    let label = System.IO.Path.GetFileNameWithoutExtension(project.RelativeProjectFile.toString)
+    let output = project.Output.toString
+    let outputType = project.OutputType.toString
+
     XElement(NsDgml + "Node",
         XAttribute(NsNone + "Id", project.ProjectGuid.toString),
-        XAttribute(NsNone + "Label", project.Output.toString),
+        XAttribute(NsNone + "Label", label),
         XAttribute(NsNone + "Category", cat),
         XAttribute(NsNone + "Fx", project.FxTarget.toString),
         XAttribute(NsNone + "Guid", project.ProjectGuid.toString),
-        XAttribute(NsNone + "IsTest", isTest))
+        XAttribute(NsNone + "IsTest", isTest),
+        XAttribute(NsNone + "Output", output),
+        XAttribute(NsNone + "OutputType", outputType))
 
 let GenerateNode (source : string) (label : string) (category : string) =
     XElement(NsDgml + "Node",
@@ -139,7 +145,9 @@ let GraphCategories (repos : RepositoryId set) =
 let GraphProperties () =
     let allProperties = [ ("Fx", "Target Framework Version", "System.String")
                           ("Guid", "Project Guid", "System.Guid") 
-                          ("IsTest", "Test Project", "System.Boolean")]
+                          ("IsTest", "Test Project", "System.Boolean")
+                          ("Output", "Project Output", "System.String") 
+                          ("OutputType", "Project Output Type", "System.String") ]
 
     let generateProperty (prop) =
         let (id, label, dataType) = prop
@@ -162,7 +170,8 @@ let GraphStyles () =
             XElement(NsDgml + "Setter", XAttribute(NsNone + "Property", "Icon"), XAttribute(NsNone + "Value", "CodeSchema_Method"))))
 
 
-let GraphContent (antho : Anthology) (projects : Project set) =
+let GraphContent (antho : Anthology) (allProjects : Project set) =
+    let projects = allProjects |> Set.filter (fun x -> (x.RelativeProjectFile.toString.Contains(".Test.") || x.RelativeProjectFile.toString.Contains(".Tests.")) |> not)
     let repos = projects |> Set.map (fun x -> x.Repository)
     let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho projects)
     let xLinks = XElement(NsDgml+"Links", GraphLinks antho projects)
