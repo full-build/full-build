@@ -35,14 +35,8 @@ let GenerateLink (source : string) (target : string) (category : string) =
         XAttribute(NsNone + "Target", target),
         XAttribute(NsNone + "Category", category))
 
-let GraphNodes (projects : Project set) (allProjects : Project set) =
+let GraphNodes (projects : Project set) (allProjects : Project set) (packages : PackageId set) (assemblies : AssemblyId set) (repos : RepositoryId set) =
     let importedProjects = Set.difference allProjects projects
-    let allPackageReferences = projects |> Seq.map (fun x -> x.PackageReferences)
-                                        |> Seq.concat
-    let allAssemblies = projects |> Seq.map (fun x -> x.AssemblyReferences)
-                                 |> Seq.concat
-
-    let repos = allProjects |> Set.map (fun x -> x.Repository)
 
     seq {
         for repo in repos do
@@ -51,12 +45,14 @@ let GraphNodes (projects : Project set) (allProjects : Project set) =
                 XAttribute(NsNone + "Label", repo.toString),
                 XAttribute(NsNone + "Group", "Expanded"))
 
-        yield XElement(NsDgml + "Node",
+        if packages.Count > 0 then
+            yield XElement(NsDgml + "Node",
                 XAttribute(NsNone + "Id", "Packages"),
                 XAttribute(NsNone + "Label", "Packages"),
                 XAttribute(NsNone + "Group", "Expanded"))
 
-        yield XElement(NsDgml + "Node",
+        if assemblies.Count > 0 then
+            yield XElement(NsDgml + "Node",
                 XAttribute(NsNone + "Id", "Assemblies"),
                 XAttribute(NsNone + "Label", "Assemblies"),
                 XAttribute(NsNone + "Group", "Expanded"))
@@ -67,10 +63,10 @@ let GraphNodes (projects : Project set) (allProjects : Project set) =
         for project in importedProjects do
             yield GenerateNode (project.ProjectGuid.toString) (project.Output.toString) "ProjectImport"
 
-        for package in allPackageReferences do
+        for package in packages do
             yield GenerateNode (package.toString) (package.toString) "Package"
 
-        for assembly in allAssemblies do
+        for assembly in assemblies do
             yield GenerateNode (assembly.toString) (assembly.toString) "Assembly"
     }
 
@@ -171,7 +167,11 @@ let GraphContent (antho : Anthology) (projects : Project set) =
                                      |> Set.unionMany
                                      |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectGuid = x))
     let repos = allProjects |> Set.map (fun x -> x.Repository)
-    let xNodes = XElement(NsDgml + "Nodes", GraphNodes nonExeProjects allProjects)
+    let packages = nonExeProjects |> Set.map (fun x -> x.PackageReferences)
+                                  |> Set.unionMany
+    let assemblies = nonExeProjects |> Set.map (fun x -> x.AssemblyReferences)
+                                    |> Set.unionMany
+    let xNodes = XElement(NsDgml + "Nodes", GraphNodes nonExeProjects allProjects packages assemblies repos)
     let xLinks = XElement(NsDgml+"Links", GraphLinks nonExeProjects allProjects)
     let xCategories = XElement(NsDgml + "Categories", GraphCategories repos)
     let xProperties = XElement(NsDgml + "Properties", GraphProperties ())
