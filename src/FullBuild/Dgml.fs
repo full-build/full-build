@@ -35,17 +35,14 @@ let GenerateLink (source : string) (target : string) (category : string) =
         XAttribute(NsNone + "Target", target),
         XAttribute(NsNone + "Category", category))
 
-let GraphNodes (antho : Anthology) (projects : Project set) =
-    let allReferencedProjects = projects |> Set.map (fun x -> x.ProjectReferences)
-                                         |> Set.unionMany
-                                         |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectGuid = x))
-    let importedProjects = Set.difference allReferencedProjects projects
+let GraphNodes (projects : Project set) (allProjects : Project set) =
+    let importedProjects = Set.difference allProjects projects
     let allPackageReferences = projects |> Seq.map (fun x -> x.PackageReferences)
                                         |> Seq.concat
     let allAssemblies = projects |> Seq.map (fun x -> x.AssemblyReferences)
                                  |> Seq.concat
 
-    let repos = allReferencedProjects |> Set.map (fun x -> x.Repository)
+    let repos = allProjects |> Set.map (fun x -> x.Repository)
 
     seq {
         for repo in repos do
@@ -77,11 +74,8 @@ let GraphNodes (antho : Anthology) (projects : Project set) =
             yield GenerateNode (assembly.toString) (assembly.toString) "Assembly"
     }
 
-let GraphLinks (antho : Anthology) (projects : Project set) =
-    let allReferencedProjects = projects |> Set.map (fun x -> x.ProjectReferences)
-                                         |> Set.unionMany
-                                         |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectGuid = x))
-    let importedProjects = Set.difference allReferencedProjects projects
+let GraphLinks (projects : Project set) (allProjects : Project set) =
+    let importedProjects = Set.difference allProjects projects
 
     seq {
         for project in projects do
@@ -170,13 +164,15 @@ let GraphStyles () =
             XElement(NsDgml + "Setter", XAttribute(NsNone + "Property", "Icon"), XAttribute(NsNone + "Value", "CodeSchema_Method"))))
 
 
-let GraphContent (antho : Anthology) (allProjects : Project set) =
-    let repos = allProjects |> Set.map (fun x -> x.ProjectReferences)
-                            |> Set.unionMany
-                            |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectGuid = x))
-                            |> Set.map (fun x -> x.Repository)
-    let xNodes = XElement(NsDgml + "Nodes", GraphNodes antho allProjects)
-    let xLinks = XElement(NsDgml+"Links", GraphLinks antho allProjects)
+let GraphContent (antho : Anthology) (projects : Project set) =
+    let nonExeProjects = projects |> Set.filter (fun x -> x.RelativeProjectFile.toString.IndexOf(".test", System.StringComparison.InvariantCultureIgnoreCase) = -1)
+
+    let allProjects = nonExeProjects |> Set.map (fun x -> x.ProjectReferences)
+                                     |> Set.unionMany
+                                     |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectGuid = x))
+    let repos = allProjects |> Set.map (fun x -> x.Repository)
+    let xNodes = XElement(NsDgml + "Nodes", GraphNodes nonExeProjects allProjects)
+    let xLinks = XElement(NsDgml+"Links", GraphLinks nonExeProjects allProjects)
     let xCategories = XElement(NsDgml + "Categories", GraphCategories repos)
     let xProperties = XElement(NsDgml + "Properties", GraphProperties ())
     let xStyles = GraphStyles ()
