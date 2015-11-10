@@ -53,14 +53,14 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     // VS project references
     let prjRefs = xdoc.Descendants(NsMsBuild + "ProjectReference")
                   |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
-                  |> Seq.map (fun x -> GetProjectOutput prjDir x |> ProjectRef.from)
+                  |> Seq.map (fun x -> GetProjectOutput prjDir x |> ProjectId.from)
                   |> Set
     
     // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER))
-                 |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectRef.from)
+                 |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectId.from)
                  |> Set
     
     prjRefs |> Set.union fbRefs
@@ -135,7 +135,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let guid = ParseGuid xguid
     let assemblyName = !> xprj.Descendants(NsMsBuild + "AssemblyName").Single() : string
     let assemblyRef = AssemblyId.from assemblyName
-    let projectRef = ProjectRef.from assemblyName
+    let projectRef = ProjectId.from assemblyName
     
     let extension =  match !> xprj.Descendants(NsMsBuild + "OutputType").Single() : string with
                      | "Library" -> OutputType.Dll
@@ -161,7 +161,7 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     { Packages = packages
       Project = { Repository = repoRef
                   RelativeProjectFile = ProjectRelativeFile relativeProjectFile
-                  UniqueProjectId = ProjectId.from guid
+                  UniqueProjectId = ProjectUniqueId.from guid
                   ProjectId = projectRef
                   Output = assemblyRef
                   OutputType = extension

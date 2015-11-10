@@ -31,7 +31,7 @@ open IoHelpers
 open System.Xml.Linq
 open MsBuildHelpers
 
-let rec ComputeProjectDependencies (antho : Anthology) (projectIds : ProjectRef set) =
+let rec ComputeProjectDependencies (antho : Anthology) (projectIds : ProjectId set) =
     let projects = antho.Projects |> Set.filter (fun x -> projectIds |> Set.contains x.ProjectId)
     let dependencies = projects |> Set.map (fun x -> x.ProjectReferences) 
                                 |> Set.unionMany
@@ -73,7 +73,7 @@ let List () =
     let antho = Configuration.LoadAnthology ()
     antho.Applications |> Seq.iter (fun x -> printfn "%s" (x.Name.toString))
 
-let Add (appName : ApplicationId) (projects : ProjectRef set) =
+let Add (appName : ApplicationId) (projects : ProjectId set) =
     let antho = Configuration.LoadAnthology ()
     let app = { Name = appName
                 Projects = projects }
