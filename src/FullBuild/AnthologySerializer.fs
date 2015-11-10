@@ -89,7 +89,7 @@ let Deserialize (content) =
     let rec convertToProjectRefs (items : AnthologyConfig.anthology_Type.projects_Item_Type.projects_Item_Type list) =
         match items with
         | [] -> Set.empty
-        | x :: tail -> convertToProjectRefs tail |> Set.add (x.project |> ProjectRef.from)
+        | x :: tail -> convertToProjectRefs tail |> Set.add (x.project |> ProjectId.from)
 
     let rec convertToProjects (items : AnthologyConfig.anthology_Type.projects_Item_Type list) =
         match items with
@@ -100,8 +100,8 @@ let Deserialize (content) =
                        let file = IoHelpers.GetFilewithoutRootDirectory (x.file)
                        convertToProjects tail |> Set.add  { Repository = RepositoryId.from repo
                                                             RelativeProjectFile = ProjectRelativeFile file
-                                                            UniqueProjectId = ProjectId.from (ParseGuid x.guid)
-                                                            ProjectId = ProjectRef.from out
+                                                            UniqueProjectId = ProjectUniqueId.from (ParseGuid x.guid)
+                                                            ProjectId = ProjectId.from out
                                                             Output = AssemblyId.from out
                                                             OutputType = OutputType.from ext
                                                             FxTarget = FrameworkVersion x.fx
@@ -112,7 +112,7 @@ let Deserialize (content) =
     let rec convertToApplicationDependencies (items : AnthologyConfig.anthology_Type.apps_Item_Type.projects_Item_Type list) =
         match items with
         | [] -> Set.empty
-        | x :: tail -> let projectId = x.project |> ProjectRef.from
+        | x :: tail -> let projectId = x.project |> ProjectId.from
                        convertToApplicationDependencies tail |> Set.add projectId
 
     let rec convertToApplications (items : AnthologyConfig.anthology_Type.apps_Item_Type list) =
