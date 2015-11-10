@@ -53,10 +53,10 @@ let SaveBaseline (baseline : Baseline) =
 let Migrate () =
     let antho = LoadAnthology ()
     
-    let toProjectRef (id : ProjectRef) =
-        let guid = id.toString |> ParseGuid |> ProjectId.from
+    let toProjectRef (id : ProjectId) =
+        let guid = id.toString |> ParseGuid |> ProjectUniqueId.from
         let project = antho.Projects |> Seq.find (fun x -> x.UniqueProjectId = guid)
-        project.Output.toString |> ProjectRef.from
+        project.Output.toString |> ProjectId.from
 
     let newAntho = { antho
                      with Applications = antho.Applications |> Set.map (fun x -> { x with Projects = x.Projects |> Set.map toProjectRef })

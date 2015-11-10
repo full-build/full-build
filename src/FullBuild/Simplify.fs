@@ -108,7 +108,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
                                      |> Map
 
     // convert assemblies to 
-    let rec convertPackageFiles (file2packageScoped : Map<AssemblyId, PackageId>) (newProjects : ProjectRef set) (newPackages : PackageId set) (files : AssemblyId list) =
+    let rec convertPackageFiles (file2packageScoped : Map<AssemblyId, PackageId>) (newProjects : ProjectId set) (newPackages : PackageId set) (files : AssemblyId list) =
         match files with
         | assName::tail -> match assName with
                            | MatchProject projects newProjectRef -> convertPackageFiles file2packageScoped (newProjects |> Set.add newProjectRef) newPackages tail
@@ -116,7 +116,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
                            | _ -> None
         | [] -> Some (newProjects, newPackages)
 
-    let rec convertPackage (package : PackageId) : (ProjectRef set * PackageId set) option =
+    let rec convertPackage (package : PackageId) : (ProjectId set * PackageId set) option =
         let file2packageScoped = file2package |> Map.filter (fun _ x -> x <> package)
         let fileConversion = convertPackageFiles file2packageScoped Set.empty Set.empty (package2files.[package] |> Set.toList)
         match fileConversion with

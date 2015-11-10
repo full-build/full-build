@@ -62,7 +62,7 @@ type CheckoutVersion =
 
 type AddApplication =
     { Name : ApplicationId
-      Projects : ProjectRef set }
+      Projects : ProjectId set }
 
 type Command = 
     | Usage
@@ -157,7 +157,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Add) :: Token(Token.Repo) :: name :: [url] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
     | Token(Token.Add) :: Token(Token.NuGet) :: [uri] -> Command.AddNuGet (RepositoryUrl.from uri)
     | Token(Token.Add) :: Token(Token.View) :: (MatchViewId name) :: filters -> Command.AddView { Name = name; Filters = filters }
-    | Token(Token.Add) :: Token(Token.Application) :: (MatchApplicationId name) :: filters -> let projects = filters |> Seq.map ProjectRef.from |> Set
+    | Token(Token.Add) :: Token(Token.Application) :: (MatchApplicationId name) :: filters -> let projects = filters |> Seq.map ProjectId.from |> Set
                                                                                               Command.AddApplication { Name = name; Projects = projects }
     | Token(Token.Drop) :: Token(Token.View) :: [(MatchViewId name)] -> Command.DropView { Name = name }
     | Token(Token.Drop) :: Token(Token.Repo) :: [(MatchRepositoryId repo)] -> Command.DropRepository repo

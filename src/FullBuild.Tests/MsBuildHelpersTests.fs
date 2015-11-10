@@ -16,12 +16,12 @@ let CheckCast () =
 [<Test>]
 let CheckProjectPropertyName () =
     let project = { Output = AssemblyId.from "cqlplus"
-                    ProjectId = ProjectRef.from "CqlPlus"
+                    ProjectId = ProjectId.from "CqlPlus"
                     OutputType = OutputType.Exe
-                    UniqueProjectId = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+                    UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                     RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                     FxTarget = FrameworkVersion "v4.5"
-                    ProjectReferences = [ ProjectRef.from "cassandrasharp.interfaces"; ProjectRef.from "cassandrasharp" ] |> set
+                    ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set
                     PackageReferences = Set.empty
                     AssemblyReferences = [ AssemblyId.from("System") ; AssemblyId.from("System.Xml") ] |> set
                     Repository = RepositoryId.from "cassandra-sharp" }
