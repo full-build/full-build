@@ -124,6 +124,12 @@ with
     member this.toString = (fun (ProjectId x) -> x.ToString("D")) this
     static member from (guid : Guid) = ProjectId guid
 
+type ProjectRef = private ProjectRef of string
+with
+    member this.toString = (fun (ProjectRef x) -> x)this
+    static member from (name : string) = ProjectRef (name.ToLowerInvariant())
+
+
 type ProjectType = private ProjectType of Guid
 with
     member this.toString = (fun (ProjectType x) -> x.ToString("D")) this
@@ -133,13 +139,14 @@ with
 type Project = 
     { Repository : RepositoryId
       RelativeProjectFile : ProjectRelativeFile
-      ProjectGuid : ProjectId
+      UniqueProjectId : ProjectId
       Output : AssemblyId
+      ProjectId : ProjectRef
       OutputType : OutputType
       FxTarget : FrameworkVersion
       AssemblyReferences : AssemblyId set
       PackageReferences : PackageId set
-      ProjectReferences : ProjectId set }
+      ProjectReferences : ProjectRef set }
 
 type ApplicationId = private ApplicationId of string
 with
@@ -148,7 +155,7 @@ with
 
 type Application = 
     { Name : ApplicationId
-      Projects : ProjectId set }
+      Projects : ProjectRef set }
 
 type Anthology = 
     { Artifacts : string

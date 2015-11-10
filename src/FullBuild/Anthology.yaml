@@ -9,9 +9,9 @@
     apps:
         - name: FullBuild
           projects:
-              - project: f2a71f9b-5d33-465a-a702-920d77279786
+              - project: fullbuild
     projects:
-        - guid: id2
+        - guid: f2a71f9b-5d33-465a-a702-920d77279786
           file: src/Project.csproj
           out: fullbuild.tests
           fx: ver
@@ -20,5 +20,4 @@
           packages:
               - package: id1
           projects:
-              - project: f2a71f9b-5d33-465a-a702-920d77279786
-
+              - project: fullbuild

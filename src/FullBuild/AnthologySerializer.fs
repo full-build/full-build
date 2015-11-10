@@ -31,7 +31,7 @@ let Serialize (antho : Anthology) =
     config.anthology.projects.Clear()
     for project in antho.Projects do
         let cproject = AnthologyConfig.anthology_Type.projects_Item_Type()
-        cproject.guid <- project.ProjectGuid.toString
+        cproject.guid <- project.UniqueProjectId.toString
         cproject.fx <- project.FxTarget.toString
         cproject.out <- sprintf "%s.%s" project.Output.toString project.OutputType.toString
         cproject.file <- sprintf "%s/%s" project.Repository.toString project.RelativeProjectFile.toString
@@ -89,7 +89,7 @@ let Deserialize (content) =
     let rec convertToProjectRefs (items : AnthologyConfig.anthology_Type.projects_Item_Type.projects_Item_Type list) =
         match items with
         | [] -> Set.empty
-        | x :: tail -> convertToProjectRefs tail |> Set.add (ProjectId.from (ParseGuid x.project))
+        | x :: tail -> convertToProjectRefs tail |> Set.add (x.project |> ProjectRef.from)
 
     let rec convertToProjects (items : AnthologyConfig.anthology_Type.projects_Item_Type list) =
         match items with
@@ -100,7 +100,8 @@ let Deserialize (content) =
                        let file = IoHelpers.GetFilewithoutRootDirectory (x.file)
                        convertToProjects tail |> Set.add  { Repository = RepositoryId.from repo
                                                             RelativeProjectFile = ProjectRelativeFile file
-                                                            ProjectGuid = ProjectId.from  (ParseGuid x.guid)
+                                                            UniqueProjectId = ProjectId.from (ParseGuid x.guid)
+                                                            ProjectId = ProjectRef.from out
                                                             Output = AssemblyId.from out
                                                             OutputType = OutputType.from ext
                                                             FxTarget = FrameworkVersion x.fx
@@ -111,7 +112,7 @@ let Deserialize (content) =
     let rec convertToApplicationDependencies (items : AnthologyConfig.anthology_Type.apps_Item_Type.projects_Item_Type list) =
         match items with
         | [] -> Set.empty
-        | x :: tail -> let projectId = x.project |> ParseGuid |> ProjectId.from
+        | x :: tail -> let projectId = x.project |> ProjectRef.from
                        convertToApplicationDependencies tail |> Set.add projectId
 
     let rec convertToApplications (items : AnthologyConfig.anthology_Type.apps_Item_Type list) =

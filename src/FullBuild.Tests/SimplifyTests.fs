@@ -17,17 +17,17 @@ let CheckSimplifyAssemblies () =
     let lognetunittestsRef = ProjectId.from (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
     let cassandraSharpAssName = AssemblyId.from "cassandrasharp"
     let cassandraSharpItfAssName = AssemblyId.from "cassandrasharp.interfaces"
-    let cassandraSharpPrjRef = ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10")
-    let cassandraSharpItfPrjRef = ProjectId.from (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c")
+    let cassandraSharpPrjRef = ProjectRef.from "cassandrasharp"
+    let cassandraSharpItfPrjRef = ProjectRef.from "cassandrasharp.interfaces"
 
-    let lognetunittests = anthology.Projects |> Seq.find (fun x -> x.ProjectGuid = lognetunittestsRef)
+    let lognetunittests = anthology.Projects |> Seq.find (fun x -> x.UniqueProjectId = lognetunittestsRef)
     lognetunittests.AssemblyReferences |> should contain cassandraSharpAssName
     lognetunittests.AssemblyReferences |> should contain cassandraSharpItfAssName
     lognetunittests.ProjectReferences |> should not' (contain cassandraSharpPrjRef)
     lognetunittests.ProjectReferences |> should not' (contain cassandraSharpItfPrjRef)
 
     let simplifedProjects = Simplify.TransformSingleAssemblyToProjectOrPackage package2Files anthology.Projects
-    let simplifiedlognetunittests = simplifedProjects |> Seq.find (fun x -> x.ProjectGuid = lognetunittestsRef)
+    let simplifiedlognetunittests = simplifedProjects |> Seq.find (fun x -> x.UniqueProjectId = lognetunittestsRef)
 
     simplifiedlognetunittests.AssemblyReferences |> should not' (contain cassandraSharpAssName)
     simplifiedlognetunittests.AssemblyReferences |> should not' (contain cassandraSharpItfAssName)
@@ -78,21 +78,23 @@ let CheckSimplifyAnthology () =
 [<Test>]
 let CheckConflictsWithSameGuid () =
     let p1 = { Output = AssemblyId.from "cqlplus"
+               ProjectId = ProjectRef.from "cqlplus"
                OutputType = OutputType.Exe
-               ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+               UniqueProjectId = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                FxTarget = FrameworkVersion "v4.5"
-               ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+               ProjectReferences = [ ProjectRef.from "cassandrasharp"; ProjectRef.from "cassandrasharp.interfaces" ] |> set
                AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp" } 
 
     let p2 = { Output = AssemblyId.from "cqlplus2"
+               ProjectId = ProjectRef.from "cqlplus"
                OutputType = OutputType.Exe
-               ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+               UniqueProjectId = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                FxTarget = FrameworkVersion "v4.5"
-               ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+               ProjectReferences = [ ProjectRef.from "cassandrasharp"; ProjectRef.from "cassandrasharp.interfaces" ] |> set
                AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }
@@ -103,21 +105,23 @@ let CheckConflictsWithSameGuid () =
 [<Test>]
 let CheckConflictsWithSameOutput () =
     let p1 = { Output = AssemblyId.from "cqlplus"
+               ProjectId = ProjectRef.from "cqlplus"
                OutputType = OutputType.Exe
-               ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+               UniqueProjectId = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                FxTarget = FrameworkVersion "v4.5"
-               ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+               ProjectReferences = [ ProjectRef.from "cassandrasharp"; ProjectRef.from "cassandrasharp.interfaces" ] |> set
                AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp" } 
 
     let p2 = { Output = AssemblyId.from "cqlplus"
+               ProjectId = ProjectRef.from "cqlplus"
                OutputType = OutputType.Exe
-               ProjectGuid = ProjectId.from (ParseGuid "39787692-f8f8-408d-9557-0c40547c1563")
+               UniqueProjectId = ProjectId.from (ParseGuid "39787692-f8f8-408d-9557-0c40547c1563")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                FxTarget = FrameworkVersion "v4.5"
-               ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+               ProjectReferences = [ ProjectRef.from "cassandrasharp"; ProjectRef.from "cassandrasharp.interfaces" ] |> set
                AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }
@@ -128,21 +132,23 @@ let CheckConflictsWithSameOutput () =
 [<Test>]
 let CheckNoConflictsSameProjectName () =
     let p1 = { Output = AssemblyId.from "cqlplus"
+               ProjectId = ProjectRef.from "cqlplus"
                OutputType = OutputType.Exe
-               ProjectGuid = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+               UniqueProjectId = ProjectId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                FxTarget = FrameworkVersion "v4.5"
-               ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+               ProjectReferences = [ ProjectRef.from "cassandrasharp"; ProjectRef.from "cassandrasharp.interfaces" ] |> set
                AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp" } 
 
     let p2 = { Output = AssemblyId.from "cqlplus2"
+               ProjectId = ProjectRef.from "cqlplus"
                OutputType = OutputType.Exe
-               ProjectGuid = ProjectId.from (ParseGuid "39787692-f8f8-408d-9557-0c40547c1563")
+               UniqueProjectId = ProjectId.from (ParseGuid "39787692-f8f8-408d-9557-0c40547c1563")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                FxTarget = FrameworkVersion "v4.5"
-               ProjectReferences = [ ProjectId.from(ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set
+               ProjectReferences = [ ProjectRef.from "cassandrasharp"; ProjectRef.from "cassandrasharp.interfaces" ] |> set
                AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }

@@ -26,6 +26,7 @@ module Configuration
 
 open Anthology
 open Env
+open StringHelpers
 
 type WorkspaceConfiguration = 
     { Repositories : Repository list }
@@ -45,3 +46,21 @@ let LoadBaseline() : Baseline =
 let SaveBaseline (baseline : Baseline) =
     let baselineFile = GetBaselineFileName ()
     BaselineSerializer.Save baselineFile baseline
+
+
+
+
+let Migrate () =
+    let antho = LoadAnthology ()
+    
+    let toProjectRef (id : ProjectRef) =
+        let guid = id.toString |> ParseGuid |> ProjectId.from
+        let project = antho.Projects |> Seq.find (fun x -> x.UniqueProjectId = guid)
+        project.Output.toString |> ProjectRef.from
+
+    let newAntho = { antho
+                     with Applications = antho.Applications |> Set.map (fun x -> { x with Projects = x.Projects |> Set.map toProjectRef })
+                          Projects = antho.Projects |> Set.map (fun x -> { x with ProjectReferences = x.ProjectReferences |> Set.map toProjectRef })
+                    }
+
+    SaveAnthology newAntho

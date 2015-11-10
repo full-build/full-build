@@ -141,6 +141,6 @@
     </PropertyGroup>
     <MSBuild Projects="$(ProjectPath)" Targets="ResolveReferences;_CopyWebApplication" Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
   </Target>
-  <Import Project="$(SolutionDir)/.full-build/projects/5fde3939-c144-4287-bc57-a96ec2d1a9da.targets" />
+  <Import Project="$(SolutionDir)/.full-build/projects/fullbuild.targets" />
   <Import Project="$(SolutionDir)/.full-build/packages/fsunit/package.targets" Condition="'$(FullBuild_fsunit_Pkg)' == ''" />
 </Project>
