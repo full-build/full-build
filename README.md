@@ -16,7 +16,7 @@ Note that projects are converted to work with full-build. They are still regular
 Once the anthology is built, developers can work using partial builds and still resynchronize with master build when then are required to.
 
 full-build paradigms are based on the fact that:
-- nuget is awful and must not be used to store teams artifacts - only external dependencies
+- nuget is must not be used to store teams artifacts - only external dependencies
 - solution files are not good to manage enterprise point of view (global consistency) and developer point of view (local development)
 - global consistency is required to ensure the whole system can be rebuilt from sources only
 
