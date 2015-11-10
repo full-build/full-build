@@ -119,15 +119,15 @@ type FrameworkVersion = FrameworkVersion of string
 with
     member this.toString = (fun (FrameworkVersion x) -> x)this
 
-type ProjectId = private ProjectId of Guid
+type ProjectUniqueId = private ProjectUniqueId of Guid
 with
-    member this.toString = (fun (ProjectId x) -> x.ToString("D")) this
-    static member from (guid : Guid) = ProjectId guid
+    member this.toString = (fun (ProjectUniqueId x) -> x.ToString("D")) this
+    static member from (guid : Guid) = ProjectUniqueId guid
 
-type ProjectRef = private ProjectRef of string
+type ProjectId = private ProjectId of string
 with
-    member this.toString = (fun (ProjectRef x) -> x)this
-    static member from (name : string) = ProjectRef (name.ToLowerInvariant())
+    member this.toString = (fun (ProjectId x) -> x)this
+    static member from (name : string) = ProjectId (name.ToLowerInvariant())
 
 
 type ProjectType = private ProjectType of Guid
@@ -139,14 +139,14 @@ with
 type Project = 
     { Repository : RepositoryId
       RelativeProjectFile : ProjectRelativeFile
-      UniqueProjectId : ProjectId
+      UniqueProjectId : ProjectUniqueId
       Output : AssemblyId
-      ProjectId : ProjectRef
+      ProjectId : ProjectId
       OutputType : OutputType
       FxTarget : FrameworkVersion
       AssemblyReferences : AssemblyId set
       PackageReferences : PackageId set
-      ProjectReferences : ProjectRef set }
+      ProjectReferences : ProjectId set }
 
 type ApplicationId = private ApplicationId of string
 with
@@ -155,7 +155,7 @@ with
 
 type Application = 
     { Name : ApplicationId
-      Projects : ProjectRef set }
+      Projects : ProjectId set }
 
 type Anthology = 
     { Artifacts : string
