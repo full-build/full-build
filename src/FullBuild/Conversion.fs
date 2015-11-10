@@ -31,7 +31,7 @@ let GenerateProjectTarget (project : Project) =
                 XElement(NsMsBuild + "ProjectReference",
                     XAttribute (NsNone + "Include", projectFile),
                     XAttribute (NsNone + "Condition", srcCondition),
-                    XElement (NsMsBuild + "Project", sprintf "{%s}" project.ProjectGuid.toString),
+                    XElement (NsMsBuild + "Project", sprintf "{%s}" project.UniqueProjectId.toString),
                     XElement (NsMsBuild + "Name", project.Output.toString)),
                 XElement (NsMsBuild + "Reference",
                     XAttribute (NsNone + "Include", sprintf "%s;%s" dllFile exeFile),
@@ -42,7 +42,7 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
     let prjDir = Env.GetFolder Env.Project
     for project in projects do
         let content = GenerateProjectTarget project
-        let projectFile = prjDir |> GetFile (AddExt Targets (project.ProjectGuid.toString))
+        let projectFile = prjDir |> GetFile (AddExt Targets (project.Output.toString))
         xdocSaver projectFile content
 
 let ConvertProject (xproj : XDocument) (project : Project) =

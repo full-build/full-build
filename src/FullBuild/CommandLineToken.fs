@@ -54,6 +54,7 @@ type Token =
     | Exec
     | Clean
     | UpdateGuids
+    | Migrate
     | Unknown
 
 let (|Token|) (token : string) = 
@@ -87,5 +88,6 @@ let (|Token|) (token : string) =
     | "exec" -> Exec
     | "clean" -> Clean
     | "update-guids" -> UpdateGuids
+    | "migrate" -> Migrate
     | _ -> Unknown
 

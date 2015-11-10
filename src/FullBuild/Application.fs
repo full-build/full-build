@@ -31,8 +31,8 @@ open IoHelpers
 open System.Xml.Linq
 open MsBuildHelpers
 
-let rec ComputeProjectDependencies (antho : Anthology) (projectIds : ProjectId set) =
-    let projects = antho.Projects |> Set.filter (fun x -> projectIds |> Set.contains x.ProjectGuid)
+let rec ComputeProjectDependencies (antho : Anthology) (projectIds : ProjectRef set) =
+    let projects = antho.Projects |> Set.filter (fun x -> projectIds |> Set.contains x.ProjectId)
     let dependencies = projects |> Set.map (fun x -> x.ProjectReferences) 
                                 |> Set.unionMany
 
@@ -58,7 +58,7 @@ let Publish (appNames : ApplicationId set) =
     for appName in appNames do
         let app = antho.Applications |> Seq.find (fun x -> x.Name = appName)
         let projectIds = app.Projects |> ComputeProjectDependencies antho
-        let projects = antho.Projects |> Set.filter (fun x -> projectIds |> Set.contains x.ProjectGuid)
+        let projects = antho.Projects |> Set.filter (fun x -> projectIds |> Set.contains x.ProjectId)
 
         let appFile = appDir |> GetFile (AddExt Targets (appName.toString))
         let appContent = BuildDeployTargetContent projects
@@ -73,7 +73,7 @@ let List () =
     let antho = Configuration.LoadAnthology ()
     antho.Applications |> Seq.iter (fun x -> printfn "%s" (x.Name.toString))
 
-let Add (appName : ApplicationId) (projects : ProjectId set) =
+let Add (appName : ApplicationId) (projects : ProjectRef set) =
     let antho = Configuration.LoadAnthology ()
     let app = { Name = appName
                 Projects = projects }

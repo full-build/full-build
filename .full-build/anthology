@@ -12,7 +12,7 @@ anthology:
   apps:
     - name: full-build
       projects:
-        - project: 5fde3939-c144-4287-bc57-a96ec2d1a9da
+        - project: fullbuild
   projects:
     - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
       file: src/FullBuild.Tests/FullBuild.Tests.fsproj
@@ -31,7 +31,7 @@ anthology:
       packages:
         - package: fsunit
       projects:
-        - project: 5fde3939-c144-4287-bc57-a96ec2d1a9da
+        - project: fullbuild
     - guid: 5fde3939-c144-4287-bc57-a96ec2d1a9da
       file: src/FullBuild/FullBuild.fsproj
       out: fullbuild.exe

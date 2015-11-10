@@ -44,9 +44,9 @@ let FindConflictsForProject (project1 : Project) (otherProjects : Project list) 
     seq {
         for project2 in otherProjects do
             if project1 <> project2 then
-                if project1.ProjectGuid = project2.ProjectGuid && (project1.Repository <> project2.Repository || project1.RelativeProjectFile <> project2.RelativeProjectFile) then
+                if project1.UniqueProjectId = project2.UniqueProjectId && (project1.Repository <> project2.Repository || project1.RelativeProjectFile <> project2.RelativeProjectFile) then
                     yield SameGuid (project1, project2)
-                else if project1.ProjectGuid <> project2.ProjectGuid && project1.Output = project2.Output then
+                else if project1.UniqueProjectId <> project2.UniqueProjectId && project1.Output = project2.Output then
                     yield SameOutput (project1, project2)
     }      
 
@@ -96,9 +96,9 @@ let MergeProjects (projects : ProjectParsing.ProjectDescriptor seq) (existingPro
     let foundProjects = projects |> Seq.map (fun x -> x.Project) 
                                  |> Set
 
-    let foundProjectGuids = foundProjects |> Set.map (fun x -> x.ProjectGuid)
+    let foundProjectGuids = foundProjects |> Set.map (fun x -> x.ProjectId)
 
-    let allProjects = existingProjects |> Set.filter (fun x -> foundProjectGuids |> Set.contains (x.ProjectGuid) |> not)
+    let allProjects = existingProjects |> Set.filter (fun x -> foundProjectGuids |> Set.contains (x.ProjectId) |> not)
                                        |> Set.union foundProjects
                                        |> List.ofSeq
     allProjects

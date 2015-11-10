@@ -14,11 +14,11 @@ let GenerateProjectNode (project : Project) =
     let outputType = project.OutputType.toString
 
     XElement(NsDgml + "Node",
-        XAttribute(NsNone + "Id", project.ProjectGuid.toString),
+        XAttribute(NsNone + "Id", project.UniqueProjectId.toString),
         XAttribute(NsNone + "Label", label),
         XAttribute(NsNone + "Category", cat),
         XAttribute(NsNone + "Fx", project.FxTarget.toString),
-        XAttribute(NsNone + "Guid", project.ProjectGuid.toString),
+        XAttribute(NsNone + "Guid", project.UniqueProjectId.toString),
         XAttribute(NsNone + "IsTest", isTest),
         XAttribute(NsNone + "Output", output),
         XAttribute(NsNone + "OutputType", outputType))
@@ -61,7 +61,7 @@ let GraphNodes (projects : Project set) (allProjects : Project set) (packages : 
             yield GenerateProjectNode project
 
         for project in importedProjects do
-            yield GenerateNode (project.ProjectGuid.toString) (project.Output.toString) "ProjectImport"
+            yield GenerateNode (project.UniqueProjectId.toString) (project.Output.toString) "ProjectImport"
 
         for package in packages do
             yield GenerateNode (package.toString) (package.toString) "Package"
@@ -76,21 +76,22 @@ let GraphLinks (projects : Project set) (allProjects : Project set) =
     seq {
         for project in projects do
             for projectRef in project.ProjectReferences do
-                yield GenerateLink (project.ProjectGuid.toString) (projectRef.toString) "ProjectRef"
+                let target = allProjects |> Seq.find (fun x -> x.ProjectId = projectRef)
+                yield GenerateLink (project.UniqueProjectId.toString) (target.UniqueProjectId.toString) "ProjectRef"
 
         for project in projects do
             for package in project.PackageReferences do
-                yield GenerateLink (project.ProjectGuid.toString) (package.toString) "PackageRef"
+                yield GenerateLink (project.UniqueProjectId.toString) (package.toString) "PackageRef"
 
         for project in projects do
             for assembly in project.AssemblyReferences do
-                yield GenerateLink (project.ProjectGuid.toString) (assembly.toString) "AssemblyRef"
+                yield GenerateLink (project.UniqueProjectId.toString) (assembly.toString) "AssemblyRef"
 
         for project in projects do
-            yield GenerateLink project.Repository.toString (project.ProjectGuid.toString) "Contains"
+            yield GenerateLink project.Repository.toString (project.UniqueProjectId.toString) "Contains"
 
         for project in importedProjects do
-            yield GenerateLink project.Repository.toString (project.ProjectGuid.toString) "Contains"
+            yield GenerateLink project.Repository.toString (project.UniqueProjectId.toString) "Contains"
 
         for project in projects do
             for package in project.PackageReferences do
@@ -165,7 +166,7 @@ let GraphContent (antho : Anthology) (projects : Project set) =
 
     let allProjects = nonExeProjects |> Set.map (fun x -> x.ProjectReferences)
                                      |> Set.unionMany
-                                     |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectGuid = x))
+                                     |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectId = x))
     let repos = allProjects |> Set.map (fun x -> x.Repository)
     let packages = nonExeProjects |> Set.map (fun x -> x.PackageReferences)
                                   |> Set.unionMany

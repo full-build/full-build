@@ -62,7 +62,7 @@ type CheckoutVersion =
 
 type AddApplication =
     { Name : ApplicationId
-      Projects : ProjectId set }
+      Projects : ProjectRef set }
 
 type Command = 
     | Usage
@@ -110,6 +110,8 @@ type Command =
     | DropApplication of ApplicationId
     | PublishApplications of PublishApplications
 
+    | Migrate
+
 let (|MatchBookmarkVersion|) version =
     match version with
     | "master" -> Master
@@ -155,7 +157,7 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.Add) :: Token(Token.Repo) :: name :: [url] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
     | Token(Token.Add) :: Token(Token.NuGet) :: [uri] -> Command.AddNuGet (RepositoryUrl.from uri)
     | Token(Token.Add) :: Token(Token.View) :: (MatchViewId name) :: filters -> Command.AddView { Name = name; Filters = filters }
-    | Token(Token.Add) :: Token(Token.Application) :: (MatchApplicationId name) :: filters -> let projects = filters |> Seq.map (ProjectId.from << ParseGuid) |> Set
+    | Token(Token.Add) :: Token(Token.Application) :: (MatchApplicationId name) :: filters -> let projects = filters |> Seq.map ProjectRef.from |> Set
                                                                                               Command.AddApplication { Name = name; Projects = projects }
     | Token(Token.Drop) :: Token(Token.View) :: [(MatchViewId name)] -> Command.DropView { Name = name }
     | Token(Token.Drop) :: Token(Token.Repo) :: [(MatchRepositoryId repo)] -> Command.DropRepository repo
@@ -166,6 +168,8 @@ let ParseCommandLine(args : string list) : Command =
     | Token(Token.List) :: [Token(Token.Package)] -> Command.ListPackages
     | Token(Token.List) :: [Token(Token.Application)] -> ListApplications
     | Token(Token.Describe) :: Token(Token.View) :: [(MatchViewId name)] -> Command.DescribeView { Name = name }
+
+    | [Token(Token.Migrate)] -> Command.Migrate
 
     | _ -> Command.Error
 

@@ -27,8 +27,8 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>graph biz</StartArguments>
-    <StartWorkingDirectory>C:\src\avp\</StartWorkingDirectory>
+    <StartArguments>migrate</StartArguments>
+    <StartWorkingDirectory>C:\src\mig\tutu\</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>0077</NoWarn>

@@ -71,6 +71,8 @@ let tryMain argv =
     | DropApplication name -> Application.Drop name
     | PublishApplications { Names = x } -> Application.Publish x
 
+    | Migrate -> Configuration.Migrate ()
+
     // misc
     | Usage -> DisplayUsage ()
     | Error -> DisplayUsage ()
