@@ -64,9 +64,9 @@ let Add (name : RepositoryId) (url : RepositoryUrl) =
 let Drop (name : RepositoryId) =
     let antho = LoadAnthology ()
     let projectsInRepo = antho.Projects |> Set.filter (fun x -> x.Repository = name) 
-    let projectIdsInRepo = projectsInRepo |> Set.map (fun x -> x.ProjectGuid)
+    let projectOutputsInRepo = projectsInRepo |> Set.map (fun x -> x.ProjectId)
 
-    let refOutsideRepo = antho.Projects |> Set.filter (fun x -> x.Repository <> name && Set.intersect x.ProjectReferences projectIdsInRepo <> Set.empty)
+    let refOutsideRepo = antho.Projects |> Set.filter (fun x -> x.Repository <> name && Set.intersect x.ProjectReferences projectOutputsInRepo <> Set.empty)
     if refOutsideRepo <> Set.empty then 
         printfn "Repository %s is referenced from following projects:" name.toString
         refOutsideRepo |> Set.iter (fun x -> printfn " - %s/%s" x.Repository.toString x.RelativeProjectFile.toString)

@@ -39,28 +39,28 @@ type ProjectDescriptor =
     { Packages : Package set
       Project : Project }
 
-let ExtractGuid(xdoc : XDocument) = 
-    let xguid = xdoc.Descendants(NsMsBuild + "ProjectGuid").Single()
-    let sguid = !> xguid : string
-    ParseGuid sguid
+let ExtractOutput(xdoc : XDocument) = 
+    let xoutput = xdoc.Descendants(NsMsBuild + "AssemblyName").Single()
+    let soutput = !> xoutput : string
+    soutput
 
-let GetProjectGuid (dir : DirectoryInfo) (relFile : string) : Guid = 
+let GetProjectOutput (dir : DirectoryInfo) (relFile : string) = 
     let file = dir |> IoHelpers.GetFile relFile
     let xdoc = XDocument.Load(file.FullName)
-    ExtractGuid xdoc
+    ExtractOutput xdoc
 
 let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) = 
     // VS project references
     let prjRefs = xdoc.Descendants(NsMsBuild + "ProjectReference")
                   |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
-                  |> Seq.map (ProjectId.from << GetProjectGuid prjDir)
+                  |> Seq.map (fun x -> GetProjectOutput prjDir x |> ProjectRef.from)
                   |> Set
     
     // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER))
-                 |> Seq.map (ProjectId.from << ParseGuid << Path.GetFileNameWithoutExtension)
+                 |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectRef.from)
                  |> Set
     
     prjRefs |> Set.union fbRefs
@@ -134,7 +134,8 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let xguid = !> xprj.Descendants(NsMsBuild + "ProjectGuid").Single() : string
     let guid = ParseGuid xguid
     let assemblyName = !> xprj.Descendants(NsMsBuild + "AssemblyName").Single() : string
-    let assemblyRef = AssemblyId.from (assemblyName)
+    let assemblyRef = AssemblyId.from assemblyName
+    let projectRef = ProjectRef.from assemblyName
     
     let extension =  match !> xprj.Descendants(NsMsBuild + "OutputType").Single() : string with
                      | "Library" -> OutputType.Dll
@@ -160,7 +161,8 @@ let ParseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     { Packages = packages
       Project = { Repository = repoRef
                   RelativeProjectFile = ProjectRelativeFile relativeProjectFile
-                  ProjectGuid = ProjectId.from guid
+                  UniqueProjectId = ProjectId.from guid
+                  ProjectId = projectRef
                   Output = assemblyRef
                   OutputType = extension
                   FxTarget = FrameworkVersion fxTarget

@@ -4,14 +4,15 @@ anthology:
     - nuget: https://www.nuget.org/api/v2/
   repositories:
     - repo: .full-build
-      type: Git
+      type: git
       uri: https://github.com/pchalamet/cassandra-sharp-full-build
     - repo: cassandra-sharp
-      type: Git
+      type: git
       uri: https://github.com/pchalamet/cassandra-sharp
     - repo: cassandra-sharp-contrib
-      type: Git
+      type: git
       uri: https://github.com/pchalamet/cassandra-sharp-contrib
+  apps: []
   projects:
     - guid: 984a4b04-c71a-4550-9193-817cfacba30a
       file: cassandra-sharp/Apache.Cassandra/Apache.Cassandra-net45.csproj
@@ -21,7 +22,7 @@ anthology:
         - assembly: system
       packages: []
       projects:
-        - project: 499eb63c-d74c-47e8-ae48-a2fc94538e9d
+        - project: thrift
     - guid: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
       file: cassandra-sharp/CassandraSharp.Interfaces/CassandraSharp.Interfaces-net45.csproj
       out: cassandrasharp.interfaces.dll
@@ -54,7 +55,7 @@ anthology:
         - package: Rx-Main
         - package: Rx-PlatformServices
       projects:
-        - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
+        - project: cassandrasharp.interfaces
     - guid: 22d4356f-bc92-4399-a92c-c1f9ef6ecc73
       file: cassandra-sharp/CassandraSharpUnitTests/CassandraSharpUnitTests-net45.csproj
       out: cassandrasharpunittests.dll
@@ -80,10 +81,10 @@ anthology:
         - package: Rx-Main
         - package: Rx-PlatformServices
       projects:
-        - project: 499eb63c-d74c-47e8-ae48-a2fc94538e9d
-        - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
-        - project: 984a4b04-c71a-4550-9193-817cfacba30a
-        - project: c1d252b7-d766-4c28-9c46-0696f896846c
+        - project: apache.cassandra
+        - project: cassandrasharp
+        - project: cassandrasharp.interfaces
+        - project: thrift
     - guid: 8b2359b2-4a73-4a49-8e1e-646014a768a4
       file: cassandra-sharp/Samples/Samples-net45.csproj
       out: samples.exe
@@ -93,8 +94,8 @@ anthology:
         - assembly: system.core
       packages: []
       projects:
-        - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
-        - project: c1d252b7-d766-4c28-9c46-0696f896846c
+        - project: cassandrasharp
+        - project: cassandrasharp.interfaces
     - guid: 499eb63c-d74c-47e8-ae48-a2fc94538e9d
       file: cassandra-sharp/Thrift/Thrift-net45.csproj
       out: thrift.dll
@@ -115,8 +116,8 @@ anthology:
         - assembly: system.xml
       packages: []
       projects:
-        - project: 6f6eb447-9569-406a-a23b-c09b6dbdbe10
-        - project: c1d252b7-d766-4c28-9c46-0696f896846c
+        - project: cassandrasharp
+        - project: cassandrasharp.interfaces
     - guid: 925833ed-8653-4e90-9c37-b5b6cb693cf4
       file: cassandra-sharp-contrib/CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj
       out: cassandrasharp.contrib.log4net.dll
@@ -130,13 +131,13 @@ anthology:
         - assembly: system.reactive.linq
         - assembly: system.reactive.platformservices
       packages:
-        - package: cassandra-sharp-interfaces
-        - package: log4net
         - package: Rx-Core
         - package: Rx-Interfaces
         - package: Rx-Linq
         - package: Rx-Main
         - package: Rx-PlatformServices
+        - package: cassandra-sharp-interfaces
+        - package: log4net
       projects: []
     - guid: 9e8648a4-d25a-4cfa-aaee-20d9d63ff571
       file: cassandra-sharp-contrib/CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj
@@ -154,14 +155,14 @@ anthology:
         - assembly: system.reactive.linq
         - assembly: system.reactive.platformservices
       packages:
-        - package: cassandra-sharp
-        - package: cassandra-sharp-core
-        - package: cassandra-sharp-interfaces
-        - package: log4net
         - package: Nunit
         - package: Rx-Core
         - package: Rx-Interfaces
         - package: Rx-Linq
         - package: Rx-Main
         - package: Rx-PlatformServices
+        - package: cassandra-sharp
+        - package: cassandra-sharp-core
+        - package: cassandra-sharp-interfaces
+        - package: log4net
       projects: []

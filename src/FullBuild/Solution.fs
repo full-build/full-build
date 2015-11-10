@@ -50,7 +50,7 @@ let GenerateSolutionContent (projects : Project seq) =
                   (ProjectToProjectType (project.RelativeProjectFile.toString))
                   (Path.GetFileNameWithoutExtension (project.RelativeProjectFile.toString))
                   (sprintf "%s/%s" (project.Repository.toString) project.RelativeProjectFile.toString)
-                  (project.ProjectGuid.toString)
+                  (project.UniqueProjectId.toString)
 
             yield "\tProjectSection(ProjectDependencies) = postProject"
 //            for dependency in project.ProjectReferences do
@@ -68,7 +68,7 @@ let GenerateSolutionContent (projects : Project seq) =
         yield "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution"
 
         for project in projects do
-            let guid = project.ProjectGuid.toString
+            let guid = project.UniqueProjectId.toString
             yield sprintf "\t\t{%s}.Debug|Any CPU.ActiveCfg = Debug|Any CPU" guid
             yield sprintf "\t\t{%s}.Debug|Any CPU.Build.0 = Debug|Any CPU" guid
             yield sprintf "\t\t{%s}.Release|Any CPU.ActiveCfg = Release|Any CPU" guid

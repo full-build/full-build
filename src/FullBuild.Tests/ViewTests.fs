@@ -27,11 +27,12 @@ let CheckSelectProject () =
                         "F", "78c2e0d4-b410-4702-af93-71db7db228d0", ["2904bc7b-8b30-41f1-8160-02b5281704b4"] 
                         "G", "eb5c2f2b-d117-47b0-8067-305b4bae9aa2", ["d7b81c18-45df-44dc-853d-8cab07e1ad97"; "78c2e0d4-b410-4702-af93-71db7db228d0"] ]
 
-    let createProject (name,id,refs) = 
-        let refIds = refs |> Seq.map (ProjectId.from << ParseGuid) |> Set
+    let createProject (name, id, refs) = 
+        let refIds = refs |> Seq.map ProjectRef.from |> Set
         { Repository = RepositoryId.from name
+          ProjectId = ProjectRef.from id
           RelativeProjectFile = ProjectRelativeFile (sprintf "%s.csproj" name)
-          ProjectGuid = ProjectId.from (ParseGuid id)
+          UniqueProjectId = ProjectId.from (ParseGuid id)
           Output = AssemblyId.from name
           OutputType = OutputType.Dll
           FxTarget = FrameworkVersion "v4.5"
@@ -40,40 +41,42 @@ let CheckSelectProject () =
           ProjectReferences = refIds }
 
     let projects = projectDefs |> Seq.map createProject |> Set
-    let goal = ["4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6" |> ParseGuid |> ProjectId.from
-                "eb5c2f2b-d117-47b0-8067-305b4bae9aa2" |> ParseGuid |> ProjectId.from ] |> Set
+    let goal = ["4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6" |> ProjectRef.from
+                "eb5c2f2b-d117-47b0-8067-305b4bae9aa2" |> ProjectRef.from ] |> Set
     let projects = ComputeProjectSelectionClosure projects goal |> Set
 
     projects |> Set.count |> should equal 5
-    projects |> should contain (ProjectId.from (ParseGuid "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6"))
-    projects |> should contain (ProjectId.from (ParseGuid "2904bc7b-8b30-41f1-8160-02b5281704b4"))
-    projects |> should contain (ProjectId.from (ParseGuid "d7b81c18-45df-44dc-853d-8cab07e1ad97"))
-    projects |> should contain (ProjectId.from (ParseGuid "78c2e0d4-b410-4702-af93-71db7db228d0"))
-    projects |> should contain (ProjectId.from (ParseGuid "eb5c2f2b-d117-47b0-8067-305b4bae9aa2"))
+    projects |> should contain (ProjectRef.from "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6")
+    projects |> should contain (ProjectRef.from "2904bc7b-8b30-41f1-8160-02b5281704b4")
+    projects |> should contain (ProjectRef.from "d7b81c18-45df-44dc-853d-8cab07e1ad97")
+    projects |> should contain (ProjectRef.from "78c2e0d4-b410-4702-af93-71db7db228d0")
+    projects |> should contain (ProjectRef.from "eb5c2f2b-d117-47b0-8067-305b4bae9aa2")
     
 
 [<Test>]
 let CheckGenerateSolution () =
     let projects = [ { Repository = RepositoryId.from "cassandra-sharp-contrib"
+                       ProjectId = ProjectRef.from "CassandraSharp.Contrib.log4net"
                        RelativeProjectFile = ProjectRelativeFile "CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj"
-                       ProjectGuid = ProjectId.from (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
+                       UniqueProjectId = ProjectId.from (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
                        Output = AssemblyId.from "CassandraSharp.Contrib.log4net"
                        OutputType = OutputType.Dll
                        FxTarget = FrameworkVersion "v4.5"   
                        AssemblyReferences = [ AssemblyId.from "System" ] |> set
                        PackageReferences = [ PackageId.from "log4net"
                                              PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"; PackageId.from "Rx-Linq"; PackageId.from "Rx-Main"; PackageId.from "Rx-PlatformServices" ] |> set
-                       ProjectReferences = [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10") ] |> set}
+                       ProjectReferences = [ ProjectRef.from "cassandrasharp.interfaces" ] |> set}
                      { Repository = RepositoryId.from "cassandra-sharp-contrib"
+                       ProjectId = ProjectRef.from "CassandraSharp.Contrib.log4netUnitTests"
                        RelativeProjectFile = ProjectRelativeFile "CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"
-                       ProjectGuid = ProjectId.from (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
+                       UniqueProjectId = ProjectId.from (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
                        Output = AssemblyId.from "CassandraSharp.Contrib.log4netUnitTests"
                        OutputType = OutputType.Dll
                        FxTarget = FrameworkVersion "v4.5"
                        AssemblyReferences = [ AssemblyId.from "System"; AssemblyId.from "System.Core" ] |> set
                        PackageReferences = [ PackageId.from "log4net" 
                                              PackageId.from "NUnit"; PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"; PackageId.from "Rx-Linq"; PackageId.from "Rx-Main"; PackageId.from "Rx-PlatformServices" ] |> set
-                       ProjectReferences = [ ProjectId.from (ParseGuid "6f6eb447-9569-406a-a23b-c09b6dbdbe10"); ProjectId.from (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846c"); ProjectId.from (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4") ] |> set } ]
+                       ProjectReferences = [ ProjectRef.from "cassandrasharp.interfaces"; ProjectRef.from "cassandrasharp"; ProjectRef.from "cassandrasharp.contrib.log4net" ] |> set } ]
 
     let content = GenerateSolutionContent projects
 
