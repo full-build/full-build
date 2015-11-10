@@ -30,7 +30,7 @@ open Collections
 let (|MatchProject|_|) (projects : Project set) (assName : AssemblyId) = 
     let replacementProject = projects |> Seq.tryFind (fun x -> x.Output = assName)
     match replacementProject with
-    | Some x -> Some x.ProjectGuid
+    | Some x -> Some x.ProjectId
     | _ -> None
 
 let (|MatchPackage|_|) (file2package : Map<AssemblyId, PackageId>) (assName : AssemblyId) =
@@ -82,7 +82,7 @@ let TransformPackageToProject (projects : Project set) : Project set =
             let assId = AssemblyId.from package.toString
             let project = projects |> Seq.tryFind (fun x -> x.Output = assId)
             match project with
-            | Some x -> yield (package, x.ProjectGuid)
+            | Some x -> yield (package, x.ProjectId)
             | _ -> ()
     }
 
@@ -108,7 +108,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
                                      |> Map
 
     // convert assemblies to 
-    let rec convertPackageFiles (file2packageScoped : Map<AssemblyId, PackageId>) (newProjects : ProjectId set) (newPackages : PackageId set) (files : AssemblyId list) =
+    let rec convertPackageFiles (file2packageScoped : Map<AssemblyId, PackageId>) (newProjects : ProjectRef set) (newPackages : PackageId set) (files : AssemblyId list) =
         match files with
         | assName::tail -> match assName with
                            | MatchProject projects newProjectRef -> convertPackageFiles file2packageScoped (newProjects |> Set.add newProjectRef) newPackages tail
@@ -116,7 +116,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
                            | _ -> None
         | [] -> Some (newProjects, newPackages)
 
-    let rec convertPackage (package : PackageId) : (ProjectId set * PackageId set) option =
+    let rec convertPackage (package : PackageId) : (ProjectRef set * PackageId set) option =
         let file2packageScoped = file2package |> Map.filter (fun _ x -> x <> package)
         let fileConversion = convertPackageFiles file2packageScoped Set.empty Set.empty (package2files.[package] |> Set.toList)
         match fileConversion with
@@ -147,7 +147,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
                                        newPackages <- newPackages |> Set.union pkgs
             let simplifiedUsedPackages = package2packages |> Map.filter (fun k _ -> newPackages |> Set.contains k)
             let simplifiedPackagesRoot = ComputePackagesRoots simplifiedUsedPackages
-            let removeAssemblies = projects |> Seq.filter (fun x -> newProjects |> Set.contains x.ProjectGuid)
+            let removeAssemblies = projects |> Seq.filter (fun x -> newProjects |> Set.contains x.ProjectId)
                                             |> Seq.map (fun x -> x.Output)
                                             |> Set
             let newProject = { project

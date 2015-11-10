@@ -57,11 +57,11 @@ let Describe (viewName : ViewId) =
 
 
 // find all referencing projects of a project
-let private referencingProjects (projects : Project set) (current : ProjectId) =
+let private referencingProjects (projects : Project set) (current : ProjectRef) =
     projects |> Set.filter (fun x -> x.ProjectReferences |> Set.contains current)
 
-let rec private computePaths (findParents : ProjectId -> Project set) (goal : ProjectId set) (path : ProjectId set) (current : Project) =
-    let currentId = current.ProjectGuid
+let rec private computePaths (findParents : ProjectRef -> Project set) (goal : ProjectRef set) (path : ProjectRef set) (current : Project) =
+    let currentId = current.ProjectId
     let parents = findParents currentId
     let newPath = Set.add currentId path
     let paths = parents |> Set.map (computePaths findParents goal (Set.add currentId path))
@@ -69,10 +69,10 @@ let rec private computePaths (findParents : ProjectId -> Project set) (goal : Pr
     if Set.contains currentId goal then Set.union newPath paths
     else paths
 
-let ComputeProjectSelectionClosure (allProjects : Project set) (goal : ProjectId set) =
+let ComputeProjectSelectionClosure (allProjects : Project set) (goal : ProjectRef set) =
     let findParents = referencingProjects allProjects
 
-    let seeds = allProjects |> Set.filter (fun x -> Set.contains x.ProjectGuid goal)
+    let seeds = allProjects |> Set.filter (fun x -> Set.contains (x.ProjectId) goal)
     let transitiveClosure = seeds |> Set.map (computePaths findParents goal Set.empty)
                                   |> Set.unionMany
     transitiveClosure
@@ -87,7 +87,7 @@ let FindViewProjects (viewName : ViewId) =
 
     // build: <repository>/<project>
     let antho = Configuration.LoadAnthology ()
-    let projects = antho.Projects |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, x.ProjectGuid))
+    let projects = antho.Projects |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, x.ProjectId))
                                   |> Map
     let projectNames = projects |> Seq.map (fun x -> x.Key) |> Set
 
@@ -96,14 +96,14 @@ let FindViewProjects (viewName : ViewId) =
 
     let matches = repoFilters |> Set.map matchRepoProject
                               |> Set.unionMany
-    let selectedProjectGuids = projects |> Map.filter (fun k v -> Set.contains k matches)
+    let selectedProjectGuids = projects |> Map.filter (fun k _ -> Set.contains k matches)
                                         |> Seq.map (fun x -> x.Value)
                                         |> Set
 
     // find projects
     let antho = Configuration.LoadAnthology ()
     let projectRefs = ComputeProjectSelectionClosure antho.Projects selectedProjectGuids |> Set
-    let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectGuid)
+    let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectId)
     projects
 
 let Generate (viewName : ViewId) =
