@@ -24,6 +24,21 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module CommandLineToken
 
+
+type TokenOption =
+    | Debug
+    | All
+    | IgnoreError
+    | Unknown
+
+let (|TokenOption|) (token : string) =
+    match token with
+    | "--debug" -> Debug
+    | "--all" -> All
+    | "--ignore-error" -> IgnoreError
+    | _ -> Unknown
+
+
 type Token = 
     | Workspace
     | View
@@ -56,6 +71,7 @@ type Token =
     | UpdateGuids
     | Migrate
     | Unknown
+
 
 let (|Token|) (token : string) = 
     match token with
@@ -90,4 +106,3 @@ let (|Token|) (token : string) =
     | "update-guids" -> UpdateGuids
     | "migrate" -> Migrate
     | _ -> Unknown
-

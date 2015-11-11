@@ -121,10 +121,10 @@ let Generate (viewName : ViewId) =
     let slnContent = GenerateSolutionContent projects
     File.WriteAllLines (slnFile.FullName, slnContent)
 
-let Graph (viewName : ViewId) =
+let Graph (viewName : ViewId) (all : bool) =
     let antho = Configuration.LoadAnthology ()
     let projects = FindViewProjects viewName |> Set
-    let graph = Dgml.GraphContent antho projects
+    let graph = Dgml.GraphContent antho projects all
 
     let wsDir = Env.GetFolder Env.Workspace
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewName.toString)

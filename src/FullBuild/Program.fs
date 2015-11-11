@@ -37,7 +37,7 @@ let tryMain argv =
     | PushWorkspace -> Workspace.Push ()
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
     | PullWorkspace -> Workspace.Pull ()
-    | Exec cmd -> Workspace.Exec cmd
+    | Exec cmd -> Workspace.Exec cmd.Command
     | CleanWorkspace -> Workspace.Clean ()
     | UpdateGuids name -> Workspace.UpdateGuid name
 
@@ -52,8 +52,8 @@ let tryMain argv =
     | DropView viewInfo -> View.Drop viewInfo.Name
     | ListViews -> View.List ()
     | DescribeView viewInfo -> View.Describe viewInfo.Name
-    | GraphView viewInfo -> View.Graph viewInfo.Name
-    | BuildView viewInfo -> View.Build viewInfo.Name "Release"
+    | GraphView viewInfo -> View.Graph viewInfo.Name viewInfo.All
+    | BuildView viewInfo -> View.Build viewInfo.Name viewInfo.Config
 
     // nuget
     | AddNuGet url -> NuGets.Add url
