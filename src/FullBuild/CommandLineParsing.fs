@@ -64,6 +64,17 @@ type AddApplication =
     { Name : ApplicationId
       Projects : ProjectId set }
 
+type BuildView =
+    { Name : ViewId
+      Config : string }
+
+type GraphView =
+    { Name : ViewId
+      All : bool }
+
+type Exec = 
+    { Command : string }
+
 type Command = 
     | Usage
     | Error
@@ -76,7 +87,7 @@ type Command =
     | PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
     | PullWorkspace
-    | Exec of string
+    | Exec of Exec
     | CleanWorkspace
     | UpdateGuids of RepositoryId
 
@@ -91,8 +102,8 @@ type Command =
     | AddView of AddView
     | DropView of ViewName
     | DescribeView of ViewName
-    | GraphView of ViewName
-    | BuildView of ViewName
+    | GraphView of GraphView
+    | BuildView of BuildView
 
     // nuget
     | AddNuGet of RepositoryUrl
@@ -126,52 +137,61 @@ let (|MatchRepositoryId|) repo =
 let (|MatchApplicationId|) name =
     ApplicationId.from name
 
-let ParseCommandLine(args : string list) : Command = 
+
+let ParseCommandLine (args : string list) : Command = 
     match args with
-    | [Token(Token.Help)] -> Command.Usage
+    | [Token Token.Help] -> Command.Usage
 
-    | Token(Token.Setup) :: masterRepository :: masterArtifacts :: [path] -> Command.SetupWorkspace { MasterRepository=RepositoryUrl.from masterRepository
-                                                                                                      MasterArtifacts=masterArtifacts
-                                                                                                      Path = path }
-    | Token(Token.Init) :: masterRepository:: [path] -> Command.InitWorkspace { MasterRepository=RepositoryUrl.from masterRepository
-                                                                                Path = path }
-    | Token(Token.Exec) :: [cmd] -> Command.Exec cmd
-    | [Token(Token.Index)] -> Command.IndexWorkspace
-    | [Token(Token.Convert)] -> Command.ConvertWorkspace
-    | Token(Token.Clone) :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                                       CloneRepositories { Filters = repoFilters }
-    | Token(Token.Graph) :: [(MatchViewId name)] -> Command.GraphView { Name = name }
-    | Token(Token.Publish) :: names -> let appNames = names |> Seq.map ApplicationId.from |> Set
-                                       PublishApplications {Names = appNames }
-    | Token(Token.Build) :: [(MatchViewId name)] -> Command.BuildView { Name = name }
-    | Token(Token.Checkout) :: [(MatchBookmarkVersion version)] -> Command.CheckoutWorkspace {Version = version}
-    | [Token(Token.Push)] -> Command.PushWorkspace
-    | [Token(Token.Pull)] -> Command.PullWorkspace
-    | [Token(Token.Clean)] -> Command.CleanWorkspace
-    | Token(Token.UpdateGuids) :: [name] -> Command.UpdateGuids (RepositoryId.from name)
+    | Token Token.Setup :: masterRepository :: masterArtifacts :: [path] -> Command.SetupWorkspace { MasterRepository=RepositoryUrl.from masterRepository
+                                                                                                     MasterArtifacts=masterArtifacts
+                                                                                                     Path = path }
+    | Token Token.Init :: masterRepository:: [path] -> Command.InitWorkspace { MasterRepository=RepositoryUrl.from masterRepository
+                                                                               Path = path }
+    | Token Token.Exec :: [cmd] -> Command.Exec { Command = cmd }
 
-    | [Token(Token.Install)] -> Command.InstallPackages
-    | [Token(Token.Update)] -> Command.UpdatePackages
-    | [Token(Token.Outdated)] -> Command.OutdatedPackages
+    | [Token Token.Index] -> Command.IndexWorkspace
+    | [Token Token.Convert] -> Command.ConvertWorkspace
+    | Token Token.Clone :: filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
+                                      CloneRepositories { Filters = repoFilters }
 
-    | Token(Token.Add) :: Token(Token.Repo) :: name :: [url] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
-    | Token(Token.Add) :: Token(Token.NuGet) :: [uri] -> Command.AddNuGet (RepositoryUrl.from uri)
-    | Token(Token.Add) :: Token(Token.View) :: (MatchViewId name) :: filters -> Command.AddView { Name = name; Filters = filters }
-    | Token(Token.Add) :: Token(Token.Application) :: (MatchApplicationId name) :: filters -> let projects = filters |> Seq.map ProjectId.from |> Set
-                                                                                              Command.AddApplication { Name = name; Projects = projects }
-    | Token(Token.Drop) :: Token(Token.View) :: [(MatchViewId name)] -> Command.DropView { Name = name }
-    | Token(Token.Drop) :: Token(Token.Repo) :: [(MatchRepositoryId repo)] -> Command.DropRepository repo
-    | Token(Token.Drop) :: Token(Token.Application) :: [(MatchApplicationId name)] -> Command.DropApplication name
-    | Token(Token.List) :: [Token(Token.Repo)] -> ListRepositories
-    | Token(Token.List) :: [Token(Token.View)] -> Command.ListViews
-    | Token(Token.List) :: [Token(Token.NuGet)] -> Command.ListNuGets
-    | Token(Token.List) :: [Token(Token.Package)] -> Command.ListPackages
-    | Token(Token.List) :: [Token(Token.Application)] -> ListApplications
-    | Token(Token.Describe) :: Token(Token.View) :: [(MatchViewId name)] -> Command.DescribeView { Name = name }
+    | Token Token.Graph :: TokenOption TokenOption.All :: [MatchViewId name] -> Command.GraphView { Name = name ; All = true}
+    | Token Token.Graph :: [MatchViewId name] -> Command.GraphView { Name = name ; All = false }
 
-    | [Token(Token.Migrate)] -> Command.Migrate
+    | Token Token.Publish :: names -> let appNames = names |> Seq.map ApplicationId.from |> Set
+                                      PublishApplications {Names = appNames }
+
+    | Token Token.Build :: TokenOption TokenOption.Debug :: [MatchViewId name] -> Command.BuildView { Name = name ; Config="Debug" }
+    | Token Token.Build :: [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = "Release" }
+
+    | Token Token.Checkout :: [MatchBookmarkVersion version] -> Command.CheckoutWorkspace {Version = version}
+    | [Token Token.Push] -> Command.PushWorkspace
+    | [Token Token.Pull] -> Command.PullWorkspace
+    | [Token Token.Clean] -> Command.CleanWorkspace
+
+    | [Token Token.Install] -> Command.InstallPackages
+    | [Token Token.Update] -> Command.UpdatePackages
+    | [Token Token.Outdated] -> Command.OutdatedPackages
+
+    | Token Token.Add :: Token Token.Repo :: name :: [url] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
+    | Token Token.Add :: Token Token.NuGet :: [uri] -> Command.AddNuGet (RepositoryUrl.from uri)
+    | Token Token.Add :: Token Token.View :: MatchViewId name :: filters -> Command.AddView { Name = name; Filters = filters }
+    | Token Token.Add :: Token Token.Application :: MatchApplicationId name :: filters -> let projects = filters |> Seq.map ProjectId.from |> Set
+                                                                                          Command.AddApplication { Name = name; Projects = projects }
+    | Token Token.Drop :: Token Token.View :: [MatchViewId name] -> Command.DropView { Name = name }
+    | Token Token.Drop :: Token Token.Repo :: [MatchRepositoryId repo] -> Command.DropRepository repo
+    | Token Token.Drop :: Token Token.Application :: [MatchApplicationId name] -> Command.DropApplication name
+    | Token Token.List :: [Token Token.Repo] -> ListRepositories
+    | Token Token.List :: [Token Token.View] -> Command.ListViews
+    | Token Token.List :: [Token Token.NuGet] -> Command.ListNuGets
+    | Token Token.List :: [Token Token.Package] -> Command.ListPackages
+    | Token Token.List :: [Token Token.Application] -> ListApplications
+    | Token Token.Describe :: Token Token.View :: [MatchViewId name] -> Command.DescribeView { Name = name }
+
+    | Token Token.UpdateGuids :: [name] -> Command.UpdateGuids (RepositoryId.from name)
+    | [Token Token.Migrate] -> Command.Migrate
 
     | _ -> Command.Error
+
 
 let UsageContent() =
     let version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version
@@ -183,8 +203,8 @@ let UsageContent() =
         "  clone <selection-wildcards ...> : clone repositories using provided wildcards"
         "  add view <view-name> <view-wildcards ...> : add repositories to view"
         "  drop <view|repo|app> <name> : drop named object"
-        "  build <view-name> : build view"
-        "  graph <view-name> : graph view content (project, packages, assemblies)"
+        "  build [--debug] <view-name> : build view"
+        "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
         "  list <repo|view|nuget|package> : list objects"
         "  describe <repo|view> <name> : describe view or repository"
         "  checkout <version|master> : checkout workspace to version"
