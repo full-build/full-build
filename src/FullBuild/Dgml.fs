@@ -161,8 +161,9 @@ let GraphStyles () =
             XElement(NsDgml + "Setter", XAttribute(NsNone + "Property", "Icon"), XAttribute(NsNone + "Value", "CodeSchema_Method"))))
 
 
-let GraphContent (antho : Anthology) (projects : Project set) =
-    let nonExeProjects = projects |> Set.filter (fun x -> x.RelativeProjectFile.toString.IndexOf(".test", System.StringComparison.InvariantCultureIgnoreCase) = -1)
+let GraphContent (antho : Anthology) (projects : Project set) (all :bool) =
+    let nonExeProjects = if all then projects
+                         else projects |> Set.filter (fun x -> x.RelativeProjectFile.toString.IndexOf(".test", System.StringComparison.InvariantCultureIgnoreCase) = -1)
 
     let allProjects = nonExeProjects |> Set.map (fun x -> x.ProjectReferences)
                                      |> Set.unionMany
