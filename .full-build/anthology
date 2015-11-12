@@ -39,7 +39,6 @@ anthology:
       assemblies:
         - assembly: fsharp.configuration
         - assembly: fsharp.core
-        - assembly: paket
         - assembly: sharpyaml
         - assembly: system
         - assembly: system.core
