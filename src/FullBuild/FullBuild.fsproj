@@ -99,9 +99,6 @@
     <Reference Include="FSharp.Configuration">
       <HintPath>$(SolutionDir)\lib\FSharp.Configuration.dll</HintPath>
     </Reference>
-    <Reference Include="paket">
-      <HintPath>C:\src\full-build\lib\paket.exe</HintPath>
-    </Reference>
     <Reference Include="SharpYaml">
       <HintPath>$(SolutionDir)\lib\SharpYaml.dll</HintPath>
     </Reference>
