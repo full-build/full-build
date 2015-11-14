@@ -14,6 +14,9 @@ This puts some contraints on the way you build your projects. There are two poin
 First of all, create an empty repository (either Git or Mercurial). This will be the master repository.
 Ensure developpers have read access. Allow write access to people in charge of configuration.
 
+# ssh keys
+TO DO
+
 ## master artifacts
 Then create a public share. Full build artifacts will be pushed there and should be available to anyone.
 Ensure developpers have read access. Allow write access to people in charge of configuration (including CI).
