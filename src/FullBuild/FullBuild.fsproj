@@ -102,6 +102,7 @@
     <Reference Include="SharpYaml">
       <HintPath>$(SolutionDir)\lib\SharpYaml.dll</HintPath>
     </Reference>
+      <Content Include="$(SolutionDir)\lib\paket.exe" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
