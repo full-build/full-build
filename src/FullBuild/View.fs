@@ -152,16 +152,21 @@ let ExternalBuild (config : string) (target : string) (viewFile : FileInfo) =
     else Exec.Exec "msbuild" args wsDir
 
 let Build (name : ViewId) (config : string) (forceRebuild : bool) =
-    let target = if forceRebuild then "Rebuild"
-                 else "Build"
-
     let vwDir = Env.GetFolder Env.View 
     let vwFile = vwDir |> GetFile (AddExt View name.toString)
     if vwFile.Exists |> not then failwithf "Unknown view name %A" name.toString
 
     let wsDir = Env.GetFolder Env.Workspace
     let viewFile = wsDir |> GetFile (AddExt Solution name.toString)
-    let shouldRefresh = viewFile.Exists || vwFile.CreationTime > viewFile.CreationTime
+
+    let shouldRefresh = (viewFile.Exists |> not) || viewFile.CreationTime < vwFile.CreationTime || forceRebuild
     if shouldRefresh then name |> Generate
+
+    let target = if shouldRefresh then "Rebuild"
+                 else "Build"
+
+    if shouldRefresh then
+        let binDir = wsDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
+        binDir.Delete (true)
 
     viewFile |> ExternalBuild config target
