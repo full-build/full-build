@@ -208,6 +208,7 @@ let UsageContent() =
         "  add-view <view-name> <view-wildcards ...> : add repositories to view"
         "  drop-<view|repo|app> <name> : drop named object"
         "  build [--debug] <view-name> : build view"
+        "  rebuild [--debug] <view-name> : clean & build view"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
         "  list-<repo|view|nuget|package> : list objects"
         "  describe <repo|view> <name> : describe view or repository"
