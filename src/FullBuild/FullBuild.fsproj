@@ -24,7 +24,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile></DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>migrate</StartArguments>
     <StartWorkingDirectory>C:\src\mig\tutu\</StartWorkingDirectory>
@@ -59,6 +60,21 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <Import Project="$(MSBuildExtensionsPath)/Microsoft/VisualStudio/v$(MSBuildToolsVersion)/WebApplications/Microsoft.WebApplication.targets" />
+  <Target Name="Publish">
+    <PropertyGroup>
+      <AppDir>$(SolutionDir)/apps/$(AppName)</AppDir>
+    </PropertyGroup>
+    <MSBuild Projects="$(ProjectPath)" Targets="ResolveReferences;_CopyWebApplication" Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
+  </Target>
+  <Import Project="$(SolutionDir)/.full-build/packages/Newtonsoft.Json/package.targets" Condition="'$(FullBuild_Newtonsoft_Json_Pkg)' == ''" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Collections.fs" />
@@ -94,6 +110,10 @@
     <Content Include="App.config" />
     <None Include="baseline.yaml" />
     <None Include="anthology.yaml" />
+    <Content Include="$(SolutionDir)\lib\paket.exe">
+      <Link>paket.exe</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Configuration">
@@ -102,7 +122,6 @@
     <Reference Include="SharpYaml">
       <HintPath>$(SolutionDir)\lib\SharpYaml.dll</HintPath>
     </Reference>
-      <Content Include="$(SolutionDir)\lib\paket.exe" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -113,19 +132,4 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <Import Project="$(MSBuildExtensionsPath)/Microsoft/VisualStudio/v$(MSBuildToolsVersion)/WebApplications/Microsoft.WebApplication.targets" />
-  <Target Name="Publish">
-    <PropertyGroup>
-      <AppDir>$(SolutionDir)/apps/$(AppName)</AppDir>
-    </PropertyGroup>
-    <MSBuild Projects="$(ProjectPath)" Targets="ResolveReferences;_CopyWebApplication" Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
-  </Target>
-  <Import Project="$(SolutionDir)/.full-build/packages/Newtonsoft.Json/package.targets" Condition="'$(FullBuild_Newtonsoft_Json_Pkg)' == ''" />
 </Project>
