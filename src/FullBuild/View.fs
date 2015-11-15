@@ -167,6 +167,6 @@ let Build (name : ViewId) (config : string) (forceRebuild : bool) =
 
     if shouldRefresh then
         let binDir = wsDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
-        binDir.Delete (true)
+        if binDir.Exists then binDir.Delete (true)
 
     viewFile |> ExternalBuild config target
