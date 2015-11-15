@@ -16,8 +16,10 @@ let GenerateProjectTarget (project : Project) =
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.toString) project.RelativeProjectFile.toString
     let output = (project.Output.toString)
-    let dllFile = sprintf "%s/%s/*.dll" MSBUILD_BIN_FOLDER output
-    let exeFile = sprintf "%s/%s/*.exe" MSBUILD_BIN_FOLDER output
+    let ext = match project.OutputType with
+              | OutputType.Dll -> "dll"
+              | OutputType.Exe -> "exe"
+    let includeFile = sprintf "%s/%s/%s.%s" MSBUILD_BIN_FOLDER output output ext
     
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -34,7 +36,7 @@ let GenerateProjectTarget (project : Project) =
                     XElement (NsMsBuild + "Project", sprintf "{%s}" project.UniqueProjectId.toString),
                     XElement (NsMsBuild + "Name", project.Output.toString)),
                 XElement (NsMsBuild + "Reference",
-                    XAttribute (NsNone + "Include", sprintf "%s;%s" dllFile exeFile),
+                    XAttribute (NsNone + "Include", includeFile),
                     XAttribute (NsNone + "Condition", binCondition),
                     XElement (NsMsBuild + "Private", "false")))))
 
