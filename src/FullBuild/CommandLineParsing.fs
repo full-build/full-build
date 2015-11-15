@@ -66,7 +66,8 @@ type AddApplication =
 
 type BuildView =
     { Name : ViewId
-      Config : string }
+      Config : string 
+      ForceRebuild : bool }
 
 type GraphView =
     { Name : ViewId
@@ -160,8 +161,11 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Publish :: names -> let appNames = names |> Seq.map ApplicationId.from |> Set
                                       PublishApplications {Names = appNames }
 
-    | Token Token.Build :: TokenOption TokenOption.Debug :: [MatchViewId name] -> Command.BuildView { Name = name ; Config="Debug" }
-    | Token Token.Build :: [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = "Release" }
+    | Token Token.Build :: TokenOption TokenOption.Debug :: [MatchViewId name] -> Command.BuildView { Name = name ; Config="Debug"; ForceRebuild=false }
+    | Token Token.Build :: [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = "Release"; ForceRebuild=false }
+
+    | Token Token.Rebuild :: TokenOption TokenOption.Debug :: [MatchViewId name] -> Command.BuildView { Name = name ; Config="Debug"; ForceRebuild=true }
+    | Token Token.Rebuild :: [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = "Release"; ForceRebuild=true }
 
     | Token Token.Checkout :: [MatchBookmarkVersion version] -> Command.CheckoutWorkspace {Version = version}
     | [Token Token.Push] -> Command.PushWorkspace

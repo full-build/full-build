@@ -51,6 +51,7 @@ type Token =
     | Update
     | Drop
     | Build
+    | Rebuild
     | Index
     | Convert
     | Add
@@ -86,6 +87,7 @@ let (|Token|) (token : string) =
     | "update" -> Update
     | "drop" -> Drop
     | "build" -> Build
+    | "rebuild" -> Rebuild
     | "index" -> Index
     | "convert" -> Convert
     | "add" -> Add

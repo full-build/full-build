@@ -143,15 +143,18 @@ let Create (viewName : ViewId) (filters : string list) =
 
 // ---------------------------------------------------------------------------------------
 
-let ExternalBuild (config : string) (viewFile : FileInfo) =
+let ExternalBuild (config : string) (target : string) (viewFile : FileInfo) =
     let wsDir = Env.GetFolder Env.Workspace
     //let args = sprintf "/nologo /p:Configuration=%s /v:m %A" config viewFile.Name
-    let args = sprintf "/nologo /p:Configuration=%s %A" config viewFile.Name
+    let args = sprintf "/nologo /t:%s /p:Configuration=%s %A" target config viewFile.Name
 
     if Env.IsMono () then Exec.Exec "xbuild" args wsDir
     else Exec.Exec "msbuild" args wsDir
 
-let Build (name : ViewId) (config : string) =
+let Build (name : ViewId) (config : string) (forceRebuild : bool) =
+    let target = if forceRebuild then "Rebuild"
+                 else "Build"
+
     let vwDir = Env.GetFolder Env.View 
     let vwFile = vwDir |> GetFile (AddExt View name.toString)
     if vwFile.Exists |> not then failwithf "Unknown view name %A" name.toString
@@ -161,4 +164,4 @@ let Build (name : ViewId) (config : string) =
     let shouldRefresh = viewFile.Exists || vwFile.CreationTime > viewFile.CreationTime
     if shouldRefresh then name |> Generate
 
-    viewFile |> ExternalBuild config
+    viewFile |> ExternalBuild config target
