@@ -127,7 +127,7 @@ let Push () =
     let hash = Vcs.VcsTip wsDir mainRepo
     let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
     if versionDir.Exists then
-        printfn "Warning: Build output already exists - skipping"
+        printfn "[WARNING] Build output already exists - skipping"
     else
         try
             let binDir = Env.GetFolder Env.Bin
