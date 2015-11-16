@@ -44,11 +44,14 @@ let FilterRepos (filters : RepositoryId set) =
             |> Seq.concat
             |> Set
 
+let cloneRepoAndInit wsDir repo =
+    Vcs.VcsCloneRepo wsDir repo
+
 let Clone (filters : RepositoryId set) = 
     let wsDir = Env.GetFolder Env.Workspace
     FilterRepos filters |> Set.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Name.toString
                                                 not <| subDir.Exists)
-                        |> Set.iter (Vcs.VcsCloneRepo wsDir)
+                        |> Set.iter (cloneRepoAndInit wsDir)
 
 let Add (name : RepositoryId) (url : RepositoryUrl) =
     let antho = LoadAnthology ()
