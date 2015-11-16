@@ -77,6 +77,7 @@ type Exec =
     { Command : string }
 
 type Command = 
+    | Version
     | Usage
     | Error
 
@@ -141,6 +142,7 @@ let (|MatchApplicationId|) name =
 
 let ParseCommandLine (args : string list) : Command = 
     match args with
+    | [Token Token.Version] -> Command.Version
     | [Token Token.Help] -> Command.Usage
 
     | Token Token.Setup :: masterRepository :: masterArtifacts :: [path] -> Command.SetupWorkspace { MasterRepository=RepositoryUrl.from masterRepository
@@ -201,12 +203,17 @@ let ParseCommandLine (args : string list) : Command =
     | _ -> Command.Error
 
 
-let UsageContent() =
+let VersionContent() =
     let version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version
     let fbVersion = sprintf "full-build %s" (version.ToString())
+    fbVersion
+
+let UsageContent() =
+    let fbVersion = VersionContent()
 
     let content = [
         "  help : display this help"
+        "  version : display full-build version"
         "  install : install packages declared in anthology"
         "  clone <selection-wildcards ...> : clone repositories using provided wildcards"
         "  add-view <view-name> <view-wildcards ...> : add repositories to view"
@@ -246,3 +253,7 @@ let UsageContent() =
 
 let DisplayUsage() = 
     UsageContent() |> Seq.iter (fun x -> printfn "%s" x)
+
+let DisplayVersion() =
+    let version = VersionContent()
+    printfn "%s" version
