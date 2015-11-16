@@ -104,7 +104,7 @@ let private GitClone (target : DirectoryInfo) (url : string) =
 let private HgClone (target : DirectoryInfo) (url : string) = 
     let args = sprintf "clone %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
-    Exec "hg" args currDir    
+    Exec "hg" args currDir
 
 
 let private GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
