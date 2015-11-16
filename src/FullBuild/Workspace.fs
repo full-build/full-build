@@ -122,7 +122,6 @@ let Push () =
 
     // commit
     Try (fun () -> Vcs.VcsCommit wsDir mainRepo "bookmark")
-    Try (fun () -> Vcs.VcsPush wsDir mainRepo)
 
     // copy bin content
     let hash = Vcs.VcsTip wsDir mainRepo
@@ -130,6 +129,9 @@ let Push () =
     let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
     IoHelpers.CopyFolder binDir versionDir
     printfn "%s" hash
+
+    // publish
+    Try (fun () -> Vcs.VcsPush wsDir mainRepo)
 
 let Checkout (version : BookmarkVersion) =
     let antho = Configuration.LoadAnthology ()
