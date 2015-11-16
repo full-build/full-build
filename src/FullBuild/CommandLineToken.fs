@@ -42,6 +42,7 @@ let (|TokenOption|) (token : string) =
 
 
 type Token = 
+    | Version
     | Workspace
     | Help
     | Setup
@@ -90,6 +91,7 @@ type Token =
 
 let (|Token|) (token : string) = 
     match token with
+    | "version" -> Version
     | "workspace" -> Workspace
 
     | "help" -> Help

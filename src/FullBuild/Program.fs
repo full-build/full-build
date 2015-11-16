@@ -74,6 +74,7 @@ let tryMain argv =
     | Migrate -> Configuration.Migrate ()
 
     // misc
+    | Version -> DisplayVersion ()
     | Usage -> DisplayUsage ()
     | Error -> DisplayUsage ()
 
