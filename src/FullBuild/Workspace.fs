@@ -125,13 +125,19 @@ let Push () =
 
     // copy bin content
     let hash = Vcs.VcsTip wsDir mainRepo
-    let binDir = Env.GetFolder Env.Bin
     let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
-    IoHelpers.CopyFolder binDir versionDir
-    printfn "%s" hash
+    if versionDir.Exists then
+        printfn "Warning: Build output already exists - skipping"
+    else
+        try
+            let binDir = Env.GetFolder Env.Bin
+            IoHelpers.CopyFolder binDir versionDir
+            printfn "%s" hash
 
-    // publish
-    Try (fun () -> Vcs.VcsPush wsDir mainRepo)
+            // publish
+            Try (fun () -> Vcs.VcsPush wsDir mainRepo)
+        with
+            _ -> if versionDir.Exists then versionDir.Delete(true)
 
 let Checkout (version : BookmarkVersion) =
     let antho = Configuration.LoadAnthology ()
