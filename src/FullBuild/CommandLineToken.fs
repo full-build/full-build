@@ -29,45 +29,59 @@ type TokenOption =
     | Debug
     | All
     | IgnoreError
+    | NoHook
     | Unknown
 
 let (|TokenOption|) (token : string) =
     match token with
     | "--debug" -> Debug
     | "--all" -> All
+    | "--no-hook" -> NoHook
     | "--ignore-error" -> IgnoreError
     | _ -> Unknown
 
 
 type Token = 
     | Workspace
-    | View
     | Help
     | Setup
     | Init
     | Clone
-    | Repo
-    | Package
     | Update
-    | Drop
     | Build
     | Rebuild
     | Index
     | Convert
-    | Add
-    | List
     | Push
-    | NuGet
     | Graph
-    | Describe
     | Install
     | Simplify
     | Outdated
-    | Application
     | Publish
     | Pull
     | Checkout
     | Exec
+
+    | AddView
+    | DropView
+    | ListView
+    | DescribeView
+
+    | AddRepo
+    | DropRepo
+    | ListRepo
+
+    | AddPackage
+    | ListPackage
+
+    | AddNuGet
+    | DropNuGet
+    | ListNuGet
+
+    | AddApp
+    | DropApp
+    | ListApp
+
     | Clean
     | UpdateGuids
     | Migrate
@@ -77,34 +91,44 @@ type Token =
 let (|Token|) (token : string) = 
     match token with
     | "workspace" -> Workspace
-    | "view" -> View
+
     | "help" -> Help
     | "setup" -> Setup
     | "init" -> Init
     | "clone" -> Clone
-    | "repo" -> Repo
-    | "package" -> Package
     | "update" -> Update
-    | "drop" -> Drop
     | "build" -> Build
     | "rebuild" -> Rebuild
     | "index" -> Index
     | "convert" -> Convert
-    | "add" -> Add
-    | "list" -> List
     | "push" -> Push
-    | "nuget" -> NuGet
     | "graph" -> Graph
-    | "describe" -> Describe
     | "install" -> Install
     | "simplify" -> Simplify
     | "outdated" -> Outdated
-    | "app" -> Application
     | "publish" -> Publish
     | "pull" -> Pull
     | "checkout" -> Checkout
     | "exec" -> Exec
     | "clean" -> Clean
+
+    | "add-view" -> AddView
+    | "drop-view" -> DropView
+    | "list-view" -> ListView
+    | "describe-view" -> DescribeView
+
+    | "add-repo" -> AddRepo
+    | "drop-repo" -> DropRepo
+    | "list-repo" -> ListRepo
+
+    | "add-nuget" -> AddNuGet
+    | "drop-nuget" -> DropNuGet
+    | "list-nuget" -> ListNuGet
+
+    | "add-app" -> AddApp
+    | "drop-app" -> DropApp
+    | "list-app" -> ListApp
+
     | "update-guids" -> UpdateGuids
     | "migrate" -> Migrate
     | _ -> Unknown

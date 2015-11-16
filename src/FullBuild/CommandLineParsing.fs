@@ -176,20 +176,24 @@ let ParseCommandLine (args : string list) : Command =
     | [Token Token.Update] -> Command.UpdatePackages
     | [Token Token.Outdated] -> Command.OutdatedPackages
 
-    | Token Token.Add :: Token Token.Repo :: name :: [url] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
-    | Token Token.Add :: Token Token.NuGet :: [uri] -> Command.AddNuGet (RepositoryUrl.from uri)
-    | Token Token.Add :: Token Token.View :: MatchViewId name :: filters -> Command.AddView { Name = name; Filters = filters }
-    | Token Token.Add :: Token Token.Application :: MatchApplicationId name :: filters -> let projects = filters |> Seq.map ProjectId.from |> Set
-                                                                                          Command.AddApplication { Name = name; Projects = projects }
-    | Token Token.Drop :: Token Token.View :: [MatchViewId name] -> Command.DropView { Name = name }
-    | Token Token.Drop :: Token Token.Repo :: [MatchRepositoryId repo] -> Command.DropRepository repo
-    | Token Token.Drop :: Token Token.Application :: [MatchApplicationId name] -> Command.DropApplication name
-    | Token Token.List :: [Token Token.Repo] -> ListRepositories
-    | Token Token.List :: [Token Token.View] -> Command.ListViews
-    | Token Token.List :: [Token Token.NuGet] -> Command.ListNuGets
-    | Token Token.List :: [Token Token.Package] -> Command.ListPackages
-    | Token Token.List :: [Token Token.Application] -> ListApplications
-    | Token Token.Describe :: Token Token.View :: [MatchViewId name] -> Command.DescribeView { Name = name }
+    | Token Token.AddRepo :: name :: [url] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
+    | Token Token.DropRepo :: [MatchRepositoryId repo] -> Command.DropRepository repo
+    | [Token Token.ListRepo] -> ListRepositories
+
+    | Token Token.AddNuGet :: [uri] -> Command.AddNuGet (RepositoryUrl.from uri)
+    | [Token Token.ListNuGet] -> Command.ListNuGets
+
+    | Token Token.AddView :: MatchViewId name :: filters -> Command.AddView { Name = name; Filters = filters }
+    | Token Token.DropView :: [MatchViewId name] -> Command.DropView { Name = name }
+    | [Token Token.ListView] -> Command.ListViews
+    | Token Token.DescribeView :: [MatchViewId name] -> Command.DescribeView { Name = name }
+
+    | Token Token.AddApp :: MatchApplicationId name :: filters -> let projects = filters |> Seq.map ProjectId.from |> Set
+                                                                  Command.AddApplication { Name = name; Projects = projects }
+    | Token Token.DropApp :: [MatchApplicationId name] -> Command.DropApplication name
+    | [Token Token.ListApp] -> ListApplications
+
+    | [Token Token.ListPackage] -> Command.ListPackages
 
     | Token Token.UpdateGuids :: [name] -> Command.UpdateGuids (RepositoryId.from name)
     | [Token Token.Migrate] -> Command.Migrate
@@ -210,8 +214,12 @@ let UsageContent() =
         "  build [--debug] <view-name> : build view"
         "  rebuild [--debug] <view-name> : clean & build view"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
-        "  list-<repo|view|nuget|package> : list objects"
-        "  describe <repo|view> <name> : describe view or repository"
+        "  list-repo : list repositories"
+        "  list-view : list views"
+        "  list-nuget : list NuGet feeds"
+        "  list-package : list packages"
+        "  describe-repo <name> : describe repository"
+        "  describe-view <name> : describe view"
         "  checkout <version|master> : checkout workspace to version"
         "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
         "  publish <app> : publish application"
@@ -219,9 +227,9 @@ let UsageContent() =
         ""
         "  setup <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
-        "  add repo <repo-name> <repo-uri> : declare a new repository (git or hg supported)"
-        "  add nuget <nuget-uri> : add nuget uri"
-        "  add app <name> <project-id-list...> : create new application from given project ids"
+        "  add-repo <repo-name> <repo-uri> : declare a new repository (git or hg supported)"
+        "  add-nuget <nuget-uri> : add nuget uri"
+        "  add-app <name> <project-id-list...> : create new application from given project ids"
         "  index : index workspace"
         "  convert : convert projects in workspace"
         "  update : update packages"
