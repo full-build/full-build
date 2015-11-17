@@ -79,10 +79,10 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Collections.fs" />
     <Compile Include="StringHelpers.fs" />
+    <Compile Include="Exec.fs" />
     <Compile Include="IoHelpers.fs" />
     <Compile Include="PatternMatching.fs" />
     <Compile Include="Env.fs" />
-    <Compile Include="Exec.fs" />
     <Compile Include="Anthology.fs" />
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="BaselineSerializer.fs" />
