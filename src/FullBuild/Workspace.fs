@@ -130,8 +130,14 @@ let Push () =
         printfn "[WARNING] Build output already exists - skipping"
     else
         try
+            let binTargetDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
             let binDir = Env.GetFolder Env.Bin
-            IoHelpers.CopyFolder binDir versionDir
+            IoHelpers.CopyFolder binDir binTargetDir
+            printfn "%s" hash
+
+            let appTargetDir = versionDir |> GetSubDirectory Env.MSBUILD_APP_OUTPUT
+            let binDir = Env.GetFolder Env.Bin
+            IoHelpers.CopyFolder binDir appTargetDir
             printfn "%s" hash
 
             // publish
@@ -161,8 +167,9 @@ let Checkout (version : BookmarkVersion) =
                | Master -> Vcs.VcsTip wsDir mainRepo
 
     let binDir = Env.GetFolder Env.Bin
-    let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
-    IoHelpers.CopyFolder versionDir binDir
+    let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash 
+    let binSourceDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
+    IoHelpers.CopyFolder binSourceDir binDir
 
 let Pull () =
     let antho = Configuration.LoadAnthology ()
