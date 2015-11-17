@@ -136,8 +136,8 @@ let Push () =
             printfn "%s" hash
 
             let appTargetDir = versionDir |> GetSubDirectory Env.MSBUILD_APP_OUTPUT
-            let binDir = Env.GetFolder Env.Bin
-            IoHelpers.CopyFolder binDir appTargetDir
+            let appDir = Env.GetFolder Env.App
+            IoHelpers.CopyFolder appDir appTargetDir
             printfn "%s" hash
 
             // publish
