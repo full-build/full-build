@@ -77,7 +77,7 @@ let private HgClean (repoDir : DirectoryInfo) =
 
 let private GitIs (uri : RepositoryUrl) =
     try
-        let currDir = Env.CurrentFolder()
+        let currDir = IoHelpers.CurrentFolder()
         let args = sprintf @"ls-remote -h %s" uri.toString
         ExecReadLine "git" args currDir |> ignore
         true
@@ -86,7 +86,7 @@ let private GitIs (uri : RepositoryUrl) =
 
 let private HgIs (uri : RepositoryUrl) =
     try
-        let currDir = Env.CurrentFolder()
+        let currDir = IoHelpers.CurrentFolder()
         let args = sprintf @"id -i -R %s" uri.toLocalOrUrl
         ExecReadLine "hg" args currDir |> ignore
         true
