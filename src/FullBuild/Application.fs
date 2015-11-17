@@ -51,11 +51,19 @@ let BuildDeployTargetContent (projects : Project set) =
                 XElement(NsMsBuild + "RemoveDir", XAttribute(NsNone + "Directories", "../../apps/$(MSBuildProjectName)")),
                 XElement(NsMsBuild + "Copy", XAttribute(NsNone + "SourceFiles", "@(ProjectFiles)"), XAttribute(NsNone + "DestinationFolder", "../../apps/$(MSBuildProjectName)")))))
 
-let Publish (appNames : ApplicationId set) =
+let Publish (filters : string list) =
     let antho = Configuration.LoadAnthology ()
     let wsDir = GetFolder Env.Workspace
     let appDir = GetFolder Env.App
-    for appName in appNames do
+    let appNames = antho.Applications |> Set.map (fun x -> x.Name.toString)
+
+    let appFilters = filters |> Set
+    let matchApps filter = appNames |> Set.filter (fun x -> PatternMatching.Match x filter)
+    let matches = appFilters |> Set.map matchApps
+                             |> Set.unionMany
+                             |> Set.map ApplicationId.from
+
+    for appName in matches do
         let app = antho.Applications |> Seq.find (fun x -> x.Name = appName)
         let projectIds = app.Projects |> ComputeProjectDependencies antho
         let projects = antho.Projects |> Set.filter (fun x -> projectIds |> Set.contains x.ProjectId)
