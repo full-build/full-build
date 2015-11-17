@@ -60,7 +60,8 @@ let CurrentFolder() : DirectoryInfo =
 
 type Folder = 
        | Workspace
-       | Bin
+       | BinOutput
+       | AppOutput
        | Config
        | View
        | App
@@ -71,7 +72,8 @@ type Folder =
 let rec GetFolder folder =
     match folder with
     | Workspace -> CurrentFolder() |> WorkspaceFolderSearch 
-    | Bin -> GetFolder Workspace |> CreateSubDirectory BIN_FOLDER
+    | BinOutput -> GetFolder Workspace |> CreateSubDirectory MSBUILD_BIN_OUTPUT
+    | AppOutput -> GetFolder Workspace |> CreateSubDirectory MSBUILD_APP_OUTPUT
     | Config -> GetFolder Workspace |> CreateSubDirectory MASTER_REPO
     | View -> GetFolder Config |> CreateSubDirectory VIEW_FOLDER
     | App -> GetFolder Config |> CreateSubDirectory APP_FOLDER

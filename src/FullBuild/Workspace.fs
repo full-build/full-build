@@ -131,12 +131,12 @@ let Push () =
     else
         try
             let binTargetDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
-            let binDir = Env.GetFolder Env.Bin
+            let binDir = Env.GetFolder Env.BinOutput
             IoHelpers.CopyFolder binDir binTargetDir
             printfn "%s" hash
 
             let appTargetDir = versionDir |> GetSubDirectory Env.MSBUILD_APP_OUTPUT
-            let appDir = Env.GetFolder Env.App
+            let appDir = Env.GetFolder Env.AppOutput
             IoHelpers.CopyFolder appDir appTargetDir
             printfn "%s" hash
 
@@ -166,7 +166,7 @@ let Checkout (version : BookmarkVersion) =
                | BookmarkVersion x -> x
                | Master -> Vcs.VcsTip wsDir mainRepo
 
-    let binDir = Env.GetFolder Env.Bin
+    let binDir = Env.GetFolder Env.BinOutput
     let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash 
     let binSourceDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
     IoHelpers.CopyFolder binSourceDir binDir
