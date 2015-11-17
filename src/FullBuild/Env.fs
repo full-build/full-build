@@ -54,9 +54,6 @@ let rec private WorkspaceFolderSearch(dir : DirectoryInfo) =
     if IsWorkspaceFolder dir then dir
     else WorkspaceFolderSearch dir.Parent
 
-let CurrentFolder() : DirectoryInfo = 
-    DirectoryInfo(Environment.CurrentDirectory)
-
 
 type Folder = 
        | Workspace
