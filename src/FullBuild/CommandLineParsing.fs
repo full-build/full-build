@@ -55,7 +55,7 @@ type ViewName =
     { Name : ViewId }
 
 type PublishApplications = 
-    { Names : ApplicationId set }
+    { Filters : string list }
 
 type CheckoutVersion =
     { Version : BookmarkVersion }
@@ -160,8 +160,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Graph :: TokenOption TokenOption.All :: [MatchViewId name] -> Command.GraphView { Name = name ; All = true}
     | Token Token.Graph :: [MatchViewId name] -> Command.GraphView { Name = name ; All = false }
 
-    | Token Token.Publish :: names -> let appNames = names |> Seq.map ApplicationId.from |> Set
-                                      PublishApplications {Names = appNames }
+    | Token Token.Publish :: filters -> PublishApplications {Filters = filters}
 
     | Token Token.Build :: TokenOption TokenOption.Debug :: [MatchViewId name] -> Command.BuildView { Name = name ; Config="Debug"; ForceRebuild=false }
     | Token Token.Build :: [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = "Release"; ForceRebuild=false }
