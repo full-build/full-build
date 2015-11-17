@@ -83,22 +83,14 @@ let ComputeRelativePath (dir : DirectoryInfo) (file : FileInfo) : string =
     ComputeRelativePathInc dir file.Directory path
 
 
-let rec private CopyFolderContent (source : DirectoryInfo) (target : DirectoryInfo) =
-    target.Create ()
+let CurrentFolder() : DirectoryInfo = 
+    DirectoryInfo(System.Environment.CurrentDirectory)
 
-    for sourceFile in source.EnumerateFiles() do
-        let targetFile = target |> GetFile sourceFile.Name
-        sourceFile.CopyTo(targetFile.FullName, true) |> ignore
-
-    for sourceFolder in source.EnumerateDirectories() do
-        let targetFolder = target |> GetSubDirectory sourceFolder.Name
-        CopyFolderContent sourceFolder targetFolder
 
 let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) =
-    if target.Exists then
-        target.Delete(true)
-
-    if source.Exists then CopyFolderContent source target
+    let currDir = CurrentFolder()
+    let args = sprintf "%s %s /MIR /MT" source.FullName target.FullName
+    Exec.Exec "robocopy.exe" args currDir
 
 let GetExtension (file : FileInfo) =
     file.Extension.Replace(".", "")
