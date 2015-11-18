@@ -38,7 +38,7 @@ let private GitCommit (repoDir : DirectoryInfo) (comment : string) =
 
 let private HgCommit (repoDir : DirectoryInfo) (comment : string) =
     Exec "git" "add -S *" repoDir
-    let args = sprintf @"commit -A -m ""%s" comment
+    let args = sprintf @"commit -A -m ""%s""" comment
     Exec "hg" args repoDir
 
 
@@ -87,7 +87,7 @@ let private GitIs (uri : RepositoryUrl) =
 let private HgIs (uri : RepositoryUrl) =
     try
         let currDir = IoHelpers.CurrentFolder()
-        let args = sprintf @"id -i -R %s" uri.toLocalOrUrl
+        let args = sprintf @"id -i -R ""%s""" uri.toLocalOrUrl
         ExecReadLine "hg" args currDir |> ignore
         true
     with
@@ -97,12 +97,12 @@ let private HgIs (uri : RepositoryUrl) =
 
 
 let private GitClone (target : DirectoryInfo) (url : string) = 
-    let args = sprintf "clone --depth=1 %A %A" url target.FullName
+    let args = sprintf @"clone --depth=1 %A ""%A""" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
     Exec "git" args currDir
 
 let private HgClone (target : DirectoryInfo) (url : string) = 
-    let args = sprintf "clone %A %A" url target.FullName
+    let args = sprintf @"clone %A ""%A""" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
     Exec "hg" args currDir
 
