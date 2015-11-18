@@ -89,7 +89,7 @@ let CurrentFolder() : DirectoryInfo =
 
 let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) =
     let currDir = CurrentFolder()
-    let args = sprintf @"""%s"" ""%s"" /MIR /MT" source.FullName target.FullName
+    let args = sprintf "%A %A /MIR /MT" source.FullName target.FullName
     Exec.Exec "robocopy.exe" args currDir
 
 let GetExtension (file : FileInfo) =
