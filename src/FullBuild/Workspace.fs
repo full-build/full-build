@@ -126,25 +126,34 @@ let Push () =
     // copy bin content
     let hash = Vcs.VcsTip wsDir mainRepo
     let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
+    let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
+    if tmpVersionDir.Exists then
+        tmpVersionDir.Delete(true)
     if versionDir.Exists then
         printfn "[WARNING] Build output already exists - skipping"
     else
         try
-            let binTargetDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
+            let binTargetDir = tmpVersionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
             let binDir = Env.GetFolder Env.BinOutput
             IoHelpers.CopyFolder binDir binTargetDir true
 
-            let appTargetDir = versionDir |> GetSubDirectory Env.MSBUILD_APP_OUTPUT
+            let appTargetDir = tmpVersionDir |> GetSubDirectory Env.MSBUILD_APP_OUTPUT
             let appDir = Env.GetFolder Env.AppOutput
             IoHelpers.CopyFolder appDir appTargetDir true
             printfn "%s" hash
 
             // publish
             Try (fun () -> Vcs.VcsPush wsDir mainRepo)
+
+            tmpVersionDir.MoveTo(versionDir.FullName)
         with
-            exn -> versionDir.Refresh ()
-                   if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
-                   reraise ()
+            _ -> versionDir.Refresh ()
+                 if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
+
+                 tmpVersionDir.Refresh()
+                 if tmpVersionDir.Exists then tmpVersionDir.Delete(true)
+
+                 reraise ()
 
 let Checkout (version : BookmarkVersion) =
     let antho = Configuration.LoadAnthology ()
