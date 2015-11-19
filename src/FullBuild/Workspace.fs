@@ -132,12 +132,12 @@ let Push () =
         try
             let binTargetDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
             let binDir = Env.GetFolder Env.BinOutput
-            IoHelpers.CopyFolder binDir binTargetDir
+            IoHelpers.CopyFolder binDir binTargetDir true
             printfn "%s" hash
 
             let appTargetDir = versionDir |> GetSubDirectory Env.MSBUILD_APP_OUTPUT
             let appDir = Env.GetFolder Env.AppOutput
-            IoHelpers.CopyFolder appDir appTargetDir
+            IoHelpers.CopyFolder appDir appTargetDir true
             printfn "%s" hash
 
             // publish
@@ -169,7 +169,7 @@ let Checkout (version : BookmarkVersion) =
     let binDir = Env.GetFolder Env.BinOutput
     let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash 
     let binSourceDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
-    IoHelpers.CopyFolder binSourceDir binDir
+    IoHelpers.CopyFolder binSourceDir binDir false
 
 let Pull () =
     let antho = Configuration.LoadAnthology ()
