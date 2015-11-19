@@ -142,7 +142,9 @@ let Push () =
             // publish
             Try (fun () -> Vcs.VcsPush wsDir mainRepo)
         with
-            _ -> if versionDir.Exists then versionDir.Delete(true)
+            exn -> versionDir.Refresh ()
+                   if versionDir.Exists then versionDir.Delete(true)
+                   reraise ()
 
 let Checkout (version : BookmarkVersion) =
     let antho = Configuration.LoadAnthology ()
