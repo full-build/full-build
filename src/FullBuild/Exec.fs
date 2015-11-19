@@ -40,7 +40,8 @@ let ExecWithArgs (command : string) (args : string) (dir : DirectoryInfo) (vars 
     use proc = Process.Start (psi)
     if proc = null then failwith "Failed to start process"
     proc.WaitForExit()
-    if proc.ExitCode <> 0 then failwithf "Process failed with error %d" proc.ExitCode
+    if proc.ExitCode <> 0 then printf "[WARNING] Process exited with error code %d" proc.ExitCode
+    if proc.ExitCode > 5 then failwithf "Process failed with error %d" proc.ExitCode
 
 let Exec (command : string) (args : string) (dir : DirectoryInfo) = 
     ExecWithArgs command args dir Map.empty
