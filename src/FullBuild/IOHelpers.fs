@@ -87,9 +87,12 @@ let CurrentFolder() : DirectoryInfo =
     DirectoryInfo(System.Environment.CurrentDirectory)
 
 
-let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) =
+let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) (readOnly : bool) =
     let currDir = CurrentFolder()
-    let args = sprintf "%A %A /MIR /MT" source.FullName target.FullName
+    let setRead = if readOnly then "/A+:R"
+                  else "/A-:R"
+
+    let args = sprintf "%s /MIR /MT %A %A" setRead source.FullName target.FullName
     Exec.Exec "robocopy.exe" args currDir
 
 let GetExtension (file : FileInfo) =
