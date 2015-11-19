@@ -143,7 +143,7 @@ let Push () =
             Try (fun () -> Vcs.VcsPush wsDir mainRepo)
         with
             exn -> versionDir.Refresh ()
-                   if versionDir.Exists then versionDir.Delete(true)
+                   if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
                    reraise ()
 
 let Checkout (version : BookmarkVersion) =
