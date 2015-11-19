@@ -133,7 +133,6 @@ let Push () =
             let binTargetDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
             let binDir = Env.GetFolder Env.BinOutput
             IoHelpers.CopyFolder binDir binTargetDir true
-            printfn "%s" hash
 
             let appTargetDir = versionDir |> GetSubDirectory Env.MSBUILD_APP_OUTPUT
             let appDir = Env.GetFolder Env.AppOutput
