@@ -27,8 +27,8 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>migrate</StartArguments>
-    <StartWorkingDirectory>C:\src\mig\tutu\</StartWorkingDirectory>
+    <StartArguments>push</StartArguments>
+    <StartWorkingDirectory>C:\src\full-build</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>0077</NoWarn>
