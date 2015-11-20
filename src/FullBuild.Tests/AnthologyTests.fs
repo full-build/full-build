@@ -29,7 +29,7 @@ let CheckToRepository () =
 [<Test>]
 let CheckEqualityWithPermutation () =
     let antho1 = {
-        Artifacts = "c:\toto"
+        Artifacts = @"c:\toto"
         NuGets = []
         MasterRepository = { Vcs = VcsType.Git; Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" }
         Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" }
@@ -44,10 +44,11 @@ let CheckEqualityWithPermutation () =
                        AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Data"; AssemblyId.from "System.Xml"] |> set
                        PackageReferences = Set.empty
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set
-        Applications = Set.empty }
+        Applications = Set.empty 
+        TestRunners = Set.empty }
 
     let antho2 = {
-        Artifacts = "c:\toto"
+        Artifacts = @"c:\toto"
         NuGets = []
         MasterRepository = { Vcs = VcsType.Git; Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" }
         Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" } 
@@ -62,6 +63,7 @@ let CheckEqualityWithPermutation () =
                        AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                        PackageReferences = Set.empty
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set 
-        Applications = Set.empty }
+        Applications = Set.empty 
+        TestRunners = Set.empty }
         
     antho1 |> should equal antho2

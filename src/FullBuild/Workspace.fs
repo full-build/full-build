@@ -58,7 +58,8 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
                   MasterRepository = repo
                   Repositories = Set.empty
                   Projects = Set.empty 
-                  Applications = Set.empty }
+                  Applications = Set.empty 
+                  TestRunners = Set.empty }
     let confDir = wsDir |> GetSubDirectory Env.MASTER_REPO
     let anthoFile = confDir |> GetFile Env.ANTHOLOGY_FILENAME
     AnthologySerializer.Save anthoFile antho

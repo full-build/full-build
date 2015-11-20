@@ -44,6 +44,9 @@ type CheckoutWorkspace =
 type CloneRepositories = 
     { Filters : RepositoryId set }
 
+type TestAssemblies = 
+    { Filters : string list }
+
 type NuGetUrl = 
     { Url : string }
 
@@ -92,6 +95,7 @@ type Command =
     | Exec of Exec
     | CleanWorkspace
     | UpdateGuids of RepositoryId
+    | TestAssemblies of TestAssemblies
 
     // repository
     | ListRepositories
@@ -151,6 +155,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Init :: masterRepository:: [path] -> Command.InitWorkspace { MasterRepository=RepositoryUrl.from masterRepository
                                                                                Path = path }
     | Token Token.Exec :: [cmd] -> Command.Exec { Command = cmd }
+    | Token Token.Test :: filters -> Command.TestAssemblies { Filters = filters }
 
     | [Token Token.Index] -> Command.IndexWorkspace
     | [Token Token.Convert] -> Command.ConvertWorkspace
@@ -219,6 +224,7 @@ let UsageContent() =
         "  drop-<view|repo|app> <name> : drop named object"
         "  build [--debug] <view-name> : build view"
         "  rebuild [--debug] <view-name> : clean & build view"
+        "  test <test-wildcards ...> : test assemblies"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
         "  list-repo : list repositories"
         "  list-view : list views"

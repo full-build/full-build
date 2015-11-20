@@ -63,6 +63,12 @@ let Serialize (antho : Anthology) =
             capp.projects.Add (cproject)
         config.anthology.apps.Add (capp)
 
+    config.anthology.tests.Clear ()
+    for testRunner in antho.TestRunners do
+        let crunner = AnthologyConfig.anthology_Type.tests_Item_Type ()
+        crunner.name <- testRunner.toString
+        config.anthology.tests.Add (crunner)
+
     config.ToString()
 
 let Deserialize (content) =
@@ -123,6 +129,12 @@ let Deserialize (content) =
                        let app = { Name = appName ; Projects = projects }
                        convertToApplications tail |> Set.add app
 
+    let rec convertToTestRunners (items : AnthologyConfig.anthology_Type.tests_Item_Type list) =
+        match items with
+        | [] -> Set.empty
+        | x :: tail -> let runner = TestRunner.from x.name
+                       convertToTestRunners tail |> Set.add runner
+
     let config = new AnthologyConfig()
     config.LoadText content
 
@@ -134,8 +146,8 @@ let Deserialize (content) =
       MasterRepository = masterRepo
       Repositories = otherRepos
       Projects = convertToProjects (config.anthology.projects |> List.ofSeq) 
-      Applications = convertToApplications (config.anthology.apps |> List.ofSeq) }
-
+      Applications = convertToApplications (config.anthology.apps |> List.ofSeq) 
+      TestRunners = convertToTestRunners (config.anthology.tests |> List.ofSeq) }
 
 let Save (filename : FileInfo) (antho : Anthology) =
     let content = Serialize antho
