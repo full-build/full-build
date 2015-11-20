@@ -38,7 +38,7 @@ let GenerateProjectTarget (project : Project) =
                 XElement (NsMsBuild + "Reference",
                     XAttribute (NsNone + "Include", includeFile),
                     XAttribute (NsNone + "Condition", binCondition),
-                    XElement (NsMsBuild + "Private", "false")))))
+                    XElement (NsMsBuild + "Private", "true")))))
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let prjDir = Env.GetFolder Env.Project
