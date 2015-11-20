@@ -8,7 +8,7 @@ open Anthology
 let runnerNUnit (matches : string seq) =
     let wsDir = GetFolder Env.Workspace
     let files = matches |> Seq.fold (fun s t -> sprintf "%s %s" s t) ""
-    let args = sprintf @"%s --where ""cat != Integration"" --noheader" files
+    let args = sprintf @"%s --where ""cat != Integration"" --noheader --result=nunit2" files
     printf "%s" args
     Exec.Exec "nunit3-console" args wsDir
 
