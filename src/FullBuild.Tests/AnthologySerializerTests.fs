@@ -9,7 +9,7 @@ open StringHelpers
 [<Test>]
 let CheckSaveLoadAnthology () =
     let antho1 = {
-        Artifacts = "c:\toto"
+        Artifacts = @"c:\toto"
         NuGets = [ RepositoryUrl.from "https://www.nuget.org/api/v2/"; RepositoryUrl.from "file:///C:/src/full-build-packages/"]
         MasterRepository = { Vcs = VcsType.Git; Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" }
         Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" }
@@ -25,7 +25,8 @@ let CheckSaveLoadAnthology () =
                        PackageReferences = [ PackageId.from "NLog" ; PackageId.from "Rx-Main" ] |> Set
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set 
         Applications = [ { Name = ApplicationId.from "toto"
-                           Projects = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set } ] |> Set }
+                           Projects = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set } ] |> Set 
+        TestRunners = Set.empty }
 
     let res = AnthologySerializer.Serialize antho1
     printfn "%s" res

@@ -43,6 +43,15 @@ with
      member this.toString = toString this
      static member from s = fromString<OutputType> s
 
+
+type TestRunner =
+    | NUnit
+with
+     member this.toString = toString this
+     static member from s = fromString<TestRunner> s
+
+
+
 type AssemblyId = private AssemblyId of string
 with
     member this.toString = (fun (AssemblyId x) -> x)this
@@ -163,7 +172,8 @@ type Anthology =
       MasterRepository : Repository
       Repositories : Repository set
       Projects : Project set 
-      Applications : Application set }
+      Applications : Application set 
+      TestRunners : TestRunner set }
 
 type Baseline = 
     { Bookmarks : Bookmark set  }
