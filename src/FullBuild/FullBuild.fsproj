@@ -103,6 +103,7 @@
     <Compile Include="PlatformMatching.fs" />
     <Compile Include="Package.fs" />
     <Compile Include="Conversion.fs" />
+    <Compile Include="Test.fs" />
     <Compile Include="Indexation.fs" />
     <Compile Include="Workspace.fs" />
     <Compile Include="Application.fs" />

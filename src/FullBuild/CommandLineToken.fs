@@ -62,6 +62,7 @@ type Token =
     | Pull
     | Checkout
     | Exec
+    | Test
 
     | AddView
     | DropView
@@ -113,6 +114,7 @@ let (|Token|) (token : string) =
     | "checkout" -> Checkout
     | "exec" -> Exec
     | "clean" -> Clean
+    | "test" -> Test
 
     | "add-view" -> AddView
     | "drop-view" -> DropView
