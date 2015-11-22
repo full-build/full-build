@@ -24,8 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile></DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>push</StartArguments>
     <StartWorkingDirectory>C:\src\full-build</StartWorkingDirectory>
@@ -74,7 +73,6 @@
     </PropertyGroup>
     <MSBuild Projects="$(ProjectPath)" Targets="ResolveReferences;_CopyWebApplication" Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
   </Target>
-  <Import Project="$(SolutionDir)/.full-build/packages/Newtonsoft.Json/package.targets" Condition="'$(FullBuild_Newtonsoft_Json_Pkg)' == ''" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Collections.fs" />
@@ -111,18 +109,8 @@
     <Content Include="App.config" />
     <None Include="baseline.yaml" />
     <None Include="anthology.yaml" />
-    <Content Include="$(SolutionDir)\lib\paket.exe">
-      <Link>paket.exe</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Configuration">
-      <HintPath>$(SolutionDir)\lib\FSharp.Configuration.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpYaml">
-      <HintPath>$(SolutionDir)\lib\SharpYaml.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -133,4 +121,5 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
+  <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Configuration/package.targets" Condition="'$(FullBuild_FSharp_Configuration_Pkg)' == ''" />
 </Project>

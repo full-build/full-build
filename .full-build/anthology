@@ -21,9 +21,7 @@ anthology:
       out: fullbuild.tests.dll
       fx: v4.6
       assemblies:
-        - assembly: fsharp.configuration
         - assembly: fsharp.core
-        - assembly: sharpyaml
         - assembly: system
         - assembly: system.core
         - assembly: system.numerics
@@ -39,9 +37,7 @@ anthology:
       out: fullbuild.exe
       fx: v4.6
       assemblies:
-        - assembly: fsharp.configuration
         - assembly: fsharp.core
-        - assembly: sharpyaml
         - assembly: system
         - assembly: system.core
         - assembly: system.numerics
@@ -49,5 +45,5 @@ anthology:
         - assembly: system.xml
         - assembly: system.xml.linq
       packages:
-        - package: Newtonsoft.Json
+        - package: FSharp.Configuration
       projects: []
