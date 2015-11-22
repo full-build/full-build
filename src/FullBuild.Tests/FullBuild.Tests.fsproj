@@ -105,12 +105,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Configuration">
-      <HintPath>$(SolutionDir)\lib\FSharp.Configuration.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpYaml">
-      <HintPath>$(SolutionDir)\lib\SharpYaml.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />

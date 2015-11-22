@@ -1,3 +1,3 @@
 source https://www.nuget.org/api/v2/
 nuget fsunit
-nuget Newtonsoft.Json ~> 3.5.8
+nuget FSharp.Configuration ~> 0.5.7
