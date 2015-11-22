@@ -6,8 +6,8 @@
       <Project>{faaf3b40-ea78-4eaf-9859-863ff16f6058}</Project>
       <Name>fullbuild.tests</Name>
     </ProjectReference>
-    <Reference Include="$(SolutionDir)/bin/fullbuild.tests/*.dll;$(SolutionDir)/bin/fullbuild.tests/*.exe" Condition="'$(Prj_fullbuild_tests)' == ''">
-      <Private>false</Private>
+    <Reference Include="$(SolutionDir)/bin/fullbuild.tests/fullbuild.tests.dll" Condition="'$(Prj_fullbuild_tests)' == ''">
+      <Private>true</Private>
     </Reference>
   </ItemGroup>
 </Project>

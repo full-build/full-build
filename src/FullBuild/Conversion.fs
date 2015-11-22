@@ -117,6 +117,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "Import").Where(filterNuget).Remove()
     cproj.Descendants(NsMsBuild + "Target").Where(filterNugetTarget).Remove()
     cproj.Descendants(NsMsBuild + "None").Where(filterNugetPackage).Remove();
+    cproj.Descendants(NsMsBuild + "Content").Where(filterNugetPackage).Remove();
 
     // set OutputPath
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
