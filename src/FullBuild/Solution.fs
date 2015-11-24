@@ -52,12 +52,24 @@ let GenerateSolutionContent (projects : Project seq) =
                   (sprintf "%s/%s" (project.Repository.toString) project.RelativeProjectFile.toString)
                   (project.UniqueProjectId.toString)
 
+
             yield "\tProjectSection(ProjectDependencies) = postProject"
 //            for dependency in project.ProjectReferences do
 //                if projects |> Seq.exists (fun x -> x.ProjectGuid = dependency) then
 //                    let dependencyName = StringifyGuid dependency.Value
 //                    yield sprintf "\t\t%s = %s" dependencyName dependencyName
             yield "\tEndProjectSection"
+            yield "EndProject"
+
+        let repositories = projects |> Seq.map (fun x -> (x.Repository, System.Guid.NewGuid() |> ProjectUniqueId.from))
+                                    |> Set
+                                    |> Map
+
+        for repository in repositories do
+            let repo = repository.Key
+            let guid = repository.Value
+
+            yield sprintf @"Project(""{2150E333-8FDC-42A3-9474-1A3956D46DE8}"") = %A, %A, ""{%s}""" repo.toString repo.toString guid.toString
             yield "EndProject"
 
         yield "Global"
@@ -75,6 +87,13 @@ let GenerateSolutionContent (projects : Project seq) =
             yield sprintf "\t\t{%s}.Release|Any CPU.Build.0 = Release|Any CPU" guid
 
         yield "\tEndGlobalSection"
+
+        yield "\tGlobalSection(NestedProjects) = preSolution"
+        for project in projects do
+            let guid = project.UniqueProjectId.toString
+            yield sprintf "\t\t{%s} = {%s}" guid repositories.[project.Repository].toString
+        yield "\tEndGlobalSection"
+
         yield "EndGlobal"
     }
 
