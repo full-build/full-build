@@ -56,6 +56,7 @@ let Serialize (antho : Anthology) =
     for app in antho.Applications do
         let capp = AnthologyConfig.anthology_Type.apps_Item_Type()
         capp.name <- app.Name.toString
+        capp.``type`` <- app.Publisher.toString
         capp.projects.Clear ()
         for project in app.Projects do
             let cproject = AnthologyConfig.anthology_Type.apps_Item_Type.projects_Item_Type()
@@ -125,8 +126,9 @@ let Deserialize (content) =
         match items with
         | [] -> Set.empty
         | x :: tail -> let appName = ApplicationId.from x.name
+                       let publishType = PublisherType.from x.``type``
                        let projects = convertToApplicationDependencies (x.projects |> List.ofSeq)
-                       let app = { Name = appName ; Projects = projects }
+                       let app = { Name = appName ; Publisher = publishType; Projects = projects }
                        convertToApplications tail |> Set.add app
 
     let rec convertToTestRunners (items : AnthologyConfig.anthology_Type.tests_Item_Type list) =

@@ -25,6 +25,7 @@ let CheckSaveLoadAnthology () =
                        PackageReferences = [ PackageId.from "NLog" ; PackageId.from "Rx-Main" ] |> Set
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set 
         Applications = [ { Name = ApplicationId.from "toto"
+                           Publisher = PublisherType.Copy
                            Projects = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set } ] |> Set 
         TestRunners = Set.empty }
 

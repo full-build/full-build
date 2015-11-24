@@ -97,7 +97,8 @@ let private HgIs (uri : RepositoryUrl) =
 
 
 let private GitClone (target : DirectoryInfo) (url : string) = 
-    let args = sprintf @"clone --depth=1 %A %A" url target.FullName
+    //let args = sprintf @"clone --depth=1 %A %A" url target.FullName
+    let args = sprintf @"clone %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
     Exec "git" args currDir
 
