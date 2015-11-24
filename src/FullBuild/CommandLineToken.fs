@@ -133,6 +133,8 @@ let (|Token|) (token : string) =
     | "drop-app" -> DropApp
     | "list-app" -> ListApp
 
+    | "list-package" -> ListPackage
+
     | "update-guids" -> UpdateGuids
     | "migrate" -> Migrate
     | _ -> Unknown
