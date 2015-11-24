@@ -108,7 +108,7 @@ let FindViewProjects (viewName : ViewId) =
 
 
 let SaveFileIfNecessary (file : FileInfo) (content : string) =
-    let overwrite = file.Exists && File.ReadAllText(file.FullName) <> content
+    let overwrite = (file.Exists |> not) || File.ReadAllText(file.FullName) <> content
     if overwrite then
         File.WriteAllText (file.FullName, content)
 
