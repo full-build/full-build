@@ -65,6 +65,7 @@ type CheckoutVersion =
 
 type AddApplication =
     { Name : ApplicationId
+      Publisher : PublisherType
       Projects : ProjectId set }
 
 type BuildView =
@@ -143,6 +144,8 @@ let (|MatchRepositoryId|) repo =
 let (|MatchApplicationId|) name =
     ApplicationId.from name
 
+let (|MatchPublisherType|) name =
+    PublisherType.from name
 
 let ParseCommandLine (args : string list) : Command = 
     match args with
@@ -194,8 +197,8 @@ let ParseCommandLine (args : string list) : Command =
     | [Token Token.ListView] -> Command.ListViews
     | Token Token.DescribeView :: [MatchViewId name] -> Command.DescribeView { Name = name }
 
-    | Token Token.AddApp :: MatchApplicationId name :: filters -> let projects = filters |> Seq.map ProjectId.from |> Set
-                                                                  Command.AddApplication { Name = name; Projects = projects }
+    | Token Token.AddApp :: MatchApplicationId name :: MatchPublisherType pub :: filters -> let projects = filters |> Seq.map ProjectId.from |> Set
+                                                                                            Command.AddApplication { Name = name; Publisher = pub; Projects = projects }
     | Token Token.DropApp :: [MatchApplicationId name] -> Command.DropApplication name
     | [Token Token.ListApp] -> ListApplications
 
@@ -221,7 +224,9 @@ let UsageContent() =
         "  install : install packages declared in anthology"
         "  clone <selection-wildcards ...> : clone repositories using provided wildcards"
         "  add-view <view-name> <view-wildcards ...> : add repositories to view"
-        "  drop-<view|repo|app> <name> : drop named object"
+        "  drop-view <view-name> : drop view"
+        "  drop-repo <repo-name> : drop repository"
+        "  drop-app <app-name> : drop application"
         "  build [--debug] <view-name> : build view"
         "  rebuild [--debug] <view-name> : clean & build view"
         "  test <test-wildcards ...> : test assemblies"
@@ -241,7 +246,7 @@ let UsageContent() =
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
         "  add-repo <repo-name> <repo-uri> : declare a new repository (git or hg supported)"
         "  add-nuget <nuget-uri> : add nuget uri"
-        "  add-app <name> <project-id-list...> : create new application from given project ids"
+        "  add-app <name> <copy> <project-id-list...> : create new application from given project ids"
         "  index : index workspace"
         "  convert : convert projects in workspace"
         "  update : update packages"
