@@ -106,6 +106,12 @@ let FindViewProjects (viewName : ViewId) =
     let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectId)
     projects
 
+
+let SaveFileIfNecessary (file : FileInfo) (content : string) =
+    let overwrite = file.Exists && File.ReadAllText(file.FullName) <> content
+    if overwrite then
+        File.WriteAllText (file.FullName, content)
+
 let Generate (viewName : ViewId) =
     let projects = FindViewProjects viewName
 
@@ -113,13 +119,14 @@ let Generate (viewName : ViewId) =
     let slnDefines = GenerateSolutionDefines projects
     let viewDir = GetFolder Env.View
     let slnDefineFile = viewDir |> GetFile (AddExt Targets viewName.toString)
-    slnDefines.Save (slnDefineFile.FullName)
+    SaveFileIfNecessary slnDefineFile (slnDefines.ToString())
 
     // generate solution file
     let wsDir = GetFolder Env.Workspace
     let slnFile = wsDir |> GetFile (AddExt Solution viewName.toString)
-    let slnContent = GenerateSolutionContent projects
-    File.WriteAllLines (slnFile.FullName, slnContent)
+    let slnContent = GenerateSolutionContent projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
+    SaveFileIfNecessary slnFile slnContent
+
 
 let Graph (viewName : ViewId) (all : bool) =
     let antho = Configuration.LoadAnthology ()
@@ -159,13 +166,12 @@ let Build (name : ViewId) (config : string) (forceRebuild : bool) =
     let wsDir = Env.GetFolder Env.Workspace
     let viewFile = wsDir |> GetFile (AddExt Solution name.toString)
 
-    let shouldRefresh = (viewFile.Exists |> not) || viewFile.CreationTime < vwFile.CreationTime || forceRebuild
-    if shouldRefresh then name |> Generate
+    Generate name
 
-    let target = if shouldRefresh then "Rebuild"
+    let target = if forceRebuild then "Rebuild"
                  else "Build"
 
-    if shouldRefresh then
+    if forceRebuild then
         let binDir = wsDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
         if binDir.Exists then binDir.Delete (true)
 
