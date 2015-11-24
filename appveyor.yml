@@ -19,7 +19,7 @@ build_script:
   
 test:
   assemblies:
-   - bin\*.tests.dll
+   - bin\**\*.tests.dll
   categories:
     except:
       - integration
