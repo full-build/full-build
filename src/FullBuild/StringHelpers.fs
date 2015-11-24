@@ -43,3 +43,11 @@ let fromString<'a> (s:string) =
     match union with
     | Some x -> FSharpValue.MakeUnion(x,[||]) :?> 'a
     | _ -> failwithf "failed to parse %s as %A" s typeof<'a>
+
+let GenerateGuidFromString (input : string) = 
+    use provider = new System.Security.Cryptography.MD5CryptoServiceProvider()
+    let inputBytes = System.Text.Encoding.Default.GetBytes(input)
+    let hashBytes = provider.ComputeHash(inputBytes) 
+    let hashGuid = Guid(hashBytes)
+    hashGuid
+    
