@@ -26,6 +26,7 @@ module Solution
 open Anthology
 open System.IO
 open System.Xml.Linq
+open StringHelpers
 open MsBuildHelpers
 
 
@@ -61,7 +62,7 @@ let GenerateSolutionContent (projects : Project seq) =
             yield "\tEndProjectSection"
             yield "EndProject"
 
-        let repositories = projects |> Seq.map (fun x -> (x.Repository, System.Guid.NewGuid() |> ProjectUniqueId.from))
+        let repositories = projects |> Seq.map (fun x -> (x.Repository, GenerateGuidFromString (x.Repository.toString) |> ProjectUniqueId.from))
                                     |> Set
                                     |> Map
 

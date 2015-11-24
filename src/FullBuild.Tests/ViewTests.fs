@@ -93,6 +93,8 @@ let CheckGenerateSolution () =
                                "\tProjectSection(ProjectDependencies) = postProject"
                                "\tEndProjectSection"
                                "EndProject"
+                               @"Project(""{2150E333-8FDC-42A3-9474-1A3956D46DE8}"") = ""cassandra-sharp-contrib"", ""cassandra-sharp-contrib"", ""{930836cc-992f-e356-ccc9-96f1adb7ff88}"""
+                               "EndProject"
                                "Global"
                                "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution"
                                "\t\tDebug|Any CPU = Debug|Any CPU"
@@ -107,5 +109,9 @@ let CheckGenerateSolution () =
                                "\t\t{9e8648a4-d25a-4cfa-aaee-20d9d63ff571}.Debug|Any CPU.Build.0 = Debug|Any CPU"
                                "\t\t{9e8648a4-d25a-4cfa-aaee-20d9d63ff571}.Release|Any CPU.ActiveCfg = Release|Any CPU"
                                "\t\t{9e8648a4-d25a-4cfa-aaee-20d9d63ff571}.Release|Any CPU.Build.0 = Release|Any CPU"
+                               "\tEndGlobalSection"
+                               "\tGlobalSection(NestedProjects) = preSolution"
+                               "\t\t{925833ed-8653-4e90-9c37-b5b6cb693cf4} = {930836cc-992f-e356-ccc9-96f1adb7ff88}"
+                               "\t\t{9e8648a4-d25a-4cfa-aaee-20d9d63ff571} = {930836cc-992f-e356-ccc9-96f1adb7ff88}"
                                "\tEndGlobalSection"
                                "EndGlobal" |]
