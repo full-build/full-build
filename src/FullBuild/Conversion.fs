@@ -163,7 +163,9 @@ let ConvertProjects (antho : Anthology) xdocLoader xdocSaver =
             let xproj = xdocLoader projFile
             let convxproj = ConvertProjectContent xproj project antho
 
-            xdocSaver projFile convxproj
+            // only save if projs differ
+            if xproj.ToString() <> convxproj.ToString() then
+                xdocSaver projFile convxproj
 
 let RemoveUselessStuff (antho : Anthology) =
     let wsDir = Env.GetFolder Env.Workspace
