@@ -162,8 +162,16 @@ with
     member this.toString = (fun (ApplicationId x) -> x)this
     static member from (name : string) = ApplicationId (name.ToLowerInvariant())
 
+
+type PublisherType =
+    | Copy
+with
+     member this.toString = toString this
+     static member from s = fromString<PublisherType> s
+
 type Application = 
     { Name : ApplicationId
+      Publisher : PublisherType
       Projects : ProjectId set }
 
 type Anthology = 

@@ -51,10 +51,33 @@ let BuildDeployTargetContent (projects : Project set) =
                 XElement(NsMsBuild + "RemoveDir", XAttribute(NsNone + "Directories", "../../apps/$(MSBuildProjectName)")),
                 XElement(NsMsBuild + "Copy", XAttribute(NsNone + "SourceFiles", "@(ProjectFiles)"), XAttribute(NsNone + "DestinationFolder", "../../apps/$(MSBuildProjectName)")))))
 
+
+
+let publishAppCopy (app : Anthology.Application) (projects : Anthology.Project set) =
+    let appDir = GetFolder Env.App
+    let wsDir = GetFolder Env.Workspace
+    let appFile = appDir |> GetFile (AddExt Targets (app.Name.toString))
+    let appContent = BuildDeployTargetContent projects
+    appContent.Save (appFile.FullName)
+
+    let args = sprintf "/nologo /v:m %A" appFile.FullName
+
+    if Env.IsMono () then Exec.Exec "xbuild" args wsDir
+    else Exec.Exec "msbuild" args wsDir
+
+
+let PublishAppSelector (app : Anthology.Application) (projects : Anthology.Project set) appCopy =
+    let publish = match app.Publisher with
+                  | PublisherType.Copy -> appCopy
+    publish app projects
+
+
+let publishApp (app : Anthology.Application) (projects : Anthology.Project set) =
+    PublishAppSelector app projects publishAppCopy
+
+
 let Publish (filters : string list) =
     let antho = Configuration.LoadAnthology ()
-    let wsDir = GetFolder Env.Workspace
-    let appDir = GetFolder Env.App
     let appNames = antho.Applications |> Set.map (fun x -> x.Name.toString)
 
     let appFilters = filters |> Set
@@ -67,23 +90,16 @@ let Publish (filters : string list) =
         let app = antho.Applications |> Seq.find (fun x -> x.Name = appName)
         let projectIds = app.Projects |> ComputeProjectDependencies antho
         let projects = antho.Projects |> Set.filter (fun x -> projectIds |> Set.contains x.ProjectId)
-
-        let appFile = appDir |> GetFile (AddExt Targets (appName.toString))
-        let appContent = BuildDeployTargetContent projects
-        appContent.Save (appFile.FullName)
-
-        let args = sprintf "/nologo /v:m %A" appFile.FullName
-
-        if Env.IsMono () then Exec.Exec "xbuild" args wsDir
-        else Exec.Exec "msbuild" args wsDir
+        publishApp app projects
 
 let List () =
     let antho = Configuration.LoadAnthology ()
     antho.Applications |> Seq.iter (fun x -> printfn "%s" (x.Name.toString))
 
-let Add (appName : ApplicationId) (projects : ProjectId set) =
+let Add (appName : ApplicationId) (projects : ProjectId set) (publisher : Anthology.PublisherType) =
     let antho = Configuration.LoadAnthology ()
     let app = { Name = appName
+                Publisher = publisher
                 Projects = projects }
 
     let newAntho = { antho

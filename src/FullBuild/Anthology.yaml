@@ -8,6 +8,7 @@
           uri: http://www.google.com
     apps:
         - name: FullBuild
+          type: copy
           projects:
               - project: fullbuild
     tests:
