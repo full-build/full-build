@@ -31,51 +31,51 @@ open Anthology
 open System.IO
 
 
-let private GitCommit (repoDir : DirectoryInfo) (comment : string) =
+let private gitCommit (repoDir : DirectoryInfo) (comment : string) =
     Exec "git" "add --all" repoDir
     let args = sprintf "commit -m %A" comment
     Exec "git" args repoDir
 
-let private HgCommit (repoDir : DirectoryInfo) (comment : string) =
+let private hgCommit (repoDir : DirectoryInfo) (comment : string) =
     Exec "git" "add -S *" repoDir
     let args = sprintf "commit -A -m %A" comment
     Exec "hg" args repoDir
 
 
-let private GitPush (repoDir : DirectoryInfo) =
+let private gitPush (repoDir : DirectoryInfo) =
     Exec "git" "push" repoDir
 
-let private HgPush (repoDir : DirectoryInfo) =
+let private hgPush (repoDir : DirectoryInfo) =
     Exec "hg" "push" repoDir
     
 
-let private GitPull (repoDir : DirectoryInfo) =
+let private gitPull (repoDir : DirectoryInfo) =
     Exec "git" "pull --rebase" repoDir
 
-let private HgPull (repoDir : DirectoryInfo) =
+let private hgPull (repoDir : DirectoryInfo) =
     Exec "hg" "pull -u" repoDir
 
 
-let private GitTip (repoDir : DirectoryInfo) =
+let private gitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=""%H"""
     let res = ExecReadLine "git" args repoDir
     res
 
-let private HgTip (repoDir : DirectoryInfo) =
+let private hgTip (repoDir : DirectoryInfo) =
     let args = @"id -i"
     let res = ExecReadLine "hg" args repoDir
     res
 
 
-let private GitClean (repoDir : DirectoryInfo) =
+let private gitClean (repoDir : DirectoryInfo) =
     Exec "git" "reset --hard" repoDir
     Exec "git" "clean -fxd" repoDir
 
-let private HgClean (repoDir : DirectoryInfo) =
+let private hgClean (repoDir : DirectoryInfo) =
     Exec "hg" "purge" repoDir
 
 
-let private GitIs (uri : RepositoryUrl) =
+let private gitIs (uri : RepositoryUrl) =
     try
         let currDir = IoHelpers.CurrentFolder()
         let args = sprintf @"ls-remote -h %s" uri.toString
@@ -84,7 +84,7 @@ let private GitIs (uri : RepositoryUrl) =
     with
         _ -> false
 
-let private HgIs (uri : RepositoryUrl) =
+let private hgIs (uri : RepositoryUrl) =
     try
         let currDir = IoHelpers.CurrentFolder()
         let args = sprintf @"id -i -R %A" uri.toLocalOrUrl
@@ -96,19 +96,25 @@ let private HgIs (uri : RepositoryUrl) =
 
 
 
-let private GitClone (target : DirectoryInfo) (url : string) = 
+let private gitClone (isGerrit : bool) (target : DirectoryInfo) (url : string) = 
     let args = sprintf @"clone --depth=1 %A %A" url target.FullName
-    //let args = sprintf @"clone %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
     Exec "git" args currDir
 
-let private HgClone (target : DirectoryInfo) (url : string) = 
+    if isGerrit then
+        let currDir = System.Reflection.Assembly.GetExecutingAssembly().Location |> DirectoryInfo
+        let commitMsgFile = currDir |> IoHelpers.GetFile "commit-msg"
+        let target = target |> IoHelpers.GetSubDirectory ".git" |> IoHelpers.GetFile "commit-msg"
+        commitMsgFile.CopyTo (target.FullName) |> ignore
+
+
+let private hgClone (target : DirectoryInfo) (url : string) = 
     let args = sprintf @"clone %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
     Exec "hg" args currDir
 
 
-let private GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
+let private gitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
     let rev = match version with
               | BookmarkVersion x -> x
               | Master -> "master"
@@ -116,7 +122,7 @@ let private GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) =
     let args = sprintf "checkout %A" rev
     Exec "git" args repoDir
 
-let private HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
+let private hgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
     let rev = match version with
               | BookmarkVersion x -> x
               | Master -> "tip"
@@ -125,12 +131,12 @@ let private HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) =
     Exec "hg" args repoDir
 
 
-let private GitIgnore (repoDir : DirectoryInfo) =
+let private gitIgnore (repoDir : DirectoryInfo) =
     let content = ["packages"; "views"; "apps"]
     let gitIgnoreFile = repoDir |> GetFile ".gitignore"
     File.WriteAllLines (gitIgnoreFile.FullName, content)
 
-let private HgIgnore (repoDir : DirectoryInfo) =
+let private hgIgnore (repoDir : DirectoryInfo) =
     // FIXME
     ()
 
@@ -139,35 +145,37 @@ let ApplyVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
     let repoDir = wsDir |> GetSubDirectory repo.Name.toString
     let f = match repo.Vcs with
             | VcsType.Git -> gitFun
+            | VcsType.Gerrit -> gitFun
             | VcsType.Hg -> hgFun
     f repoDir
 
 
-let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) = 
-    (ApplyVcs wsDir repo GitClone HgClone) repo.Url.toString
+let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) =
+    let gitCloneFunc =  gitClone (repo.Vcs = VcsType.Gerrit)
+    (ApplyVcs wsDir repo gitCloneFunc hgClone) repo.Url.toString
 
 let VcsTip (wsDir : DirectoryInfo) (repo : Repository) = 
-    ApplyVcs wsDir repo GitTip HgTip
+    ApplyVcs wsDir repo gitTip hgTip
 
 let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion) = 
-    (ApplyVcs wsDir repo GitCheckout HgCheckout) version
+    (ApplyVcs wsDir repo gitCheckout hgCheckout) version
 
 let VcsIgnore (wsDir : DirectoryInfo) (repo : Repository) =
-    ApplyVcs wsDir repo GitIgnore HgIgnore
+    ApplyVcs wsDir repo gitIgnore hgIgnore
 
 let VcsPull (wsDir : DirectoryInfo) (repo : Repository) =
-    ApplyVcs wsDir repo GitPull HgPull
+    ApplyVcs wsDir repo gitPull hgPull
 
 let VcsCommit (wsDir : DirectoryInfo) (repo : Repository) (comment : string) =
-    (ApplyVcs wsDir repo GitCommit HgCommit) comment
+    (ApplyVcs wsDir repo gitCommit hgCommit) comment
 
 let VcsPush (wsDir : DirectoryInfo) (repo : Repository) =
-    (ApplyVcs wsDir repo GitPush HgPush)
+    (ApplyVcs wsDir repo gitPush hgPush)
 
 let VcsClean (wsDir : DirectoryInfo) (repo : Repository) =
-    (ApplyVcs wsDir repo GitClean HgClean)
+    (ApplyVcs wsDir repo gitClean hgClean)
 
 let VcsDetermineType (url : RepositoryUrl) =
-    if GitIs url then VcsType.Git
-    else if HgIs url then VcsType.Hg
+    if gitIs url then VcsType.Git
+    else if hgIs url then VcsType.Hg
     else failwithf "Failed to determine type of repository %A" url.toLocalOrUrl
