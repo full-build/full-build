@@ -12,7 +12,7 @@ let CheckSaveLoadBaseline () =
                                        { Repository = RepositoryId.from "cassandra-sharp-contrib"; Version=BookmarkVersion "5678c"}] }
 
     let res = BaselineSerializer.SerializeBaseline baseline1
-    printfn "%s" res
+    //printfn "%s" res
 
     let baseline2 = BaselineSerializer.DeserializeBaseline res
     baseline2 |> should equal baseline1

@@ -30,7 +30,7 @@ let CheckSaveLoadAnthology () =
         TestRunners = Set.empty }
 
     let res = AnthologySerializer.Serialize antho1
-    printfn "%s" res
+    //printfn "%s" res
 
     let antho2 = AnthologySerializer.Deserialize res
     antho2 |> should equal antho1

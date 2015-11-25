@@ -107,10 +107,8 @@ let CheckParseConvertedProject () =
 
     let projectFile = FileInfo ("./ConvertedProject.csproj")
     let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) projectFile.Directory (RepositoryId.from "Test") projectFile
+
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from "cassandrasharp.interfaces"]
-
-    prjDescriptor.Packages |> Seq.iter (fun x -> printfn "%A" x.Id.toString)
-
     prjDescriptor.Packages |> should equal expectedPackages
     prjDescriptor.Project |> should equal expectedProject
 
@@ -141,8 +139,6 @@ let CheckParseConvertedProjectWithoutPackagesConfig () =
     let projectFile = FileInfo ("./ConvertedProject.csproj")
     let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader false) projectFile.Directory (RepositoryId.from "Test") projectFile
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from "cassandrasharp.interfaces"]
-
-    prjDescriptor.Packages |> Seq.iter (fun x -> printfn "%A" x.Id.toString)
 
     prjDescriptor.Packages |> should equal expectedPackages
     prjDescriptor.Project |> should equal expectedProject
