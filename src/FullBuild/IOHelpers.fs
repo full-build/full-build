@@ -23,8 +23,15 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module IoHelpers
-
 open System.IO
+
+
+// http://ss64.com/nt/robocopy-exit.html
+let private checkErrorCode err =
+    if err > 7 then failwithf "Process failed with error %d" err
+
+let private checkedExec = 
+    Exec.Exec checkErrorCode
 
 
 type Extension =
@@ -87,13 +94,15 @@ let CurrentFolder() : DirectoryInfo =
     DirectoryInfo(System.Environment.CurrentDirectory)
 
 
+
+
 let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) (readOnly : bool) =
     let currDir = CurrentFolder()
     let setRead = if readOnly then "/A+:R"
                   else "/A-:R"
 
     let args = sprintf "%s /MIR /MT /NP /NFL /NDL /NJH %A %A" setRead source.FullName target.FullName
-    Exec.Exec "robocopy.exe" args currDir
+    checkedExec "robocopy.exe" args currDir
 
 let GetExtension (file : FileInfo) =
     file.Extension.Replace(".", "")

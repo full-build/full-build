@@ -37,6 +37,17 @@ open Collections
 open System
 
 
+let private checkErrorCode err =
+    if err <> 0 then failwithf "Process failed with error %d" err
+
+let private checkedExec = 
+    Exec.Exec checkErrorCode
+
+let private checkedExecWithVars = 
+    Exec.ExecWithVars checkErrorCode
+
+
+
 let Init (path : string) (uri : RepositoryUrl) = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
@@ -209,8 +220,8 @@ let Exec cmd =
             let args = sprintf @"/c ""%s""" cmd
 
             try
-                if Env.IsMono () then Exec.ExecWithArgs "sh" ("-c " + args) repoDir vars
-                else Exec.ExecWithArgs "cmd" args repoDir vars
+                if Env.IsMono () then checkedExecWithVars "sh" ("-c " + args) repoDir vars
+                else checkedExecWithVars "cmd" args repoDir vars
             with e -> printfn "*** %s" e.Message
 
 let Clean () =
