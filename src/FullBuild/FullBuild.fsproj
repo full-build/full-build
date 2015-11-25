@@ -24,7 +24,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile></DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>push</StartArguments>
     <StartWorkingDirectory>C:\src\full-build</StartWorkingDirectory>
@@ -109,6 +110,9 @@
     <Content Include="App.config" />
     <None Include="baseline.yaml" />
     <None Include="anthology.yaml" />
+    <Content Include="commit-msg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
