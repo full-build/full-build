@@ -69,7 +69,7 @@ let CheckSimplifyAnthology () =
 
     let newAnthology = Simplify.SimplifyAnthologyWithPackages anthology package2files package2packages
     let file = FileInfo (Path.GetRandomFileName())
-    printfn "Temporary file is %A" file.FullName
+    //printfn "Temporary file is %A" file.FullName
 
     AnthologySerializer.Save file newAnthology
 
