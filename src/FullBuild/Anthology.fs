@@ -81,6 +81,7 @@ type Package =
       Version : PackageVersion }
 
 type VcsType = 
+    | Gerrit
     | Git
     | Hg
 with
