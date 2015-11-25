@@ -31,6 +31,15 @@ open IoHelpers
 open System.Xml.Linq
 open MsBuildHelpers
 
+
+let private checkErrorCode err =
+    if err <> 0 then failwithf "Process failed with error %d" err
+
+let private checkedExec = 
+    Exec.Exec checkErrorCode
+
+
+
 let rec ComputeProjectDependencies (antho : Anthology) (projectIds : ProjectId set) =
     let projects = antho.Projects |> Set.filter (fun x -> projectIds |> Set.contains x.ProjectId)
     let dependencies = projects |> Set.map (fun x -> x.ProjectReferences) 
@@ -62,8 +71,8 @@ let publishAppCopy (app : Anthology.Application) (projects : Anthology.Project s
 
     let args = sprintf "/nologo /v:m %A" appFile.FullName
 
-    if Env.IsMono () then Exec.Exec "xbuild" args wsDir
-    else Exec.Exec "msbuild" args wsDir
+    if Env.IsMono () then checkedExec "xbuild" args wsDir
+    else checkedExec "msbuild" args wsDir
 
 
 let PublishAppSelector (app : Anthology.Application) (projects : Anthology.Project set) appCopy =

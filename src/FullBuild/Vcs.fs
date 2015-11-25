@@ -25,61 +25,67 @@
 module Vcs
 
 open System
-open Exec
-open IoHelpers
 open Anthology
 open System.IO
 
+let private checkErrorCode err =
+    if err <> 0 then failwithf "Process failed with error %d" err
+
+let private checkedExec = 
+    Exec.Exec checkErrorCode
+
+let private checkedExecReadLine =
+    Exec.ExecReadLine checkErrorCode
 
 let private gitCommit (repoDir : DirectoryInfo) (comment : string) =
-    Exec "git" "add --all" repoDir
+    checkedExec "git" "add --all" repoDir
     let args = sprintf "commit -m %A" comment
-    Exec "git" args repoDir
+    checkedExec "git" args repoDir
 
 let private hgCommit (repoDir : DirectoryInfo) (comment : string) =
-    Exec "git" "add -S *" repoDir
+    checkedExec "git" "add -S *" repoDir
     let args = sprintf "commit -A -m %A" comment
-    Exec "hg" args repoDir
+    checkedExec "hg" args repoDir
 
 
 let private gitPush (repoDir : DirectoryInfo) =
-    Exec "git" "push" repoDir
+    checkedExec "git" "push" repoDir
 
 let private hgPush (repoDir : DirectoryInfo) =
-    Exec "hg" "push" repoDir
+    checkedExec "hg" "push" repoDir
     
 
 let private gitPull (repoDir : DirectoryInfo) =
-    Exec "git" "pull --rebase" repoDir
+    checkedExec "git" "pull --rebase" repoDir
 
 let private hgPull (repoDir : DirectoryInfo) =
-    Exec "hg" "pull -u" repoDir
+    checkedExec "hg" "pull -u" repoDir
 
 
 let private gitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=""%H"""
-    let res = ExecReadLine "git" args repoDir
+    let res = checkedExecReadLine "git" args repoDir
     res
 
 let private hgTip (repoDir : DirectoryInfo) =
     let args = @"id -i"
-    let res = ExecReadLine "hg" args repoDir
+    let res = checkedExecReadLine "hg" args repoDir
     res
 
 
 let private gitClean (repoDir : DirectoryInfo) =
-    Exec "git" "reset --hard" repoDir
-    Exec "git" "clean -fxd" repoDir
+    checkedExec "git" "reset --hard" repoDir
+    checkedExec "git" "clean -fxd" repoDir
 
 let private hgClean (repoDir : DirectoryInfo) =
-    Exec "hg" "purge" repoDir
+    checkedExec "hg" "purge" repoDir
 
 
 let private gitIs (uri : RepositoryUrl) =
     try
         let currDir = IoHelpers.CurrentFolder()
         let args = sprintf @"ls-remote -h %s" uri.toString
-        ExecReadLine "git" args currDir |> ignore
+        checkedExecReadLine "git" args currDir |> ignore
         true
     with
         _ -> false
@@ -88,7 +94,7 @@ let private hgIs (uri : RepositoryUrl) =
     try
         let currDir = IoHelpers.CurrentFolder()
         let args = sprintf @"id -i -R %A" uri.toLocalOrUrl
-        ExecReadLine "hg" args currDir |> ignore
+        checkedExecReadLine "hg" args currDir |> ignore
         true
     with
         _ -> false
@@ -99,7 +105,7 @@ let private hgIs (uri : RepositoryUrl) =
 let private gitClone (isGerrit : bool) (target : DirectoryInfo) (url : string) = 
     let args = sprintf @"clone --depth=1 %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
-    Exec "git" args currDir
+    checkedExec "git" args currDir
 
     if isGerrit then
         let currDir = System.Reflection.Assembly.GetExecutingAssembly().Location |> DirectoryInfo
@@ -111,7 +117,7 @@ let private gitClone (isGerrit : bool) (target : DirectoryInfo) (url : string) =
 let private hgClone (target : DirectoryInfo) (url : string) = 
     let args = sprintf @"clone %A %A" url target.FullName
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
-    Exec "hg" args currDir
+    checkedExec "hg" args currDir
 
 
 let private gitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
@@ -120,7 +126,7 @@ let private gitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) =
               | Master -> "master"
 
     let args = sprintf "checkout %A" rev
-    Exec "git" args repoDir
+    checkedExec "git" args repoDir
 
 let private hgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
     let rev = match version with
@@ -128,12 +134,12 @@ let private hgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion) =
               | Master -> "tip"
 
     let args = sprintf "update -r %A" rev
-    Exec "hg" args repoDir
+    checkedExec "hg" args repoDir
 
 
 let private gitIgnore (repoDir : DirectoryInfo) =
     let content = ["packages"; "views"; "apps"]
-    let gitIgnoreFile = repoDir |> GetFile ".gitignore"
+    let gitIgnoreFile = repoDir |> IoHelpers.GetFile ".gitignore"
     File.WriteAllLines (gitIgnoreFile.FullName, content)
 
 let private hgIgnore (repoDir : DirectoryInfo) =
@@ -142,7 +148,7 @@ let private hgIgnore (repoDir : DirectoryInfo) =
 
 
 let ApplyVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
-    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name.toString
     let f = match repo.Vcs with
             | VcsType.Git -> gitFun
             | VcsType.Gerrit -> gitFun
