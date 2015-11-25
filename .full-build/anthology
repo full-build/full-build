@@ -11,6 +11,7 @@ anthology:
       uri: https://github.com/pchalamet/full-build
   apps:
     - name: full-build
+      type: copy
       projects:
         - project: fullbuild
   tests:
