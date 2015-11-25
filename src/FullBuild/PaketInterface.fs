@@ -30,6 +30,12 @@ open IoHelpers
 open Collections
 
 
+let checkErrorCode err =
+    if err <> 0 then failwithf "Process failed with error %d" err
+
+let private checkedExec = 
+    Exec.Exec checkErrorCode
+
 
 let ParseContent (lines : string seq) =
     seq {
@@ -109,8 +115,8 @@ let RemoveDependencies (packages : PackageId set) =
 
 let ExecutePaketCommand cmd =
     let confDir = Env.GetFolder Env.Config
-    if Env.IsMono() then Exec.Exec "mono" ("paket.exe " + cmd) confDir
-    else Exec.Exec "paket.exe" cmd confDir
+    if Env.IsMono() then checkedExec "mono" ("paket.exe " + cmd) confDir
+    else checkedExec "paket.exe" cmd confDir
 
 let PaketInstall () =
     ExecutePaketCommand "install"

@@ -31,7 +31,7 @@ let defaultPSI (command : string) (args : string) (dir : DirectoryInfo) =
     let psi = ProcessStartInfo (FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir.FullName, LoadUserProfile = true)
     psi
 
-let ExecWithArgs (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) = 
+let ExecWithVars checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) = 
     let psi = defaultPSI command args dir
 
     for var in vars do
@@ -40,20 +40,20 @@ let ExecWithArgs (command : string) (args : string) (dir : DirectoryInfo) (vars 
     use proc = Process.Start (psi)
     if proc = null then failwith "Failed to start process"
     proc.WaitForExit()
-    if proc.ExitCode <> 0 then printf "[WARNING] Process exited with error code %A" proc.ExitCode
-    if proc.ExitCode > 5 then failwithf "Process failed with error %d" proc.ExitCode
+    checkErrorCode proc.ExitCode
 
-let Exec (command : string) (args : string) (dir : DirectoryInfo) = 
-    ExecWithArgs command args dir Map.empty
+let Exec checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) = 
+    ExecWithVars checkErrorCode command args dir Map.empty
 
-let ExecReadLine (command : string) (args : string) (dir : DirectoryInfo) = 
+let ExecReadLine checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) = 
     let mutable psi = defaultPSI command args dir
     psi.RedirectStandardOutput <- true
 
     use proc = Process.Start (psi)
     if proc = null then failwith "Failed to start process"
     proc.WaitForExit()
-    if proc.ExitCode <> 0 then failwithf "Process failed with error %d" proc.ExitCode
+    checkErrorCode proc.ExitCode
+
     use stm = proc.StandardOutput
     stm.ReadLine ()
 
