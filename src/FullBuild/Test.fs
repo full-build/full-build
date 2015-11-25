@@ -7,6 +7,12 @@ open Anthology
 
 
 
+let checkErrorCode err =
+    if err <> 0 then failwithf "Process failed with error %d" err
+
+let private checkedExec = 
+    Exec.Exec checkErrorCode
+
 let excludeListToArgs (excludes : string list) =
     match excludes with
     | [] -> ""
@@ -20,7 +26,7 @@ let runnerNUnit (matches : string seq) (excludes : string list) =
     let files = matches |> Seq.fold (fun s t -> sprintf @"%s %A" s t) ""
     let excludeArgs = excludeListToArgs excludes
     let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs 
-    Exec.Exec "nunit3-console" args wsDir
+    checkedExec "nunit3-console" args wsDir
 
 let testAssembliesWithProvidedRunners (runnerType : TestRunner) files nunitRunner =
     let runner = match runnerType with

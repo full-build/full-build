@@ -2,18 +2,24 @@
 
 open NUnit.Framework
 open FsUnit
-open Exec
 open System
 open System.IO
+
+
+let private checkErrorCode err =
+    if err <> 0 then failwithf "Process failed with error %d" err
+
+let private checkedExec = 
+    Exec.Exec checkErrorCode
 
 [<Test>]
 let CheckExecOk () =
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
-    Exec "cmd" "/c dir >nul" currDir
+    checkedExec "cmd" "/c dir >nul" currDir
 
 
 [<Test>]
 let CheckExecFailure () =
     let currDir = DirectoryInfo(Environment.CurrentDirectory)
-    (fun () -> Exec "gloubiboulga" "" currDir |> ignore) |> should throw typeof<System.ComponentModel.Win32Exception>
+    (fun () -> checkedExec "gloubiboulga" "" currDir |> ignore) |> should throw typeof<System.ComponentModel.Win32Exception>
 

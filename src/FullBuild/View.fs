@@ -34,6 +34,15 @@ open Configuration
 open Collections
 open Solution
 
+
+let checkErrorCode err =
+    if err <> 0 then failwithf "Process failed with error %d" err
+
+let private checkedExec = 
+    Exec.Exec checkErrorCode
+
+
+
 let Drop (viewName : ViewId) =
     let vwDir = GetFolder Env.View
     let vwFile = GetFile (AddExt View viewName.toString) vwDir
@@ -155,8 +164,8 @@ let ExternalBuild (config : string) (target : string) (viewFile : FileInfo) =
     //let args = sprintf "/nologo /p:Configuration=%s /v:m %A" config viewFile.Name
     let args = sprintf "/nologo /t:%s /p:Configuration=%s %A" target config viewFile.Name
 
-    if Env.IsMono () then Exec.Exec "xbuild" args wsDir
-    else Exec.Exec "msbuild" args wsDir
+    if Env.IsMono () then checkedExec "xbuild" args wsDir
+    else checkedExec "msbuild" args wsDir
 
 let Build (name : ViewId) (config : string) (forceRebuild : bool) =
     let vwDir = Env.GetFolder Env.View 
