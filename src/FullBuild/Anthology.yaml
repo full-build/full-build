@@ -2,6 +2,8 @@
     artifacts: C:\Binaries
     nugets:
       - nuget: https://www.nuget.org/api/v2/
+    test: nunit
+    build: msbuild
     repositories:
         - repo: id1
           type: git
@@ -11,8 +13,6 @@
           type: copy
           projects:
               - project: fullbuild
-    tests:
-        - type: NUnit
     projects:
         - guid: f2a71f9b-5d33-465a-a702-920d77279786
           file: src/Project.csproj

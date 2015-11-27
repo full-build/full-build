@@ -44,13 +44,6 @@ with
      static member from s = fromString<OutputType> s
 
 
-type TestRunner =
-    | NUnit
-with
-     member this.toString = toString this
-     static member from s = fromString<TestRunner> s
-
-
 
 type AssemblyId = private AssemblyId of string
 with
@@ -170,6 +163,19 @@ with
      member this.toString = toString this
      static member from s = fromString<PublisherType> s
 
+type TestRunnerType =
+    | NUnit
+with
+     member this.toString = toString this
+     static member from s = fromString<TestRunnerType> s
+
+type BuilderType =
+    | MSBuild
+with
+     member this.toString = toString this
+     static member from s = fromString<BuilderType> s
+
+
 type Application = 
     { Name : ApplicationId
       Publisher : PublisherType
@@ -182,7 +188,8 @@ type Anthology =
       Repositories : Repository set
       Projects : Project set 
       Applications : Application set 
-      TestRunners : TestRunner set }
+      Tester : TestRunnerType 
+      Builder : BuilderType }
 
 type Baseline = 
     { Bookmarks : Bookmark set  }
