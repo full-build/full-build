@@ -1,4 +1,3 @@
 source https://www.nuget.org/api/v2/
 nuget fsunit
 nuget FSharp.Configuration ~> 0.5.7
-nuget Argu ~> 1.1.2

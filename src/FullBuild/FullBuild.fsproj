@@ -125,6 +125,5 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
-  <Import Project="$(SolutionDir)/.full-build/packages/Argu/package.targets" Condition="'$(FullBuild_Argu_Pkg)' == ''" />
   <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Configuration/package.targets" Condition="'$(FullBuild_FSharp_Configuration_Pkg)' == ''" />
 </Project>
