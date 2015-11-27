@@ -155,12 +155,12 @@ let Push () =
             let appTargetDir = tmpVersionDir |> GetSubDirectory Env.MSBUILD_APP_OUTPUT
             let appDir = Env.GetFolder Env.AppOutput
             IoHelpers.CopyFolder appDir appTargetDir true
-            printfn "%s" hash
 
             // publish
             Try (fun () -> Vcs.VcsPush wsDir mainRepo)
 
             tmpVersionDir.MoveTo(versionDir.FullName)
+            printfn "[version] %s" hash
         with
             _ -> versionDir.Refresh ()
                  if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
