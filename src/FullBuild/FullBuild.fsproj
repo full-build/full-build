@@ -24,8 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile></DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>push</StartArguments>
     <StartWorkingDirectory>C:\src\full-build</StartWorkingDirectory>
@@ -89,6 +88,7 @@
     <Compile Include="PaketInterface.fs" />
     <Compile Include="ProjectParsing.fs" />
     <Compile Include="Vcs.fs" />
+    <Compile Include="CommandLine.fs" />
     <Compile Include="CommandLineToken.fs" />
     <Compile Include="CommandLineParsing.fs" />
     <Compile Include="Configuration.fs" />
@@ -125,5 +125,6 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
+  <Import Project="$(SolutionDir)/.full-build/packages/Argu/package.targets" Condition="'$(FullBuild_Argu_Pkg)' == ''" />
   <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Configuration/package.targets" Condition="'$(FullBuild_FSharp_Configuration_Pkg)' == ''" />
 </Project>
