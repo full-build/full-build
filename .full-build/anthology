@@ -15,7 +15,7 @@ anthology:
       projects:
         - project: fullbuild
   tests:
-    - name: nunit
+    - type: nunit
   projects:
     - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
       file: src/FullBuild.Tests/FullBuild.Tests.fsproj

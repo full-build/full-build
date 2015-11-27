@@ -12,7 +12,7 @@
           projects:
               - project: fullbuild
     tests:
-        - name: NUnit
+        - type: NUnit
     projects:
         - guid: f2a71f9b-5d33-465a-a702-920d77279786
           file: src/Project.csproj

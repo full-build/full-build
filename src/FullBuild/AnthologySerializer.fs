@@ -67,7 +67,7 @@ let Serialize (antho : Anthology) =
     config.anthology.tests.Clear ()
     for testRunner in antho.TestRunners do
         let crunner = AnthologyConfig.anthology_Type.tests_Item_Type ()
-        crunner.name <- testRunner.toString
+        crunner.``type`` <- testRunner.toString
         config.anthology.tests.Add (crunner)
 
     config.ToString()
@@ -134,7 +134,7 @@ let Deserialize (content) =
     let rec convertToTestRunners (items : AnthologyConfig.anthology_Type.tests_Item_Type list) =
         match items with
         | [] -> Set.empty
-        | x :: tail -> let runner = TestRunner.from x.name
+        | x :: tail -> let runner = TestRunner.from x.``type``
                        convertToTestRunners tail |> Set.add runner
 
     let config = new AnthologyConfig()
