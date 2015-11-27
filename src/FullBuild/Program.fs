@@ -24,6 +24,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 module Main
 
+open CommandLine
 open CommandLineParsing
 
 let tryMain argv = 
