@@ -64,25 +64,16 @@ type Token =
     | Exec
     | Test
 
-    | AddView
-    | DropView
-    | ListView
-    | DescribeView
+    | Add
+    | Drop
+    | List
+    | Describe
 
-    | AddRepo
-    | DropRepo
-    | ListRepo
-
-    | AddPackage
-    | ListPackage
-
-    | AddNuGet
-    | DropNuGet
-    | ListNuGet
-
-    | AddApp
-    | DropApp
-    | ListApp
+    | View
+    | Repo
+    | Package
+    | NuGet
+    | App
 
     | Clean
     | UpdateGuids
@@ -116,24 +107,16 @@ let (|Token|) (token : string) =
     | "clean" -> Clean
     | "test" -> Test
 
-    | "add-view" -> AddView
-    | "drop-view" -> DropView
-    | "list-view" -> ListView
-    | "describe-view" -> DescribeView
+    | "add" -> Add
+    | "drop" -> Drop
+    | "list" -> List
+    | "describe" -> Describe
 
-    | "add-repo" -> AddRepo
-    | "drop-repo" -> DropRepo
-    | "list-repo" -> ListRepo
-
-    | "add-nuget" -> AddNuGet
-    | "drop-nuget" -> DropNuGet
-    | "list-nuget" -> ListNuGet
-
-    | "add-app" -> AddApp
-    | "drop-app" -> DropApp
-    | "list-app" -> ListApp
-
-    | "list-package" -> ListPackage
+    | "view" -> View
+    | "repo" -> Repo
+    | "package" -> Package
+    | "nuget" -> NuGet
+    | "app" -> App
 
     | "update-guids" -> UpdateGuids
     | "migrate" -> Migrate
