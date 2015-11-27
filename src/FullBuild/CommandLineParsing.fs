@@ -93,10 +93,13 @@ let commandClone (args : string list) =
     | filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                  CloneRepositories { Filters = repoFilters }
 
-let commandGraph (args : string list) =
+
+
+
+let rec commandGraph (args : string list) (all : bool) =
     match args with
-    | TokenOption TokenOption.All :: [MatchViewId name] -> Command.GraphView { Name = name ; All = true}
-    | [MatchViewId name] -> Command.GraphView { Name = name ; All = false }
+    | TokenOption TokenOption.All :: tail -> commandGraph tail true
+    | [MatchViewId name] -> Command.GraphView { Name = name ; All = all }
     | _ -> Command.Error
 
 let commandPublish (args : string list) =
@@ -104,10 +107,12 @@ let commandPublish (args : string list) =
     | [] -> Command.Error
     | filters -> PublishApplications {Filters = filters}
 
-let commandBuild (args : string list) (forceBuild : bool) =
+
+
+let rec commandBuild (args : string list) (config : string) (forceBuild : bool) =
     match args with
-    | TokenOption TokenOption.Debug :: [MatchViewId name] -> Command.BuildView { Name = name ; Config = "Debug"; ForceRebuild = forceBuild }
-    | [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = "Release"; ForceRebuild = forceBuild }
+    | TokenOption TokenOption.Debug :: tail -> commandBuild tail "Debug" forceBuild
+    | [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = config; ForceRebuild = forceBuild }
     | _ -> Command.Error
 
 let commandCheckout (args : string list) =
@@ -157,7 +162,7 @@ let commandDropRepo (args : string list) =
 
 let commandListRepo (args : string list) =
     match args with
-    | [MatchRepositoryId repo] -> ListRepositories
+    | [] -> ListRepositories
     | _ -> Command.Error
 
 let commandAddNuGet (args : string list) =
@@ -231,13 +236,13 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Init :: cmdArgs -> commandInit cmdArgs
     | Token Token.Exec :: cmdArgs -> commandExec cmdArgs
     | Token Token.Test :: cmdArgs -> commandTest cmdArgs
-    | Token Token.Index :: cmdArgs -> commandTest cmdArgs
+    | Token Token.Index :: cmdArgs -> commandIndex cmdArgs
     | Token Token.Convert :: cmdArgs -> commandConvert cmdArgs
     | Token Token.Clone :: cmdArgs -> commandClone cmdArgs
-    | Token Token.Graph :: cmdArgs -> commandGraph cmdArgs
+    | Token Token.Graph :: cmdArgs -> commandGraph cmdArgs false
     | Token Token.Publish :: cmdArgs -> commandPublish cmdArgs
-    | Token Token.Build :: cmdArgs -> commandBuild cmdArgs false
-    | Token Token.Rebuild :: cmdArgs -> commandBuild cmdArgs true
+    | Token Token.Build :: cmdArgs -> commandBuild cmdArgs "Release" false
+    | Token Token.Rebuild :: cmdArgs -> commandBuild cmdArgs "Release" true
     | Token Token.Checkout :: cmdArgs -> commandCheckout cmdArgs
     | Token Token.Push :: cmdArgs -> commandPush cmdArgs
     | Token Token.Pull :: cmdArgs -> commandPull cmdArgs
