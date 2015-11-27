@@ -28,13 +28,13 @@ let runnerNUnit (matches : string seq) (excludes : string list) =
     let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs 
     checkedExec "nunit3-console" args wsDir
 
-let testAssembliesWithProvidedRunners (runnerType : TestRunner) files nunitRunner =
+let testAssembliesWithProvidedRunners (runnerType : TestRunnerType) files nunitRunner =
     let runner = match runnerType with
                  | NUnit -> nunitRunner
     runner files
 
 
-let TestAssembliesWithRunners (runnerType : TestRunner) files =
+let TestAssembliesWithRunners (runnerType : TestRunnerType) files =
     testAssembliesWithProvidedRunners runnerType files runnerNUnit
 
 
@@ -51,5 +51,4 @@ let TestAssemblies (filters : string list) =
                           |> Seq.map (fun x -> x.FullName)
 
     let anthology = Configuration.LoadAnthology ()
-    for testRunner in anthology.TestRunners do
-        TestAssembliesWithRunners testRunner matches ["Integration"]
+    TestAssembliesWithRunners anthology.Tester matches ["Integration"]

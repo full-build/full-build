@@ -14,8 +14,8 @@ anthology:
       type: copy
       projects:
         - project: fullbuild
-  tests:
-    - type: nunit
+  test: nunit
+  build: msbuild
   projects:
     - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
       file: src/FullBuild.Tests/FullBuild.Tests.fsproj

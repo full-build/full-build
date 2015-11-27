@@ -159,13 +159,25 @@ let Create (viewName : ViewId) (filters : string list) =
 
 // ---------------------------------------------------------------------------------------
 
-let ExternalBuild (config : string) (target : string) (viewFile : FileInfo) =
+let builderMSBuild (config : string) (target : string) (viewFile : FileInfo) =
     let wsDir = Env.GetFolder Env.Workspace
     //let args = sprintf "/nologo /p:Configuration=%s /v:m %A" config viewFile.Name
     let args = sprintf "/nologo /t:%s /p:Configuration=%s %A" target config viewFile.Name
 
     if Env.IsMono () then checkedExec "xbuild" args wsDir
     else checkedExec "msbuild" args wsDir
+
+
+let buildWithProvidedBuilder (builderType : BuilderType) config target viewFile msbuildBuilder =
+    let builder = match builderType with
+                  | BuilderType.MSBuild -> msbuildBuilder
+
+    builder config target viewFile
+
+
+let buildWithBuilder (builder : BuilderType) config target viewFile =
+    buildWithProvidedBuilder builder config target viewFile builderMSBuild
+
 
 let Build (name : ViewId) (config : string) (forceRebuild : bool) =
     let vwDir = Env.GetFolder Env.View 
@@ -184,4 +196,6 @@ let Build (name : ViewId) (config : string) (forceRebuild : bool) =
         let binDir = wsDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
         if binDir.Exists then binDir.Delete (true)
 
-    viewFile |> ExternalBuild config target
+    let antho = Configuration.LoadAnthology ()
+    buildWithBuilder antho.Builder config target viewFile
+

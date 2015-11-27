@@ -45,7 +45,8 @@ let CheckEqualityWithPermutation () =
                        PackageReferences = Set.empty
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set
         Applications = Set.empty 
-        TestRunners = Set.empty }
+        Tester = TestRunnerType.NUnit
+        Builder = BuilderType.MSBuild }
 
     let antho2 = {
         Artifacts = @"c:\toto"
@@ -64,6 +65,7 @@ let CheckEqualityWithPermutation () =
                        PackageReferences = Set.empty
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set 
         Applications = Set.empty 
-        TestRunners = Set.empty }
+        Tester = TestRunnerType.NUnit
+        Builder = BuilderType.MSBuild }
         
     antho1 |> should equal antho2
