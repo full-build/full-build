@@ -27,7 +27,8 @@ let CheckSaveLoadAnthology () =
         Applications = [ { Name = ApplicationId.from "toto"
                            Publisher = PublisherType.Copy
                            Projects = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set } ] |> Set 
-        TestRunners = Set.empty }
+        Tester = TestRunnerType.NUnit
+        Builder = BuilderType.MSBuild }
 
     let res = AnthologySerializer.Serialize antho1
     //printfn "%s" res

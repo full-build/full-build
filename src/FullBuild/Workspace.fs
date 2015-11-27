@@ -72,7 +72,8 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
                   Repositories = Set.empty
                   Projects = Set.empty 
                   Applications = Set.empty 
-                  TestRunners = Set.empty }
+                  Tester = TestRunnerType.NUnit 
+                  Builder = BuilderType.MSBuild }
     let confDir = wsDir |> GetSubDirectory Env.MASTER_REPO
     let anthoFile = confDir |> GetFile Env.ANTHOLOGY_FILENAME
     AnthologySerializer.Save anthoFile antho
