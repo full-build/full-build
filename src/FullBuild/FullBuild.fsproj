@@ -75,6 +75,10 @@
     <MSBuild Projects="$(ProjectPath)" Targets="ResolveReferences;_CopyWebApplication" Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
   </Target>
   <ItemGroup>
+    <Content Include="..\..\LICENSE.txt">
+      <Link>LICENSE.txt</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Collections.fs" />
     <Compile Include="StringHelpers.fs" />
