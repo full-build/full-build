@@ -39,9 +39,10 @@ let TestAssembliesWithRunners (runnerType : TestRunnerType) files =
 
 
 let TestAssemblies (filters : string list) =
+    let anthology = Configuration.LoadAnthology ()
     let binDir = GetFolder Env.BinOutput
-    let dirs = binDir.GetDirectories()
-    let prjNames = dirs |> Seq.map (fun x -> (x.Name, x))
+    let prjNames = anthology.Projects |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, binDir |> IoHelpers.GetSubDirectory x.Output.toString))
+
     let matchProjects filter = prjNames |> Seq.filter (fun x -> PatternMatching.Match (fst x) filter)
 
     let matches = filters |> Seq.map matchProjects
@@ -50,5 +51,4 @@ let TestAssemblies (filters : string list) =
                           |> Seq.collect id
                           |> Seq.map (fun x -> x.FullName)
 
-    let anthology = Configuration.LoadAnthology ()
     TestAssembliesWithRunners anthology.Tester matches ["Integration"]
