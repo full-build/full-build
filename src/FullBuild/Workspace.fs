@@ -128,7 +128,8 @@ let Try action =
 let Push () = 
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
-    let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
+    let allRepos = antho.Repositories |> Set.add antho.MasterRepository
+    let clonedRepos = allRepos |> ClonedRepositories wsDir
     let bookmarks = CollectRepoHash wsDir clonedRepos
     let baseline = { Bookmarks = bookmarks }
     Configuration.SaveBaseline baseline
@@ -170,11 +171,22 @@ let Push () =
 
                  reraise ()
 
+
+let updateMasterBinaries () =
+    let antho = Configuration.LoadAnthology ()
+    let baseline = Configuration.LoadBaseline ()
+    let hash = baseline.Bookmarks |> Seq.find (fun x -> x.Repository = antho.MasterRepository.Name)
+    let binDir = Env.GetFolder Env.BinOutput
+    let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory (hash.Version.toString)
+    let binSourceDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
+    IoHelpers.CopyFolder binSourceDir binDir false
+
+
 let Checkout (version : BookmarkVersion) =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
     let mainRepo = antho.MasterRepository
-    Vcs.VcsCheckout wsDir mainRepo version
+    Vcs.VcsCheckout wsDir mainRepo (Some version)
 
     // checkout repositories
     let antho = Configuration.LoadAnthology ()
@@ -183,18 +195,10 @@ let Checkout (version : BookmarkVersion) =
     for repo in clonedRepos do
         let repoVersion = baseline.Bookmarks |> Seq.tryFind (fun x -> x.Repository = repo.Name)
         match repoVersion with
-        | Some x -> Vcs.VcsCheckout wsDir repo x.Version
-        | None -> Vcs.VcsCheckout wsDir repo Master
+        | Some x -> Vcs.VcsCheckout wsDir repo (Some x.Version)
+        | None -> Vcs.VcsCheckout wsDir repo None
 
-    // copy binaries from version
-    let hash = match version with
-               | BookmarkVersion x -> x
-               | Master -> Vcs.VcsTip wsDir mainRepo
-
-    let binDir = Env.GetFolder Env.BinOutput
-    let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash 
-    let binSourceDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
-    IoHelpers.CopyFolder binSourceDir binDir false
+    updateMasterBinaries ()
 
 let Pull () =
     let antho = Configuration.LoadAnthology ()
