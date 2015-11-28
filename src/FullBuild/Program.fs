@@ -41,7 +41,7 @@ let tryMain argv =
     | Exec cmd -> Workspace.Exec cmd.Command
     | CleanWorkspace -> Workspace.Clean ()
     | UpdateGuids name -> Workspace.UpdateGuid name
-    | TestAssemblies filters -> Test.TestAssemblies filters.Filters
+    | TestAssemblies testInfo -> Test.TestAssemblies testInfo.Filters testInfo.Excludes
 
     // repository
     | AddRepository (name, url) -> Repo.Add name url
