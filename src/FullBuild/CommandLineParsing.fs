@@ -1,27 +1,17 @@
-﻿// Copyright (c) 2014-2015, Pierre Chalamet
-// All rights reserved.
-// 
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of Pierre Chalamet nor the
-//       names of its contributors may be used to endorse or promote products
-//       derived from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL PIERRE CHALAMET BE LIABLE FOR ANY
-// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+﻿//   Copyright 2014-2015 Pierre Chalamet
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+
 module CommandLineParsing
 
 open Anthology
@@ -84,18 +74,19 @@ let commandConvert (args : string list) =
     | [] -> Command.ConvertWorkspace
     | _ -> Command.Error
 
-let commandClone (args : string list) =
+let rec commandClone (shallow : bool) (args : string list) =
     match args with
+    | TokenOption TokenOption.NoShallow :: tail -> commandClone false tail
     | [] -> Command.Error
     | filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                 CloneRepositories { Filters = repoFilters }
+                 CloneRepositories { Filters = repoFilters; Shallow = shallow }
 
 
 
 
-let rec commandGraph (args : string list) (all : bool) =
+let rec commandGraph (all : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.All :: tail -> commandGraph tail true
+    | TokenOption TokenOption.All :: tail -> commandGraph true tail
     | [MatchViewId name] -> Command.GraphView { Name = name ; All = all }
     | _ -> Command.Error
 
@@ -106,9 +97,9 @@ let commandPublish (args : string list) =
 
 
 
-let rec commandBuild (args : string list) (config : string) (forceBuild : bool) =
+let rec commandBuild (config : string) (forceBuild : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Debug :: tail -> commandBuild tail "Debug" forceBuild
+    | TokenOption TokenOption.Debug :: tail -> commandBuild "Debug" forceBuild tail
     | [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = config; ForceRebuild = forceBuild }
     | _ -> Command.Error
 
@@ -151,9 +142,18 @@ let commandOutdated (args : string list) =
     | [] -> Command.OutdatedPackages
     | _ -> Command.Error
 
-let commandAddRepo (args : string list) =
+let rec commandAddRepo (repoType : VcsType option) (args : string list) =
+    let checkAndSetRepoType newValue =
+        if repoType <> None then failwith "Too many parameters : --git, --gerrit or --hg"
+        commandAddRepo (Some newValue)
+
     match args with
-    | name :: [url] -> Command.AddRepository (RepositoryId.from name, RepositoryUrl.from url)
+    | TokenOption TokenOption.Git :: tail -> checkAndSetRepoType VcsType.Git tail 
+    | TokenOption TokenOption.Gerrit :: tail -> checkAndSetRepoType VcsType.Gerrit tail 
+    | TokenOption TokenOption.Hg :: tail -> checkAndSetRepoType VcsType.Hg tail 
+    | name :: [url] -> match repoType with
+                       | None -> failwith "Missing mandatory parameter --git, --gerrit or --hg"
+                       | Some x -> Command.AddRepository { Repo = RepositoryId.from name; Url = RepositoryUrl.from url; Type = x }
     | _ -> Command.Error
 
 let commandDropRepo (args : string list) =
@@ -236,14 +236,14 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Setup :: cmdArgs -> commandSetup cmdArgs
     | Token Token.Init :: cmdArgs -> commandInit cmdArgs
     | Token Token.Exec :: cmdArgs -> commandExec cmdArgs
-    | Token Token.Test :: cmdArgs -> commandTest cmdArgs List.empty
+    | Token Token.Test :: cmdArgs -> commandTest [] cmdArgs
     | Token Token.Index :: cmdArgs -> commandIndex cmdArgs
     | Token Token.Convert :: cmdArgs -> commandConvert cmdArgs
-    | Token Token.Clone :: cmdArgs -> commandClone cmdArgs
-    | Token Token.Graph :: cmdArgs -> commandGraph cmdArgs false
+    | Token Token.Clone :: cmdArgs -> commandClone true cmdArgs
+    | Token Token.Graph :: cmdArgs -> commandGraph false cmdArgs
     | Token Token.Publish :: cmdArgs -> commandPublish cmdArgs
-    | Token Token.Build :: cmdArgs -> commandBuild cmdArgs "Release" false
-    | Token Token.Rebuild :: cmdArgs -> commandBuild cmdArgs "Release" true
+    | Token Token.Build :: cmdArgs -> commandBuild "Release" false cmdArgs 
+    | Token Token.Rebuild :: cmdArgs -> commandBuild "Release" true cmdArgs
     | Token Token.Checkout :: cmdArgs -> commandCheckout cmdArgs
     | Token Token.Push :: cmdArgs -> commandPush cmdArgs
     | Token Token.Pull :: cmdArgs -> commandPull cmdArgs false false
@@ -254,7 +254,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Outdated :: Token Token.Package :: cmdArgs -> commandOutdated cmdArgs
     | Token Token.List :: Token Token.Package :: cmdArgs -> commandListPackage cmdArgs
 
-    | Token Token.Add :: Token Token.Repo :: cmdArgs -> commandAddRepo cmdArgs
+    | Token Token.Add :: Token Token.Repo :: cmdArgs -> commandAddRepo None cmdArgs
     | Token Token.Drop :: Token Token.Repo :: cmdArgs -> commandDropRepo cmdArgs
     | Token Token.List :: Token Token.Repo :: cmdArgs -> commandListRepo cmdArgs
 
@@ -286,11 +286,11 @@ let UsageContent() =
         "  version : display full-build version"
         "  setup <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
-        "  clone <selection-wildcards ...> : clone repositories using provided wildcards"
-        "  checkout <version|master> : checkout workspace to version"
+        "  clone [--noshallow] <repo-wildcard>+ : clone repositories using provided wildcards"
+        "  checkout <version> : checkout workspace to version"
         "  build [--debug] <view-name> : build view"
         "  rebuild [--debug] <view-name> : clean & build view"
-        "  test [--exclude <category>] <test-wildcards ...> : test assemblies"
+        "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
         "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
         "  index : index workspace"
@@ -306,21 +306,22 @@ let UsageContent() =
         "  outdated package : display outdated packages"
         "  list package : list packages"
         ""
-        "  add repo <repo-name> <repo-uri> : declare a new repository (git or hg supported)"
+        "  add repo <--git | --gerrit | --hg> <repo-name> <repo-uri> : declare a new repository"
         "  drop repo <repo-name> : drop repository"
         "  list repo : list repositories"
         ""
         "  add nuget <nuget-uri> : add nuget uri"
         "  list nuget : list NuGet feeds"
         ""
-        "  add view <view-name> <view-wildcards ...> : add repositories to view"
+        "  add view <view-name> <view-wildcard>+ : add repositories to view"
         "  drop view <view-name> : drop view"
         "  list view : list views"
         "  describe view <name> : describe view"
         ""
-        "  add app <name> <copy> <project-id-list...> : create new application from given project ids"
+        "  add app <--copy | --azure> <app-name> <project-id>+ : create new application from given project ids"
         "  drop app <app-name> : drop application"
-        "  list app : list applications" ]
+        "  list app : list applications" 
+        "  describe app <app-name>" ]
 
     content
 
