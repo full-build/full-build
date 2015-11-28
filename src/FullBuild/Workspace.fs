@@ -226,6 +226,11 @@ let Exec cmd =
             let args = sprintf @"/c ""%s""" cmd
 
             try
+                let oldColor = Console.ForegroundColor
+                Console.ForegroundColor <- ConsoleColor.Cyan
+                printfn "==> %s" repo.Name.toString
+                Console.ForegroundColor <- oldColor
+    
                 if Env.IsMono () then checkedExecWithVars "sh" ("-c " + args) repoDir vars
                 else checkedExecWithVars "cmd" args repoDir vars
             with e -> printfn "*** %s" e.Message
