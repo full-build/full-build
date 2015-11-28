@@ -14,12 +14,11 @@ let SerializeBaseline (baseline : Baseline) =
     let config = new BaselineConfig()
     config.baseline.Clear()
     for bookmark in baseline.Bookmarks do
-        match bookmark.Version with
-        | Master -> ()
-        | BookmarkVersion version -> let item = new BaselineConfig.baseline_Item_Type ()
-                                     item.repo <- bookmark.Repository.toString
-                                     item.version <- version
-                                     config.baseline.Add item
+        let item = new BaselineConfig.baseline_Item_Type ()
+        item.repo <- bookmark.Repository.toString
+        item.version <- bookmark.Version.toString
+        config.baseline.Add item
+
     config.ToString()
 
 
