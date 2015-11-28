@@ -33,9 +33,7 @@ open CommandLine
 
 
 let (|MatchBookmarkVersion|) version =
-    match version with
-    | "master" -> Master
-    | x -> BookmarkVersion x
+    BookmarkVersion version
 
 let (|MatchViewId|) view =
     ViewId view
