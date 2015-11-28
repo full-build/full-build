@@ -93,7 +93,6 @@
     <Compile Include="CommandLineToken.fs" />
     <Compile Include="CommandLineParsing.fs" />
     <Compile Include="Configuration.fs" />
-    <Compile Include="Selection.fs" />
     <Compile Include="Repo.fs" />
     <Compile Include="Solution.fs" />
     <Compile Include="Dgml.fs" />
