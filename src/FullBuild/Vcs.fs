@@ -163,6 +163,7 @@ let VcsCloneRepo (wsDir : DirectoryInfo) (repo : Repository) =
 let VcsTip (wsDir : DirectoryInfo) (repo : Repository) = 
     ApplyVcs wsDir repo gitTip hgTip
 
+// version : None ==> master
 let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion option) = 
     (ApplyVcs wsDir repo gitCheckout hgCheckout) version
 
