@@ -172,23 +172,21 @@ let Push () =
                  reraise ()
 
 
-let updateMasterBinaries () =
-    let antho = Configuration.LoadAnthology ()
-    let baseline = Configuration.LoadBaseline ()
-    let hash = baseline.Bookmarks |> Seq.find (fun x -> x.Repository = antho.MasterRepository.Name)
+let updateMasterBinaries hash artifactDir =
     let binDir = Env.GetFolder Env.BinOutput
-    let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory (hash.Version.toString)
+    let versionDir = artifactDir |> GetSubDirectory (hash.Version.toString)
     let binSourceDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
     IoHelpers.CopyFolder binSourceDir binDir false
 
 
 let Checkout (version : BookmarkVersion) =
+    // checkout repositories
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
     let mainRepo = antho.MasterRepository
     Vcs.VcsCheckout wsDir mainRepo (Some version)
 
-    // checkout repositories
+    // checkout each repository now
     let antho = Configuration.LoadAnthology ()
     let baseline = Configuration.LoadBaseline ()
     let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
@@ -198,7 +196,10 @@ let Checkout (version : BookmarkVersion) =
         | Some x -> Vcs.VcsCheckout wsDir repo (Some x.Version)
         | None -> Vcs.VcsCheckout wsDir repo None
 
-    updateMasterBinaries ()
+    // update binaries with observable baseline
+    let hash = baseline.Bookmarks |> Seq.find (fun x -> x.Repository = antho.MasterRepository.Name)
+    let artifactDir = antho.Artifacts |> DirectoryInfo
+    updateMasterBinaries hash artifactDir
 
 let Pull () =
     let antho = Configuration.LoadAnthology ()
