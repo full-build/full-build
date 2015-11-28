@@ -27,7 +27,6 @@ module CommandLineParsing
 open Anthology
 open CommandLineToken
 open Collections
-open StringHelpers
 open CommandLine
 
 
@@ -123,9 +122,13 @@ let commandPush (args : string list) =
     | [] -> Command.PushWorkspace
     | _ -> Command.Error
 
-let commandPull (args : string list) =
+let rec commandPull (args : string list) (src : bool) (bin : bool) =
     match args with
-    | [] -> Command.PullWorkspace
+    | TokenOption TokenOption.All :: tail -> commandPull tail true true
+    | TokenOption TokenOption.Src :: tail -> commandPull tail true bin
+    | TokenOption TokenOption.Bin :: tail -> commandPull tail src true
+    | [] -> if not (src || bin) then failwith "Missing mandatory parameter: --all, --src or --bin"
+            Command.PullWorkspace
     | _ -> Command.Error
 
 let commandClean (args : string list) =
@@ -243,7 +246,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Rebuild :: cmdArgs -> commandBuild cmdArgs "Release" true
     | Token Token.Checkout :: cmdArgs -> commandCheckout cmdArgs
     | Token Token.Push :: cmdArgs -> commandPush cmdArgs
-    | Token Token.Pull :: cmdArgs -> commandPull cmdArgs
+    | Token Token.Pull :: cmdArgs -> commandPull cmdArgs false false
     | Token Token.Clean :: cmdArgs -> commandClean cmdArgs
 
     | Token Token.Install :: Token Token.Package :: cmdArgs -> commandInstall cmdArgs
@@ -291,7 +294,7 @@ let UsageContent() =
         "  checkout <version|master> : checkout workspace to version"
         "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
         "  publish <app> : publish application"
-        "  pull : update to latest version"
+        "  pull <--all | --bin | --src> : update to latest version"
         "  setup <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
         "  index : index workspace"

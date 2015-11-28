@@ -28,14 +28,18 @@ module CommandLineToken
 type TokenOption =
     | Debug
     | All
+    | Bin
+    | Src
     | IgnoreError
     | NoHook
     | Unknown
 
 let (|TokenOption|) (token : string) =
     match token with
-    | "--debug" -> Debug
-    | "--all" -> All
+    | "--debug" -> TokenOption.Debug
+    | "--all" -> TokenOption.All
+    | "--bin" -> TokenOption.Bin
+    | "--src" -> TokenOption.Src
     | "--no-hook" -> NoHook
     | "--ignore-error" -> IgnoreError
     | _ -> Unknown
