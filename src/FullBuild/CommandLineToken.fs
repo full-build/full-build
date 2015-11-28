@@ -30,8 +30,7 @@ type TokenOption =
     | All
     | Bin
     | Src
-    | IgnoreError
-    | NoHook
+    | Exclude
     | Unknown
 
 let (|TokenOption|) (token : string) =
@@ -40,8 +39,7 @@ let (|TokenOption|) (token : string) =
     | "--all" -> TokenOption.All
     | "--bin" -> TokenOption.Bin
     | "--src" -> TokenOption.Src
-    | "--no-hook" -> NoHook
-    | "--ignore-error" -> IgnoreError
+    | "--exclude" -> TokenOption.Exclude
     | _ -> Unknown
 
 
