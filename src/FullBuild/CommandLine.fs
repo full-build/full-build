@@ -20,7 +20,8 @@ type CloneRepositories =
     { Filters : RepositoryId set }
 
 type TestAssemblies = 
-    { Filters : string list }
+    { Filters : string list 
+      Excludes : string list }
 
 type NuGetUrl = 
     { Url : string }

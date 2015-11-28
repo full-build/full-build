@@ -38,7 +38,7 @@ let TestAssembliesWithRunners (runnerType : TestRunnerType) files =
     testAssembliesWithProvidedRunners runnerType files runnerNUnit
 
 
-let TestAssemblies (filters : string list) =
+let TestAssemblies (filters : string list) (excludes : string list) =
     let anthology = Configuration.LoadAnthology ()
     let binDir = GetFolder Env.BinOutput
     let prjNames = anthology.Projects |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, binDir |> IoHelpers.GetSubDirectory x.Output.toString))
@@ -51,4 +51,4 @@ let TestAssemblies (filters : string list) =
                           |> Seq.collect id
                           |> Seq.map (fun x -> x.FullName)
 
-    TestAssembliesWithRunners anthology.Tester matches ["Integration"]
+    TestAssembliesWithRunners anthology.Tester matches excludes

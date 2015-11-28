@@ -68,10 +68,10 @@ let commandExec (args : string list) =
     | [cmd] -> Command.Exec { Command = cmd }
     | _ -> Command.Error
 
-let commandTest (args : string list) =
+let rec commandTest (args : string list) (excludes : string list) =
     match args with
-    | [] -> Command.Error
-    | filters -> Command.TestAssemblies { Filters = filters }
+    | TokenOption TokenOption.Exclude :: category :: tail -> commandTest tail (category :: excludes)
+    | filters -> Command.TestAssemblies { Filters = filters; Excludes = excludes }
 
 
 let commandIndex (args : string list) =
@@ -236,7 +236,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Setup :: cmdArgs -> commandSetup cmdArgs
     | Token Token.Init :: cmdArgs -> commandInit cmdArgs
     | Token Token.Exec :: cmdArgs -> commandExec cmdArgs
-    | Token Token.Test :: cmdArgs -> commandTest cmdArgs
+    | Token Token.Test :: cmdArgs -> commandTest cmdArgs List.empty
     | Token Token.Index :: cmdArgs -> commandIndex cmdArgs
     | Token Token.Convert :: cmdArgs -> commandConvert cmdArgs
     | Token Token.Clone :: cmdArgs -> commandClone cmdArgs
@@ -281,52 +281,46 @@ let VersionContent() =
     fbVersion
 
 let UsageContent() =
-    let fbVersion = VersionContent()
-
     let content = [
         "  help : display this help"
         "  version : display full-build version"
-        "  clone <selection-wildcards ...> : clone repositories using provided wildcards"
-        "  build [--debug] <view-name> : build view"
-        "  rebuild [--debug] <view-name> : clean & build view"
-        "  test <test-wildcards ...> : test assemblies"
-        "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
-        "  checkout <version|master> : checkout workspace to version"
-        "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
-        "  publish <app> : publish application"
-        "  pull <--all | --bin | --src> : update to latest version"
         "  setup <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
+        "  clone <selection-wildcards ...> : clone repositories using provided wildcards"
+        "  checkout <version|master> : checkout workspace to version"
+        "  build [--debug] <view-name> : build view"
+        "  rebuild [--debug] <view-name> : clean & build view"
+        "  test [--exclude <category>] <test-wildcards ...> : test assemblies"
+        "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
+        "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
         "  index : index workspace"
         "  convert : convert projects in workspace"
+        "  pull <--all | --bin | --src> : update to latest version"
         "  push : push a baseline from current repositories version and display version"
-        // package
+        "  publish <app> : publish application"
+        "  clean : DANGER! reset and clean workspace (interactive command)"
+        "  update-guids : DANGER! change guids of all projects in given repository (interactive command)" 
+        ""
         "  install package : install packages declared in anthology"
         "  update package : update packages"
         "  outdated package : display outdated packages"
         "  list package : list packages"
-        // repo
+        ""
         "  add repo <repo-name> <repo-uri> : declare a new repository (git or hg supported)"
         "  drop repo <repo-name> : drop repository"
         "  list repo : list repositories"
-        // nuget
+        ""
         "  add nuget <nuget-uri> : add nuget uri"
         "  list nuget : list NuGet feeds"
-        // view
+        ""
         "  add view <view-name> <view-wildcards ...> : add repositories to view"
         "  drop view <view-name> : drop view"
         "  list view : list views"
         "  describe view <name> : describe view"
-        //app
+        ""
         "  add app <name> <copy> <project-id-list...> : create new application from given project ids"
         "  drop app <app-name> : drop application"
-        "  list app : list applications"
-        ""
-        "DANGER ZONE!"
-        "  clean : reset and clean workspace (interactive command)"
-        "  update-guids : change guids of all projects in given repository (interactive command)" 
-        ""
-        fbVersion ]
+        "  list app : list applications" ]
 
     content
 
