@@ -142,18 +142,9 @@ let commandOutdated (args : string list) =
     | [] -> Command.OutdatedPackages
     | _ -> Command.Error
 
-let rec commandAddRepo (repoType : VcsType option) (args : string list) =
-    let checkAndSetRepoType newValue =
-        if repoType <> None then failwith "Too many parameters : --git, --gerrit or --hg"
-        commandAddRepo (Some newValue)
-
+let commandAddRepo  (args : string list) =
     match args with
-    | TokenOption TokenOption.Git :: tail -> checkAndSetRepoType VcsType.Git tail 
-    | TokenOption TokenOption.Gerrit :: tail -> checkAndSetRepoType VcsType.Gerrit tail 
-    | TokenOption TokenOption.Hg :: tail -> checkAndSetRepoType VcsType.Hg tail 
-    | name :: [url] -> match repoType with
-                       | None -> failwith "Missing mandatory parameter --git, --gerrit or --hg"
-                       | Some x -> Command.AddRepository { Repo = RepositoryId.from name; Url = RepositoryUrl.from url; Type = x }
+    | name :: vcs :: [url] -> Command.AddRepository { Repo = RepositoryId.from name; Url = RepositoryUrl.from url; Type = VcsType.from vcs }
     | _ -> Command.Error
 
 let commandDropRepo (args : string list) =
@@ -254,7 +245,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Outdated :: Token Token.Package :: cmdArgs -> commandOutdated cmdArgs
     | Token Token.List :: Token Token.Package :: cmdArgs -> commandListPackage cmdArgs
 
-    | Token Token.Add :: Token Token.Repo :: cmdArgs -> commandAddRepo None cmdArgs
+    | Token Token.Add :: Token Token.Repo :: cmdArgs -> commandAddRepo cmdArgs
     | Token Token.Drop :: Token Token.Repo :: cmdArgs -> commandDropRepo cmdArgs
     | Token Token.List :: Token Token.Repo :: cmdArgs -> commandListRepo cmdArgs
 
@@ -306,7 +297,7 @@ let UsageContent() =
         "  outdated package : display outdated packages"
         "  list package : list packages"
         ""
-        "  add repo <--git | --gerrit | --hg> <repo-name> <repo-uri> : declare a new repository"
+        "  add repo <repo-name> <git | gerrit | hg> <repo-uri> : declare a new repository"
         "  drop repo <repo-name> : drop repository"
         "  list repo : list repositories"
         ""
@@ -318,7 +309,7 @@ let UsageContent() =
         "  list view : list views"
         "  describe view <name> : describe view"
         ""
-        "  add app <--copy | --azure> <app-name> <project-id>+ : create new application from given project ids"
+        "  add app <app-name> <copy | azure> <project-id>+ : create new application from given project ids"
         "  drop app <app-name> : drop application"
         "  list app : list applications" 
         "  describe app <app-name>" ]

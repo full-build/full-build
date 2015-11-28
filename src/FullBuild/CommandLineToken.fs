@@ -22,9 +22,6 @@ type TokenOption =
     | Src
     | Exclude
     | NoShallow
-    | Git
-    | Gerrit
-    | Hg
     | Unknown
 
 let (|TokenOption|) (token : string) =
@@ -35,9 +32,6 @@ let (|TokenOption|) (token : string) =
     | "--src" -> TokenOption.Src
     | "--exclude" -> TokenOption.Exclude
     | "--noshallow" -> TokenOption.NoShallow
-    | "--git" -> TokenOption.Git
-    | "--gerrit" -> TokenOption.Gerrit
-    | "--hg" -> TokenOption.Hg
     | _ -> Unknown
 
 
