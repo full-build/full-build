@@ -18,8 +18,8 @@ pushd cs-do
 %FULLBUILD% graph all || goto :ko
 %FULLBUILD% build all || goto :ko
 %FULLBUILD% drop view csc || goto :ko
-%FULLBUILD% outdated || goto :ko
-%FULLBUILD% update || goto :ko
+%FULLBUILD% outdated package || goto :ko
+%FULLBUILD% update package || goto :ko
 %FULLBUILD% push || goto :ko
 
 
