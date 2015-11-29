@@ -115,11 +115,9 @@ let commandPush (args : string list) =
 
 let rec commandPull (args : string list) (src : bool) (bin : bool) =
     match args with
-    | TokenOption TokenOption.All :: tail -> commandPull tail true true
-    | TokenOption TokenOption.Src :: tail -> commandPull tail true bin
-    | TokenOption TokenOption.Bin :: tail -> commandPull tail src true
-    | [] -> if not (src || bin) then failwith "Missing mandatory parameter: --all, --src or --bin"
-            Command.PullWorkspace
+    | TokenOption TokenOption.Src :: tail -> commandPull tail true false
+    | TokenOption TokenOption.Bin :: tail -> commandPull tail false true
+    | [] -> Command.PullWorkspace { Src = src ; Bin = bin }
     | _ -> Command.Error
 
 let commandClean (args : string list) =
@@ -237,7 +235,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Rebuild :: cmdArgs -> commandBuild "Release" true cmdArgs
     | Token Token.Checkout :: cmdArgs -> commandCheckout cmdArgs
     | Token Token.Push :: cmdArgs -> commandPush cmdArgs
-    | Token Token.Pull :: cmdArgs -> commandPull cmdArgs false false
+    | Token Token.Pull :: cmdArgs -> commandPull cmdArgs true true
     | Token Token.Clean :: cmdArgs -> commandClean cmdArgs
 
     | Token Token.Install :: Token Token.Package :: cmdArgs -> commandInstall cmdArgs
@@ -286,7 +284,7 @@ let UsageContent() =
         "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
         "  index : index workspace"
         "  convert : convert projects in workspace"
-        "  pull <--all | --bin | --src> : update to latest version"
+        "  pull [--src | --bin] : update to latest version"
         "  push : push a baseline from current repositories version and display version"
         "  publish <app> : publish application"
         "  clean : DANGER! reset and clean workspace (interactive command)"
