@@ -139,8 +139,7 @@ let private hgIgnore (repoDir : DirectoryInfo) =
     // FIXME
     ()
 
-
-let ApplyVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
+let chooseVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name.toString
     let f = match repo.Vcs with
             | VcsType.Git -> gitFun
@@ -148,33 +147,32 @@ let ApplyVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
             | VcsType.Hg -> hgFun
     f repoDir
 
-
 let VcsCloneRepo (wsDir : DirectoryInfo) (shallow : bool) (repo : Repository) =
     let gitCloneFunc =  gitClone (repo.Vcs = VcsType.Gerrit) shallow
     let hgCloneFunc = hgClone
-    (ApplyVcs wsDir repo gitCloneFunc hgCloneFunc) repo.Url.toString
+    (chooseVcs wsDir repo gitCloneFunc hgCloneFunc) repo.Url.toString
 
 let VcsTip (wsDir : DirectoryInfo) (repo : Repository) = 
-    ApplyVcs wsDir repo gitTip hgTip
+    chooseVcs wsDir repo gitTip hgTip
 
 // version : None ==> master
 let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion option) = 
-    (ApplyVcs wsDir repo gitCheckout hgCheckout) version
+    (chooseVcs wsDir repo gitCheckout hgCheckout) version
 
 let VcsIgnore (wsDir : DirectoryInfo) (repo : Repository) =
-    ApplyVcs wsDir repo gitIgnore hgIgnore
+    chooseVcs wsDir repo  gitIgnore hgIgnore
 
 let VcsPull (wsDir : DirectoryInfo) (repo : Repository) =
-    ApplyVcs wsDir repo gitPull hgPull
+    chooseVcs wsDir repo  gitPull hgPull
 
 let VcsCommit (wsDir : DirectoryInfo) (repo : Repository) (comment : string) =
-    (ApplyVcs wsDir repo gitCommit hgCommit) comment
+    (chooseVcs wsDir repo gitCommit hgCommit) comment
 
 let VcsPush (wsDir : DirectoryInfo) (repo : Repository) =
-    (ApplyVcs wsDir repo gitPush hgPush)
+    (chooseVcs wsDir repo gitPush hgPush)
 
 let VcsClean (wsDir : DirectoryInfo) (repo : Repository) =
-    (ApplyVcs wsDir repo gitClean hgClean)
+    (chooseVcs wsDir repo gitClean hgClean)
 
 let VcsDetermineType (url : RepositoryUrl) =
     if gitIs url then VcsType.Git
