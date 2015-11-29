@@ -15,7 +15,6 @@
 module CommandLine
 open Anthology
 open Collections
-open StringHelpers
 
 
 type SetupWorkspace = 
@@ -78,6 +77,12 @@ type AddRepository =
         Type : VcsType
     }
 
+type PullWorkspace =
+    {
+        Src : bool
+        Bin : bool
+    }
+
 type Command = 
     | Version
     | Usage
@@ -90,7 +95,7 @@ type Command =
     | ConvertWorkspace
     | PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
-    | PullWorkspace
+    | PullWorkspace of PullWorkspace
     | Exec of Exec
     | CleanWorkspace
     | UpdateGuids of RepositoryId

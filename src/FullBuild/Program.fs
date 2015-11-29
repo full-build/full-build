@@ -27,7 +27,7 @@ let tryMain argv =
     | ConvertWorkspace -> Workspace.Convert ()
     | PushWorkspace -> Workspace.Push ()
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
-    | PullWorkspace -> Workspace.Pull ()
+    | PullWorkspace pullInfo -> Workspace.Pull pullInfo.Src pullInfo.Bin
     | Exec cmd -> Workspace.Exec cmd.Command
     | CleanWorkspace -> Workspace.Clean ()
     | UpdateGuids name -> Workspace.UpdateGuid name

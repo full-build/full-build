@@ -171,6 +171,7 @@ let updateMasterBinaries hash artifactDir =
 
 let Checkout (version : BookmarkVersion) =
     // checkout repositories
+    DisplayHighlight ".full-build"
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
     let mainRepo = antho.MasterRepository
@@ -181,6 +182,7 @@ let Checkout (version : BookmarkVersion) =
     let baseline = Configuration.LoadBaseline ()
     let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
     for repo in clonedRepos do
+        DisplayHighlight repo.Name.toString
         let repoVersion = baseline.Bookmarks |> Seq.tryFind (fun x -> x.Repository = repo.Name)
         match repoVersion with
         | Some x -> Vcs.VcsCheckout wsDir repo (Some x.Version)
@@ -189,20 +191,34 @@ let Checkout (version : BookmarkVersion) =
     // update binaries with observable baseline
     let hash = baseline.Bookmarks |> Seq.find (fun x -> x.Repository = antho.MasterRepository.Name)
     let artifactDir = antho.Artifacts |> DirectoryInfo
+    DisplayHighlight (sprintf "bin %s" hash.Version.toString)
     updateMasterBinaries hash artifactDir
 
-let Pull () =
+let Pull (src : bool) (bin : bool) =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
-    let mainRepo = antho.MasterRepository
-    Vcs.VcsPull wsDir mainRepo
 
-    let antho = Configuration.LoadAnthology ()
-    let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
-    for repo in clonedRepos do
-        let repoDir = wsDir |> GetSubDirectory repo.Name.toString
-        if repoDir.Exists then
-            Vcs.VcsPull wsDir repo
+    if src then
+        DisplayHighlight ".full-build"
+        let mainRepo = antho.MasterRepository
+        Vcs.VcsPull wsDir mainRepo
+
+        let antho = Configuration.LoadAnthology ()
+        let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
+        for repo in clonedRepos do
+            DisplayHighlight repo.Name.toString
+
+            let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+            if repoDir.Exists then
+                Vcs.VcsPull wsDir repo
+
+    if bin then
+        let baseline = Configuration.LoadBaseline ()
+        let hash = baseline.Bookmarks |> Seq.find (fun x -> x.Repository = antho.MasterRepository.Name)
+        let artifactDir = antho.Artifacts |> DirectoryInfo
+        DisplayHighlight (sprintf "bin %s" hash.Version.toString)
+        updateMasterBinaries hash artifactDir
+
 
 let Exec cmd =
     let antho = Configuration.LoadAnthology()
@@ -216,10 +232,7 @@ let Exec cmd =
             let args = sprintf @"/c ""%s""" cmd
 
             try
-                let oldColor = Console.ForegroundColor
-                Console.ForegroundColor <- ConsoleColor.Cyan
-                printfn "==> %s" repo.Name.toString
-                Console.ForegroundColor <- oldColor
+                DisplayHighlight repo.Name.toString
     
                 if Env.IsMono () then checkedExecWithVars "sh" ("-c " + args) repoDir vars
                 else checkedExecWithVars "cmd" args repoDir vars
