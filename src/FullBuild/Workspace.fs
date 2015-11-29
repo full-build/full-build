@@ -38,16 +38,6 @@ let private checkedExecWithVars =
 
 
 
-let Init (path : string) (uri : RepositoryUrl) = 
-    let wsDir = DirectoryInfo(path)
-    wsDir.Create()
-    if IsWorkspaceFolder wsDir then 
-        printf "[WARNING] Workspace already exists - skipping"
-    else
-        let vcsType = Vcs.VcsDetermineType uri
-        let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType}
-        VcsCloneRepo wsDir true repo
-
 let Create (path : string) (uri : RepositoryUrl) (bin : string) = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
@@ -162,11 +152,20 @@ let Push () =
                  reraise ()
 
 
-let updateMasterBinaries hash artifactDir =
+let updateMasterBinaries () =
+    let antho = Configuration.LoadAnthology ()
+    let baseline = Configuration.LoadBaseline ()
     let binDir = Env.GetFolder Env.BinOutput
-    let versionDir = artifactDir |> GetSubDirectory (hash.Version.toString)
-    let binSourceDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
-    IoHelpers.CopyFolder binSourceDir binDir false
+    let artifactDir = antho.Artifacts |> DirectoryInfo
+
+    let hash = baseline.Bookmarks |> Seq.tryFind (fun x -> x.Repository = antho.MasterRepository.Name)
+    match hash with
+    | Some bookmark -> let versionDir = artifactDir |> GetSubDirectory (bookmark.Version.toString)
+                       let binSourceDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
+                       DisplayHighlight (sprintf "bin %s" bookmark.Version.toString)
+                       IoHelpers.CopyFolder binSourceDir binDir false
+    | None -> DisplayHighlight "[WARNING] No reference binaries found"
+
 
 
 let Checkout (version : BookmarkVersion) =
@@ -189,10 +188,7 @@ let Checkout (version : BookmarkVersion) =
         | None -> Vcs.VcsCheckout wsDir repo None
 
     // update binaries with observable baseline
-    let hash = baseline.Bookmarks |> Seq.find (fun x -> x.Repository = antho.MasterRepository.Name)
-    let artifactDir = antho.Artifacts |> DirectoryInfo
-    DisplayHighlight (sprintf "bin %s" hash.Version.toString)
-    updateMasterBinaries hash artifactDir
+    updateMasterBinaries ()
 
 let Pull (src : bool) (bin : bool) =
     let antho = Configuration.LoadAnthology ()
@@ -213,11 +209,20 @@ let Pull (src : bool) (bin : bool) =
                 Vcs.VcsPull wsDir repo
 
     if bin then
-        let baseline = Configuration.LoadBaseline ()
-        let hash = baseline.Bookmarks |> Seq.find (fun x -> x.Repository = antho.MasterRepository.Name)
-        let artifactDir = antho.Artifacts |> DirectoryInfo
-        DisplayHighlight (sprintf "bin %s" hash.Version.toString)
-        updateMasterBinaries hash artifactDir
+        updateMasterBinaries ()
+
+
+let Init (path : string) (uri : RepositoryUrl) = 
+    let wsDir = DirectoryInfo(path)
+    wsDir.Create()
+    if IsWorkspaceFolder wsDir then 
+        printf "[WARNING] Workspace already exists - skipping"
+    else
+        let vcsType = Vcs.VcsDetermineType uri
+        let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType}
+        VcsCloneRepo wsDir true repo
+
+    updateMasterBinaries ()
 
 
 let Exec cmd =
