@@ -61,6 +61,7 @@ let TestAssemblies (filters : string list) (excludes : string list) =
 
     let matches = filters |> Seq.map matchProjects
                           |> Seq.collect id
+                          |> Seq.filter (fun (_, y) -> y.Exists)
                           |> Seq.map (fun (_,y) -> y.EnumerateFiles("*.test*.dll", SearchOption.AllDirectories))
                           |> Seq.collect id
                           |> Seq.map (fun x -> x.FullName)
