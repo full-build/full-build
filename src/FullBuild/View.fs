@@ -149,27 +149,27 @@ let Create (viewName : ViewId) (filters : string list) =
 
 // ---------------------------------------------------------------------------------------
 
-let builderMSBuild (config : string) (target : string) (viewFile : FileInfo) =
+let builderMSBuild (config : string) (target : string) (viewFile : FileInfo) (multithread : bool) =
     let wsDir = Env.GetFolder Env.Workspace
-    //let args = sprintf "/nologo /p:Configuration=%s /v:m %A" config viewFile.Name
-    let args = sprintf "/nologo /t:%s /p:Configuration=%s %A" target config viewFile.Name
+    let argTarget = sprintf "/t:%s" target
+    let argMt = if multithread then "/m"
+                else ""
+    let argConfig = sprintf "/p:Configuration=%s" config
+    let args = sprintf "/nologo %s %s %s %A" argTarget argMt argConfig viewFile.Name
 
     if Env.IsMono () then checkedExec "xbuild" args wsDir
     else checkedExec "msbuild" args wsDir
 
 
-let buildWithProvidedBuilder (builderType : BuilderType) config target viewFile msbuildBuilder =
+let chooseBuilder (builderType : BuilderType) msbuildBuilder =
     let builder = match builderType with
                   | BuilderType.MSBuild -> msbuildBuilder
+    builder
 
-    builder config target viewFile
+let buildWithBuilder (builder : BuilderType) =
+    chooseBuilder builder builderMSBuild
 
-
-let buildWithBuilder (builder : BuilderType) config target viewFile =
-    buildWithProvidedBuilder builder config target viewFile builderMSBuild
-
-
-let Build (name : ViewId) (config : string) (forceRebuild : bool) =
+let Build (name : ViewId) (config : string) (clean : bool) (multithread : bool) =
     let vwDir = Env.GetFolder Env.View 
     let vwFile = vwDir |> GetFile (AddExt View name.toString)
     if vwFile.Exists |> not then failwithf "Unknown view name %A" name.toString
@@ -179,13 +179,13 @@ let Build (name : ViewId) (config : string) (forceRebuild : bool) =
 
     Generate name
 
-    let target = if forceRebuild then "Rebuild"
+    let target = if clean then "Rebuild"
                  else "Build"
 
-    if forceRebuild then
+    if clean then
         let binDir = wsDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
         if binDir.Exists then binDir.Delete (true)
 
     let antho = Configuration.LoadAnthology ()
-    buildWithBuilder antho.Builder config target viewFile
+    (buildWithBuilder antho.Builder) config target viewFile multithread
 

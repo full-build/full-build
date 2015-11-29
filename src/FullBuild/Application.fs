@@ -65,14 +65,14 @@ let publishAppCopy (app : Anthology.Application) (projects : Anthology.Project s
     else checkedExec "msbuild" args wsDir
 
 
-let PublishAppSelector (app : Anthology.Application) (projects : Anthology.Project set) appCopy =
-    let publish = match app.Publisher with
+let choosePublisher (pubType : PublisherType) appCopy =
+    let publish = match pubType with
                   | PublisherType.Copy -> appCopy
-    publish app projects
+    publish
 
 
-let publishApp (app : Anthology.Application) (projects : Anthology.Project set) =
-    PublishAppSelector app projects publishAppCopy
+let publishWithPublisher (pubType : PublisherType) =
+    choosePublisher pubType publishAppCopy
 
 
 let Publish (filters : string list) =
@@ -89,7 +89,7 @@ let Publish (filters : string list) =
         let app = antho.Applications |> Seq.find (fun x -> x.Name = appName)
         let projectIds = app.Projects |> ComputeProjectDependencies antho
         let projects = antho.Projects |> Set.filter (fun x -> projectIds |> Set.contains x.ProjectId)
-        publishApp app projects
+        (publishWithPublisher app.Publisher) app projects
 
 let List () =
     let antho = Configuration.LoadAnthology ()
