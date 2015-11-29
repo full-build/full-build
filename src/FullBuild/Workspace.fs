@@ -141,7 +141,6 @@ let Push () =
             Try (fun () -> Vcs.VcsPush wsDir mainRepo)
 
             tmpVersionDir.MoveTo(versionDir.FullName)
-            printfn "[version] %s" hash
         with
             _ -> versionDir.Refresh ()
                  if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
@@ -150,6 +149,7 @@ let Push () =
                  if tmpVersionDir.Exists then tmpVersionDir.Delete(true)
 
                  reraise ()
+    printfn "[version] %s" hash
 
 
 let updateMasterBinaries () =
