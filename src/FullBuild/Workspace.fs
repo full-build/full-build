@@ -108,7 +108,7 @@ let Try action =
 let Push () = 
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
-    let allRepos = antho.Repositories |> Set.add antho.MasterRepository
+    let allRepos = antho.Repositories
     let clonedRepos = allRepos |> ClonedRepositories wsDir
     let bookmarks = CollectRepoHash wsDir clonedRepos
     let baseline = { Bookmarks = bookmarks }
@@ -154,18 +154,19 @@ let Push () =
 
 let updateMasterBinaries () =
     let antho = Configuration.LoadAnthology ()
-    let baseline = Configuration.LoadBaseline ()
     let binDir = Env.GetFolder Env.BinOutput
     let artifactDir = antho.Artifacts |> DirectoryInfo
 
-    let hash = baseline.Bookmarks |> Seq.tryFind (fun x -> x.Repository = antho.MasterRepository.Name)
-    match hash with
-    | Some bookmark -> let versionDir = artifactDir |> GetSubDirectory (bookmark.Version.toString)
-                       let binSourceDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
-                       DisplayHighlight (sprintf "bin %s" bookmark.Version.toString)
-                       IoHelpers.CopyFolder binSourceDir binDir false
-    | None -> DisplayHighlight "[WARNING] No reference binaries found"
-
+    let wsDir = Env.GetFolder Env.Workspace
+    let mainRepo = antho.MasterRepository
+    let hash = Vcs.VcsTip wsDir mainRepo
+    let versionDir = artifactDir |> GetSubDirectory hash
+    if versionDir.Exists then
+        let binSourceDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
+        DisplayHighlight (sprintf "bin %s" hash)
+        IoHelpers.CopyFolder binSourceDir binDir false
+    else
+        DisplayHighlight "[WARNING] No reference binaries found"
 
 
 let Checkout (version : BookmarkVersion) =
