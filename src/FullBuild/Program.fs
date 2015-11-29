@@ -47,7 +47,7 @@ let tryMain argv =
     | ListViews -> View.List ()
     | DescribeView viewInfo -> View.Describe viewInfo.Name
     | GraphView viewInfo -> View.Graph viewInfo.Name viewInfo.All
-    | BuildView viewInfo -> View.Build viewInfo.Name viewInfo.Config viewInfo.ForceRebuild
+    | BuildView viewInfo -> View.Build viewInfo.Name viewInfo.Config viewInfo.Clean viewInfo.Multithread
 
     // nuget
     | AddNuGet url -> NuGets.Add url

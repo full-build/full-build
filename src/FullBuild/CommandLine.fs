@@ -61,7 +61,8 @@ type AddApplication =
 type BuildView =
     { Name : ViewId
       Config : string 
-      ForceRebuild : bool }
+      Clean : bool
+      Multithread : bool }
 
 type GraphView =
     { Name : ViewId
