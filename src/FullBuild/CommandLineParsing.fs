@@ -58,9 +58,9 @@ let commandExec (args : string list) =
     | [cmd] -> Command.Exec { Command = cmd }
     | _ -> Command.Error
 
-let rec commandTest (args : string list) (excludes : string list) =
+let rec commandTest (excludes : string list) (args : string list) =
     match args with
-    | TokenOption TokenOption.Exclude :: category :: tail -> commandTest tail (category :: excludes)
+    | TokenOption TokenOption.Exclude :: category :: tail -> tail |> commandTest (category :: excludes)
     | filters -> Command.TestAssemblies { Filters = filters; Excludes = excludes }
 
 
@@ -76,7 +76,7 @@ let commandConvert (args : string list) =
 
 let rec commandClone (shallow : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.NoShallow :: tail -> commandClone false tail
+    | TokenOption TokenOption.NoShallow :: tail -> tail |> commandClone false
     | [] -> Command.Error
     | filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                  CloneRepositories { Filters = repoFilters; Shallow = shallow }
@@ -86,7 +86,7 @@ let rec commandClone (shallow : bool) (args : string list) =
 
 let rec commandGraph (all : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.All :: tail -> commandGraph true tail
+    | TokenOption TokenOption.All :: tail -> tail |> commandGraph true
     | [MatchViewId name] -> Command.GraphView { Name = name ; All = all }
     | _ -> Command.Error
 
@@ -99,7 +99,7 @@ let commandPublish (args : string list) =
 
 let rec commandBuild (config : string) (forceBuild : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Debug :: tail -> commandBuild "Debug" forceBuild tail
+    | TokenOption TokenOption.Debug :: tail -> tail |> commandBuild "Debug" forceBuild
     | [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = config; ForceRebuild = forceBuild }
     | _ -> Command.Error
 
@@ -113,10 +113,10 @@ let commandPush (args : string list) =
     | [] -> Command.PushWorkspace
     | _ -> Command.Error
 
-let rec commandPull (args : string list) (src : bool) (bin : bool) =
+let rec commandPull (src : bool) (bin : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Src :: tail -> commandPull tail true false
-    | TokenOption TokenOption.Bin :: tail -> commandPull tail false true
+    | TokenOption TokenOption.Src :: tail -> tail |> commandPull true false
+    | TokenOption TokenOption.Bin :: tail -> tail |> commandPull false true
     | [] -> Command.PullWorkspace { Src = src ; Bin = bin }
     | _ -> Command.Error
 
@@ -228,14 +228,14 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Test :: cmdArgs -> commandTest [] cmdArgs
     | Token Token.Index :: cmdArgs -> commandIndex cmdArgs
     | Token Token.Convert :: cmdArgs -> commandConvert cmdArgs
-    | Token Token.Clone :: cmdArgs -> commandClone true cmdArgs
-    | Token Token.Graph :: cmdArgs -> commandGraph false cmdArgs
+    | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone true
+    | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
     | Token Token.Publish :: cmdArgs -> commandPublish cmdArgs
-    | Token Token.Build :: cmdArgs -> commandBuild "Release" false cmdArgs 
-    | Token Token.Rebuild :: cmdArgs -> commandBuild "Release" true cmdArgs
+    | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false
+    | Token Token.Rebuild :: cmdArgs ->  cmdArgs |> commandBuild "Release" true
     | Token Token.Checkout :: cmdArgs -> commandCheckout cmdArgs
     | Token Token.Push :: cmdArgs -> commandPush cmdArgs
-    | Token Token.Pull :: cmdArgs -> commandPull cmdArgs true true
+    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true
     | Token Token.Clean :: cmdArgs -> commandClean cmdArgs
 
     | Token Token.Install :: Token Token.Package :: cmdArgs -> commandInstall cmdArgs
