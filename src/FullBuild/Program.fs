@@ -18,6 +18,8 @@ open CommandLine
 open CommandLineParsing
 
 let tryMain argv = 
+    Env.CheckLicense ()
+
     let cmd = ParseCommandLine (argv |> Seq.toList)
     match cmd with
     // workspace

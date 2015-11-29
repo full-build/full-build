@@ -78,3 +78,13 @@ let GetBaselineFileName() =
 let IsMono () =
     let monoRuntime = System.Type.GetType ("Mono.Runtime") 
     monoRuntime <> null
+
+let CheckLicense () =
+    let fbAssembly = System.Reflection.Assembly.GetExecutingAssembly().Location |> FileInfo
+    let licFile = fbAssembly.Directory |> GetFile "LICENSE.txt"
+    if not (licFile.Exists) then failwithf "Please ensure original LICENSE.txt is available."
+
+    let licContent = File.ReadAllText (licFile.FullName)
+    let guid = StringHelpers.GenerateGuidFromString licContent
+    let licGuid = StringHelpers.ParseGuid "dc2991a6-9f65-a56c-26ac-3ba65d875d80"
+    if guid <> licGuid then failwithf "Please ensure original LICENSE.txt is available."
