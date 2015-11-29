@@ -13,6 +13,7 @@
 //   limitations under the License.
 
 module IoHelpers
+open System
 open System.IO
 
 
@@ -105,3 +106,8 @@ let GetFilewithoutRootDirectory (file : string) =
     let idx = file.IndexOf('/')
     file.Substring(idx+1)
    
+let DisplayHighlight s =
+    let oldColor = Console.ForegroundColor
+    Console.ForegroundColor <- ConsoleColor.Cyan
+    printfn "==> %s" s
+    Console.ForegroundColor <- oldColor
