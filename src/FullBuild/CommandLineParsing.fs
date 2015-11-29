@@ -97,10 +97,12 @@ let commandPublish (args : string list) =
 
 
 
-let rec commandBuild (config : string) (forceBuild : bool) (args : string list) =
+let rec commandBuild (config : string) (clean : bool) (multithread : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Debug :: tail -> tail |> commandBuild "Debug" forceBuild
-    | [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = config; ForceRebuild = forceBuild }
+    | TokenOption TokenOption.Debug :: tail -> tail |> commandBuild "Debug" clean multithread
+    | TokenOption TokenOption.Multithread :: tail -> tail |> commandBuild config clean true
+    | TokenOption TokenOption.Clean :: tail -> tail |> commandBuild config true multithread
+    | [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = config; Clean = clean; Multithread = multithread }
     | _ -> Command.Error
 
 let commandCheckout (args : string list) =
@@ -231,8 +233,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone true
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
     | Token Token.Publish :: cmdArgs -> commandPublish cmdArgs
-    | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false
-    | Token Token.Rebuild :: cmdArgs ->  cmdArgs |> commandBuild "Release" true
+    | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false
     | Token Token.Checkout :: cmdArgs -> commandCheckout cmdArgs
     | Token Token.Push :: cmdArgs -> commandPush cmdArgs
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true
@@ -297,8 +298,7 @@ let UsageContent() =
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
         "  clone [--noshallow] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
-        "  build [--debug] <view-name> : build view"
-        "  rebuild [--debug] <view-name> : clean & build view"
+        "  build [--debug] [--mt] [--clean] <view-name> : build view"
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
         "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"

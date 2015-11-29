@@ -22,6 +22,8 @@ type TokenOption =
     | Src
     | Exclude
     | NoShallow
+    | Multithread
+    | Clean
     | Unknown
 
 let (|TokenOption|) (token : string) =
@@ -31,6 +33,8 @@ let (|TokenOption|) (token : string) =
     | "--bin" -> TokenOption.Bin
     | "--src" -> TokenOption.Src
     | "--exclude" -> TokenOption.Exclude
+    | "--mt" -> TokenOption.Multithread
+    | "--clean" -> TokenOption.Clean
     | "--noshallow" -> TokenOption.NoShallow
     | _ -> Unknown
 
@@ -44,7 +48,6 @@ type Token =
     | Clone
     | Update
     | Build
-    | Rebuild
     | Index
     | Convert
     | Push
@@ -86,7 +89,6 @@ let (|Token|) (token : string) =
     | "clone" -> Clone
     | "update" -> Update
     | "build" -> Build
-    | "rebuild" -> Rebuild
     | "index" -> Index
     | "convert" -> Convert
     | "push" -> Push

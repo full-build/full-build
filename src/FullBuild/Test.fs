@@ -22,7 +22,7 @@ open Anthology
 
 
 let checkErrorCode err =
-    if err <> 0 then failwithf "Process failed with error %d" err
+    if err < 0 then failwithf "Process failed with error %d" err
 
 let private checkedExec = 
     Exec.Exec checkErrorCode
@@ -42,15 +42,13 @@ let runnerNUnit (matches : string seq) (excludes : string list) =
     let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs 
     checkedExec "nunit3-console" args wsDir
 
-let testAssembliesWithProvidedRunners (runnerType : TestRunnerType) files nunitRunner =
+let chooseTestRunner (runnerType : TestRunnerType) nunitRunner =
     let runner = match runnerType with
                  | NUnit -> nunitRunner
-    runner files
+    runner
 
-
-let TestAssembliesWithRunners (runnerType : TestRunnerType) files =
-    testAssembliesWithProvidedRunners runnerType files runnerNUnit
-
+let testWithTestRunner (runnerType : TestRunnerType) =
+    chooseTestRunner runnerType runnerNUnit
 
 let TestAssemblies (filters : string list) (excludes : string list) =
     let anthology = Configuration.LoadAnthology ()
@@ -66,4 +64,4 @@ let TestAssemblies (filters : string list) (excludes : string list) =
                           |> Seq.collect id
                           |> Seq.map (fun x -> x.FullName)
 
-    TestAssembliesWithRunners anthology.Tester matches excludes
+    (testWithTestRunner anthology.Tester) matches excludes
