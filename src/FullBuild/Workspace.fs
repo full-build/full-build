@@ -223,8 +223,6 @@ let Init (path : string) (uri : RepositoryUrl) =
         let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType}
         VcsCloneRepo wsDir true repo
 
-    updateMasterBinaries ()
-
 
 let Exec cmd =
     let antho = Configuration.LoadAnthology()
