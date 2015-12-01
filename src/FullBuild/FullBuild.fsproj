@@ -27,8 +27,8 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>test --exclude Integration *</StartArguments>
-    <StartWorkingDirectory>C:\src\avp</StartWorkingDirectory>
+    <StartArguments>publish *</StartArguments>
+    <StartWorkingDirectory>C:\src\full-build</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>0077</NoWarn>
@@ -122,6 +122,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />

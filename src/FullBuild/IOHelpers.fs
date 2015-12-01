@@ -37,6 +37,7 @@ type Extension =
     | App
     | Exe
     | Dll
+    | Zip
 
 let AddExt (ext : Extension) (fileName : string) : string =
     let sext = match ext with 
@@ -51,6 +52,7 @@ let AddExt (ext : Extension) (fileName : string) : string =
                | App -> "app"
                | Exe -> "exe"
                | Dll -> "dll"
+               | Zip -> "zip"
     sprintf "%s.%s" fileName sext
 
 let ToUnix (f : string) : string =
