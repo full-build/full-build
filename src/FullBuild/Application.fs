@@ -65,14 +65,31 @@ let publishAppCopy (app : Anthology.Application) (projects : Anthology.Project s
     else checkedExec "msbuild" args wsDir
 
 
-let choosePublisher (pubType : PublisherType) appCopy =
+let publishAppZip (app : Anthology.Application) (projects : Anthology.Project set) =
+    let tmpApp = { app
+                   with Name = ApplicationId.from "tmpzip"
+                        Publisher = PublisherType.Copy }
+
+    publishAppCopy tmpApp projects
+
+    let appDir = GetFolder Env.AppOutput
+    let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name.toString)
+    let targetFile = appDir |> GetFile (app.Name.toString)
+    if targetFile.Exists then targetFile.Delete()
+
+    System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Optimal, false)
+    sourceFolder.Delete(true)
+    
+
+let choosePublisher (pubType : PublisherType) appCopy appZip =
     let publish = match pubType with
                   | PublisherType.Copy -> appCopy
+                  | PublisherType.Zip -> appZip
     publish
 
 
 let publishWithPublisher (pubType : PublisherType) =
-    choosePublisher pubType publishAppCopy
+    choosePublisher pubType publishAppCopy publishAppZip
 
 
 let Publish (filters : string list) =
