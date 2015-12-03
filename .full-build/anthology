@@ -2,6 +2,8 @@ anthology:
   artifacts: C:\Binaries
   nugets:
     - nuget: https://www.nuget.org/api/v2/
+  test: nunit
+  build: msbuild
   repositories:
     - repo: .full-build
       type: git
@@ -18,8 +20,6 @@ anthology:
       type: zip
       projects:
         - project: fullbuild
-  test: nunit
-  build: msbuild
   projects:
     - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
       file: src/FullBuild.Tests/FullBuild.Tests.fsproj
@@ -45,6 +45,8 @@ anthology:
         - assembly: fsharp.core
         - assembly: system
         - assembly: system.core
+        - assembly: system.io.compression
+        - assembly: system.io.compression.filesystem
         - assembly: system.numerics
         - assembly: system.runtime.serialization
         - assembly: system.xml
