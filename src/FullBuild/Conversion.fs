@@ -24,6 +24,25 @@ open MsBuildHelpers
 open Env
 open Anthology
 
+let generateCopyReference (project : Project) =
+    let projectProperty = ProjectPropertyName project
+    let binCondition = sprintf "'$(%s)' == ''" projectProperty
+    let copy = seq {
+        for dep in project.ProjectReferences do
+            yield XElement(NsMsBuild + "Copy",
+                    XAttribute(NsNone + "SourceFiles", sprintf "$(SolutionDir)/bin/%s/*.dll" dep.toString),
+                    XAttribute(NsNone + "DestinationFolder", "$(SolutionDir)/bin/$(ProjectName)"))
+            yield XElement(NsMsBuild + "Copy",
+                    XAttribute(NsNone + "SourceFiles", sprintf "$(SolutionDir)/bin/%s/*.exe" dep.toString),
+                    XAttribute(NsNone + "DestinationFolder", "$(SolutionDir)/bin/$(ProjectName)"))
+    }
+
+    XElement(NsMsBuild + "Target",
+        XAttribute(NsNone + "Name", sprintf "%s_copy" projectProperty),
+        XAttribute(NsNone + "Condition", binCondition),
+        XAttribute(NsNone + "AfterTargets", "Build"),
+        copy)
+
 let GenerateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
@@ -52,7 +71,8 @@ let GenerateProjectTarget (project : Project) =
                 XElement (NsMsBuild + "Reference",
                     XAttribute (NsNone + "Include", includeFile),
                     XAttribute (NsNone + "Condition", binCondition),
-                    XElement (NsMsBuild + "Private", "true")))))
+                    XElement (NsMsBuild + "Private", "true"))),
+            generateCopyReference project))
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let prjDir = Env.GetFolder Env.Project
