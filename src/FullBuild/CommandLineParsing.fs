@@ -101,7 +101,6 @@ let rec commandBuild (config : string) (clean : bool) (multithread : bool) (args
     match args with
     | TokenOption TokenOption.Debug :: tail -> tail |> commandBuild "Debug" clean multithread
     | TokenOption TokenOption.Multithread :: tail -> tail |> commandBuild config clean true
-    | TokenOption TokenOption.Clean :: tail -> tail |> commandBuild config true multithread
     | [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = config; Clean = clean; Multithread = multithread }
     | _ -> Command.Error
 
@@ -234,6 +233,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
     | Token Token.Publish :: cmdArgs -> commandPublish cmdArgs
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false
+    | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false
     | Token Token.Checkout :: cmdArgs -> commandCheckout cmdArgs
     | Token Token.Push :: cmdArgs -> commandPush cmdArgs
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true
@@ -298,7 +298,8 @@ let UsageContent() =
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
         "  clone [--noshallow] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
-        "  build [--debug] [--mt] [--clean] <view-name> : build view"
+        "  build [--debug] [--mt] <view-name> : build view"
+        "  rebuild [--debug] [--mt] <view-name> : rebuild view (clean & build)"
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
         "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
