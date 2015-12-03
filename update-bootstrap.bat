@@ -1,4 +1,4 @@
-bin\fullbuild\FullBuild.exe publish full-build || goto :ko
+bin\fullbuild\FullBuild.exe publish * || goto :ko
 robocopy apps\full-build bootstrap || goto :ko
 goto :ok
 
