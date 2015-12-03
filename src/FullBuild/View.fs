@@ -17,10 +17,6 @@ open System.IO
 open Env
 open IoHelpers
 open Anthology
-open StringHelpers
-open System.Xml.Linq
-open MsBuildHelpers
-open Configuration
 open Collections
 open Solution
 
