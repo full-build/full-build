@@ -26,22 +26,25 @@ open Anthology
 
 let generateCopyReference (project : Project) =
     let projectProperty = ProjectPropertyName project
+    let fileSelectorProp = sprintf "%sFiles" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
-    let copy = seq {
+    let fileSelector = seq {
         for dep in project.ProjectReferences do
-            yield XElement(NsMsBuild + "Copy",
-                    XAttribute(NsNone + "SourceFiles", sprintf "$(SolutionDir)/bin/%s/*.dll" dep.toString),
-                    XAttribute(NsNone + "DestinationFolder", "$(SolutionDir)/bin/$(ProjectName)"))
-            yield XElement(NsMsBuild + "Copy",
-                    XAttribute(NsNone + "SourceFiles", sprintf "$(SolutionDir)/bin/%s/*.exe" dep.toString),
-                    XAttribute(NsNone + "DestinationFolder", "$(SolutionDir)/bin/$(ProjectName)"))
+            yield XElement(NsMsBuild + fileSelectorProp,
+                XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/bin/%s/*.dll" dep.toString))
+            yield XElement(NsMsBuild + fileSelectorProp,
+                XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/bin/%s/*.exe" dep.toString))
     }
 
     XElement(NsMsBuild + "Target",
         XAttribute(NsNone + "Name", sprintf "%s_copy" projectProperty),
         XAttribute(NsNone + "Condition", binCondition),
         XAttribute(NsNone + "AfterTargets", "Build"),
-        copy)
+        XElement(NsMsBuild + "ItemGroup",
+            fileSelector),           
+        XElement(NsMsBuild + "Copy",
+            XAttribute(NsNone + "SourceFiles", sprintf "@(%s)" fileSelectorProp),
+            XAttribute(NsNone + "DestinationFolder", "$(SolutionDir)/bin/$(ProjectName)")))
 
 let GenerateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project
