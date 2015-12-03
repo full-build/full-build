@@ -27,8 +27,8 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>publish *</StartArguments>
-    <StartWorkingDirectory>C:\src\full-build</StartWorkingDirectory>
+    <StartArguments>graph all</StartArguments>
+    <StartWorkingDirectory>C:\src\avp</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>0077</NoWarn>
