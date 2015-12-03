@@ -16,7 +16,6 @@ module Repo
 
 open Anthology
 open PatternMatching
-open Env
 open Configuration
 open Collections
 open IoHelpers

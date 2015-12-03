@@ -17,7 +17,6 @@ module Workspace
 open System.IO
 open IoHelpers
 open Env
-open Configuration
 open Vcs
 open Anthology
 open MsBuildHelpers
