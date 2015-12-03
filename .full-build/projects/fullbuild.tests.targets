@@ -10,4 +10,8 @@
       <Private>true</Private>
     </Reference>
   </ItemGroup>
+  <Target Name="Prj_fullbuild_tests_copy" Condition="'$(Prj_fullbuild_tests)' == ''" AfterTargets="Build">
+    <Copy SourceFiles="$(SolutionDir)/bin/fullbuild/*.dll" DestinationFolder="$(SolutionDir)/bin/$(ProjectName)" />
+    <Copy SourceFiles="$(SolutionDir)/bin/fullbuild/*.exe" DestinationFolder="$(SolutionDir)/bin/$(ProjectName)" />
+  </Target>
 </Project>
