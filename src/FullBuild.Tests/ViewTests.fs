@@ -91,6 +91,7 @@ let CheckGenerateSolution () =
                                "EndProject"
                                @"Project(""{fae04ec0-301f-11d3-bf4b-00c04f79efbc}"") = ""CassandraSharp.Contrib.log4netUnitTests-net45"", ""cassandra-sharp-contrib/CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"", ""{9e8648a4-d25a-4cfa-aaee-20d9d63ff571}"""
                                "\tProjectSection(ProjectDependencies) = postProject"
+                               "\t\t{925833ed-8653-4e90-9c37-b5b6cb693cf4} = {925833ed-8653-4e90-9c37-b5b6cb693cf4}"
                                "\tEndProjectSection"
                                "EndProject"
                                @"Project(""{2150E333-8FDC-42A3-9474-1A3956D46DE8}"") = ""cassandra-sharp-contrib"", ""cassandra-sharp-contrib"", ""{930836cc-992f-e356-ccc9-96f1adb7ff88}"""
