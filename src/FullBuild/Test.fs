@@ -13,7 +13,6 @@
 //   limitations under the License.
 
 module Test
-open IoHelpers
 open Env
 open System.IO
 open Anthology

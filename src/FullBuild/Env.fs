@@ -14,11 +14,9 @@
 
 module Env
 
-open System
 open System.IO
 open IoHelpers
 
-let private BIN_FOLDER = "bin"
 let private VIEW_FOLDER = "views"
 let private PROJECT_FOLDER = "projects"
 let private APP_FOLDER = "apps"
