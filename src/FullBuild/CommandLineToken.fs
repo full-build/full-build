@@ -88,7 +88,7 @@ let (|Token|) (token : string) =
     | "clone" -> Clone
     | "update" -> Update
     | "build" -> Build
-    | "rebuild" -> Build
+    | "rebuild" -> Rebuild
     | "index" -> Index
     | "convert" -> Convert
     | "push" -> Push
