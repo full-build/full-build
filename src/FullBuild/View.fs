@@ -175,7 +175,7 @@ let Build (name : ViewId) (config : string) (clean : bool) (multithread : bool) 
 
     Generate name
 
-    let target = if clean then "Rebuild"
+    let target = if clean then "Clean;Build"
                  else "Build"
 
     if clean then
