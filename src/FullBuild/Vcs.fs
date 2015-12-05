@@ -97,11 +97,11 @@ let private gitClone (isGerrit : bool) (shallow : bool) (target : DirectoryInfo)
                 else ""
 
     let args = sprintf @"clone %s %A %A" depth url target.FullName
-    let currDir = DirectoryInfo(Environment.CurrentDirectory)
+    let currDir = IoHelpers.CurrentFolder ()
     checkedExec "git" args currDir
 
     if isGerrit then
-        let currDir = System.Reflection.Assembly.GetExecutingAssembly().Location |> DirectoryInfo
+        let currDir = ((Env.GetExecutingAssembly ()).Location |> FileInfo).Directory
         let commitMsgFile = currDir |> IoHelpers.GetFile "commit-msg"
         let target = target |> IoHelpers.GetSubDirectory ".git" |> IoHelpers.GetFile "commit-msg"
         commitMsgFile.CopyTo (target.FullName) |> ignore
@@ -109,7 +109,7 @@ let private gitClone (isGerrit : bool) (shallow : bool) (target : DirectoryInfo)
 
 let private hgClone (target : DirectoryInfo) (url : string) = 
     let args = sprintf @"clone %A %A" url target.FullName
-    let currDir = DirectoryInfo(Environment.CurrentDirectory)
+    let currDir = IoHelpers.CurrentFolder ()
     checkedExec "hg" args currDir
 
 

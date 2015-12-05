@@ -8,7 +8,7 @@ open FsUnit
 
 [<Test>]
 let CheckGetSubDirectory () =
-    let currDir = DirectoryInfo (Environment.CurrentDirectory)
+    let currDir = IoHelpers.CurrentFolder ()
     let subdir = currDir |> GetSubDirectory "toto"
     subdir.FullName.Contains("toto") |> should equal true
 
@@ -21,7 +21,7 @@ let CheckCreateSubDirectory () =
 
 [<Test>]
 let CheckGetFile () =
-    let currDir = DirectoryInfo (Environment.CurrentDirectory)
+    let currDir = IoHelpers.CurrentFolder ()
     let file = currDir |> GetFile "toto" 
     file.FullName.Contains("toto") |> should equal true
 

@@ -14,12 +14,12 @@ let private checkedExec =
 
 [<Test>]
 let CheckExecOk () =
-    let currDir = DirectoryInfo(Environment.CurrentDirectory)
+    let currDir = IoHelpers.CurrentFolder ()
     checkedExec "cmd" "/c dir >nul" currDir
 
 
 [<Test>]
 let CheckExecFailure () =
-    let currDir = DirectoryInfo(Environment.CurrentDirectory)
+    let currDir = IoHelpers.CurrentFolder ()
     (fun () -> checkedExec "gloubiboulga" "" currDir |> ignore) |> should throw typeof<System.ComponentModel.Win32Exception>
 
