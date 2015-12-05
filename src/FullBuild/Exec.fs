@@ -25,7 +25,7 @@ let ExecWithVars checkErrorCode (command : string) (args : string) (dir : Direct
     let psi = defaultPSI command args dir
 
     for var in vars do
-        psi.EnvironmentVariables.Add (var.Key, var.Value)
+        psi.Environment.Add(var.Key, var.Value)
 
     use proc = Process.Start (psi)
     if proc = null then failwith "Failed to start process"
