@@ -84,7 +84,7 @@ let ComputeRelativePath (dir : DirectoryInfo) (file : FileInfo) : string =
 
 
 let CurrentFolder() : DirectoryInfo = 
-    DirectoryInfo(System.Environment.CurrentDirectory)
+    Directory.GetCurrentDirectory () |> DirectoryInfo
 
 
 
