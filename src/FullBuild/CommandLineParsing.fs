@@ -266,7 +266,8 @@ let ParseCommandLine (args : string list) : Command =
 
 
 let VersionContent() =
-    let version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version
+    let fbAssembly = Env.GetExecutingAssembly()
+    let version = fbAssembly.GetName().Version
     
     let fbVersion = sprintf "full-build %s" (version.ToString())
 

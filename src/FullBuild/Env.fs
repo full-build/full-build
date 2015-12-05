@@ -16,6 +16,7 @@ module Env
 
 open System.IO
 open IoHelpers
+open System.Reflection
 
 let private VIEW_FOLDER = "views"
 let private PROJECT_FOLDER = "projects"
@@ -42,6 +43,11 @@ let rec private WorkspaceFolderSearch(dir : DirectoryInfo) =
     if IsWorkspaceFolder dir then dir
     else WorkspaceFolderSearch dir.Parent
 
+type DummyType () = class end
+
+let GetExecutingAssembly () =
+    let fbAssembly = typeof<DummyType>.GetTypeInfo().Assembly
+    fbAssembly
 
 type Folder = 
        | Workspace
@@ -78,8 +84,8 @@ let IsMono () =
     monoRuntime <> null
 
 let CheckLicense () =
-    let fbAssembly = System.Reflection.Assembly.GetExecutingAssembly().Location |> FileInfo
-    let licFile = fbAssembly.Directory |> GetFile "LICENSE.txt"
+    let fbAssemblyFile = (GetExecutingAssembly ()).Location |> FileInfo
+    let licFile = fbAssemblyFile.Directory |> GetFile "LICENSE.txt"
     if not (licFile.Exists) then failwithf "Please ensure original LICENSE.txt is available."
 
     let licContent = File.ReadAllText (licFile.FullName)
