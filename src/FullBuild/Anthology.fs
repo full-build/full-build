@@ -171,7 +171,7 @@ with
 type Application = 
     { Name : ApplicationId
       Publisher : PublisherType
-      Projects : ProjectId set }
+      Project : ProjectId }
 
 type Anthology = 
     { Artifacts : string

@@ -29,9 +29,6 @@ open System
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
 
-let private checkedExec = 
-    Exec.Exec checkErrorCode
-
 let private checkedExecWithVars = 
     Exec.ExecWithVars checkErrorCode
 
@@ -53,13 +50,19 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
                   Applications = Set.empty 
                   Tester = TestRunnerType.NUnit 
                   Builder = BuilderType.MSBuild }
-    let confDir = wsDir |> GetSubDirectory Env.MASTER_REPO
+    let confDir = Env.GetFolder Env.Config
     let anthoFile = confDir |> GetFile Env.ANTHOLOGY_FILENAME
     AnthologySerializer.Save anthoFile antho
 
     let baseline = { Bookmarks = Set.empty }
     let baselineFile = confDir |> GetFile Env.BASELINE_FILENAME
     BaselineSerializer.Save baselineFile baseline
+
+    // setup additional files for views to work correctly
+    let installDir = Env.GetFolder Env.Installation
+    let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
+    let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
+    publishSource.CopyTo(publishTarget.FullName) |> ignore
 
     Vcs.VcsIgnore wsDir repo
     Vcs.VcsCommit wsDir repo "setup"
@@ -128,9 +131,11 @@ let Push () =
         printfn "[WARNING] Build output already exists - skipping"
     else
         try
-            let binTargetDir = tmpVersionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
-            let binDir = Env.GetFolder Env.BinOutput
-            IoHelpers.CopyFolder binDir binTargetDir true
+            let binDir = tmpVersionDir |> GetSubDirectory "bin"
+            for project in antho.Projects do
+                let binDirSrc = sprintf "%s/%s/%s" (wsDir.FullName) (AnthologyBridge.RelativeProjectFolderFromWorkspace project) MSBUILD_BIN_OUTPUT |> DirectoryInfo
+                let binDirDst = binDir |> GetSubDirectory (project.ProjectId.toString)
+                IoHelpers.CopyFolder binDirSrc binDirDst true
 
             let appTargetDir = tmpVersionDir |> GetSubDirectory Env.MSBUILD_APP_OUTPUT
             let appDir = Env.GetFolder Env.AppOutput
@@ -153,7 +158,6 @@ let Push () =
 
 let updateMasterBinaries () =
     let antho = Configuration.LoadAnthology ()
-    let binDir = Env.GetFolder Env.BinOutput
     let artifactDir = antho.Artifacts |> DirectoryInfo
 
     let wsDir = Env.GetFolder Env.Workspace
@@ -161,9 +165,15 @@ let updateMasterBinaries () =
     let hash = Vcs.VcsTip wsDir mainRepo
     let versionDir = artifactDir |> GetSubDirectory hash
     if versionDir.Exists then
-        let binSourceDir = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
-        DisplayHighlight (sprintf "bin %s" hash)
-        IoHelpers.CopyFolder binSourceDir binDir false
+        let binDirSrc = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
+        for project in antho.Projects do
+            let binDirProjectSrc = binDirSrc |> GetSubDirectory project.ProjectId.toString
+            if binDirProjectSrc.Exists then
+                let repoDir = wsDir |> GetSubDirectory project.Repository.toString
+                if (repoDir.Exists) then
+                    let binDirProjectDst = repoDir |> GetSubDirectory (AnthologyBridge.RelativeProjectFolderFromWorkspace project)
+                    DisplayHighlight (sprintf "bin %s" hash)
+                    IoHelpers.CopyFolder binDirProjectSrc binDirProjectDst false
     else
         DisplayHighlight "[WARNING] No reference binaries found"
 

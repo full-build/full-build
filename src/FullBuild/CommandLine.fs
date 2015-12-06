@@ -56,7 +56,7 @@ type CheckoutVersion =
 type AddApplication =
     { Name : ApplicationId
       Publisher : PublisherType
-      Projects : ProjectId set }
+      Project : ProjectId }
 
 type BuildView =
     { Name : ViewId
