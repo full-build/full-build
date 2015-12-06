@@ -178,10 +178,5 @@ let Build (name : ViewId) (config : string) (clean : bool) (multithread : bool) 
     let target = if clean then "Clean,Build"
                  else "Build"
 
-    if clean then
-        let binDir = wsDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
-        if binDir.Exists then binDir.Delete (true)
-
     let antho = Configuration.LoadAnthology ()
     (buildWithBuilder antho.Builder) config target viewFile multithread
-

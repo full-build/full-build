@@ -12,3 +12,4 @@ packages
 .vs
 *~
 TestResult.xml
+Settings.FSharpLint

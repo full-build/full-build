@@ -51,8 +51,8 @@ let testWithTestRunner (runnerType : TestRunnerType) =
 
 let TestAssemblies (filters : string list) (excludes : string list) =
     let anthology = Configuration.LoadAnthology ()
-    let binDir = GetFolder Env.BinOutput
-    let prjNames = anthology.Projects |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, binDir |> IoHelpers.GetSubDirectory x.Output.toString))
+    let prjNames = anthology.Projects 
+                    |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, sprintf "%s/bin" (AnthologyBridge.RelativeProjectFolderFromWorkspace x) |> DirectoryInfo ))
 
     let matchProjects filter = prjNames |> Seq.filter (fun x -> PatternMatching.Match (fst x) filter)
 

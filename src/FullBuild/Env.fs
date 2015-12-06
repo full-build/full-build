@@ -24,6 +24,7 @@ let private APP_FOLDER = "apps"
 let private PACKAGE_FOLDER = "packages"
 let ANTHOLOGY_FILENAME = "anthology"
 let BASELINE_FILENAME = "baseline"
+let FULLBUILD_TARGETS = "full-build.targets"
 let MASTER_REPO = ".full-build"
 let MSBUILD_SOLUTION_DIR = "$(SolutionDir)"
 let MSBUILD_TARGETFX_DIR = "$(TargetFrameworkVersion)"
@@ -31,8 +32,9 @@ let MSBUILD_BIN_OUTPUT = "bin"
 let MSBUILD_APP_OUTPUT = "apps"
 let MSBUILD_PROJECT_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR MASTER_REPO PROJECT_FOLDER
 let MSBUILD_PACKAGE_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR MASTER_REPO PACKAGE_FOLDER
-let MSBUILD_BIN_FOLDER = sprintf "%s/%s" MSBUILD_SOLUTION_DIR MSBUILD_BIN_OUTPUT
+let MSBUILD_BIN_FOLDER = MSBUILD_BIN_OUTPUT
 let MSBUILD_NUGET_FOLDER = sprintf "../%s/" PACKAGE_FOLDER
+let MSBUILD_FULLBUILD_TARGETS = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR MASTER_REPO FULLBUILD_TARGETS
 
 let IsWorkspaceFolder(wsDir : DirectoryInfo) = 
     let subDir = wsDir |> GetSubDirectory MASTER_REPO
@@ -45,32 +47,34 @@ let rec private WorkspaceFolderSearch(dir : DirectoryInfo) =
 
 type DummyType () = class end
 
-let GetExecutingAssembly () =
+let GetFullBuildAssembly () =
     let fbAssembly = typeof<DummyType>.GetTypeInfo().Assembly
     fbAssembly
 
+let private getInstallationFolder () =
+    let fbAssembly = GetFullBuildAssembly ()
+    let fbAssFI = fbAssembly.Location |> FileInfo
+    fbAssFI.Directory
+
 type Folder = 
        | Workspace
-       | BinOutput
        | AppOutput
        | Config
        | View
-       | App
        | Project
        | Package
+       | Installation
 
 
 let rec GetFolder folder =
     match folder with
     | Workspace -> CurrentFolder() |> WorkspaceFolderSearch 
-    | BinOutput -> GetFolder Workspace |> CreateSubDirectory MSBUILD_BIN_OUTPUT
     | AppOutput -> GetFolder Workspace |> CreateSubDirectory MSBUILD_APP_OUTPUT
     | Config -> GetFolder Workspace |> CreateSubDirectory MASTER_REPO
     | View -> GetFolder Config |> CreateSubDirectory VIEW_FOLDER
-    | App -> GetFolder Config |> CreateSubDirectory APP_FOLDER
     | Project -> GetFolder Config |> CreateSubDirectory PROJECT_FOLDER
     | Package -> GetFolder Config |> CreateSubDirectory PACKAGE_FOLDER
-
+    | Installation -> getInstallationFolder()
 
 let GetAnthologyFileName() = 
     GetFolder Config |> GetFile ANTHOLOGY_FILENAME
@@ -84,8 +88,8 @@ let IsMono () =
     monoRuntime <> null
 
 let CheckLicense () =
-    let fbAssemblyFile = (GetExecutingAssembly ()).Location |> FileInfo
-    let licFile = fbAssemblyFile.Directory |> GetFile "LICENSE.txt"
+    let fbInstallDir = GetFolder Installation
+    let licFile = fbInstallDir |> GetFile "LICENSE.txt"
     if not (licFile.Exists) then failwithf "Please ensure original LICENSE.txt is available."
 
     let licContent = File.ReadAllText (licFile.FullName)
