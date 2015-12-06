@@ -101,8 +101,8 @@ let private gitClone (isGerrit : bool) (shallow : bool) (target : DirectoryInfo)
     checkedExec "git" args currDir
 
     if isGerrit then
-        let currDir = ((Env.GetExecutingAssembly ()).Location |> FileInfo).Directory
-        let commitMsgFile = currDir |> IoHelpers.GetFile "commit-msg"
+        let installDir = Env.GetFolder Env.Installation
+        let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
         let target = target |> IoHelpers.GetSubDirectory ".git" |> IoHelpers.GetFile "commit-msg"
         commitMsgFile.CopyTo (target.FullName) |> ignore
 

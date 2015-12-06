@@ -6,12 +6,12 @@
       <Project>{5fde3939-c144-4287-bc57-a96ec2d1a9da}</Project>
       <Name>fullbuild</Name>
     </ProjectReference>
-    <Reference Include="$(SolutionDir)/bin/fullbuild/fullbuild.exe" Condition="'$(Prj_fullbuild)' == ''">
+    <Reference Include="$(SolutionDir)/src/FullBuild/bin/fullbuild.exe" Condition="'$(Prj_fullbuild)' == ''">
       <Private>true</Private>
     </Reference>
   </ItemGroup>
   <Target Name="Prj_fullbuild_copy" Condition="'$(Prj_fullbuild)' == ''" AfterTargets="Build">
     <ItemGroup />
-    <Copy SourceFiles="@(Prj_fullbuildFiles)" DestinationFolder="$(SolutionDir)/bin/$(ProjectName)" />
+    <Copy SourceFiles="@(Prj_fullbuildFiles)" DestinationFolder="$(OutDir)" />
   </Target>
 </Project>
