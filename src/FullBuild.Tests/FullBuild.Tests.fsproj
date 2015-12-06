@@ -20,11 +20,10 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>$(SolutionDir)/bin/fullbuild.tests/</OutputPath>
+    <OutputPath>bin</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile></DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
   </PropertyGroup>
@@ -32,7 +31,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>$(SolutionDir)/bin/fullbuild.tests/</OutputPath>
+    <OutputPath>bin</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\FsFullBuild.Tests.XML</DocumentationFile>
@@ -139,4 +138,5 @@
   </Target>
   <Import Project="$(SolutionDir)/.full-build/projects/fullbuild.targets" />
   <Import Project="$(SolutionDir)/.full-build/packages/fsunit/package.targets" Condition="'$(FullBuild_fsunit_Pkg)' == ''" />
+  <Import Project="$(SolutionDir)/.full-build/full-build.targets" />
 </Project>

@@ -6,7 +6,7 @@
       <Project>{faaf3b40-ea78-4eaf-9859-863ff16f6058}</Project>
       <Name>fullbuild.tests</Name>
     </ProjectReference>
-    <Reference Include="$(SolutionDir)/bin/fullbuild.tests/fullbuild.tests.dll" Condition="'$(Prj_fullbuild_tests)' == ''">
+    <Reference Include="$(SolutionDir)/src/FullBuild.Tests/bin/fullbuild.tests.dll" Condition="'$(Prj_fullbuild_tests)' == ''">
       <Private>true</Private>
     </Reference>
   </ItemGroup>
@@ -15,6 +15,6 @@
       <Prj_fullbuild_testsFiles Include="$(SolutionDir)/bin/fullbuild/*.dll" />
       <Prj_fullbuild_testsFiles Include="$(SolutionDir)/bin/fullbuild/*.exe" />
     </ItemGroup>
-    <Copy SourceFiles="@(Prj_fullbuild_testsFiles)" DestinationFolder="$(SolutionDir)/bin/$(ProjectName)" />
+    <Copy SourceFiles="@(Prj_fullbuild_testsFiles)" DestinationFolder="$(OutDir)" />
   </Target>
 </Project>

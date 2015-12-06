@@ -71,13 +71,8 @@ let Serialize (antho : Anthology) =
         let capp = AnthologyConfig.anthology_Type.apps_Item_Type()
         capp.name <- app.Name.toString
         capp.``type`` <- app.Publisher.toString
-        capp.projects.Clear ()
-        for project in app.Projects do
-            let cproject = AnthologyConfig.anthology_Type.apps_Item_Type.projects_Item_Type()
-            cproject.project <- project.toString
-            capp.projects.Add (cproject)
+        capp.project <- app.Project.toString
         config.anthology.apps.Add (capp)
-
 
     config.anthology.test <- antho.Tester.toString
     config.anthology.build <- antho.Builder.toString
@@ -87,7 +82,7 @@ let Serialize (antho : Anthology) =
 let Deserialize (content) =
     let rec convertToNuGets (items : AnthologyConfig.anthology_Type.nugets_Item_Type list) =
         match items with
-        | [] -> List.empty
+        | [] -> []
         | x :: tail -> (RepositoryUrl.from (x.nuget)) :: convertToNuGets tail
 
     let rec convertToRepositories (items : AnthologyConfig.anthology_Type.repositories_Item_Type list) =
@@ -128,19 +123,13 @@ let Deserialize (content) =
                                                             PackageReferences = convertToPackages (x.packages |> List.ofSeq)
                                                             ProjectReferences = convertToProjectRefs (x.projects |> List.ofSeq) }
 
-    let rec convertToApplicationDependencies (items : AnthologyConfig.anthology_Type.apps_Item_Type.projects_Item_Type list) =
-        match items with
-        | [] -> Set.empty
-        | x :: tail -> let projectId = x.project |> ProjectId.from
-                       convertToApplicationDependencies tail |> Set.add projectId
-
     let rec convertToApplications (items : AnthologyConfig.anthology_Type.apps_Item_Type list) =
         match items with
         | [] -> Set.empty
         | x :: tail -> let appName = ApplicationId.from x.name
                        let publishType = PublisherType.from x.``type``
-                       let projects = convertToApplicationDependencies (x.projects |> List.ofSeq)
-                       let app = { Name = appName ; Publisher = publishType; Projects = projects }
+                       let project = x.project |> ProjectId.from
+                       let app = { Name = appName ; Publisher = publishType; Project = project }
                        convertToApplications tail |> Set.add app
 
     let convertToTestRunner (item : string) =

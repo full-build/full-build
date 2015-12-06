@@ -188,8 +188,8 @@ let commandDescribeView (args : string list) =
 
 let commandAddApp (args : string list) =
     match args with
-    | MatchApplicationId name :: MatchPublisherType pub :: filters -> let projects = filters |> Seq.map ProjectId.from |> Set
-                                                                      Command.AddApplication { Name = name; Publisher = pub; Projects = projects }
+    | MatchApplicationId name :: MatchPublisherType pub :: [app] -> let project = app |> ProjectId.from
+                                                                    Command.AddApplication { Name = name; Publisher = pub; Project = project }
     | _ -> Command.Error
 
 let commandDropApp (args : string list) =
@@ -266,7 +266,7 @@ let ParseCommandLine (args : string list) : Command =
 
 
 let VersionContent() =
-    let fbAssembly = Env.GetExecutingAssembly()
+    let fbAssembly = Env.GetFullBuildAssembly ()
     let version = fbAssembly.GetName().Version
     
     let fbVersion = sprintf "full-build %s" (version.ToString())

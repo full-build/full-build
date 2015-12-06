@@ -1,0 +1,28 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<FBIsWebProject>false</FBIsWebProject>
+		<FBIsWebProject Condition="'$(OutputType)'=='library' and '$(WebProjectOutputDir)' != ''">true</FBIsWebProject>
+		<FBIsTestProject>false</FBIsTestProject>
+		<FBIsTestProject Condition="'$(OutputType)'=='library' and ($(MSBuildProjectName.EndsWith('.Test')) or $(MSBuildProjectName.EndsWith('.Tests'))) and !$(FBIsWebProject)">true</FBIsTestProject>
+		<FBIsLibrary >false</FBIsLibrary>
+		<FBIsLibrary Condition="'$(OutputType)'=='library' and !$(FBIsWebProject) and !$(FBIsTestProject)">true</FBIsLibrary>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<FBApp>*** undefined ***</FBApp>
+		<FBContentFolder>$(SolutionDir)\apps\$(FBApp)</FBContentFolder>
+    <FBBinFolder>$(FBContentFolder)</FBBinFolder>
+		<FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)\bin</FBBinFolder>
+	</PropertyGroup>
+
+	<Target Name="FBPublish" DependsOnTargets="Build">
+		<Message Text="Copying content to $(FBContentFolder)" />
+		<Copy SourceFiles="@(Content)" DestinationFolder="$(FBContentFolder)\%(Content.RelativeDir)" />
+
+		<Message Text="Copying binaries to $(FBBinFolder)" />
+		<CreateItem Include="$(OutputPath)\*">
+			<Output TaskParameter="Include" ItemName="Binaries"/>
+		</CreateItem>
+		<Copy SourceFiles="@(Binaries)" DestinationFolder="$(FBBinFolder)" />
+	</Target>
+</Project>

@@ -17,9 +17,7 @@ open System.IO
 open System.Xml.Linq
 open System
 open System.Linq
-open System.Text
 open IoHelpers
-open StringHelpers
 open MsBuildHelpers
 open Env
 open Anthology
@@ -41,10 +39,10 @@ let generateCopyReference (project : Project) =
         XAttribute(NsNone + "Condition", binCondition),
         XAttribute(NsNone + "AfterTargets", "Build"),
         XElement(NsMsBuild + "ItemGroup",
-            fileSelector),           
+            fileSelector),
         XElement(NsMsBuild + "Copy",
             XAttribute(NsNone + "SourceFiles", sprintf "@(%s)" fileSelectorProp),
-            XAttribute(NsNone + "DestinationFolder", "$(SolutionDir)/bin/$(ProjectName)")))
+            XAttribute(NsNone + "DestinationFolder", "$(OutDir)")))
 
 let GenerateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project
@@ -55,7 +53,8 @@ let GenerateProjectTarget (project : Project) =
     let ext = match project.OutputType with
               | OutputType.Dll -> "dll"
               | OutputType.Exe -> "exe"
-    let includeFile = sprintf "%s/%s/%s.%s" MSBUILD_BIN_FOLDER output output ext
+    let prjPath = sprintf "%s/%s/bin" MSBUILD_SOLUTION_DIR (AnthologyBridge.RelativeProjectFolderFromWorkspace project)
+    let includeFile = sprintf "%s/%s.%s" prjPath output ext
     
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -93,6 +92,10 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_PACKAGE_FOLDER, StringComparison.CurrentCultureIgnoreCase)
 
+    let filterFullBuildTargets (xel : XElement) =
+        let attr = !> (xel.Attribute (NsNone + "Project")) : string
+        attr.StartsWith(MSBUILD_FULLBUILD_TARGETS, StringComparison.CurrentCultureIgnoreCase)
+
     let filterNuget (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith("$(SolutionDir)\.nuget\NuGet.targets", StringComparison.CurrentCultureIgnoreCase)
@@ -127,8 +130,8 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         not <| xel.DescendantNodes().Any()
 
     let setOutputPath (xel : XElement) =
-        let outputDir = sprintf "%s/%s/" MSBUILD_BIN_FOLDER project.Output.toString
-        xel.Value <- outputDir
+//        let outputDir = sprintf "%s/%s/" MSBUILD_BIN_FOLDER project.Output.toString
+        xel.Value <- MSBUILD_BIN_FOLDER
 
     // cleanup everything that will be modified
     let cproj = XDocument (xproj)
@@ -147,6 +150,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     // remove full-build imports
     cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
     cproj.Descendants(NsMsBuild + "Import").Where(filterPackage).Remove()
+    cproj.Descendants(NsMsBuild + "Import").Where(filterFullBuildTargets).Remove()
 //    cproj.Descendants(NsMsBuild + "Import").Where(filterPublishImport).Remove()
 //    cproj.Descendants(NsMsBuild + "Target").Where(filterPublishTarget).Remove()
 
@@ -185,9 +189,14 @@ let ConvertProject (xproj : XDocument) (project : Project) =
                         XAttribute (NsNone + "Project", importFile),
                         XAttribute(NsNone + "Condition", condition))
         cproj.Root.LastNode.AddAfterSelf (import)
+
+    // import publish
+    let importFB = XElement (NsMsBuild + "Import",
+                       XAttribute (NsNone + "Project", Env.MSBUILD_FULLBUILD_TARGETS))
+    cproj.Root.LastNode.AddAfterSelf (importFB)
     cproj
 
-let ConvertProjectContent (xproj : XDocument) (project : Project) (antho : Anthology) =
+let ConvertProjectContent (xproj : XDocument) (project : Project) =
     let convxproj = ConvertProject xproj project
     convxproj
 
@@ -198,7 +207,7 @@ let ConvertProjects (antho : Anthology) xdocLoader xdocSaver =
         if repoDir.Exists then
             let projFile = repoDir |> GetFile project.RelativeProjectFile.toString 
             let xproj = xdocLoader projFile
-            let convxproj = ConvertProjectContent xproj project antho
+            let convxproj = ConvertProjectContent xproj project
 
             // only save if projs differ
             if xproj.ToString() <> convxproj.ToString() then

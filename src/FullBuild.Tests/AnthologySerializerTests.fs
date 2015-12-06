@@ -26,7 +26,7 @@ let CheckSaveLoadAnthology () =
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set 
         Applications = [ { Name = ApplicationId.from "toto"
                            Publisher = PublisherType.Copy
-                           Projects = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set } ] |> Set 
+                           Project = ProjectId.from "cassandrasharp" } ] |> Set 
         Tester = TestRunnerType.NUnit
         Builder = BuilderType.MSBuild }
 
