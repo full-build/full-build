@@ -131,11 +131,9 @@ let Push () =
         printfn "[WARNING] Build output already exists - skipping"
     else
         try
-            let binDir = tmpVersionDir |> GetSubDirectory "bin"
-            for project in antho.Projects do
-                let binDirSrc = sprintf "%s/%s/%s" (wsDir.FullName) (AnthologyBridge.RelativeProjectFolderFromWorkspace project) MSBUILD_BIN_OUTPUT |> DirectoryInfo
-                let binDirDst = binDir |> GetSubDirectory (project.ProjectId.toString)
-                IoHelpers.CopyFolder binDirSrc binDirDst true
+            let sourceBinDir = Env.GetFolder Env.Bin
+            let targetBinDir = tmpVersionDir |> GetSubDirectory "bin"
+            IoHelpers.CopyFolder sourceBinDir targetBinDir true
 
             let appTargetDir = tmpVersionDir |> GetSubDirectory Env.MSBUILD_APP_OUTPUT
             let appDir = Env.GetFolder Env.AppOutput
@@ -165,15 +163,9 @@ let updateMasterBinaries () =
     let hash = Vcs.VcsTip wsDir mainRepo
     let versionDir = artifactDir |> GetSubDirectory hash
     if versionDir.Exists then
-        let binDirSrc = versionDir |> GetSubDirectory Env.MSBUILD_BIN_OUTPUT
-        for project in antho.Projects do
-            let binDirProjectSrc = binDirSrc |> GetSubDirectory project.ProjectId.toString
-            if binDirProjectSrc.Exists then
-                let repoDir = wsDir |> GetSubDirectory project.Repository.toString
-                if (repoDir.Exists) then
-                    let binDirProjectDst = repoDir |> GetSubDirectory (AnthologyBridge.RelativeProjectFolderFromWorkspace project)
-                    DisplayHighlight (sprintf "bin %s" hash)
-                    IoHelpers.CopyFolder binDirProjectSrc binDirProjectDst false
+        let sourceBinDir = versionDir |> GetSubDirectory "bin"
+        let targetBinDir = Env.GetFolder Env.Bin
+        IoHelpers.CopyFolder sourceBinDir targetBinDir false
     else
         DisplayHighlight "[WARNING] No reference binaries found"
 
