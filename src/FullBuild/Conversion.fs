@@ -21,17 +21,18 @@ open IoHelpers
 open MsBuildHelpers
 open Env
 open Anthology
+open Collections
 
-let generateCopyReference (project : Project) =
+let generateCopyReference (project : Project) (projects : Project seq) =
     let projectProperty = ProjectPropertyName project
     let fileSelectorProp = sprintf "%sFiles" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let fileSelector = seq {
         for dep in project.ProjectReferences do
+            let depProject = projects |> Seq.find (fun x -> x.ProjectId = dep)
+            let depOutput = sprintf "%s.%s" depProject.Output.toString depProject.OutputType.toString
             yield XElement(NsMsBuild + fileSelectorProp,
-                XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/bin/%s/*.dll" dep.toString))
-            yield XElement(NsMsBuild + fileSelectorProp,
-                XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/bin/%s/*.exe" dep.toString))
+                XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/bin/%s" depOutput))
     }
 
     XElement(NsMsBuild + "Target",
@@ -44,7 +45,7 @@ let generateCopyReference (project : Project) =
             XAttribute(NsNone + "SourceFiles", sprintf "@(%s)" fileSelectorProp),
             XAttribute(NsNone + "DestinationFolder", "$(OutDir)")))
 
-let GenerateProjectTarget (project : Project) =
+let GenerateProjectTarget (project : Project) (projects : Project seq) =
     let projectProperty = ProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
@@ -74,12 +75,12 @@ let GenerateProjectTarget (project : Project) =
                     XAttribute (NsNone + "Include", includeFile),
                     XAttribute (NsNone + "Condition", binCondition),
                     XElement (NsMsBuild + "Private", "true"))),
-            generateCopyReference project))
+            generateCopyReference project projects))
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let prjDir = Env.GetFolder Env.Project
     for project in projects do
-        let content = GenerateProjectTarget project
+        let content = GenerateProjectTarget project projects
         let projectFile = prjDir |> GetFile (AddExt Targets (project.Output.toString))
         xdocSaver projectFile content
 

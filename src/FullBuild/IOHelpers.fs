@@ -94,7 +94,7 @@ let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) (readOnly : boo
     let setRead = if readOnly then "/A+:R"
                   else "/A-:R"
 
-    let args = sprintf "%s /MIR /MT /NP /NFL /NDL /NJH %A %A" setRead source.FullName target.FullName
+    let args = sprintf "%s /MIR /MT /NP /NFL /NDL /NJH /NJS %A %A" setRead source.FullName target.FullName
     checkedExec "robocopy.exe" args currDir
 
 let GetExtension (file : FileInfo) =

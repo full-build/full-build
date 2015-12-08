@@ -20,19 +20,18 @@ open System.Reflection
 
 let private VIEW_FOLDER = "views"
 let private PROJECT_FOLDER = "projects"
-let private APP_FOLDER = "apps"
 let private PACKAGE_FOLDER = "packages"
+let private BIN_FOLDER = "bin"
 let ANTHOLOGY_FILENAME = "anthology"
 let BASELINE_FILENAME = "baseline"
 let FULLBUILD_TARGETS = "full-build.targets"
 let MASTER_REPO = ".full-build"
 let MSBUILD_SOLUTION_DIR = "$(SolutionDir)"
 let MSBUILD_TARGETFX_DIR = "$(TargetFrameworkVersion)"
-let MSBUILD_BIN_OUTPUT = "bin"
 let MSBUILD_APP_OUTPUT = "apps"
 let MSBUILD_PROJECT_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR MASTER_REPO PROJECT_FOLDER
 let MSBUILD_PACKAGE_FOLDER = sprintf "%s/%s/%s/" MSBUILD_SOLUTION_DIR MASTER_REPO PACKAGE_FOLDER
-let MSBUILD_BIN_FOLDER = MSBUILD_BIN_OUTPUT
+let MSBUILD_BIN_FOLDER = "bin"
 let MSBUILD_NUGET_FOLDER = sprintf "../%s/" PACKAGE_FOLDER
 let MSBUILD_FULLBUILD_TARGETS = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR MASTER_REPO FULLBUILD_TARGETS
 
@@ -63,6 +62,7 @@ type Folder =
        | View
        | Project
        | Package
+       | Bin
        | Installation
 
 
@@ -74,6 +74,7 @@ let rec GetFolder folder =
     | View -> GetFolder Config |> CreateSubDirectory VIEW_FOLDER
     | Project -> GetFolder Config |> CreateSubDirectory PROJECT_FOLDER
     | Package -> GetFolder Config |> CreateSubDirectory PACKAGE_FOLDER
+    | Bin -> GetFolder Config |> CreateSubDirectory BIN_FOLDER
     | Installation -> getInstallationFolder()
 
 let GetAnthologyFileName() = 
