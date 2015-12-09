@@ -1,5 +1,6 @@
 ﻿module AnthologyBridge
 open Anthology
+open System.IO
 
 
 let RelativeProjectFolderFromWorkspace (project : Project) =

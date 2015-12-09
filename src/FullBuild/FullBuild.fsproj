@@ -20,13 +20,13 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>$(SolutionDir)/.full-build/bin</OutputPath>
+    <OutputPath>bin</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>$(SolutionDir)/.full-build/bin/fullbuild.xml</DocumentationFile>
+    <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>publish *</StartArguments>
+    <StartArguments>test *</StartArguments>
     <StartWorkingDirectory>C:\src\full-build</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
@@ -36,11 +36,11 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>$(SolutionDir)/.full-build/bin</OutputPath>
+    <OutputPath>bin</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>$(SolutionDir)/.full-build/bin/fullbuild.xml</DocumentationFile>
+    <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
