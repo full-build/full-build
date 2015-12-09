@@ -43,8 +43,6 @@ let Clone (filters : RepositoryId set) (shallow : bool) =
                         |> Set.iter (cloneRepoAndInit wsDir shallow)
 
 let Add (name : RepositoryId) (url : RepositoryUrl) (vcsType : VcsType) =
-    Vcs.VcsDetermineType url |> ignore
-
     let antho = LoadAnthology ()
     let repo = { Name = name; Url = url; Vcs = vcsType }
     let repos = antho.Repositories |> Set.add repo
