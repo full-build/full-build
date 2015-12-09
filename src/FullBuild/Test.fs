@@ -50,17 +50,23 @@ let testWithTestRunner (runnerType : TestRunnerType) =
     chooseTestRunner runnerType runnerNUnit
 
 let TestAssemblies (filters : string list) (excludes : string list) =
+    let wsDir = Env.GetFolder Env.Workspace
+    let fullPathForProject x = wsDir |> IoHelpers.GetSubDirectory (AnthologyBridge.RelativeProjectFolderFromWorkspace x)
+                                     |> IoHelpers.GetSubDirectory "bin"
+
     let anthology = Configuration.LoadAnthology ()
     let prjNames = anthology.Projects 
-                    |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, sprintf "%s/bin" (AnthologyBridge.RelativeProjectFolderFromWorkspace x) |> DirectoryInfo ))
+                    |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, fullPathForProject x))
+                    |> Seq.filter (fun (_, y) -> y.Exists)
+                    |> Seq.toList
 
     let matchProjects filter = prjNames |> Seq.filter (fun x -> PatternMatching.Match (fst x) filter)
 
     let matches = filters |> Seq.map matchProjects
                           |> Seq.collect id
-                          |> Seq.filter (fun (_, y) -> y.Exists)
                           |> Seq.map (fun (_,y) -> y.EnumerateFiles("*.test*.dll", SearchOption.AllDirectories))
                           |> Seq.collect id
                           |> Seq.map (fun x -> x.FullName)
+                          |> Seq.toList
 
     (testWithTestRunner anthology.Tester) matches excludes
