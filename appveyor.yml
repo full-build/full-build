@@ -16,7 +16,10 @@ assembly_info:
 
 build_script:
   - cmd: build-update.bat
-    
+  
+test:
+  assemblies:
+  
 deploy_script:
   - cmd: push-release.bat
   
