@@ -10,9 +10,9 @@
 
   <PropertyGroup>
     <FBApp>*** undefined ***</FBApp>
-    <FBContentFolder>$(SolutionDir)\apps\$(FBApp)</FBContentFolder>
+    <FBContentFolder>$(SolutionDir)/apps/$(FBApp)</FBContentFolder>
     <FBBinFolder>$(FBContentFolder)</FBBinFolder>
-    <FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)\bin</FBBinFolder>
+    <FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)/.full-build/bin</FBBinFolder>
   </PropertyGroup>
 
   <Target Name="BeforeGenerateProjectPriFile">
@@ -24,9 +24,9 @@
   </Target>
 
   <Target Name="FBPublish">
-    <Copy SourceFiles="@(Content)" DestinationFolder="$(FBContentFolder)\%(Content.RelativeDir)" />
+    <Copy SourceFiles="@(Content)" DestinationFolder="$(FBContentFolder)/%(Content.RelativeDir)" />
 
-    <CreateItem Include="$(OutputPath)\*">
+    <CreateItem Include="$(OutputPath)/*">
       <Output TaskParameter="Include" ItemName="Binaries"/>
     </CreateItem>
     <Copy SourceFiles="@(Binaries)" DestinationFolder="$(FBBinFolder)" />

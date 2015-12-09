@@ -131,9 +131,11 @@ let private hgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion opti
 
 
 let private gitIgnore (repoDir : DirectoryInfo) =
-    let content = ["packages"; "views"; "apps"]
-    let gitIgnoreFile = repoDir |> IoHelpers.GetFile ".gitignore"
-    File.WriteAllLines (gitIgnoreFile.FullName, content)
+    let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"
+
+    let installDir = Env.GetFolder Env.Installation
+    let srcGitIgnore = installDir |> IoHelpers.GetFile "gitignore"
+    srcGitIgnore.CopyTo(dstGitIgnore.FullName) |> ignore
 
 let private hgIgnore (repoDir : DirectoryInfo) =
     // FIXME
