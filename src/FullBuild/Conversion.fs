@@ -131,10 +131,10 @@ let ConvertProject (xproj : XDocument) (project : Project) =
 
     let setOutputPath (xel : XElement) =
 //        let outputDir = sprintf "%s/%s/" MSBUILD_BIN_FOLDER project.Output.toString
-        xel.Value <- MSBUILD_BIN_FOLDER
+        xel.Value <- BIN_FOLDER
 
     let setDocumentation (xel : XElement) =
-        let fileName = sprintf "%s/%s.xml" MSBUILD_BIN_FOLDER project.ProjectId.toString
+        let fileName = sprintf "%s/%s.xml" BIN_FOLDER project.ProjectId.toString
         xel.Value <- fileName
 
     // cleanup everything that will be modified
@@ -234,7 +234,7 @@ let RemoveUselessStuff (antho : Anthology) =
     for project in antho.Projects do
         let prjDir = wsDir |> GetSubDirectory (AnthologyBridge.RelativeProjectFolderFromWorkspace project)
         if prjDir.Exists then 
-            let binDir = prjDir |> GetSubDirectory "bin"
-            let objDir = prjDir |> GetSubDirectory "obj"
+            let binDir = prjDir |> GetSubDirectory BIN_FOLDER
+            let objDir = prjDir |> GetSubDirectory OBJ_FOLDER
             if binDir.Exists then binDir.Delete(true)
             if objDir.Exists then objDir.Delete(true)
