@@ -32,7 +32,7 @@ let generateCopyReference (project : Project) (projects : Project seq) =
             let depProject = projects |> Seq.find (fun x -> x.ProjectId = dep)
             let depOutput = sprintf "%s.%s" depProject.Output.toString depProject.OutputType.toString
             yield XElement(NsMsBuild + fileSelectorProp,
-                XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/bin/%s" depOutput))
+                XAttribute(NsNone + "Include", sprintf "%s/%s" MSBUILD_BIN_FOLDER depOutput))
     }
 
     XElement(NsMsBuild + "Target",
@@ -54,9 +54,8 @@ let GenerateProjectTarget (project : Project) (projects : Project seq) =
     let ext = match project.OutputType with
               | OutputType.Dll -> "dll"
               | OutputType.Exe -> "exe"
-    let prjPath = sprintf "%s/%s/bin" MSBUILD_SOLUTION_DIR (AnthologyBridge.RelativeProjectFolderFromWorkspace project)
-    let includeFile = sprintf "%s/%s.%s" prjPath output ext
-    
+    let includeFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
+
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
     // Then we end up either importing output assembly or project depending on view configuration

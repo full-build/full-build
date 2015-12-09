@@ -20,11 +20,11 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>bin</OutputPath>
+    <OutputPath>$(SolutionDir)/.full-build/bin</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
+    <DocumentationFile>$(SolutionDir)/.full-build/bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>publish *</StartArguments>
     <StartWorkingDirectory>C:\src\full-build</StartWorkingDirectory>
@@ -36,11 +36,11 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>bin</OutputPath>
+    <OutputPath>$(SolutionDir)/.full-build/bin</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
+    <DocumentationFile>$(SolutionDir)/.full-build/bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
@@ -116,6 +116,9 @@
     <None Include="baseline.yaml" />
     <None Include="anthology.yaml" />
     <Content Include="full-build.targets">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="gitignore">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="commit-msg">

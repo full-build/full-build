@@ -12,8 +12,7 @@
   </ItemGroup>
   <Target Name="Prj_fullbuild_tests_copy" Condition="'$(Prj_fullbuild_tests)' == ''" AfterTargets="Build">
     <ItemGroup>
-      <Prj_fullbuild_testsFiles Include="$(SolutionDir)/bin/fullbuild/*.dll" />
-      <Prj_fullbuild_testsFiles Include="$(SolutionDir)/bin/fullbuild/*.exe" />
+      <Prj_fullbuild_testsFiles Include="$(SolutionDir)/.full-build/bin/fullbuild.exe" />
     </ItemGroup>
     <Copy SourceFiles="@(Prj_fullbuild_testsFiles)" DestinationFolder="$(OutDir)" />
   </Target>

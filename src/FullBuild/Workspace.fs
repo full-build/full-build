@@ -132,10 +132,10 @@ let Push () =
     else
         try
             let sourceBinDir = Env.GetFolder Env.Bin
-            let targetBinDir = tmpVersionDir |> GetSubDirectory "bin"
+            let targetBinDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
             IoHelpers.CopyFolder sourceBinDir targetBinDir true
 
-            let appTargetDir = tmpVersionDir |> GetSubDirectory Env.MSBUILD_APP_OUTPUT
+            let appTargetDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_APPS_FOLDER
             let appDir = Env.GetFolder Env.AppOutput
             IoHelpers.CopyFolder appDir appTargetDir true
 
@@ -163,7 +163,7 @@ let updateMasterBinaries () =
     let hash = Vcs.VcsTip wsDir mainRepo
     let versionDir = artifactDir |> GetSubDirectory hash
     if versionDir.Exists then
-        let sourceBinDir = versionDir |> GetSubDirectory "bin"
+        let sourceBinDir = versionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
         let targetBinDir = Env.GetFolder Env.Bin
         IoHelpers.CopyFolder sourceBinDir targetBinDir false
     else
