@@ -16,14 +16,7 @@ assembly_info:
 
 build_script:
   - cmd: build-update.bat
-  
-test:
-  assemblies:
-   - bin\**\*.tests.dll
-  categories:
-    except:
-      - integration
-  
+    
 deploy_script:
   - cmd: push-release.bat
   
