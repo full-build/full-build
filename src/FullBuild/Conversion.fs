@@ -23,29 +23,50 @@ open Env
 open Anthology
 open Collections
 
-let generateCopyReference (project : Project) (projects : Project seq) =
+
+let generateImportCopy (project : Project) =
+    let projectRefs = seq {
+        for prjRef in project.ProjectReferences do
+            yield XElement(NsMsBuild + "ItemGroup",
+                    XElement(NsMsBuild + "FBProjectReferences",
+                        XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/.full-build/projects/%s-copy.targets" prjRef.toString)))
+    }
+
+    let packageRefs = seq {
+        for pkgRef in project.PackageReferences do
+            yield XElement(NsMsBuild + "ItemGroup",
+                     XElement(NsMsBuild + "FBProjectReferences",
+                        XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/.full-build/packages/%s/package-copy.targets" pkgRef.toString)))
+    }
+
+    XDocument(
+        XElement(NsMsBuild + "Project",
+            projectRefs,
+            packageRefs))
+
+
+let importCopyFrom (project : Project) =
+    seq {
+        // generate FBProjectReferences
+        for dep in project.ProjectReferences do
+            yield XElement(NsMsBuild + "Import",
+                    XAttribute(NsNone + "Project", sprintf "$(SolutionDir)/.full-build/projects/%s-copy.target" dep.toString))
+    }
+
+let generateCopyFromTarget (project : Project) =
     let projectProperty = ProjectPropertyName project
     let fileSelectorProp = sprintf "%sFiles" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
-    let fileSelector = seq {
-        for dep in project.ProjectReferences do
-            let depProject = projects |> Seq.find (fun x -> x.ProjectId = dep)
-            let depOutput = sprintf "%s.%s" depProject.Output.toString depProject.OutputType.toString
-            yield XElement(NsMsBuild + fileSelectorProp,
-                XAttribute(NsNone + "Include", sprintf "%s/%s" MSBUILD_BIN_FOLDER depOutput))
-    }
 
     XElement(NsMsBuild + "Target",
         XAttribute(NsNone + "Name", sprintf "%s_copy" projectProperty),
         XAttribute(NsNone + "Condition", binCondition),
         XAttribute(NsNone + "AfterTargets", "Build"),
-        XElement(NsMsBuild + "ItemGroup",
-            fileSelector),
         XElement(NsMsBuild + "Copy",
-            XAttribute(NsNone + "SourceFiles", sprintf "@(%s)" fileSelectorProp),
+            XAttribute(NsNone + "SourceFiles", "FBProjectReferences"),
             XAttribute(NsNone + "DestinationFolder", "$(OutDir)")))
 
-let GenerateProjectTarget (project : Project) (projects : Project seq) =
+let GenerateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
@@ -74,14 +95,20 @@ let GenerateProjectTarget (project : Project) (projects : Project seq) =
                     XAttribute (NsNone + "Include", includeFile),
                     XAttribute (NsNone + "Condition", binCondition),
                     XElement (NsMsBuild + "Private", "true"))),
-            generateCopyReference project projects))
+            importCopyFrom project,
+            generateCopyFromTarget project))
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let prjDir = Env.GetFolder Env.Project
     for project in projects do
-        let content = GenerateProjectTarget project projects
+        let refProjectContent = GenerateProjectTarget project
         let projectFile = prjDir |> GetFile (AddExt Targets (project.Output.toString))
-        xdocSaver projectFile content
+        xdocSaver projectFile refProjectContent
+
+        let refCopyProjectContent = generateImportCopy project
+        let copyProjectFile = prjDir |> GetFile (AddExt Targets (project.Output.toString + "-copy"))
+        xdocSaver copyProjectFile refCopyProjectContent
+
 
 let ConvertProject (xproj : XDocument) (project : Project) =
     let filterProject (xel : XElement) =
