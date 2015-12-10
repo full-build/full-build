@@ -27,22 +27,28 @@ open Collections
 let generateImportCopy (project : Project) =
     let projectRefs = seq {
         for prjRef in project.ProjectReferences do
-            yield XElement(NsMsBuild + "ItemGroup",
-                    XElement(NsMsBuild + "FBProjectReferences",
-                        XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/.full-build/projects/%s-copy.targets" prjRef.toString)))
+            yield XElement(NsMsBuild + "FBProjectReferences",
+                    XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/.full-build/projects/%s-copy.targets" prjRef.toString))
     }
 
     let packageRefs = seq {
         for pkgRef in project.PackageReferences do
-            yield XElement(NsMsBuild + "ItemGroup",
-                     XElement(NsMsBuild + "FBProjectReferences",
-                        XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/.full-build/packages/%s/package-copy.targets" pkgRef.toString)))
+            yield XElement(NsMsBuild + "FBProjectReferences",
+                    XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/.full-build/packages/%s/package-copy.targets" pkgRef.toString))
     }
 
+    let output = (project.Output.toString)
+    let ext = match project.OutputType with
+              | OutputType.Dll -> "dll"
+              | OutputType.Exe -> "exe"
+    let copyFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
     XDocument(
         XElement(NsMsBuild + "Project",
             projectRefs,
-            packageRefs))
+            packageRefs,
+            XElement(NsMsBuild + "ItemGroup",
+                XElement(NsMsBuild + "FBCopyFiles", 
+                    XAttribute(NsNone + "Include", copyFile)))))
 
 
 let importCopyFrom (project : Project) =
