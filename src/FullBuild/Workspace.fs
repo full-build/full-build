@@ -143,6 +143,9 @@ let Push () =
             Try (fun () -> Vcs.VcsPush wsDir mainRepo)
 
             tmpVersionDir.MoveTo(versionDir.FullName)
+
+            let latestVersionFile = DirectoryInfo(antho.Artifacts) |> GetFile "latest"
+            File.WriteAllText(latestVersionFile.FullName, hash)
         with
             _ -> versionDir.Refresh ()
                  if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
@@ -154,15 +157,13 @@ let Push () =
     printfn "[version] %s" hash
 
 
-let updateMasterBinaries () =
+let updateMasterBinaries hash =
     let antho = Configuration.LoadAnthology ()
     let artifactDir = antho.Artifacts |> DirectoryInfo
 
-    let wsDir = Env.GetFolder Env.Workspace
-    let mainRepo = antho.MasterRepository
-    let hash = Vcs.VcsTip wsDir mainRepo
     let versionDir = artifactDir |> GetSubDirectory hash
     if versionDir.Exists then
+        DisplayHighlight (sprintf "Getting binaries %s" hash)
         let sourceBinDir = versionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
         let targetBinDir = Env.GetFolder Env.Bin
         IoHelpers.CopyFolder sourceBinDir targetBinDir false
@@ -190,7 +191,7 @@ let Checkout (version : BookmarkVersion) =
         | None -> Vcs.VcsCheckout wsDir repo None
 
     // update binaries with observable baseline
-    updateMasterBinaries ()
+    updateMasterBinaries version.toString
 
 let Pull (src : bool) (bin : bool) =
     let antho = Configuration.LoadAnthology ()
@@ -211,7 +212,9 @@ let Pull (src : bool) (bin : bool) =
                 Vcs.VcsPull wsDir repo
 
     if bin then
-        updateMasterBinaries ()
+        let latestVersionFile = DirectoryInfo(antho.Artifacts) |> GetFile "latest"
+        let hash = File.ReadAllText(latestVersionFile.FullName)
+        updateMasterBinaries hash
 
 
 let Init (path : string) (uri : RepositoryUrl) = 
