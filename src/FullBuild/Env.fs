@@ -77,7 +77,7 @@ let rec GetFolder folder =
     | View -> GetFolder Config |> CreateSubDirectory VIEW_FOLDER
     | Project -> GetFolder Config |> CreateSubDirectory PROJECT_FOLDER
     | Package -> GetFolder Config |> CreateSubDirectory PACKAGE_FOLDER
-    | Bin -> GetFolder Config |> CreateSubDirectory BIN_FOLDER
+    | Bin -> GetFolder Workspace |> CreateSubDirectory BIN_FOLDER
     | Installation -> getInstallationFolder()
 
 let GetAnthologyFileName() = 
