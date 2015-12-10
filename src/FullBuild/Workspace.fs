@@ -163,6 +163,7 @@ let updateMasterBinaries hash =
 
     let versionDir = artifactDir |> GetSubDirectory hash
     if versionDir.Exists then
+        DisplayHighlight (sprintf "Getting binaries %s" hash)
         let sourceBinDir = versionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
         let targetBinDir = Env.GetFolder Env.Bin
         IoHelpers.CopyFolder sourceBinDir targetBinDir false
