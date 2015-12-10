@@ -39,7 +39,6 @@ let runnerNUnit (matches : string seq) (excludes : string list) =
     let files = matches |> Seq.fold (fun s t -> sprintf @"%s %A" s t) ""
     let excludeArgs = excludeListToArgs excludes
     let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs 
-    printf "%s" args
     checkedExec "nunit3-console" args wsDir
 
 let chooseTestRunner (runnerType : TestRunnerType) nunitRunner =
@@ -70,4 +69,6 @@ let TestAssemblies (filters : string list) (excludes : string list) =
                           |> Seq.map (fun x -> x.FullName)
                           |> Seq.toList
 
-    (testWithTestRunner anthology.Tester) matches excludes
+    match matches.Length with
+    | 0 -> printfn "[WARNING] No test found"
+    | _ -> (testWithTestRunner anthology.Tester) matches excludes
