@@ -338,7 +338,7 @@ let UsageContent() =
         "  describe view <name> : describe view"
         "  alter view [--default] <viewName> : alter view"
         ""
-        "  add app <app-name> <copy | zip | azure> <project-id>+ : create new application from given project ids"
+        "  add app <app-name> <copy | zip | docker> <project-id>+ : create new application from given project ids"
         "  drop app <app-name> : drop application"
         "  list app : list applications" 
         "  describe app <app-name>" ]
