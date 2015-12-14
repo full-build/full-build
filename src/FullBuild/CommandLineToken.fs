@@ -24,6 +24,7 @@ type TokenOption =
     | Multithread
     | NoShallow
     | Default
+    | Branch
     | Unknown
 
 let (|TokenOption|) (token : string) =
@@ -36,6 +37,7 @@ let (|TokenOption|) (token : string) =
     | "--mt" -> TokenOption.Multithread
     | "--noshallow" -> TokenOption.NoShallow
     | "--default" -> TokenOption.Default
+    | "--branch" -> TokenOption.Branch
     | _ -> Unknown
 
 

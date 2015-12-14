@@ -36,7 +36,7 @@ let tryMain argv =
     | TestAssemblies testInfo -> Test.TestAssemblies testInfo.Filters testInfo.Excludes
 
     // repository
-    | AddRepository repoInfo -> Repo.Add repoInfo.Repo repoInfo.Url repoInfo.Type
+    | AddRepository repoInfo -> Repo.Add repoInfo.Repo repoInfo.Url repoInfo.Type repoInfo.Branch
     | CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters repoInfo.Shallow
     | ListRepositories -> Repo.List ()
     | DropRepository repo -> Repo.Drop repo

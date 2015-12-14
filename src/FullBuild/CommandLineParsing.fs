@@ -33,6 +33,9 @@ let (|MatchRepositoryId|) repo =
 let (|MatchApplicationId|) name =
     ApplicationId.from name
 
+let (|MatchBranchId|) name =
+    BranchId.from name
+
 let (|MatchPublisherType|) name =
     PublisherType.from name
 
@@ -102,7 +105,7 @@ let rec commandBuild (config : string) (clean : bool) (multithread : bool) (args
     | TokenOption TokenOption.Debug :: tail -> tail |> commandBuild "Debug" clean multithread
     | TokenOption TokenOption.Multithread :: tail -> tail |> commandBuild config clean true
     | [] -> Command.BuildView { Name = None ; Config = config; Clean = clean; Multithread = multithread }
-    | [(MatchViewId name)] -> Command.BuildView { Name = Some name ; Config = config; Clean = clean; Multithread = multithread }
+    | [MatchViewId name] -> Command.BuildView { Name = Some name ; Config = config; Clean = clean; Multithread = multithread }
     | _ -> Command.Error
 
 let commandCheckout (args : string list) =
@@ -142,9 +145,13 @@ let commandOutdated (args : string list) =
     | [] -> Command.OutdatedPackages
     | _ -> Command.Error
 
-let commandAddRepo  (args : string list) =
+let rec commandAddRepo (branch : BranchId option) (args : string list) =
     match args with
-    | name :: vcs :: [url] -> Command.AddRepository { Repo = RepositoryId.from name; Url = RepositoryUrl.from url; Type = VcsType.from vcs }
+    | TokenOption TokenOption.Branch :: MatchBranchId branch :: tail -> tail |> commandAddRepo (Some branch)
+    | name :: vcs :: [url] -> Command.AddRepository { Repo = RepositoryId.from name
+                                                      Url = RepositoryUrl.from url
+                                                      Branch = branch
+                                                      Type = VcsType.from vcs }
     | _ -> Command.Error
 
 let commandDropRepo (args : string list) =
@@ -251,7 +258,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Outdated :: Token Token.Package :: cmdArgs -> commandOutdated cmdArgs
     | Token Token.List :: Token Token.Package :: cmdArgs -> commandListPackage cmdArgs
 
-    | Token Token.Add :: Token Token.Repo :: cmdArgs -> commandAddRepo cmdArgs
+    | Token Token.Add :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandAddRepo None
     | Token Token.Drop :: Token Token.Repo :: cmdArgs -> commandDropRepo cmdArgs
     | Token Token.List :: Token Token.Repo :: cmdArgs -> commandListRepo cmdArgs
 
@@ -325,7 +332,7 @@ let UsageContent() =
         "  outdated package : display outdated packages"
         "  list package : list packages"
         ""
-        "  add repo <repo-name> <git | gerrit | hg> <repo-uri> : declare a new repository"
+        "  add repo [--branch <branchId>] <repo-name> <git | gerrit | hg> <repo-uri> : declare a new repository"
         "  drop repo <repo-name> : drop repository"
         "  list repo : list repositories"
         ""
