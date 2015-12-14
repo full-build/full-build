@@ -39,7 +39,7 @@ let private hgCommit (repoDir : DirectoryInfo) (comment : string) =
 
 
 let private gitPush (repoDir : DirectoryInfo) =
-    checkedExec "git" "push" repoDir
+    checkedExec "git" "push --quiet" repoDir
 
 let private hgPush (repoDir : DirectoryInfo) =
     checkedExec "hg" "push" repoDir
