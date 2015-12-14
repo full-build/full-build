@@ -77,6 +77,12 @@ with
     member this.toString = (fun (RepositoryId x) -> x)this
     static member from (name : string) = RepositoryId (name.ToLowerInvariant())
 
+type BranchId = private BranchId of string
+with
+    member this.toString = (fun (BranchId x) -> x)this
+    static member from (name : string) = BranchId (name)
+
+
 type RepositoryUrl = private RepositoryUrl of string
 with
     member this.toString = (fun (RepositoryUrl x) -> x)this
@@ -94,6 +100,7 @@ with
 type Repository = 
     { Name : RepositoryId
       Vcs : VcsType
+      Branch : BranchId option
       Url : RepositoryUrl }
 
 type BookmarkVersion = BookmarkVersion of string

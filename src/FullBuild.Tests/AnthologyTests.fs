@@ -15,14 +15,16 @@ let CheckReferences () =
     RepositoryId.from "badaboum" |> should equal <| RepositoryId.from "BADABOUM"
 
 let CheckToRepository () =
-    let repoGit = { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" }
+    let repoGit = { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"; Branch = None}
     repoGit |> should equal { Vcs = VcsType.Git
                               Name = RepositoryId.from "cassandra-sharp"
+                              Branch = None
                               Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" } 
 
-    let repoHg = { Vcs = VcsType.Hg; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" }
+    let repoHg = { Vcs = VcsType.Hg; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"; Branch = None }
     repoHg |> should equal { Vcs = VcsType.Hg
                              Name = RepositoryId.from "cassandra-sharp"
+                             Branch = None
                              Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" } 
 
 
@@ -31,9 +33,9 @@ let CheckEqualityWithPermutation () =
     let antho1 = {
         Artifacts = @"c:\toto"
         NuGets = []
-        MasterRepository = { Vcs = VcsType.Git; Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" }
-        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" }
-                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" } ] |> set
+        MasterRepository = { Vcs = VcsType.Git; Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" ; Branch = None}
+        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" ; Branch = None}
+                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" ; Branch = None} ] |> set
         Projects = [ { Output = AssemblyId.from "cqlplus"
                        ProjectId = ProjectId.from "cqlplus"
                        OutputType = OutputType.Exe
@@ -51,9 +53,9 @@ let CheckEqualityWithPermutation () =
     let antho2 = {
         Artifacts = @"c:\toto"
         NuGets = []
-        MasterRepository = { Vcs = VcsType.Git; Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" }
-        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" } 
-                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" } ] |> set
+        MasterRepository = { Vcs = VcsType.Git; Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" ; Branch = None}
+        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" ; Branch = None} 
+                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" ; Branch = None} ] |> set
         Projects = [ { Output = AssemblyId.from "cqlplus"
                        ProjectId = ProjectId.from "cqlplus"
                        OutputType = OutputType.Exe

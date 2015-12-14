@@ -40,6 +40,9 @@ let Serialize (antho : Anthology) =
         crepo.repo <- repo.Name.toString
         crepo.``type`` <- repo.Vcs.toString
         crepo.uri <- Uri (repo.Url.toString)
+        match repo.Branch with
+        | None -> crepo.branch <- null
+        | Some x -> crepo.branch <- x.toString
         config.anthology.repositories.Add crepo
 
     config.anthology.projects.Clear()
@@ -88,7 +91,12 @@ let Deserialize (content) =
     let rec convertToRepositories (items : AnthologyConfig.anthology_Type.repositories_Item_Type list) =
         match items with
         | [] -> Set.empty
-        | x :: tail -> convertToRepositories tail |> Set.add { Name=RepositoryId.from x.repo; Vcs=VcsType.from x.``type``; Url=RepositoryUrl.from (x.uri)}
+        | x :: tail -> let maybeBranch = if String.IsNullOrEmpty(x.branch) then None
+                                         else x.branch |> BranchId.from |> Some
+                       convertToRepositories tail |> Set.add { Name = RepositoryId.from x.repo
+                                                               Vcs = VcsType.from x.``type``
+                                                               Branch = maybeBranch
+                                                               Url = RepositoryUrl.from (x.uri)}
 
     let rec convertToAssemblies (items : AnthologyConfig.anthology_Type.projects_Item_Type.assemblies_Item_Type list) =
         match items with

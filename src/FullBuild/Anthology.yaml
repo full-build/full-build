@@ -7,6 +7,10 @@
     repositories:
         - repo: id1
           type: git
+          branch: fullbuild
+          uri: http://www.google.com
+        - repo: id1
+          type: git
           uri: http://www.google.com
     apps:
         - name: FullBuild

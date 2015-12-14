@@ -39,7 +39,7 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
     let vcsType = Vcs.VcsDetermineType uri
-    let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType}
+    let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType; Branch = None }
     VcsCloneRepo wsDir true repo
 
     let antho = { Artifacts = bin
@@ -224,7 +224,7 @@ let Init (path : string) (uri : RepositoryUrl) =
         printf "[WARNING] Workspace already exists - skipping"
     else
         let vcsType = Vcs.VcsDetermineType uri
-        let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType}
+        let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType; Branch = None }
         VcsCloneRepo wsDir true repo
 
 
