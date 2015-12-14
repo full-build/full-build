@@ -40,7 +40,7 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
     let vcsType = Vcs.VcsDetermineType uri
     let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType; Branch = None }
-    VcsCloneRepo wsDir true repo
+    VcsClone wsDir true repo
 
     let antho = { Artifacts = bin
                   NuGets = []
@@ -225,7 +225,7 @@ let Init (path : string) (uri : RepositoryUrl) =
     else
         let vcsType = Vcs.VcsDetermineType uri
         let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType; Branch = None }
-        VcsCloneRepo wsDir true repo
+        VcsClone wsDir true repo
 
 
 let Exec cmd =
