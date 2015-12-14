@@ -34,7 +34,7 @@ let FilterRepos (filters : RepositoryId set) =
             |> Set
 
 let cloneRepoAndInit wsDir shallow repo =
-    Vcs.VcsCloneRepo wsDir shallow repo
+    Vcs.VcsClone wsDir shallow repo
 
 let Clone (filters : RepositoryId set) (shallow : bool) = 
     let wsDir = Env.GetFolder Env.Workspace
