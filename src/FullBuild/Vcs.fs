@@ -92,11 +92,17 @@ let private hgIs (uri : RepositoryUrl) =
 
 
 
-let private gitClone (isGerrit : bool) (shallow : bool) (target : DirectoryInfo) (url : string) = 
+let private gitClone (isGerrit : bool) (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
     let depth = if shallow then "--depth=1"
                 else ""
 
-    let args = sprintf @"clone %s %A %A" depth url target.FullName
+    let bronly = match branch with
+                 | None -> ""
+                 | Some x -> sprintf "--branch %s --single-branch" x.toString
+
+    let args = sprintf @"clone %s %s %s %A" url depth bronly target.FullName
+    printfn "%s" args
+
     let currDir = IoHelpers.CurrentFolder ()
     checkedExec "git" args currDir
 
@@ -150,7 +156,7 @@ let chooseVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
     f repoDir
 
 let VcsCloneRepo (wsDir : DirectoryInfo) (shallow : bool) (repo : Repository) =
-    let gitCloneFunc =  gitClone (repo.Vcs = VcsType.Gerrit) shallow
+    let gitCloneFunc =  gitClone (repo.Vcs = VcsType.Gerrit) shallow repo.Branch
     let hgCloneFunc = hgClone
     (chooseVcs wsDir repo gitCloneFunc hgCloneFunc) repo.Url.toString
 
