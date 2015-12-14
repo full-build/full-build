@@ -42,9 +42,9 @@ let Clone (filters : RepositoryId set) (shallow : bool) =
                                                 not <| subDir.Exists)
                         |> Set.iter (cloneRepoAndInit wsDir shallow)
 
-let Add (name : RepositoryId) (url : RepositoryUrl) (vcsType : VcsType) =
+let Add (name : RepositoryId) (url : RepositoryUrl) (vcsType : VcsType) (branch : BranchId option) =
     let antho = LoadAnthology ()
-    let repo = { Name = name; Url = url; Vcs = vcsType }
+    let repo = { Name = name; Url = url; Vcs = vcsType ; Branch = branch }
     let repos = antho.Repositories |> Set.add repo
                                    |> Seq.distinctBy (fun x -> x.Name)
                                    |> Set
