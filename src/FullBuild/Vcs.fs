@@ -100,7 +100,7 @@ let private gitClone (isGerrit : bool) (shallow : bool) (branch : BranchId optio
                  | None -> ""
                  | Some x -> sprintf "--branch %s --single-branch" x.toString
 
-    let args = sprintf @"clone %s %s %s %A" url depth bronly target.FullName
+    let args = sprintf @"clone %s --quiet %s %s %A" url depth bronly target.FullName
     printfn "%s" args
 
     let currDir = IoHelpers.CurrentFolder ()
@@ -155,7 +155,7 @@ let chooseVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
             | VcsType.Hg -> hgFun
     f repoDir
 
-let VcsCloneRepo (wsDir : DirectoryInfo) (shallow : bool) (repo : Repository) =
+let VcsClone (wsDir : DirectoryInfo) (shallow : bool) (repo : Repository) =
     let gitCloneFunc =  gitClone (repo.Vcs = VcsType.Gerrit) shallow repo.Branch
     let hgCloneFunc = hgClone
     (chooseVcs wsDir repo gitCloneFunc hgCloneFunc) repo.Url.toString
