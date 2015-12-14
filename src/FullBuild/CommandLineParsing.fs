@@ -101,7 +101,8 @@ let rec commandBuild (config : string) (clean : bool) (multithread : bool) (args
     match args with
     | TokenOption TokenOption.Debug :: tail -> tail |> commandBuild "Debug" clean multithread
     | TokenOption TokenOption.Multithread :: tail -> tail |> commandBuild config clean true
-    | [(MatchViewId name)] -> Command.BuildView { Name = name ; Config = config; Clean = clean; Multithread = multithread }
+    | [] -> Command.BuildView { Name = None ; Config = config; Clean = clean; Multithread = multithread }
+    | [(MatchViewId name)] -> Command.BuildView { Name = Some name ; Config = config; Clean = clean; Multithread = multithread }
     | _ -> Command.Error
 
 let commandCheckout (args : string list) =
@@ -186,6 +187,12 @@ let commandDescribeView (args : string list) =
     | [MatchViewId name] -> Command.DescribeView { Name = name }
     | _ -> Command.Error
 
+let rec commandAlterView (isDefault : bool) (args : string list) =
+    match args with
+    | TokenOption TokenOption.Default :: tail -> tail |> commandAlterView true
+    | [MatchViewId name] -> Command.AlterView { Name = name ; Default = isDefault }
+    | _ -> Command.Error
+
 let commandAddApp (args : string list) =
     match args with
     | MatchApplicationId name :: MatchPublisherType pub :: [app] -> let project = app |> ProjectId.from
@@ -255,6 +262,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Drop :: Token Token.View :: cmdArgs -> commandDropView cmdArgs
     | Token Token.List :: Token Token.View :: cmdArgs -> commandListView cmdArgs
     | Token Token.Describe :: Token Token.View :: cmdArgs -> commandDescribeView cmdArgs
+    | Token Token.Alter :: Token Token.View :: cmdArgs -> cmdArgs |> commandAlterView false
     
     | Token Token.Add :: Token Token.App :: cmdArgs -> commandAddApp cmdArgs
     | Token Token.Drop :: Token Token.App :: cmdArgs -> commandDropApp cmdArgs
@@ -299,8 +307,8 @@ let UsageContent() =
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
         "  clone [--noshallow] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
-        "  build [--debug] [--mt] <view-name> : build view"
-        "  rebuild [--debug] [--mt] <view-name> : rebuild view (clean & build)"
+        "  build [--debug] [--mt] [<view-name>] : build view"
+        "  rebuild [--debug] [--mt] [<view-name>] : rebuild view (clean & build)"
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
         "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
@@ -328,6 +336,7 @@ let UsageContent() =
         "  drop view <view-name> : drop view"
         "  list view : list views"
         "  describe view <name> : describe view"
+        "  alter view [--default] <viewName> : alter view"
         ""
         "  add app <app-name> <copy | zip | azure> <project-id>+ : create new application from given project ids"
         "  drop app <app-name> : drop application"

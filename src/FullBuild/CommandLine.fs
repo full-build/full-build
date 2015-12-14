@@ -59,10 +59,15 @@ type AddApplication =
       Project : ProjectId }
 
 type BuildView =
-    { Name : ViewId
+    { Name : ViewId option
       Config : string 
       Clean : bool
       Multithread : bool }
+
+type AlterView =
+    { Name : ViewId
+      Default : bool }
+
 
 type GraphView =
     { Name : ViewId
@@ -115,6 +120,7 @@ type Command =
     | DescribeView of ViewName
     | GraphView of GraphView
     | BuildView of BuildView
+    | AlterView of AlterView
 
     // nuget
     | AddNuGet of RepositoryUrl
