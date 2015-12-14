@@ -28,24 +28,41 @@ let private checkedExec =
     Exec.Exec checkErrorCode
 
 
+let assertViewExists (viewName : ViewId) =
+    let vwDir = GetFolder Env.View
+    let vwFile = GetFile (AddExt View viewName.toString) vwDir
+    if not vwFile.Exists then failwithf "View %A does not exist" viewName.toString
+
 
 let Drop (viewName : ViewId) =
     let vwDir = GetFolder Env.View
-    let vwFile = GetFile (AddExt View viewName.toString) vwDir
-    vwFile.Delete()
+    let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
+    if vwFile.Exists then vwFile.Delete()
 
-    let vwDefineFile = GetFile (AddExt Targets viewName.toString) vwDir
-    vwDefineFile.Delete()
+    let vwDefineFile = vwDir |> GetFile (AddExt Targets viewName.toString)
+    if vwDefineFile.Exists then vwDefineFile.Delete()
 
-    let wsDir = Env.GetFolder Env.Workspace
-    let viewFile = GetFile (AddExt Solution viewName.toString) wsDir
-    viewFile.Delete ()
+    let wsDir = GetFolder Env.Workspace
+    let slnFile = wsDir |> GetFile (AddExt Solution viewName.toString)
+    if slnFile.Exists then slnFile.Delete()
 
 let List () =
     let vwDir = GetFolder Env.View
-    vwDir.EnumerateFiles (AddExt  View "*") |> Seq.iter (fun x -> printfn "%s" (Path.GetFileNameWithoutExtension (x.Name)))
+    let defaultFile = vwDir |> GetFile "default"
+    let defaultView = if defaultFile.Exists then File.ReadAllText (defaultFile.FullName)
+                      else "default"
+
+    let printViewInfo viewName = 
+        let defaultInfo = if viewName = defaultView then "[default]"
+                          else ""
+        printfn "%s %s" viewName defaultInfo
+
+    vwDir.EnumerateFiles (AddExt  View "*") |> Seq.iter (fun x -> printViewInfo (Path.GetFileNameWithoutExtension x.Name))
+
 
 let Describe (viewName : ViewId) =
+    assertViewExists viewName
+
     let vwDir = GetFolder Env.View
     let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
     File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
@@ -108,6 +125,8 @@ let SaveFileIfNecessary (file : FileInfo) (content : string) =
         File.WriteAllText (file.FullName, content)
 
 let Generate (viewName : ViewId) =
+    assertViewExists viewName
+
     let projects = FindViewProjects viewName
 
     // generate solution defines
@@ -124,6 +143,8 @@ let Generate (viewName : ViewId) =
 
 
 let Graph (viewName : ViewId) (all : bool) =
+    assertViewExists viewName
+
     let antho = Configuration.LoadAnthology ()
     let projects = FindViewProjects viewName |> Set
     let graph = Dgml.GraphContent antho projects all
@@ -165,15 +186,38 @@ let chooseBuilder (builderType : BuilderType) msbuildBuilder =
 let buildWithBuilder (builder : BuilderType) =
     chooseBuilder builder builderMSBuild
 
-let Build (name : ViewId) (config : string) (clean : bool) (multithread : bool) =
+
+let defaultView () =
+    let vwDir = GetFolder Env.View
+    let defaultFile = vwDir |> GetFile "default"
+    if not defaultFile.Exists then failwith "No default view defined"
+    let viewName = File.ReadAllText (defaultFile.FullName)
+    viewName |> ViewId
+
+let AlterView (viewName : ViewId) (isDefault : bool) =
+    assertViewExists viewName
+
+    if isDefault then 
+        let vwDir = GetFolder Env.View
+        let defaultFile = vwDir |> GetFile "default"
+        File.WriteAllText (defaultFile.FullName, viewName.toString)
+
+
+let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (multithread : bool) =
+    let viewName = match maybeViewName with
+                   | Some x -> x
+                   | None -> defaultView()
+
+    assertViewExists viewName
+
     let vwDir = Env.GetFolder Env.View 
-    let vwFile = vwDir |> GetFile (AddExt View name.toString)
-    if vwFile.Exists |> not then failwithf "Unknown view name %A" name.toString
+    let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
+    if vwFile.Exists |> not then failwithf "Unknown view name %A" viewName.toString
 
     let wsDir = Env.GetFolder Env.Workspace
-    let viewFile = wsDir |> GetFile (AddExt Solution name.toString)
+    let viewFile = wsDir |> GetFile (AddExt Solution viewName.toString)
 
-    Generate name
+    Generate viewName
 
     let target = if clean then "Clean,Build"
                  else "Build"

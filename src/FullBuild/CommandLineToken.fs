@@ -21,8 +21,9 @@ type TokenOption =
     | Bin
     | Src
     | Exclude
-    | NoShallow
     | Multithread
+    | NoShallow
+    | Default
     | Unknown
 
 let (|TokenOption|) (token : string) =
@@ -34,6 +35,7 @@ let (|TokenOption|) (token : string) =
     | "--exclude" -> TokenOption.Exclude
     | "--mt" -> TokenOption.Multithread
     | "--noshallow" -> TokenOption.NoShallow
+    | "--default" -> TokenOption.Default
     | _ -> Unknown
 
 
@@ -59,6 +61,7 @@ type Token =
     | Checkout
     | Exec
     | Test
+    | Alter
 
     | Add
     | Drop
@@ -102,6 +105,7 @@ let (|Token|) (token : string) =
     | "exec" -> Exec
     | "clean" -> Clean
     | "test" -> Test
+    | "alter" -> Alter
 
     | "add" -> Add
     | "drop" -> Drop
