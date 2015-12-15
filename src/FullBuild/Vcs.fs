@@ -109,12 +109,18 @@ let private gitClone (isGerrit : bool) (shallow : bool) (branch : BranchId optio
     if isGerrit then
         let installDir = Env.GetFolder Env.Installation
         let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
-        let target = target |> IoHelpers.GetSubDirectory ".git" |> IoHelpers.GetFile "commit-msg"
+        let target = target |> IoHelpers.GetSubDirectory ".git"
+                            |> IoHelpers.GetSubDirectory "hooks" 
+                            |> IoHelpers.GetFile "commit-msg"
         commitMsgFile.CopyTo (target.FullName) |> ignore
 
 
-let private hgClone (target : DirectoryInfo) (url : string) = 
-    let args = sprintf @"clone %A %A" url target.FullName
+let private hgClone (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
+    let bronly = match branch with
+                 | None -> ""
+                 | Some x -> sprintf "-r %s" x.toString
+
+    let args = sprintf @"clone %s %A %A" bronly url target.FullName
     let currDir = IoHelpers.CurrentFolder ()
     checkedExec "hg" args currDir
 
@@ -157,7 +163,7 @@ let chooseVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
 
 let VcsClone (wsDir : DirectoryInfo) (shallow : bool) (repo : Repository) =
     let gitCloneFunc =  gitClone (repo.Vcs = VcsType.Gerrit) shallow repo.Branch
-    let hgCloneFunc = hgClone
+    let hgCloneFunc = hgClone repo.Branch
     (chooseVcs wsDir repo gitCloneFunc hgCloneFunc) repo.Url.toString
 
 let VcsTip (wsDir : DirectoryInfo) (repo : Repository) = 
