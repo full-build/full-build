@@ -27,14 +27,21 @@ open Collections
 let generateImportCopy (project : Project) =
     let projectRefs = seq {
         for prjRef in project.ProjectReferences do
-            yield XElement(NsMsBuild + "FBProjectReferences",
-                    XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/.full-build/projects/%s-copy.targets" prjRef.toString))
+            let prjProperty = ProjectPropertyName prjRef
+            let condition = sprintf "'$(%s_Copy)' == ''" prjProperty
+
+            yield XElement(NsMsBuild + "Import",
+                    XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/.full-build/projects/%s-copy.targets" prjRef.toString),
+                    XAttribute(NsNone + "Condition", condition)
     }
 
     let packageRefs = seq {
         for pkgRef in project.PackageReferences do
-            yield XElement(NsMsBuild + "FBProjectReferences",
-                    XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/.full-build/packages/%s/package-copy.targets" pkgRef.toString))
+            let pkgProperty = PackagePropertyName pkgRef
+            let condition = sprintf "'$(%s_Copy)' == ''" pkgProperty
+            yield XElement(NsMsBuild + "Import",
+                    XAttribute(NsNone + "Include", sprintf "$(SolutionDir)/.full-build/packages/%s/package-copy.targets" pkgRef.toString),
+                    XAttribute(NsNone + "Condition", condition)
     }
 
     let output = (project.Output.toString)
@@ -42,8 +49,12 @@ let generateImportCopy (project : Project) =
               | OutputType.Dll -> "dll"
               | OutputType.Exe -> "exe"
     let copyFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
+    let prjProperty = ProjectPropertyName project
+    let condition = sprintf "'$(%s_Copy)' == ''" prjProperty
     XDocument(
         XElement(NsMsBuild + "Project",
+            XElement (NsMsBuild + "PropertyGroup",
+                XElement (NsMsBuild + defineName, "Y")),
             projectRefs,
             packageRefs,
             XElement(NsMsBuild + "ItemGroup",
@@ -61,7 +72,6 @@ let importCopyFrom (project : Project) =
 
 let generateCopyFromTarget (project : Project) =
     let projectProperty = ProjectPropertyName project
-    let fileSelectorProp = sprintf "%sFiles" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
 
     XElement(NsMsBuild + "Target",
