@@ -28,11 +28,11 @@ let inline (!>) (x : ^a) : ^b = (((^a or ^b) : (static member op_Explicit : ^a -
 let ReplaceInvalidChars (s : string) =
     s.Replace('-', '_').Replace('.', '_').Replace("{", "").Replace("}", "")
 
-let ProjectPropertyName (project : Project) =
-    let prjGuid = project.Output.toString |> ReplaceInvalidChars
+let ProjectPropertyName (projectId : ProjectId) =
+    let prjGuid = projectId.toString |> ReplaceInvalidChars
     let prjProp = sprintf "Prj_%s" prjGuid
     prjProp
 
-let PackagePropertyName (id : string) =
-    let pkgProp = sprintf "FullBuild_%s_Pkg" id |> ReplaceInvalidChars
+let PackagePropertyName (packageId : PackageId) =
+    let pkgProp = sprintf "FullBuild_%s_Pkg" packageId.toString |> ReplaceInvalidChars
     pkgProp
