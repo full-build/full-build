@@ -19,7 +19,7 @@
   </Target>
 
   <Target Name="FBCopyBin" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)/bin/" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)/.full-build/bin/" />
     <Copy SourceFiles="@(FBCopyFiles)" DestinationFolder="$(TargetPath)" />
   </Target>
 
