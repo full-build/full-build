@@ -48,7 +48,7 @@ let GenerateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
                 itemGroup))
 
 let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
-    let pkgProp = PackagePropertyName package.toString
+    let pkgProp = PackagePropertyName package
     let packageWarnProp = sprintf "%s_Warning" pkgProp
 
     let whens = seq {    
@@ -87,7 +87,7 @@ let GenerateDependenciesContent (dependencies : PackageId seq) =
         for dependency in dependencies do
             let depId = dependency.toString
             let dependencyTargets = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER depId
-            let pkgProperty = PackagePropertyName depId
+            let pkgProperty = PackagePropertyName dependency
             let condition = sprintf "'$(%s)' == ''" pkgProperty
     
             yield XElement(NsMsBuild + "Import",
@@ -96,7 +96,7 @@ let GenerateDependenciesContent (dependencies : PackageId seq) =
     }
 
 let GenerateProjectContent (package : PackageId) (imports : XElement seq) (choose : XElement seq) =
-    let defineName = PackagePropertyName (package.toString)
+    let defineName = PackagePropertyName package
     let propCondition = sprintf "'$(%s)' == ''" defineName
     let project = XElement (NsMsBuild + "Project",
                     XAttribute (NsNone + "Condition", propCondition),

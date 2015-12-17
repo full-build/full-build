@@ -23,30 +23,27 @@ open Env
 open Anthology
 open Collections
 
-let generateCopyReference (project : Project) (projects : Project seq) =
-    let projectProperty = ProjectPropertyName project
-    let fileSelectorProp = sprintf "%sFiles" projectProperty
-    let binCondition = sprintf "'$(%s)' == ''" projectProperty
-    let fileSelector = seq {
-        for dep in project.ProjectReferences do
-            let depProject = projects |> Seq.find (fun x -> x.ProjectId = dep)
-            let depOutput = sprintf "%s.%s" depProject.Output.toString depProject.OutputType.toString
-            yield XElement(NsMsBuild + fileSelectorProp,
-                XAttribute(NsNone + "Include", sprintf "%s/%s" MSBUILD_BIN_FOLDER depOutput))
-    }
 
-    XElement(NsMsBuild + "Target",
-        XAttribute(NsNone + "Name", sprintf "%s_copy" projectProperty),
-        XAttribute(NsNone + "Condition", binCondition),
-        XAttribute(NsNone + "AfterTargets", "Build"),
-        XElement(NsMsBuild + "ItemGroup",
-            fileSelector),
-        XElement(NsMsBuild + "Copy",
-            XAttribute(NsNone + "SourceFiles", sprintf "@(%s)" fileSelectorProp),
-            XAttribute(NsNone + "DestinationFolder", "$(OutDir)")))
+let importCopyFrom (project : Project) =
+    let prjProperty = ProjectPropertyName project.ProjectId
+    let condition = sprintf "'$(%s)' == ''" prjProperty
+    let prjFolder = Path.GetDirectoryName (project.RelativeProjectFile.toString)
+    let path = sprintf "$(SolutionDir)/%s/%s/bin/" (project.Repository.toString) (prjFolder) 
+    let ext = match project.OutputType with
+              | OutputType.Dll -> ".dll"
+              | OutputType.Exe -> ".exe"
 
-let GenerateProjectTarget (project : Project) (projects : Project seq) =
-    let projectProperty = ProjectPropertyName project
+    let inc = sprintf "%s*.dll;%s.*.exe" path path
+    let excl = sprintf "%s%s%s" path project.Output.toString ext
+
+    XElement(NsMsBuild + "ItemGroup",
+        XElement(NsMsBuild + "FBCopyFiles", 
+            XAttribute(NsNone + "Include", inc),
+            XAttribute(NsNone + "Exclude", excl)),
+        XAttribute(NsNone + "Condition", condition))
+
+let GenerateProjectTarget (project : Project) =
+    let projectProperty = ProjectPropertyName project.ProjectId
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.toString) project.RelativeProjectFile.toString
@@ -74,14 +71,15 @@ let GenerateProjectTarget (project : Project) (projects : Project seq) =
                     XAttribute (NsNone + "Include", includeFile),
                     XAttribute (NsNone + "Condition", binCondition),
                     XElement (NsMsBuild + "Private", "true"))),
-            generateCopyReference project projects))
+            importCopyFrom project))
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let prjDir = Env.GetFolder Env.Project
     for project in projects do
-        let content = GenerateProjectTarget project projects
+        let refProjectContent = GenerateProjectTarget project
         let projectFile = prjDir |> GetFile (AddExt Targets (project.Output.toString))
-        xdocSaver projectFile content
+        xdocSaver projectFile refProjectContent
+
 
 let ConvertProject (xproj : XDocument) (project : Project) =
     let filterProject (xel : XElement) =
@@ -188,7 +186,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     for packageReference in project.PackageReferences do
         let pkgId = packageReference.toString
         let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER pkgId
-        let pkgProperty = PackagePropertyName pkgId
+        let pkgProperty = PackagePropertyName packageReference
         let condition = sprintf "'$(%s)' == ''" pkgProperty
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile),
