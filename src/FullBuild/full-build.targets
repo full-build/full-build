@@ -12,15 +12,15 @@
     <FBApp>*** undefined ***</FBApp>
     <FBContentFolder>$(SolutionDir)/apps/$(FBApp)</FBContentFolder>
     <FBBinFolder>$(FBContentFolder)</FBBinFolder>
-    <FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)/.full-build/bin</FBBinFolder>
+    <FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)/bin</FBBinFolder>
   </PropertyGroup>
 
   <Target Name="BeforeGenerateProjectPriFile">
   </Target>
 
-
   <Target Name="FBCopyBin" AfterTargets="Build">
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)/bin/" />
+    <Copy SourceFiles="@(FBCopyFiles)" DestinationFolder="$(TargetPath)" />
   </Target>
 
   <Target Name="FBPublish">
