@@ -26,11 +26,11 @@ let CheckProjectPropertyName () =
                     AssemblyReferences = [ AssemblyId.from("System") ; AssemblyId.from("System.Xml") ] |> set
                     Repository = RepositoryId.from "cassandra-sharp" }
 
-    let propName = ProjectPropertyName project
+    let propName = ProjectPropertyName project.ProjectId
     propName |> should equal "Prj_cqlplus"
 
 [<Test>]
 let CheckPackagePropertyName () =
-    let package = "Rx-Core"
+    let package = "Rx-Core" |> PackageId.from
     let propName = PackagePropertyName package
     propName |> should equal "FullBuild_Rx_Core_Pkg"
