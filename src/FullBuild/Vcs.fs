@@ -101,7 +101,6 @@ let private gitClone (isGerrit : bool) (shallow : bool) (branch : BranchId optio
                  | Some x -> sprintf "--branch %s --single-branch" x.toString
 
     let args = sprintf @"clone %s --quiet %s %s %A" url depth bronly target.FullName
-    printfn "%s" args
 
     let currDir = IoHelpers.CurrentFolder ()
     checkedExec "git" args currDir
