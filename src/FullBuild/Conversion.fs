@@ -24,53 +24,23 @@ open Anthology
 open Collections
 
 
-let generateImportCopy (project : Project) =
-    let projectRefs = seq {
-        for prjRef in project.ProjectReferences do
-            let prjProperty = ProjectPropertyName prjRef
-            let condition = sprintf "'$(%s_Copy)' == ''" prjProperty
-
-            yield XElement(NsMsBuild + "Import",
-                    XAttribute(NsNone + "Project", sprintf "$(SolutionDir)/.full-build/projects/%s-copy.targets" prjRef.toString),
-                    XAttribute(NsNone + "Condition", condition))
-    }
-
-    let packageRefs = seq {
-        for pkgRef in project.PackageReferences do
-            let pkgProperty = PackagePropertyName pkgRef
-            let condition = sprintf "'$(%s_Copy)' == ''" pkgProperty
-            yield XElement(NsMsBuild + "Import",
-                    XAttribute(NsNone + "Project", sprintf "$(SolutionDir)/.full-build/packages/%s/package-copy.targets" pkgRef.toString),
-                    XAttribute(NsNone + "Condition", condition))
-    }
-
-    let output = (project.Output.toString)
-    let ext = match project.OutputType with
-              | OutputType.Dll -> "dll"
-              | OutputType.Exe -> "exe"
-    let copyFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
-    let prjProperty =  sprintf "%s_Copy" (ProjectPropertyName project.ProjectId)
-    XDocument(
-        XElement(NsMsBuild + "Project",
-            XElement (NsMsBuild + "PropertyGroup",
-                XElement (NsMsBuild + prjProperty, "Y")),
-            projectRefs,
-            packageRefs,
-            XElement(NsMsBuild + "ItemGroup",
-                XElement(NsMsBuild + "FBCopyFiles", 
-                    XAttribute(NsNone + "Include", copyFile)))))
-
-
 let importCopyFrom (project : Project) =
-    seq {
-        // generate FBCopyFiles
-        for dep in project.ProjectReferences do
-            let prjProperty = ProjectPropertyName dep
-            let condition = sprintf "'$(%s_Copy)' == ''" prjProperty
-            yield XElement(NsMsBuild + "Import",
-                    XAttribute(NsNone + "Project", sprintf "$(SolutionDir)/.full-build/projects/%s-copy.targets" dep.toString),
-                    XAttribute(NsNone + "Condition", condition))
-    }
+    let prjProperty = ProjectPropertyName project.ProjectId
+    let condition = sprintf "'$(%s)' == ''" prjProperty
+    let prjFolder = Path.GetDirectoryName (project.RelativeProjectFile.toString)
+    let path = sprintf "$(SolutionDir)/%s/%s/bin/" (project.Repository.toString) (prjFolder) 
+    let ext = match project.OutputType with
+              | OutputType.Dll -> ".dll"
+              | OutputType.Exe -> ".exe"
+
+    let inc = sprintf "%s*.dll;%s.*.exe" path path
+    let excl = sprintf "%s%s%s" path project.Output.toString ext
+
+    XElement(NsMsBuild + "ItemGroup",
+        XElement(NsMsBuild + "FBCopyFiles", 
+            XAttribute(NsNone + "Include", inc),
+            XAttribute(NsNone + "Exclude", excl)),
+        XAttribute(NsNone + "Condition", condition))
 
 let GenerateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project.ProjectId
@@ -109,10 +79,6 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
         let refProjectContent = GenerateProjectTarget project
         let projectFile = prjDir |> GetFile (AddExt Targets (project.Output.toString))
         xdocSaver projectFile refProjectContent
-
-        let refCopyProjectContent = generateImportCopy project
-        let copyProjectFile = prjDir |> GetFile (AddExt Targets (project.Output.toString + "-copy"))
-        xdocSaver copyProjectFile refCopyProjectContent
 
 
 let ConvertProject (xproj : XDocument) (project : Project) =
