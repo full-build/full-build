@@ -27,7 +27,7 @@ let tryMain argv =
     | InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository
     | IndexWorkspace -> Workspace.Index ()
     | ConvertWorkspace -> Workspace.Convert ()
-    | PushWorkspace -> Workspace.Push ()
+    | PushWorkspace buildInfo -> Workspace.Push buildInfo.BuildNumber
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
     | PullWorkspace pullInfo -> Workspace.Pull pullInfo.Src pullInfo.Bin
     | Exec cmd -> Workspace.Exec cmd.Command

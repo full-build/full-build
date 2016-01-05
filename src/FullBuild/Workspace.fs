@@ -101,13 +101,7 @@ let CollectRepoHash wsDir (repos : Repository set) =
     repos |> Set.map getRepoHash
 
 
-let Try action =
-    try
-        action()
-    with
-        _ -> ()
-
-let Push () = 
+let Push buildnum = 
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
     let allRepos = antho.Repositories
@@ -123,53 +117,8 @@ let Push () =
 
     // copy bin content
     let hash = Vcs.VcsTip wsDir mainRepo
-    let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
-    let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
-    if tmpVersionDir.Exists then
-        tmpVersionDir.Delete(true)
-    if versionDir.Exists then
-        printfn "[WARNING] Build output already exists - skipping"
-    else
-        try
-            let sourceBinDir = Env.GetFolder Env.Bin
-            let targetBinDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
-            IoHelpers.CopyFolder sourceBinDir targetBinDir true
-
-            let appTargetDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_APPS_FOLDER
-            let appDir = Env.GetFolder Env.AppOutput
-            IoHelpers.CopyFolder appDir appTargetDir true
-
-            // publish
-            Try (fun () -> Vcs.VcsPush wsDir mainRepo)
-
-            tmpVersionDir.MoveTo(versionDir.FullName)
-
-            let latestVersionFile = DirectoryInfo(antho.Artifacts) |> GetFile "latest"
-            File.WriteAllText(latestVersionFile.FullName, hash)
-        with
-            _ -> versionDir.Refresh ()
-                 if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
-
-                 tmpVersionDir.Refresh()
-                 if tmpVersionDir.Exists then tmpVersionDir.Delete(true)
-
-                 reraise ()
+    BuildArtifacts.Publish buildnum hash
     printfn "[version] %s" hash
-
-
-let updateMasterBinaries hash =
-    let antho = Configuration.LoadAnthology ()
-    let artifactDir = antho.Artifacts |> DirectoryInfo
-
-    let versionDir = artifactDir |> GetSubDirectory hash
-    if versionDir.Exists then
-        DisplayHighlight (sprintf "Getting binaries %s" hash)
-        let sourceBinDir = versionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
-        let targetBinDir = Env.GetFolder Env.Bin
-        IoHelpers.CopyFolder sourceBinDir targetBinDir false
-    else
-        DisplayHighlight "[WARNING] No reference binaries found"
-
 
 let Checkout (version : BookmarkVersion) =
     // checkout repositories
@@ -191,7 +140,7 @@ let Checkout (version : BookmarkVersion) =
         | None -> Vcs.VcsCheckout wsDir repo None
 
     // update binaries with observable baseline
-    updateMasterBinaries version.toString
+    BuildArtifacts.PullReferenceBinaries version.toString
 
 let Pull (src : bool) (bin : bool) =
     let antho = Configuration.LoadAnthology ()
@@ -212,10 +161,7 @@ let Pull (src : bool) (bin : bool) =
                 Vcs.VcsPull wsDir repo
 
     if bin then
-        let latestVersionFile = DirectoryInfo(antho.Artifacts) |> GetFile "latest"
-        let hash = File.ReadAllText(latestVersionFile.FullName)
-        updateMasterBinaries hash
-
+        BuildArtifacts.PullLatestReferenceBinaries ()
 
 let Init (path : string) (uri : RepositoryUrl) = 
     let wsDir = DirectoryInfo(path)
