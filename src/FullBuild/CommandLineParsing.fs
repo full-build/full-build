@@ -115,7 +115,7 @@ let commandCheckout (args : string list) =
 
 let commandPush (args : string list) =
     match args with
-    | [] -> Command.PushWorkspace
+    | [buildNumber] -> Command.PushWorkspace { BuildNumber = buildNumber }
     | _ -> Command.Error
 
 let rec commandPull (src : bool) (bin : bool) (args : string list) =
@@ -322,7 +322,7 @@ let UsageContent() =
         "  index : index workspace"
         "  convert : convert projects in workspace"
         "  pull [--src | --bin] : update to latest version"
-        "  push : push a baseline from current repositories version and display version"
+        "  push <buildNumber> : push a baseline from current repositories version and display version"
         "  publish <app> : publish application"
         "  clean : DANGER! reset and clean workspace (interactive command)"
         "  update-guids : DANGER! change guids of all projects in given repository (interactive command)" 

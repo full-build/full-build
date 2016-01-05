@@ -113,3 +113,11 @@ let DisplayHighlight s =
     Console.ForegroundColor <- ConsoleColor.Cyan
     printfn "==> %s" s
     Console.ForegroundColor <- oldColor
+
+
+let Try action =
+    try
+        action()
+    with
+        _ -> ()
+

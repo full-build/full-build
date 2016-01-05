@@ -90,6 +90,11 @@ type PullWorkspace =
         Bin : bool
     }
 
+type PushWorkspace =
+    {
+        BuildNumber : string
+    }
+
 type Command = 
     | Version
     | Usage
@@ -100,7 +105,7 @@ type Command =
     | InitWorkspace of InitWorkspace
     | IndexWorkspace
     | ConvertWorkspace
-    | PushWorkspace
+    | PushWorkspace of PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
     | PullWorkspace of PullWorkspace
     | Exec of Exec
