@@ -13,10 +13,10 @@ let Publish buildnum hash =
     let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
     if tmpVersionDir.Exists then
         tmpVersionDir.Delete(true)
-    if versionDir.Exists then
-        printfn "[WARNING] Build output already exists - skipping"
-    else
-        try
+
+    try
+        let doPublish = not versionDir.Exists
+        if doPublish then            
             let sourceBinDir = Env.GetFolder Env.Bin
             let targetBinDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
             IoHelpers.CopyFolder sourceBinDir targetBinDir true
@@ -29,18 +29,21 @@ let Publish buildnum hash =
             Try (fun () -> Vcs.VcsPush wsDir mainRepo)
 
             tmpVersionDir.MoveTo(versionDir.FullName)
+        else
+            printfn "[WARNING] Build output already exists - skipping"
 
-            let latestVersionFile = DirectoryInfo(antho.Artifacts) |> GetFile "versions"
-            let version = sprintf "%s:%s" buildnum hash
-            File.AppendAllLines(latestVersionFile.FullName, [version])
-        with
-            _ -> versionDir.Refresh ()
-                 if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
+        let latestVersionFile = DirectoryInfo(antho.Artifacts) |> GetFile "versions"
+        let version = sprintf "%s:%s" buildnum hash
+        File.AppendAllLines(latestVersionFile.FullName, [version])
+        printfn "[version] %s" hash
+    with
+        _ -> versionDir.Refresh ()
+             if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
 
-                 tmpVersionDir.Refresh()
-                 if tmpVersionDir.Exists then tmpVersionDir.Delete(true)
+             tmpVersionDir.Refresh()
+             if tmpVersionDir.Exists then tmpVersionDir.Delete(true)
 
-                 reraise ()
+             reraise ()
 
 let PullReferenceBinaries version =
     let antho = Configuration.LoadAnthology ()
