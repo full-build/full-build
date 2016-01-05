@@ -32,7 +32,7 @@ let Publish buildnum hash =
 
             let latestVersionFile = DirectoryInfo(antho.Artifacts) |> GetFile "versions"
             let version = sprintf "%s:%s" buildnum hash
-            File.AppendAllLines(latestVersionFile.FullName, [hash])
+            File.AppendAllLines(latestVersionFile.FullName, [version])
         with
             _ -> versionDir.Refresh ()
                  if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
@@ -59,5 +59,5 @@ let PullLatestReferenceBinaries () =
     let antho = Configuration.LoadAnthology ()
     let versionsFile = DirectoryInfo(antho.Artifacts) |> GetFile "versions"
     let version = File.ReadAllLines(versionsFile.FullName) |> Seq.last
-    let hash = version.Split(':').[1]
+    let hash = version.Split(':') |> Seq.last
     PullReferenceBinaries hash
