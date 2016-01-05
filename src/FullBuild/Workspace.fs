@@ -118,7 +118,6 @@ let Push buildnum =
     // copy bin content
     let hash = Vcs.VcsTip wsDir mainRepo
     BuildArtifacts.Publish buildnum hash
-    printfn "[version] %s" hash
 
 let Checkout (version : BookmarkVersion) =
     // checkout repositories
