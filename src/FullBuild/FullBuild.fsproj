@@ -100,6 +100,8 @@
     <Compile Include="Repo.fs" />
     <Compile Include="Solution.fs" />
     <Compile Include="Dgml.fs" />
+    <Compile Include="Versionners.fs" />
+    <Compile Include="Builders.fs" />
     <Compile Include="View.fs" />
     <Compile Include="NuGets.fs" />
     <Compile Include="Simplify.fs" />
@@ -107,9 +109,11 @@
     <Compile Include="PlatformMatching.fs" />
     <Compile Include="Package.fs" />
     <Compile Include="Conversion.fs" />
+    <Compile Include="TestRunners.fs" />
     <Compile Include="Test.fs" />
     <Compile Include="Indexation.fs" />
     <Compile Include="BuildArtifacts.fs" />
+    <Compile Include="Publishers.fs" />
     <Compile Include="Workspace.fs" />
     <Compile Include="Application.fs" />
     <Compile Include="Program.fs" />
