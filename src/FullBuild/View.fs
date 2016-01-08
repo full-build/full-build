@@ -177,7 +177,7 @@ let AlterView (viewName : ViewId) (isDefault : bool) =
         File.WriteAllText (defaultFile.FullName, viewName.toString)
 
 
-let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (multithread : bool) =
+let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (multithread : bool) (version : string) =
     let viewName = match maybeViewName with
                    | Some x -> x
                    | None -> defaultView()
@@ -197,4 +197,4 @@ let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (mult
                  else "Build"
 
     let antho = Configuration.LoadAnthology ()
-    (Builders.BuildWithBuilder antho.Builder) config target viewFile multithread
+    (Builders.BuildWithBuilder antho.Builder) config target viewFile multithread version
