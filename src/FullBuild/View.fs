@@ -193,8 +193,5 @@ let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (mult
 
     Generate viewName
 
-    let target = if clean then "Clean,Build"
-                 else "Build"
-
     let antho = Configuration.LoadAnthology ()
-    (Builders.BuildWithBuilder antho.Builder) config target viewFile multithread version
+    (Builders.BuildWithBuilder antho.Builder) viewFile config clean multithread version

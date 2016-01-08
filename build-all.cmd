@@ -12,12 +12,12 @@ call :test
 goto :ok
 
 :build
-call build-release.bat %1 || goto :ko
-call update-bootstrap.bat || goto :ko
+call build.cmd %1 || goto :ko
+call publish.cmd || goto :ko
 goto :eof
 
 :test
-call test-release.bat || goto :ko
+call test.cmd || goto :ko
 goto :eof
 
 :ok
