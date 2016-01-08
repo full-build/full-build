@@ -49,10 +49,12 @@ let commandSetup (args : string list) =
     | _ -> Command.Error
 
 
-let commandInit (args : string list) =
+let rec commandInit (version : string option) (args : string list) =
     match args with 
+    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandInit (Some version)
     | masterRepository:: [path] -> Command.InitWorkspace { MasterRepository = RepositoryUrl.from masterRepository
-                                                           Path = path }
+                                                           Path = path 
+                                                           Version = version }
     | _ -> Command.Error
 
 
@@ -238,7 +240,7 @@ let ParseCommandLine (args : string list) : Command =
     | [Token Token.Version] -> Command.Version
     | [Token Token.Help] -> Command.Usage
     | Token Token.Setup :: cmdArgs -> commandSetup cmdArgs
-    | Token Token.Init :: cmdArgs -> commandInit cmdArgs
+    | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit None
     | Token Token.Exec :: cmdArgs -> commandExec cmdArgs
     | Token Token.Test :: cmdArgs -> commandTest [] cmdArgs
     | Token Token.Index :: cmdArgs -> commandIndex cmdArgs
@@ -311,7 +313,7 @@ let UsageContent() =
         "  help : display this help"
         "  version : display full-build version"
         "  setup <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
-        "  init <master-repository> <local-path> : initialize a new workspace in given path"
+        "  init [--version <version>] <master-repository> <local-path> : initialize a new workspace in given path"
         "  clone [--noshallow] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
         "  build [--debug] [--mt] [<view-name>] : build view"

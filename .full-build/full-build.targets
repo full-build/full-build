@@ -10,19 +10,30 @@
 
   <PropertyGroup>
     <FBApp>*** undefined ***</FBApp>
-    <FBContentFolder>$(SolutionDir)\apps\$(FBApp)</FBContentFolder>
+    <FBContentFolder>$(SolutionDir)/apps/$(FBApp)</FBContentFolder>
     <FBBinFolder>$(FBContentFolder)</FBBinFolder>
-    <FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)\bin</FBBinFolder>
+    <FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)/bin</FBBinFolder>
   </PropertyGroup>
 
+
+  <ItemGroup>
+    <Compile Include="$(SolutionDir)/.full-build/AssemblyInfo$(DefaultLanguageSourceExtension)" Condition="Exists('$(SolutionDir)/.full-build/AssemblyInfo$(DefaultLanguageSourceExtension)')" />
+    <Compile Include="$(SolutionDir)/BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)" />
+  </ItemGroup>
+  
+  
+  <Target Name="BeforeGenerateProjectPriFile">
+  </Target>
+
   <Target Name="FBCopyBin" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)/bin/" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)/.full-build/bin/" />
+    <Copy SourceFiles="@(FBCopyFiles)" DestinationFolder="$(TargetPath)" />
   </Target>
 
   <Target Name="FBPublish">
-    <Copy SourceFiles="@(Content)" DestinationFolder="$(FBContentFolder)\%(Content.RelativeDir)" />
+    <Copy SourceFiles="@(Content)" DestinationFolder="$(FBContentFolder)/%(Content.RelativeDir)" />
 
-    <CreateItem Include="$(OutputPath)\*">
+    <CreateItem Include="$(OutputPath)/*">
       <Output TaskParameter="Include" ItemName="Binaries"/>
     </CreateItem>
     <Copy SourceFiles="@(Binaries)" DestinationFolder="$(FBBinFolder)" />

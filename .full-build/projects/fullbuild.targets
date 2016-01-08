@@ -10,8 +10,7 @@
       <Private>true</Private>
     </Reference>
   </ItemGroup>
-  <Target Name="Prj_fullbuild_copy" Condition="'$(Prj_fullbuild)' == ''" AfterTargets="Build">
-    <ItemGroup />
-    <Copy SourceFiles="@(Prj_fullbuildFiles)" DestinationFolder="$(OutDir)" />
-  </Target>
+  <ItemGroup Condition="'$(Prj_fullbuild)' == ''">
+    <FBCopyFiles Include="$(SolutionDir)/src/FullBuild/bin/*.dll;$(SolutionDir)/src/FullBuild/bin/.*.exe;$(SolutionDir)/src/FullBuild/bin/.pdb" Exclude="$(SolutionDir)/src/FullBuild/bin/fullbuild.exe" />
+  </ItemGroup>
 </Project>
