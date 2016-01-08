@@ -8,11 +8,16 @@ setlocal
 
 call :build %1 
 call :build %1
+call :test
 goto :ok
 
 :build
 call build-release.bat %1 || goto :ko
 call update-bootstrap.bat || goto :ko
+goto :eof
+
+:test
+call test-release.bat || goto :ko
 goto :eof
 
 :ok
