@@ -12,3 +12,8 @@ open FsUnit
 let CheckIsWorkspaceFolder () =
     let currDir = IoHelpers.CurrentFolder ()
     currDir |> IsWorkspaceFolder |> should equal false
+
+
+[<Test>]
+let CheckLicense () =
+    Env.CheckLicense ()
