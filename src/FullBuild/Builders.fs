@@ -12,11 +12,42 @@ let private checkedExec =
     Exec.Exec checkErrorCode
 
 
-let buildMsbuild (config : string) (target : string) (viewFile : FileInfo) (multithread : bool) =
+
+
+
+let generateVersionFs version =
+    [|
+        "namespace FullBuildVersion"
+        "open System.Reflection"
+        sprintf "[<assembly: AssemblyVersion(%A)>]" version
+        "()"
+    |]
+
+let generateVersionCs version =
+    [|
+        "using System.Reflection;"
+        sprintf "[assembly: AssemblyVersion(%A)]" version
+    |]
+
+let versionMsbuild version =
+    let wsDir = Env.GetFolder Folder.Workspace
+    let fsFile = wsDir |> GetFile "BuildVersionAssemblyInfo.fs"
+    File.WriteAllLines(fsFile.FullName, generateVersionFs version)
+
+    let csFile = wsDir |> GetFile "BuildVersionAssemblyInfo.cs"
+    File.WriteAllLines(csFile.FullName, generateVersionCs version)
+
+
+
+
+let buildMsbuild (config : string) (target : string) (viewFile : FileInfo) (multithread : bool) (version : string) =
+    versionMsbuild version
+
     let wsDir = Env.GetFolder Env.Workspace
     let argTarget = sprintf "/t:%s" target
     let argMt = if multithread then "/m"
                 else ""
+
     let argConfig = sprintf "/p:Configuration=%s" config
     let args = sprintf "/nologo %s %s %s %A" argTarget argMt argConfig viewFile.Name
 
@@ -24,7 +55,7 @@ let buildMsbuild (config : string) (target : string) (viewFile : FileInfo) (mult
     else checkedExec "msbuild" args wsDir
 
 
-let buildFake (config : string) (target : string) (viewFile : FileInfo) (multithread : bool) =
+let buildFake (config : string) (target : string) (viewFile : FileInfo) (multithread : bool) (version : string) =
     ()
 
 let chooseBuilder (builderType : BuilderType) msbuildBuilder fakeBuild =
