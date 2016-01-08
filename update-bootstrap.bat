@@ -1,3 +1,6 @@
+@echo off
+setlocal
+
 src\FullBuild\bin\FullBuild.exe publish * || goto :ko
 robocopy apps\full-build bootstrap || goto :ko
 goto :ok

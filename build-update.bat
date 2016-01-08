@@ -2,12 +2,16 @@ rem build twice - this is not a typo
 rem first time is to build using old version
 rem second time is to build using new version
 rem both build ensure compatibility on version update
-call :build
-call :build
+
+@echo off
+setlocal
+
+call :build %1 
+call :build %1
 goto :ok
 
 :build
-call build-release.bat || goto :ko
+call build-release.bat %1 || goto :ko
 call update-bootstrap.bat || goto :ko
 goto :eof
 
