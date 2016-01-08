@@ -49,12 +49,10 @@ let commandSetup (args : string list) =
     | _ -> Command.Error
 
 
-let rec commandInit (version : string option) (args : string list) =
+let commandInit (args : string list) =
     match args with 
-    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandInit (Some version)
     | masterRepository:: [path] -> Command.InitWorkspace { MasterRepository = RepositoryUrl.from masterRepository
-                                                           Path = path 
-                                                           Version = version }
+                                                           Path = path }
     | _ -> Command.Error
 
 
@@ -102,12 +100,13 @@ let commandPublish (args : string list) =
 
 
 
-let rec commandBuild (config : string) (clean : bool) (multithread : bool) (args : string list) =
+let rec commandBuild (config : string) (clean : bool) (multithread : bool) (version : string) (args : string list) =
     match args with
-    | TokenOption TokenOption.Debug :: tail -> tail |> commandBuild "Debug" clean multithread
-    | TokenOption TokenOption.Multithread :: tail -> tail |> commandBuild config clean true
-    | [] -> Command.BuildView { Name = None ; Config = config; Clean = clean; Multithread = multithread }
-    | [MatchViewId name] -> Command.BuildView { Name = Some name ; Config = config; Clean = clean; Multithread = multithread }
+    | TokenOption TokenOption.Version :: ver :: tail -> tail |> commandBuild config clean multithread ver
+    | TokenOption TokenOption.Debug :: tail -> tail |> commandBuild "Debug" clean multithread version
+    | TokenOption TokenOption.Multithread :: tail -> tail |> commandBuild config clean true version
+    | [] -> Command.BuildView { Name = None ; Config = config; Clean = clean; Multithread = multithread; Version = version }
+    | [MatchViewId name] -> Command.BuildView { Name = Some name ; Config = config; Clean = clean; Multithread = multithread; Version = version }
     | _ -> Command.Error
 
 let commandCheckout (args : string list) =
@@ -240,7 +239,7 @@ let ParseCommandLine (args : string list) : Command =
     | [Token Token.Version] -> Command.Version
     | [Token Token.Help] -> Command.Usage
     | Token Token.Setup :: cmdArgs -> commandSetup cmdArgs
-    | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit None
+    | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> commandExec cmdArgs
     | Token Token.Test :: cmdArgs -> commandTest [] cmdArgs
     | Token Token.Index :: cmdArgs -> commandIndex cmdArgs
@@ -248,8 +247,8 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone true
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
     | Token Token.Publish :: cmdArgs -> commandPublish cmdArgs
-    | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false
-    | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false
+    | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false "0.0.0.*"
+    | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false "0.0.0.*"
     | Token Token.Checkout :: cmdArgs -> commandCheckout cmdArgs
     | Token Token.Push :: cmdArgs -> commandPush cmdArgs
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true
@@ -313,11 +312,11 @@ let UsageContent() =
         "  help : display this help"
         "  version : display full-build version"
         "  setup <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
-        "  init [--version <version>] <master-repository> <local-path> : initialize a new workspace in given path"
+        "  init <master-repository> <local-path> : initialize a new workspace in given path"
         "  clone [--noshallow] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
-        "  build [--debug] [--mt] [<view-name>] : build view"
-        "  rebuild [--debug] [--mt] [<view-name>] : rebuild view (clean & build)"
+        "  build [--debug] [--version <version>] [--mt] [<view-name>] : build view"
+        "  rebuild [--debug] [--version <version>] [--mt] [<view-name>] : rebuild view (clean & build)"
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
         "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"

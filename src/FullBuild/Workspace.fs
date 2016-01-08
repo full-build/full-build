@@ -33,15 +33,6 @@ let private checkedExecWithVars =
     Exec.ExecWithVars checkErrorCode
 
 
-let setVersion (wsDir : DirectoryInfo) version =
-    let oldPath = Environment.CurrentDirectory
-    try
-        Environment.CurrentDirectory <- wsDir.FullName
-        let antho = Configuration.LoadAnthology ()
-        Versionners.VersionWithBuilder antho.Builder version
-    finally
-        Environment.CurrentDirectory <- oldPath
-
 
 let Create (path : string) (uri : RepositoryUrl) (bin : string) = 
     let wsDir = DirectoryInfo(path)
@@ -66,8 +57,6 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
     let baseline = { Bookmarks = Set.empty }
     let baselineFile = confDir |> GetFile Env.BASELINE_FILENAME
     BaselineSerializer.Save baselineFile baseline
-
-    setVersion wsDir "0.0.0.*"
 
     // setup additional files for views to work correctly
     let installDir = Env.GetFolder Env.Installation
@@ -95,9 +84,6 @@ let Convert () =
     Conversion.GenerateProjects antho.Projects XDocumentSaver
     Conversion.ConvertProjects antho XDocumentLoader XDocumentSaver
     Conversion.RemoveUselessStuff antho
-
-    let wsDir = Env.GetFolder Env.Workspace
-    setVersion wsDir "0.0.0.*"
 
     // setup additional files for views to work correctly
     let confDir = Env.GetFolder Env.Config
@@ -181,7 +167,7 @@ let Pull (src : bool) (bin : bool) =
         BuildArtifacts.PullLatestReferenceBinaries ()
 
 
-let Init (path : string) (uri : RepositoryUrl) (maybeVersion : string option) = 
+let Init (path : string) (uri : RepositoryUrl) = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then 
@@ -190,11 +176,6 @@ let Init (path : string) (uri : RepositoryUrl) (maybeVersion : string option) =
         let vcsType = Vcs.VcsDetermineType uri
         let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType; Branch = None }
         VcsClone wsDir true repo
-
-    let version = match maybeVersion with
-                    | None -> "0.0.0.*"
-                    | Some x -> x
-    setVersion wsDir version
 
 let Exec cmd =
     let antho = Configuration.LoadAnthology()

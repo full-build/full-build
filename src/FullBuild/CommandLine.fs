@@ -24,8 +24,7 @@ type SetupWorkspace =
 
 type InitWorkspace = 
     { MasterRepository : RepositoryUrl
-      Path : string 
-      Version : string option }
+      Path : string }
 
 type CheckoutWorkspace = 
     { Version : string }
@@ -63,7 +62,8 @@ type BuildView =
     { Name : ViewId option
       Config : string 
       Clean : bool
-      Multithread : bool }
+      Multithread : bool 
+      Version : string }
 
 type AlterView =
     { Name : ViewId
