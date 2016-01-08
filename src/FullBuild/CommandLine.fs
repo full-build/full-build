@@ -24,7 +24,8 @@ type SetupWorkspace =
 
 type InitWorkspace = 
     { MasterRepository : RepositoryUrl
-      Path : string }
+      Path : string 
+      Version : string option }
 
 type CheckoutWorkspace = 
     { Version : string }

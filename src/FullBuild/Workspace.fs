@@ -34,6 +34,27 @@ let private checkedExecWithVars =
 
 
 
+let generateVersionFs version =
+    [|
+        "namespace FullBuildVersion"
+        "open System.Reflection"
+        sprintf "[<assembly: AssemblyVersion(%A)>]" version
+        "()"
+    |]
+
+let generateVersionCs version =
+    [|
+        "using System.Reflection;"
+        sprintf "[assembly: AssemblyVersion(%A)]" version
+    |]
+
+let generateVersion (wsDir : DirectoryInfo) version =
+    let fsFile = wsDir |> GetFile "BuildVersionAssemblyInfo.fs"
+    File.WriteAllLines(fsFile.FullName, generateVersionFs version)
+
+    let csFile = wsDir |> GetFile "BuildVersionAssemblyInfo.cs"
+    File.WriteAllLines(csFile.FullName, generateVersionCs version)
+
 let Create (path : string) (uri : RepositoryUrl) (bin : string) = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
@@ -58,6 +79,8 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
     let baselineFile = confDir |> GetFile Env.BASELINE_FILENAME
     BaselineSerializer.Save baselineFile baseline
 
+    generateVersion wsDir "0.0.0.*"
+
     // setup additional files for views to work correctly
     let installDir = Env.GetFolder Env.Installation
     let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
@@ -75,19 +98,26 @@ let XDocumentLoader (fileName : FileInfo) =
 let XDocumentSaver (fileName : FileInfo) (xdoc : XDocument) =
     xdoc.Save (fileName.FullName)
 
-let TransformProjects (antho : Anthology) =
-    Conversion.GenerateProjects antho.Projects XDocumentSaver
-    Conversion.ConvertProjects antho XDocumentLoader XDocumentSaver
-
-
 let Index () =
     let newAntho = Indexation.IndexWorkspace () |> Package.Simplify
     Configuration.SaveAnthology newAntho
 
 let Convert () = 
     let antho = Configuration.LoadAnthology ()
-    TransformProjects antho
+    Conversion.GenerateProjects antho.Projects XDocumentSaver
+    Conversion.ConvertProjects antho XDocumentLoader XDocumentSaver
     Conversion.RemoveUselessStuff antho
+
+    let wsDir = Env.GetFolder Env.Workspace
+    generateVersion wsDir "0.0.0.*"
+
+    // setup additional files for views to work correctly
+    let confDir = Env.GetFolder Env.Config
+    let installDir = Env.GetFolder Env.Installation
+    let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
+    let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
+    publishSource.CopyTo(publishTarget.FullName, true) |> ignore
+
 
 let ClonedRepositories (wsDir : DirectoryInfo) (repos : Repository set) =
     repos |> Set.filter (fun x -> let repoDir = wsDir |> GetSubDirectory x.Name.toString
@@ -162,7 +192,8 @@ let Pull (src : bool) (bin : bool) =
     if bin then
         BuildArtifacts.PullLatestReferenceBinaries ()
 
-let Init (path : string) (uri : RepositoryUrl) = 
+
+let Init (path : string) (uri : RepositoryUrl) (maybeVersion : string option) = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then 
@@ -171,6 +202,11 @@ let Init (path : string) (uri : RepositoryUrl) =
         let vcsType = Vcs.VcsDetermineType uri
         let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType; Branch = None }
         VcsClone wsDir true repo
+
+    let version = match maybeVersion with
+                    | None -> "0.0.0.*"
+                    | Some x -> x
+    generateVersion wsDir version
 
 
 let Exec cmd =
