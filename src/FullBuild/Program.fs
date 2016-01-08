@@ -24,7 +24,7 @@ let tryMain argv =
     match cmd with
     // workspace
     | SetupWorkspace wsInfo -> Workspace.Create wsInfo.Path wsInfo.MasterRepository wsInfo.MasterArtifacts
-    | InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository
+    | InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository wsInfo.Version
     | IndexWorkspace -> Workspace.Index ()
     | ConvertWorkspace -> Workspace.Convert ()
     | PushWorkspace buildInfo -> Workspace.Push buildInfo.BuildNumber

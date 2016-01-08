@@ -52,6 +52,7 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
+  <Import Project="$(SolutionDir)/.full-build/full-build.targets" />
   <ItemGroup>
     <Compile Include="StringHelpersTests.fs" />
     <Compile Include="IoHelpersTests.fs" />
@@ -138,5 +139,4 @@
   </Target>
   <Import Project="$(SolutionDir)/.full-build/projects/fullbuild.targets" />
   <Import Project="$(SolutionDir)/.full-build/packages/fsunit/package.targets" Condition="'$(FullBuild_fsunit_Pkg)' == ''" />
-  <Import Project="$(SolutionDir)/.full-build/full-build.targets" />
 </Project>

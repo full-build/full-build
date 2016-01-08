@@ -25,6 +25,7 @@ type TokenOption =
     | NoShallow
     | Default
     | Branch
+    | Version
     | Unknown
 
 let (|TokenOption|) (token : string) =
@@ -38,6 +39,7 @@ let (|TokenOption|) (token : string) =
     | "--noshallow" -> TokenOption.NoShallow
     | "--default" -> TokenOption.Default
     | "--branch" -> TokenOption.Branch
+    | "--version" -> TokenOption.Version
     | _ -> Unknown
 
 

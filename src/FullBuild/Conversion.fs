@@ -135,6 +135,10 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         let fileName = sprintf "%s/%s.xml" BIN_FOLDER project.ProjectId.toString
         xel.Value <- fileName
 
+    let filterAssemblyInfo (xel : XElement) =
+        let fileName = !> xel.Attribute(XNamespace.None + "Include") : string
+        fileName.IndexOf("AssemblyInfo.", StringComparison.CurrentCultureIgnoreCase) <> -1
+
     // cleanup everything that will be modified
     let cproj = XDocument (xproj)
 
@@ -153,14 +157,15 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
     cproj.Descendants(NsMsBuild + "Import").Where(filterPackage).Remove()
     cproj.Descendants(NsMsBuild + "Import").Where(filterFullBuildTargets).Remove()
-//    cproj.Descendants(NsMsBuild + "Import").Where(filterPublishImport).Remove()
-//    cproj.Descendants(NsMsBuild + "Target").Where(filterPublishTarget).Remove()
 
     // remove nuget stuff
     cproj.Descendants(NsMsBuild + "Import").Where(filterNuget).Remove()
     cproj.Descendants(NsMsBuild + "Target").Where(filterNugetTarget).Remove()
     cproj.Descendants(NsMsBuild + "None").Where(filterNugetPackage).Remove();
-    cproj.Descendants(NsMsBuild + "Content").Where(filterNugetPackage).Remove();
+    cproj.Descendants(NsMsBuild + "Content").Where(filterNugetPackage).Remove()
+
+    // set assembly info
+    cproj.Descendants(NsMsBuild + "Compile").Where(filterAssemblyInfo).Remove()
 
     // set OutputPath
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
@@ -196,7 +201,10 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     // import publish
     let importFB = XElement (NsMsBuild + "Import",
                        XAttribute (NsNone + "Project", Env.MSBUILD_FULLBUILD_TARGETS))
-    cproj.Root.LastNode.AddAfterSelf (importFB)
+
+    let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
+    firstItemGroup.AddBeforeSelf (importFB)
+//    cproj.Root.LastNode.AddAfterSelf (importFB)
     cproj
 
 let ConvertProjectContent (xproj : XDocument) (project : Project) =
