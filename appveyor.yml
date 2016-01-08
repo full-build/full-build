@@ -15,7 +15,7 @@ test:
   assemblies:
   
 deploy_script:
-  - cmd: push-release.bat
+  - cmd: push.cmd
   
 artifacts:
   path: apps/full-build.zip
