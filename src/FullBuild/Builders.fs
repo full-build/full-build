@@ -40,8 +40,11 @@ let versionMsbuild version =
 
 
 
-let buildMsbuild (config : string) (target : string) (viewFile : FileInfo) (multithread : bool) (version : string) =
+let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
     versionMsbuild version
+
+    let target = if clean then "Clean,Build"
+                 else "Build"
 
     let wsDir = Env.GetFolder Env.Workspace
     let argTarget = sprintf "/t:%s" target
@@ -55,7 +58,7 @@ let buildMsbuild (config : string) (target : string) (viewFile : FileInfo) (mult
     else checkedExec "msbuild" args wsDir
 
 
-let buildFake (config : string) (target : string) (viewFile : FileInfo) (multithread : bool) (version : string) =
+let buildFake (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
     ()
 
 let chooseBuilder (builderType : BuilderType) msbuildBuilder fakeBuild =
