@@ -21,12 +21,6 @@ open Collections
 open Solution
 
 
-let checkErrorCode err =
-    if err <> 0 then failwithf "Process failed with error %d" err
-
-let private checkedExec = 
-    Exec.Exec checkErrorCode
-
 
 let assertViewExists (viewName : ViewId) =
     let vwDir = GetFolder Env.View
@@ -166,26 +160,6 @@ let Create (viewName : ViewId) (filters : string list) =
 
 // ---------------------------------------------------------------------------------------
 
-let builderMSBuild (config : string) (target : string) (viewFile : FileInfo) (multithread : bool) =
-    let wsDir = Env.GetFolder Env.Workspace
-    let argTarget = sprintf "/t:%s" target
-    let argMt = if multithread then "/m"
-                else ""
-    let argConfig = sprintf "/p:Configuration=%s" config
-    let args = sprintf "/nologo %s %s %s %A" argTarget argMt argConfig viewFile.Name
-
-    if Env.IsMono () then checkedExec "xbuild" args wsDir
-    else checkedExec "msbuild" args wsDir
-
-
-let chooseBuilder (builderType : BuilderType) msbuildBuilder =
-    let builder = match builderType with
-                  | BuilderType.MSBuild -> msbuildBuilder
-    builder
-
-let buildWithBuilder (builder : BuilderType) =
-    chooseBuilder builder builderMSBuild
-
 
 let defaultView () =
     let vwDir = GetFolder Env.View
@@ -223,4 +197,4 @@ let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (mult
                  else "Build"
 
     let antho = Configuration.LoadAnthology ()
-    (buildWithBuilder antho.Builder) config target viewFile multithread
+    (Builders.BuildWithBuilder antho.Builder) config target viewFile multithread
