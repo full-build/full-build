@@ -24,7 +24,7 @@ let tryMain argv =
     match cmd with
     // workspace
     | SetupWorkspace wsInfo -> Workspace.Create wsInfo.Path wsInfo.MasterRepository wsInfo.MasterArtifacts
-    | InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository wsInfo.Version
+    | InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository
     | IndexWorkspace -> Workspace.Index ()
     | ConvertWorkspace -> Workspace.Convert ()
     | PushWorkspace buildInfo -> Workspace.Push buildInfo.BuildNumber
@@ -47,7 +47,7 @@ let tryMain argv =
     | ListViews -> View.List ()
     | DescribeView viewInfo -> View.Describe viewInfo.Name
     | GraphView viewInfo -> View.Graph viewInfo.Name viewInfo.All
-    | BuildView viewInfo -> View.Build viewInfo.Name viewInfo.Config viewInfo.Clean viewInfo.Multithread
+    | BuildView viewInfo -> View.Build viewInfo.Name viewInfo.Config viewInfo.Clean viewInfo.Multithread viewInfo.Version
     | AlterView viewInfo -> View.AlterView viewInfo.Name viewInfo.Default
 
     // nuget
