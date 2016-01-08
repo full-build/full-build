@@ -36,7 +36,7 @@ let publishZip (app : Anthology.Application) =
 
     let appDir = GetFolder Env.AppOutput
     let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name.toString)
-    let targetFile = appDir |> GetFile (AddExt Extension.Zip app.Name.toString)
+    let targetFile = appDir |> GetFile app.Name.toString
     if targetFile.Exists then targetFile.Delete()
 
     System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Optimal, false)
