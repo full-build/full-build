@@ -33,27 +33,15 @@ let private checkedExecWithVars =
     Exec.ExecWithVars checkErrorCode
 
 
+let setVersion (wsDir : DirectoryInfo) version =
+    let oldPath = Environment.CurrentDirectory
+    try
+        Environment.CurrentDirectory <- wsDir.FullName
+        let antho = Configuration.LoadAnthology ()
+        Versionners.VersionWithBuilder antho.Builder version
+    finally
+        Environment.CurrentDirectory <- oldPath
 
-let generateVersionFs version =
-    [|
-        "namespace FullBuildVersion"
-        "open System.Reflection"
-        sprintf "[<assembly: AssemblyVersion(%A)>]" version
-        "()"
-    |]
-
-let generateVersionCs version =
-    [|
-        "using System.Reflection;"
-        sprintf "[assembly: AssemblyVersion(%A)]" version
-    |]
-
-let generateVersion (wsDir : DirectoryInfo) version =
-    let fsFile = wsDir |> GetFile "BuildVersionAssemblyInfo.fs"
-    File.WriteAllLines(fsFile.FullName, generateVersionFs version)
-
-    let csFile = wsDir |> GetFile "BuildVersionAssemblyInfo.cs"
-    File.WriteAllLines(csFile.FullName, generateVersionCs version)
 
 let Create (path : string) (uri : RepositoryUrl) (bin : string) = 
     let wsDir = DirectoryInfo(path)
@@ -79,7 +67,7 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) =
     let baselineFile = confDir |> GetFile Env.BASELINE_FILENAME
     BaselineSerializer.Save baselineFile baseline
 
-    generateVersion wsDir "0.0.0.*"
+    setVersion wsDir "0.0.0.*"
 
     // setup additional files for views to work correctly
     let installDir = Env.GetFolder Env.Installation
@@ -109,7 +97,7 @@ let Convert () =
     Conversion.RemoveUselessStuff antho
 
     let wsDir = Env.GetFolder Env.Workspace
-    generateVersion wsDir "0.0.0.*"
+    setVersion wsDir "0.0.0.*"
 
     // setup additional files for views to work correctly
     let confDir = Env.GetFolder Env.Config
@@ -206,8 +194,7 @@ let Init (path : string) (uri : RepositoryUrl) (maybeVersion : string option) =
     let version = match maybeVersion with
                     | None -> "0.0.0.*"
                     | Some x -> x
-    generateVersion wsDir version
-
+    setVersion wsDir version
 
 let Exec cmd =
     let antho = Configuration.LoadAnthology()
