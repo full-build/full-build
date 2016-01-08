@@ -15,6 +15,13 @@
     <FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)/bin</FBBinFolder>
   </PropertyGroup>
 
+
+  <ItemGroup>
+    <Compile Include="$(SolutionDir)/.full-build/AssemblyInfo$(DefaultLanguageSourceExtension)" Condition="Exists('$(SolutionDir)/.full-build/AssemblyInfo$(DefaultLanguageSourceExtension)')" />
+    <Compile Include="$(SolutionDir)/BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)" />
+  </ItemGroup>
+  
+  
   <Target Name="BeforeGenerateProjectPriFile">
   </Target>
 
