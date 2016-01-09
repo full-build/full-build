@@ -58,9 +58,9 @@ let publishZip (app : Anthology.Application) =
     
 
 let publishFake (app : Anthology.Application) =
-    ()
-
-
+    let args = sprintf @".full-build\build.fsx target=Publish app=%A" app.Name
+    let wsDir = Env.GetFolder Env.Workspace
+    checkedExec "fake" args wsDir
 
 
 
