@@ -73,7 +73,9 @@ let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multith
 
 
 let buildFake (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
-    ()
+    let args = sprintf @".full-build\build.fsx target=Build config=%A clean=%A mt=%A version=%A" config clean multithread version
+    let wsDir = Env.GetFolder Env.Workspace
+    checkedExec "fake" args wsDir
 
 let chooseBuilder (builderType : BuilderType) msbuildBuilder fakeBuild =
     let builder = match builderType with

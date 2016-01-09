@@ -35,15 +35,17 @@ let excludeListToArgs (excludes : string list) =
 
 
 
-let runnerNUnit (matches : string seq) (excludes : string list) =
+let runnerNUnit (includes : string list) (excludes : string list) =
     let wsDir = GetFolder Env.Workspace
-    let files = matches |> Seq.fold (fun s t -> sprintf @"%s %A" s t) ""
+    let files = includes |> List.fold (fun s t -> sprintf @"%s %A" s t) ""
     let excludeArgs = excludeListToArgs excludes
     let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs 
     checkedExec "nunit3-console" args wsDir
 
-let runnerFake (matches : string seq) (excludes : string list) =
-    ()
+let runnerFake (includes : string list) (excludes : string list) =
+    let args = sprintf @".full-build\build.fsx target=Test includes=%A excludes=%A" includes excludes
+    let wsDir = Env.GetFolder Env.Workspace
+    checkedExec "fake" args wsDir
 
 let chooseTestRunner (runnerType : TestRunnerType) nunitRunner fakeRunner =
     let runner = match runnerType with
