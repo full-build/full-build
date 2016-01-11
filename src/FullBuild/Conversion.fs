@@ -139,6 +139,23 @@ let ConvertProject (xproj : XDocument) (project : Project) =
         let fileName = !> xel.Attribute(XNamespace.None + "Include") : string
         fileName.IndexOf("AssemblyInfo.", StringComparison.CurrentCultureIgnoreCase) <> -1
 
+    let rec patchAssemblyVersion (lines : string list) =
+        match lines with
+        | line :: tail -> if line.Contains("AssemblyVersion") then
+                            patchAssemblyVersion tail
+                          else line :: patchAssemblyVersion tail
+        | [] -> []
+
+    let patchAssemblyInfo (xel : XElement) =
+        let fileName = !> xel.Attribute(XNamespace.None + "Include") : string
+        let repoDir = Env.GetFolder Folder.Workspace |> GetSubDirectory project.Repository.toString
+        let prjFile = repoDir |> GetFile project.RelativeProjectFile.toString 
+        let prjDir = Path.GetDirectoryName (prjFile.FullName) |> DirectoryInfo                       
+        let infoFile = prjDir |> GetFile fileName
+        let content = File.ReadAllLines (infoFile.FullName) |> List.ofSeq
+                                                            |> patchAssemblyVersion
+        File.WriteAllLines(infoFile.FullName, content)
+
     // cleanup everything that will be modified
     let cproj = XDocument (xproj)
 
@@ -165,7 +182,8 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "Content").Where(filterNugetPackage).Remove()
 
     // set assembly info
-    cproj.Descendants(NsMsBuild + "Compile").Where(filterAssemblyInfo).Remove()
+    cproj.Descendants(NsMsBuild + "Compile").Where(filterAssemblyInfo)
+                                            |> Seq.iter patchAssemblyInfo
 
     // set OutputPath
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
