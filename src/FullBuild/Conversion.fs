@@ -33,7 +33,7 @@ let importCopyFrom (project : Project) =
               | OutputType.Dll -> ".dll"
               | OutputType.Exe -> ".exe"
 
-    let inc = sprintf "%s*.dll;%s.*.exe;%s.pdb" path path path
+    let inc = sprintf "%s*.dll;%s*.exe;%s*.pdb" path path path
     let excl = sprintf "%s%s%s" path project.Output.toString ext
 
     XElement(NsMsBuild + "ItemGroup",

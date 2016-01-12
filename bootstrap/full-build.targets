@@ -26,8 +26,8 @@
   </Target>
 
   <Target Name="FBCopyBin" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)/.full-build/bin/" />
-    <Copy SourceFiles="@(FBCopyFiles)" DestinationFolder="$(TargetPath)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)/.full-build/bin/" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(FBCopyFiles)" DestinationFolder="$(TargetPath)" SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="FBPublish">
