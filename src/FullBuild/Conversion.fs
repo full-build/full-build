@@ -81,7 +81,7 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
         xdocSaver projectFile refProjectContent
 
 
-let ConvertProject (xproj : XDocument) (project : Project) =
+let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
     let filterProject (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
@@ -127,8 +127,49 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     let hasNoChild (xel : XElement) =
         not <| xel.DescendantNodes().Any()
 
+    let always _ = true
+
+    // cleanup everything that will be modified
+    let cproj = XDocument (xproj)
+
+    let seekAndDestroy =
+        [ 
+            // paket
+            NsMsBuild + "None", filterPaketReference
+            NsMsBuild + "Import", filterPaketTarget
+            NsMsBuild + "Choose", filterPaket
+
+            // remove project references
+            NsMsBuild + "ProjectReference", always
+            
+            // remove unknown assembly references
+            NsMsBuild + "Reference", filterAssemblies project.AssemblyReferences
+
+            // remove full-build imports
+            NsMsBuild + "Import", filterProject
+            NsMsBuild + "Import", filterPackage
+            NsMsBuild + "Import", filterFullBuildTargets
+
+            // remove nuget stuff
+            NsMsBuild + "Import", filterNuget
+            NsMsBuild + "Target", filterNugetTarget
+            NsMsBuild + "None", filterNugetPackage
+            NsMsBuild + "Content", filterNugetPackage
+
+            // cleanup project
+            NsMsBuild + "BaseIntermediateOutputPath", always 
+            NsMsBuild + "SolutionDir", always
+            NsMsBuild + "RestorePackages", always
+            NsMsBuild + "NuGetPackageImportStamp", always
+            NsMsBuild + "ItemGroup", hasNoChild
+        ]
+
+    seekAndDestroy |> Seq.iter (fun (x, y) -> cproj.Descendants(x).Where(y).Remove())
+    cproj
+
+
+let ConvertProject (xproj : XDocument) (project : Project) =
     let setOutputPath (xel : XElement) =
-//        let outputDir = sprintf "%s/%s/" MSBUILD_BIN_FOLDER project.Output.toString
         xel.Value <- BIN_FOLDER
 
     let setDocumentation (xel : XElement) =
@@ -156,30 +197,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
                                                             |> patchAssemblyVersion
         File.WriteAllLines(infoFile.FullName, content)
 
-    // cleanup everything that will be modified
-    let cproj = XDocument (xproj)
-
-    // paket
-    cproj.Descendants(NsMsBuild + "None").Where(filterPaketReference).Remove()
-    cproj.Descendants(NsMsBuild + "Import").Where(filterPaketTarget).Remove()
-    cproj.Descendants(NsMsBuild + "Choose").Where(filterPaket).Remove()
-
-    // remove project references
-    cproj.Descendants(NsMsBuild + "ProjectReference").Remove()
-    
-    // remove unknown assembly references
-    cproj.Descendants(NsMsBuild + "Reference").Where(filterAssemblies project.AssemblyReferences).Remove()
-
-    // remove full-build imports
-    cproj.Descendants(NsMsBuild + "Import").Where(filterProject).Remove()
-    cproj.Descendants(NsMsBuild + "Import").Where(filterPackage).Remove()
-    cproj.Descendants(NsMsBuild + "Import").Where(filterFullBuildTargets).Remove()
-
-    // remove nuget stuff
-    cproj.Descendants(NsMsBuild + "Import").Where(filterNuget).Remove()
-    cproj.Descendants(NsMsBuild + "Target").Where(filterNugetTarget).Remove()
-    cproj.Descendants(NsMsBuild + "None").Where(filterNugetPackage).Remove();
-    cproj.Descendants(NsMsBuild + "Content").Where(filterNugetPackage).Remove()
+    let cproj = cleanupProject xproj project
 
     // set assembly info
     cproj.Descendants(NsMsBuild + "Compile").Where(filterAssemblyInfo)
@@ -189,13 +207,6 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
     cproj.Descendants(NsMsBuild + "DocumentationFile") |> Seq.iter setDocumentation
     cproj.Descendants(NsMsBuild + "TargetFrameworkVersion") |> Seq.iter (fun x -> x.Value <- project.FxTarget.toString)
-
-    // cleanup project
-    cproj.Descendants(NsMsBuild + "BaseIntermediateOutputPath").Remove()
-    cproj.Descendants(NsMsBuild + "SolutionDir").Remove()
-    cproj.Descendants(NsMsBuild + "RestorePackages").Remove()
-    cproj.Descendants(NsMsBuild + "NuGetPackageImportStamp").Remove()
-    cproj.Descendants(NsMsBuild + "ItemGroup").Where(hasNoChild).Remove()
 
     // add project references
     for projectReference in project.ProjectReferences do
@@ -222,7 +233,6 @@ let ConvertProject (xproj : XDocument) (project : Project) =
 
     let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     firstItemGroup.AddBeforeSelf (importFB)
-//    cproj.Root.LastNode.AddAfterSelf (importFB)
     cproj
 
 let ConvertProjectContent (xproj : XDocument) (project : Project) =
