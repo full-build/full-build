@@ -254,16 +254,26 @@ let ConvertProjects (antho : Anthology) xdocLoader xdocSaver =
 
 let RemoveUselessStuff (antho : Anthology) =
     let wsDir = Env.GetFolder Env.Workspace
+    let seekAndDestroyFiles = [
+                                "*.sln"
+                                "packages.config"
+                                "paket.dependencies"
+                                "paket.lock"
+                                "paket.references"
+                              ]
+    let seekAndDestroyDirs = [
+                                "packages"
+                                ".paket"
+                                ".nuget"
+                             ]
+
     for repo in antho.Repositories do
         let repoDir = wsDir |> GetSubDirectory (repo.Name.toString)
         if repoDir.Exists then
-            repoDir.EnumerateFiles("*.sln", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
-            repoDir.EnumerateFiles("packages.config", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
-            repoDir.EnumerateFiles("paket.dependencies", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
-            repoDir.EnumerateFiles("paket.lock", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
-            repoDir.EnumerateFiles("paket.references", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete())
-            repoDir.EnumerateDirectories("packages", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete(true))
-            repoDir.EnumerateDirectories(".paket", SearchOption.AllDirectories) |> Seq.iter (fun x -> x.Delete(true))
+            seekAndDestroyFiles |> Seq.iter (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)
+                                                      |> Seq.iter (fun x -> x.Delete()))
+            seekAndDestroyDirs |> Seq.iter (fun x -> repoDir.EnumerateDirectories (x, SearchOption.AllDirectories)
+                                                     |> Seq.iter (fun x -> x.Delete(true)))
 
     for project in antho.Projects do
         let prjDir = wsDir |> GetSubDirectory (AnthologyBridge.RelativeProjectFolderFromWorkspace project)
