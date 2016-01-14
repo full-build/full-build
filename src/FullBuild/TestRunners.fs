@@ -50,7 +50,6 @@ let runnerFake (includes : string list) (excludes : string list) =
 let chooseTestRunner (runnerType : TestRunnerType) nunitRunner fakeRunner =
     let runner = match runnerType with
                  | TestRunnerType.NUnit -> nunitRunner
-                 | TestRunnerType.Fake -> fakeRunner
     runner
 
 let TestWithTestRunner (runnerType : TestRunnerType) =

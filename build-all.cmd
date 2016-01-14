@@ -6,7 +6,7 @@ rem both build ensure compatibility on version update
 @echo off
 setlocal
 
-call :build %1 
+call :build %1
 call :build %1
 call :test
 goto :ok

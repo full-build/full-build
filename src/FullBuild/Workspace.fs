@@ -34,11 +34,10 @@ let private checkedExecWithVars =
 
 
 
-let Create (path : string) (uri : RepositoryUrl) (bin : string) = 
+let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsType) = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
-    let vcsType = Vcs.VcsDetermineType uri
     let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType; Branch = None }
     VcsClone wsDir true repo
 
@@ -167,13 +166,12 @@ let Pull (src : bool) (bin : bool) =
         BuildArtifacts.PullLatestReferenceBinaries ()
 
 
-let Init (path : string) (uri : RepositoryUrl) = 
+let Init (path : string) (uri : RepositoryUrl) (vcsType : VcsType) = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then 
         printf "[WARNING] Workspace already exists - skipping"
     else
-        let vcsType = Vcs.VcsDetermineType uri
         let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType; Branch = None }
         VcsClone wsDir true repo
 

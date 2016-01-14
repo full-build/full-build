@@ -23,8 +23,8 @@ let tryMain argv =
     let cmd = ParseCommandLine (argv |> Seq.toList)
     match cmd with
     // workspace
-    | SetupWorkspace wsInfo -> Workspace.Create wsInfo.Path wsInfo.MasterRepository wsInfo.MasterArtifacts
-    | InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository
+    | SetupWorkspace wsInfo -> Workspace.Create wsInfo.Path wsInfo.MasterRepository wsInfo.MasterArtifacts wsInfo.Type
+    | InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository wsInfo.Type
     | IndexWorkspace -> Workspace.Index ()
     | ConvertWorkspace -> Workspace.Convert ()
     | PushWorkspace buildInfo -> Workspace.Push buildInfo.BuildNumber

@@ -20,10 +20,12 @@ open Collections
 type SetupWorkspace = 
     { MasterRepository : RepositoryUrl
       MasterArtifacts : string
+      Type : VcsType
       Path : string }
 
 type InitWorkspace = 
     { MasterRepository : RepositoryUrl
+      Type : VcsType
       Path : string }
 
 type CheckoutWorkspace = 
