@@ -83,19 +83,32 @@ let ComputeProjectSelectionClosure (allProjects : Project set) (goal : ProjectId
                                   |> Set.unionMany
     transitiveClosure
 
+let filterClonedRepositories (wsDir : DirectoryInfo) (repo : Repository) =
+    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+    let exists = repoDir.Exists
+    exists
+
 let FindViewProjects (viewName : ViewId) =
     // load back filter & generate view accordingly
-    let vwDir = Env.GetFolder Env.View 
+    let wsDir = Env.GetFolder Folder.Workspace
+    let vwDir = Env.GetFolder Folder.View 
     let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
     let filters = File.ReadAllLines(vwFile.FullName)
 
     let repoFilters = filters |> Set
 
-    // build: <repository>/<project>
     let antho = Configuration.LoadAnthology ()
-    let projects = antho.Projects |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, x.ProjectId))
-                                  |> Map
-    let projectNames = projects |> Seq.map (fun x -> x.Key) |> Set
+
+    // select only available repositories
+    let availableRepos = antho.Repositories |> Set.filter (filterClonedRepositories wsDir)
+                                            |> Set.map(fun x -> x.Name)
+
+    // build: <repository>/<project>
+    let projects = antho.Projects 
+                   |> Seq.filter (fun x -> availableRepos |> Set.contains x.Repository)
+                   |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, x.ProjectId))
+                   |> Map
+    let projectNames = projects |> Seq.map (fun x -> x.Key) |> set
 
     let matchRepoProject filter =
         projectNames |> Set.filter (fun x -> PatternMatching.Match x filter)
