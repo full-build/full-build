@@ -43,16 +43,18 @@ let (|MatchPublisherType|) name =
 
 let commandSetup (args : string list) =
     match args with
-    | masterRepository :: masterArtifacts :: [path] -> Command.SetupWorkspace { MasterRepository = RepositoryUrl.from masterRepository
-                                                                                MasterArtifacts = masterArtifacts
-                                                                                Path = path }
+    | vcs :: masterRepository :: masterArtifacts :: [path] -> Command.SetupWorkspace { MasterRepository = RepositoryUrl.from masterRepository
+                                                                                       MasterArtifacts = masterArtifacts
+                                                                                       Type = VcsType.from vcs
+                                                                                       Path = path }
     | _ -> Command.Error
 
 
 let commandInit (args : string list) =
     match args with 
-    | masterRepository:: [path] -> Command.InitWorkspace { MasterRepository = RepositoryUrl.from masterRepository
-                                                           Path = path }
+    | vcs :: masterRepository:: [path] -> Command.InitWorkspace { MasterRepository = RepositoryUrl.from masterRepository
+                                                                  Type = VcsType.from vcs
+                                                                  Path = path }
     | _ -> Command.Error
 
 
@@ -312,8 +314,8 @@ let UsageContent() =
     let content = [
         "  help : display this help"
         "  version : display full-build version"
-        "  setup <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
-        "  init <master-repository> <local-path> : initialize a new workspace in given path"
+        "  setup <git|gerrit|hg> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
+        "  init <git|gerrit|hg> <master-repository> <local-path> : initialize a new workspace in given path"
         "  clone [--noshallow] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
         "  build [--debug] [--version <version>] [--mt] [<view-name>] : build view"
@@ -334,7 +336,7 @@ let UsageContent() =
         "  outdated package : display outdated packages"
         "  list package : list packages"
         ""
-        "  add repo [--branch <branchId>] <repo-name> <git | gerrit | hg> <repo-uri> : declare a new repository"
+        "  add repo [--branch <branchId>] <repo-name> <git|gerrit|hg> <repo-uri> : declare a new repository"
         "  drop repo <repo-name> : drop repository"
         "  list repo : list repositories"
         ""
@@ -347,7 +349,7 @@ let UsageContent() =
         "  describe view <name> : describe view"
         "  alter view [--default] <viewName> : alter view"
         ""
-        "  add app <app-name> <copy | zip | docker> <project-id>+ : create new application from given project ids"
+        "  add app <app-name> <copy|zip|docker|fake> <project-id>+ : create new application from given project ids"
         "  drop app <app-name> : drop application"
         "  list app : list applications" 
         "  describe app <app-name>" ]

@@ -80,7 +80,6 @@ let buildFake (viewFile : FileInfo) (config : string) (clean : bool) (multithrea
 let chooseBuilder (builderType : BuilderType) msbuildBuilder fakeBuild =
     let builder = match builderType with
                   | BuilderType.MSBuild -> msbuildBuilder
-                  | BuilderType.Fake -> fakeBuild
     builder
 
 
