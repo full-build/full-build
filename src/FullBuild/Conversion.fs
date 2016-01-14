@@ -24,23 +24,23 @@ open Anthology
 open Collections
 
 
-let importCopyFrom (project : Project) =
-    let prjProperty = ProjectPropertyName project.ProjectId
-    let condition = sprintf "'$(%s)' == ''" prjProperty
-    let prjFolder = Path.GetDirectoryName (project.RelativeProjectFile.toString)
-    let path = sprintf "$(SolutionDir)/%s/%s/bin/" (project.Repository.toString) (prjFolder) 
-    let ext = match project.OutputType with
-              | OutputType.Dll -> ".dll"
-              | OutputType.Exe -> ".exe"
-
-    let inc = sprintf "%s*.dll;%s*.exe;%s*.pdb" path path path
-    let excl = sprintf "%s%s%s" path project.Output.toString ext
-
-    XElement(NsMsBuild + "ItemGroup",
-        XElement(NsMsBuild + "FBCopyFiles", 
-            XAttribute(NsNone + "Include", inc),
-            XAttribute(NsNone + "Exclude", excl)),
-        XAttribute(NsNone + "Condition", condition))
+//let importCopyFrom (project : Project) =
+//    let prjProperty = ProjectPropertyName project.ProjectId
+//    let condition = sprintf "'$(%s)' == ''" prjProperty
+//    let prjFolder = Path.GetDirectoryName (project.RelativeProjectFile.toString)
+//    let path = sprintf "$(SolutionDir)/%s/%s/bin/" (project.Repository.toString) (prjFolder) 
+//    let ext = match project.OutputType with
+//              | OutputType.Dll -> ".dll"
+//              | OutputType.Exe -> ".exe"
+//
+//    let inc = sprintf "%s*.dll;%s*.exe;%s*.pdb" path path path
+//    let excl = sprintf "%s%s%s" path project.Output.toString ext
+//
+//    XElement(NsMsBuild + "ItemGroup",
+//        XElement(NsMsBuild + "FBCopyFiles", 
+//            XAttribute(NsNone + "Include", inc),
+//            XAttribute(NsNone + "Exclude", excl)),
+//        XAttribute(NsNone + "Condition", condition))
 
 let GenerateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project.ProjectId
@@ -51,7 +51,8 @@ let GenerateProjectTarget (project : Project) =
     let ext = match project.OutputType with
               | OutputType.Dll -> "dll"
               | OutputType.Exe -> "exe"
-    let includeFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
+    let binFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
+    let pdbFile = sprintf "%s/%s.pdb" MSBUILD_BIN_FOLDER output
 
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -68,10 +69,12 @@ let GenerateProjectTarget (project : Project) =
                     XElement (NsMsBuild + "Project", sprintf "{%s}" project.UniqueProjectId.toString),
                     XElement (NsMsBuild + "Name", project.Output.toString)),
                 XElement (NsMsBuild + "Reference",
-                    XAttribute (NsNone + "Include", includeFile),
+                    XAttribute (NsNone + "Include", binFile),
                     XAttribute (NsNone + "Condition", binCondition),
-                    XElement (NsMsBuild + "Private", "true"))),
-            importCopyFrom project))
+                    XElement (NsMsBuild + "Private", "true")),
+                XElement (NsMsBuild + "FBCopyFiles", 
+                    XAttribute(NsNone + "Include", sprintf "%s;%s" binFile pdbFile),
+                    XAttribute(NsNone + "Condition", binCondition)))))
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let prjDir = Env.GetFolder Env.Project
@@ -171,6 +174,9 @@ let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
 let ConvertProject (xproj : XDocument) (project : Project) =
     let setOutputPath (xel : XElement) =
         xel.Value <- BIN_FOLDER
+
+    let setDebugSymbols (xel : XElement) =
+        xel.Value <- "true"
 
     let setDocumentation (xel : XElement) =
         let fileName = sprintf "%s/%s.xml" BIN_FOLDER project.ProjectId.toString
