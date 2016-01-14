@@ -33,7 +33,8 @@ let FilterRepos (filters : RepositoryId set) =
             |> Seq.concat
             |> Set
 
-let cloneRepoAndInit wsDir shallow repo =
+let cloneRepoAndInit wsDir shallow (repo : Repository) =
+    DisplayHighlight repo.Name.toString
     Vcs.VcsClone wsDir shallow repo
 
 let Clone (filters : RepositoryId set) (shallow : bool) = 

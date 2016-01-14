@@ -56,9 +56,10 @@ let commandInit (args : string list) =
     | _ -> Command.Error
 
 
-let commandExec (args : string list) =
+let rec commandExec (all : bool) (args : string list) =
     match args with 
-    | [cmd] -> Command.Exec { Command = cmd }
+    | TokenOption TokenOption.All :: tail -> tail |> commandExec true
+    | [cmd] -> Command.Exec { Command = cmd; All = all }
     | _ -> Command.Error
 
 let rec commandTest (excludes : string list) (args : string list) =
@@ -240,7 +241,7 @@ let ParseCommandLine (args : string list) : Command =
     | [Token Token.Help] -> Command.Usage
     | Token Token.Setup :: cmdArgs -> commandSetup cmdArgs
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
-    | Token Token.Exec :: cmdArgs -> commandExec cmdArgs
+    | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
     | Token Token.Test :: cmdArgs -> commandTest [] cmdArgs
     | Token Token.Index :: cmdArgs -> commandIndex cmdArgs
     | Token Token.Convert :: cmdArgs -> commandConvert cmdArgs
@@ -319,7 +320,7 @@ let UsageContent() =
         "  rebuild [--debug] [--version <version>] [--mt] [<view-name>] : rebuild view (clean & build)"
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
-        "  exec <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
+        "  exec [--all] <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
         "  index : index workspace"
         "  convert : convert projects in workspace"
         "  pull [--src | --bin] : update to latest version"

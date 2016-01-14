@@ -75,7 +75,8 @@ type GraphView =
       All : bool }
 
 type Exec = 
-    { Command : string }
+    { Command : string 
+      All : bool }
 
 type AddRepository =
     {

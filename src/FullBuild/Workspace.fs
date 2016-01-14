@@ -150,8 +150,8 @@ let Pull (src : bool) (bin : bool) =
     let wsDir = Env.GetFolder Env.Workspace
 
     if src then
-        DisplayHighlight ".full-build"
         let mainRepo = antho.MasterRepository
+        DisplayHighlight mainRepo.Name.toString
         Vcs.VcsPull wsDir mainRepo
 
         let antho = Configuration.LoadAnthology ()
@@ -177,10 +177,14 @@ let Init (path : string) (uri : RepositoryUrl) =
         let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType; Branch = None }
         VcsClone wsDir true repo
 
-let Exec cmd =
+let Exec cmd master =
     let antho = Configuration.LoadAnthology()
     let wsDir = Env.GetFolder Env.Workspace
-    for repo in antho.Repositories do
+    let repos = match master with
+                | true -> antho.Repositories |> Set.add antho.MasterRepository 
+                | _ -> antho.Repositories
+
+    for repo in repos do
         let repoDir = wsDir |> GetSubDirectory repo.Name.toString
         if repoDir.Exists then
             let vars = [ ("FB_NAME", repo.Name.toString)
