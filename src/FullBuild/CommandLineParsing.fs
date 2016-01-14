@@ -322,7 +322,7 @@ let UsageContent() =
         "  rebuild [--debug] [--version <version>] [--mt] [<view-name>] : rebuild view (clean & build)"
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
-        "  exec [--all] <cmd> : execute command for each repository (variables FB_NAME, FB_PATH, FB_URL available)"
+        "  exec [--all] <cmd> : execute command for each repository (variables: FB_NAME,FB_PATH,FB_URL)"
         "  index : index workspace"
         "  convert : convert projects in workspace"
         "  pull [--src | --bin] : update to latest version"
@@ -349,7 +349,7 @@ let UsageContent() =
         "  describe view <name> : describe view"
         "  alter view [--default] <viewName> : alter view"
         ""
-        "  add app <app-name> <copy|zip|docker|fake> <project-id>+ : create new application from given project ids"
+        "  add app <app-name> <copy|zip|fake> <project-id>+ : create new application from given project ids"
         "  drop app <app-name> : drop application"
         "  list app : list applications" 
         "  describe app <app-name>" ]
