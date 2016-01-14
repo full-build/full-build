@@ -9,8 +9,6 @@
     <Reference Include="$(SolutionDir)/.full-build/bin/fullbuild.tests.dll" Condition="'$(Prj_fullbuild_tests)' == ''">
       <Private>true</Private>
     </Reference>
-  </ItemGroup>
-  <ItemGroup Condition="'$(Prj_fullbuild_tests)' == ''">
-    <FBCopyFiles Include="$(SolutionDir)/src/FullBuild.Tests/bin/*.dll;$(SolutionDir)/src/FullBuild.Tests/bin/.*.exe;$(SolutionDir)/src/FullBuild.Tests/bin/.pdb" Exclude="$(SolutionDir)/src/FullBuild.Tests/bin/fullbuild.tests.dll" />
+    <FBCopyFiles Include="$(SolutionDir)/.full-build/bin/fullbuild.tests.dll;$(SolutionDir)/.full-build/bin/fullbuild.tests.pdb" Condition="'$(Prj_fullbuild_tests)' == ''" />
   </ItemGroup>
 </Project>
