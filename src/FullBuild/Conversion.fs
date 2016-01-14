@@ -135,36 +135,36 @@ let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
     let seekAndDestroy =
         [ 
             // paket
-            NsMsBuild + "None", filterPaketReference
-            NsMsBuild + "Import", filterPaketTarget
-            NsMsBuild + "Choose", filterPaket
+            "None", filterPaketReference
+            "Import", filterPaketTarget
+            "Choose", filterPaket
 
-            // remove project references
-            NsMsBuild + "ProjectReference", always
+            // project references
+            "ProjectReference", always
             
-            // remove unknown assembly references
-            NsMsBuild + "Reference", filterAssemblies project.AssemblyReferences
+            // unknown assembly references
+            "Reference", filterAssemblies project.AssemblyReferences
 
-            // remove full-build imports
-            NsMsBuild + "Import", filterProject
-            NsMsBuild + "Import", filterPackage
-            NsMsBuild + "Import", filterFullBuildTargets
+            // full-build imports
+            "Import", filterProject
+            "Import", filterPackage
+            "Import", filterFullBuildTargets
 
-            // remove nuget stuff
-            NsMsBuild + "Import", filterNuget
-            NsMsBuild + "Target", filterNugetTarget
-            NsMsBuild + "None", filterNugetPackage
-            NsMsBuild + "Content", filterNugetPackage
+            // nuget stuff
+            "Import", filterNuget
+            "Target", filterNugetTarget
+            "None", filterNugetPackage
+            "Content", filterNugetPackage
 
             // cleanup project
-            NsMsBuild + "BaseIntermediateOutputPath", always 
-            NsMsBuild + "SolutionDir", always
-            NsMsBuild + "RestorePackages", always
-            NsMsBuild + "NuGetPackageImportStamp", always
-            NsMsBuild + "ItemGroup", hasNoChild
+            "BaseIntermediateOutputPath", always 
+            "SolutionDir", always
+            "RestorePackages", always
+            "NuGetPackageImportStamp", always
+            "ItemGroup", hasNoChild
         ]
 
-    seekAndDestroy |> Seq.iter (fun (x, y) -> cproj.Descendants(x).Where(y).Remove())
+    seekAndDestroy |> Seq.iter (fun (x, y) -> cproj.Descendants(NsMsBuild + x).Where(y).Remove())
     cproj
 
 
