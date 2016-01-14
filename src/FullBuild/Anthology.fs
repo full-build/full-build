@@ -165,14 +165,12 @@ with
 
 type TestRunnerType =
     | NUnit
-    | Fake
 with
      member this.toString = toString this
      static member from s = fromString<TestRunnerType> s
 
 type BuilderType =
     | MSBuild
-    | Fake
 with
      member this.toString = toString this
      static member from s = fromString<BuilderType> s

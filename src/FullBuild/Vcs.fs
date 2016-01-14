@@ -14,7 +14,6 @@
 
 module Vcs
 
-open System
 open Anthology
 open System.IO
 
@@ -187,7 +186,7 @@ let VcsPush (wsDir : DirectoryInfo) (repo : Repository) =
 let VcsClean (wsDir : DirectoryInfo) (repo : Repository) =
     (chooseVcs wsDir repo gitClean hgClean)
 
-let VcsDetermineType (url : RepositoryUrl) =
-    if gitIs url then VcsType.Git
-    else if hgIs url then VcsType.Hg
-    else failwithf "Failed to determine type of repository %A" url.toLocalOrUrl
+//let VcsDetermineType (url : RepositoryUrl) =
+//    if gitIs url then VcsType.Git
+//    else if hgIs url then VcsType.Hg
+//    else failwithf "Failed to determine type of repository %A" url.toLocalOrUrl
