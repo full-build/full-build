@@ -94,8 +94,7 @@ let private hgIs (uri : RepositoryUrl) =
 let private gitClone (isGerrit : bool) (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
     let bronly = match branch with
                  | None -> ""
-                 | Some x -> if not shallow then sprintf "--branch %s --single-branch" x.toString
-                             else ""
+                 | Some x -> sprintf "--branch %s --single-branch" x.toString
 
     let depth = if shallow then "--depth=1"
                 else ""
