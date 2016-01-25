@@ -26,6 +26,8 @@ type TokenOption =
     | Default
     | Branch
     | Version
+    | MsBuild
+    | Fake
     | Unknown
 
 let (|TokenOption|) (token : string) =

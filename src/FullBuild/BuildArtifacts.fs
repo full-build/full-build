@@ -40,7 +40,7 @@ let Publish buildnum hash =
             IoHelpers.CopyFolder appDir appTargetDir true
 
             // publish
-            Try (fun () -> Vcs.VcsPush wsDir mainRepo)
+            Try (fun () -> Vcs.VcsPush wsDir antho.Vcs mainRepo)
 
             tmpVersionDir.MoveTo(versionDir.FullName)
         else
