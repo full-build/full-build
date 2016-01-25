@@ -30,7 +30,7 @@ let ReplaceInvalidChars (s : string) =
 
 let ProjectPropertyName (projectId : ProjectId) =
     let prjGuid = projectId.toString |> ReplaceInvalidChars
-    let prjProp = sprintf "Prj_%s" prjGuid
+    let prjProp = sprintf "FullBuild_%s" prjGuid
     prjProp
 
 let PackagePropertyName (packageId : PackageId) =

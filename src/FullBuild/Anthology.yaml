@@ -3,14 +3,18 @@
     nugets:
       - nuget: https://www.nuget.org/api/v2/
     test: nunit
-    build: msbuild
+    vcs: git
+    mainrepository:
+        repo: id1
+        branch: fullbuild
+        uri: http://www.google.com
     repositories:
         - repo: id1
-          type: git
           branch: fullbuild
+          build: msbuild
           uri: http://www.google.com
         - repo: id1
-          type: git
+          build: msbuild
           uri: http://www.google.com
     apps:
         - name: FullBuild

@@ -149,13 +149,13 @@ let commandOutdated (args : string list) =
     | [] -> Command.OutdatedPackages
     | _ -> Command.Error
 
-let rec commandAddRepo (branch : BranchId option) (args : string list) =
+let rec commandAddRepo (branch : BranchId option) (builder : BuilderType) (args : string list) =
     match args with
-    | TokenOption TokenOption.Branch :: MatchBranchId branch :: tail -> tail |> commandAddRepo (Some branch)
-    | name :: vcs :: [url] -> Command.AddRepository { Repo = RepositoryId.from name
-                                                      Url = RepositoryUrl.from url
-                                                      Branch = branch
-                                                      Type = VcsType.from vcs }
+    | TokenOption TokenOption.Branch :: MatchBranchId branch :: tail -> tail |> commandAddRepo (Some branch) builder
+    | name :: builder :: vcs :: [url] -> Command.AddRepository { Repo = RepositoryId.from name
+                                                                 Url = RepositoryUrl.from url
+                                                                 Branch = branch
+                                                                 Builder = BuilderType.from builder }
     | _ -> Command.Error
 
 let commandDropRepo (args : string list) =
@@ -262,7 +262,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Outdated :: Token Token.Package :: cmdArgs -> commandOutdated cmdArgs
     | Token Token.List :: Token Token.Package :: cmdArgs -> commandListPackage cmdArgs
 
-    | Token Token.Add :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandAddRepo None
+    | Token Token.Add :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandAddRepo None BuilderType.MSBuild
     | Token Token.Drop :: Token Token.Repo :: cmdArgs -> commandDropRepo cmdArgs
     | Token Token.List :: Token Token.Repo :: cmdArgs -> commandListRepo cmdArgs
 
@@ -315,14 +315,14 @@ let UsageContent() =
         "  help : display this help"
         "  version : display full-build version"
         "  setup <git|gerrit|hg> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
-        "  init <git|gerrit|hg> <master-repository> <local-path> : initialize a new workspace in given path"
+        "  init <master-repository> <local-path> : initialize a new workspace in given path"
         "  clone [--noshallow] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
         "  build [--debug] [--version <version>] [--mt] [<view-name>] : build view"
         "  rebuild [--debug] [--version <version>] [--mt] [<view-name>] : rebuild view (clean & build)"
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
-        "  exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL)"
+        "  exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         "  index : index workspace"
         "  convert : convert projects in workspace"
         "  pull [--src|--bin] : update to latest version"
@@ -336,7 +336,7 @@ let UsageContent() =
         "  outdated package : display outdated packages"
         "  list package : list packages"
         ""
-        "  add repo [--branch <branchId>] <repo-name> <git|gerrit|hg> <repo-uri> : declare a new repository"
+        "  add repo [--branch <branchId>] <repo-name> <msbuild|fake> <repo-uri> : declare a new repository"
         "  drop repo <repo-name> : drop repository"
         "  list repo : list repositories"
         ""
