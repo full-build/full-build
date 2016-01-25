@@ -15,15 +15,13 @@ let CheckReferences () =
     RepositoryId.from "badaboum" |> should equal <| RepositoryId.from "BADABOUM"
 
 let CheckToRepository () =
-    let repoGit = { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"; Branch = None}
-    repoGit |> should equal { Vcs = VcsType.Git
-                              Name = RepositoryId.from "cassandra-sharp"
+    let repoGit = { Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"; Branch = None}
+    repoGit |> should equal { Name = RepositoryId.from "cassandra-sharp"
                               Branch = None
                               Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" } 
 
-    let repoHg = { Vcs = VcsType.Hg; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"; Branch = None }
-    repoHg |> should equal { Vcs = VcsType.Hg
-                             Name = RepositoryId.from "cassandra-sharp"
+    let repoHg = { Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"; Branch = None }
+    repoHg |> should equal { Name = RepositoryId.from "cassandra-sharp"
                              Branch = None
                              Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" } 
 
@@ -33,9 +31,11 @@ let CheckEqualityWithPermutation () =
     let antho1 = {
         Artifacts = @"c:\toto"
         NuGets = []
-        MasterRepository = { Vcs = VcsType.Git; Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" ; Branch = None}
-        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" ; Branch = None}
-                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" ; Branch = None} ] |> set
+        MasterRepository = { Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" ; Branch = None}
+        Repositories = [ { Builder = BuilderType.MSBuild
+                           Repository = { Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" ; Branch = None} }
+                         { Builder = BuilderType.MSBuild
+                           Repository = { Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" ; Branch = None} } ] |> set
         Projects = [ { Output = AssemblyId.from "cqlplus"
                        ProjectId = ProjectId.from "cqlplus"
                        OutputType = OutputType.Exe
@@ -47,15 +47,17 @@ let CheckEqualityWithPermutation () =
                        PackageReferences = Set.empty
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set
         Applications = Set.empty 
-        Tester = TestRunnerType.NUnit
-        Builder = BuilderType.MSBuild }
+        Tester = TestRunnerType.NUnit 
+        Vcs = VcsType.Git }
 
     let antho2 = {
         Artifacts = @"c:\toto"
         NuGets = []
-        MasterRepository = { Vcs = VcsType.Git; Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" ; Branch = None}
-        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" ; Branch = None} 
-                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" ; Branch = None} ] |> set
+        MasterRepository = { Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" ; Branch = None}
+        Repositories = [ { Builder = BuilderType.MSBuild
+                           Repository = { Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" ; Branch = None} }
+                         { Builder = BuilderType.MSBuild
+                           Repository = { Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" ; Branch = None} } ] |> set
         Projects = [ { Output = AssemblyId.from "cqlplus"
                        ProjectId = ProjectId.from "cqlplus"
                        OutputType = OutputType.Exe
@@ -67,7 +69,7 @@ let CheckEqualityWithPermutation () =
                        PackageReferences = Set.empty
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set 
         Applications = Set.empty 
-        Tester = TestRunnerType.NUnit
-        Builder = BuilderType.MSBuild }
+        Tester = TestRunnerType.NUnit 
+        Vcs = VcsType.Git }
         
     antho1 |> should equal antho2

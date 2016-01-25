@@ -100,7 +100,8 @@ let FindViewProjects (viewName : ViewId) =
     let antho = Configuration.LoadAnthology ()
 
     // select only available repositories
-    let availableRepos = antho.Repositories |> Set.filter (filterClonedRepositories wsDir)
+    let availableRepos = antho.Repositories |> Set.map (fun x -> x.Repository)
+                                            |> Set.filter (filterClonedRepositories wsDir)
                                             |> Set.map(fun x -> x.Name)
 
     // build: <repository>/<project>
@@ -207,4 +208,5 @@ let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (mult
     Generate viewName
 
     let antho = Configuration.LoadAnthology ()
-    (Builders.BuildWithBuilder antho.Builder) viewFile config clean multithread version
+    // TODO: should build with Fake too
+    (Builders.BuildWithBuilder BuilderType.MSBuild) viewFile config clean multithread version

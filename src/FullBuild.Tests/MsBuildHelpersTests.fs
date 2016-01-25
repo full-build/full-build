@@ -27,7 +27,7 @@ let CheckProjectPropertyName () =
                     Repository = RepositoryId.from "cassandra-sharp" }
 
     let propName = ProjectPropertyName project.ProjectId
-    propName |> should equal "Prj_cqlplus"
+    propName |> should equal "FullBuild_cqlplus"
 
 [<Test>]
 let CheckPackagePropertyName () =

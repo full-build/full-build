@@ -1,6 +1,5 @@
 ﻿module AnthologySerializerTests
 
-open AnthologySerializer
 open FsUnit
 open NUnit.Framework
 open Anthology
@@ -11,9 +10,11 @@ let CheckSaveLoadAnthology () =
     let antho1 = {
         Artifacts = @"c:\toto"
         NuGets = [ RepositoryUrl.from "https://www.nuget.org/api/v2/"; RepositoryUrl.from "file:///C:/src/full-build-packages/"]
-        MasterRepository = { Vcs = VcsType.Git; Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build"; Branch = None }
-        Repositories = [ { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"; Branch = Some (BranchId.from "fullbuild") }
-                         { Vcs = VcsType.Git; Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib"; Branch = None } ] |> set
+        MasterRepository = { Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build"; Branch = None }
+        Repositories = [ { Builder = BuilderType.MSBuild
+                           Repository = { Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"; Branch = Some (BranchId.from "fullbuild") } }
+                         { Builder = BuilderType.MSBuild
+                           Repository = { Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib"; Branch = None } } ] |> set
         Projects = [ { Output = AssemblyId.from "cqlplus"
                        ProjectId = ProjectId.from "cqlplus"
                        OutputType = OutputType.Exe
@@ -27,8 +28,8 @@ let CheckSaveLoadAnthology () =
         Applications = [ { Name = ApplicationId.from "toto"
                            Publisher = PublisherType.Copy
                            Project = ProjectId.from "cassandrasharp" } ] |> Set 
-        Tester = TestRunnerType.NUnit
-        Builder = BuilderType.MSBuild }
+        Tester = TestRunnerType.NUnit 
+        Vcs = VcsType.Gerrit }
 
     let res = AnthologySerializer.Serialize antho1
     printfn "%s" res

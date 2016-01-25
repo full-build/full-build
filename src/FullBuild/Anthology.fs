@@ -97,17 +97,27 @@ with
                                              if uri.IsWellFormedOriginalString() then RepositoryUrl (maybeUri.ToLowerInvariant())
                                              else failwithf "Invalid uri %A" uri
 
+type BuilderType =
+    | MSBuild
+    | Fake
+with
+     member this.toString = toString this
+     static member from s = fromString<BuilderType> s
+
 type Repository = 
     { Name : RepositoryId
-      Vcs : VcsType
-      Branch : BranchId option
-      Url : RepositoryUrl }
+      Url : RepositoryUrl 
+      Branch : BranchId option }
+
+type BuildableRepository =
+    { Repository : Repository
+      Builder : BuilderType }
 
 type BookmarkVersion = BookmarkVersion of string
 with
     member this.toString = (fun (BookmarkVersion x) -> x)this
     static member from (version : string) = BookmarkVersion (version)
-               
+
 type Bookmark = 
     { Repository : RepositoryId
       Version : BookmarkVersion }
@@ -169,13 +179,6 @@ with
      member this.toString = toString this
      static member from s = fromString<TestRunnerType> s
 
-type BuilderType =
-    | MSBuild
-with
-     member this.toString = toString this
-     static member from s = fromString<BuilderType> s
-
-
 type Application = 
     { Name : ApplicationId
       Publisher : PublisherType
@@ -184,12 +187,12 @@ type Application =
 type Anthology = 
     { Artifacts : string
       NuGets : RepositoryUrl list 
+      Vcs : VcsType
       MasterRepository : Repository
-      Repositories : Repository set
+      Repositories : BuildableRepository set
       Projects : Project set 
       Applications : Application set 
-      Tester : TestRunnerType 
-      Builder : BuilderType }
+      Tester : TestRunnerType }
 
 type Baseline = 
     { Bookmarks : Bookmark set  }
