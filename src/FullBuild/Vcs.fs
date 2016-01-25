@@ -151,42 +151,37 @@ let private hgIgnore (repoDir : DirectoryInfo) =
     // FIXME
     ()
 
-let chooseVcs (wsDir : DirectoryInfo) (repo : Repository) gitFun hgFun =
+let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gitFun hgFun =
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name.toString
-    let f = match repo.Vcs with
+    let f = match vcsType with
             | VcsType.Git -> gitFun
             | VcsType.Gerrit -> gitFun
             | VcsType.Hg -> hgFun
     f repoDir
 
-let VcsClone (wsDir : DirectoryInfo) (shallow : bool) (repo : Repository) =
-    let gitCloneFunc =  gitClone (repo.Vcs = VcsType.Gerrit) shallow repo.Branch
+let VcsClone (wsDir : DirectoryInfo) (vcsType : VcsType) (shallow : bool) (repo : Repository) =
+    let gitCloneFunc =  gitClone (vcsType = VcsType.Gerrit) shallow repo.Branch
     let hgCloneFunc = hgClone repo.Branch
-    (chooseVcs wsDir repo gitCloneFunc hgCloneFunc) repo.Url.toString
+    (chooseVcs wsDir vcsType repo gitCloneFunc hgCloneFunc) repo.Url.toString
 
-let VcsTip (wsDir : DirectoryInfo) (repo : Repository) = 
-    chooseVcs wsDir repo gitTip hgTip
+let VcsTip (wsDir : DirectoryInfo) (vcsType : VcsType) repo = 
+    chooseVcs wsDir vcsType repo gitTip hgTip
 
 // version : None ==> master
-let VcsCheckout (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion option) = 
-    (chooseVcs wsDir repo gitCheckout hgCheckout) version
+let VcsCheckout (wsDir : DirectoryInfo) (vcsType : VcsType) repo (version : BookmarkVersion option) = 
+    (chooseVcs wsDir vcsType repo gitCheckout hgCheckout) version
 
-let VcsIgnore (wsDir : DirectoryInfo) (repo : Repository) =
-    chooseVcs wsDir repo  gitIgnore hgIgnore
+let VcsIgnore (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
+    chooseVcs wsDir vcsType repo  gitIgnore hgIgnore
 
-let VcsPull (wsDir : DirectoryInfo) (repo : Repository) =
-    chooseVcs wsDir repo  gitPull hgPull
+let VcsPull (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
+    chooseVcs wsDir vcsType repo  gitPull hgPull
 
-let VcsCommit (wsDir : DirectoryInfo) (repo : Repository) (comment : string) =
-    (chooseVcs wsDir repo gitCommit hgCommit) comment
+let VcsCommit (wsDir : DirectoryInfo) (vcsType : VcsType) repo (comment : string) =
+    (chooseVcs wsDir vcsType repo gitCommit hgCommit) comment
 
-let VcsPush (wsDir : DirectoryInfo) (repo : Repository) =
-    (chooseVcs wsDir repo gitPush hgPush)
+let VcsPush (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
+    (chooseVcs wsDir vcsType repo gitPush hgPush)
 
-let VcsClean (wsDir : DirectoryInfo) (repo : Repository) =
-    (chooseVcs wsDir repo gitClean hgClean)
-
-//let VcsDetermineType (url : RepositoryUrl) =
-//    if gitIs url then VcsType.Git
-//    else if hgIs url then VcsType.Hg
-//    else failwithf "Failed to determine type of repository %A" url.toLocalOrUrl
+let VcsClean (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
+    (chooseVcs wsDir vcsType repo gitClean hgClean)

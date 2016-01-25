@@ -26,6 +26,7 @@ type private AnthologyConfig = FSharp.Configuration.YamlConfig<"anthology.yaml">
 let Serialize (antho : Anthology) =
     let config = new AnthologyConfig()
     config.anthology.artifacts <- antho.Artifacts
+    config.anthology.vcs <- antho.Vcs.toString
 
     config.anthology.nugets.Clear()
     for nuget in antho.NuGets do
@@ -34,16 +35,24 @@ let Serialize (antho : Anthology) =
         config.anthology.nugets.Add (cnuget)
 
     config.anthology.repositories.Clear()
-    let repos = antho.Repositories |> Set.add antho.MasterRepository
+    let repos = antho.Repositories
     for repo in repos do
         let crepo = AnthologyConfig.anthology_Type.repositories_Item_Type()
-        crepo.repo <- repo.Name.toString
-        crepo.``type`` <- repo.Vcs.toString
-        crepo.uri <- Uri (repo.Url.toString)
-        match repo.Branch with
+        crepo.repo <- repo.Repository.Name.toString
+        crepo.uri <- Uri (repo.Repository.Url.toString)
+        crepo.build <- repo.Builder.toString
+
+        match repo.Repository.Branch with
         | None -> crepo.branch <- null
         | Some x -> crepo.branch <- x.toString
         config.anthology.repositories.Add crepo
+
+    let cmainrepo = config.anthology.mainrepository
+    cmainrepo.repo <- antho.MasterRepository.Name.toString
+    cmainrepo.uri <- Uri (antho.MasterRepository.Url.toString)
+    match antho.MasterRepository.Branch with
+    | None -> cmainrepo.branch <- null
+    | Some x -> cmainrepo.branch <- x.toString
 
     config.anthology.projects.Clear()
     for project in antho.Projects do
@@ -78,7 +87,6 @@ let Serialize (antho : Anthology) =
         config.anthology.apps.Add (capp)
 
     config.anthology.test <- antho.Tester.toString
-    config.anthology.build <- antho.Builder.toString
 
     config.ToString()
 
@@ -88,15 +96,22 @@ let Deserialize (content) =
         | [] -> []
         | x :: tail -> (RepositoryUrl.from (x.nuget)) :: convertToNuGets tail
 
-    let rec convertToRepositories (items : AnthologyConfig.anthology_Type.repositories_Item_Type list) =
+    let convertToRepository (item : AnthologyConfig.anthology_Type.mainrepository_Type) : Repository =  
+        let maybeBranch = if String.IsNullOrEmpty(item.branch) then None
+                          else item.branch |> BranchId.from |> Some
+        { Name = RepositoryId.from item.repo
+          Url = RepositoryUrl.from (item.uri)
+          Branch = maybeBranch }
+
+    let rec convertToBuildableRepositories (items : AnthologyConfig.anthology_Type.repositories_Item_Type list) =
         match items with
         | [] -> Set.empty
         | x :: tail -> let maybeBranch = if String.IsNullOrEmpty(x.branch) then None
                                          else x.branch |> BranchId.from |> Some
-                       convertToRepositories tail |> Set.add { Name = RepositoryId.from x.repo
-                                                               Vcs = VcsType.from x.``type``
-                                                               Branch = maybeBranch
-                                                               Url = RepositoryUrl.from (x.uri)}
+                       convertToBuildableRepositories tail |> Set.add { Repository = { Name = RepositoryId.from x.repo
+                                                                                       Branch = maybeBranch
+                                                                                       Url = RepositoryUrl.from (x.uri) }
+                                                                        Builder = BuilderType.from x.build }
 
     let rec convertToAssemblies (items : AnthologyConfig.anthology_Type.projects_Item_Type.assemblies_Item_Type list) =
         match items with
@@ -149,17 +164,16 @@ let Deserialize (content) =
     let config = new AnthologyConfig()
     config.LoadText content
 
-    let repos = convertToRepositories (config.anthology.repositories |> List.ofSeq)
-    let masterRepo = repos |> Seq.find (fun x -> x.Name = RepositoryId.from Env.MASTER_REPO)
-    let otherRepos = Set.remove masterRepo repos
+    let repos = convertToBuildableRepositories (config.anthology.repositories |> List.ofSeq)
+    let mainRepo = convertToRepository (config.anthology.mainrepository)
     { Artifacts = config.anthology.artifacts
+      Vcs = VcsType.from config.anthology.vcs
       NuGets = convertToNuGets (config.anthology.nugets |> List.ofSeq)
-      MasterRepository = masterRepo
-      Repositories = otherRepos
+      MasterRepository = mainRepo
+      Repositories = repos
       Projects = convertToProjects (config.anthology.projects |> List.ofSeq) 
       Applications = convertToApplications (config.anthology.apps |> List.ofSeq) 
-      Tester = convertToTestRunner (config.anthology.test) 
-      Builder = convertToBuilder (config.anthology.build) }
+      Tester = convertToTestRunner (config.anthology.test) }
 
 let Save (filename : FileInfo) (antho : Anthology) =
     let content = Serialize antho

@@ -81,9 +81,9 @@
     </Content>
     <Compile Include="Collections.fs" />
     <Compile Include="StringHelpers.fs" />
+    <Compile Include="PatternMatching.fs" />
     <Compile Include="Exec.fs" />
     <Compile Include="IoHelpers.fs" />
-    <Compile Include="PatternMatching.fs" />
     <Compile Include="Env.fs" />
     <Compile Include="Anthology.fs" />
     <Compile Include="AnthologySerializer.fs" />
@@ -109,6 +109,7 @@
     <Compile Include="FrameworkHandling.fs" />
     <Compile Include="PlatformMatching.fs" />
     <Compile Include="Package.fs" />
+    <Compile Include="MsBuildConversion.fs" />
     <Compile Include="Conversion.fs" />
     <Compile Include="Test.fs" />
     <Compile Include="Indexation.fs" />

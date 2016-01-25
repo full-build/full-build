@@ -126,7 +126,8 @@ let MergeProjects (projects : ProjectParsing.ProjectDescriptor seq) (existingPro
 let IndexWorkspace () = 
     let wsDir = Env.GetFolder Env.Workspace
     let antho = Configuration.LoadAnthology()
-    let projects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir antho.Repositories
+    let repos = antho.Repositories |> Set.map (fun x -> x.Repository)
+    let projects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir repos
 
     let packagesToAdd = DetectNewDependencies projects
     PaketInterface.AppendDependencies packagesToAdd

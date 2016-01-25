@@ -85,7 +85,7 @@ type AddRepository =
         Repo : RepositoryId
         Url : RepositoryUrl
         Branch : BranchId option
-        Type : VcsType
+        Builder : BuilderType
     }
 
 type PullWorkspace =

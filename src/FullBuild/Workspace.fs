@@ -34,12 +34,11 @@ let private checkedExecWithVars =
 
 
 
-let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsType) = 
+let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsType) : Unit = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
-    let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType; Branch = None }
-    VcsClone wsDir true repo
+    let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Branch = None }
 
     let antho = { Artifacts = bin
                   NuGets = []
@@ -48,7 +47,9 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
                   Projects = Set.empty 
                   Applications = Set.empty 
                   Tester = TestRunnerType.NUnit 
-                  Builder = BuilderType.MSBuild }
+                  Vcs = vcsType }
+    VcsClone wsDir vcsType true repo
+
     let confDir = Env.GetFolder Env.Config
     let anthoFile = confDir |> GetFile Env.ANTHOLOGY_FILENAME
     AnthologySerializer.Save anthoFile antho
@@ -63,26 +64,24 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
     let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
     publishSource.CopyTo(publishTarget.FullName) |> ignore
 
-    Vcs.VcsIgnore wsDir repo
-    Vcs.VcsCommit wsDir repo "setup"
+    Vcs.VcsIgnore wsDir vcsType repo
+    Vcs.VcsCommit wsDir vcsType repo "setup"
 
-
-
-let XDocumentLoader (fileName : FileInfo) =
-    XDocument.Load fileName.FullName
-
-let XDocumentSaver (fileName : FileInfo) (xdoc : XDocument) =
-    xdoc.Save (fileName.FullName)
 
 let Index () =
     let newAntho = Indexation.IndexWorkspace () |> Package.Simplify
     Configuration.SaveAnthology newAntho
 
+
+
 let Convert () = 
     let antho = Configuration.LoadAnthology ()
-    Conversion.GenerateProjects antho.Projects XDocumentSaver
-    Conversion.ConvertProjects antho XDocumentLoader XDocumentSaver
-    Conversion.RemoveUselessStuff antho
+    let builder2repos = antho.Repositories |> Seq.groupBy (fun x -> x.Builder)
+
+    for builder2repo in builder2repos do
+        let (builder, brepos) = builder2repo
+        let repos = brepos |> Seq.map (fun x -> x.Repository.Name) |> Set.ofSeq
+        Conversion.Convert builder repos
 
     // setup additional files for views to work correctly
     let confDir = Env.GetFolder Env.Config
@@ -92,13 +91,14 @@ let Convert () =
     publishSource.CopyTo(publishTarget.FullName, true) |> ignore
 
 
-let ClonedRepositories (wsDir : DirectoryInfo) (repos : Repository set) =
-    repos |> Set.filter (fun x -> let repoDir = wsDir |> GetSubDirectory x.Name.toString
+let ClonedRepositories (wsDir : DirectoryInfo) (repos : BuildableRepository set) =
+    repos |> Set.map (fun x -> x.Repository)    
+          |> Set.filter (fun x -> let repoDir = wsDir |> GetSubDirectory x.Name.toString
                                   repoDir.Exists)
 
-let CollectRepoHash wsDir (repos : Repository set) =
+let CollectRepoHash wsDir vcsType (repos : Repository set) =
     let getRepoHash (repo : Repository) =
-        let tip = Vcs.VcsTip wsDir repo
+        let tip = Vcs.VcsTip wsDir vcsType repo
         { Repository = repo.Name; Version = BookmarkVersion tip}
 
     repos |> Set.map getRepoHash
@@ -109,17 +109,17 @@ let Push buildnum =
     let wsDir = Env.GetFolder Env.Workspace
     let allRepos = antho.Repositories
     let clonedRepos = allRepos |> ClonedRepositories wsDir
-    let bookmarks = CollectRepoHash wsDir clonedRepos
+    let bookmarks = CollectRepoHash wsDir antho.Vcs clonedRepos
     let baseline = { Bookmarks = bookmarks }
     Configuration.SaveBaseline baseline
 
     let mainRepo = antho.MasterRepository
 
     // commit
-    Try (fun () -> Vcs.VcsCommit wsDir mainRepo "bookmark")
+    Try (fun () -> Vcs.VcsCommit wsDir antho.Vcs mainRepo "bookmark")
 
     // copy bin content
-    let hash = Vcs.VcsTip wsDir mainRepo
+    let hash = Vcs.VcsTip wsDir antho.Vcs mainRepo
     BuildArtifacts.Publish buildnum hash
 
 let Checkout (version : BookmarkVersion) =
@@ -128,7 +128,7 @@ let Checkout (version : BookmarkVersion) =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
     let mainRepo = antho.MasterRepository
-    Vcs.VcsCheckout wsDir mainRepo (Some version)
+    Vcs.VcsCheckout wsDir antho.Vcs mainRepo (Some version)
 
     // checkout each repository now
     let antho = Configuration.LoadAnthology ()
@@ -138,8 +138,8 @@ let Checkout (version : BookmarkVersion) =
         DisplayHighlight repo.Name.toString
         let repoVersion = baseline.Bookmarks |> Seq.tryFind (fun x -> x.Repository = repo.Name)
         match repoVersion with
-        | Some x -> Vcs.VcsCheckout wsDir repo (Some x.Version)
-        | None -> Vcs.VcsCheckout wsDir repo None
+        | Some x -> Vcs.VcsCheckout wsDir antho.Vcs repo (Some x.Version)
+        | None -> Vcs.VcsCheckout wsDir antho.Vcs repo None
 
     // update binaries with observable baseline
     BuildArtifacts.PullReferenceBinaries version.toString
@@ -151,7 +151,7 @@ let Pull (src : bool) (bin : bool) =
     if src then
         let mainRepo = antho.MasterRepository
         DisplayHighlight mainRepo.Name.toString
-        Vcs.VcsPull wsDir mainRepo
+        Vcs.VcsPull wsDir antho.Vcs mainRepo
 
         let antho = Configuration.LoadAnthology ()
         let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
@@ -160,34 +160,36 @@ let Pull (src : bool) (bin : bool) =
 
             let repoDir = wsDir |> GetSubDirectory repo.Name.toString
             if repoDir.Exists then
-                Vcs.VcsPull wsDir repo
+                Vcs.VcsPull wsDir antho.Vcs repo
 
     if bin then
         BuildArtifacts.PullLatestReferenceBinaries ()
 
 
-let Init (path : string) (uri : RepositoryUrl) (vcsType : VcsType) = 
+let Init (path : string) (uri : RepositoryUrl) (vcsType : VcsType) : Unit = 
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then 
         printf "[WARNING] Workspace already exists - skipping"
     else
-        let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Vcs=vcsType; Branch = None }
-        VcsClone wsDir true repo
+        let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Branch = None }
+        VcsClone wsDir vcsType true repo
 
 let Exec cmd master =
     let antho = Configuration.LoadAnthology()
     let wsDir = Env.GetFolder Env.Workspace
-    let repos = match master with
-                | true -> antho.Repositories |> Set.add antho.MasterRepository 
-                | _ -> antho.Repositories
+    let repos = antho.Repositories |> Set.map (fun x -> x.Repository)
+    let execRepos = match master with
+                    | true -> repos |> Set.add antho.MasterRepository 
+                    | _ -> repos
 
-    for repo in repos do
+    for repo in execRepos do
         let repoDir = wsDir |> GetSubDirectory repo.Name.toString
         if repoDir.Exists then
-            let vars = [ ("FB_NAME", repo.Name.toString)
-                         ("FB_PATH", repoDir.FullName)
-                         ("FB_URL", repo.Url.toLocalOrUrl) ] |> Map.ofSeq
+            let vars = [ "FB_NAME", repo.Name.toString
+                         "FB_PATH", repoDir.FullName
+                         "FB_URL", repo.Url.toLocalOrUrl 
+                         "FB_WKS", wsDir.FullName ] |> Map.ofSeq
             let args = sprintf @"/c ""%s""" cmd
 
             try
@@ -206,23 +208,23 @@ let Clean () =
         // master repository will be cleaned again as final step
         let oldAntho = Configuration.LoadAnthology ()
         let wsDir = Env.GetFolder Env.Workspace
-        Vcs.VcsClean wsDir oldAntho.MasterRepository
+        Vcs.VcsClean wsDir oldAntho.Vcs oldAntho.MasterRepository
         let newAntho = Configuration.LoadAnthology()
         Configuration.SaveAnthology oldAntho
          
-       // remove repositories
+        // remove repositories
         let reposToRemove = Set.difference oldAntho.Repositories newAntho.Repositories
         for repo in reposToRemove do
-            let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+            let repoDir = wsDir |> GetSubDirectory repo.Repository.Name.toString
             if repoDir.Exists then repoDir.Delete(true)
 
         // clean existing repositories
         for repo in newAntho.Repositories do
-            let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+            let repoDir = wsDir |> GetSubDirectory repo.Repository.Name.toString
             if repoDir.Exists then
-                Vcs.VcsClean wsDir repo
+                Vcs.VcsClean wsDir newAntho.Vcs repo.Repository
 
-        Vcs.VcsClean wsDir newAntho.MasterRepository
+        Vcs.VcsClean wsDir newAntho.Vcs newAntho.MasterRepository
 
 let UpdateGuid (repo : RepositoryId) =
     printfn "DANGER ! You will lose all uncommitted changes. Do you want to continue [Yes to confirm] ?"

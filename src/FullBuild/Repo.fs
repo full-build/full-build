@@ -22,10 +22,10 @@ open IoHelpers
 
 let List() = 
     let antho = LoadAnthology()
-    antho.Repositories |> Seq.iter (fun x -> printfn "%s : %s [%A]" x.Name.toString x.Url.toString x.Vcs)
+    antho.Repositories |> Seq.iter (fun x -> printfn "%s : %s [%A]" x.Repository.Name.toString x.Repository.Url.toString x.Builder)
 
-let MatchRepo (repo : Repository set) (filter : RepositoryId) = 
-    repo |> Set.filter (fun x -> Match x.Name.toString filter.toString)
+let MatchRepo (repo : BuildableRepository set) (filter : RepositoryId) = 
+    repo |> Set.filter (fun x -> Match x.Repository.Name.toString filter.toString)
 
 let FilterRepos (filters : RepositoryId set) = 
     let antho = LoadAnthology()
@@ -33,21 +33,24 @@ let FilterRepos (filters : RepositoryId set) =
             |> Seq.concat
             |> Set
 
-let cloneRepoAndInit wsDir shallow (repo : Repository) =
+let cloneRepoAndInit wsDir vcs shallow (repo : Repository) =
     DisplayHighlight repo.Name.toString
-    Vcs.VcsClone wsDir shallow repo
+    Vcs.VcsClone wsDir vcs shallow repo
 
 let Clone (filters : RepositoryId set) (shallow : bool) = 
+    let antho = LoadAnthology()
     let wsDir = Env.GetFolder Env.Workspace
-    FilterRepos filters |> Set.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Name.toString
+    FilterRepos filters |> Set.map (fun x -> x.Repository)
+                        |> Set.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Name.toString
                                                 not <| subDir.Exists)
-                        |> Set.iter (cloneRepoAndInit wsDir shallow)
+                        |> Set.iter (cloneRepoAndInit wsDir antho.Vcs shallow)
 
-let Add (name : RepositoryId) (url : RepositoryUrl) (vcsType : VcsType) (branch : BranchId option) =
+let Add (name : RepositoryId) (url : RepositoryUrl) (branch : BranchId option) (builder : BuilderType) =
     let antho = LoadAnthology ()
-    let repo = { Name = name; Url = url; Vcs = vcsType ; Branch = branch }
-    let repos = antho.Repositories |> Set.add repo
-                                   |> Seq.distinctBy (fun x -> x.Name)
+    let repo = { Name = name; Url = url; Branch = branch }
+    let buildableRepo = { Repository = repo; Builder = builder }
+    let repos = antho.Repositories |> Set.add buildableRepo
+                                   |> Seq.distinctBy (fun x -> x.Repository.Name)
                                    |> Set
     let newAntho = {antho 
                     with Repositories = repos}
@@ -65,5 +68,5 @@ let Drop (name : RepositoryId) =
     else
         let newAntho = { antho
                          with Projects = Set.difference antho.Projects projectsInRepo
-                              Repositories = antho.Repositories |> Set.filter (fun x -> x.Name <> name) }
+                              Repositories = antho.Repositories |> Set.filter (fun x -> x.Repository.Name <> name) }
         Configuration.SaveAnthology newAntho
