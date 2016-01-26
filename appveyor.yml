@@ -1,28 +1,22 @@
+os: Visual Studio 2015
+
 environment:
   GITHUB_TOKEN:
     secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
 
 skip_tags: true
 
-version: 0.7.{build}
-assembly_info:
-  patch: true
-  file: AssemblyInfo.*
-  assembly_version: "{version}"
-  assembly_file_version: "{version}"
-  assembly_informational_version: "{version}"
+version: 2.1.{build}
 
 build_script:
-  -cmd: build-release.bat
+  - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION%.*
   
-platform: Any CPU
-configuration: Release
-build:
-  project: src/full-build.sln
-
+test:
+  assemblies:
+  
 deploy_script:
-  -cmd: push-release.bat
+  - cmd: push.cmd
   
 artifacts:
-  path: src/bin/$(CONFIGURATION)
-  name: $(CONFIGURATION)
+  path: apps/full-build.zip
+  name: full-build

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>FullBuild</name></assembly>
+<members>
+<member name="T:Paket.FrameworkIdentifier">
+<summary>
+ Framework Identifier type.
+</summary>
+</member>
+<member name="T:Paket.FrameworkVersion">
+<summary>
+ The Framework version.
+</summary>
+</member>
+</members>
+</doc>

@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5FDE3939-C144-4287-BC57-A96EC2D1A9DA}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>FullBuild</RootNamespace>
+    <AssemblyName>FullBuild</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
+    <Name>FullBuild</Name>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>bin</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
+    <StartArguments>index</StartArguments>
+    <StartWorkingDirectory>C:\src\avp</StartWorkingDirectory>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <NoWarn>0077</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '11.0'">
+      <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')">
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets')">
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Import Project="$(FSharpTargetsPath)" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <Import Project="$(MSBuildExtensionsPath)/Microsoft/VisualStudio/v$(MSBuildToolsVersion)/WebApplications/Microsoft.WebApplication.targets" />
+  <Target Name="Publish">
+    <PropertyGroup>
+      <AppDir>$(SolutionDir)/apps/$(AppName)</AppDir>
+    </PropertyGroup>
+    <MSBuild Projects="$(ProjectPath)" Targets="ResolveReferences;_CopyWebApplication" Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
+  </Target>
+  <Import Project="$(SolutionDir)/.full-build/full-build.targets" />
+  <ItemGroup>
+    <Content Include="..\..\LICENSE.txt">
+      <Link>LICENSE.txt</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Compile Include="Collections.fs" />
+    <Compile Include="StringHelpers.fs" />
+    <Compile Include="Exec.fs" />
+    <Compile Include="IoHelpers.fs" />
+    <Compile Include="PatternMatching.fs" />
+    <Compile Include="Env.fs" />
+    <Compile Include="Anthology.fs" />
+    <Compile Include="AnthologySerializer.fs" />
+    <Compile Include="BaselineSerializer.fs" />
+    <Compile Include="AnthologyBridge.fs" />
+    <Compile Include="MsBuildHelpers.fs" />
+    <Compile Include="PaketInterface.fs" />
+    <Compile Include="ProjectParsing.fs" />
+    <Compile Include="Vcs.fs" />
+    <Compile Include="CommandLine.fs" />
+    <Compile Include="CommandLineToken.fs" />
+    <Compile Include="CommandLineParsing.fs" />
+    <Compile Include="Configuration.fs" />
+    <Compile Include="Repo.fs" />
+    <Compile Include="Solution.fs" />
+    <Compile Include="Dgml.fs" />
+    <Compile Include="Builders.fs" />
+    <Compile Include="Publishers.fs" />
+    <Compile Include="TestRunners.fs" />
+    <Compile Include="View.fs" />
+    <Compile Include="NuGets.fs" />
+    <Compile Include="Simplify.fs" />
+    <Compile Include="FrameworkHandling.fs" />
+    <Compile Include="PlatformMatching.fs" />
+    <Compile Include="Package.fs" />
+    <Compile Include="Conversion.fs" />
+    <Compile Include="Test.fs" />
+    <Compile Include="Indexation.fs" />
+    <Compile Include="BuildArtifacts.fs" />
+    <Compile Include="Workspace.fs" />
+    <Compile Include="Application.fs" />
+    <Compile Include="Program.fs" />
+    <None Include="App.config" />
+    <None Include="baseline.yaml" />
+    <None Include="anthology.yaml" />
+    <Content Include="full-build.targets">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="gitignore">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="commit-msg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Configuration/package.targets" Condition="'$(FullBuild_FSharp_Configuration_Pkg)' == ''" />
+</Project>

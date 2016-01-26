@@ -1,5 +1,15 @@
 *.user
 *.suo
+*.cache
+*.sln
+*.ncrunchsolution
+*.dgml
 bin
 obj
+apps
+tests/*
 packages
+.vs
+*~
+TestResult.xml
+Settings.FSharpLint
