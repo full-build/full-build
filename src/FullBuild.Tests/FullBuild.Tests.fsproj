@@ -63,6 +63,7 @@
     <Compile Include="AnthologyTests.fs" />
     <Compile Include="BaselineSerializerTests.fs" />
     <Compile Include="AnthologySerializerTests.fs" />
+    <Compile Include="ViewSerializerTests.fs" />
     <Compile Include="ProjectParsingTests.fs" />
     <Compile Include="CommandLineParsingTests.fs" />
     <Compile Include="RepoTests.fs" />

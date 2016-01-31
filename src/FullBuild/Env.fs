@@ -86,6 +86,8 @@ let GetAnthologyFileName() =
 let GetBaselineFileName() = 
     GetFolder Config  |> GetFile BASELINE_FILENAME
 
+let GetViewFileName viewName =
+    GetFolder View |> GetFile (AddExt Extension.View viewName)
 
 let IsMono () =
     let monoRuntime = System.Type.GetType ("Mono.Runtime") 
