@@ -13,7 +13,6 @@
 //   limitations under the License.
 
 module View
-open System.IO
 open Env
 open IoHelpers
 open Anthology
@@ -21,11 +20,10 @@ open Collections
 open Solution
 
 
-
-let assertViewExists (viewName : ViewId) =
-    let vwDir = GetFolder Env.View
-    let vwFile = GetFile (AddExt View viewName.toString) vwDir
-    if not vwFile.Exists then failwithf "View %A does not exist" viewName.toString
+//let assertViewExists (viewName : ViewId) =
+//    let vwDir = GetFolder Env.View
+//    let vwFile = GetFile (AddExt View viewName.toString) vwDir
+//    if not vwFile.Exists then failwithf "View %A does not exist" viewName.toString
 
 
 let Drop (viewName : ViewId) =
@@ -43,24 +41,23 @@ let Drop (viewName : ViewId) =
 let List () =
     let vwDir = GetFolder Env.View
     let defaultFile = vwDir |> GetFile "default"
-    let defaultView = if defaultFile.Exists then File.ReadAllText (defaultFile.FullName)
-                      else "default"
+    let defaultView = if defaultFile.Exists then System.IO.File.ReadAllText (defaultFile.FullName)
+                      else ""
 
     let printViewInfo viewName = 
         let defaultInfo = if viewName = defaultView then "[default]"
                           else ""
         printfn "%s %s" viewName defaultInfo
 
-    vwDir.EnumerateFiles (AddExt  View "*") |> Seq.iter (fun x -> printViewInfo (Path.GetFileNameWithoutExtension x.Name))
+    vwDir.EnumerateFiles (AddExt View "*") |> Seq.iter (fun x -> printViewInfo (System.IO.Path.GetFileNameWithoutExtension x.Name))
 
 
-let Describe (viewName : ViewId) =
-    assertViewExists viewName
-
+let Describe (viewId : ViewId) =
     let vwDir = GetFolder Env.View
-    let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
-    File.ReadAllLines (vwFile.FullName) |> Seq.iter (fun x -> printfn "%s" x)
-
+    let view = Configuration.LoadView viewId
+    let builderInfo = view.Parameters |> Seq.fold (+) (sprintf "[%s] " view.Builder.toString)
+    printfn "%s" builderInfo
+    view.Filters |> Seq.iter (fun x -> printfn "%s" x)
 
 // find all referencing projects of a project
 let private referencingProjects (projects : Project set) (current : ProjectId) =
@@ -83,19 +80,16 @@ let ComputeProjectSelectionClosure (allProjects : Project set) (goal : ProjectId
                                   |> Set.unionMany
     transitiveClosure
 
-let filterClonedRepositories (wsDir : DirectoryInfo) (repo : Repository) =
+let filterClonedRepositories (wsDir : System.IO.DirectoryInfo) (repo : Repository) =
     let repoDir = wsDir |> GetSubDirectory repo.Name.toString
     let exists = repoDir.Exists
     exists
 
-let FindViewProjects (viewName : ViewId) =
+let FindViewProjects (viewId : ViewId) =
     // load back filter & generate view accordingly
     let wsDir = Env.GetFolder Folder.Workspace
-    let vwDir = Env.GetFolder Folder.View 
-    let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
-    let filters = File.ReadAllLines(vwFile.FullName)
-
-    let repoFilters = filters |> Set
+    let view = Configuration.LoadView viewId
+    let repoFilters = view.Filters |> Set
 
     let antho = Configuration.LoadAnthology ()
 
@@ -127,32 +121,24 @@ let FindViewProjects (viewName : ViewId) =
     projects
 
 
-let SaveFileIfNecessary (file : FileInfo) (content : string) =
-    let overwrite = (file.Exists |> not) || File.ReadAllText(file.FullName) <> content
-    if overwrite then
-        File.WriteAllText (file.FullName, content)
 
-let Generate (viewName : ViewId) =
-    assertViewExists viewName
-
-    let projects = FindViewProjects viewName
+let Generate (viewId : ViewId) =
+    let projects = FindViewProjects viewId
 
     // generate solution defines
     let slnDefines = GenerateSolutionDefines projects
     let viewDir = GetFolder Env.View
-    let slnDefineFile = viewDir |> GetFile (AddExt Targets viewName.toString)
+    let slnDefineFile = viewDir |> GetFile (AddExt Targets viewId.toString)
     SaveFileIfNecessary slnDefineFile (slnDefines.ToString())
 
     // generate solution file
     let wsDir = GetFolder Env.Workspace
-    let slnFile = wsDir |> GetFile (AddExt Solution viewName.toString)
+    let slnFile = wsDir |> GetFile (AddExt Solution viewId.toString)
     let slnContent = GenerateSolutionContent projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
     SaveFileIfNecessary slnFile slnContent
 
 
 let Graph (viewName : ViewId) (all : bool) =
-    assertViewExists viewName
-
     let antho = Configuration.LoadAnthology ()
     let projects = FindViewProjects viewName |> Set
     let graph = Dgml.GraphContent antho projects all
@@ -161,16 +147,16 @@ let Graph (viewName : ViewId) (all : bool) =
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewName.toString)
     graph.Save graphFile.FullName
 
-let Create (viewName : ViewId) (filters : string list) =
+let Create (viewId : ViewId) (filters : string list) =
     if filters.Length = 0 then
         failwith "Expecting at least one filter"
 
-    let vwDir = Env.GetFolder Env.View 
-    let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
-    File.WriteAllLines (vwFile.FullName, filters)
+    let view = { Filters = filters |> Set
+                 Builder = BuilderType.MSBuild
+                 Parameters = Set.empty }
+    Configuration.SaveView viewId view
 
-    Generate viewName
-
+    Generate viewId
 
 // ---------------------------------------------------------------------------------------
 
@@ -179,24 +165,22 @@ let defaultView () =
     let vwDir = GetFolder Env.View
     let defaultFile = vwDir |> GetFile "default"
     if not defaultFile.Exists then failwith "No default view defined"
-    let viewName = File.ReadAllText (defaultFile.FullName)
+    let viewName = System.IO.File.ReadAllText (defaultFile.FullName)
     viewName |> ViewId
 
-let AlterView (viewName : ViewId) (isDefault : bool) =
-    assertViewExists viewName
-
+let AlterView (viewId : ViewId) (isDefault : bool) =
     if isDefault then 
         let vwDir = GetFolder Env.View
         let defaultFile = vwDir |> GetFile "default"
-        File.WriteAllText (defaultFile.FullName, viewName.toString)
+        System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
+
+
 
 
 let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (multithread : bool) (version : string) =
     let viewName = match maybeViewName with
                    | Some x -> x
                    | None -> defaultView()
-
-    assertViewExists viewName
 
     let vwDir = Env.GetFolder Env.View 
     let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
