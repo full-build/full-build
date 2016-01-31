@@ -16,7 +16,6 @@ module Configuration
 
 open Anthology
 open Env
-open StringHelpers
 
 type WorkspaceConfiguration = 
     { Repositories : Repository list }
@@ -25,19 +24,30 @@ let LoadAnthology() : Anthology =
     let anthoFn = GetAnthologyFileName ()
     AnthologySerializer.Load anthoFn
 
-let SaveAnthology(anthology : Anthology) = 
+let SaveAnthology  = 
     let anthoFn = GetAnthologyFileName ()
-    AnthologySerializer.Save anthoFn anthology
+    AnthologySerializer.Save anthoFn
 
 let LoadBaseline() : Baseline =
     let baselineFile = GetBaselineFileName ()
     BaselineSerializer.Load baselineFile
 
-let SaveBaseline (baseline : Baseline) =
+let SaveBaseline =
     let baselineFile = GetBaselineFileName ()
-    BaselineSerializer.Save baselineFile baseline
+    BaselineSerializer.Save baselineFile
 
+let LoadView (viewId :ViewId) : View =
+    let viewFile = GetViewFileName viewId.toString 
+    ViewSerializer.Load viewFile
 
+let SaveView (viewId : ViewId) =
+    let viewFile = GetViewFileName viewId.toString 
+    ViewSerializer.Save viewFile
+
+let ViewExists (viewId : ViewId) =
+    let viewFile = GetViewFileName viewId.toString 
+    viewFile.Exists
+    
 
 
 let Migrate () =

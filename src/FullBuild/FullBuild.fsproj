@@ -88,6 +88,7 @@
     <Compile Include="Anthology.fs" />
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="BaselineSerializer.fs" />
+    <Compile Include="ViewSerializer.fs" />
     <Compile Include="AnthologyBridge.fs" />
     <Compile Include="MsBuildHelpers.fs" />
     <Compile Include="PaketInterface.fs" />
@@ -119,7 +120,7 @@
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="baseline.yaml" />
-    <None Include="anthology.yaml" />
+    <None Include="view.yaml" />
     <Content Include="full-build.targets">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -129,6 +130,7 @@
     <Content Include="commit-msg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="anthology.yaml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
