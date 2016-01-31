@@ -115,6 +115,14 @@ let DisplayHighlight s =
     Console.ForegroundColor <- oldColor
 
 
+
+
+let SaveFileIfNecessary (file : FileInfo) (content : string) =
+    let overwrite = (file.Exists |> not) || File.ReadAllText(file.FullName) <> content
+    if overwrite then
+        File.WriteAllText (file.FullName, content)
+
+
 let Try action =
     try
         action()

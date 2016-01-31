@@ -197,3 +197,7 @@ type Anthology =
 type Baseline = 
     { Bookmarks : Bookmark set  }
 
+type View =
+    { Filters : string set
+      Builder : BuilderType
+      Parameters : string set }
