@@ -1,0 +1,8 @@
+﻿view:
+    filters:
+        - filter: toto/*
+        - filter: titi/*
+    builder: msbuild
+    parameters: 
+        - parameter: --mt
+
