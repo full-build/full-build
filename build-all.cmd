@@ -6,9 +6,9 @@ rem both build ensure compatibility on version update
 @echo off
 setlocal
 
-call :build %1
-call :build %1
-call :test
+call :build %1 || goto :ko
+call :build %1 || goto :ko
+call :test || goto :ko
 goto :ok
 
 :build
@@ -24,4 +24,5 @@ goto :eof
 exit /b 0
 
 :ko
+echo BUILD FAILURE
 exit /b 5
