@@ -9,11 +9,14 @@ echo building version %VERSION%
 set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
 set HERE=%~dp0
 
+call :dobuild || goto :ko
+goto :ok
 
+:dobuild
 bootstrap\fullbuild install package || goto :ko
 bootstrap\fullbuild add view fullbuild * || goto :ko
 bootstrap\fullbuild rebuild --version %VERSION% fullbuild || goto :ko
-goto :ok
+goto :eof
 
 :ok
 exit /b 0
