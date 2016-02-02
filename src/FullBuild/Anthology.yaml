@@ -12,9 +12,11 @@
         - repo: id1
           branch: fullbuild
           build: msbuild
+          sticky: false
           uri: http://www.google.com
         - repo: id1
           build: msbuild
+          sticky: true
           uri: http://www.google.com
     apps:
         - name: FullBuild

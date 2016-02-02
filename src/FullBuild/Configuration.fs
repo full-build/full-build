@@ -38,6 +38,7 @@ let SaveBaseline =
 
 let LoadView (viewId :ViewId) : View =
     let viewFile = GetViewFileName viewId.toString 
+    if not viewFile.Exists then failwithf "View %A does not exist" viewId.toString
     ViewSerializer.Load viewFile
 
 let SaveView (viewId : ViewId) =

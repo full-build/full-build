@@ -41,6 +41,7 @@ let Serialize (antho : Anthology) =
         crepo.repo <- repo.Repository.Name.toString
         crepo.uri <- Uri (repo.Repository.Url.toString)
         crepo.build <- repo.Builder.toString
+        crepo.sticky <- repo.Sticky
 
         match repo.Repository.Branch with
         | None -> crepo.branch <- null
@@ -111,7 +112,8 @@ let Deserialize (content) =
                        convertToBuildableRepositories tail |> Set.add { Repository = { Name = RepositoryId.from x.repo
                                                                                        Branch = maybeBranch
                                                                                        Url = RepositoryUrl.from (x.uri) }
-                                                                        Builder = BuilderType.from x.build }
+                                                                        Builder = BuilderType.from x.build 
+                                                                        Sticky = x.sticky }
 
     let rec convertToAssemblies (items : AnthologyConfig.anthology_Type.projects_Item_Type.assemblies_Item_Type list) =
         match items with

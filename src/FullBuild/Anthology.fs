@@ -111,6 +111,7 @@ type Repository =
 
 type BuildableRepository =
     { Repository : Repository
+      Sticky : bool 
       Builder : BuilderType }
 
 type BookmarkVersion = BookmarkVersion of string
