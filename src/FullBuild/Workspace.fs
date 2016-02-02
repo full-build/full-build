@@ -127,6 +127,16 @@ let Push buildnum =
     let hash = Vcs.VcsTip wsDir antho.Vcs mainRepo
     BuildArtifacts.Publish buildnum hash
 
+let CloneStickyRepositories (wsDir : DirectoryInfo) =
+    let currDir = System.Environment.CurrentDirectory
+    try
+        System.Environment.CurrentDirectory <- wsDir.FullName
+        let antho = Configuration.LoadAnthology()
+        antho.Repositories |> Set.filter (fun x -> x.Sticky)
+                           |> Seq.iter (fun x -> VcsClone wsDir antho.Vcs false x.Repository)
+    finally
+        System.Environment.CurrentDirectory <- currDir
+
 let Checkout (version : BookmarkVersion) =
     // checkout repositories
     DisplayHighlight ".full-build"
@@ -159,6 +169,10 @@ let Pull (src : bool) (bin : bool) =
         Vcs.VcsPull wsDir antho.Vcs mainRepo
 
         let antho = Configuration.LoadAnthology ()
+
+        // install sticky repositories as one could have popped up
+        CloneStickyRepositories wsDir
+
         let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
         for repo in clonedRepos do
             DisplayHighlight repo.Name.toString
@@ -180,6 +194,8 @@ let Init (path : string) (uri : RepositoryUrl) (vcsType : VcsType) : Unit =
         let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Branch = None }
         VcsClone wsDir vcsType true repo
 
+    CloneStickyRepositories wsDir
+   
 let Exec cmd master =
     let antho = Configuration.LoadAnthology()
     let wsDir = Env.GetFolder Env.Workspace
