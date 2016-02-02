@@ -26,8 +26,7 @@ type TokenOption =
     | Default
     | Branch
     | Version
-    | MsBuild
-    | Fake
+    | Sticky
     | Unknown
 
 let (|TokenOption|) (token : string) =
@@ -42,6 +41,7 @@ let (|TokenOption|) (token : string) =
     | "--default" -> TokenOption.Default
     | "--branch" -> TokenOption.Branch
     | "--version" -> TokenOption.Version
+    | "--sticky" -> TokenOption.Sticky
     | _ -> Unknown
 
 

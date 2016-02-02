@@ -36,7 +36,7 @@ let tryMain argv =
     | TestAssemblies testInfo -> Test.TestAssemblies testInfo.Filters testInfo.Excludes
 
     // repository
-    | AddRepository repoInfo -> Repo.Add repoInfo.Repo repoInfo.Url repoInfo.Branch repoInfo.Builder
+    | AddRepository repoInfo -> Repo.Add repoInfo.Repo repoInfo.Url repoInfo.Branch repoInfo.Builder repoInfo.Sticky
     | CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters repoInfo.Shallow
     | ListRepositories -> Repo.List ()
     | DropRepository repo -> Repo.Drop repo
@@ -64,7 +64,7 @@ let tryMain argv =
     | ListApplications -> Application.List ()
     | AddApplication appInfo -> Application.Add appInfo.Name appInfo.Project appInfo.Publisher
     | DropApplication name -> Application.Drop name
-    | PublishApplications { Filters = x } -> Application.Publish x
+    | PublishApplications pubInfo -> Application.Publish pubInfo.Filters
 
     | Migrate -> Configuration.Migrate ()
 

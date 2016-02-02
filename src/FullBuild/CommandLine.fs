@@ -86,6 +86,7 @@ type AddRepository =
         Url : RepositoryUrl
         Branch : BranchId option
         Builder : BuilderType
+        Sticky : bool
     }
 
 type PullWorkspace =
