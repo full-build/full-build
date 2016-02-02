@@ -38,35 +38,40 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
-    let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Branch = None }
 
-    let antho = { Artifacts = bin
-                  NuGets = []
-                  MasterRepository = repo
-                  Repositories = Set.empty
-                  Projects = Set.empty 
-                  Applications = Set.empty 
-                  Tester = TestRunnerType.NUnit 
-                  Vcs = vcsType }
-    VcsClone wsDir vcsType true repo
+    let currDir = Environment.CurrentDirectory
+    try
+        Environment.CurrentDirectory <- wsDir.FullName
+        let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Branch = None }
 
-    let confDir = Env.GetFolder Env.Config
-    let anthoFile = confDir |> GetFile Env.ANTHOLOGY_FILENAME
-    AnthologySerializer.Save anthoFile antho
+        let antho = { Artifacts = bin
+                      NuGets = []
+                      MasterRepository = repo
+                      Repositories = Set.empty
+                      Projects = Set.empty 
+                      Applications = Set.empty 
+                      Tester = TestRunnerType.NUnit 
+                      Vcs = vcsType }
+        VcsClone wsDir vcsType true repo
 
-    let baseline = { Bookmarks = Set.empty }
-    let baselineFile = confDir |> GetFile Env.BASELINE_FILENAME
-    BaselineSerializer.Save baselineFile baseline
+        let confDir = Env.GetFolder Env.Config
+        let anthoFile = confDir |> GetFile Env.ANTHOLOGY_FILENAME
+        AnthologySerializer.Save anthoFile antho
 
-    // setup additional files for views to work correctly
-    let installDir = Env.GetFolder Env.Installation
-    let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
-    let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
-    publishSource.CopyTo(publishTarget.FullName) |> ignore
+        let baseline = { Bookmarks = Set.empty }
+        let baselineFile = confDir |> GetFile Env.BASELINE_FILENAME
+        BaselineSerializer.Save baselineFile baseline
 
-    Vcs.VcsIgnore wsDir vcsType repo
-    Vcs.VcsCommit wsDir vcsType repo "setup"
+        // setup additional files for views to work correctly
+        let installDir = Env.GetFolder Env.Installation
+        let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
+        let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
+        publishSource.CopyTo(publishTarget.FullName) |> ignore
 
+        Vcs.VcsIgnore wsDir vcsType repo
+        Vcs.VcsCommit wsDir vcsType repo "setup"
+    finally
+        Environment.CurrentDirectory <- currDir
 
 let Index () =
     let newAntho = Indexation.IndexWorkspace () |> Package.Simplify

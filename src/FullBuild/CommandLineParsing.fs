@@ -149,13 +149,15 @@ let commandOutdated (args : string list) =
     | [] -> Command.OutdatedPackages
     | _ -> Command.Error
 
-let rec commandAddRepo (branch : BranchId option) (builder : BuilderType) (args : string list) =
+let rec commandAddRepo (branch : BranchId option) (builder : BuilderType) (sticky : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Branch :: MatchBranchId branch :: tail -> tail |> commandAddRepo (Some branch) builder
-    | name :: builder :: vcs :: [url] -> Command.AddRepository { Repo = RepositoryId.from name
-                                                                 Url = RepositoryUrl.from url
-                                                                 Branch = branch
-                                                                 Builder = BuilderType.from builder }
+    | TokenOption TokenOption.Sticky :: tail -> tail |> commandAddRepo branch builder true
+    | TokenOption TokenOption.Branch :: MatchBranchId branch :: tail -> tail |> commandAddRepo (Some branch) builder sticky
+    | name :: builder :: [url] -> Command.AddRepository { Repo = RepositoryId.from name
+                                                          Url = RepositoryUrl.from url
+                                                          Branch = branch
+                                                          Builder = BuilderType.from builder 
+                                                          Sticky = sticky }
     | _ -> Command.Error
 
 let commandDropRepo (args : string list) =
@@ -262,7 +264,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Outdated :: Token Token.Package :: cmdArgs -> commandOutdated cmdArgs
     | Token Token.List :: Token Token.Package :: cmdArgs -> commandListPackage cmdArgs
 
-    | Token Token.Add :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandAddRepo None BuilderType.MSBuild
+    | Token Token.Add :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandAddRepo None BuilderType.MSBuild false
     | Token Token.Drop :: Token Token.Repo :: cmdArgs -> commandDropRepo cmdArgs
     | Token Token.List :: Token Token.Repo :: cmdArgs -> commandListRepo cmdArgs
 
@@ -336,7 +338,7 @@ let UsageContent() =
         "  outdated package : display outdated packages"
         "  list package : list packages"
         ""
-        "  add repo [--branch <branchId>] <repo-name> <msbuild|fake> <repo-uri> : declare a new repository"
+        "  add repo [--branch <branchId>] [--sticky] <repo-name> <msbuild|fake> <repo-uri> : declare a new repository"
         "  drop repo <repo-name> : drop repository"
         "  list repo : list repositories"
         ""
