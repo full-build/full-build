@@ -318,7 +318,7 @@ let UsageContent() =
         "  version : display full-build version"
         "  setup <git|gerrit|hg> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
-        "  clone [--noshallow] <repo-wildcard>+ : clone repositories using provided wildcards"
+        "  clone [--shallow] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
         "  build [--debug] [--version <version>] [--mt] [<view-name>] : build view"
         "  rebuild [--debug] [--version <version>] [--mt] [<view-name>] : rebuild view (clean & build)"
