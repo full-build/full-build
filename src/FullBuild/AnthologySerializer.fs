@@ -49,7 +49,6 @@ let Serialize (antho : Anthology) =
         config.anthology.repositories.Add crepo
 
     let cmainrepo = config.anthology.mainrepository
-    cmainrepo.repo <- antho.MasterRepository.Name.toString
     cmainrepo.uri <- Uri (antho.MasterRepository.Url.toString)
     match antho.MasterRepository.Branch with
     | None -> cmainrepo.branch <- null
@@ -100,20 +99,21 @@ let Deserialize (content) =
     let convertToRepository (item : AnthologyConfig.anthology_Type.mainrepository_Type) : Repository =  
         let maybeBranch = if String.IsNullOrEmpty(item.branch) then None
                           else item.branch |> BranchId.from |> Some
-        { Name = RepositoryId.from item.repo
-          Url = RepositoryUrl.from (item.uri)
-          Branch = maybeBranch }
+        { Url = RepositoryUrl.from (item.uri)
+          Branch = maybeBranch 
+          Name = RepositoryId.from Env.MASTER_REPO }
 
     let rec convertToBuildableRepositories (items : AnthologyConfig.anthology_Type.repositories_Item_Type list) =
         match items with
         | [] -> Set.empty
         | x :: tail -> let maybeBranch = if String.IsNullOrEmpty(x.branch) then None
                                          else x.branch |> BranchId.from |> Some
-                       convertToBuildableRepositories tail |> Set.add { Repository = { Name = RepositoryId.from x.repo
-                                                                                       Branch = maybeBranch
-                                                                                       Url = RepositoryUrl.from (x.uri) }
+                       convertToBuildableRepositories tail |> Set.add { Repository = { Branch = maybeBranch
+                                                                                       Url = RepositoryUrl.from (x.uri) 
+                                                                                       Name = RepositoryId.from x.repo }
                                                                         Builder = BuilderType.from x.build 
-                                                                        Sticky = x.sticky }
+                                                                        Sticky = x.sticky 
+                                                                        }
 
     let rec convertToAssemblies (items : AnthologyConfig.anthology_Type.projects_Item_Type.assemblies_Item_Type list) =
         match items with
