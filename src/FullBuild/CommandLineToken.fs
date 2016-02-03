@@ -22,7 +22,7 @@ type TokenOption =
     | Src
     | Exclude
     | Multithread
-    | NoShallow
+    | Shallow
     | Default
     | Branch
     | Version
@@ -37,7 +37,7 @@ let (|TokenOption|) (token : string) =
     | "--src" -> TokenOption.Src
     | "--exclude" -> TokenOption.Exclude
     | "--mt" -> TokenOption.Multithread
-    | "--noshallow" -> TokenOption.NoShallow
+    | "--shallow" -> TokenOption.Shallow
     | "--default" -> TokenOption.Default
     | "--branch" -> TokenOption.Branch
     | "--version" -> TokenOption.Version
