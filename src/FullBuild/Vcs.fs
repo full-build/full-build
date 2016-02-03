@@ -16,6 +16,7 @@ module Vcs
 
 open Anthology
 open System.IO
+open IoHelpers
 
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
@@ -62,11 +63,21 @@ let private hgTip (repoDir : DirectoryInfo) =
     res
 
 
-let private gitClean (repoDir : DirectoryInfo) =
+let private gitClean (repoDir : DirectoryInfo) (repo : Repository) =
+    let br = match repo.Branch with
+             | Some x -> x.toString
+             | None -> "master"
+
+    DisplayHighlight "Resetting branch"
     checkedExec "git" "reset --hard" repoDir
+
+    DisplayHighlight "Cleaning branch"
     checkedExec "git" "clean -fxd" repoDir
 
-let private hgClean (repoDir : DirectoryInfo) =
+    DisplayHighlight (sprintf "Checking out %s" br)
+    checkedExec "git" (sprintf "checkout %s" br) repoDir
+
+let private hgClean (repoDir : DirectoryInfo) (repo : Repository) =
     checkedExec "hg" "purge" repoDir
 
 
@@ -184,4 +195,4 @@ let VcsPush (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
     (chooseVcs wsDir vcsType repo gitPush hgPush)
 
 let VcsClean (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
-    (chooseVcs wsDir vcsType repo gitClean hgClean)
+    (chooseVcs wsDir vcsType repo gitClean hgClean) repo
