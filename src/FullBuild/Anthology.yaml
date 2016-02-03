@@ -5,8 +5,7 @@
     test: nunit
     vcs: git
     mainrepository:
-        repo: id1
-        branch: fullbuild
+        branch: master
         uri: http://www.google.com
     repositories:
         - repo: id1

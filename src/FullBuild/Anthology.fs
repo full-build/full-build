@@ -105,8 +105,8 @@ with
      static member from s = fromString<BuilderType> s
 
 type Repository = 
-    { Name : RepositoryId
-      Url : RepositoryUrl 
+    { Url : RepositoryUrl 
+      Name : RepositoryId
       Branch : BranchId option }
 
 type BuildableRepository =
