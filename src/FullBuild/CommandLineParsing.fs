@@ -82,7 +82,7 @@ let commandConvert (args : string list) =
 
 let rec commandClone (shallow : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.NoShallow :: tail -> tail |> commandClone false
+    | TokenOption TokenOption.Shallow :: tail -> tail |> commandClone true
     | [] -> Command.Error
     | filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                  CloneRepositories { Filters = repoFilters; Shallow = shallow }
@@ -249,7 +249,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Test :: cmdArgs -> commandTest [] cmdArgs
     | Token Token.Index :: cmdArgs -> commandIndex cmdArgs
     | Token Token.Convert :: cmdArgs -> commandConvert cmdArgs
-    | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone true
+    | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
     | Token Token.Publish :: cmdArgs -> commandPublish cmdArgs
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false "0.0.0.*"
