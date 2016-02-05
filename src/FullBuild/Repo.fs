@@ -37,13 +37,18 @@ let cloneRepoAndInit wsDir vcs shallow (repo : Repository) =
     DisplayHighlight repo.Name.toString
     Vcs.VcsClone wsDir vcs shallow repo
 
-let Clone (filters : RepositoryId set) (shallow : bool) = 
+let Clone (filters : RepositoryId set) (shallow : bool) (all : bool) = 
     let antho = LoadAnthology()
     let wsDir = Env.GetFolder Env.Workspace
-    FilterRepos filters |> Set.map (fun x -> x.Repository)
-                        |> Set.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Name.toString
-                                                not <| subDir.Exists)
-                        |> Set.iter (cloneRepoAndInit wsDir antho.Vcs shallow)
+
+    let selectedRepos = FilterRepos filters |> Set.map (fun x -> x.Repository.Name)
+    let cloneReposId = match all with
+                       | true -> AnthologyGraph.ComputeRepositoriesDependencies antho.Projects selectedRepos
+                       | _ -> selectedRepos
+    let cloneRepos = antho.Repositories |> Set.filter (fun x -> cloneReposId |> Set.contains x.Repository.Name)
+    cloneRepos |> Set.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Repository.Name.toString
+                                       not <| subDir.Exists)
+               |> Set.iter (fun x -> cloneRepoAndInit wsDir antho.Vcs shallow x.Repository)
 
 let Add (name : RepositoryId) (url : RepositoryUrl) (branch : BranchId option) (builder : BuilderType) (sticky : bool) =
     let antho = LoadAnthology ()
