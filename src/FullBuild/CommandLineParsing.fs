@@ -180,9 +180,10 @@ let commandListNuGet (args : string list) =
     | [] -> Command.ListNuGets
     | _ -> Command.Error
 
-let commandAddView (args : string list) =
+let rec commandAddView (sourceOnly : bool) (args : string list) =
     match args with
-    | MatchViewId name :: filters -> Command.AddView { Name = name; Filters = filters }
+    | TokenOption TokenOption.Src :: tail -> tail |> commandAddView true
+    | MatchViewId name :: filters -> Command.AddView { Name = name; Filters = filters ; SourceOnly = sourceOnly}
     | _ -> Command.Error
 
 let commandDropView (args : string list) =
@@ -271,7 +272,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Add :: Token Token.NuGet :: cmdArgs -> commandAddNuGet cmdArgs
     | Token Token.List :: Token Token.NuGet :: cmdArgs -> commandListNuGet cmdArgs
 
-    | Token Token.Add :: Token Token.View :: cmdArgs -> commandAddView cmdArgs
+    | Token Token.Add :: Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false
     | Token Token.Drop :: Token Token.View :: cmdArgs -> commandDropView cmdArgs
     | Token Token.List :: Token Token.View :: cmdArgs -> commandListView cmdArgs
     | Token Token.Describe :: Token Token.View :: cmdArgs -> commandDescribeView cmdArgs
@@ -318,7 +319,7 @@ let UsageContent() =
         "  version : display full-build version"
         "  setup <git|gerrit|hg> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
-        "  clone [--shallow] <repo-wildcard>+ : clone repositories using provided wildcards"
+        "  clone [--shallow] [--all] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
         "  build [--debug] [--version <version>] [--mt] [<view-name>] : build view"
         "  rebuild [--debug] [--version <version>] [--mt] [<view-name>] : rebuild view (clean & build)"
@@ -345,7 +346,7 @@ let UsageContent() =
         "  add nuget <nuget-uri> : add nuget uri"
         "  list nuget : list NuGet feeds"
         ""
-        "  add view <view-name> <view-wildcard>+ : add repositories to view"
+        "  add view [--src] <view-name> <view-wildcard>+ : add repositories to view"
         "  drop view <view-name> : drop view"
         "  list view : list views"
         "  describe view <name> : describe view"

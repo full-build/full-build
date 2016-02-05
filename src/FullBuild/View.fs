@@ -80,6 +80,21 @@ let ComputeProjectSelectionClosure (allProjects : Project set) (goal : ProjectId
                                   |> Set.unionMany
     transitiveClosure
 
+
+let rec ComputeAllProjectsSelectionSourceOnly (allProjects : Project set) (selectionId : ProjectId set) =
+    let selection = allProjects |> Set.filter (fun x -> selectionId |> Set.contains x.ProjectId)
+
+    let dependenciesId = selection |> Seq.map (fun x -> x.ProjectReferences)
+                                   |> Seq.collect id
+                                   |> Set
+    let newSelectionId = allProjects |> Set.filter (fun x -> dependenciesId |> Set.contains x.ProjectId)
+                                   |> Set.map (fun x -> x.ProjectId)
+                                   |> Set.union selectionId
+
+    match newSelectionId <> selectionId with
+    | false -> ComputeAllProjectsSelectionSourceOnly allProjects newSelectionId
+    | _ -> newSelectionId
+
 let filterClonedRepositories (wsDir : System.IO.DirectoryInfo) (repo : Repository) =
     let repoDir = wsDir |> GetSubDirectory repo.Name.toString
     let exists = repoDir.Exists
@@ -116,7 +131,10 @@ let FindViewProjects (viewId : ViewId) =
 
     // find projects
     let antho = Configuration.LoadAnthology ()
-    let projectRefs = ComputeProjectSelectionClosure antho.Projects selectedProjectGuids |> Set
+    let projectRefs = match view.SourceOnly with
+                      | true -> ComputeAllProjectsSelectionSourceOnly antho.Projects selectedProjectGuids |> Set
+                      | _ -> ComputeProjectSelectionClosure antho.Projects selectedProjectGuids |> Set
+
     let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectId)
     projects
 
@@ -147,13 +165,14 @@ let Graph (viewName : ViewId) (all : bool) =
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewName.toString)
     graph.Save graphFile.FullName
 
-let Create (viewId : ViewId) (filters : string list) =
+let Create (viewId : ViewId) (filters : string list) (all : bool) =
     if filters.Length = 0 then
         failwith "Expecting at least one filter"
 
     let view = { Filters = filters |> Set
                  Builder = BuilderType.MSBuild
-                 Parameters = Set.empty }
+                 Parameters = Set.empty 
+                 SourceOnly = all }
     Configuration.SaveView viewId view
 
     Generate viewId
