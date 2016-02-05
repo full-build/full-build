@@ -43,7 +43,7 @@ let CheckSelectProject () =
     let projects = projectDefs |> Seq.map createProject |> Set
     let goal = ["4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6" |> ProjectId.from
                 "eb5c2f2b-d117-47b0-8067-305b4bae9aa2" |> ProjectId.from ] |> Set
-    let projects = ComputeProjectSelectionClosure projects goal |> Set
+    let projects = AnthologyGraph.ComputeProjectSelectionClosure projects goal |> Set
 
     projects |> Set.count |> should equal 5
     projects |> should contain (ProjectId.from "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6")
