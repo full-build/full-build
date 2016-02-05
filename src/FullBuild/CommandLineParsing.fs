@@ -80,12 +80,13 @@ let commandConvert (args : string list) =
     | [] -> Command.ConvertWorkspace
     | _ -> Command.Error
 
-let rec commandClone (shallow : bool) (args : string list) =
+let rec commandClone (shallow : bool) (all : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Shallow :: tail -> tail |> commandClone true
+    | TokenOption TokenOption.Shallow :: tail -> tail |> commandClone true all
+    | TokenOption TokenOption.All :: tail -> tail |> commandClone shallow true
     | [] -> Command.Error
     | filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                 CloneRepositories { Filters = repoFilters; Shallow = shallow }
+                 CloneRepositories { Filters = repoFilters; Shallow = shallow; All = all }
 
 
 
@@ -250,7 +251,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Test :: cmdArgs -> commandTest [] cmdArgs
     | Token Token.Index :: cmdArgs -> commandIndex cmdArgs
     | Token Token.Convert :: cmdArgs -> commandConvert cmdArgs
-    | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false
+    | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
     | Token Token.Publish :: cmdArgs -> commandPublish cmdArgs
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false "0.0.0.*"

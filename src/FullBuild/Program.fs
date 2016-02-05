@@ -37,7 +37,7 @@ let tryMain argv =
 
     // repository
     | AddRepository repoInfo -> Repo.Add repoInfo.Repo repoInfo.Url repoInfo.Branch repoInfo.Builder repoInfo.Sticky
-    | CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters repoInfo.Shallow
+    | CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters repoInfo.Shallow repoInfo.All
     | ListRepositories -> Repo.List ()
     | DropRepository repo -> Repo.Drop repo
 
