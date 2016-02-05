@@ -201,4 +201,5 @@ type Baseline =
 type View =
     { Filters : string set
       Builder : BuilderType
-      Parameters : string set }
+      Parameters : string set 
+      SourceOnly : bool }
