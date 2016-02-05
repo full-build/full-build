@@ -33,7 +33,8 @@ type CheckoutWorkspace =
 
 type CloneRepositories = 
     { Filters : RepositoryId set 
-      Shallow : bool}
+      Shallow : bool
+      All : bool }
 
 type TestAssemblies = 
     { Filters : string list 
