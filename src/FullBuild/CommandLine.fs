@@ -44,7 +44,8 @@ type NuGetUrl =
 
 type AddView = 
     { Name : ViewId
-      Filters : string list }
+      Filters : string list 
+      SourceOnly : bool }
 
 type ViewName = 
     { Name : ViewId }
