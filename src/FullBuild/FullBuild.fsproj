@@ -66,13 +66,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="$(MSBuildExtensionsPath)/Microsoft/VisualStudio/v$(MSBuildToolsVersion)/WebApplications/Microsoft.WebApplication.targets" />
-  <Target Name="Publish">
-    <PropertyGroup>
-      <AppDir>$(SolutionDir)/apps/$(AppName)</AppDir>
-    </PropertyGroup>
-    <MSBuild Projects="$(ProjectPath)" Targets="ResolveReferences;_CopyWebApplication" Properties="WebProjectOutputDir=$(AppDir);OutDir=$(AppDir)" />
-  </Target>
   <Import Project="$(SolutionDir)/.full-build/full-build.targets" />
   <ItemGroup>
     <Content Include="..\..\LICENSE.txt">
