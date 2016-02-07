@@ -27,8 +27,8 @@
 
   <Target Name="FBCopyBin" AfterTargets="Build">
     <Copy SourceFiles="$(OutputPath)$(AssemblyName)$(TargetExt)" DestinationFolder="$(SolutionDir)/.full-build/bin/" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" />
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(SolutionDir)/.full-build/bin/" ContinueOnError="true" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" />
-    <Copy SourceFiles="@(FBCopyFiles)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" ContinueOnError="true" UseHardlinksIfPossible="true" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(SolutionDir)/.full-build/bin/" Condition="Exists('%(FullPath)')" ContinueOnError="true" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" />
+    <Copy SourceFiles="@(FBCopyFiles)" DestinationFolder="$(OutputPath)" Condition="Exists('%(FullPath)')" SkipUnchangedFiles="true" ContinueOnError="true" UseHardlinksIfPossible="true" />
   </Target>
 
   <Target Name="FBPublish">
