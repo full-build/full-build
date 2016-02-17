@@ -102,6 +102,11 @@ type PushWorkspace =
         BuildNumber : string
     }
 
+type IndexWorkspace =
+    {
+        Optimize : bool
+    }
+
 type Command = 
     | Version
     | Usage
@@ -110,7 +115,7 @@ type Command =
     // workspace
     | SetupWorkspace of SetupWorkspace
     | InitWorkspace of InitWorkspace
-    | IndexWorkspace
+    | IndexWorkspace of IndexWorkspace
     | ConvertWorkspace
     | PushWorkspace of PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
