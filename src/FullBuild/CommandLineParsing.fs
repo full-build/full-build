@@ -70,9 +70,10 @@ let rec commandTest (excludes : string list) (args : string list) =
     | filters -> Command.TestAssemblies { Filters = filters; Excludes = excludes }
 
 
-let commandIndex (args : string list) =
+let rec commandIndex (optimize : bool) (args : string list) =
     match args with
-    | [] -> Command.IndexWorkspace
+    | TokenOption TokenOption.Optimize :: tail -> tail |> commandIndex true
+    | [] -> Command.IndexWorkspace { Optimize = optimize }
     | _ -> Command.Error
 
 let commandConvert (args : string list) =
@@ -249,7 +250,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
     | Token Token.Test :: cmdArgs -> commandTest [] cmdArgs
-    | Token Token.Index :: cmdArgs -> commandIndex cmdArgs
+    | Token Token.Index :: cmdArgs -> cmdArgs |> commandIndex false
     | Token Token.Convert :: cmdArgs -> commandConvert cmdArgs
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
@@ -327,7 +328,7 @@ let UsageContent() =
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
         "  exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
-        "  index : index workspace"
+        "  index [--optimize] : index workspace"
         "  convert : convert projects in workspace"
         "  pull [--src|--bin] : update to latest version"
         "  push <buildNumber> : push a baseline from current repositories version and display version"

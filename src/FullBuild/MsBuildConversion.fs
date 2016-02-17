@@ -188,9 +188,10 @@ let ConvertProject (xproj : XDocument) (project : Project) =
 
     let rec patchAssemblyVersion (lines : string list) =
         match lines with
-        | line :: tail -> if line.Contains("AssemblyVersion") then
-                            patchAssemblyVersion tail
-                          else line :: patchAssemblyVersion tail
+        | line :: tail -> if line.Contains("AssemblyVersion") || line.Contains("AssemblyFileVersion") then 
+                              patchAssemblyVersion tail
+                          else 
+                              line :: patchAssemblyVersion tail
         | [] -> []
 
     let patchAssemblyInfo (xel : XElement) =

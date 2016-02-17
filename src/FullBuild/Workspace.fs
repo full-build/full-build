@@ -73,10 +73,15 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
     finally
         Environment.CurrentDirectory <- currDir
 
-let Index () =
-    let newAntho = Indexation.IndexWorkspace () |> Package.Simplify
-    Configuration.SaveAnthology newAntho
+let Index (optimizeOnly : bool) =    
+    if not optimizeOnly then    
+        let newAntho = Indexation.IndexWorkspace () 
+        Configuration.SaveAnthology newAntho
 
+    let optAntho = Configuration.LoadAnthology ()
+                   |> Indexation.Optimize
+                   |> Package.Simplify
+    Configuration.SaveAnthology optAntho
 
 
 let Convert () = 
