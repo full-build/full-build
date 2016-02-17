@@ -138,11 +138,14 @@ let IndexWorkspace () =
         DisplayConflicts conflicts
         failwith "Conflict(s) detected"
 
+    let newAntho = { antho 
+                     with Projects = allProjects |> Set.ofList }
+    newAntho
+
+let Optimize (newAntho : Anthology) =
     /// BEGIN HACK : here we optimize anthology and dependencies in order to speed up package retrieval after conversion
     ///              warning: big side effect (anthology and paket.dependencies are modified)
     // automaticaly migrate packages to project - this will avoid retrieving them
-    let newAntho = { antho 
-                     with Projects = allProjects |> Set.ofList }
     let simplifiedAntho = Simplify.SimplifyAnthologyWithoutPackage newAntho
     Configuration.SaveAnthology simplifiedAntho
 
