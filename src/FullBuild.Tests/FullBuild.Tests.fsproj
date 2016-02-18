@@ -70,6 +70,7 @@
     <Compile Include="ViewTests.fs" />
     <Compile Include="NuGetTests.fs" />
     <Compile Include="SimplifyTests.fs" />
+    <Compile Include="IndexationTests.fs" />
     <None Include="app.config" />
     <None Include="ProjectWithInvalidRefs.fsproj" />
     <None Include="anthology-indexed.yaml">
