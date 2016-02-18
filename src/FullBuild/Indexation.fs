@@ -105,19 +105,36 @@ let DetectNewDependencies (projects : ProjectParsing.ProjectDescriptor seq) =
 
 
 
-let MergeProjects (projects : ProjectParsing.ProjectDescriptor seq) (existingProjects : Project set) =
-    // merge project
-    let foundProjects = projects |> Seq.map (fun x -> x.Project) 
+let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
+    // this is the repositories we are dealing with
+    let foundRepos = newProjects |> Seq.map (fun x -> x.Repository) 
                                  |> Set
 
-    let foundProjectGuids = foundProjects |> Set.map (fun x -> x.ProjectId)
+    // this is the projects that will be removed from current anthology
+    let removedProjectIds = existingProjects |> Set.filter (fun x -> foundRepos |> Set.contains x.Repository)
+                                             |> Set.map (fun x -> x.ProjectId)
 
-    let allProjects = existingProjects |> Set.filter (fun x -> foundProjectGuids |> Set.contains (x.ProjectId) |> not)
-                                       |> Set.union foundProjects
-                                       |> List.ofSeq
-    allProjects
+    // the new projects
+    let newProjectIds = newProjects |> Seq.map (fun x -> x.ProjectId)
+                                    |> Set
 
+    // what will be chopped
+    let reallyRemovedProjects = Set.difference removedProjectIds newProjectIds
 
+    // projects that won't be touched
+    let remainingProjects = existingProjects |> Set.filter (fun x -> foundRepos |> Set.contains x.Repository |> not)
+
+    // ensure no pending references on deleted projects
+    let referencesOnRemovedProjects = remainingProjects |> Set.map (fun x -> Set.intersect x.ProjectReferences reallyRemovedProjects)
+                                                        |> Set.unionMany
+    if (referencesOnRemovedProjects <> Set.empty) then
+        printfn "Failure to deleted still referenced projects:"
+        for referenceOnRemovedProject in referencesOnRemovedProjects do
+            printfn "  %s" referenceOnRemovedProject.toString
+        failwithf "Failure to deleted still referenced projects"    
+
+    // we can safely replace now
+    Set.union remainingProjects newProjects
 
 
 // this function has 2 side effects:
@@ -127,12 +144,14 @@ let IndexWorkspace () =
     let wsDir = Env.GetFolder Env.Workspace
     let antho = Configuration.LoadAnthology()
     let repos = antho.Repositories |> Set.map (fun x -> x.Repository)
-    let projects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir repos
+    let parsedProjects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir repos
 
-    let packagesToAdd = DetectNewDependencies projects
+    let packagesToAdd = DetectNewDependencies parsedProjects
     PaketInterface.AppendDependencies packagesToAdd
 
-    let allProjects = MergeProjects projects antho.Projects
+    let projects = parsedProjects |> Seq.map (fun x -> x.Project)
+                                  |> Set
+    let allProjects = MergeProjects projects antho.Projects |> Set.toList
     let conflicts = FindConflicts allProjects |> List.ofSeq
     if conflicts <> [] then
         DisplayConflicts conflicts
