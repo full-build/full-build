@@ -31,11 +31,11 @@ let rec public ComputeAllProjectsSelectionSourceOnly (allProjects : Project set)
                                    |> Seq.collect id
                                    |> Set
     let newSelectionId = allProjects |> Set.filter (fun x -> dependenciesId |> Set.contains x.ProjectId)
-                                   |> Set.map (fun x -> x.ProjectId)
-                                   |> Set.union selectionId
+                                     |> Set.map (fun x -> x.ProjectId)
+                                     |> Set.union selectionId
 
     match newSelectionId <> selectionId with
-    | false -> ComputeAllProjectsSelectionSourceOnly allProjects newSelectionId
+    | true -> ComputeAllProjectsSelectionSourceOnly allProjects newSelectionId
     | _ -> newSelectionId
 
 
