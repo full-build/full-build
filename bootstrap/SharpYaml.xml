@@ -85,27 +85,6 @@
             Emits an event.
             </summary>
         </member>
-        <member name="M:SharpYaml.Emitter.#ctor(System.IO.TextWriter)">
-            <summary>
-            Initializes a new instance of the <see cref="T:SharpYaml.IEmitter"/> class.
-            </summary>
-            <param name="output">The <see cref="T:System.IO.TextWriter"/> where the emitter will write.</param>
-        </member>
-        <member name="M:SharpYaml.Emitter.#ctor(System.IO.TextWriter,System.Int32)">
-            <summary>
-            Initializes a new instance of the <see cref="T:SharpYaml.IEmitter"/> class.
-            </summary>
-            <param name="output">The <see cref="T:System.IO.TextWriter"/> where the emitter will write.</param>
-            <param name="bestIndent">The preferred indentation.</param>
-        </member>
-        <member name="M:SharpYaml.Emitter.#ctor(System.IO.TextWriter,System.Int32,System.Int32)">
-            <summary>
-            Initializes a new instance of the <see cref="T:SharpYaml.IEmitter"/> class.
-            </summary>
-            <param name="output">The <see cref="T:System.IO.TextWriter"/> where the emitter will write.</param>
-            <param name="bestIndent">The preferred indentation.</param>
-            <param name="bestWidth">The preferred text width.</param>
-        </member>
         <member name="M:SharpYaml.Emitter.#ctor(System.IO.TextWriter,System.Int32,System.Int32,System.Boolean,System.Boolean)">
             <summary>
             Initializes a new instance of the <see cref="T:SharpYaml.IEmitter"/> class.
@@ -443,6 +422,11 @@
         <member name="M:SharpYaml.EventReader.Skip">
             <summary>
             Skips the current event and any "child" event.
+            </summary>
+        </member>
+        <member name="M:SharpYaml.EventReader.Skip(System.Int32)">
+            <summary>
+            Skips until we reach the appropriate depth again
             </summary>
         </member>
         <member name="M:SharpYaml.EventReader.EnsureNotAtEndOfStream">
@@ -1057,6 +1041,22 @@
             </summary>
             <value>The style.</value>
         </member>
+        <member name="T:SharpYaml.IParser">
+            <summary>
+            Represents a YAML stream paser.
+            </summary>
+        </member>
+        <member name="M:SharpYaml.IParser.MoveNext">
+            <summary>
+            Moves to the next event.
+            </summary>
+            <returns>Returns true if there are more events available, otherwise returns false.</returns>
+        </member>
+        <member name="P:SharpYaml.IParser.Current">
+            <summary>
+            Gets the current event.
+            </summary>
+        </member>
         <member name="T:SharpYaml.Serialization.ChainedEventEmitter">
             <summary>
             Provided the base implementation for an IEventEmitter that is a
@@ -1066,6 +1066,69 @@
         <member name="T:SharpYaml.Serialization.IEventEmitter">
             <summary>
             Interface used to write YAML events.
+            </summary>
+        </member>
+        <member name="T:SharpYaml.Serialization.DefaultNamingConvention">
+            <summary>
+            A naming convention where all members are outputed as-is.
+            </summary>
+        </member>
+        <member name="T:SharpYaml.Serialization.IMemberNamingConvention">
+            <summary>
+            Base interface for renaming members.
+            </summary>
+        </member>
+        <member name="M:SharpYaml.Serialization.IMemberNamingConvention.Convert(System.String)">
+            <summary>
+            Converts the specified member name.
+            </summary>
+            <param name="name">The name.</param>
+            <returns>System.String.</returns>
+        </member>
+        <member name="P:SharpYaml.Serialization.IMemberNamingConvention.Comparer">
+            <summary>
+            Gets the comparer used for this member name.
+            </summary>
+            <value>The comparer.</value>
+        </member>
+        <member name="T:SharpYaml.Serialization.DescriptorCategory">
+            <summary>
+            A category used by <see cref="T:SharpYaml.Serialization.ITypeDescriptor"/>.
+            </summary>
+        </member>
+        <member name="F:SharpYaml.Serialization.DescriptorCategory.Primitive">
+            <summary>
+            A primitive.
+            </summary>
+        </member>
+        <member name="F:SharpYaml.Serialization.DescriptorCategory.Collection">
+            <summary>
+            A collection.
+            </summary>
+        </member>
+        <member name="F:SharpYaml.Serialization.DescriptorCategory.Array">
+            <summary>
+            An array
+            </summary>
+        </member>
+        <member name="F:SharpYaml.Serialization.DescriptorCategory.Dictionary">
+            <summary>
+            A dictionary
+            </summary>
+        </member>
+        <member name="F:SharpYaml.Serialization.DescriptorCategory.Object">
+            <summary>
+            An object
+            </summary>
+        </member>
+        <member name="F:SharpYaml.Serialization.DescriptorCategory.Nullable">
+            <summary>
+            A nullable value
+            </summary>
+        </member>
+        <member name="F:SharpYaml.Serialization.DescriptorCategory.Custom">
+            <summary>
+            A custom descriptor.
             </summary>
         </member>
         <member name="T:SharpYaml.Serialization.Descriptors.DefaultKeyComparer">
@@ -1082,6 +1145,48 @@
             when comparing keys.
               </li>
               </ul></remarks>
+        </member>
+        <member name="T:SharpYaml.Serialization.FlatNamingConvention">
+            <summary>
+            A naming convention where all members are transformed from`CamelCase` to `camel_case`.
+            </summary>
+        </member>
+        <member name="T:SharpYaml.Serialization.ITagTypeResolver">
+            <summary>
+            Provides tag discovery from a type and type discovery from a tag.
+            </summary>
+        </member>
+        <member name="M:SharpYaml.Serialization.ITagTypeResolver.TypeFromTag(System.String,System.Boolean@)">
+            <summary>
+            Finds a type from a tag, null if not found.
+            </summary>
+            <param name="tagName">Name of the tag.</param>
+            <param name="isAlias"></param>
+            <returns>A Type or null if not found</returns>
+        </member>
+        <member name="M:SharpYaml.Serialization.ITagTypeResolver.TagFromType(System.Type)">
+            <summary>
+            Finds a tag from a type, null if not found.
+            </summary>
+            <param name="type">The type.</param>
+            <returns>A tag or null if not found</returns>
+        </member>
+        <member name="M:SharpYaml.Serialization.ITagTypeResolver.ResolveType(System.String)">
+            <summary>
+            Resolves a type from the specified typeName.
+            </summary>
+            <param name="typeName">Name of the type.</param>
+            <returns>Type found for this typeName</returns>
+        </member>
+        <member name="T:SharpYaml.Serialization.Logging.ILogger">
+            <summary>
+            Logger interface.
+            </summary>
+        </member>
+        <member name="T:SharpYaml.Serialization.Logging.LogLevel">
+            <summary>
+            Severity log level.
+            </summary>
         </member>
         <member name="T:SharpYaml.Serialization.ObjectContext">
             <summary>
@@ -1156,6 +1261,32 @@
             The style used when serializing.
             </summary>
         </member>
+        <member name="T:SharpYaml.Serialization.SerializerContextSettings">
+            <summary>
+            Some parameters that can be transmitted from caller
+            </summary>
+        </member>
+        <member name="M:SharpYaml.Serialization.SerializerContextSettings.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:SharpYaml.Serialization.SerializerContextSettings"/> class.
+            </summary>
+        </member>
+        <member name="P:SharpYaml.Serialization.SerializerContextSettings.Logger">
+            <summary>
+            Gets the logger.
+            </summary>
+            <value>
+            The logger.
+            </value>
+        </member>
+        <member name="P:SharpYaml.Serialization.SerializerContextSettings.MemberMask">
+            <summary>
+            Gets or sets the member mask that will be used to filter <see cref="P:SharpYaml.Serialization.YamlMemberAttribute.Mask"/>.
+            </summary>
+            <value>
+            The member mask.
+            </value>
+        </member>
         <member name="T:SharpYaml.Serialization.Serializers.DefaultObjectSerializerBackend">
             <summary>
             Default implementation for <see cref="T:SharpYaml.Serialization.IObjectSerializerBackend"/>
@@ -1199,11 +1330,12 @@
             TODO: Explain memberValue when can be not null
             </remarks>
         </member>
-        <member name="M:SharpYaml.Serialization.IObjectSerializerBackend.ReadCollectionItem(SharpYaml.Serialization.ObjectContext@,System.Type)">
+        <member name="M:SharpYaml.Serialization.IObjectSerializerBackend.ReadCollectionItem(SharpYaml.Serialization.ObjectContext@,System.Object,System.Type)">
             <summary>
             Reads the collection item from the current YAML stream.
             </summary>
             <param name="objectContext">The object context.</param>
+            <param name="value">The value.</param>
             <param name="itemType">Type of the item.</param>
             <returns>The collection item read from YAML stream.</returns>
         </member>
@@ -1247,6 +1379,23 @@
             <param name="objectContext">The object context.</param>
             <param name="keyValue">The key value.</param>
             <param name="types">The types.</param>
+        </member>
+        <member name="T:SharpYaml.Serialization.YamlRemapAttribute">
+            <summary>
+            Allows to re-map a previous name to the specified property/field/enum/class/struct.
+            </summary>
+        </member>
+        <member name="M:SharpYaml.Serialization.YamlRemapAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SharpYaml.Serialization.YamlRemapAttribute"/> class.
+            </summary>
+            <param name="name">The previous name.</param>
+        </member>
+        <member name="P:SharpYaml.Serialization.YamlRemapAttribute.Name">
+            <summary>
+            Gets the previous name.
+            </summary>
+            <value>The previous name.</value>
         </member>
         <member name="T:SharpYaml.YamlStyle">
             <summary>
@@ -1411,22 +1560,6 @@
         <member name="P:SharpYaml.InsertionQueue`1.Count">
             <summary>
             Gets the number of items that are contained by the queue.
-            </summary>
-        </member>
-        <member name="T:SharpYaml.IParser">
-            <summary>
-            Represents a YAML stream paser.
-            </summary>
-        </member>
-        <member name="M:SharpYaml.IParser.MoveNext">
-            <summary>
-            Moves to the next event.
-            </summary>
-            <returns>Returns true if there are more events available, otherwise returns false.</returns>
-        </member>
-        <member name="P:SharpYaml.IParser.Current">
-            <summary>
-            Gets the current event.
             </summary>
         </member>
         <member name="T:SharpYaml.LookAheadBuffer">
@@ -2501,6 +2634,13 @@
             Provides access members of a type.
             </summary>
         </member>
+        <member name="M:SharpYaml.Serialization.ITypeDescriptor.IsMemberRemapped(System.String)">
+            <summary>
+            Determines whether the named member is remmaped.
+            </summary>
+            <param name="name">The name.</param>
+            <returns><c>true</c> if the named member is remmaped; otherwise, <c>false</c>.</returns>
+        </member>
         <member name="M:SharpYaml.Serialization.ITypeDescriptor.Contains(System.String)">
             <summary>
             Determines whether this instance contains a member with the specified member name.
@@ -2525,6 +2665,12 @@
             Gets the member count.
             </summary>
             <value>The member count.</value>
+        </member>
+        <member name="P:SharpYaml.Serialization.ITypeDescriptor.Category">
+            <summary>
+            Gets the category of this descriptor.
+            </summary>
+            <value>The category.</value>
         </member>
         <member name="P:SharpYaml.Serialization.ITypeDescriptor.HasMembers">
             <summary>
@@ -2551,14 +2697,21 @@
             </summary>
             <value>The style.</value>
         </member>
-        <member name="M:SharpYaml.Serialization.Descriptors.ObjectDescriptor.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Type,System.Boolean)">
+        <member name="M:SharpYaml.Serialization.Descriptors.ObjectDescriptor.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Type,System.Boolean,SharpYaml.Serialization.IMemberNamingConvention)">
             <summary>
             Initializes a new instance of the <see cref="T:SharpYaml.Serialization.Descriptors.ObjectDescriptor"/> class.
             </summary>
             <param name="attributeRegistry">The attribute registry.</param>
             <param name="type">The type.</param>
-            <param name="emitDefaultValues"></param>
+            <param name="emitDefaultValues">if set to <c>true</c> [emit default values].</param>
+            <param name="namingConvention">The naming convention.</param>
             <exception cref="T:System.ArgumentNullException">type</exception>
+            <exception cref="T:SharpYaml.YamlException">type</exception>
+        </member>
+        <member name="M:SharpYaml.Serialization.Descriptors.ObjectDescriptor.Initialize">
+            <summary>
+            Initializes this instance.
+            </summary>
             <exception cref="T:SharpYaml.YamlException">Failed to get ObjectDescriptor for type [{0}]. The member [{1}] cannot be registered as a member with the same name is already registered [{2}].DoFormat(type.FullName, member, existingMember)</exception>
         </member>
         <member name="M:SharpYaml.Serialization.Descriptors.ObjectDescriptor.SortMembers(System.Collections.Generic.IComparer{System.Object})">
@@ -2567,12 +2720,19 @@
             </summary>
             <param name="keyComparer">The key comparer.</param>
         </member>
-        <member name="M:SharpYaml.Serialization.Descriptors.ArrayDescriptor.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Type)">
+        <member name="P:SharpYaml.Serialization.Descriptors.ObjectDescriptor.NamingConvention">
+            <summary>
+            Gets the naming convention.
+            </summary>
+            <value>The naming convention.</value>
+        </member>
+        <member name="M:SharpYaml.Serialization.Descriptors.ArrayDescriptor.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Type,SharpYaml.Serialization.IMemberNamingConvention)">
             <summary>
             Initializes a new instance of the <see cref="T:SharpYaml.Serialization.Descriptors.ObjectDescriptor"/> class.
             </summary>
             <param name="attributeRegistry">The attribute registry.</param>
             <param name="type">The type.</param>
+            <param name="namingConvention">The naming convention.</param>
             <exception cref="T:System.ArgumentException">Expecting arrat type;type</exception>
         </member>
         <member name="M:SharpYaml.Serialization.Descriptors.ArrayDescriptor.CreateArray(System.Int32)">
@@ -2592,13 +2752,14 @@
             Provides a descriptor for a <see cref="T:System.Collections.ICollection"/>.
             </summary>
         </member>
-        <member name="M:SharpYaml.Serialization.Descriptors.CollectionDescriptor.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Type,System.Boolean)">
+        <member name="M:SharpYaml.Serialization.Descriptors.CollectionDescriptor.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Type,System.Boolean,SharpYaml.Serialization.IMemberNamingConvention)">
             <summary>
             Initializes a new instance of the <see cref="T:SharpYaml.Serialization.Descriptors.CollectionDescriptor"/> class.
             </summary>
             <param name="attributeRegistry">The attribute registry.</param>
             <param name="type">The type.</param>
             <param name="emitDefaultValues">if set to <c>true</c> [emit default values].</param>
+            <param name="namingConvention">The naming convention.</param>
             <exception cref="T:System.ArgumentException">Expecting a type inheriting from System.Collections.ICollection;type</exception>
         </member>
         <member name="M:SharpYaml.Serialization.Descriptors.CollectionDescriptor.CollectionAdd(System.Object,System.Object)">
@@ -2629,17 +2790,14 @@
             <param name="type">The type.</param>
             <returns><c>true</c> if the specified type is collection; otherwise, <c>false</c>.</returns>
         </member>
+        <member name="M:SharpYaml.Serialization.Descriptors.CollectionDescriptor.PrepareMember(SharpYaml.Serialization.Descriptors.MemberDescriptorBase)">
+            <inheritdoc/>
+        </member>
         <member name="P:SharpYaml.Serialization.Descriptors.CollectionDescriptor.ElementType">
             <summary>
             Gets or sets the type of the element.
             </summary>
             <value>The type of the element.</value>
-        </member>
-        <member name="P:SharpYaml.Serialization.Descriptors.CollectionDescriptor.HasOnlyCapacity">
-            <summary>
-            Gets a value indicating whether the collection has only the capacity as a property defined.
-            </summary>
-            <value><c>true</c> if the collection has only the capacity as a property defined; otherwise, <c>false</c>.</value>
         </member>
         <member name="P:SharpYaml.Serialization.Descriptors.CollectionDescriptor.IsPureCollection">
             <summary>
@@ -2658,13 +2816,14 @@
             Provides a descriptor for a <see cref="T:System.Collections.IDictionary"/>.
             </summary>
         </member>
-        <member name="M:SharpYaml.Serialization.Descriptors.DictionaryDescriptor.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Type,System.Boolean)">
+        <member name="M:SharpYaml.Serialization.Descriptors.DictionaryDescriptor.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Type,System.Boolean,SharpYaml.Serialization.IMemberNamingConvention)">
             <summary>
             Initializes a new instance of the <see cref="T:SharpYaml.Serialization.Descriptors.DictionaryDescriptor"/> class.
             </summary>
             <param name="attributeRegistry">The attribute registry.</param>
             <param name="type">The type.</param>
             <param name="emitDefaultValues">if set to <c>true</c> [emit default values].</param>
+            <param name="namingConvention">The naming convention.</param>
             <exception cref="T:System.ArgumentException">Expecting a type inheriting from System.Collections.IDictionary;type</exception>
         </member>
         <member name="M:SharpYaml.Serialization.Descriptors.DictionaryDescriptor.IsReadOnly(System.Object)">
@@ -2758,6 +2917,18 @@
             </summary>
             <value>The name.</value>
         </member>
+        <member name="P:SharpYaml.Serialization.IMemberDescriptor.OriginalName">
+            <summary>
+            Gets the name.
+            </summary>
+            <value>The name.</value>
+        </member>
+        <member name="P:SharpYaml.Serialization.IMemberDescriptor.DefaultNameComparer">
+            <summary>
+            Gets the default name comparer.
+            </summary>
+            <value>The default name comparer.</value>
+        </member>
         <member name="P:SharpYaml.Serialization.IMemberDescriptor.Type">
             <summary>
             Gets the type.
@@ -2784,6 +2955,22 @@
             </summary>
             <value><c>true</c> if this instance has set method; otherwise, <c>false</c>.</value>
         </member>
+        <member name="P:SharpYaml.Serialization.IMemberDescriptor.IsPublic">
+            <summary>
+            Gets a value indicating whether this member is public.
+            </summary>
+            <value>
+              <c>true</c> if this member is public; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:SharpYaml.Serialization.IMemberDescriptor.Mask">
+            <summary>
+            Gets the serialization mask, that will be checked against the context to know if this field needs to be serialized.
+            </summary>
+            <value>
+            The mask.
+            </value>
+        </member>
         <member name="P:SharpYaml.Serialization.IMemberDescriptor.Style">
             <summary>
             Gets the default style attached to this member.
@@ -2795,6 +2982,26 @@
             Gets a value indicating whether this member should be serialized.
             </summary>
             <value><c>true</c> if [should serialize]; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:SharpYaml.Serialization.IMemberDescriptor.AlternativeNames">
+            <summary>
+            Gets the alternative names that will map back to this member (may be null).
+            </summary>
+            <value>The alternative names that will map back to this member (may be null).</value>
+        </member>
+        <member name="P:SharpYaml.Serialization.IMemberDescriptor.Tag">
+            <summary>
+            Gets or sets a custom tag to associate with this object.
+            </summary>
+            <value>A custom tag object.</value>
+        </member>
+        <member name="M:SharpYaml.Serialization.Descriptors.MemberDescriptorBase.#ctor(System.Reflection.MemberInfo,System.StringComparer)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SharpYaml.Serialization.Descriptors.MemberDescriptorBase"/> class.
+            </summary>
+            <param name="memberInfo">The member information.</param>
+            <param name="defaultNameComparer">The default name comparer.</param>
+            <exception cref="T:System.ArgumentNullException">memberInfo</exception>
         </member>
         <member name="P:SharpYaml.Serialization.Descriptors.MemberDescriptorBase.DeclaringType">
             <summary>
@@ -2808,11 +3015,13 @@
             </summary>
             <value>The member information.</value>
         </member>
-        <member name="M:SharpYaml.Serialization.Descriptors.FieldDescriptor.#ctor(System.Reflection.FieldInfo)">
+        <member name="M:SharpYaml.Serialization.Descriptors.FieldDescriptor.#ctor(System.Reflection.FieldInfo,System.StringComparer)">
             <summary>
             Initializes a new instance of the <see cref="T:SharpYaml.Serialization.Descriptors.FieldDescriptor"/> class.
             </summary>
             <param name="fieldInfo">The property information.</param>
+            <param name="defaultNameComparer">The default name comparer.</param>
+            <exception cref="T:System.ArgumentNullException">fieldInfo</exception>
         </member>
         <member name="M:SharpYaml.Serialization.Descriptors.FieldDescriptor.ToString">
             <summary>
@@ -2831,12 +3040,13 @@
             Describes a descriptor for a nullable type <see cref="T:System.Nullable`1"/>.
             </summary>
         </member>
-        <member name="M:SharpYaml.Serialization.Descriptors.NullableDescriptor.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Type)">
+        <member name="M:SharpYaml.Serialization.Descriptors.NullableDescriptor.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Type,SharpYaml.Serialization.IMemberNamingConvention)">
             <summary>
             Initializes a new instance of the <see cref="T:SharpYaml.Serialization.Descriptors.ObjectDescriptor"/> class.
             </summary>
             <param name="attributeRegistry">The attribute registry.</param>
             <param name="type">The type.</param>
+            <param name="namingConvention">The naming convention.</param>
             <exception cref="T:System.ArgumentException">Type [{0}] is not a primitive</exception>
         </member>
         <member name="M:SharpYaml.Serialization.Descriptors.NullableDescriptor.IsNullable(System.Type)">
@@ -2857,12 +3067,13 @@
             Describes a descriptor for a primitive (bool, char, sbyte, byte, int, uint, long, ulong, float, double, decimal, string, DateTime).
             </summary>
         </member>
-        <member name="M:SharpYaml.Serialization.Descriptors.PrimitiveDescriptor.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Type)">
+        <member name="M:SharpYaml.Serialization.Descriptors.PrimitiveDescriptor.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Type,SharpYaml.Serialization.IMemberNamingConvention)">
             <summary>
             Initializes a new instance of the <see cref="T:SharpYaml.Serialization.Descriptors.ObjectDescriptor"/> class.
             </summary>
             <param name="attributeRegistry">The attribute registry.</param>
             <param name="type">The type.</param>
+            <param name="namingConvention">The naming convention.</param>
             <exception cref="T:System.ArgumentException">Type [{0}] is not a primitive</exception>
         </member>
         <member name="M:SharpYaml.Serialization.Descriptors.PrimitiveDescriptor.IsPrimitive(System.Type)">
@@ -2872,16 +3083,26 @@
             <param name="type">The type.</param>
             <returns><c>true</c> if the specified type is primitive; otherwise, <c>false</c>.</returns>
         </member>
+        <member name="M:SharpYaml.Serialization.Descriptors.PrimitiveDescriptor.ParseEnum(System.String,System.Boolean@)">
+            <summary>
+            Parses the enum and trying to use remap if any declared.
+            </summary>
+            <param name="enumAsText">The enum as text.</param>
+            <param name="remapped">if set to <c>true</c> the enum was remapped.</param>
+            <returns>System.Object.</returns>
+        </member>
         <member name="T:SharpYaml.Serialization.Descriptors.PropertyDescriptor">
             <summary>
             A <see cref="T:SharpYaml.Serialization.IMemberDescriptor"/> for a <see cref="P:SharpYaml.Serialization.Descriptors.PropertyDescriptor.PropertyInfo"/>
             </summary>
         </member>
-        <member name="M:SharpYaml.Serialization.Descriptors.PropertyDescriptor.#ctor(System.Reflection.PropertyInfo)">
+        <member name="M:SharpYaml.Serialization.Descriptors.PropertyDescriptor.#ctor(System.Reflection.PropertyInfo,System.StringComparer)">
             <summary>
             Initializes a new instance of the <see cref="T:SharpYaml.Serialization.Descriptors.PropertyDescriptor"/> class.
             </summary>
             <param name="propertyInfo">The property information.</param>
+            <param name="defaultNameComparer">The default name comparer.</param>
+            <exception cref="T:System.ArgumentNullException">propertyInfo</exception>
         </member>
         <member name="M:SharpYaml.Serialization.Descriptors.PropertyDescriptor.ToString">
             <summary>
@@ -2905,19 +3126,21 @@
             A factory to create an instance of a <see cref="T:SharpYaml.Serialization.ITypeDescriptor"/>
             </summary>
         </member>
-        <member name="M:SharpYaml.Serialization.ITypeDescriptorFactory.Find(System.Type)">
+        <member name="M:SharpYaml.Serialization.ITypeDescriptorFactory.Find(System.Type,System.Collections.Generic.IComparer{System.Object})">
             <summary>
             Tries to create an instance of a <see cref="T:SharpYaml.Serialization.ITypeDescriptor"/> from the type. Return null if this factory is not handling this type.
             </summary>
             <param name="type">The type.</param>
+            <param name="memberComparer"></param>
             <returns>ITypeDescriptor.</returns>
         </member>
-        <member name="M:SharpYaml.Serialization.Descriptors.TypeDescriptorFactory.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Boolean)">
+        <member name="M:SharpYaml.Serialization.Descriptors.TypeDescriptorFactory.#ctor(SharpYaml.Serialization.IAttributeRegistry,System.Boolean,SharpYaml.Serialization.IMemberNamingConvention)">
             <summary>
             Initializes a new instance of the <see cref="T:SharpYaml.Serialization.Descriptors.TypeDescriptorFactory"/> class.
             </summary>
             <param name="attributeRegistry">The attribute registry.</param>
             <param name="emitDefaultValues">if set to <c>true</c> [emit default values].</param>
+            <param name="namingConvention">The naming convention.</param>
             <exception cref="T:System.ArgumentNullException">attributeRegistry</exception>
         </member>
         <member name="M:SharpYaml.Serialization.Descriptors.TypeDescriptorFactory.Create(System.Type)">
@@ -3026,6 +3249,12 @@
             <param name="memberInfo">The member information.</param>
             <param name="attribute">The attribute.</param>
         </member>
+        <member name="P:SharpYaml.Serialization.IAttributeRegistry.AttributeRemap">
+            <summary>
+            Gets or sets the attribute remapper. May be null
+            </summary>
+            <value>The remap attribute.</value>
+        </member>
         <member name="T:SharpYaml.Serialization.AttributeRegistryExtensions">
             <summary>
             Extension methods for attribute registry.
@@ -3054,27 +3283,6 @@
             Prodives tag discovery from a type and type discovery from a tag.
             </summary>
         </member>
-        <member name="M:SharpYaml.Serialization.ITagTypeRegistry.TypeFromTag(System.String)">
-            <summary>
-            Finds a type from a tag, null if not found.
-            </summary>
-            <param name="tagName">Name of the tag.</param>
-            <returns>A Type or null if not found</returns>
-        </member>
-        <member name="M:SharpYaml.Serialization.ITagTypeRegistry.TagFromType(System.Type)">
-            <summary>
-            Finds a tag from a type, null if not found.
-            </summary>
-            <param name="type">The type.</param>
-            <returns>A tag or null if not found</returns>
-        </member>
-        <member name="M:SharpYaml.Serialization.ITagTypeRegistry.ResolveType(System.String)">
-            <summary>
-            Resolves a type from the specified typeName.
-            </summary>
-            <param name="typeName">Name of the type.</param>
-            <returns>Type found for this typeName</returns>
-        </member>
         <member name="M:SharpYaml.Serialization.ITagTypeRegistry.RegisterAssembly(System.Reflection.Assembly,SharpYaml.Serialization.IAttributeRegistry)">
             <summary>
             Registers an assembly when trying to resolve types. All types
@@ -3084,12 +3292,13 @@
             <param name="assembly">The assembly.</param>
             <param name="attributeRegistry">The attribute registry to use when quering for <see cref="T:SharpYaml.Serialization.YamlTagAttribute"/>.</param>
         </member>
-        <member name="M:SharpYaml.Serialization.ITagTypeRegistry.RegisterTagMapping(System.String,System.Type)">
+        <member name="M:SharpYaml.Serialization.ITagTypeRegistry.RegisterTagMapping(System.String,System.Type,System.Boolean)">
             <summary>
             Register a mapping between a tag and a type.
             </summary>
             <param name="tag">The tag.</param>
             <param name="type">The type.</param>
+            <param name="alias">if set to <c>true</c> the specified tag is an alias to an existing type that has already a tag associated with it (remap).</param>
         </member>
         <member name="T:SharpYaml.Serialization.IYamlVisitor">
             <summary>
@@ -3256,6 +3465,24 @@
             <param name="objectContext"></param>
             <exception cref="T:SharpYaml.YamlException">Unable to deserialize property [{0}] not found in type [{1}].DoFormat(propertyName, typeDescriptor)</exception>
         </member>
+        <member name="M:SharpYaml.Serialization.Serializers.ObjectSerializer.TryReadMember(SharpYaml.Serialization.ObjectContext@,System.String@)">
+            <summary>
+            Tries to read a member.
+            </summary>
+            <param name="objectContext">The object context.</param>
+            <param name="memberName">Name of the member.</param>
+            <returns><c>true</c> if the member was successfully read, <c>false</c> otherwise.</returns>
+        </member>
+        <member name="M:SharpYaml.Serialization.Serializers.ObjectSerializer.TryReadMember(SharpYaml.Serialization.ObjectContext@,SharpYaml.Events.Scalar@,System.String@)">
+            <summary>
+            Tries to read an item of the object from the YAML flow (either a sequence item or mapping key/value item).
+            </summary>
+            <param name="objectContext">The object context.</param>
+            <param name="memberScalar">The member scalar.</param>
+            <param name="memberName">Name of the member.</param>
+            <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
+            <exception cref="T:SharpYaml.YamlException">Unable to deserialize property [{0}] not found in type [{1}].DoFormat(propertyName, typeDescriptor)</exception>
+        </member>
         <member name="M:SharpYaml.Serialization.Serializers.ObjectSerializer.WriteYaml(SharpYaml.Serialization.ObjectContext@)">
             <inheritdoc/>
         </member>
@@ -3287,11 +3514,22 @@
             or
             Cannot deserialize list to readonly collection type [{0}]..DoFormat(thisObject.GetType())</exception>
         </member>
-        <member name="M:SharpYaml.Serialization.Serializers.CollectionSerializer.ReadCollectionItem(SharpYaml.Serialization.ObjectContext@,System.Type)">
+        <member name="M:SharpYaml.Serialization.Serializers.CollectionSerializer.ReadAddCollectionItem(SharpYaml.Serialization.ObjectContext@,System.Type,SharpYaml.Serialization.Descriptors.CollectionDescriptor,System.Object,System.Int32)">
+            <summary>
+            Reads and adds item to the collection.
+            </summary>
+            <param name="objectContext">The object context.</param>
+            <param name="elementType">Type of the element.</param>
+            <param name="collectionDescriptor">The collection descriptor.</param>
+            <param name="thisObject">The this object.</param>
+            <param name="index">The index.</param>
+        </member>
+        <member name="M:SharpYaml.Serialization.Serializers.CollectionSerializer.ReadCollectionItem(SharpYaml.Serialization.ObjectContext@,System.Object,System.Type)">
             <summary>
             Reads a collection item.
             </summary>
             <param name="objectContext">The object context.</param>
+            <param name="value">The value.</param>
             <param name="itemType">Type of the item.</param>
             <returns>The item to add to the current collection.</returns>
         </member>
@@ -3358,6 +3596,13 @@
             This method can be overloaded to replace the converted scalar just before writing it.
             </remarks>
         </member>
+        <member name="M:SharpYaml.Serialization.Serializers.PrimitiveSerializer.AppendDecimalPoint(System.String)">
+            <summary>
+            Appends decimal point to arg if it does not exist
+            </summary>
+            <param name="text"></param>
+            <returns></returns>
+        </member>
         <member name="T:SharpYaml.Serialization.Serializers.RoutingSerializer">
             <summary>
             This serializer is responsible to route to a specific serializer.
@@ -3368,11 +3613,12 @@
             A context used while deserializing.
             </summary>
         </member>
-        <member name="M:SharpYaml.Serialization.SerializerContext.#ctor(SharpYaml.Serialization.Serializer)">
+        <member name="M:SharpYaml.Serialization.SerializerContext.#ctor(SharpYaml.Serialization.Serializer,SharpYaml.Serialization.SerializerContextSettings)">
             <summary>
             Initializes a new instance of the <see cref="T:SharpYaml.Serialization.SerializerContext"/> class.
             </summary>
             <param name="serializer">The serializer.</param>
+            <param name="serializerContextSettings">The serializer context settings.</param>
         </member>
         <member name="M:SharpYaml.Serialization.SerializerContext.ReadYaml(System.Object,System.Type)">
             <summary>
@@ -3394,11 +3640,12 @@
             <param name="type">The type.</param>
             <returns>An instance of <see cref="T:SharpYaml.Serialization.ITypeDescriptor"/>.</returns>
         </member>
-        <member name="M:SharpYaml.Serialization.SerializerContext.TypeFromTag(System.String)">
+        <member name="M:SharpYaml.Serialization.SerializerContext.TypeFromTag(System.String,System.Boolean@)">
             <summary>
             Resolves a type from the specified tag.
             </summary>
             <param name="tagName">Name of the tag.</param>
+            <param name="isAlias"></param>
             <returns>Type.</returns>
         </member>
         <member name="M:SharpYaml.Serialization.SerializerContext.TagFromType(System.Type)">
@@ -3430,6 +3677,14 @@
             </summary>
             <value><c>true</c> if we are in the context of serializing; otherwise, <c>false</c>.</value>
         </member>
+        <member name="P:SharpYaml.Serialization.SerializerContext.ContextSettings">
+            <summary>
+            Gets the context settings.
+            </summary>
+            <value>
+            The context settings.
+            </value>
+        </member>
         <member name="P:SharpYaml.Serialization.SerializerContext.Settings">
             <summary>
             Gets the settings.
@@ -3450,7 +3705,7 @@
         </member>
         <member name="P:SharpYaml.Serialization.SerializerContext.Reader">
             <summary>
-            Gets the reader used while deserializing.
+            Gets or sets the reader used while deserializing.
             </summary>
             <value>The reader.</value>
         </member>
@@ -3460,6 +3715,28 @@
             </summary>
             <value>The object serializer backend.</value>
         </member>
+        <member name="P:SharpYaml.Serialization.SerializerContext.AllowErrors">
+            <summary>
+            Gets or sets a value indicating whether errors are allowed.
+            </summary>
+            <value>
+              <c>true</c> if errors are allowed; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:SharpYaml.Serialization.SerializerContext.HasRemapOccurred">
+            <summary>
+            Gets a value indicating whether the deserialization has generated some remap.
+            </summary>
+            <value><c>true</c> if the deserialization has generated some remap; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:SharpYaml.Serialization.SerializerContext.MemberMask">
+            <summary>
+            Gets or sets the member mask that will be used to filter <see cref="P:SharpYaml.Serialization.YamlMemberAttribute.Mask"/>.
+            </summary>
+            <value>
+            The member mask.
+            </value>
+        </member>
         <member name="P:SharpYaml.Serialization.SerializerContext.ObjectFactory">
             <summary>
             Gets or sets the type of the create.
@@ -3468,7 +3745,7 @@
         </member>
         <member name="P:SharpYaml.Serialization.SerializerContext.Writer">
             <summary>
-            Gets the writer used while deserializing.
+            Gets or sets the writer used while deserializing.
             </summary>
             <value>The writer.</value>
         </member>
@@ -3500,24 +3777,37 @@
             <param name="memberInfo">The member information.</param>
             <param name="attribute">The attribute.</param>
         </member>
-        <member name="T:SharpYaml.Serialization.TagTypeRegistry">
+        <member name="P:SharpYaml.Serialization.AttributeRegistry.AttributeRemap">
+            <summary>
+            Gets or sets the attribute remapper. May be null
+            </summary>
+            <value>The remap attribute.</value>
+        </member>
+        <member name="T:SharpYaml.Serialization.AssemblyRegistry">
             <summary>
             Default implementation of ITagTypeRegistry.
             </summary>
         </member>
-        <member name="M:SharpYaml.Serialization.TagTypeRegistry.#ctor(SharpYaml.Schemas.IYamlSchema)">
+        <member name="M:SharpYaml.Serialization.AssemblyRegistry.#ctor(SharpYaml.Schemas.IYamlSchema)">
             <summary>
-            Initializes a new instance of the <see cref="T:SharpYaml.Serialization.TagTypeRegistry"/> class.
+            Initializes a new instance of the <see cref="T:SharpYaml.Serialization.AssemblyRegistry"/> class.
             </summary>
         </member>
-        <member name="M:SharpYaml.Serialization.TagTypeRegistry.RegisterTagMapping(System.String,System.Type)">
+        <member name="M:SharpYaml.Serialization.AssemblyRegistry.RegisterTagMapping(System.String,System.Type,System.Boolean)">
             <summary>
             Register a mapping between a tag and a type.
             </summary>
             <param name="tag">The tag.</param>
             <param name="type">The type.</param>
+            <param name="alias"></param>
         </member>
-        <member name="P:SharpYaml.Serialization.TagTypeRegistry.UseShortTypeName">
+        <member name="P:SharpYaml.Serialization.AssemblyRegistry.SerializableFactories">
+            <summary>
+            Gets the serializable factories.
+            </summary>
+            <value>The serializable factories.</value>
+        </member>
+        <member name="P:SharpYaml.Serialization.AssemblyRegistry.UseShortTypeName">
             <summary>
             Gets or sets a value indicating whether [use short type name].
             </summary>
@@ -3981,6 +4271,11 @@
             Specify the way to store a property or field of some class or structure.
             </summary>
         </member>
+        <member name="M:SharpYaml.Serialization.YamlMemberAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:SharpYaml.Serialization.YamlMemberAttribute"/> class.
+            </summary>
+        </member>
         <member name="M:SharpYaml.Serialization.YamlMemberAttribute.#ctor(System.Int32)">
             <summary>
             Initializes a new instance of the <see cref="T:SharpYaml.Serialization.YamlMemberAttribute"/> class.
@@ -4023,6 +4318,12 @@
             Gets or sets the order. Default is -1 (default to alphabetical)
             </summary>
             <value>The order.</value>
+        </member>
+        <member name="P:SharpYaml.Serialization.YamlMemberAttribute.Mask">
+            <summary>
+            Gets the mask.
+            </summary>
+            <value>The mask.</value>
         </member>
         <member name="T:SharpYaml.Serialization.YamlNodeIdentityEqualityComparer">
             <summary>
@@ -4289,12 +4590,13 @@
             <param name="graph">The graph.</param>
             <returns>A YAML string of the object.</returns>
         </member>
-        <member name="M:SharpYaml.Serialization.Serializer.Serialize(System.Object,System.Type)">
+        <member name="M:SharpYaml.Serialization.Serializer.Serialize(System.Object,System.Type,SharpYaml.Serialization.SerializerContextSettings)">
             <summary>
             Serializes the specified object to a string.
             </summary>
             <param name="graph">The graph.</param>
             <param name="expectedType">The expected type.</param>
+            <param name="contextSettings">The context settings.</param>
             <returns>A YAML string of the object.</returns>
         </member>
         <member name="M:SharpYaml.Serialization.Serializer.Serialize(System.IO.Stream,System.Object)">
@@ -4304,12 +4606,13 @@
             <param name="stream">The stream.</param>
             <param name="graph">The object to serialize.</param>
         </member>
-        <member name="M:SharpYaml.Serialization.Serializer.Serialize(System.IO.Stream,System.Object,System.Type)">
+        <member name="M:SharpYaml.Serialization.Serializer.Serialize(System.IO.Stream,System.Object,System.Type,SharpYaml.Serialization.SerializerContextSettings)">
             <summary>
             Serializes the specified object.
             </summary>
             <param name="stream">The stream.</param>
             <param name="graph">The object to serialize.</param>
+            <param name="contextSettings">The context settings.</param>
         </member>
         <member name="M:SharpYaml.Serialization.Serializer.Serialize(System.IO.TextWriter,System.Object)">
             <summary>
@@ -4318,13 +4621,14 @@
             <param name="writer">The <see cref="T:System.IO.TextWriter"/> where to serialize the object.</param>
             <param name="graph">The object to serialize.</param>
         </member>
-        <member name="M:SharpYaml.Serialization.Serializer.Serialize(System.IO.TextWriter,System.Object,System.Type)">
+        <member name="M:SharpYaml.Serialization.Serializer.Serialize(System.IO.TextWriter,System.Object,System.Type,SharpYaml.Serialization.SerializerContextSettings)">
             <summary>
             Serializes the specified object.
             </summary>
             <param name="writer">The <see cref="T:System.IO.TextWriter"/> where to serialize the object.</param>
             <param name="graph">The object to serialize.</param>
             <param name="type">The static type of the object to serialize.</param>
+            <param name="contextSettings">The context settings.</param>
         </member>
         <member name="M:SharpYaml.Serialization.Serializer.Serialize(SharpYaml.IEmitter,System.Object)">
             <summary>
@@ -4333,13 +4637,14 @@
             <param name="emitter">The <see cref="T:SharpYaml.IEmitter"/> where to serialize the object.</param>
             <param name="graph">The object to serialize.</param>
         </member>
-        <member name="M:SharpYaml.Serialization.Serializer.Serialize(SharpYaml.IEmitter,System.Object,System.Type)">
+        <member name="M:SharpYaml.Serialization.Serializer.Serialize(SharpYaml.IEmitter,System.Object,System.Type,SharpYaml.Serialization.SerializerContextSettings)">
             <summary>
             Serializes the specified object.
             </summary>
             <param name="emitter">The <see cref="T:SharpYaml.IEmitter"/> where to serialize the object.</param>
             <param name="graph">The object to serialize.</param>
             <param name="type">The static type of the object to serialize.</param>
+            <param name="contextSettings">The context settings.</param>
         </member>
         <member name="M:SharpYaml.Serialization.Serializer.Deserialize(System.IO.Stream)">
             <summary>
@@ -4355,12 +4660,24 @@
             <param name="reader">The reader.</param>
             <returns>A deserialized object.</returns>
         </member>
-        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(System.IO.Stream,System.Type)">
+        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(System.IO.Stream,System.Type,SharpYaml.Serialization.SerializerContextSettings)">
             <summary>
             Deserializes an object from the specified <see cref="T:System.IO.Stream"/> with an expected specific type.
             </summary>
             <param name="stream">The stream.</param>
             <param name="expectedType">The expected type.</param>
+            <param name="contextSettings">The context settings.</param>
+            <returns>A deserialized object.</returns>
+            <exception cref="T:System.ArgumentNullException">stream</exception>
+        </member>
+        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(System.IO.Stream,System.Type,SharpYaml.Serialization.SerializerContextSettings,SharpYaml.Serialization.SerializerContext@)">
+            <summary>
+            Deserializes an object from the specified <see cref="T:System.IO.Stream"/> with an expected specific type.
+            </summary>
+            <param name="stream">The stream.</param>
+            <param name="expectedType">The expected type.</param>
+            <param name="contextSettings">The context settings.</param>
+            <param name="context">The context used to deserialize this object.</param>
             <returns>A deserialized object.</returns>
             <exception cref="T:System.ArgumentNullException">stream</exception>
         </member>
@@ -4373,37 +4690,65 @@
             <returns>A deserialized object.</returns>
             <exception cref="T:System.ArgumentNullException">stream</exception>
         </member>
-        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(System.IO.TextReader,System.Type)">
+        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(System.IO.TextReader,System.Type,System.Object,SharpYaml.Serialization.SerializerContextSettings)">
             <summary>
             Deserializes an object from the specified <see cref="T:System.IO.TextReader"/> with an expected specific type.
             </summary>
             <param name="reader">The reader.</param>
             <param name="expectedType">The expected type.</param>
+            <param name="existingObject">The object to deserialize into. If null (the default) then a new object will be created</param>
+            <param name="contextSettings">The context settings.</param>
             <returns>A deserialized object.</returns>
             <exception cref="T:System.ArgumentNullException">reader</exception>
         </member>
-        <member name="M:SharpYaml.Serialization.Serializer.Deserialize``1(System.IO.TextReader)">
+        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(System.IO.TextReader,System.Type,System.Object,SharpYaml.Serialization.SerializerContextSettings,SharpYaml.Serialization.SerializerContext@)">
+            <summary>
+            Deserializes an object from the specified <see cref="T:System.IO.TextReader"/> with an expected specific type.
+            </summary>
+            <param name="reader">The reader.</param>
+            <param name="expectedType">The expected type.</param>
+            <param name="existingObject">The object to deserialize into. If null (the default) then a new object will be created</param>
+            <param name="contextSettings">The context settings.</param>
+            <param name="context">The context used to deserialize this object.</param>
+            <returns>A deserialized object.</returns>
+            <exception cref="T:System.ArgumentNullException">reader</exception>
+        </member>
+        <member name="M:SharpYaml.Serialization.Serializer.Deserialize``1(System.IO.TextReader,System.Object)">
             <summary>
             Deserializes an object from the specified <see cref="T:System.IO.TextReader"/> with an expected specific type.
             </summary>
             <typeparam name="T">The expected type</typeparam>
             <param name="reader">The reader.</param>
+            <param name="existingObject">The object to deserialize into. If null (the default) then a new object will be created</param>
             <returns>A deserialized object.</returns>
             <exception cref="T:System.ArgumentNullException">reader</exception>
         </member>
-        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(System.String)">
+        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(System.String,System.Object)">
             <summary>
             Deserializes an object from the specified string.
             </summary>
             <param name="fromText">The text.</param>
+            <param name="existingObject">The object to deserialize into. If null (the default) then a new object will be created</param>
             <returns>A deserialized object.</returns>
         </member>
-        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(System.String,System.Type)">
+        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(System.String,System.Type,System.Object)">
             <summary>
             Deserializes an object from the specified string. with an expected specific type.
             </summary>
             <param name="fromText">From text.</param>
             <param name="expectedType">The expected type.</param>
+            <param name="existingObject">The object to deserialize into. If null (the default) then a new object will be created</param>
+            <returns>A deserialized object.</returns>
+            <exception cref="T:System.ArgumentNullException">stream</exception>
+        </member>
+        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(System.String,System.Type,System.Object,SharpYaml.Serialization.SerializerContext@)">
+            <summary>
+            Deserializes an object from the specified string. with an expected specific type.
+            </summary>
+            <param name="fromText">From text.</param>
+            <param name="expectedType">The expected type.</param>
+            <param name="existingObject">The object to deserialize into. If null (the default) then a new object will be created</param>
+            <param name="context">The context used to deserialize this object.</param>
             <returns>A deserialized object.</returns>
             <exception cref="T:System.ArgumentNullException">stream</exception>
         </member>
@@ -4425,12 +4770,91 @@
             <returns>A deserialized object.</returns>
             <exception cref="T:System.ArgumentNullException">reader</exception>
         </member>
-        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(SharpYaml.EventReader,System.Type)">
+        <member name="M:SharpYaml.Serialization.Serializer.DeserializeInto``1(System.String,``0)">
+            <summary>
+            Deserializes an object from the specified string. with an expected specific type.
+            </summary>
+            <typeparam name="T">The expected type</typeparam>
+            <param name="fromText">From text.</param>
+            <param name="existingObject">The object to deserialize into.</param>
+            <returns>A deserialized object.</returns>
+            <exception cref="T:System.ArgumentNullException">stream</exception>
+            
+            Note: These need a different name, because otherwise they will conflict with existing Deserialize(string,Type). They are new so the difference should not matter
+        </member>
+        <member name="M:SharpYaml.Serialization.Serializer.DeserializeInto``1(SharpYaml.EventReader,``0)">
+            <summary>
+            Deserializes an object from the specified <see cref="T:SharpYaml.EventReader"/> with an expected specific type.
+            </summary>
+            <typeparam name="T">The expected type</typeparam>
+            <param name="reader">The reader.</param>
+            <param name="existingObject">The object to deserialize into.</param>
+            <returns>A deserialized object.</returns>
+            <exception cref="T:System.ArgumentNullException">reader</exception>
+        </member>
+        <member name="M:SharpYaml.Serialization.Serializer.Deserialize``1(System.String,SharpYaml.Serialization.SerializerContext@)">
+            <summary>
+            Deserializes an object from the specified string. with an expected specific type.
+            </summary>
+            <typeparam name="T">The expected type</typeparam>
+            <param name="fromText">From text.</param>
+            <param name="context">The context.</param>
+            <returns>A deserialized object.</returns>
+            <exception cref="T:System.ArgumentNullException">stream</exception>
+        </member>
+        <member name="M:SharpYaml.Serialization.Serializer.Deserialize``1(SharpYaml.EventReader,SharpYaml.Serialization.SerializerContext@)">
+            <summary>
+            Deserializes an object from the specified <see cref="T:SharpYaml.EventReader"/> with an expected specific type.
+            </summary>
+            <typeparam name="T">The expected type</typeparam>
+            <param name="reader">The reader.</param>
+            <param name="context">The context used to deserialize this object.</param>
+            <returns>A deserialized object.</returns>
+            <exception cref="T:System.ArgumentNullException">reader</exception>
+        </member>
+        <member name="M:SharpYaml.Serialization.Serializer.DeserializeInto``1(System.String,``0,SharpYaml.Serialization.SerializerContext@)">
+            <summary>
+            Deserializes an object from the specified string. with an expected specific type.
+            </summary>
+            <typeparam name="T">The expected type</typeparam>
+            <param name="fromText">From text.</param>
+            <param name="existingObject">The object to deserialize into.</param>
+            <param name="context">The context used to deserialize this object.</param>
+            <returns>A deserialized object.</returns>
+            <exception cref="T:System.ArgumentNullException">stream</exception>
+            Note: These need a different name, because otherwise they will conflict with existing Deserialize(string,Type). They are new so the difference should not matter
+        </member>
+        <member name="M:SharpYaml.Serialization.Serializer.DeserializeInto``1(SharpYaml.EventReader,``0,SharpYaml.Serialization.SerializerContext@)">
+            <summary>
+            Deserializes an object from the specified <see cref="T:SharpYaml.EventReader"/> with an expected specific type.
+            </summary>
+            <typeparam name="T">The expected type</typeparam>
+            <param name="reader">The reader.</param>
+            <param name="existingObject">The object to deserialize into.</param>
+            <param name="context">The context used to deserialize this object.</param>
+            <returns>A deserialized object.</returns>
+            <exception cref="T:System.ArgumentNullException">reader</exception>
+        </member>
+        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(SharpYaml.EventReader,System.Type,System.Object,SharpYaml.Serialization.SerializerContextSettings)">
             <summary>
             Deserializes an object from the specified <see cref="T:SharpYaml.EventReader"/> with an expected specific type.
             </summary>
             <param name="reader">The reader.</param>
-            <param name="expectedType">The expected type.</param>
+            <param name="expectedType">The expected type, maybe null.</param>
+            <param name="existingObject">An existing object, may be null.</param>
+            <param name="contextSettings">The context settings.</param>
+            <returns>A deserialized object.</returns>
+            <exception cref="T:System.ArgumentNullException">reader</exception>
+        </member>
+        <member name="M:SharpYaml.Serialization.Serializer.Deserialize(SharpYaml.EventReader,System.Type,System.Object,SharpYaml.Serialization.SerializerContextSettings,SharpYaml.Serialization.SerializerContext@)">
+            <summary>
+            Deserializes an object from the specified <see cref="T:SharpYaml.EventReader"/> with an expected specific type.
+            </summary>
+            <param name="reader">The reader.</param>
+            <param name="expectedType">The expected type, maybe null.</param>
+            <param name="existingObject">An existing object, may be null.</param>
+            <param name="contextSettings">The context settings.</param>
+            <param name="context">The context used to deserialize the object.</param>
             <returns>A deserialized object.</returns>
             <exception cref="T:System.ArgumentNullException">reader</exception>
         </member>
@@ -4461,12 +4885,13 @@
             </summary>
             <param name="assembly">The assembly.</param>
         </member>
-        <member name="M:SharpYaml.Serialization.SerializerSettings.RegisterTagMapping(System.String,System.Type)">
+        <member name="M:SharpYaml.Serialization.SerializerSettings.RegisterTagMapping(System.String,System.Type,System.Boolean)">
             <summary>
             Register a mapping between a tag and a type.
             </summary>
             <param name="tagName">Name of the tag.</param>
             <param name="tagType">Type of the tag.</param>
+            <param name="isAlias">if set to <c>true</c> the new tag name is an alias to a type that has already a tag name associated to it.</param>
         </member>
         <member name="M:SharpYaml.Serialization.SerializerSettings.RegisterSerializer(System.Type,SharpYaml.Serialization.IYamlSerializable)">
             <summary>
@@ -4556,11 +4981,29 @@
             </summary>
             <value>The key comparer.</value>
         </member>
+        <member name="P:SharpYaml.Serialization.SerializerSettings.SerializeDictionaryItemsAsMembers">
+            <summary>
+            Gets or sets a value indicating whether to serialize dictionary items as regular members.s
+            </summary>
+            <value><c>true</c> if [enable dictionary items as members]; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:SharpYaml.Serialization.SerializerSettings.NamingConvention">
+            <summary>
+            Gets or sets the naming convention. Default is to output name as-is <see cref="T:SharpYaml.Serialization.DefaultNamingConvention"/>.
+            </summary>
+            <value>The naming convention.</value>
+        </member>
         <member name="P:SharpYaml.Serialization.SerializerSettings.EmitShortTypeName">
             <summary>
             Gets or sets a value indicating whether to emit short type name (type, assembly name) or full <see cref="P:System.Type.AssemblyQualifiedName"/>. Default is false.
             </summary>
             <value><c>true</c> to emit short type name; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:SharpYaml.Serialization.SerializerSettings.TagTypeRegistry">
+            <summary>
+            Gets the tag type registry.
+            </summary>
+            <value>The tag type registry.</value>
         </member>
         <member name="P:SharpYaml.Serialization.SerializerSettings.DefaultStyle">
             <summary>
@@ -4642,11 +5085,13 @@
             </summary>
             <param name="input">The input.</param>
         </member>
-        <member name="M:SharpYaml.Serialization.YamlStream.Save(System.IO.TextWriter)">
+        <member name="M:SharpYaml.Serialization.YamlStream.Save(System.IO.TextWriter,System.Boolean,System.Int32)">
             <summary>
             Saves the stream to the specified output.
             </summary>
             <param name="output">The output.</param>
+            <param name="isLastDocumentEndImplicit">If set to <c>true</c>, last <see cref="T:SharpYaml.Events.DocumentEnd"/> will be implicit.</param>
+            <param name="bestIndent">The desired indent.</param>
         </member>
         <member name="M:SharpYaml.Serialization.YamlStream.Accept(SharpYaml.Serialization.IYamlVisitor)">
             <summary>

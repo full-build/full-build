@@ -13,6 +13,11 @@
  Turns a string into a nice PascalCase identifier
 </summary>
 </member>
+<member name="M:FSharp.Configuration.Helper.op_LessDivideGreater(System.String,System.String)">
+<summary>
+ Path.Combine
+</summary>
+</member>
 <member name="M:FSharp.Configuration.Helper.ValueParser.tryParseWith``2(Microsoft.FSharp.Core.FSharpFunc{``0,System.Tuple{System.Boolean,``1}})">
 <summary>
  Converts a function returning bool,value to a function returning value option.
