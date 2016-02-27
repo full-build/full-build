@@ -70,6 +70,7 @@ type Token =
     | Exec
     | Test
     | Alter
+    | Open
 
     | Add
     | Drop
@@ -114,6 +115,7 @@ let (|Token|) (token : string) =
     | "clean" -> Clean
     | "test" -> Test
     | "alter" -> Alter
+    | "open" -> Open
 
     | "add" -> Add
     | "drop" -> Drop
