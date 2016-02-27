@@ -3,21 +3,20 @@ anthology:
   nugets:
     - nuget: https://www.nuget.org/api/v2/
   test: nunit
+  vcs: git
   mainrepository:
-    repo: id1
-    type: git
-    branch: fullbuild
+    branch: master
     uri: http://www.google.com/
   repositories:
     - repo: .full-build
-      type: git
-      branch: fullbuild
+      branch: master
       build: msbuild
+      sticky: false
       uri: http://github.com/pchalamet/cassandra-sharp-full-build
     - repo: src
-      type: git
-      branch: fullbuild
+      branch: master
       build: msbuild
+      sticky: false
       uri: https://github.com/pchalamet/full-build
   apps:
     - name: full-build
@@ -32,7 +31,6 @@ anthology:
       out: fullbuild.tests.dll
       fx: v4.6
       assemblies:
-        - assembly: fsharp.core
         - assembly: system
         - assembly: system.core
         - assembly: system.numerics
@@ -40,6 +38,7 @@ anthology:
         - assembly: system.xml
         - assembly: system.xml.linq
       packages:
+        - package: FSharp.Core
         - package: fsunit
       projects:
         - project: fullbuild
@@ -48,7 +47,6 @@ anthology:
       out: fullbuild.exe
       fx: v4.6
       assemblies:
-        - assembly: fsharp.core
         - assembly: system
         - assembly: system.core
         - assembly: system.io.compression
@@ -59,4 +57,5 @@ anthology:
         - assembly: system.xml.linq
       packages:
         - package: FSharp.Configuration
+        - package: FSharp.Core
       projects: []
