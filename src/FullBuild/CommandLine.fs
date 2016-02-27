@@ -73,6 +73,8 @@ type AlterView =
     { Name : ViewId
       Default : bool }
 
+type OpenView =
+    { Name : ViewId }
 
 type GraphView =
     { Name : ViewId
@@ -139,6 +141,7 @@ type Command =
     | GraphView of GraphView
     | BuildView of BuildView
     | AlterView of AlterView
+    | OpenView of OpenView
 
     // nuget
     | AddNuGet of RepositoryUrl
