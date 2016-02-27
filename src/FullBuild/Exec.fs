@@ -35,6 +35,11 @@ let ExecWithVars checkErrorCode (command : string) (args : string) (dir : Direct
 let Exec checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) = 
     ExecWithVars checkErrorCode command args dir Map.empty
 
+let ExecVerb (command : string) (verb : string) =
+    let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Verb = verb)
+    Process.Start (psi) |> ignore
+    
+
 let ExecReadLine checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) = 
     let mutable psi = defaultPSI command args dir
     psi.RedirectStandardOutput <- true
