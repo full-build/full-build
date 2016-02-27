@@ -209,6 +209,11 @@ let rec commandAlterView (isDefault : bool) (args : string list) =
     | [MatchViewId name] -> Command.AlterView { Name = name ; Default = isDefault }
     | _ -> Command.Error
 
+let commandOpenView (args : string list) =
+    match args with
+    | [MatchViewId name] -> Command.OpenView { Name = name }
+    | _ -> Command.Error
+
 let commandAddApp (args : string list) =
     match args with
     | MatchApplicationId name :: MatchPublisherType pub :: [app] -> let project = app |> ProjectId.from
@@ -262,7 +267,10 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true
     | Token Token.Clean :: cmdArgs -> commandClean cmdArgs
 
-    | Token Token.Install :: Token Token.Package :: cmdArgs -> commandInstall cmdArgs
+    // compat
+    | Token Token.Install :: Token Token.Package :: cmdArgs -> cmdArgs |> commandInstall
+    | Token Token.Install :: cmdArgs -> cmdArgs |> commandInstall
+    // end compat
     | Token Token.Update :: Token Token.Package :: cmdArgs -> commandUpdate cmdArgs
     | Token Token.Outdated :: Token Token.Package :: cmdArgs -> commandOutdated cmdArgs
     | Token Token.List :: Token Token.Package :: cmdArgs -> commandListPackage cmdArgs
@@ -274,11 +282,18 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Add :: Token Token.NuGet :: cmdArgs -> commandAddNuGet cmdArgs
     | Token Token.List :: Token Token.NuGet :: cmdArgs -> commandListNuGet cmdArgs
 
+    // compat
     | Token Token.Add :: Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false
+    | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false
+    // end compat
     | Token Token.Drop :: Token Token.View :: cmdArgs -> commandDropView cmdArgs
     | Token Token.List :: Token Token.View :: cmdArgs -> commandListView cmdArgs
     | Token Token.Describe :: Token Token.View :: cmdArgs -> commandDescribeView cmdArgs
     | Token Token.Alter :: Token Token.View :: cmdArgs -> cmdArgs |> commandAlterView false
+    // compat
+    | Token Token.Open :: Token Token.View :: cmdArgs -> cmdArgs |> commandOpenView
+    | Token Token.Open :: cmdArgs -> cmdArgs |> commandOpenView
+    // end compat
     
     | Token Token.Add :: Token Token.App :: cmdArgs -> commandAddApp cmdArgs
     | Token Token.Drop :: Token Token.App :: cmdArgs -> commandDropApp cmdArgs
@@ -334,9 +349,8 @@ let UsageContent() =
         "  push <buildNumber> : push a baseline from current repositories version and display version"
         "  publish <app> : publish application"
         "  clean : DANGER! reset and clean workspace (interactive command)"
-        "  update-guids : DANGER! change guids of all projects in given repository (interactive command)" 
         ""
-        "  install package : install packages declared in anthology"
+        "  install [package] : install packages declared in anthology"
         "  update package : update packages"
         "  outdated package : display outdated packages"
         "  list package : list packages"
@@ -348,16 +362,19 @@ let UsageContent() =
         "  add nuget <nuget-uri> : add nuget uri"
         "  list nuget : list NuGet feeds"
         ""
-        "  add view [--src] <view-name> <view-wildcard>+ : add repositories to view"
+        "  [add] view [--src] <view-name> <view-wildcard>+ : add repositories to view"
         "  drop view <view-name> : drop view"
         "  list view : list views"
         "  describe view <name> : describe view"
         "  alter view [--default] <viewName> : alter view"
+        "  open [view] <viewName> : open view with your favorite ide"
         ""
         "  add app <app-name> <copy|zip|fake> <project-id>+ : create new application from given project ids"
         "  drop app <app-name> : drop application"
         "  list app : list applications" 
-        "  describe app <app-name>" ]
+        "  describe app <app-name>"
+        ""
+        "  update-guids : DANGER! change guids of all projects in given repository (interactive command)" ]
 
     content
 

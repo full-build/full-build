@@ -13,8 +13,8 @@ call :dobuild || goto :ko
 goto :ok
 
 :dobuild
-bootstrap\fullbuild install package || goto :ko
-bootstrap\fullbuild add view fullbuild * || goto :ko
+bootstrap\fullbuild install || goto :ko
+bootstrap\fullbuild view fullbuild * || goto :ko
 bootstrap\fullbuild rebuild --version %VERSION% fullbuild || goto :ko
 goto :eof
 

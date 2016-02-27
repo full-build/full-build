@@ -20,6 +20,11 @@ open Collections
 open Solution
 
 
+
+let checkErrorCode err =
+    if err <> 0 then failwithf "Process failed with error %d" err
+
+
 //let assertViewExists (viewName : ViewId) =
 //    let vwDir = GetFolder Env.View
 //    let vwFile = GetFile (AddExt View viewName.toString) vwDir
@@ -152,16 +157,7 @@ let defaultView () =
     let viewName = System.IO.File.ReadAllText (defaultFile.FullName)
     viewName |> ViewId
 
-let AlterView (viewId : ViewId) (isDefault : bool) =
-    if isDefault then 
-        let vwDir = GetFolder Env.View
-        let defaultFile = vwDir |> GetFile "default"
-        System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
-
-
-
-
-let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (multithread : bool) (version : string) =
+let GenerateView (maybeViewName : ViewId option) =
     let viewName = match maybeViewName with
                    | Some x -> x
                    | None -> defaultView()
@@ -174,6 +170,24 @@ let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (mult
     let viewFile = wsDir |> GetFile (AddExt Solution viewName.toString)
 
     Generate viewName
+    viewFile
+
+
+
+let AlterView (viewId : ViewId) (isDefault : bool) =
+    if isDefault then 
+        let vwDir = GetFolder Env.View
+        let defaultFile = vwDir |> GetFile "default"
+        System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
+
+let OpenView (viewId : ViewId) =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let viewFile = GenerateView (Some viewId)
+    Exec.ExecVerb viewFile.FullName "open"
+
+
+let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (multithread : bool) (version : string) =
+    let viewFile = GenerateView maybeViewName
 
     let antho = Configuration.LoadAnthology ()
     // TODO: should build with Fake too
