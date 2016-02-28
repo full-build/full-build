@@ -14,8 +14,8 @@ goto :ok
 
 :dobuild
 bootstrap\fullbuild install || goto :ko
-bootstrap\fullbuild view fullbuild * || goto :ko
-bootstrap\fullbuild rebuild --version %VERSION% fullbuild || goto :ko
+bootstrap\fullbuild view all * || goto :ko
+bootstrap\fullbuild rebuild --version %VERSION% all || goto :ko
 goto :eof
 
 :ok
