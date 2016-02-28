@@ -214,6 +214,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
     cproj.Descendants(NsMsBuild + "DocumentationFile") |> Seq.iter setDocumentation
     cproj.Descendants(NsMsBuild + "TargetFrameworkVersion") |> Seq.iter (fun x -> x.Value <- project.FxTarget.toString)
+    cproj.Descendants(NsMsBuild + "AutoGenerateBindingRedirects") |> Seq.iter (fun x -> x.Value <- "false")
 
     // add project references
     for projectReference in project.ProjectReferences do
