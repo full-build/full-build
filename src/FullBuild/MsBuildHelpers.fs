@@ -20,6 +20,8 @@ let NsMsBuild = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2
 
 let NsDgml = XNamespace.Get("http://schemas.microsoft.com/vs/2009/dgml")
 
+let NsRuntime = XNamespace.Get("urn:schemas-microsoft-com:asm.v1")
+
 let NsNone = XNamespace.None
 
 let inline (!>) (x : ^a) : ^b = (((^a or ^b) : (static member op_Explicit : ^a -> ^b) x))
