@@ -124,11 +124,12 @@ let commandPush (args : string list) =
     | [buildNumber] -> Command.PushWorkspace { BuildNumber = buildNumber }
     | _ -> Command.Error
 
-let rec commandPull (src : bool) (bin : bool) (args : string list) =
+let rec commandPull (src : bool) (bin : bool) (rebase : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Src :: tail -> tail |> commandPull true false
-    | TokenOption TokenOption.Bin :: tail -> tail |> commandPull false true
-    | [] -> Command.PullWorkspace { Src = src ; Bin = bin }
+    | TokenOption TokenOption.Src :: tail -> tail |> commandPull true false rebase
+    | TokenOption TokenOption.Bin :: tail -> tail |> commandPull false true rebase
+    | TokenOption TokenOption.Rebase :: tail -> tail |> commandPull src bin true
+    | [] -> Command.PullWorkspace { Src = src ; Bin = bin; Rebase = rebase }
     | _ -> Command.Error
 
 let commandClean (args : string list) =
@@ -264,7 +265,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false "0.0.0.*"
     | Token Token.Checkout :: cmdArgs -> commandCheckout cmdArgs
     | Token Token.Push :: cmdArgs -> commandPush cmdArgs
-    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true
+    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false
     | Token Token.Clean :: cmdArgs -> commandClean cmdArgs
 
     // compat
@@ -348,7 +349,7 @@ let UsageContent() =
         "  exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         "  index [--optimize] : index workspace"
         "  convert : convert projects in workspace"
-        "  pull [--src|--bin] : update to latest version"
+        "  pull [--src|--bin] [--rebase] : update to latest version - rebase if requested"
         "  push <buildNumber> : push a baseline from current repositories version and display version"
         "  publish <app> : publish application"
         "  clean : DANGER! reset and clean workspace (interactive command)"

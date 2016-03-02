@@ -97,6 +97,7 @@ type PullWorkspace =
     {
         Src : bool
         Bin : bool
+        Rebase : bool
     }
 
 type PushWorkspace =
