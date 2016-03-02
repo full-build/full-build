@@ -164,14 +164,14 @@ let Checkout (version : BookmarkVersion) =
     // update binaries with observable baseline
     BuildArtifacts.PullReferenceBinaries version.toString
 
-let Pull (src : bool) (bin : bool) =
+let Pull (src : bool) (bin : bool) (rebase : bool) =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
 
     if src then
         let mainRepo = antho.MasterRepository
         DisplayHighlight mainRepo.Name.toString
-        Vcs.VcsPull wsDir antho.Vcs mainRepo
+        Vcs.VcsPull rebase wsDir antho.Vcs mainRepo
 
         let antho = Configuration.LoadAnthology ()
 
@@ -184,7 +184,7 @@ let Pull (src : bool) (bin : bool) =
 
             let repoDir = wsDir |> GetSubDirectory repo.Name.toString
             if repoDir.Exists then
-                Vcs.VcsPull wsDir antho.Vcs repo
+                Vcs.VcsPull rebase wsDir antho.Vcs repo
 
     if bin then
         BuildArtifacts.PullLatestReferenceBinaries ()
