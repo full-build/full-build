@@ -45,12 +45,13 @@ let private hgPush (repoDir : DirectoryInfo) =
     checkedExec "hg" "push" repoDir
     
 
-let private gitPull (repoDir : DirectoryInfo) =
-    checkedExec "git" "pull --rebase" repoDir
+let private gitPull (rebase : bool) (repoDir : DirectoryInfo) =
+    let dorebase = if rebase then "--rebase" else ""
+    let args = sprintf "pull %s" dorebase
+    checkedExec "git" args  repoDir
 
 let private hgPull (repoDir : DirectoryInfo) =
     checkedExec "hg" "pull -u" repoDir
-
 
 let private gitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=""%H"""
@@ -185,8 +186,8 @@ let VcsCheckout (wsDir : DirectoryInfo) (vcsType : VcsType) repo (version : Book
 let VcsIgnore (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
     chooseVcs wsDir vcsType repo  gitIgnore hgIgnore
 
-let VcsPull (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
-    chooseVcs wsDir vcsType repo  gitPull hgPull
+let VcsPull (rebase : bool) (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
+    chooseVcs wsDir vcsType repo (gitPull rebase) hgPull 
 
 let VcsCommit (wsDir : DirectoryInfo) (vcsType : VcsType) repo (comment : string) =
     (chooseVcs wsDir vcsType repo gitCommit hgCommit) comment

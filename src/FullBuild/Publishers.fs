@@ -26,6 +26,10 @@ let private checkedExec =
     Exec.Exec checkErrorCode
 
 
+let updateBindingRedirects (artifacts : DirectoryInfo) =
+    ()
+
+
 
 let publishCopy (app : Anthology.Application) =
     let wsDir = GetFolder Env.Workspace
@@ -38,6 +42,7 @@ let publishCopy (app : Anthology.Application) =
 
         if Env.IsMono () then checkedExec "xbuild" args wsDir
         else checkedExec "msbuild" args wsDir
+
     else
         printfn "[WARNING] Can't publish application %A without repository" app.Name.toString
 
