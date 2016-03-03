@@ -58,4 +58,5 @@ anthology:
       packages:
         - package: FSharp.Configuration
         - package: FSharp.Core
+        - package: Mono.Cecil
       projects: []
