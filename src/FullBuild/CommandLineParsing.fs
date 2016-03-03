@@ -27,8 +27,11 @@ let (|MatchBookmarkVersion|) version =
 let (|MatchViewId|) view =
     ViewId view
 
-let (|MatchRepositoryId|) repo =
-    RepositoryId.from repo
+let (|MatchRepositoryId|) name =
+    RepositoryId.from name
+
+let (|MatchProjectId|) name =
+    ProjectId.from name
 
 let (|MatchApplicationId|) name =
     ApplicationId.from name
@@ -217,8 +220,7 @@ let commandOpenView (args : string list) =
 
 let commandAddApp (args : string list) =
     match args with
-    | MatchApplicationId name :: MatchPublisherType pub :: [app] -> let project = app |> ProjectId.from
-                                                                    Command.AddApplication { Name = name; Publisher = pub; Project = project }
+    | MatchApplicationId name :: MatchPublisherType pub :: [MatchProjectId prj] -> Command.AddApplication { Name = name; Publisher = pub; Project = prj }
     | _ -> Command.Error
 
 let commandDropApp (args : string list) =
@@ -246,6 +248,10 @@ let commandMigrate (args : string list) =
     | [] -> Command.Migrate
     | _ -> Command.Error
 
+let commandBind (args : string list) =
+    match args with
+    | [MatchProjectId prj] -> Command.BindProject { Project = prj }
+    | _ -> Command.Error
 
 
 let ParseCommandLine (args : string list) : Command = 
@@ -267,6 +273,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Push :: cmdArgs -> commandPush cmdArgs
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false
     | Token Token.Clean :: cmdArgs -> commandClean cmdArgs
+    | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
 
     // compat
     | Token Token.Install :: Token Token.Package :: cmdArgs -> cmdArgs |> commandInstall
@@ -352,6 +359,7 @@ let UsageContent() =
         "  pull [--src|--bin] [--rebase] : update to latest version - rebase if requested"
         "  push <buildNumber> : push a baseline from current repositories version and display version"
         "  publish <app> : publish application"
+        "  bind <projectId> : update bindings"
         "  clean : DANGER! reset and clean workspace (interactive command)"
         ""
         "  update package : update packages"

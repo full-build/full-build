@@ -29,60 +29,6 @@ let private checkedExec =
     Exec.Exec checkErrorCode
 
 
-let generateBinding (file : FileInfo) =
-    try
-        let bytes = File.ReadAllBytes(file.FullName)
-        let ass = System.Reflection.Assembly.ReflectionOnlyLoad(bytes)
-        if null = ass then null
-        else
-            let name = ass.GetName()
-            let flags = name.Flags
-            if System.Reflection.AssemblyNameFlags.None = (flags &&& System.Reflection.AssemblyNameFlags.PublicKey) then null
-            else
-                // <dependentAssembly>
-                //   <assemblyIdentity name="protobuf-net" publicKeyToken="257b51d87d2e4d67"/>
-                //   <bindingRedirect oldVersion="2.0.0.280" newVersion="2.0.0.481"/>
-                // </dependentAssembly>
-                let publicKey = name.GetPublicKeyToken()
-                let publicKeyToken = publicKey |> Seq.map (fun x -> x.ToString("x2")) |> System.String.Concat
-                let depAss = XElement(NsRuntime + "dependentAssembly",
-                                        XElement(NsRuntime + "assemblyIdentity",
-                                            XAttribute(NsNone + "name", name.Name), 
-                                            XAttribute(NsNone + "publicKeyToken", publicKeyToken)),
-                                        XElement(NsRuntime + "bindingRedirect", 
-                                            XAttribute(NsNone + "oldVersion", "0.0.0.0-65535.65535.65535.65535"), 
-                                            XAttribute(NsNone + "newVersion", name.Version.ToString())))
-                depAss                                      
-    with
-        exn -> null
-
-
-let forceBindings (bindings : XElement) (exeFile : FileInfo) =
-    let appConfig = exeFile.FullName |> IoHelpers.AddExt IoHelpers.Extension.Config |> FileInfo
-    let config = if appConfig.Exists then XDocument.Load(appConfig.FullName)
-                 else XDocument(XElement(NsNone + "configuration"))
-
-    let mutable runtime = config.Descendants(NsNone + "runtime").SingleOrDefault()
-    if null = runtime then
-        runtime <- XElement(NsNone + "runtime")
-        config.Root.Add(runtime)
-
-    let mutable assBinding = config.Descendants(NsRuntime + "assemblyBinding").SingleOrDefault()
-    if null <> assBinding then
-        assBinding.Remove()
-        runtime.Add (bindings)      
-
-    File.WriteAllText(appConfig.FullName, config.ToString())
-
-
-let updateBindingRedirects (artifactDir : DirectoryInfo) =
-    let dependentAssemblies = artifactDir.GetFiles ("*.dll")  
-                              |> Seq.map generateBinding
-                              |> Seq.filter (fun x -> x <> null)
-    let bindings = XElement(NsRuntime + "assemblyBinding", dependentAssemblies)
-    
-    artifactDir.GetFiles ("*.exe") |> Seq.iter (forceBindings bindings)
-
 let publishCopy (app : Anthology.Application) =
     let wsDir = GetFolder Env.Workspace
     let antho = Configuration.LoadAnthology ()
@@ -97,7 +43,7 @@ let publishCopy (app : Anthology.Application) =
 
         let appDir = GetFolder Env.AppOutput
         let artifactDir = appDir |> GetSubDirectory app.Name.toString
-        updateBindingRedirects artifactDir
+        Bindings.UpdateArtifactBindingRedirects artifactDir
     else
         printfn "[WARNING] Can't publish application %A without repository" app.Name.toString
 
