@@ -1,0 +1,107 @@
+﻿//   Copyright 2014-2016 Pierre Chalamet
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+
+module Bindings
+open Anthology
+open IoHelpers
+open Env
+open System.IO
+open System.Linq
+open System.Xml.Linq
+open MsBuildHelpers
+open Collections
+
+
+let generateBinding (allAssemblies : AssemblyId set) (file : FileInfo) =
+    try
+        let assId = AssemblyId.from file
+        if not (allAssemblies |> Set.contains assId) then
+            let bytes = File.ReadAllBytes(file.FullName)
+            let ass = System.Reflection.Assembly.ReflectionOnlyLoad(bytes)
+            if null <> ass then
+                let name = ass.GetName()
+                let flags = name.Flags
+                if System.Reflection.AssemblyNameFlags.None <> (flags &&& System.Reflection.AssemblyNameFlags.PublicKey) then
+                    // <dependentAssembly>
+                    //   <assemblyIdentity name="protobuf-net" publicKeyToken="257b51d87d2e4d67"/>
+                    //   <bindingRedirect oldVersion="2.0.0.280" newVersion="2.0.0.481"/>
+                    // </dependentAssembly>
+                    let publicKey = name.GetPublicKeyToken()
+                    let publicKeyToken = publicKey |> Seq.map (fun x -> x.ToString("x2")) |> System.String.Concat
+                    let depAss = XElement(NsRuntime + "dependentAssembly",
+                                            XElement(NsRuntime + "assemblyIdentity",
+                                                XAttribute(NsNone + "name", name.Name), 
+                                                XAttribute(NsNone + "publicKeyToken", publicKeyToken)),
+                                            XElement(NsRuntime + "bindingRedirect", 
+                                                XAttribute(NsNone + "oldVersion", "0.0.0.0-65535.65535.65535.65535"), 
+                                                XAttribute(NsNone + "newVersion", name.Version.ToString())))
+                    depAss 
+                else null
+            else null
+        else null
+    with
+        exn -> null
+
+
+
+let getExeConfig (exeFile : FileInfo) =
+    let appConfig = exeFile.FullName |> IoHelpers.AddExt IoHelpers.Extension.Config |> FileInfo
+    appConfig    
+
+
+let forceBindings (bindings : XElement) (appConfig : FileInfo) =
+    let config = if appConfig.Exists then XDocument.Load(appConfig.FullName)
+                 else XDocument(XElement(NsNone + "configuration"))
+
+    let mutable runtime = config.Descendants(NsNone + "runtime").SingleOrDefault()
+    if null = runtime then
+        runtime <- XElement(NsNone + "runtime")
+        config.Root.Add(runtime)
+
+    let mutable assBinding = config.Descendants(NsRuntime + "assemblyBinding").SingleOrDefault()
+    if null <> assBinding then
+        assBinding.Remove()
+        runtime.Add (bindings)      
+
+    // <assemblyBinding>
+    //   <assemblyIdentity name="protobuf-net" publicKeyToken="257b51d87d2e4d67"/>
+    //   <bindingRedirect oldVersion="2.0.0.280" newVersion="2.0.0.481"/>
+    // </assemblyBinding>
+    File.WriteAllText(appConfig.FullName, config.ToString())
+
+let anthologyAssemblies () =
+    let antho = Configuration.LoadAnthology()
+    let assemblies = antho.Projects |> Seq.map (fun x -> x.Output)
+                                    |> Set
+    assemblies
+
+let generateBindings (allAssemblies : AssemblyId set) (artifactDir : DirectoryInfo) =
+    let dependentAssemblies = artifactDir.GetFiles ("*.dll")  
+                              |> Seq.map (generateBinding allAssemblies)
+                              |> Seq.filter (fun x -> x <> null)
+    let bindings = XElement(NsRuntime + "assemblyBinding", dependentAssemblies)
+    bindings
+
+let UpdateArtifactBindingRedirects (artifactDir : DirectoryInfo) =
+    let assemblies = anthologyAssemblies()
+    let bindings = generateBindings assemblies artifactDir 
+    artifactDir.GetFiles ("*.exe") |> Seq.map getExeConfig
+                                   |> Seq.iter (forceBindings bindings)
+
+let UpdateProjectBindingRedirects (projectDir : DirectoryInfo) =
+    let assemblies = anthologyAssemblies()
+    let artifactDir = projectDir |> GetSubDirectory "bin"
+    let bindings = generateBindings assemblies artifactDir 
+    let appConfig = projectDir |> GetFile "app.config"
+    forceBindings bindings appConfig

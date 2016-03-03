@@ -66,6 +66,7 @@ let tryMain argv =
     | AddApplication appInfo -> Application.Add appInfo.Name appInfo.Project appInfo.Publisher
     | DropApplication name -> Application.Drop name
     | PublishApplications pubInfo -> Application.Publish pubInfo.Filters
+    | BindProject prjInfo -> Application.BindProject prjInfo.Project
 
     | Migrate -> Configuration.Migrate ()
 
