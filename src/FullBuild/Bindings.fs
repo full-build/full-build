@@ -24,33 +24,29 @@ open Collections
 
 
 let generateBinding (allAssemblies : AssemblyId set) (file : FileInfo) =
-    try
-        let assId = AssemblyId.from file
-        if not (allAssemblies |> Set.contains assId) then
-            let ass = Mono.Cecil.AssemblyDefinition.ReadAssembly(file.FullName)
-            if null <> ass then
-                let name = ass.Name
-                if ass.Name.HasPublicKey then
-                    // <dependentAssembly>
-                    //   <assemblyIdentity name="protobuf-net" publicKeyToken="257b51d87d2e4d67"/>
-                    //   <bindingRedirect oldVersion="2.0.0.280" newVersion="2.0.0.481"/>
-                    // </dependentAssembly>
-                    let publicKey = name.PublicKeyToken
-                    let publicKeyToken = publicKey |> Seq.map (fun x -> x.ToString("x2")) |> System.String.Concat
-                    let depAss = XElement(NsRuntime + "dependentAssembly",
-                                            XElement(NsRuntime + "assemblyIdentity",
-                                                XAttribute(NsNone + "name", name.Name), 
-                                                XAttribute(NsNone + "publicKeyToken", publicKeyToken)),
-                                            XElement(NsRuntime + "bindingRedirect", 
-                                                XAttribute(NsNone + "oldVersion", "0.0.0.0-65535.65535.65535.65535"), 
-                                                XAttribute(NsNone + "newVersion", name.Version.ToString())))
-                    depAss 
-                else null
+    let assId = AssemblyId.from file
+    if not (allAssemblies |> Set.contains assId) then
+        let ass = Mono.Cecil.AssemblyDefinition.ReadAssembly(file.FullName)
+        if null <> ass then
+            let name = ass.Name
+            if ass.Name.HasPublicKey then
+                // <dependentAssembly>
+                //   <assemblyIdentity name="protobuf-net" publicKeyToken="257b51d87d2e4d67"/>
+                //   <bindingRedirect oldVersion="2.0.0.280" newVersion="2.0.0.481"/>
+                // </dependentAssembly>
+                let publicKey = name.PublicKeyToken
+                let publicKeyToken = publicKey |> Seq.map (fun x -> x.ToString("x2")) |> System.String.Concat
+                let depAss = XElement(NsRuntime + "dependentAssembly",
+                                        XElement(NsRuntime + "assemblyIdentity",
+                                            XAttribute(NsNone + "name", name.Name), 
+                                            XAttribute(NsNone + "publicKeyToken", publicKeyToken)),
+                                        XElement(NsRuntime + "bindingRedirect", 
+                                            XAttribute(NsNone + "oldVersion", "0.0.0.0-65535.65535.65535.65535"), 
+                                            XAttribute(NsNone + "newVersion", name.Version.ToString())))
+                depAss 
             else null
         else null
-    with
-        exn -> printfn "[WARNING] Failure to inspect file %A\n%A" file exn
-               null
+    else null
 
 
 let getExeConfig (exeFile : FileInfo) =
@@ -77,7 +73,7 @@ let forceBindings (bindings : XElement) (appConfig : FileInfo) =
     //   <assemblyIdentity name="protobuf-net" publicKeyToken="257b51d87d2e4d67"/>
     //   <bindingRedirect oldVersion="2.0.0.280" newVersion="2.0.0.481"/>
     // </assemblyBinding>
-    File.WriteAllText(appConfig.FullName, config.ToString())
+    config.Save(appConfig.FullName)
 
 let anthologyAssemblies () =
     let antho = Configuration.LoadAnthology()
