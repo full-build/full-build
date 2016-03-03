@@ -96,6 +96,7 @@
     <Compile Include="Solution.fs" />
     <Compile Include="Dgml.fs" />
     <Compile Include="Builders.fs" />
+    <Compile Include="Bindings.fs" />
     <Compile Include="Publishers.fs" />
     <Compile Include="TestRunners.fs" />
     <Compile Include="View.fs" />
