@@ -85,30 +85,25 @@ type Exec =
       All : bool }
 
 type AddRepository =
-    {
-        Repo : RepositoryId
-        Url : RepositoryUrl
-        Branch : BranchId option
-        Builder : BuilderType
-        Sticky : bool
-    }
+    { Repo : RepositoryId
+      Url : RepositoryUrl
+      Branch : BranchId option
+      Builder : BuilderType
+      Sticky : bool }
 
 type PullWorkspace =
-    {
-        Src : bool
-        Bin : bool
-        Rebase : bool
-    }
+    { Src : bool
+      Bin : bool
+      Rebase : bool }
 
 type PushWorkspace =
-    {
-        BuildNumber : string
-    }
+    { BuildNumber : string }
 
 type IndexWorkspace =
-    {
-        Optimize : bool
-    }
+    { Optimize : bool }
+
+type BindProject =
+    { Project : ProjectId }
 
 type Command = 
     | Version
@@ -159,5 +154,6 @@ type Command =
     | AddApplication of AddApplication
     | DropApplication of ApplicationId
     | PublishApplications of PublishApplications
+    | BindProject of BindProject
 
     | Migrate

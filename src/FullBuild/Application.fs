@@ -15,6 +15,8 @@
 module Application
 open Anthology
 open Collections
+open IoHelpers
+open Env
 
 
 
@@ -54,3 +56,18 @@ let Drop (appName : ApplicationId) =
                      with Applications = antho.Applications |> Set.filter (fun x -> x.Name <> appName) }
 
     Configuration.SaveAnthology newAntho
+
+
+let updateProjectBindings (project : Project) =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let prjFile = wsDir |> GetSubDirectory project.Repository.toString
+                        |> GetFile project.RelativeProjectFile.toString
+    let prjDir = prjFile.Directory
+    Bindings.UpdateProjectBindingRedirects prjDir
+
+let BindProject (prj : ProjectId) =
+    let antho = Configuration.LoadAnthology()
+    let maybeProject = antho.Projects |> Seq.tryFind (fun x -> x.ProjectId = prj)
+    match maybeProject with
+    | Some project -> updateProjectBindings project
+    | None -> failwithf "Unknown project"
