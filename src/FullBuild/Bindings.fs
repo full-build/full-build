@@ -27,17 +27,15 @@ let generateBinding (allAssemblies : AssemblyId set) (file : FileInfo) =
     try
         let assId = AssemblyId.from file
         if not (allAssemblies |> Set.contains assId) then
-            let bytes = File.ReadAllBytes(file.FullName)
-            let ass = System.Reflection.Assembly.ReflectionOnlyLoad(bytes)
+            let ass = Mono.Cecil.AssemblyDefinition.ReadAssembly(file.FullName)
             if null <> ass then
-                let name = ass.GetName()
-                let flags = name.Flags
-                if System.Reflection.AssemblyNameFlags.None <> (flags &&& System.Reflection.AssemblyNameFlags.PublicKey) then
+                let name = ass.Name
+                if ass.Name.HasPublicKey then
                     // <dependentAssembly>
                     //   <assemblyIdentity name="protobuf-net" publicKeyToken="257b51d87d2e4d67"/>
                     //   <bindingRedirect oldVersion="2.0.0.280" newVersion="2.0.0.481"/>
                     // </dependentAssembly>
-                    let publicKey = name.GetPublicKeyToken()
+                    let publicKey = name.PublicKeyToken
                     let publicKeyToken = publicKey |> Seq.map (fun x -> x.ToString("x2")) |> System.String.Concat
                     let depAss = XElement(NsRuntime + "dependentAssembly",
                                             XElement(NsRuntime + "assemblyIdentity",
@@ -51,8 +49,8 @@ let generateBinding (allAssemblies : AssemblyId set) (file : FileInfo) =
             else null
         else null
     with
-        exn -> null
-
+        exn -> printfn "[WARNING] Failure to inspect file %A\n%A" file exn
+               null
 
 
 let getExeConfig (exeFile : FileInfo) =
