@@ -103,7 +103,7 @@ type IndexWorkspace =
     { Optimize : bool }
 
 type BindProject =
-    { Project : ProjectId }
+    { Filters : string list }
 
 type Command = 
     | Version
