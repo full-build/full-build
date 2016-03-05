@@ -17,6 +17,7 @@ open Anthology
 open Collections
 open IoHelpers
 open Env
+open PatternMatching
 
 
 
@@ -65,9 +66,38 @@ let updateProjectBindings (project : Project) =
     let prjDir = prjFile.Directory
     Bindings.UpdateProjectBindingRedirects prjDir
 
-let BindProject (prj : ProjectId) =
+
+let filterClonedRepositories (wsDir : System.IO.DirectoryInfo) (repo : Repository) =
+    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+    let exists = repoDir.Exists
+    exists
+
+
+let BindProject (filters : string list) =
     let antho = Configuration.LoadAnthology()
-    let maybeProject = antho.Projects |> Seq.tryFind (fun x -> x.ProjectId = prj)
-    match maybeProject with
-    | Some project -> updateProjectBindings project
-    | None -> failwithf "Unknown project"
+    let wsDir = Env.GetFolder Folder.Workspace
+    let prjFilters = filters |> Set
+
+        // select only available repositories
+    let availableRepos = antho.Repositories |> Set.map (fun x -> x.Repository)
+                                            |> Set.filter (filterClonedRepositories wsDir)
+                                            |> Set.map(fun x -> x.Name)
+
+    // build: <repository>/<project>
+    let projects = antho.Projects 
+                   |> Seq.filter (fun x -> availableRepos |> Set.contains x.Repository)
+                   |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, x.ProjectId))
+                   |> Map
+    let projectNames = projects |> Seq.map (fun x -> x.Key) |> set
+
+    let matchRepoProject filter =
+        projectNames |> Set.filter (fun x -> PatternMatching.Match x filter)
+
+    let matches = prjFilters |> Set.map matchRepoProject
+                             |> Set.unionMany
+    let selectedProjectIds = projects |> Map.filter (fun k _ -> Set.contains k matches)
+                                      |> Seq.map (fun x -> x.Value)
+                                      |> Set
+
+    antho.Projects |> Set.filter (fun x -> Set.contains x.ProjectId selectedProjectIds)
+                   |> Set.iter updateProjectBindings

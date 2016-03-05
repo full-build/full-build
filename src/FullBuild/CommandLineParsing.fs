@@ -131,7 +131,6 @@ let rec commandPull (src : bool) (bin : bool) (rebase : bool) (args : string lis
     match args with
     | TokenOption TokenOption.Src :: tail -> tail |> commandPull true false rebase
     | TokenOption TokenOption.Bin :: tail -> tail |> commandPull false true rebase
-    | TokenOption TokenOption.Rebase :: tail -> tail |> commandPull src bin true
     | [] -> Command.PullWorkspace { Src = src ; Bin = bin; Rebase = rebase }
     | _ -> Command.Error
 
@@ -189,7 +188,7 @@ let commandListNuGet (args : string list) =
 let rec commandAddView (sourceOnly : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Src :: tail -> tail |> commandAddView true
-    | MatchViewId name :: filters -> Command.AddView { Name = name; Filters = filters ; SourceOnly = sourceOnly}
+    | MatchViewId name :: one :: more -> Command.AddView { Name = name; Filters = one::more ; SourceOnly = sourceOnly}
     | _ -> Command.Error
 
 let commandDropView (args : string list) =
@@ -250,9 +249,8 @@ let commandMigrate (args : string list) =
 
 let commandBind (args : string list) =
     match args with
-    | [MatchProjectId prj] -> Command.BindProject { Project = prj }
+    | one :: more -> Command.BindProject { Filters = one::more }
     | _ -> Command.Error
-
 
 let ParseCommandLine (args : string list) : Command = 
     match args with
@@ -271,7 +269,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false "0.0.0.*"
     | Token Token.Checkout :: cmdArgs -> commandCheckout cmdArgs
     | Token Token.Push :: cmdArgs -> commandPush cmdArgs
-    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false
+    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true true
     | Token Token.Clean :: cmdArgs -> commandClean cmdArgs
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
 
@@ -359,7 +357,7 @@ let UsageContent() =
         "  pull [--src|--bin] [--rebase] : update to latest version - rebase if requested"
         "  push <buildNumber> : push a baseline from current repositories version and display version"
         "  publish <app> : publish application"
-        "  bind <projectId> : update bindings"
+        "  bind <projectId-wildcard>+ : update bindings"
         "  clean : DANGER! reset and clean workspace (interactive command)"
         ""
         "  update package : update packages"
