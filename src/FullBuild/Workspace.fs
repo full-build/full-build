@@ -253,7 +253,7 @@ let Clean () =
         Vcs.VcsClean wsDir newAntho.Vcs newAntho.MasterRepository
 
 let UpdateGuid (repo : RepositoryId) =
-    printfn "DANGER ! You will lose all uncommitted changes. Do you want to continue [Yes to confirm] ?"
+    printfn "DANGER ! You will change all project guids for selected repository. Do you want to continue [Yes to confirm] ?"
     let res = Console.ReadLine()
     if res = "Yes" then
         let antho = Configuration.LoadAnthology ()
