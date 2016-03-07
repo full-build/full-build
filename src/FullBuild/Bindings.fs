@@ -64,10 +64,8 @@ let forceBindings (bindings : XElement) (appConfig : FileInfo) =
         runtime <- XElement(NsNone + "runtime")
         config.Root.Add(runtime)
 
-    let mutable assBinding = config.Descendants(NsRuntime + "assemblyBinding").SingleOrDefault()
-    if null <> assBinding then
-        assBinding.Remove()
-        runtime.Add (bindings)      
+    config.Descendants(NsRuntime + "assemblyBinding").Remove()    
+    runtime.Add (bindings)      
 
     // <assemblyBinding>
     //   <assemblyIdentity name="protobuf-net" publicKeyToken="257b51d87d2e4d67"/>
