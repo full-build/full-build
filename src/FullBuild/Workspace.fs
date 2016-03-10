@@ -248,8 +248,10 @@ let Clean () =
         for repo in newAntho.Repositories do
             let repoDir = wsDir |> GetSubDirectory repo.Repository.Name.toString
             if repoDir.Exists then
+                DisplayHighlight repo.Repository.Name.toString
                 Vcs.VcsClean wsDir newAntho.Vcs repo.Repository
 
+        DisplayHighlight newAntho.MasterRepository.Name.toString
         Vcs.VcsClean wsDir newAntho.Vcs newAntho.MasterRepository
 
 let UpdateGuid (repo : RepositoryId) =
