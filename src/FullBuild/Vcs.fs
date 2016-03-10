@@ -69,13 +69,8 @@ let private gitClean (repoDir : DirectoryInfo) (repo : Repository) =
              | Some x -> x.toString
              | None -> "master"
 
-    DisplayHighlight "Resetting branch"
     checkedExec "git" "reset --hard" repoDir
-
-    DisplayHighlight "Cleaning branch"
     checkedExec "git" "clean -fxd" repoDir
-
-    DisplayHighlight (sprintf "Checking out %s" br)
     checkedExec "git" (sprintf "checkout %s" br) repoDir
 
 let private hgClean (repoDir : DirectoryInfo) (repo : Repository) =
