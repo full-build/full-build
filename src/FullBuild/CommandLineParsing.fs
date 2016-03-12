@@ -131,6 +131,7 @@ let rec commandPull (src : bool) (bin : bool) (rebase : bool) (args : string lis
     match args with
     | TokenOption TokenOption.Src :: tail -> tail |> commandPull true false rebase
     | TokenOption TokenOption.Bin :: tail -> tail |> commandPull false true rebase
+    | TokenOption TokenOption.Rebase :: tail -> tail |> commandPull src bin true
     | [] -> Command.PullWorkspace { Src = src ; Bin = bin; Rebase = rebase }
     | _ -> Command.Error
 
@@ -269,7 +270,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false "0.0.0.*"
     | Token Token.Checkout :: cmdArgs -> commandCheckout cmdArgs
     | Token Token.Push :: cmdArgs -> commandPush cmdArgs
-    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true true
+    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false
     | Token Token.Clean :: cmdArgs -> commandClean cmdArgs
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
 
@@ -354,7 +355,7 @@ let UsageContent() =
         "  exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         "  index [--optimize] : index workspace"
         "  convert : convert projects in workspace"
-        "  pull [--src|--bin] [--rebase] : update to latest version - rebase if requested"
+        "  pull [--src|--bin] [--rebase] : update to latest version - rebase if requested (ff is default)"
         "  push <buildNumber> : push a baseline from current repositories version and display version"
         "  publish <app> : publish application"
         "  bind <projectId-wildcard>+ : update bindings"

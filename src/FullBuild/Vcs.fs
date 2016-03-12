@@ -46,7 +46,7 @@ let private hgPush (repoDir : DirectoryInfo) =
     
 
 let private gitPull (rebase : bool) (repoDir : DirectoryInfo) =
-    let dorebase = if rebase then "--rebase" else ""
+    let dorebase = if rebase then "--rebase" else "--ff-only"
     let args = sprintf "pull %s" dorebase
     checkedExec "git" args  repoDir
 
