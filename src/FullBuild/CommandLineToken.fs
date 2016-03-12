@@ -27,6 +27,7 @@ type TokenOption =
     | Branch
     | Version
     | Sticky
+    | Rebase
     | Optimize
     | Unknown
 
@@ -43,6 +44,7 @@ let (|TokenOption|) (token : string) =
     | "--branch" -> TokenOption.Branch
     | "--version" -> TokenOption.Version
     | "--sticky" -> TokenOption.Sticky
+    | "--rebase" -> TokenOption.Rebase
     | "--optimize" -> TokenOption.Optimize
     | _ -> Unknown
 
