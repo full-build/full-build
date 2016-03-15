@@ -17,9 +17,6 @@ open Anthology
 open IoHelpers
 open Env
 open System.IO
-open System.Linq
-open System.Xml.Linq
-open MsBuildHelpers
 
 
 let private checkErrorCode err =
