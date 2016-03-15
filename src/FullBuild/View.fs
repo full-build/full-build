@@ -25,12 +25,6 @@ let checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
 
 
-//let assertViewExists (viewName : ViewId) =
-//    let vwDir = GetFolder Env.View
-//    let vwFile = GetFile (AddExt View viewName.toString) vwDir
-//    if not vwFile.Exists then failwithf "View %A does not exist" viewName.toString
-
-
 let Drop (viewName : ViewId) =
     let vwDir = GetFolder Env.View
     let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
@@ -58,7 +52,6 @@ let List () =
 
 
 let Describe (viewId : ViewId) =
-    let vwDir = GetFolder Env.View
     let view = Configuration.LoadView viewId
     let builderInfo = view.Parameters |> Seq.fold (+) (sprintf "[%s] " view.Builder.toString)
     printfn "%s" builderInfo
@@ -181,7 +174,6 @@ let AlterView (viewId : ViewId) (isDefault : bool) =
         System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
 
 let OpenView (viewId : ViewId) =
-    let wsDir = Env.GetFolder Env.Folder.Workspace
     let viewFile = GenerateView (Some viewId)
     Exec.ExecVerb viewFile.FullName "open"
 
