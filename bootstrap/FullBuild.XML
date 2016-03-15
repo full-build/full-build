@@ -2,6 +2,11 @@
 <doc>
 <assembly><name>FullBuild</name></assembly>
 <members>
+<member name="M:Paket.FrameworkIdentifier.IsSameCategoryAs(Paket.FrameworkIdentifier)">
+<summary>
+ Return if the parameter is of the same framework category (dotnet, windows phone, silverlight, ...)
+</summary>
+</member>
 <member name="T:Paket.FrameworkIdentifier">
 <summary>
  Framework Identifier type.

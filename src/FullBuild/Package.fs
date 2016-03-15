@@ -59,7 +59,7 @@ let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
 
             for path2pf in path2platforms do
                 let pathLib = libDir |> IoHelpers.GetSubDirectory path2pf.Key
-                let condition = Paket.PlatformMatching.getCondition None path2pf.Value
+                let condition = Paket.PlatformMatching.getCondition None (List.ofSeq path2pf.Value)
                 let whenCondition = if condition = "$(TargetFrameworkIdentifier) == 'true'" then "True"
                                     else condition
                 yield GenerateItemGroup pathLib whenCondition
