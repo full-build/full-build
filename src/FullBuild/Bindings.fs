@@ -49,10 +49,8 @@ let generateBinding (allAssemblies : AssemblyId set) (file : FileInfo) =
     else null
 
 
-let getExeConfig (exeFile : FileInfo) =
-    let appConfig = exeFile.FullName |> IoHelpers.AddExt IoHelpers.Extension.Config |> FileInfo
-    let appTemplateConfig = exeFile.Directory |> GetFile "app.template.config"
-    [ appConfig; appTemplateConfig ]
+let getAssemblyConfig (file : FileInfo) =
+    file.FullName |> IoHelpers.AddExt IoHelpers.Extension.Config |> FileInfo
 
 
 let forceBindings (bindings : XElement) (appConfig : FileInfo) =
@@ -89,9 +87,12 @@ let generateBindings (allAssemblies : AssemblyId set) (artifactDir : DirectoryIn
 let UpdateArtifactBindingRedirects (artifactDir : DirectoryInfo) =
     let assemblies = anthologyAssemblies()
     let bindings = generateBindings assemblies artifactDir 
-    artifactDir.GetFiles ("*.exe") |> Seq.map getExeConfig
-                                   |> Seq.concat
-                                   |> Seq.iter (forceBindings bindings)
+
+    let dllConfigs = artifactDir.GetFiles ("*.dll") |> Seq.map getAssemblyConfig |> Seq.where(fun x -> x.Exists)
+    let exeConfigs = artifactDir.GetFiles ("*.exe") |> Seq.map getAssemblyConfig 
+    let templateConfig = GetFile "app.template.config" artifactDir |> Seq.singleton
+
+    exeConfigs|> Seq.append dllConfigs |> Seq.append templateConfig |> Seq.iter (forceBindings bindings)
 
 let UpdateProjectBindingRedirects (projectDir : DirectoryInfo) =
     let assemblies = anthologyAssemblies()
