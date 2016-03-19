@@ -146,6 +146,13 @@ let private hgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion opti
     let args = sprintf "update -r %A" rev
     checkedExec "hg" args repoDir
 
+let private gitHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =     
+    let args = sprintf "%s %s..HEAD" @"log --pretty=format:""%H %ae %s""" version.toString
+    let res = checkedExecReadLine "git" args repoDir
+    res
+
+let private hgHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
+    ""
 
 let private gitIgnore (repoDir : DirectoryInfo) =
     let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"
@@ -192,3 +199,6 @@ let VcsPush (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
 
 let VcsClean (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
     (chooseVcs wsDir vcsType repo gitClean hgClean) repo
+
+let VcsLog (wsDir : DirectoryInfo) (vcsType : VcsType) repo (version : BookmarkVersion) =
+    (chooseVcs wsDir vcsType repo gitHistory hgHistory) version

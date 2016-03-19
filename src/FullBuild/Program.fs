@@ -34,6 +34,7 @@ let tryMain argv =
     | CleanWorkspace -> Workspace.Clean ()
     | UpdateGuids name -> Workspace.UpdateGuid name
     | TestAssemblies testInfo -> Test.TestAssemblies testInfo.Filters testInfo.Excludes
+    | History -> Workspace.History ()
 
     // repository
     | AddRepository repoInfo -> Repo.Add repoInfo.Repo repoInfo.Url repoInfo.Branch repoInfo.Builder repoInfo.Sticky
