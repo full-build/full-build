@@ -253,6 +253,12 @@ let commandBind (args : string list) =
     | one :: more -> Command.BindProject { Filters = one::more }
     | _ -> Command.Error
 
+let commandHistory (args : string list) =
+    match args with
+    | [] -> Command.History
+    | _ -> Command.Error
+
+
 let ParseCommandLine (args : string list) : Command = 
     match args with
     | [Token Token.Version] -> Command.Version
@@ -273,6 +279,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false
     | Token Token.Clean :: cmdArgs -> commandClean cmdArgs
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
+    | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory
 
     // compat
     | Token Token.Install :: Token Token.Package :: cmdArgs -> cmdArgs |> commandInstall
@@ -360,6 +367,7 @@ let UsageContent() =
         "  publish <app> : publish application"
         "  bind <projectId-wildcard>+ : update bindings"
         "  clean : DANGER! reset and clean workspace (interactive command)"
+        "  history : display history since last baseline"
         ""
         "  update package : update packages"
         "  outdated package : display outdated packages"

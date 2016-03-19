@@ -122,6 +122,7 @@ type Command =
     | CleanWorkspace
     | UpdateGuids of RepositoryId
     | TestAssemblies of TestAssemblies
+    | History
 
     // repository
     | ListRepositories

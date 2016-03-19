@@ -267,3 +267,16 @@ let UpdateGuid (repo : RepositoryId) =
             let guid = xdoc.Descendants(NsMsBuild + "ProjectGuid").Single()
             guid.Value <- Guid.NewGuid().ToString("B")
             xdoc.Save(project.FullName)
+
+let History () =
+    let antho = Configuration.LoadAnthology()
+    let baseline = Configuration.LoadBaseline()
+    let wsDir = Env.GetFolder Env.Workspace
+    for bookmark in baseline.Bookmarks do
+        let repoDir = wsDir |> GetSubDirectory bookmark.Repository.toString
+        if repoDir.Exists then
+            let repo = antho.Repositories |> Seq.find (fun x -> x.Repository.Name = bookmark.Repository)
+            let res = Vcs.VcsLog wsDir antho.Vcs repo.Repository bookmark.Version
+            if res <> null then 
+                DisplayHighlight repo.Repository.Name.toString
+                printfn "%s" res

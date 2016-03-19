@@ -74,6 +74,7 @@ type Token =
     | Alter
     | Open
     | Bind
+    | History
 
     | Add
     | Drop
@@ -120,6 +121,7 @@ let (|Token|) (token : string) =
     | "alter" -> Alter
     | "open" -> Open
     | "bind" -> Bind
+    | "history" -> History
 
     | "add" -> Add
     | "drop" -> Drop
