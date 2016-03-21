@@ -34,10 +34,10 @@
   <Target Name="FBPublish">
     <Copy SourceFiles="@(Content)" DestinationFolder="$(FBContentFolder)/%(Content.RelativeDir)" UseHardlinksIfPossible="true" />
 
-    <CreateItem Include="$(OutputPath)/*">
+    <CreateItem Include="$(OutputPath)/**/*.*">
       <Output TaskParameter="Include" ItemName="Binaries"/>
     </CreateItem>
-    <Copy SourceFiles="@(Binaries)" DestinationFolder="$(FBBinFolder)" UseHardlinksIfPossible="true" />
+    <Copy SourceFiles="@(Binaries)" DestinationFolder="$(FBBinFolder)/%(Binaries.RecursiveDir)" UseHardlinksIfPossible="true" />
   </Target>
 
 </Project>
