@@ -110,6 +110,9 @@ let ExecutePaketCommand cmd =
 let PaketInstall () =
     ExecutePaketCommand "install"
 
+let PaketRestore () =
+    ExecutePaketCommand "restore"
+
 let PaketUpdate () =
     ExecutePaketCommand "update"
 

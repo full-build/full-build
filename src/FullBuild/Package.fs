@@ -149,9 +149,17 @@ let InstallPackages (nugets : RepositoryUrl list) =
                       |> Seq.map fst
     allPackages |> Seq.iter GenerateTargetForPackage
 
+let RestorePackages () =
+    PaketInterface.PaketRestore ()
+
+    let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
+                      |> Map.toList
+                      |> Seq.map fst
+    allPackages |> Seq.iter GenerateTargetForPackage
+
+
 let Install () =
-    let antho = Configuration.LoadAnthology ()
-    InstallPackages antho.NuGets
+    RestorePackages ()
 
 let Update () =
     PaketInterface.PaketUpdate ()
