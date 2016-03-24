@@ -45,7 +45,6 @@ let (|TokenOption|) (token : string) =
     | "--version" -> TokenOption.Version
     | "--sticky" -> TokenOption.Sticky
     | "--rebase" -> TokenOption.Rebase
-    | "--optimize" -> TokenOption.Optimize
     | _ -> Unknown
 
 
@@ -110,7 +109,6 @@ let (|Token|) (token : string) =
     | "push" -> Push
     | "graph" -> Graph
     | "install" -> Install
-    | "simplify" -> Simplify
     | "outdated" -> Outdated
     | "publish" -> Publish
     | "pull" -> Pull
