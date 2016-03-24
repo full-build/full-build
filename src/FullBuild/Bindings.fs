@@ -88,11 +88,15 @@ let UpdateArtifactBindingRedirects (artifactDir : DirectoryInfo) =
     let assemblies = anthologyAssemblies()
     let bindings = generateBindings assemblies artifactDir 
 
-    let dllConfigs = artifactDir.GetFiles ("*.dll") |> Seq.map getAssemblyConfig |> Seq.where(fun x -> x.Exists)
+    let dllConfigs = artifactDir.GetFiles ("*.dll") |> Seq.map getAssemblyConfig
     let exeConfigs = artifactDir.GetFiles ("*.exe") |> Seq.map getAssemblyConfig 
-    let templateConfig = GetFile "app.template.config" artifactDir |> Seq.singleton
+    let templateConfig = artifactDir |> GetFile "app.template.config" |> Seq.singleton
 
-    exeConfigs|> Seq.append dllConfigs |> Seq.append templateConfig |> Seq.iter (forceBindings bindings)
+    exeConfigs 
+        |> Seq.append dllConfigs 
+        |> Seq.append templateConfig 
+        |> Seq.filter (fun x -> x.Exists)
+        |> Seq.iter (forceBindings bindings)
 
 let UpdateProjectBindingRedirects (projectDir : DirectoryInfo) =
     let assemblies = anthologyAssemblies()
