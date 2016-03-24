@@ -140,23 +140,21 @@ let GatherAllAssemblies (package : PackageId) : AssemblyId set =
                                      |> Set
     Set.difference files fxDependencies
 
+
+let GeneratePackageImports () =
+    let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
+                      |> Map.toList
+                      |> Seq.map fst
+    allPackages |> Seq.iter GenerateTargetForPackage
+
 let InstallPackages (nugets : RepositoryUrl list) =
     PaketInterface.UpdateSources nugets
     PaketInterface.PaketInstall ()
-
-    let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
-                      |> Map.toList
-                      |> Seq.map fst
-    allPackages |> Seq.iter GenerateTargetForPackage
+    GeneratePackageImports()
 
 let RestorePackages () =
     PaketInterface.PaketRestore ()
-
-    let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
-                      |> Map.toList
-                      |> Seq.map fst
-    allPackages |> Seq.iter GenerateTargetForPackage
-
+    GeneratePackageImports()
 
 let Install () =
     RestorePackages ()

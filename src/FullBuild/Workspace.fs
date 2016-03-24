@@ -73,16 +73,11 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
     finally
         Environment.CurrentDirectory <- currDir
 
-let Index (optimizeOnly : bool) =    
-    if not optimizeOnly then    
-        let newAntho = Indexation.IndexWorkspace () 
-        Configuration.SaveAnthology newAntho
-
-    let optAntho = Configuration.LoadAnthology ()
-                   |> Indexation.Optimize
-                   |> Package.Simplify
-    Configuration.SaveAnthology optAntho
-
+let Index () =    
+    Indexation.IndexWorkspace () 
+        |> Indexation.Optimize
+        |> Package.Simplify
+        |> Configuration.SaveAnthology
 
 let Convert () = 
     let antho = Configuration.LoadAnthology ()
@@ -276,7 +271,14 @@ let History () =
         let repoDir = wsDir |> GetSubDirectory bookmark.Repository.toString
         if repoDir.Exists then
             let repo = antho.Repositories |> Seq.find (fun x -> x.Repository.Name = bookmark.Repository)
-            let res = Vcs.VcsLog wsDir antho.Vcs repo.Repository bookmark.Version
-            if res <> null then 
+            let revision = Vcs.VcsLog wsDir antho.Vcs repo.Repository bookmark.Version
+            if revision <> null then 
                 DisplayHighlight repo.Repository.Name.toString
-                printfn "%s" res
+                printfn "%s" revision
+    let lastCommit = Vcs.VcsLastCommit wsDir antho.Vcs antho.MasterRepository "baseline"
+    match lastCommit with 
+    | Some version -> let revision = Vcs.VcsLog wsDir antho.Vcs antho.MasterRepository version
+                      if revision <> null then 
+                          DisplayHighlight antho.MasterRepository.Name.toString
+                          printfn "%s" revision
+    | _ -> ()
