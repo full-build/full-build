@@ -147,7 +147,7 @@ let private hgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion opti
     checkedExec "hg" args repoDir
 
 let private gitHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =     
-    let args = sprintf "%s %s..HEAD" @"log --pretty=format:""%H %ae %s""" version.toString
+    let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version.toString
     let res = checkedExecReadLine "git" args repoDir
     res
 
@@ -155,7 +155,7 @@ let private hgHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =
     null
 
 let private gitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =     
-    let args = sprintf "log -1 --format=%%H %s" relativeFile
+    let args = sprintf @"log -1 --format=%%H %s" relativeFile
     let res = checkedExecReadLine "git" args repoDir
     let ver = BookmarkVersion.from res
     Some ver
