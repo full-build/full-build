@@ -54,7 +54,7 @@ let private hgPull (repoDir : DirectoryInfo) =
     checkedExec "hg" "pull -u" repoDir
 
 let private gitTip (repoDir : DirectoryInfo) =
-    let args = @"log -1 --format=""%H"""
+    let args = @"log -1 --format=%H"
     let res = checkedExecReadLine "git" args repoDir
     res
 
@@ -152,7 +152,16 @@ let private gitHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =
     res
 
 let private hgHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
-    ""
+    null
+
+let private gitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =     
+    let args = sprintf "log -1 --format=%%H %s" relativeFile
+    let res = checkedExecReadLine "git" args repoDir
+    let ver = BookmarkVersion.from res
+    Some ver
+    
+let private hgLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =     
+    None
 
 let private gitIgnore (repoDir : DirectoryInfo) =
     let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"
@@ -202,3 +211,6 @@ let VcsClean (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
 
 let VcsLog (wsDir : DirectoryInfo) (vcsType : VcsType) repo (version : BookmarkVersion) =
     (chooseVcs wsDir vcsType repo gitHistory hgHistory) version
+
+let VcsLastCommit (wsDir : DirectoryInfo) (vcsType : VcsType) repo (relativeFile : string) =
+    (chooseVcs wsDir vcsType repo gitLastCommit hgLastCommit) relativeFile

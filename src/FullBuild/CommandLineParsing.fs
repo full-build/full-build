@@ -73,10 +73,9 @@ let rec commandTest (excludes : string list) (args : string list) =
     | filters -> Command.TestAssemblies { Filters = filters; Excludes = excludes }
 
 
-let rec commandIndex (optimize : bool) (args : string list) =
+let rec commandIndex (args : string list) =
     match args with
-    | TokenOption TokenOption.Optimize :: tail -> tail |> commandIndex true
-    | [] -> Command.IndexWorkspace { Optimize = optimize }
+    | [] -> Command.IndexWorkspace
     | _ -> Command.Error
 
 let commandConvert (args : string list) =
@@ -263,21 +262,21 @@ let ParseCommandLine (args : string list) : Command =
     match args with
     | [Token Token.Version] -> Command.Version
     | [Token Token.Help] -> Command.Usage
-    | Token Token.Setup :: cmdArgs -> commandSetup cmdArgs
+    | Token Token.Setup :: cmdArgs -> cmdArgs |> commandSetup 
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
-    | Token Token.Test :: cmdArgs -> commandTest [] cmdArgs
-    | Token Token.Index :: cmdArgs -> cmdArgs |> commandIndex false
-    | Token Token.Convert :: cmdArgs -> commandConvert cmdArgs
+    | Token Token.Test :: cmdArgs -> cmdArgs |> commandTest []
+    | Token Token.Index :: cmdArgs -> cmdArgs |> commandIndex
+    | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
-    | Token Token.Publish :: cmdArgs -> commandPublish cmdArgs
+    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false "0.0.0.*"
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false "0.0.0.*"
-    | Token Token.Checkout :: cmdArgs -> commandCheckout cmdArgs
-    | Token Token.Push :: cmdArgs -> commandPush cmdArgs
+    | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
+    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false
-    | Token Token.Clean :: cmdArgs -> commandClean cmdArgs
+    | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
     | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory
 
@@ -285,36 +284,36 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Install :: Token Token.Package :: cmdArgs -> cmdArgs |> commandInstall
     | Token Token.Install :: cmdArgs -> cmdArgs |> commandInstall
     // end compat
-    | Token Token.Update :: Token Token.Package :: cmdArgs -> commandUpdate cmdArgs
-    | Token Token.Outdated :: Token Token.Package :: cmdArgs -> commandOutdated cmdArgs
-    | Token Token.List :: Token Token.Package :: cmdArgs -> commandListPackage cmdArgs
+    | Token Token.Update :: Token Token.Package :: cmdArgs -> cmdArgs |> commandUpdate
+    | Token Token.Outdated :: Token Token.Package :: cmdArgs -> cmdArgs |> commandOutdated
+    | Token Token.List :: Token Token.Package :: cmdArgs -> cmdArgs |> commandListPackage
 
     | Token Token.Add :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandAddRepo None BuilderType.MSBuild false
-    | Token Token.Drop :: Token Token.Repo :: cmdArgs -> commandDropRepo cmdArgs
-    | Token Token.List :: Token Token.Repo :: cmdArgs -> commandListRepo cmdArgs
+    | Token Token.Drop :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandDropRepo
+    | Token Token.List :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandListRepo
 
-    | Token Token.Add :: Token Token.NuGet :: cmdArgs -> commandAddNuGet cmdArgs
-    | Token Token.List :: Token Token.NuGet :: cmdArgs -> commandListNuGet cmdArgs
+    | Token Token.Add :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandAddNuGet
+    | Token Token.List :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandListNuGet
 
     // compat
     | Token Token.Add :: Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false
     | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false
     // end compat
-    | Token Token.Drop :: Token Token.View :: cmdArgs -> commandDropView cmdArgs
-    | Token Token.List :: Token Token.View :: cmdArgs -> commandListView cmdArgs
-    | Token Token.Describe :: Token Token.View :: cmdArgs -> commandDescribeView cmdArgs
+    | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
+    | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
+    | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
     | Token Token.Alter :: Token Token.View :: cmdArgs -> cmdArgs |> commandAlterView false
     // compat
     | Token Token.Open :: Token Token.View :: cmdArgs -> cmdArgs |> commandOpenView
     | Token Token.Open :: cmdArgs -> cmdArgs |> commandOpenView
     // end compat
     
-    | Token Token.Add :: Token Token.App :: cmdArgs -> commandAddApp cmdArgs
-    | Token Token.Drop :: Token Token.App :: cmdArgs -> commandDropApp cmdArgs
-    | Token Token.List :: Token Token.App :: cmdArgs -> commandListApp cmdArgs
+    | Token Token.Add :: Token Token.App :: cmdArgs -> cmdArgs |> commandAddApp
+    | Token Token.Drop :: Token Token.App :: cmdArgs -> cmdArgs |> commandDropApp
+    | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp
 
-    | Token Token.UpdateGuids :: cmdArgs -> commandUpdateGuids cmdArgs
-    | Token Token.Migrate :: cmdArgs -> commandMigrate cmdArgs
+    | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
+    | Token Token.Migrate :: cmdArgs -> cmdArgs |> commandMigrate
     | _ -> Command.Error
 
 
@@ -360,7 +359,7 @@ let UsageContent() =
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
         "  exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
-        "  index [--optimize] : index workspace"
+        "  index : index workspace"
         "  convert : convert projects in workspace"
         "  pull [--src|--bin] [--rebase] : update to latest version - rebase if requested (ff is default)"
         "  push <buildNumber> : push a baseline from current repositories version and display version"

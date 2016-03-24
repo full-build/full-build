@@ -99,9 +99,6 @@ type PullWorkspace =
 type PushWorkspace =
     { BuildNumber : string }
 
-type IndexWorkspace =
-    { Optimize : bool }
-
 type BindProject =
     { Filters : string list }
 
@@ -113,7 +110,7 @@ type Command =
     // workspace
     | SetupWorkspace of SetupWorkspace
     | InitWorkspace of InitWorkspace
-    | IndexWorkspace of IndexWorkspace
+    | IndexWorkspace
     | ConvertWorkspace
     | PushWorkspace of PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
