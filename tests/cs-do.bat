@@ -11,8 +11,8 @@ pushd cs-do
 %FULLBUILD% clone * || goto :ko
 %FULLBUILD% index || goto :ko
 %FULLBUILD% convert || goto :ko
-%FULLBUILD% add view all * || goto :ko
-%FULLBUILD% add view csc cassandra-sharp-contrib/* || goto :ko
+%FULLBUILD% view all * || goto :ko
+%FULLBUILD% view csc cassandra-sharp-contrib/* || goto :ko
 %FULLBUILD% list view || goto :ko
 %FULLBUILD% describe view all || goto :ko
 %FULLBUILD% graph all || goto :ko
@@ -20,7 +20,7 @@ pushd cs-do
 %FULLBUILD% drop view csc || goto :ko
 %FULLBUILD% outdated package || goto :ko
 %FULLBUILD% update package || goto :ko
-%FULLBUILD% push || goto :ko
+%FULLBUILD% push 42 || goto :ko
 
 
 :ok
