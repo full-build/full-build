@@ -107,9 +107,9 @@ let commandPublish (args : string list) =
 
 
 
-let rec commandBuild (config : string) (clean : bool) (multithread : bool) (version : string) (args : string list) =
+let rec commandBuild (config : string) (clean : bool) (multithread : bool) (version : string option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Version :: ver :: tail -> tail |> commandBuild config clean multithread ver
+    | TokenOption TokenOption.Version :: ver :: tail -> tail |> commandBuild config clean multithread (Some ver)
     | TokenOption TokenOption.Debug :: tail -> tail |> commandBuild "Debug" clean multithread version
     | TokenOption TokenOption.Multithread :: tail -> tail |> commandBuild config clean true version
     | [] -> Command.BuildView { Name = None ; Config = config; Clean = clean; Multithread = multithread; Version = version }
@@ -271,8 +271,8 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
     | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish
-    | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false "0.0.0.*"
-    | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false "0.0.0.*"
+    | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
+    | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false
