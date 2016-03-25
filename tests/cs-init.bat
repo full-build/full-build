@@ -6,14 +6,14 @@ call fb-init.bat
 taskkill /im tgitcache.exe 1>NUL 2>NUL
 if exist cs-init rmdir /s /q cs-init || goto :ko
 
-%FULLBUILD% setup https://github.com/pchalamet/cassandra-sharp-full-build c:\BinRepo cs-init
+%FULLBUILD% setup git https://github.com/pchalamet/cassandra-sharp-full-build c:\BinRepo cs-init
 
 rem create workspace
 pushd cs-init
 
 %FULLBUILD% add nuget https://www.nuget.org/api/v2/ || goto :ko
-%FULLBUILD% add repo cassandra-sharp https://github.com/pchalamet/cassandra-sharp || goto :ko
-%FULLBUILD% add repo cassandra-sharp-contrib https://github.com/pchalamet/cassandra-sharp-contrib || goto :ko
+%FULLBUILD% add repo cassandra-sharp msbuild https://github.com/pchalamet/cassandra-sharp || goto :ko
+%FULLBUILD% add repo cassandra-sharp-contrib msbuild https://github.com/pchalamet/cassandra-sharp-contrib || goto :ko
 %FULLBUILD% clone *  || goto :ko
 
 :ok
