@@ -178,7 +178,7 @@ let OpenView (viewId : ViewId) =
     Exec.ExecVerb viewFile.FullName "open"
 
 
-let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (multithread : bool) (version : string) =
+let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (multithread : bool) (version : string option) =
     let viewFile = GenerateView maybeViewName
 
     let antho = Configuration.LoadAnthology ()

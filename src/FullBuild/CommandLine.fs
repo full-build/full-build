@@ -67,7 +67,7 @@ type BuildView =
       Config : string 
       Clean : bool
       Multithread : bool 
-      Version : string }
+      Version : string option }
 
 type AlterView =
     { Name : ViewId
