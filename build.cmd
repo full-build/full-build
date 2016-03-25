@@ -2,7 +2,6 @@ echo on
 setlocal
 
 set VERSION=%1
-set VERSION=%1
 if [%VERSION%] == [] set VERSION=0.0.0.* 
 echo building version %VERSION%
 
