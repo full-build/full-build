@@ -6,6 +6,7 @@
     <FBIsTestProject Condition="'$(OutputType)'=='library' and ($(MSBuildProjectName.EndsWith('.Test')) or $(MSBuildProjectName.EndsWith('.Tests'))) and !$(FBIsWebProject)">true</FBIsTestProject>
     <FBIsLibrary >false</FBIsLibrary>
     <FBIsLibrary Condition="'$(OutputType)'=='library' and !$(FBIsWebProject) and !$(FBIsTestProject)">true</FBIsLibrary>
+    <FBUseHardlink>false</FBUseHardlink>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -26,18 +27,18 @@
   </Target>
 
   <Target Name="FBCopyBin" AfterTargets="Build">
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName)$(TargetExt)" DestinationFolder="$(SolutionDir)/.full-build/bin/" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" />
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(SolutionDir)/.full-build/bin/" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" ContinueOnError="true" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" />
-    <Copy SourceFiles="@(FBCopyFiles)" DestinationFolder="$(OutputPath)" Condition="Exists('%(FBCopyFiles.FullPath)')" SkipUnchangedFiles="true" ContinueOnError="true" UseHardlinksIfPossible="true" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName)$(TargetExt)" DestinationFolder="$(SolutionDir)/.full-build/bin/" SkipUnchangedFiles="true" UseHardlinksIfPossible="$(FBUseHardlnk)"   />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(SolutionDir)/.full-build/bin/" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" ContinueOnError="true" SkipUnchangedFiles="true" UseHardlinksIfPossible="$(FBUseHardlnk)"   />
+    <Copy SourceFiles="@(FBCopyFiles)" DestinationFolder="$(OutputPath)" Condition="Exists('%(FBCopyFiles.FullPath)')" SkipUnchangedFiles="true" ContinueOnError="true" UseHardlinksIfPossible="$(FBUseHardlnk)"   />
   </Target>
 
   <Target Name="FBPublish">
-    <Copy SourceFiles="@(Content)" DestinationFolder="$(FBContentFolder)/%(Content.RelativeDir)" UseHardlinksIfPossible="true" />
+    <Copy SourceFiles="@(Content)" DestinationFolder="$(FBContentFolder)/%(Content.RelativeDir)" UseHardlinksIfPossible="$(FBUseHardlnk)"   />
 
     <CreateItem Include="$(OutputPath)/**/*.*">
       <Output TaskParameter="Include" ItemName="Binaries"/>
     </CreateItem>
-    <Copy SourceFiles="@(Binaries)" DestinationFolder="$(FBBinFolder)/%(Binaries.RecursiveDir)" UseHardlinksIfPossible="true" />
+    <Copy SourceFiles="@(Binaries)" DestinationFolder="$(FBBinFolder)/%(Binaries.RecursiveDir)" UseHardlinksIfPossible="$(FBUseHardlnk)"   />
   </Target>
 
 </Project>
