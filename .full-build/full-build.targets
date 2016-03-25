@@ -17,8 +17,7 @@
 
 
   <ItemGroup>
-    <Compile Include="$(SolutionDir)/.full-build/AssemblyInfo$(DefaultLanguageSourceExtension)" Condition="Exists('$(SolutionDir)/.full-build/AssemblyInfo$(DefaultLanguageSourceExtension)')" />
-    <Compile Include="$(SolutionDir)/BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)" />
+    <Compile Include="$(SolutionDir)/.full-build/bin/BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)" Condition="Exists('$(SolutionDir)/.full-build/AssemblyInfo$(DefaultLanguageSourceExtension)')" />
   </ItemGroup>
   
   

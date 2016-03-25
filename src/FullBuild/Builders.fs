@@ -44,11 +44,11 @@ let generateVersionCs version =
     |]
 
 let versionMsbuild version =
-    let wsDir = Env.GetFolder Folder.Workspace
-    let fsFile = wsDir |> GetFile "BuildVersionAssemblyInfo.fs"
+    let binDir = Env.GetFolder Folder.Bin
+    let fsFile = binDir |> GetFile "BuildVersionAssemblyInfo.fs"
     File.WriteAllLines(fsFile.FullName, generateVersionFs version)
 
-    let csFile = wsDir |> GetFile "BuildVersionAssemblyInfo.cs"
+    let csFile = binDir |> GetFile "BuildVersionAssemblyInfo.cs"
     File.WriteAllLines(csFile.FullName, generateVersionCs version)
 
 
