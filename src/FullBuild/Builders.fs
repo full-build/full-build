@@ -54,8 +54,10 @@ let versionMsbuild version =
 
 
 
-let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
-    versionMsbuild version
+let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
+    match version with
+    | Some givenVersion -> versionMsbuild givenVersion
+    | _ -> ()
 
     let target = if clean then "Clean,Build"
                  else "Build"
@@ -72,7 +74,7 @@ let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multith
     else checkedExec "msbuild" args wsDir
 
 
-let buildFake (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
+let buildFake (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
     let args = sprintf @".full-build\build.fsx target=Build config=%A clean=%A mt=%A version=%A" config clean multithread version
     let wsDir = Env.GetFolder Env.Workspace
     checkedExec "fake" args wsDir
