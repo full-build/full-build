@@ -213,6 +213,7 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     // set OutputPath
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
     cproj.Descendants(NsMsBuild + "DocumentationFile") |> Seq.iter setDocumentation
+    cproj.Descendants(NsMsBuild + "AssemblyName") |> Seq.iter (fun x -> x.Value <- project.Output.toString)
     cproj.Descendants(NsMsBuild + "TargetFrameworkVersion") |> Seq.iter (fun x -> x.Value <- project.FxTarget.toString)
     cproj.Descendants(NsMsBuild + "AutoGenerateBindingRedirects") |> Seq.iter (fun x -> x.Value <- "false")
 

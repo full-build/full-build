@@ -8,7 +8,7 @@
     <ProjectGuid>{5FDE3939-C144-4287-BC57-A96EC2D1A9DA}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>FullBuild</RootNamespace>
-    <AssemblyName>FullBuild</AssemblyName>
+    <AssemblyName>fullbuild</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
