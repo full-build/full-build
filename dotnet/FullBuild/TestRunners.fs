@@ -40,7 +40,7 @@ let runnerNUnit (includes : string list) (excludes : string list) =
     let files = includes |> List.fold (fun s t -> sprintf @"%s %A" s t) ""
     let excludeArgs = excludeListToArgs excludes
     let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs 
-    checkedExec "nunit3-console" args wsDir
+    checkedExec "nunit3-console.exe" args wsDir
 
 let runnerFake (includes : string list) (excludes : string list) =
     let args = sprintf @".full-build\build.fsx target=Test includes=%A excludes=%A" includes excludes
