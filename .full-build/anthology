@@ -13,7 +13,7 @@ anthology:
       build: msbuild
       sticky: false
       uri: http://github.com/pchalamet/cassandra-sharp-full-build
-    - repo: src
+    - repo: dotnet
       branch: master
       build: msbuild
       sticky: false
@@ -27,7 +27,7 @@ anthology:
       project: fullbuild
   projects:
     - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
-      file: src/FullBuild.Tests/FullBuild.Tests.fsproj
+      file: dotnet/FullBuild.Tests/FullBuild.Tests.fsproj
       out: fullbuild.tests.dll
       fx: v4.6
       assemblies:
@@ -43,7 +43,7 @@ anthology:
       projects:
         - project: fullbuild
     - guid: 5fde3939-c144-4287-bc57-a96ec2d1a9da
-      file: src/FullBuild/FullBuild.fsproj
+      file: dotnet/FullBuild/FullBuild.fsproj
       out: fullbuild.exe
       fx: v4.6
       assemblies:
