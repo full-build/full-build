@@ -8,7 +8,7 @@
     <ProjectGuid>{FAAF3B40-EA78-4EAF-9859-863FF16F6058}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>FsFullBuild.Tests</RootNamespace>
-    <AssemblyName>FullBuild.Tests</AssemblyName>
+    <AssemblyName>fullbuild.tests</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
