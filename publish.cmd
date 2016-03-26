@@ -5,7 +5,7 @@ call :dopublish || goto :ko
 goto :ok
 
 :dopublish
-src\fullbuild\bin\fullbuild publish * || goto :ko
+dotnet\fullbuild\bin\fullbuild publish * || goto :ko
 robocopy apps\full-build bootstrap
 verify >nul
 goto :eof
