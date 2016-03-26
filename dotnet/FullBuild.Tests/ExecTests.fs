@@ -14,9 +14,9 @@ let private checkedExec =
 
 [<Test>]
 let CheckExecOk () =
-    let currDir = IoHelpers.CurrentFolder ()
-    checkedExec "cmd" "/c dir >nul" currDir
-
+    if not <| Env.IsMono() then
+        let currDir = IoHelpers.CurrentFolder ()
+        checkedExec "cmd" "/c dir >nul" currDir
 
 [<Test>]
 let CheckExecFailure () =
