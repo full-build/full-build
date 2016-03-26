@@ -14,13 +14,13 @@ function failure
 
 function build 
 {
-  exec ./build.sh $1 || failure
-  exec ./publish.sh || failure
+  ./build.sh $1 || failure
+  ./publish.sh || failure
 }
 
 function testbuild
 {
-  exec ./test.sh || failure
+  ./test.sh || failure
 }
 
 VERSION=$1
