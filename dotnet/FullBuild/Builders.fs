@@ -59,11 +59,13 @@ let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multith
     | Some givenVersion -> versionMsbuild givenVersion
     | _ -> ()
 
-    let target = if clean then "Clean;Build"
+    let target = if clean then "Rebuild"
                  else "Build"
 
+
+    let viewName = Path.GetFileNameWithoutExtension(viewFile.Name)
     let wsDir = Env.GetFolder Env.Workspace
-    let argTarget = sprintf "/t:%s" target
+    let argTarget = sprintf "/t:%s /p:SolutionDir=%A /p:SolutionName=%A" target wsDir.FullName viewName
     let argMt = if multithread then "/m"
                 else ""
 
