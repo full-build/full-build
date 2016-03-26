@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 
 function failure
@@ -15,7 +15,7 @@ function build
 }
 
 VERSION=$1
-if [-z "$VERSION"]; then 
+if [ -z "$VERSION" ]; then 
   VERSION=0.0.0.*
 fi 
 
