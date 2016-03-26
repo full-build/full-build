@@ -13,16 +13,6 @@ anthology:
       build: msbuild
       sticky: false
       uri: http://github.com/pchalamet/cassandra-sharp-full-build
-    - repo: cassandra-sharp
-      branch: null
-      build: msbuild
-      sticky: false
-      uri: https://github.com/pchalamet/cassandra-sharp
-    - repo: cassandra-sharp-contrib
-      branch: null
-      build: msbuild
-      sticky: false
-      uri: https://github.com/pchalamet/cassandra-sharp-contrib
     - repo: src
       branch: master
       build: msbuild
