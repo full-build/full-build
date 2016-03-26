@@ -2,7 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(SolutionDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <ItemGroup>
-    <ProjectReference Include="$(SolutionDir)/src/FullBuild/FullBuild.fsproj" Condition="'$(FullBuild_fullbuild)' != ''">
+    <ProjectReference Include="$(SolutionDir)/dotnet/FullBuild/FullBuild.fsproj" Condition="'$(FullBuild_fullbuild)' != ''">
       <Project>{5fde3939-c144-4287-bc57-a96ec2d1a9da}</Project>
       <Name>fullbuild</Name>
     </ProjectReference>
