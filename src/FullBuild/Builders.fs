@@ -59,7 +59,7 @@ let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multith
     | Some givenVersion -> versionMsbuild givenVersion
     | _ -> ()
 
-    let target = if clean then "Clean,Build"
+    let target = if clean then "Clean;Build"
                  else "Build"
 
     let wsDir = Env.GetFolder Env.Workspace
