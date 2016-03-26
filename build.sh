@@ -3,6 +3,7 @@
 
 function failure
 {
+  echo BUILD FAILURE
   exit 5
 }
 
