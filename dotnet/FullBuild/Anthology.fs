@@ -99,7 +99,6 @@ with
 
 type BuilderType =
     | MSBuild
-    | Fake
 with
      member this.toString = toString this
      static member from s = fromString<BuilderType> s
@@ -169,7 +168,6 @@ with
 type PublisherType =
     | Copy
     | Zip
-    | Fake
 with
      member this.toString = toString this
      static member from s = fromString<PublisherType> s
