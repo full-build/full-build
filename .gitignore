@@ -13,6 +13,7 @@ views
 !/bootstrap/packages
 !/bootstrap/bin
 !/bootstrap/views
+!/bootstrap/bootstrap.sln
 .vs
 *~
 TestResult.xml
