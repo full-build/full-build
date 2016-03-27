@@ -12,6 +12,11 @@ function failure
 }
 
 
+function bootstrapBuild
+{
+  ./build-bootstrap.sh || failure
+}
+
 function build 
 {
   ./build.sh $1 || failure
@@ -24,7 +29,7 @@ function testbuild
 }
 
 VERSION=$1
-build $VERSION
+bootstrapBuild
 build $VERSION
 testbuild 
 
