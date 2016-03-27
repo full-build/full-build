@@ -1,12 +1,14 @@
 @echo off
 setlocal
 
+set HERE=%~dp0
+
 call :dopublish || goto :ko
 goto :ok
 
 :dopublish
-dotnet\fullbuild\bin\fullbuild publish * || goto :ko
-robocopy apps\full-build bootstrap
+%HERE%\dotnet\fullbuild\bin\fullbuild publish * || goto :ko
+robocopy %HERE%\apps\full-build %HERE%\refbin /MIR
 verify >nul
 goto :eof
 
