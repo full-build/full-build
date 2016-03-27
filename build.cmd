@@ -12,9 +12,9 @@ call :dobuild || goto :ko
 goto :ok
 
 :dobuild
-bootstrap\fullbuild install || goto :ko
-bootstrap\fullbuild view all * || goto :ko
-bootstrap\fullbuild rebuild --version %VERSION% all || goto :ko
+refbin\fullbuild install || goto :ko
+refbin\fullbuild view all * || goto :ko
+refbin\fullbuild rebuild --version %VERSION% all || goto :ko
 goto :eof
 
 :ok

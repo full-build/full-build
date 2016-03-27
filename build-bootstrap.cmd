@@ -4,7 +4,7 @@ setlocal
 set HERE=%~dp0
 
 pushd %HERE%\.full-build
-%HERE%\bootstrap\paket.exe install || goto :failure
+%HERE%\tools\paket.exe install || goto :failure
 popd
 robocopy bootstrap\bin %HERE%\.full-build\bin /MIR
 robocopy bootstrap\views .full-build\views /MIR
