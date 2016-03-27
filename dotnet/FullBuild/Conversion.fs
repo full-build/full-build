@@ -24,4 +24,3 @@ let convertMsBuild repos =
 let Convert builder repos =
     match builder with
     | BuilderType.MSBuild -> convertMsBuild repos
-    | BuilderType.Fake -> failwith "fake is not implemented"
