@@ -58,23 +58,15 @@ let publishZip (app : Anthology.Application) =
 
     System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Optimal, false)
     sourceFolder.Delete(true)
-    
-
-let publishFake (app : Anthology.Application) =
-    let args = sprintf @".full-build\build.fsx target=Publish app=%A" app.Name
-    let wsDir = Env.GetFolder Env.Workspace
-    checkedExec "fake" args wsDir
 
 
-
-let choosePublisher (pubType : PublisherType) appCopy appZip appFake =
+let choosePublisher (pubType : PublisherType) appCopy appZip =
     let publish = match pubType with
                   | PublisherType.Copy -> appCopy
                   | PublisherType.Zip -> appZip
-                  | PublisherType.Fake -> appFake
     publish
 
 
 let PublishWithPublisher (pubType : PublisherType) =
-    choosePublisher pubType publishCopy publishZip publishFake
+    choosePublisher pubType publishCopy publishZip
 

@@ -75,19 +75,10 @@ let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multith
     if Env.IsMono () then checkedExec "xbuild" args wsDir
     else checkedExec "msbuild" args wsDir
 
-
-let buildFake (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
-    let args = sprintf @".full-build\build.fsx target=Build config=%A clean=%A mt=%A version=%A" config clean multithread version
-    let wsDir = Env.GetFolder Env.Workspace
-    checkedExec "fake" args wsDir
-
-let chooseBuilder (builderType : BuilderType) msbuildBuilder fakeBuild =
+let chooseBuilder (builderType : BuilderType) msbuildBuilder =
     let builder = match builderType with
                   | BuilderType.MSBuild -> msbuildBuilder
-                  | BuilderType.Fake -> failwith "fake is not implemented"
     builder
 
-
-
 let BuildWithBuilder (builder : BuilderType) =
-    chooseBuilder builder buildMsbuild buildFake
+    chooseBuilder builder buildMsbuild
