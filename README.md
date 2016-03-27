@@ -27,6 +27,19 @@ full-build provides following benefits:
 * Focus developer on selected repositories (local builds based on full build outputs)
 * Promote code review and low-coupling between developers
 
+# how to build
+First, ensure you have .net 4.5 or Mono. You will need F# 4 installed too.
+Then:  
+* On windows, run build-all.cmd
+* On Linux/OSX, run build-all.sh
+
+Once build is done, binaries are in refbin folder.
+
+Note that before using Visual Studio or Xamarin Studio, you have to compile first as this setup development environment. Solution bootstrap.sln can then be used.
+
+# contribution
+Contributions are welcomed. Ensure you have read CONTRIBUTING.md and LICENSE.txt before sending PR.
+
 
 # Licence
    Copyright 2014-2015 Pierre Chalamet
