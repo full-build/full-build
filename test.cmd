@@ -5,7 +5,7 @@ set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
 set HERE=%~dp0
 
 
-bootstrap\fullbuild test * || goto :ko
+refbin\fullbuild test * || goto :ko
 goto :ok
 
 :ok

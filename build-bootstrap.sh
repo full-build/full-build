@@ -15,7 +15,7 @@ function failure
 mkdir .full-build/bin
 mkdir .full-build/views
 pushd .full-build
-mono ../bootstrap/paket.exe install
+mono ../tools/paket.exe install
 popd
 cp -r bootstrap/bin .full-build/
 cp -r bootstrap/views .full-build/
@@ -24,4 +24,4 @@ cp -r bootstrap/packages .full-build/
 cp bootstrap/bootstrap.sln .
 
 xbuild /t:Rebuild /p:SolutionDir=`pwd` /p:SolutionName=bootstrap bootstrap.sln
-
+./publish.sh

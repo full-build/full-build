@@ -6,4 +6,5 @@ function failure
 }
 
 mono dotnet/fullbuild/bin/fullbuild.exe publish "*" || failure
+cp -r apps/full-build ./refbin
 
