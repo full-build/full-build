@@ -66,7 +66,11 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="$(SolutionDir)/.full-build/full-build.targets" />
+  <PropertyGroup>
+    <FBWorkspaceDir Condition="$(FBWorkspaceDir) == ''">$(NCrunchOriginalSolutionDir)</FBWorkspaceDir>
+    <FBWorkspaceDir Condition="$(FBWorkspaceDir) == ''">$(SolutionDir)</FBWorkspaceDir>
+  </PropertyGroup>
+  <Import Project="$(FBWorkspaceDir)/.full-build/full-build.targets" />
   <ItemGroup>
     <Content Include="..\..\LICENSE.txt">
       <Link>LICENSE.txt</Link>
@@ -137,7 +141,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
-  <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Configuration/package.targets" Condition="'$(FullBuild_FSharp_Configuration_Pkg)' == ''" />
-  <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Core/package.targets" Condition="'$(FullBuild_FSharp_Core_Pkg)' == ''" />
-  <Import Project="$(SolutionDir)/.full-build/packages/Mono.Cecil/package.targets" Condition="'$(FullBuild_Mono_Cecil_Pkg)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Configuration/package.targets" Condition="'$(FullBuild_FSharp_Configuration_Pkg)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Core/package.targets" Condition="'$(FullBuild_FSharp_Core_Pkg)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/Mono.Cecil/package.targets" Condition="'$(FullBuild_Mono_Cecil_Pkg)' == ''" />
 </Project>

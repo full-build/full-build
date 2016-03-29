@@ -7,8 +7,6 @@
     <FBIsLibrary >false</FBIsLibrary>
     <FBIsLibrary Condition="'$(OutputType)'=='library' and !$(FBIsWebProject) and !$(FBIsTestProject)">true</FBIsLibrary>
     <FBUseHardlink>false</FBUseHardlink>
-    <FBWorkspaceDir Condition="$(NCrunchOriginalSolutionDir) != ''">$(NCrunchOriginalSolutionDir)</FBWorkspaceDir>
-    <FBWorkspaceDir Condition="$(SolutionDir) != ''">$(SolutionDir)</FBWorkspaceDir>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -20,11 +18,11 @@
 
 
   <ItemGroup>
-    <Compile Include="$(FBWorkspaceDir)/.full-build/bin/BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)" 
+    <Compile Include="$(FBWorkspaceDir)/.full-build/bin/BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)"
              Condition="Exists('$(FBWorkspaceDir)/.full-build/bin/BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)')" />
   </ItemGroup>
-  
-  
+
+
   <Target Name="BeforeGenerateProjectPriFile">
   </Target>
 
