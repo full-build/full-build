@@ -60,7 +60,7 @@ let GenerateProjectTarget (project : Project) =
     XDocument (
         XElement(NsMsBuild + "Project", 
             XElement (NsMsBuild + "Import",
-                XAttribute (NsNone + "Project", "$(SolutionDir)/.full-build/views/$(SolutionName).targets"),
+                XAttribute (NsNone + "Project", "$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets"),
                 XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
             XElement (NsMsBuild + "ItemGroup",
                 XElement(NsMsBuild + "ProjectReference",
@@ -85,17 +85,20 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
 
 
 let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
-    let filterProject (xel : XElement) =
+    let filterFullBuildProject (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
+            || attr.StartsWith(MSBUILD_PROJECT_FOLDER2, StringComparison.CurrentCultureIgnoreCase)
 
-    let filterPackage (xel : XElement) =
+    let filterFullBuildPackage (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_PACKAGE_FOLDER, StringComparison.CurrentCultureIgnoreCase)
+            || attr.StartsWith(MSBUILD_PACKAGE_FOLDER2, StringComparison.CurrentCultureIgnoreCase)
 
     let filterFullBuildTargets (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_FULLBUILD_TARGETS, StringComparison.CurrentCultureIgnoreCase)
+            || attr.StartsWith(MSBUILD_FULLBUILD_TARGETS2, StringComparison.CurrentCultureIgnoreCase)
 
     let filterNuget (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
@@ -149,8 +152,8 @@ let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
             "Reference", filterAssemblies project.AssemblyReferences
 
             // full-build imports
-            "Import", filterProject
-            "Import", filterPackage
+            "Import", filterFullBuildProject
+            "Import", filterFullBuildPackage
             "Import", filterFullBuildTargets
 
             // nuget stuff
