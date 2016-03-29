@@ -52,7 +52,11 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <Import Project="$(SolutionDir)/.full-build/full-build.targets" />
+  <PropertyGroup>
+    <FBWorkspaceDir Condition="$(FBWorkspaceDir) == ''">$(NCrunchOriginalSolutionDir)</FBWorkspaceDir>
+    <FBWorkspaceDir Condition="$(FBWorkspaceDir) == ''">$(SolutionDir)</FBWorkspaceDir>
+  </PropertyGroup>
+  <Import Project="$(FBWorkspaceDir)/.full-build/full-build.targets" />
   <ItemGroup>
     <Compile Include="StringHelpersTests.fs" />
     <Compile Include="IoHelpersTests.fs" />
@@ -122,7 +126,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="$(SolutionDir)/.full-build/projects/fullbuild.targets" />
-  <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Core/package.targets" Condition="'$(FullBuild_FSharp_Core_Pkg)' == ''" />
-  <Import Project="$(SolutionDir)/.full-build/packages/fsunit/package.targets" Condition="'$(FullBuild_fsunit_Pkg)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/projects/fullbuild.targets" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Core/package.targets" Condition="'$(FullBuild_FSharp_Core_Pkg)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/fsunit/package.targets" Condition="'$(FullBuild_fsunit_Pkg)' == ''" />
 </Project>

@@ -155,6 +155,7 @@ let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
             "Import", filterFullBuildProject
             "Import", filterFullBuildPackage
             "Import", filterFullBuildTargets
+            "FBWorkspaceDir", always
 
             // nuget stuff
             "Import", filterNuget
@@ -168,6 +169,7 @@ let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
             "RestorePackages", always
             "NuGetPackageImportStamp", always
             "ItemGroup", hasNoChild
+            "PropertyGroup", hasNoChild
         ]
 
     seekAndDestroy |> Seq.iter (fun (x, y) -> cproj.Descendants(NsMsBuild + x).Where(y).Remove())
@@ -239,11 +241,19 @@ let ConvertProject (xproj : XDocument) (project : Project) =
                         XAttribute(NsNone + "Condition", condition))
         cproj.Root.LastNode.AddAfterSelf (import)
 
-    // import publish
+    // import fb target
+    let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
+    let fbDirProp = XElement(NsMsBuild + "PropertyGroup",
+                        XElement(NsMsBuild + "FBWorkspaceDir",
+                            XAttribute(NsNone + "Condition", "$(FBWorkspaceDir) == ''"),
+                            "$(NCrunchOriginalSolutionDir)"),
+                        XElement(NsMsBuild + "FBWorkspaceDir",
+                            XAttribute(NsNone + "Condition", "$(FBWorkspaceDir) == ''"),
+                            "$(SolutionDir)"))
+    firstItemGroup.AddBeforeSelf (fbDirProp)
+
     let importFB = XElement (NsMsBuild + "Import",
                        XAttribute (NsNone + "Project", Env.MSBUILD_FULLBUILD_TARGETS))
-
-    let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     firstItemGroup.AddBeforeSelf (importFB)
     cproj
 

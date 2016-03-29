@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(SolutionDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <ItemGroup>
-    <ProjectReference Include="$(SolutionDir)/dotnet/FullBuild/FullBuild.fsproj" Condition="'$(FullBuild_fullbuild)' != ''">
+    <ProjectReference Include="$(FBWorkspaceDir)/dotnet/FullBuild/FullBuild.fsproj" Condition="'$(FullBuild_fullbuild)' != ''">
       <Project>{5fde3939-c144-4287-bc57-a96ec2d1a9da}</Project>
       <Name>fullbuild</Name>
     </ProjectReference>
-    <Reference Include="$(SolutionDir)/.full-build/bin/fullbuild.exe" Condition="'$(FullBuild_fullbuild)' == ''">
+    <Reference Include="$(FBWorkspaceDir)/.full-build/bin/fullbuild.exe" Condition="'$(FullBuild_fullbuild)' == ''">
       <Private>true</Private>
     </Reference>
-    <FBCopyFiles Include="$(SolutionDir)/.full-build/bin/fullbuild.exe;$(SolutionDir)/.full-build/bin/fullbuild.pdb" Condition="'$(FullBuild_fullbuild)' == ''" />
+    <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/bin/fullbuild.exe;$(FBWorkspaceDir)/.full-build/bin/fullbuild.pdb" Condition="'$(FullBuild_fullbuild)' == ''" />
   </ItemGroup>
 </Project>
