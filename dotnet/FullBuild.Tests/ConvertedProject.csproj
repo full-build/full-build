@@ -45,9 +45,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
   </ItemGroup>
-  <Import Project="$(SolutionDir)/.full-build/projects/cassandrasharp.interfaces.targets" />
-  <Import Project="$(SolutionDir)/.full-build/packages/Rx-Core/package.targets" />
-  <Import Project="$(SolutionDir)/.full-build/packages/Rx-Interfaces/package.targets" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/projects/cassandrasharp.interfaces.targets" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/Rx-Core/package.targets" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/Rx-Interfaces/package.targets" />
   <Import Project="$(SolutionDir)/.full-build/packages/Rx-Linq/package.targets" />
   <Import Project="$(SolutionDir)/.full-build/packages/Rx-PlatformServices/package.targets" />
   <ItemGroup>
