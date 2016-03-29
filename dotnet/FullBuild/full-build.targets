@@ -7,28 +7,30 @@
     <FBIsLibrary >false</FBIsLibrary>
     <FBIsLibrary Condition="'$(OutputType)'=='library' and !$(FBIsWebProject) and !$(FBIsTestProject)">true</FBIsLibrary>
     <FBUseHardlink>true</FBUseHardlink>
+    <FBWorkspaceDir Condition="$(NCrunchOriginalSolutionDir) != ''">$(NCrunchOriginalSolutionDir)</FBWorkspaceDir>
+    <FBWorkspaceDir Condition="$(SolutionDir) != ''">$(SolutionDir)</FBWorkspaceDir>
   </PropertyGroup>
 
   <PropertyGroup>
     <FBApp>*** undefined ***</FBApp>
-    <FBContentFolder>$(SolutionDir)/apps/$(FBApp)</FBContentFolder>
+    <FBContentFolder>$(FBWorkspaceDir)/apps/$(FBApp)</FBContentFolder>
     <FBBinFolder>$(FBContentFolder)</FBBinFolder>
     <FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)/bin</FBBinFolder>
   </PropertyGroup>
 
 
   <ItemGroup>
-    <Compile Include="$(SolutionDir)/.full-build/bin/BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)" 
-             Condition="Exists('$(SolutionDir)/.full-build/bin/BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)')" />
+    <Compile Include="$(FBWorkspaceDir)/.full-build/bin/BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)"
+             Condition="Exists('$(FBWorkspaceDir)/.full-build/bin/BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)')" />
   </ItemGroup>
-  
-  
+
+
   <Target Name="BeforeGenerateProjectPriFile">
   </Target>
 
   <Target Name="FBCopyBin" AfterTargets="Build">
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName)$(TargetExt)" DestinationFolder="$(SolutionDir)/.full-build/bin/" SkipUnchangedFiles="true" UseHardlinksIfPossible="$(FBUseHardlnk)"   />
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(SolutionDir)/.full-build/bin/" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" ContinueOnError="true" SkipUnchangedFiles="true" UseHardlinksIfPossible="$(FBUseHardlnk)"   />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName)$(TargetExt)" DestinationFolder="$(FBWorkspaceDir)/.full-build/bin/" SkipUnchangedFiles="true" UseHardlinksIfPossible="$(FBUseHardlnk)"   />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(FBWorkspaceDir)/.full-build/bin/" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" ContinueOnError="true" SkipUnchangedFiles="true" UseHardlinksIfPossible="$(FBUseHardlnk)"   />
     <Copy SourceFiles="@(FBCopyFiles)" DestinationFolder="$(OutputPath)" Condition="Exists('%(FBCopyFiles.FullPath)')" SkipUnchangedFiles="true" ContinueOnError="true" UseHardlinksIfPossible="$(FBUseHardlnk)"   />
   </Target>
 

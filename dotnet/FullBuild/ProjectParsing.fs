@@ -49,7 +49,7 @@ let GetProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
-                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER))
+                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER) || x.StartsWith(MSBUILD_PROJECT_FOLDER2))
                  |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectId.from)
                  |> Set
     
@@ -104,7 +104,7 @@ let GetPackageFromPaketReference (xel : XElement) =
 let GetFullBuildPackages (prjDoc : XDocument)  =
     let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
-                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER))
+                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER) || x.StartsWith(MSBUILD_PACKAGE_FOLDER2))
                  |> Seq.map ParseFullBuildPackage
                  |> Set
     fbPkgs
