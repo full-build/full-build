@@ -7,8 +7,6 @@
     <FBIsLibrary >false</FBIsLibrary>
     <FBIsLibrary Condition="'$(OutputType)'=='library' and !$(FBIsWebProject) and !$(FBIsTestProject)">true</FBIsLibrary>
     <FBUseHardlink>true</FBUseHardlink>
-    <FBWorkspaceDir Condition="$(NCrunchOriginalSolutionDir) != ''">$(NCrunchOriginalSolutionDir)</FBWorkspaceDir>
-    <FBWorkspaceDir Condition="$(SolutionDir) != ''">$(SolutionDir)</FBWorkspaceDir>
   </PropertyGroup>
 
   <PropertyGroup>
