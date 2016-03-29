@@ -73,28 +73,6 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
     finally
         Environment.CurrentDirectory <- currDir
 
-let Index () =    
-    Indexation.IndexWorkspace () 
-        |> Indexation.Optimize
-        |> Package.Simplify
-        |> Configuration.SaveAnthology
-
-let Convert () = 
-    let antho = Configuration.LoadAnthology ()
-    let builder2repos = antho.Repositories |> Seq.groupBy (fun x -> x.Builder)
-
-    for builder2repo in builder2repos do
-        let (builder, brepos) = builder2repo
-        let repos = brepos |> Seq.map (fun x -> x.Repository.Name) |> Set.ofSeq
-        Conversion.Convert builder repos
-
-    // setup additional files for views to work correctly
-    let confDir = Env.GetFolder Env.Config
-    let installDir = Env.GetFolder Env.Installation
-    let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
-    let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
-    publishSource.CopyTo(publishTarget.FullName, true) |> ignore
-
 
 let ClonedRepositories (wsDir : DirectoryInfo) (repos : BuildableRepository set) =
     repos |> Set.map (fun x -> x.Repository)    
@@ -282,3 +260,46 @@ let History () =
                           DisplayHighlight antho.MasterRepository.Name.toString
                           printfn "%s" revision
     | _ -> ()
+
+
+
+let availableRepositories (filters : RepositoryId set) =
+    let antho = Configuration.LoadAnthology()
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let selectedRepos = Repo.FilterRepos filters |> Set.map (fun x -> x.Repository.Name)
+    let cloneRepos = antho.Repositories |> Set.filter (fun x -> selectedRepos |> Set.contains x.Repository.Name)
+    cloneRepos |> Set.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Repository.Name.toString
+                                       subDir.Exists)
+
+
+let Index (filters : RepositoryId set) =    
+    let repos = filters
+                |> availableRepositories
+    repos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Repository.Name.toString)
+
+    repos
+        |> Set.map (fun x -> x.Repository)
+        |> Indexation.IndexWorkspace 
+        |> Indexation.Optimize
+        |> Package.Simplify
+        |> Configuration.SaveAnthology
+
+let Convert (filters : RepositoryId set) = 
+    let repos = filters
+                |> availableRepositories
+    repos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Repository.Name.toString)
+
+    let builder2repos = repos
+                        |> Seq.groupBy (fun x -> x.Builder)
+
+    for builder2repo in builder2repos do
+        let (builder, brepos) = builder2repo
+        let repos = brepos |> Seq.map (fun x -> x.Repository.Name) |> Set.ofSeq
+        Conversion.Convert builder repos
+
+    // setup additional files for views to work correctly
+    let confDir = Env.GetFolder Env.Config
+    let installDir = Env.GetFolder Env.Installation
+    let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
+    let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
+    publishSource.CopyTo(publishTarget.FullName, true) |> ignore
