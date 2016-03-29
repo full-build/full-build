@@ -70,18 +70,21 @@ let rec commandExec (all : bool) (args : string list) =
 let rec commandTest (excludes : string list) (args : string list) =
     match args with
     | TokenOption TokenOption.Exclude :: category :: tail -> tail |> commandTest (category :: excludes)
+    | [] -> Command.Error
     | filters -> Command.TestAssemblies { Filters = filters; Excludes = excludes }
 
 
 let rec commandIndex (args : string list) =
     match args with
-    | [] -> Command.IndexWorkspace
-    | _ -> Command.Error
+    | [] -> Command.Error
+    | filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
+                 IndexRepositories { Filters = repoFilters }
 
 let commandConvert (args : string list) =
     match args with
-    | [] -> Command.ConvertWorkspace
-    | _ -> Command.Error
+    | [] -> Command.Error
+    | filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
+                 ConvertRepositories { Filters = repoFilters }
 
 let rec commandClone (shallow : bool) (all : bool) (args : string list) =
     match args with
@@ -359,8 +362,8 @@ let UsageContent() =
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
         "  exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
-        "  index : index workspace"
-        "  convert : convert projects in workspace"
+        "  index <repo-wildcard>+ : index repositories"
+        "  convert <repo-wildcard> : convert projects in repositories"
         "  pull [--src|--bin] [--rebase] : update to latest version - rebase if requested (ff is default)"
         "  push <buildNumber> : push a baseline from current repositories version and display version"
         "  publish <app> : publish application"

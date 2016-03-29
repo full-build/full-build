@@ -36,6 +36,12 @@ type CloneRepositories =
       Shallow : bool
       All : bool }
 
+type IndexRepositories = 
+    { Filters : RepositoryId set }
+
+type ConvertRepositories = 
+    { Filters : RepositoryId set }
+
 type TestAssemblies = 
     { Filters : string list 
       Excludes : string list }
@@ -110,8 +116,8 @@ type Command =
     // workspace
     | SetupWorkspace of SetupWorkspace
     | InitWorkspace of InitWorkspace
-    | IndexWorkspace
-    | ConvertWorkspace
+    | IndexRepositories of IndexRepositories
+    | ConvertRepositories of ConvertRepositories
     | PushWorkspace of PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
     | PullWorkspace of PullWorkspace
