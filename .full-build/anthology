@@ -8,11 +8,6 @@ anthology:
     branch: master
     uri: http://www.google.com/
   repositories:
-    - repo: .full-build
-      branch: master
-      build: msbuild
-      sticky: false
-      uri: http://github.com/pchalamet/cassandra-sharp-full-build
     - repo: dotnet
       branch: master
       build: msbuild
