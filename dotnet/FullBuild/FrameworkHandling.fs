@@ -1,4 +1,7 @@
-﻿namespace Paket
+﻿// From Paket project
+// https://fsprojects.github.io/Paket/
+
+namespace Paket
 
 open System.IO
 open System
