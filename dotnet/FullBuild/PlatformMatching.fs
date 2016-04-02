@@ -1,4 +1,7 @@
-﻿module Paket.PlatformMatching
+﻿// From Paket project
+// https://fsprojects.github.io/Paket/
+
+module Paket.PlatformMatching
 
 open System
 
