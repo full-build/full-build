@@ -48,21 +48,3 @@ let SaveView (viewId : ViewId) =
 let ViewExists (viewId : ViewId) =
     let viewFile = GetViewFileName viewId.toString 
     viewFile.Exists
-    
-
-
-let Migrate () =
-//    let antho = LoadAnthology ()
-//    
-//    let toProjectRef (id : ProjectId) =
-//        let guid = id.toString |> ParseGuid |> ProjectUniqueId.from
-//        let project = antho.Projects |> Seq.find (fun x -> x.UniqueProjectId = guid)
-//        project.Output.toString |> ProjectId.from
-//
-//    let newAntho = { antho
-//                     with Applications = antho.Applications |> Set.map (fun x -> { x with Projects = x.Projects |> Set.map toProjectRef })
-//                          Projects = antho.Projects |> Set.map (fun x -> { x with ProjectReferences = x.ProjectReferences |> Set.map toProjectRef })
-//                    }
-//
-//    SaveAnthology newAntho
-    ()

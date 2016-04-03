@@ -86,7 +86,6 @@
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="BaselineSerializer.fs" />
     <Compile Include="ViewSerializer.fs" />
-    <Compile Include="AnthologyBridge.fs" />
     <Compile Include="MsBuildHelpers.fs" />
     <Compile Include="PaketInterface.fs" />
     <Compile Include="ProjectParsing.fs" />

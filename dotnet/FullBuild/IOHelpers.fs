@@ -15,6 +15,7 @@
 module IoHelpers
 open System
 open System.IO
+open System.Xml.Linq
 
 
 // http://ss64.com/nt/robocopy-exit.html
@@ -119,11 +120,6 @@ let DisplayHighlight s =
 
 
 
-let SaveFileIfNecessary (file : FileInfo) (content : string) =
-    let overwrite = (file.Exists |> not) || File.ReadAllText(file.FullName) <> content
-    if overwrite then
-        File.WriteAllText (file.FullName, content)
-
 
 let Try action =
     try
@@ -131,3 +127,25 @@ let Try action =
     with
         _ -> ()
 
+
+let FindKnownProjects (repoDir : DirectoryInfo) =
+    [AddExt CsProj "*"
+     AddExt VbProj "*"
+     AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
+                        |> Seq.concat
+
+
+let SaveFileIfNecessary (file : FileInfo) (content : string) =
+    let overwrite = (file.Exists |> not) || File.ReadAllText(file.FullName) <> content
+    if overwrite then
+        File.WriteAllText (file.FullName, content)
+
+let XDocLoader (fileName : FileInfo) =
+    XDocument.Load fileName.FullName
+
+let XDocSaver (fileName : FileInfo) (xdoc : XDocument) =
+    xdoc.ToString()
+        |> SaveFileIfNecessary fileName            
+
+let ForceDelete (dir : DirectoryInfo) =
+    if dir.Exists then dir.Delete(true)
