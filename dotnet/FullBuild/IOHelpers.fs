@@ -85,6 +85,14 @@ let ComputeRelativePath (dir : DirectoryInfo) (file : FileInfo) : string =
     let path = file.Name
     ComputeRelativePathInc dir file.Directory path
 
+let rec genHops (count : int) (path : string) =
+    match count with
+    | 0 -> path
+    | x -> genHops (count-1) ("../" + path)
+
+let ComputeHops (file : string) : string =
+    let count = file.Split('/').Length
+    genHops count ""
 
 let CurrentFolder() : DirectoryInfo = 
     Directory.GetCurrentDirectory () |> DirectoryInfo
