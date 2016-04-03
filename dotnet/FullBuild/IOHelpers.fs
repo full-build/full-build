@@ -87,7 +87,7 @@ let ComputeRelativePath (dir : DirectoryInfo) (file : FileInfo) : string =
 
 let rec genHops (count : int) (path : string) =
     match count with
-    | 0 -> path
+    | 1 -> path
     | x -> genHops (count-1) ("../" + path)
 
 let ComputeHops (file : string) : string =
