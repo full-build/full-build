@@ -46,19 +46,19 @@ let IsWorkspaceFolder(wsDir : DirectoryInfo) =
     let subDir = wsDir |> GetSubDirectory MASTER_REPO
     subDir.Exists
 
-let rec private WorkspaceFolderSearch(dir : DirectoryInfo) = 
+let rec private workspaceFolderSearch(dir : DirectoryInfo) = 
     if dir = null || not dir.Exists then failwith "Can't find workspace root directory. Check you are in a workspace."
     if IsWorkspaceFolder dir then dir
-    else WorkspaceFolderSearch dir.Parent
+    else workspaceFolderSearch dir.Parent
 
 type DummyType () = class end
 
-let GetFullBuildAssembly () =
+let getFullBuildAssembly () =
     let fbAssembly = typeof<DummyType>.GetTypeInfo().Assembly
     fbAssembly
 
 let private getInstallationFolder () =
-    let fbAssembly = GetFullBuildAssembly ()
+    let fbAssembly = getFullBuildAssembly ()
     let fbAssFI = fbAssembly.Location |> FileInfo
     fbAssFI.Directory
 
@@ -75,7 +75,7 @@ type Folder =
 
 let rec GetFolder folder =
     match folder with
-    | Workspace -> CurrentFolder() |> WorkspaceFolderSearch 
+    | Workspace -> CurrentFolder() |> workspaceFolderSearch 
     | AppOutput -> GetFolder Workspace |> CreateSubDirectory MSBUILD_APP_OUTPUT
     | Config -> GetFolder Workspace |> CreateSubDirectory MASTER_REPO
     | View -> GetFolder Config |> CreateSubDirectory VIEW_FOLDER
@@ -106,3 +106,9 @@ let CheckLicense () =
     let guid = StringHelpers.GenerateGuidFromString licContent
     let licGuid = StringHelpers.ParseGuid "21a734e7-1308-06de-3905-7708ed4c4dbc"
     if guid <> licGuid then failwithf "Please ensure original LICENSE.txt is available."
+
+let FullBuildVersion () =
+    let fbAssembly = getFullBuildAssembly ()
+    let version = fbAssembly.GetName().Version
+    version
+       

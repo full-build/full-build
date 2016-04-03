@@ -159,5 +159,3 @@ type Command =
     | DropApplication of ApplicationId
     | PublishApplications of PublishApplications
     | BindProject of BindProject
-
-    | Migrate

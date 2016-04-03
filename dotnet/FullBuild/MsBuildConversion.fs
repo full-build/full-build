@@ -24,25 +24,8 @@ open Anthology
 open Collections
 
 
-//let importCopyFrom (project : Project) =
-//    let prjProperty = ProjectPropertyName project.ProjectId
-//    let condition = sprintf "'$(%s)' == ''" prjProperty
-//    let prjFolder = Path.GetDirectoryName (project.RelativeProjectFile.toString)
-//    let path = sprintf "$(SolutionDir)/%s/%s/bin/" (project.Repository.toString) (prjFolder) 
-//    let ext = match project.OutputType with
-//              | OutputType.Dll -> ".dll"
-//              | OutputType.Exe -> ".exe"
-//
-//    let inc = sprintf "%s*.dll;%s*.exe;%s*.pdb" path path path
-//    let excl = sprintf "%s%s%s" path project.Output.toString ext
-//
-//    XElement(NsMsBuild + "ItemGroup",
-//        XElement(NsMsBuild + "FBCopyFiles", 
-//            XAttribute(NsNone + "Include", inc),
-//            XAttribute(NsNone + "Exclude", excl)),
-//        XAttribute(NsNone + "Condition", condition))
 
-let GenerateProjectTarget (project : Project) =
+let generateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project.ProjectId
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
@@ -75,13 +58,6 @@ let GenerateProjectTarget (project : Project) =
                 XElement (NsMsBuild + "FBCopyFiles", 
                     XAttribute(NsNone + "Include", sprintf "%s;%s" binFile pdbFile),
                     XAttribute(NsNone + "Condition", binCondition)))))
-
-let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
-    let prjDir = Env.GetFolder Env.Project
-    for project in projects do
-        let refProjectContent = GenerateProjectTarget project
-        let projectFile = prjDir |> GetFile (AddExt Targets (project.Output.toString))
-        xdocSaver projectFile refProjectContent
 
 
 let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
@@ -176,12 +152,9 @@ let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
     cproj
 
 
-let ConvertProject (xproj : XDocument) (project : Project) =
+let convertProject (xproj : XDocument) (project : Project) =
     let setOutputPath (xel : XElement) =
         xel.Value <- BIN_FOLDER
-
-    let setDebugSymbols (xel : XElement) =
-        xel.Value <- "true"
 
     let setDocumentation (xel : XElement) =
         let fileName = sprintf "%s/%s.xml" BIN_FOLDER project.ProjectId.toString
@@ -257,9 +230,11 @@ let ConvertProject (xproj : XDocument) (project : Project) =
     firstItemGroup.AddBeforeSelf (importFB)
     cproj
 
-let ConvertProjectContent (xproj : XDocument) (project : Project) =
-    let convxproj = ConvertProject xproj project
+let convertProjectContent (xproj : XDocument) (project : Project) =
+    let convxproj = convertProject xproj project
     convxproj
+
+
 
 let ConvertProjects projects xdocLoader xdocSaver =
     let wsDir = Env.GetFolder Env.Workspace
@@ -268,11 +243,16 @@ let ConvertProjects projects xdocLoader xdocSaver =
         if repoDir.Exists then
             let projFile = repoDir |> GetFile project.RelativeProjectFile.toString 
             let xproj = xdocLoader projFile
-            let convxproj = ConvertProjectContent xproj project
+            let convxproj = convertProjectContent xproj project
+            xdocSaver projFile convxproj
 
-            // only save if projs differ
-            if xproj.ToString() <> convxproj.ToString() then
-                xdocSaver projFile convxproj
+let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
+    let prjDir = Env.GetFolder Env.Project
+    for project in projects do
+        let refProjectContent = generateProjectTarget project
+        let projectFile = prjDir |> GetFile (AddExt Targets (project.Output.toString))
+        xdocSaver projectFile refProjectContent
+
 
 let RemoveUselessStuff (projects : Project set) =
     let wsDir = Env.GetFolder Env.Workspace
@@ -299,9 +279,9 @@ let RemoveUselessStuff (projects : Project set) =
                                                      |> Seq.iter (fun x -> x.Delete(true)))
 
     for project in projects do
-        let prjDir = wsDir |> GetSubDirectory (AnthologyBridge.RelativeProjectFolderFromWorkspace project)
+        let prjDir = wsDir |> GetSubDirectory (project.relativeProjectFolderFromWorkspace)
         if prjDir.Exists then 
             let binDir = prjDir |> GetSubDirectory BIN_FOLDER
             let objDir = prjDir |> GetSubDirectory OBJ_FOLDER
-            if binDir.Exists then binDir.Delete(true)
-            if objDir.Exists then objDir.Delete(true)
+            binDir |> IoHelpers.ForceDelete
+            objDir |> IoHelpers.ForceDelete
