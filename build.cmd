@@ -13,8 +13,8 @@ goto :ok
 
 :dobuild
 refbin\fullbuild install || goto :ko
-refbin\fullbuild view all * || goto :ko
-refbin\fullbuild rebuild --version %VERSION% all || goto :ko
+refbin\fullbuild view fullbuild * || goto :ko
+refbin\fullbuild rebuild --version %VERSION% fullbuild || goto :ko
 goto :eof
 
 :ok

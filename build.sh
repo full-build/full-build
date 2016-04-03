@@ -11,8 +11,8 @@ function failure
 function build
 {
   mono refbin/fullbuild.exe install || failure
-  mono refbin/fullbuild.exe view all "*" || failure
-  mono refbin/fullbuild.exe rebuild --version $1 all || failure
+  mono refbin/fullbuild.exe view fullbuild "*" || failure
+  mono refbin/fullbuild.exe rebuild --version $1 fullbuild || failure
 }
 
 VERSION=$1
