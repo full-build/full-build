@@ -29,3 +29,8 @@ let CheckGetFile () =
 let CheckAddExt () =
     let file = AddExt Targets "toto"
     file |> should equal "toto.targets"
+
+[<Test>]
+let CheckRelativeHops () =
+    let res = IoHelpers.ComputeHops "toto/tutu/pouet.csproj"
+    res |> should equal "../../../"

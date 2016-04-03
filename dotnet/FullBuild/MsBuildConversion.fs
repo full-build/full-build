@@ -215,14 +215,18 @@ let convertProject (xproj : XDocument) (project : Project) =
         cproj.Root.LastNode.AddAfterSelf (import)
 
     // import fb target
+    let wbRelative = ComputeHops project.relativeProjectFolderFromWorkspace
     let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     let fbDirProp = XElement(NsMsBuild + "PropertyGroup",
                         XElement(NsMsBuild + "FBWorkspaceDir",
-                            XAttribute(NsNone + "Condition", "$(FBWorkspaceDir) == ''"),
                             "$(NCrunchOriginalSolutionDir)"),
                         XElement(NsMsBuild + "FBWorkspaceDir",
                             XAttribute(NsNone + "Condition", "$(FBWorkspaceDir) == ''"),
-                            "$(SolutionDir)"))
+                            "$(SolutionDir)"),
+                        XElement(NsMsBuild + "FBWorkspaceDir",
+                            XAttribute(NsNone + "Condition", "$(FBWorkspaceDir) == ''"),
+                            wbRelative))
+
     firstItemGroup.AddBeforeSelf (fbDirProp)
 
     let importFB = XElement (NsMsBuild + "Import",
