@@ -9,7 +9,7 @@ open StringHelpers
 open Solution
 
 [<Test>]
-let CheckSelectProject () =
+let CheckSelectSubProject () =
     // 
     //      G
     //     / \
@@ -41,17 +41,178 @@ let CheckSelectProject () =
           ProjectReferences = refIds }
 
     let projects = projectDefs |> Seq.map createProject |> Set
+    // goal is A & G
     let goal = ["4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6" |> ProjectId.from
                 "eb5c2f2b-d117-47b0-8067-305b4bae9aa2" |> ProjectId.from ] |> Set
     let projects = AnthologyGraph.ComputeProjectSelectionClosure projects goal |> Set
 
+    // expect A, C, E, F & G
     projects |> Set.count |> should equal 5
-    projects |> should contain (ProjectId.from "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6")
-    projects |> should contain (ProjectId.from "2904bc7b-8b30-41f1-8160-02b5281704b4")
-    projects |> should contain (ProjectId.from "d7b81c18-45df-44dc-853d-8cab07e1ad97")
-    projects |> should contain (ProjectId.from "78c2e0d4-b410-4702-af93-71db7db228d0")
-    projects |> should contain (ProjectId.from "eb5c2f2b-d117-47b0-8067-305b4bae9aa2")
+    projects |> should contain (ProjectId.from "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6") // A
+    projects |> should contain (ProjectId.from "2904bc7b-8b30-41f1-8160-02b5281704b4") // C
+    projects |> should contain (ProjectId.from "d7b81c18-45df-44dc-853d-8cab07e1ad97") // E
+    projects |> should contain (ProjectId.from "78c2e0d4-b410-4702-af93-71db7db228d0") // F
+    projects |> should contain (ProjectId.from "eb5c2f2b-d117-47b0-8067-305b4bae9aa2") // G
     
+
+[<Test>]
+let CheckSelectAllProject () =
+    // 
+    //      G
+    //     / \
+    //    E   F
+    //     \ /
+    //      C   D
+    //     / \ /
+    //    A   B
+    // 
+    let projectDefs = [ "A", "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6", [] 
+                        "B", "386c73d8-95dc-4684-ba6c-20f4cd63e42a", []
+                        "C", "2904bc7b-8b30-41f1-8160-02b5281704b4", ["4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6"; "386c73d8-95dc-4684-ba6c-20f4cd63e42a"]
+                        "D", "209eab33-f903-4195-bc2d-03d086129168", ["386c73d8-95dc-4684-ba6c-20f4cd63e42a"]
+                        "E", "d7b81c18-45df-44dc-853d-8cab07e1ad97", ["2904bc7b-8b30-41f1-8160-02b5281704b4"]
+                        "F", "78c2e0d4-b410-4702-af93-71db7db228d0", ["2904bc7b-8b30-41f1-8160-02b5281704b4"] 
+                        "G", "eb5c2f2b-d117-47b0-8067-305b4bae9aa2", ["d7b81c18-45df-44dc-853d-8cab07e1ad97"; "78c2e0d4-b410-4702-af93-71db7db228d0"] ]
+
+    let createProject (name, id, refs) = 
+        let refIds = refs |> Seq.map ProjectId.from |> Set
+        { Repository = RepositoryId.from name
+          ProjectId = ProjectId.from id
+          RelativeProjectFile = ProjectRelativeFile (sprintf "%s.csproj" name)
+          UniqueProjectId = ProjectUniqueId.from (ParseGuid id)
+          Output = AssemblyId.from name
+          OutputType = OutputType.Dll
+          FxTarget = FrameworkVersion "v4.5"
+          AssemblyReferences = Set.empty
+          PackageReferences = Set.empty
+          ProjectReferences = refIds }
+
+    let projects = projectDefs |> Seq.map createProject |> Set
+    // goal is A & G
+    let goal = ["4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6" |> ProjectId.from
+                "386c73d8-95dc-4684-ba6c-20f4cd63e42a" |> ProjectId.from
+                "2904bc7b-8b30-41f1-8160-02b5281704b4" |> ProjectId.from
+                "209eab33-f903-4195-bc2d-03d086129168" |> ProjectId.from
+                "d7b81c18-45df-44dc-853d-8cab07e1ad97" |> ProjectId.from
+                "78c2e0d4-b410-4702-af93-71db7db228d0" |> ProjectId.from
+                "eb5c2f2b-d117-47b0-8067-305b4bae9aa2" |> ProjectId.from ] |> Set
+    let projects = AnthologyGraph.ComputeProjectSelectionClosure projects goal |> Set
+
+    // expect all nodes
+    projects |> Set.count |> should equal 7
+    projects |> should contain (ProjectId.from "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6") // A
+    projects |> should contain (ProjectId.from "386c73d8-95dc-4684-ba6c-20f4cd63e42a") // B
+    projects |> should contain (ProjectId.from "2904bc7b-8b30-41f1-8160-02b5281704b4") // C
+    projects |> should contain (ProjectId.from "209eab33-f903-4195-bc2d-03d086129168") // D
+    projects |> should contain (ProjectId.from "d7b81c18-45df-44dc-853d-8cab07e1ad97") // E
+    projects |> should contain (ProjectId.from "78c2e0d4-b410-4702-af93-71db7db228d0") // F
+    projects |> should contain (ProjectId.from "eb5c2f2b-d117-47b0-8067-305b4bae9aa2") // G
+
+
+[<Test>]
+let CheckSelectSubProjectSourceOnly () =
+    // 
+    //      G
+    //     / \
+    //    E   F
+    //     \ /
+    //      C   D
+    //     / \ /
+    //    A   B
+    // 
+    let projectDefs = [ "A", "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6", [] 
+                        "B", "386c73d8-95dc-4684-ba6c-20f4cd63e42a", []
+                        "C", "2904bc7b-8b30-41f1-8160-02b5281704b4", ["4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6"; "386c73d8-95dc-4684-ba6c-20f4cd63e42a"]
+                        "D", "209eab33-f903-4195-bc2d-03d086129168", ["386c73d8-95dc-4684-ba6c-20f4cd63e42a"]
+                        "E", "d7b81c18-45df-44dc-853d-8cab07e1ad97", ["2904bc7b-8b30-41f1-8160-02b5281704b4"]
+                        "F", "78c2e0d4-b410-4702-af93-71db7db228d0", ["2904bc7b-8b30-41f1-8160-02b5281704b4"] 
+                        "G", "eb5c2f2b-d117-47b0-8067-305b4bae9aa2", ["d7b81c18-45df-44dc-853d-8cab07e1ad97"; "78c2e0d4-b410-4702-af93-71db7db228d0"] ]
+
+    let createProject (name, id, refs) = 
+        let refIds = refs |> Seq.map ProjectId.from |> Set
+        { Repository = RepositoryId.from name
+          ProjectId = ProjectId.from id
+          RelativeProjectFile = ProjectRelativeFile (sprintf "%s.csproj" name)
+          UniqueProjectId = ProjectUniqueId.from (ParseGuid id)
+          Output = AssemblyId.from name
+          OutputType = OutputType.Dll
+          FxTarget = FrameworkVersion "v4.5"
+          AssemblyReferences = Set.empty
+          PackageReferences = Set.empty
+          ProjectReferences = refIds }
+
+    let projects = projectDefs |> Seq.map createProject |> Set
+    // goal is A & G but D
+    let goal = ["4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6" |> ProjectId.from
+                "eb5c2f2b-d117-47b0-8067-305b4bae9aa2" |> ProjectId.from ] |> Set
+    let projects = AnthologyGraph.ComputeProjectSelectionClosureSourceOnly projects goal |> Set
+
+    // expect all nodes
+    projects |> Set.count |> should equal 6
+    projects |> should contain (ProjectId.from "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6") // A
+    projects |> should contain (ProjectId.from "386c73d8-95dc-4684-ba6c-20f4cd63e42a") // B
+    projects |> should contain (ProjectId.from "2904bc7b-8b30-41f1-8160-02b5281704b4") // C
+    projects |> should contain (ProjectId.from "d7b81c18-45df-44dc-853d-8cab07e1ad97") // E
+    projects |> should contain (ProjectId.from "78c2e0d4-b410-4702-af93-71db7db228d0") // F
+    projects |> should contain (ProjectId.from "eb5c2f2b-d117-47b0-8067-305b4bae9aa2") // G
+    
+
+
+[<Test>]
+let CheckSelectAllProjectSourceOnly () =
+    // 
+    //      G
+    //     / \
+    //    E   F
+    //     \ /
+    //      C   D
+    //     / \ /
+    //    A   B
+    // 
+    let projectDefs = [ "A", "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6", [] 
+                        "B", "386c73d8-95dc-4684-ba6c-20f4cd63e42a", []
+                        "C", "2904bc7b-8b30-41f1-8160-02b5281704b4", ["4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6"; "386c73d8-95dc-4684-ba6c-20f4cd63e42a"]
+                        "D", "209eab33-f903-4195-bc2d-03d086129168", ["386c73d8-95dc-4684-ba6c-20f4cd63e42a"]
+                        "E", "d7b81c18-45df-44dc-853d-8cab07e1ad97", ["2904bc7b-8b30-41f1-8160-02b5281704b4"]
+                        "F", "78c2e0d4-b410-4702-af93-71db7db228d0", ["2904bc7b-8b30-41f1-8160-02b5281704b4"] 
+                        "G", "eb5c2f2b-d117-47b0-8067-305b4bae9aa2", ["d7b81c18-45df-44dc-853d-8cab07e1ad97"; "78c2e0d4-b410-4702-af93-71db7db228d0"] ]
+
+    let createProject (name, id, refs) = 
+        let refIds = refs |> Seq.map ProjectId.from |> Set
+        { Repository = RepositoryId.from name
+          ProjectId = ProjectId.from id
+          RelativeProjectFile = ProjectRelativeFile (sprintf "%s.csproj" name)
+          UniqueProjectId = ProjectUniqueId.from (ParseGuid id)
+          Output = AssemblyId.from name
+          OutputType = OutputType.Dll
+          FxTarget = FrameworkVersion "v4.5"
+          AssemblyReferences = Set.empty
+          PackageReferences = Set.empty
+          ProjectReferences = refIds }
+
+    let projects = projectDefs |> Seq.map createProject |> Set
+    // goal is A & G
+    let goal = ["4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6" |> ProjectId.from
+                "386c73d8-95dc-4684-ba6c-20f4cd63e42a" |> ProjectId.from
+                "2904bc7b-8b30-41f1-8160-02b5281704b4" |> ProjectId.from
+                "209eab33-f903-4195-bc2d-03d086129168" |> ProjectId.from
+                "d7b81c18-45df-44dc-853d-8cab07e1ad97" |> ProjectId.from
+                "78c2e0d4-b410-4702-af93-71db7db228d0" |> ProjectId.from
+                "eb5c2f2b-d117-47b0-8067-305b4bae9aa2" |> ProjectId.from ] |> Set
+    let projects = AnthologyGraph.ComputeProjectSelectionClosureSourceOnly projects goal |> Set
+
+    // expect all nodes
+    projects |> Set.count |> should equal 7
+    projects |> should contain (ProjectId.from "4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6") // A
+    projects |> should contain (ProjectId.from "386c73d8-95dc-4684-ba6c-20f4cd63e42a") // B
+    projects |> should contain (ProjectId.from "2904bc7b-8b30-41f1-8160-02b5281704b4") // C
+    projects |> should contain (ProjectId.from "209eab33-f903-4195-bc2d-03d086129168") // D
+    projects |> should contain (ProjectId.from "d7b81c18-45df-44dc-853d-8cab07e1ad97") // E
+    projects |> should contain (ProjectId.from "78c2e0d4-b410-4702-af93-71db7db228d0") // F
+    projects |> should contain (ProjectId.from "eb5c2f2b-d117-47b0-8067-305b4bae9aa2") // G
+
+
+
 
 [<Test>]
 let CheckGenerateSolution () =

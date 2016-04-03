@@ -150,21 +150,23 @@ let defaultView () =
     let viewName = System.IO.File.ReadAllText (defaultFile.FullName)
     viewName |> ViewId
 
-let GenerateView (maybeViewName : ViewId option) =
+let getViewName (maybeViewName : ViewId option) =
     let viewName = match maybeViewName with
                    | Some x -> x
                    | None -> defaultView()
+    viewName
 
+let getViewFile (view : ViewId) =
     let vwDir = Env.GetFolder Env.View 
-    let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
-    if vwFile.Exists |> not then failwithf "Unknown view name %A" viewName.toString
+    let vwFile = vwDir |> GetFile (AddExt View view.toString)
+    if vwFile.Exists |> not then failwithf "Unknown view name %A" view.toString
 
     let wsDir = Env.GetFolder Env.Workspace
-    let viewFile = wsDir |> GetFile (AddExt Solution viewName.toString)
-
-    generate viewName
+    let viewFile = wsDir |> GetFile (AddExt Solution view.toString)
     viewFile
 
+let GenerateView (viewName : ViewId) =
+    generate viewName
 
 
 let AlterView (viewId : ViewId) (isDefault : bool) =
@@ -174,13 +176,11 @@ let AlterView (viewId : ViewId) (isDefault : bool) =
         System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
 
 let OpenView (viewId : ViewId) =
-    let viewFile = GenerateView (Some viewId)
+    let viewFile = getViewFile viewId
     Exec.ExecVerb viewFile.FullName "open"
 
 
 let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (multithread : bool) (version : string option) =
-    let viewFile = GenerateView maybeViewName
-
-    let antho = Configuration.LoadAnthology ()
-    // TODO: should build with Fake too
+    let viewId = getViewName maybeViewName
+    let viewFile = getViewFile viewId
     (Builders.BuildWithBuilder BuilderType.MSBuild) viewFile config clean multithread version
