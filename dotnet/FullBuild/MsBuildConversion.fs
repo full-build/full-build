@@ -73,8 +73,7 @@ let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
 
     let filterFullBuildTargets (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
-        attr.StartsWith(MSBUILD_FULLBUILD_TARGETS, StringComparison.CurrentCultureIgnoreCase)
-            || attr.StartsWith(MSBUILD_FULLBUILD_TARGETS2, StringComparison.CurrentCultureIgnoreCase)
+        attr.EndsWith(".full-build/full-build.targets", StringComparison.CurrentCultureIgnoreCase)
 
     let filterNuget (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
@@ -215,7 +214,7 @@ let convertProject (xproj : XDocument) (project : Project) =
         cproj.Root.LastNode.AddAfterSelf (import)
 
     // import fb target
-    let wbRelative = ComputeHops project.relativeProjectFolderFromWorkspace
+    let wbRelative = ComputeHops (sprintf "%s/%s" project.Repository.toString project.RelativeProjectFile.toString)
     let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     let fbDirProp = XElement(NsMsBuild + "PropertyGroup",
                         XElement(NsMsBuild + "SolutionDir",

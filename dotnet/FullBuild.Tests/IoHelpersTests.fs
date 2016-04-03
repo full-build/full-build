@@ -33,4 +33,4 @@ let CheckAddExt () =
 [<Test>]
 let CheckRelativeHops () =
     let res = IoHelpers.ComputeHops "toto/tutu/pouet.csproj"
-    res |> should equal "../../../"
+    res |> should equal "../../"
