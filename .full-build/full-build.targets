@@ -7,7 +7,7 @@
     <FBIsLibrary >false</FBIsLibrary>
     <FBIsLibrary Condition="'$(OutputType)'=='library' and !$(FBIsWebProject) and !$(FBIsTestProject)">true</FBIsLibrary>
     <FBUseHardlink>false</FBUseHardlink>
-    <FBWorkspaceDir>$(NCrunchOriginalSolutionDir)</FBWorkspaceDir>
+    <FBWorkspaceDir Condition="$(FBWorkspaceDir) == ''">$(NCrunchOriginalSolutionDir)</FBWorkspaceDir>
     <FBWorkspaceDir Condition="$(FBWorkspaceDir) == ''">$(SolutionDir)</FBWorkspaceDir>
     <FBApp>*** undefined ***</FBApp>
     <FBContentFolder>$(FBWorkspaceDir)/apps/$(FBApp)</FBContentFolder>
