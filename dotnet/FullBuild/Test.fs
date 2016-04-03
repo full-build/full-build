@@ -21,8 +21,8 @@ open Anthology
 
 let TestAssemblies (filters : string list) (excludes : string list) =
     let wsDir = Env.GetFolder Env.Workspace
-    let fullPathForProject x = wsDir |> IoHelpers.GetSubDirectory (AnthologyBridge.RelativeProjectFolderFromWorkspace x)
-                                     |> IoHelpers.GetSubDirectory "bin"
+    let fullPathForProject (x : Project) = wsDir |> IoHelpers.GetSubDirectory (x.relativeProjectFolderFromWorkspace)
+                                           |> IoHelpers.GetSubDirectory "bin"
 
     let anthology = Configuration.LoadAnthology ()
     let prjNames = anthology.Projects 

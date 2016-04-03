@@ -25,6 +25,67 @@ let checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
 
 
+
+let filterClonedRepositories (wsDir : System.IO.DirectoryInfo) (repo : Repository) =
+    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+    let exists = repoDir.Exists
+    exists
+
+let findViewProjects (viewId : ViewId) =
+    // load back filter & generate view accordingly
+    let wsDir = Env.GetFolder Folder.Workspace
+    let view = Configuration.LoadView viewId
+    let repoFilters = view.Filters |> Set
+
+    let antho = Configuration.LoadAnthology ()
+
+    // select only available repositories
+    let availableRepos = antho.Repositories |> Set.map (fun x -> x.Repository)
+                                            |> Set.filter (filterClonedRepositories wsDir)
+                                            |> Set.map(fun x -> x.Name)
+
+    // build: <repository>/<project>
+    let projects = antho.Projects 
+                   |> Seq.filter (fun x -> availableRepos |> Set.contains x.Repository)
+                   |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, x.ProjectId))
+                   |> Map
+    let projectNames = projects |> Seq.map (fun x -> x.Key) |> set
+
+    let matchRepoProject filter =
+        projectNames |> Set.filter (fun x -> PatternMatching.Match x filter)
+
+    let matches = repoFilters |> Set.map matchRepoProject
+                              |> Set.unionMany
+    let selectedProjectGuids = projects |> Map.filter (fun k _ -> Set.contains k matches)
+                                        |> Seq.map (fun x -> x.Value)
+                                        |> Set
+
+    // find projects
+    let antho = Configuration.LoadAnthology ()
+    let projectRefs = match view.SourceOnly with
+                      | true -> AnthologyGraph.ComputeProjectSelectionClosureSourceOnly antho.Projects selectedProjectGuids |> Set
+                      | _ -> AnthologyGraph.ComputeProjectSelectionClosure antho.Projects selectedProjectGuids |> Set
+
+    let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectId)
+    projects
+
+
+
+let generate (viewId : ViewId) =
+    let projects = findViewProjects viewId
+
+    // generate solution defines
+    let slnDefines = GenerateSolutionDefines projects
+    let viewDir = GetFolder Env.View
+    let slnDefineFile = viewDir |> GetFile (AddExt Targets viewId.toString)
+    SaveFileIfNecessary slnDefineFile (slnDefines.ToString())
+
+    // generate solution file
+    let wsDir = GetFolder Env.Workspace
+    let slnFile = wsDir |> GetFile (AddExt Solution viewId.toString)
+    let slnContent = GenerateSolutionContent projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
+    SaveFileIfNecessary slnFile slnContent
+
 let Drop (viewName : ViewId) =
     let vwDir = GetFolder Env.View
     let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
@@ -58,70 +119,9 @@ let Describe (viewId : ViewId) =
     view.Filters |> Seq.iter (fun x -> printfn "%s" x)
 
 
-let filterClonedRepositories (wsDir : System.IO.DirectoryInfo) (repo : Repository) =
-    let repoDir = wsDir |> GetSubDirectory repo.Name.toString
-    let exists = repoDir.Exists
-    exists
-
-let FindViewProjects (viewId : ViewId) =
-    // load back filter & generate view accordingly
-    let wsDir = Env.GetFolder Folder.Workspace
-    let view = Configuration.LoadView viewId
-    let repoFilters = view.Filters |> Set
-
-    let antho = Configuration.LoadAnthology ()
-
-    // select only available repositories
-    let availableRepos = antho.Repositories |> Set.map (fun x -> x.Repository)
-                                            |> Set.filter (filterClonedRepositories wsDir)
-                                            |> Set.map(fun x -> x.Name)
-
-    // build: <repository>/<project>
-    let projects = antho.Projects 
-                   |> Seq.filter (fun x -> availableRepos |> Set.contains x.Repository)
-                   |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, x.ProjectId))
-                   |> Map
-    let projectNames = projects |> Seq.map (fun x -> x.Key) |> set
-
-    let matchRepoProject filter =
-        projectNames |> Set.filter (fun x -> PatternMatching.Match x filter)
-
-    let matches = repoFilters |> Set.map matchRepoProject
-                              |> Set.unionMany
-    let selectedProjectGuids = projects |> Map.filter (fun k _ -> Set.contains k matches)
-                                        |> Seq.map (fun x -> x.Value)
-                                        |> Set
-
-    // find projects
-    let antho = Configuration.LoadAnthology ()
-    let projectRefs = match view.SourceOnly with
-                      | true -> AnthologyGraph.ComputeAllProjectsSelectionSourceOnly antho.Projects selectedProjectGuids |> Set
-                      | _ -> AnthologyGraph.ComputeProjectSelectionClosure antho.Projects selectedProjectGuids |> Set
-
-    let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectId)
-    projects
-
-
-
-let Generate (viewId : ViewId) =
-    let projects = FindViewProjects viewId
-
-    // generate solution defines
-    let slnDefines = GenerateSolutionDefines projects
-    let viewDir = GetFolder Env.View
-    let slnDefineFile = viewDir |> GetFile (AddExt Targets viewId.toString)
-    SaveFileIfNecessary slnDefineFile (slnDefines.ToString())
-
-    // generate solution file
-    let wsDir = GetFolder Env.Workspace
-    let slnFile = wsDir |> GetFile (AddExt Solution viewId.toString)
-    let slnContent = GenerateSolutionContent projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
-    SaveFileIfNecessary slnFile slnContent
-
-
 let Graph (viewName : ViewId) (all : bool) =
     let antho = Configuration.LoadAnthology ()
-    let projects = FindViewProjects viewName |> Set
+    let projects = findViewProjects viewName |> Set
     let graph = Dgml.GraphContent antho projects all
 
     let wsDir = Env.GetFolder Env.Workspace
@@ -138,7 +138,7 @@ let Create (viewId : ViewId) (filters : string list) (all : bool) =
                  SourceOnly = all }
     Configuration.SaveView viewId view
 
-    Generate viewId
+    generate viewId
 
 // ---------------------------------------------------------------------------------------
 
@@ -162,7 +162,7 @@ let GenerateView (maybeViewName : ViewId option) =
     let wsDir = Env.GetFolder Env.Workspace
     let viewFile = wsDir |> GetFile (AddExt Solution viewName.toString)
 
-    Generate viewName
+    generate viewName
     viewFile
 
 

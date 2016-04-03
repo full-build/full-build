@@ -245,11 +245,6 @@ let commandUpdateGuids (args : string list) =
     | [name] -> Command.UpdateGuids (RepositoryId.from name)
     | _ -> Command.Error
 
-let commandMigrate (args : string list) =
-    match args with
-    | [] -> Command.Migrate
-    | _ -> Command.Error
-
 let commandBind (args : string list) =
     match args with
     | one :: more -> Command.BindProject { Filters = one::more }
@@ -316,14 +311,11 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
-    | Token Token.Migrate :: cmdArgs -> cmdArgs |> commandMigrate
     | _ -> Command.Error
 
 
 let VersionContent() =
-    let fbAssembly = Env.GetFullBuildAssembly ()
-    let version = fbAssembly.GetName().Version
-    
+    let version = Env.FullBuildVersion()    
     let fbVersion = sprintf "full-build %s" (version.ToString())
 
     [

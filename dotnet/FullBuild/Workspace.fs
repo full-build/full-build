@@ -234,7 +234,7 @@ let UpdateGuid (repo : RepositoryId) =
         let antho = Configuration.LoadAnthology ()
         let wsDir = Env.GetFolder Env.Workspace
         let repoDir = wsDir |> GetSubDirectory repo.toString
-        let projects = Indexation.FindKnownProjects repoDir
+        let projects = IoHelpers.FindKnownProjects repoDir
         for project in projects do
             let xdoc = XDocument.Load(project.FullName)
             let guid = xdoc.Descendants(NsMsBuild + "ProjectGuid").Single()

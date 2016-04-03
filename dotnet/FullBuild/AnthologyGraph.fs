@@ -38,7 +38,7 @@ let ComputeProjectSelectionClosure (allProjects : Project set) (goal : ProjectId
     transitiveClosure
 
 
-let rec public ComputeAllProjectsSelectionSourceOnly (allProjects : Project set) (selectionId : ProjectId set) =
+let rec public ComputeProjectSelectionClosureSourceOnly (allProjects : Project set) (selectionId : ProjectId set) =
     let selection = allProjects |> Set.filter (fun x -> selectionId |> Set.contains x.ProjectId)
 
     let dependenciesId = selection |> Seq.map (fun x -> x.ProjectReferences)
@@ -49,7 +49,7 @@ let rec public ComputeAllProjectsSelectionSourceOnly (allProjects : Project set)
                                      |> Set.union selectionId
 
     match newSelectionId <> selectionId with
-    | true -> ComputeAllProjectsSelectionSourceOnly allProjects newSelectionId
+    | true -> ComputeProjectSelectionClosureSourceOnly allProjects newSelectionId
     | _ -> newSelectionId
 
 
@@ -58,7 +58,7 @@ let rec public ComputeAllProjectsSelectionSourceOnly (allProjects : Project set)
 let ComputeRepositoriesDependencies (allProjects : Project set) (selectedRepos : RepositoryId set) =
     let selectedProjects = allProjects |> Set.filter (fun x -> selectedRepos |> Set.contains x.Repository)
                                        |> Set.map (fun x -> x.ProjectId)
-    let transitiveProjects = ComputeAllProjectsSelectionSourceOnly allProjects selectedProjects
+    let transitiveProjects = ComputeProjectSelectionClosureSourceOnly allProjects selectedProjects
     let repositories = allProjects |> Set.filter (fun x -> transitiveProjects |> Set.contains x.ProjectId)
                                    |> Set.map (fun x -> x.Repository)
     repositories

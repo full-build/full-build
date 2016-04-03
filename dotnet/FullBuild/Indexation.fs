@@ -21,28 +21,22 @@ open MsBuildHelpers
 open Anthology
 open Collections
 
-let FindKnownProjects (repoDir : DirectoryInfo) =
-    [AddExt CsProj "*"
-     AddExt VbProj "*"
-     AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
-                        |> Seq.concat
-
-let private ProjectCanBeProcessed (fileName : FileInfo) =
+let private projectCanBeProcessed (fileName : FileInfo) =
     let xdoc = XDocument.Load (fileName.FullName)
     let fbIgnore = !> xdoc.Descendants(NsMsBuild + "FullBuildIgnore").FirstOrDefault() : string
     match bool.TryParse(fbIgnore) with
     | (true, x) -> not <| x
     | _ -> true
 
-let private ParseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) =
-    repoDir |> FindKnownProjects 
-            |> Seq.filter ProjectCanBeProcessed
+let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) =
+    repoDir |> IoHelpers.FindKnownProjects 
+            |> Seq.filter projectCanBeProcessed
             |> Seq.map (parser repoDir repoRef)
 
-let ParseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) = 
+let parseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) = 
     repos |> Seq.map (fun x -> GetSubDirectory x.Name.toString wsDir) 
           |> Seq.filter (fun x -> x.Exists) 
-          |> Seq.map (fun x -> ParseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
+          |> Seq.map (fun x -> parseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
           |> Seq.concat
 
 
@@ -54,7 +48,7 @@ type ConflictType =
     | SameOutput of Project*Project
 
 
-let FindConflictsForProject (project1 : Project) (otherProjects : Project list) =
+let findConflictsForProject (project1 : Project) (otherProjects : Project list) =
     seq {
         for project2 in otherProjects do
             if project1 <> project2 then
@@ -64,11 +58,11 @@ let FindConflictsForProject (project1 : Project) (otherProjects : Project list) 
                     yield SameOutput (project1, project2)
     }      
 
-let rec FindConflicts (projects : Project list) =
+let rec findConflicts (projects : Project list) =
     seq {
         match projects with
-        | h :: t -> yield! FindConflictsForProject h t
-                    yield! FindConflicts t
+        | h :: t -> yield! findConflictsForProject h t
+                    yield! findConflicts t
         | _ -> ()
     }
 
@@ -77,7 +71,7 @@ let rec FindConflicts (projects : Project list) =
 
 
 
-let rec DisplayConflicts (conflicts : ConflictType list) =
+let rec displayConflicts (conflicts : ConflictType list) =
     let displayConflict (p1 : Project) (p2 : Project) (msg : string) =
         printfn "Conflict detected between projects (%s) : " msg
         printfn " - %s/%s" p1.Repository.toString p1.RelativeProjectFile.toString 
@@ -85,15 +79,15 @@ let rec DisplayConflicts (conflicts : ConflictType list) =
 
     match conflicts with
     | SameGuid (p1, p2) :: tail -> displayConflict p1 p2 "same guid"
-                                   DisplayConflicts tail
+                                   displayConflicts tail
 
     | SameOutput (p1, p2) :: tail -> displayConflict p1 p2 "same output"
-                                     DisplayConflicts tail
+                                     displayConflicts tail
     | [] -> ()
 
 
 
-let DetectNewDependencies (projects : ProjectParsing.ProjectDescriptor seq) =
+let detectNewDependencies (projects : ProjectParsing.ProjectDescriptor seq) =
     // add new packages (with correct version requirement)
     let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
                                  |> Seq.concat
@@ -143,17 +137,17 @@ let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
 let IndexWorkspace (repos : Repository set) = 
     let wsDir = Env.GetFolder Env.Workspace
     let antho = Configuration.LoadAnthology()
-    let parsedProjects = ParseWorkspaceProjects ProjectParsing.ParseProject wsDir repos
+    let parsedProjects = parseWorkspaceProjects ProjectParsing.ParseProject wsDir repos
 
-    let packagesToAdd = DetectNewDependencies parsedProjects
+    let packagesToAdd = detectNewDependencies parsedProjects
     PaketInterface.AppendDependencies packagesToAdd
 
     let projects = parsedProjects |> Seq.map (fun x -> x.Project)
                                   |> Set
     let allProjects = MergeProjects projects antho.Projects |> Set.toList
-    let conflicts = FindConflicts allProjects |> List.ofSeq
+    let conflicts = findConflicts allProjects |> List.ofSeq
     if conflicts <> [] then
-        DisplayConflicts conflicts
+        displayConflicts conflicts
         failwith "Conflict(s) detected"
 
     let newAntho = { antho 

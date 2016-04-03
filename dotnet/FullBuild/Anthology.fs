@@ -158,12 +158,16 @@ type Project =
       AssemblyReferences : AssemblyId set
       PackageReferences : PackageId set
       ProjectReferences : ProjectId set }
+with
+    member this.relativeProjectFolderFromWorkspace =
+        let relativePath = this.RelativeProjectFile.toString |> System.IO.Path.GetDirectoryName
+        let path = sprintf "%s/%s" this.Repository.toString  relativePath
+        path
 
 type ApplicationId = private ApplicationId of string
 with
     member this.toString = (fun (ApplicationId x) -> x)this
     static member from (name : string) = ApplicationId (name.ToLowerInvariant())
-
 
 type PublisherType =
     | Copy

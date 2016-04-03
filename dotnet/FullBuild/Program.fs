@@ -69,8 +69,6 @@ let tryMain argv =
     | PublishApplications pubInfo -> Application.Publish pubInfo.Filters
     | BindProject prjInfo -> Application.BindProject prjInfo.Filters
 
-    | Migrate -> Configuration.Migrate ()
-
     // misc
     | Version -> DisplayVersion ()
     | Usage -> DisplayUsage ()
