@@ -148,8 +148,9 @@ let SaveFileIfNecessary (file : FileInfo) (content : string) =
     if overwrite then
         File.WriteAllText (file.FullName, content)
 
-let XDocLoader (fileName : FileInfo) =
-    XDocument.Load fileName.FullName
+let XDocLoader (fileName : FileInfo) : XDocument option =
+    if fileName.Exists then Some (XDocument.Load (fileName.FullName))
+    else None
 
 let XDocSaver (fileName : FileInfo) (xdoc : XDocument) =
     xdoc.ToString()
