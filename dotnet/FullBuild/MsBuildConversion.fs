@@ -234,9 +234,11 @@ let ConvertProjects projects xdocLoader xdocSaver =
         let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
         if repoDir.Exists then
             let projFile = repoDir |> GetFile project.RelativeProjectFile.toString 
-            let xproj = xdocLoader projFile
-            let convxproj = convertProjectContent xproj project
-            xdocSaver projFile convxproj
+            let maybexproj = xdocLoader projFile
+            match maybexproj with
+            | Some xproj -> let convxproj = convertProjectContent xproj project
+                            xdocSaver projFile convxproj
+            | _ -> failwithf "Project %A does not exist" projFile
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
     let prjDir = Env.GetFolder Env.Project

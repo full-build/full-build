@@ -27,7 +27,7 @@ let private checkedExec =
     Exec.Exec checkErrorCode
 
 
-let ParseContent (lines : string seq) =
+let parseContent (lines : string seq) =
     seq {
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
@@ -36,7 +36,7 @@ let ParseContent (lines : string seq) =
             | _ -> ()
     }
 
-let UpdateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
+let updateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
     seq {
         for source in sources do
             let sourceUri = source.toLocalOrUrl
@@ -54,7 +54,7 @@ let UpdateSources (sources : RepositoryUrl seq) =
     let paketDep = confDir |> GetFile "paket.dependencies" 
     let oldContent = if paketDep.Exists then File.ReadAllLines (paketDep.FullName) |> Array.toSeq
                      else Seq.empty
-    let content = UpdateSourceContent oldContent sources
+    let content = updateSourceContent oldContent sources
     File.WriteAllLines (paketDep.FullName, content)
 
 let ParsePaketDependencies () =
@@ -62,12 +62,12 @@ let ParsePaketDependencies () =
     let paketDep = confDir |> GetFile "paket.dependencies" 
     if paketDep.Exists then
         let lines = File.ReadAllLines (paketDep.FullName)
-        let packageRefs =  ParseContent lines
+        let packageRefs =  parseContent lines
         packageRefs |> Set
     else
         Set.empty
 
-let GenerateDependenciesContent (packages : Package seq) =
+let generateDependenciesContent (packages : Package seq) =
     seq {
         for package in packages do
             match package.Version with
@@ -80,10 +80,10 @@ let AppendDependencies (packages : Package seq) =
     let paketDep = confDir |> GetFile "paket.dependencies" 
 
 
-    let content = GenerateDependenciesContent packages
+    let content = generateDependenciesContent packages
     File.AppendAllLines (paketDep.FullName, content)
 
-let RemoveDependenciesContent (lines : string seq) (packages : PackageId set) =
+let removeDependenciesContent (lines : string seq) (packages : PackageId set) =
     seq {
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
@@ -97,27 +97,27 @@ let RemoveDependencies (packages : PackageId set) =
     let confDir = Env.GetFolder Env.Config
     let paketDep = confDir |> GetFile "paket.dependencies" 
     let content = File.ReadAllLines (paketDep.FullName)
-    let newContent = RemoveDependenciesContent content packages
+    let newContent = removeDependenciesContent content packages
     File.WriteAllLines (paketDep.FullName, newContent)
 
-
-
-
-let ExecutePaketCommand cmd =
+let executePaketCommand cmd =
     let confDir = Env.GetFolder Env.Config
     checkedExec "paket.exe" cmd confDir
 
+
+
+
 let PaketInstall () =
-    ExecutePaketCommand "install"
+    executePaketCommand "install"
 
 let PaketRestore () =
-    ExecutePaketCommand "restore"
+    executePaketCommand "restore"
 
 let PaketUpdate () =
-    ExecutePaketCommand "update"
+    executePaketCommand "update"
 
 let PaketOutdated () =
-    ExecutePaketCommand "outdated"
+    executePaketCommand "outdated"
 
 let PaketInstalled () =
-    ExecutePaketCommand "show-installed-packages"
+    executePaketCommand "show-installed-packages"
