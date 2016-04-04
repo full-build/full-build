@@ -9,7 +9,7 @@
     <FBIsLibrary >false</FBIsLibrary>
     <FBIsLibrary Condition="'$(OutputType)'=='library' and !$(FBIsWebProject) and !$(FBIsTestProject)">true</FBIsLibrary>
 
-    <SolutionDir Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileFullPath)/..</SolutionDir>
+    <SolutionDir Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)/../</SolutionDir>
     <FBWorkspaceDir Condition="'$(FBWorkspaceDir)' == ''">$(NCrunchOriginalSolutionDir)</FBWorkspaceDir>
     <FBWorkspaceDir Condition="'$(FBWorkspaceDir)' == ''">$(SolutionDir)</FBWorkspaceDir>
 
