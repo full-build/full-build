@@ -51,9 +51,6 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <PropertyGroup>
-    <SolutionDir Condition="$(SolutionDir) == ''">../../</SolutionDir>
-  </PropertyGroup>
   <Import Project="../../.full-build/full-build.targets" />
   <ItemGroup>
     <Compile Include="StringHelpersTests.fs" />

@@ -216,13 +216,6 @@ let convertProject (xproj : XDocument) (project : Project) =
     // import fb target
     let wbRelative = ComputeHops (sprintf "%s/%s" project.Repository.toString project.RelativeProjectFile.toString)
     let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
-    let fbDirProp = XElement(NsMsBuild + "PropertyGroup",
-                        XElement(NsMsBuild + "SolutionDir",
-                            XAttribute(NsNone + "Condition", "$(SolutionDir) == ''"),
-                            wbRelative))
-
-    firstItemGroup.AddBeforeSelf (fbDirProp)
-
     let importFB = XElement (NsMsBuild + "Import",
                        XAttribute (NsNone + "Project", 
                                    sprintf "%s.full-build/full-build.targets" wbRelative))

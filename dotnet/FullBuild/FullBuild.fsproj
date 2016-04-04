@@ -65,9 +65,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <PropertyGroup>
-    <SolutionDir Condition="$(SolutionDir) == ''">../../</SolutionDir>
-  </PropertyGroup>
   <Import Project="../../.full-build/full-build.targets" />
   <ItemGroup>
     <Content Include="..\..\LICENSE.txt">
