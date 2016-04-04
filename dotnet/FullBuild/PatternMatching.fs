@@ -19,16 +19,16 @@ let private (|MatchZeroOrMore|_|) c =
     | '*' -> Some c
     | _ -> None
 
-let rec private MatchRec (content : char list) (pattern : char list) = 
+let rec private matchRec (content : char list) (pattern : char list) = 
     let matchZeroOrMore remainingPattern = 
         match content with
-        | [] -> MatchRec content remainingPattern
-        | _ :: t1 -> if MatchRec content remainingPattern then true // match 0 time
-                     else MatchRec t1 pattern // try match one more time
+        | [] -> matchRec content remainingPattern
+        | _ :: t1 -> if matchRec content remainingPattern then true // match 0 time
+                     else matchRec t1 pattern // try match one more time
     
     let matchChar firstPatternChar remainingPattern = 
         match content with
-        | firstContentChar :: remainingContent when firstContentChar = firstPatternChar -> MatchRec remainingContent remainingPattern
+        | firstContentChar :: remainingContent when firstContentChar = firstPatternChar -> matchRec remainingContent remainingPattern
         | _ -> false
     
     match pattern with
@@ -37,4 +37,4 @@ let rec private MatchRec (content : char list) (pattern : char list) =
     | head :: tail -> matchChar head tail
 
 let Match (content : string) (pattern : string) = 
-    MatchRec (content.ToLowerInvariant() |> Seq.toList) (pattern.ToLowerInvariant() |> Seq.toList)
+    matchRec (content.ToLowerInvariant() |> Seq.toList) (pattern.ToLowerInvariant() |> Seq.toList)

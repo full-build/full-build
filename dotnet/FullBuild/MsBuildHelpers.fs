@@ -27,14 +27,14 @@ let NsNone = XNamespace.None
 let inline (!>) (x : ^a) : ^b = (((^a or ^b) : (static member op_Explicit : ^a -> ^b) x))
 
 
-let ReplaceInvalidChars (s : string) =
+let replaceInvalidChars (s : string) =
     s.Replace('-', '_').Replace('.', '_').Replace("{", "").Replace("}", "")
 
 let ProjectPropertyName (projectId : ProjectId) =
-    let prjGuid = projectId.toString |> ReplaceInvalidChars
+    let prjGuid = projectId.toString |> replaceInvalidChars
     let prjProp = sprintf "FullBuild_%s" prjGuid
     prjProp
 
 let PackagePropertyName (packageId : PackageId) =
-    let pkgProp = sprintf "FullBuild_%s_Pkg" packageId.toString |> ReplaceInvalidChars
+    let pkgProp = sprintf "FullBuild_%s_Pkg" packageId.toString |> replaceInvalidChars
     pkgProp

@@ -44,26 +44,26 @@ let CheckBasicParsingCSharp () =
                                  { Id=PackageId.from "xunit"; Version=PackageVersion "1.9.1" } ]
     
     let file = FileInfo ("./CSharpProjectSample1.csproj")
-    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
+    let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
     prjDescriptor.Project.UniqueProjectId |> should equal (ProjectUniqueId.from (ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396"))
     prjDescriptor.Packages |> should equal expectedPackages
 
 [<Test>]
 let CheckBasicParsingFSharp () =
     let file = FileInfo ("./FSharpProjectSample1.fsproj")
-    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
+    let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
     prjDescriptor.Project.UniqueProjectId |> should equal (ProjectUniqueId.from (ParseGuid "5fde3939-c144-4287-bc57-a96ec2d1a9da"))
 
 [<Test>]
 let CheckParseVirginProject () =
     let file = FileInfo ("./VirginProject.csproj")
-    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
+    let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from "CassandraSharp"]
 
 [<Test>]
 let CheckParsePaketizedProject () =
     let file = FileInfo ("./Paket.fsproj")
-    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader false) file.Directory (RepositoryId.from "Test") file
+    let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader false) file.Directory (RepositoryId.from "Test") file
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from "CassandraSharp"]
     prjDescriptor.Project.PackageReferences |> should equal (Set [ PackageId.from "FSharp.Core"; PackageId.from "UnionArgParser" ])
 
@@ -106,7 +106,7 @@ let CheckParseConvertedProject () =
                             ProjectReferences = Set [ ProjectId.from "cassandrasharp.interfaces" ] }
 
     let projectFile = FileInfo ("./ConvertedProject.csproj")
-    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader true) projectFile.Directory (RepositoryId.from "Test") projectFile
+    let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader true) projectFile.Directory (RepositoryId.from "Test") projectFile
 
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from "cassandrasharp.interfaces"]
     prjDescriptor.Packages |> should equal expectedPackages
@@ -137,7 +137,7 @@ let CheckParseConvertedProjectWithoutPackagesConfig () =
                             ProjectReferences = Set [ ProjectId.from "cassandrasharp.interfaces" ] }
 
     let projectFile = FileInfo ("./ConvertedProject.csproj")
-    let prjDescriptor = ProjectParsing.ParseProjectContent (XDocumentLoader false) projectFile.Directory (RepositoryId.from "Test") projectFile
+    let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader false) projectFile.Directory (RepositoryId.from "Test") projectFile
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from "cassandrasharp.interfaces"]
 
     prjDescriptor.Packages |> should equal expectedPackages
@@ -146,5 +146,5 @@ let CheckParseConvertedProjectWithoutPackagesConfig () =
 [<Test>]
 let CheckParseInvalidProject () =
     let projectFile = FileInfo ("./ProjectWithInvalidRefs.csproj")
-    let getPrjDescriptor = (fun () -> ProjectParsing.ParseProjectContent (XDocumentLoader true) projectFile.Directory (RepositoryId.from "Test") projectFile |> ignore)
+    let getPrjDescriptor = (fun () -> ProjectParsing.parseProjectContent (XDocumentLoader true) projectFile.Directory (RepositoryId.from "Test") projectFile |> ignore)
     getPrjDescriptor |> should throw typeof<System.Exception>
