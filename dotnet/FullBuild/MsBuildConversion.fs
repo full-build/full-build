@@ -196,10 +196,11 @@ let convertProject (xproj : XDocument) (project : Project) =
 
     // import fb target
     let wbRelative = ComputeHops (sprintf "%s/%s" project.Repository.toString project.RelativeProjectFile.toString)
+    let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     let importFB = XElement (NsMsBuild + "Import",
                        XAttribute (NsNone + "Project", 
                                    sprintf "%s.full-build/full-build.targets" wbRelative))
-    cproj.Root.LastNode.AddAfterSelf (importFB)
+    firstItemGroup.AddBeforeSelf (importFB)
 
     // add project references
     for projectReference in project.ProjectReferences do
@@ -207,7 +208,7 @@ let convertProject (xproj : XDocument) (project : Project) =
         let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER prjRef
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
-        importFB.AddAfterSelf(import)
+        cproj.Root.LastNode.AddAfterSelf(import)
 
     // add nuget references
     for packageReference in project.PackageReferences do
@@ -218,7 +219,7 @@ let convertProject (xproj : XDocument) (project : Project) =
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile),
                         XAttribute(NsNone + "Condition", condition))
-        importFB.AddAfterSelf(import)
+        cproj.Root.LastNode.AddAfterSelf(import)
     cproj
 
 let convertProjectContent (xproj : XDocument) (project : Project) =
