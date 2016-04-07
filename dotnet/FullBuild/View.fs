@@ -31,10 +31,9 @@ let filterClonedRepositories (wsDir : System.IO.DirectoryInfo) (repo : Repositor
     let exists = repoDir.Exists
     exists
 
-let findViewProjects (viewId : ViewId) =
+let findViewProjects (view : View) =
     // load back filter & generate view accordingly
     let wsDir = Env.GetFolder Folder.Workspace
-    let view = Configuration.LoadView viewId
     let repoFilters = view.Filters |> Set
 
     let antho = Configuration.LoadAnthology ()
@@ -71,8 +70,8 @@ let findViewProjects (viewId : ViewId) =
 
 
 
-let generate (viewId : ViewId) =
-    let projects = findViewProjects viewId
+let generate (viewId : ViewId) (view : View) =
+    let projects = findViewProjects view
 
     // generate solution defines
     let slnDefines = GenerateSolutionDefines projects
@@ -119,26 +118,26 @@ let Describe (viewId : ViewId) =
     view.Filters |> Seq.iter (fun x -> printfn "%s" x)
 
 
-let Graph (viewName : ViewId) (all : bool) =
+let Graph (viewId : ViewId) (all : bool) =
     let antho = Configuration.LoadAnthology ()
-    let projects = findViewProjects viewName |> Set
+    let view = Configuration.LoadView viewId
+    let projects = findViewProjects view |> Set
     let graph = Dgml.GraphContent antho projects all
 
     let wsDir = Env.GetFolder Env.Workspace
-    let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewName.toString)
+    let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewId.toString)
     graph.Save graphFile.FullName
 
-let Create (viewId : ViewId) (filters : string list) (all : bool) =
+let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) =
     if filters.Length = 0 then
         failwith "Expecting at least one filter"
 
     let view = { Filters = filters |> Set
                  Builder = BuilderType.MSBuild
                  Parameters = Set.empty 
-                 SourceOnly = all }
+                 SourceOnly = forceSrc }
     Configuration.SaveView viewId view
-
-    generate viewId
+    generate viewId view
 
 // ---------------------------------------------------------------------------------------
 
@@ -165,8 +164,9 @@ let getViewFile (view : ViewId) =
     let viewFile = wsDir |> GetFile (AddExt Solution view.toString)
     viewFile
 
-let GenerateView (viewName : ViewId) =
-    generate viewName
+let GenerateView (viewId : ViewId) =
+    let view = Configuration.LoadView viewId
+    generate viewId view
 
 
 let AlterView (viewId : ViewId) (isDefault : bool) =
@@ -175,7 +175,12 @@ let AlterView (viewId : ViewId) (isDefault : bool) =
         let defaultFile = vwDir |> GetFile "default"
         System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
 
-let OpenView (viewId : ViewId) =
+let OpenView (viewId : ViewId) (forceSrc : bool) =
+    let view = Configuration.LoadView viewId
+    if forceSrc && (view.SourceOnly <> forceSrc) then
+        let newView = { view with SourceOnly = forceSrc }
+        generate viewId newView
+
     let viewFile = getViewFile viewId
     Exec.ExecVerb viewFile.FullName "open"
 

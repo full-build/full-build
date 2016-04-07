@@ -50,7 +50,7 @@ let tryMain argv =
     | GraphView viewInfo -> View.Graph viewInfo.Name viewInfo.All
     | BuildView viewInfo -> View.Build viewInfo.Name viewInfo.Config viewInfo.Clean viewInfo.Multithread viewInfo.Version
     | AlterView viewInfo -> View.AlterView viewInfo.Name viewInfo.Default
-    | OpenView viewInfo -> View.OpenView viewInfo.Name
+    | OpenView viewInfo -> View.OpenView viewInfo.Name viewInfo.ForceSrc
 
     // nuget
     | AddNuGet url -> NuGets.Add url
