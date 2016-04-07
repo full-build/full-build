@@ -80,7 +80,8 @@ type AlterView =
       Default : bool }
 
 type OpenView =
-    { Name : ViewId }
+    { Name : ViewId 
+      ForceSrc : bool }
 
 type GraphView =
     { Name : ViewId
