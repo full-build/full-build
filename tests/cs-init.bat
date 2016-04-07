@@ -12,8 +12,8 @@ rem create workspace
 pushd cs-init
 
 %FULLBUILD% add nuget https://www.nuget.org/api/v2/ || goto :ko
-%FULLBUILD% add repo cassandra-sharp msbuild https://github.com/pchalamet/cassandra-sharp || goto :ko
-%FULLBUILD% add repo cassandra-sharp-contrib msbuild https://github.com/pchalamet/cassandra-sharp-contrib || goto :ko
+%FULLBUILD% add repo cassandra-sharp https://github.com/pchalamet/cassandra-sharp || goto :ko
+%FULLBUILD% add repo cassandra-sharp-contrib https://github.com/pchalamet/cassandra-sharp-contrib || goto :ko
 %FULLBUILD% clone *  || goto :ko
 
 :ok
