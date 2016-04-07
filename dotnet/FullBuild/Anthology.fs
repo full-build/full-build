@@ -172,6 +172,7 @@ with
 type PublisherType =
     | Copy
     | Zip
+    | Docker
 with
      member this.toString = toString this
      static member from s = fromString<PublisherType> s

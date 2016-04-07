@@ -60,13 +60,30 @@ let publishZip (app : Anthology.Application) =
     sourceFolder.Delete(true)
 
 
-let choosePublisher (pubType : PublisherType) appCopy appZip =
+let publishDocker (app : Anthology.Application) =
+    let tmpApp = { app
+                   with Name = ApplicationId.from "tmpdocker"
+                        Publisher = PublisherType.Copy }
+
+    publishCopy tmpApp
+
+    let appDir = GetFolder Env.AppOutput
+    let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name.toString)
+    let targetFile = appDir |> GetFile app.Name.toString
+    if targetFile.Exists then targetFile.Delete()
+
+    let dockerArgs = sprintf "build -t %s ." app.Name.toString
+    Exec.Exec checkErrorCode "docker" dockerArgs sourceFolder
+    sourceFolder.Delete(true)        
+
+let choosePublisher (pubType : PublisherType) appCopy appZip appDocker =
     let publish = match pubType with
                   | PublisherType.Copy -> appCopy
                   | PublisherType.Zip -> appZip
+                  | PublisherType.Docker -> appDocker
     publish
 
 
 let PublishWithPublisher (pubType : PublisherType) =
-    choosePublisher pubType publishCopy publishZip
+    choosePublisher pubType publishCopy publishZip publishDocker
 
