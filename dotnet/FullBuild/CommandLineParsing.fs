@@ -215,9 +215,10 @@ let rec commandAlterView (isDefault : bool) (args : string list) =
     | [MatchViewId name] -> Command.AlterView { Name = name ; Default = isDefault }
     | _ -> Command.Error
 
-let commandOpenView (args : string list) =
+let rec commandOpenView (forceSrc : bool) (args : string list) =
     match args with
-    | [MatchViewId name] -> Command.OpenView { Name = name }
+    | TokenOption TokenOption.Src :: tail -> tail |> commandOpenView true
+    | [MatchViewId name] -> Command.OpenView { Name = name; ForceSrc = forceSrc }
     | _ -> Command.Error
 
 let commandAddApp (args : string list) =
@@ -278,10 +279,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
     | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory
 
-    // compat
-    | Token Token.Install :: Token Token.Package :: cmdArgs -> cmdArgs |> commandInstall
     | Token Token.Install :: cmdArgs -> cmdArgs |> commandInstall
-    // end compat
     | Token Token.Update :: Token Token.Package :: cmdArgs -> cmdArgs |> commandUpdate
     | Token Token.Outdated :: Token Token.Package :: cmdArgs -> cmdArgs |> commandOutdated
     | Token Token.List :: Token Token.Package :: cmdArgs -> cmdArgs |> commandListPackage
@@ -293,18 +291,12 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Add :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandAddNuGet
     | Token Token.List :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandListNuGet
 
-    // compat
-    | Token Token.Add :: Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false
     | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false
-    // end compat
     | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
     | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
     | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
     | Token Token.Alter :: Token Token.View :: cmdArgs -> cmdArgs |> commandAlterView false
-    // compat
-    | Token Token.Open :: Token Token.View :: cmdArgs -> cmdArgs |> commandOpenView
-    | Token Token.Open :: cmdArgs -> cmdArgs |> commandOpenView
-    // end compat
+    | Token Token.Open :: cmdArgs -> cmdArgs |> commandOpenView false
     
     | Token Token.Add :: Token Token.App :: cmdArgs -> cmdArgs |> commandAddApp
     | Token Token.Drop :: Token Token.App :: cmdArgs -> cmdArgs |> commandDropApp
@@ -348,7 +340,7 @@ let UsageContent() =
         "  checkout <version> : checkout workspace to version"
         "  install : install packages"
         "  view [--src] <view-name> <view-wildcard>+ : add repositories to view"
-        "  open <viewName> : open view with your favorite ide"
+        "  open [--src] <viewName> : open view with your favorite ide"
         "  build [--debug] [--version <version>] [--mt] [<view-name>] : build view"
         "  rebuild [--debug] [--version <version>] [--mt] [<view-name>] : rebuild view (clean & build)"
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
