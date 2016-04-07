@@ -161,11 +161,11 @@ let rec commandAddRepo (branch : BranchId option) (builder : BuilderType) (stick
     match args with
     | TokenOption TokenOption.Sticky :: tail -> tail |> commandAddRepo branch builder true
     | TokenOption TokenOption.Branch :: MatchBranchId branch :: tail -> tail |> commandAddRepo (Some branch) builder sticky
-    | name :: builder :: [url] -> Command.AddRepository { Repo = RepositoryId.from name
-                                                          Url = RepositoryUrl.from url
-                                                          Branch = branch
-                                                          Builder = BuilderType.from builder 
-                                                          Sticky = sticky }
+    | name :: [url] -> Command.AddRepository { Repo = RepositoryId.from name
+                                               Url = RepositoryUrl.from url
+                                               Branch = branch
+                                               Builder = builder 
+                                               Sticky = sticky }
     | _ -> Command.Error
 
 let commandDropRepo (args : string list) =
@@ -359,7 +359,7 @@ let UsageContent() =
         "  outdated package : display outdated packages"
         "  list package : list packages"
         ""
-        "  add repo [--branch <branchId>] [--sticky] <repo-name> <msbuild> <repo-uri> : declare a new repository"
+        "  add repo [--branch <branchId>] [--sticky] <repo-name> <repo-uri> : declare a new repository"
         "  drop repo <repo-name> : drop repository"
         "  list repo : list repositories"
         ""
