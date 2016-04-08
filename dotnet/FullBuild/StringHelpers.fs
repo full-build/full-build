@@ -41,3 +41,6 @@ let GenerateGuidFromString (input : string) =
     let hashGuid = Guid(hashBytes)
     hashGuid
     
+let containsIgnoreCase (x : string) (y : string) =
+    x.IndexOf(y, System.StringComparison.CurrentCultureIgnoreCase) <> -1
+
