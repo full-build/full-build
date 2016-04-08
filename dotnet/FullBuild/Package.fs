@@ -142,10 +142,11 @@ let GatherAllAssemblies (package : PackageId) : AssemblyId set =
 
 
 let GeneratePackageImports () =
-    let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
-                      |> Map.toList
-                      |> Seq.map fst
-    allPackages |> Seq.iter GenerateTargetForPackage
+    PaketInterface.ParsePaketDependencies ()
+        |> NuGets.BuildPackageDependencies
+        |> Map.toList
+        |> Seq.map fst
+        |> Seq.iter GenerateTargetForPackage
 
 let InstallPackages (nugets : RepositoryUrl list) =
     PaketInterface.UpdateSources nugets
