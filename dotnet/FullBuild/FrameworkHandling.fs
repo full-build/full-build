@@ -336,20 +336,17 @@ module KnownTargetProfiles =
         SinglePlatform(WindowsPhoneSilverlight "v8.0")
         SinglePlatform(WindowsPhoneSilverlight "v8.1")]
 
-    let DNXCoreProfiles =
-        [SinglePlatform(DNXCore (FrameworkVersion.V5_0))]
-
     let AllDotNetProfiles =
        DotNetFrameworkProfiles @ 
        WindowsProfiles @ 
        SilverlightProfiles @
-       DNXCoreProfiles @
        WindowsPhoneSilverlightProfiles @
        [SinglePlatform(MonoAndroid)
         SinglePlatform(MonoTouch)
         SinglePlatform(XamariniOS)
         SinglePlatform(XamarinMac)
         SinglePlatform(WindowsPhoneApp "v8.1")
+        SinglePlatform(DNXCore (FrameworkVersion.V5_0))
         PortableProfile("Profile2", [ DotNetFramework FrameworkVersion.V4; Silverlight "v4.0"; Windows "v4.5"; WindowsPhoneSilverlight "v7.0" ])
         PortableProfile("Profile3", [ DotNetFramework FrameworkVersion.V4; Silverlight "v4.0" ])
         PortableProfile("Profile4", [ DotNetFramework FrameworkVersion.V4_5; Silverlight "v4.0"; Windows "v4.5"; WindowsPhoneSilverlight "v7.0" ])
