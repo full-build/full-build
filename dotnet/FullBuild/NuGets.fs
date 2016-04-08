@@ -47,7 +47,9 @@ let rec BuildPackageDependencies (packages : PackageId seq) =
             yield! buildDependencies dependencies
     }
 
-    (buildDependencies packages) |> Map
+    packages 
+        |> buildDependencies 
+        |> Map
 
 
 let ComputePackagesRoots (package2packages : Map<PackageId, PackageId set>) =
@@ -56,7 +58,7 @@ let ComputePackagesRoots (package2packages : Map<PackageId, PackageId set>) =
                                  |> Set
     roots
 
-let ComputeTransitivePackageDependencies (packages : PackageId seq) =
+let ComputeTransitivePackageDependencies (packages : PackageId set) =
     let allPackages = BuildPackageDependencies packages
     let ids = allPackages |> Seq.map (fun x -> x.Key) |> Set
     ids
