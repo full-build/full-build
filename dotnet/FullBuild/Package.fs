@@ -53,9 +53,11 @@ let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
 
     let whens = seq {    
         if libDir.Exists then
-            let dirs = libDir.EnumerateDirectories() |> Seq.map (fun x -> x.Name) |> List.ofSeq
-            let path2platforms = if dirs.Length = 0 then Paket.PlatformMatching.getSupportedTargetProfiles [""]
-                                 else Paket.PlatformMatching.getSupportedTargetProfiles dirs
+            let foundDirs = libDir.EnumerateDirectories() |> Seq.map (fun x -> x.Name) |> List.ofSeq
+            // for very old nugets we do not have folder per platform
+            let dirs = if foundDirs.Length = 0 then [""]
+                       else foundDirs
+            let path2platforms = Paket.PlatformMatching.getSupportedTargetProfiles dirs
 
             for path2pf in path2platforms do
                 let pathLib = libDir |> IoHelpers.GetSubDirectory path2pf.Key
