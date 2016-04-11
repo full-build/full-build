@@ -49,7 +49,6 @@ let GenerateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
 
 let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
     let pkgProp = PackagePropertyName package
-    let packageWarnProp = sprintf "%s_Warning" pkgProp
 
     let whens = seq {    
         if libDir.Exists then
@@ -65,10 +64,6 @@ let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
                 let whenCondition = if condition = "$(TargetFrameworkIdentifier) == 'true'" then "True"
                                     else condition
                 yield GenerateItemGroup pathLib whenCondition
-
-            yield XElement(NsMsBuild + "Otherwise",
-                    new XElement(NsMsBuild + "PropertyGroup",
-                        new XElement(NsMsBuild + packageWarnProp, "Y")))
     }
 
     seq {
@@ -77,11 +72,6 @@ let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
             yield XElement (NsMsBuild + "PropertyGroup",
                         XElement(NsMsBuild + "CompileDependsOn", sprintf "%s; $(CompileDependsOn)" targetName))
             yield XElement (NsMsBuild + "Choose", whens)
-            yield XElement (NsMsBuild + "Target", 
-                        XAttribute (NsNone + "Name", targetName),
-                        XElement (NsMsBuild + "Error",
-                            XAttribute(NsNone + "Text", sprintf "Warning! Can't find compatible package %A for requested FrameworkVersion $(FrameworkVersion)" package.toString),
-                            XAttribute(NsNone + "Condition", sprintf "'$(%s)' != ''" packageWarnProp)))
     }
     
 let GenerateDependenciesContent (dependencies : PackageId seq) =
