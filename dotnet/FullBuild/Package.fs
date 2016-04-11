@@ -68,9 +68,6 @@ let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
 
     seq {
         if whens.Any() then
-            let targetName = sprintf "%s_Check" pkgProp
-            yield XElement (NsMsBuild + "PropertyGroup",
-                        XElement(NsMsBuild + "CompileDependsOn", sprintf "%s; $(CompileDependsOn)" targetName))
             yield XElement (NsMsBuild + "Choose", whens)
     }
     
