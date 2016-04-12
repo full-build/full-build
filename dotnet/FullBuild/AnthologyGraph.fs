@@ -38,6 +38,7 @@ let private computePath (findParents : ProjectId -> Project set) (goal : Project
     let startNodeId = startNode.ProjectId
     let goalWithoutStartNode = goal |> Set.remove startNodeId
     explorePathUntilGoal findParents goalWithoutStartNode Set.empty startNode
+        |> Set.union goal
 
 let ComputeProjectSelectionClosure (allProjects : Project set) (goal : ProjectId set) =
     let findParents = referencingProjects allProjects
@@ -54,22 +55,6 @@ let rec public ComputeProjectSelectionClosureSourceOnly (allProjects : Project s
     let transitiveClosure = allProjects |> Set.map (computePath findParents goal)
                                         |> Set.unionMany
     transitiveClosure
-
-
-//    let selection = allProjects |> Set.filter (fun x -> selectionId |> Set.contains x.ProjectId)
-//
-//    let dependenciesId = selection |> Seq.map (fun x -> x.ProjectReferences)
-//                                   |> Seq.collect id
-//                                   |> Set
-//    let newSelectionId = allProjects |> Set.filter (fun x -> dependenciesId |> Set.contains x.ProjectId)
-//                                     |> Set.map (fun x -> x.ProjectId)
-//                                     |> Set.union selectionId
-//
-//    match newSelectionId <> selectionId with
-//    | true -> ComputeProjectSelectionClosureSourceOnly allProjects newSelectionId
-//    | _ -> newSelectionId
-
-
 
 
 let ComputeRepositoriesDependencies (allProjects : Project set) (selectedRepos : RepositoryId set) =
