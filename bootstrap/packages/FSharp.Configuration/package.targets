@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Condition="'$(FullBuild_FSharp_Configuration_Pkg)' == ''" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FullBuild_FSharp_Configuration_Pkg>Y</FullBuild_FSharp_Configuration_Pkg>
+  </PropertyGroup>
+  <PropertyGroup>
+    <CompileDependsOn>FullBuild_FSharp_Configuration_Pkg_Check; $(CompileDependsOn)</CompileDependsOn>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
+      <ItemGroup>
+        <Reference Include="FSharp.Configuration">
+          <HintPath>$(SolutionDir)/.full-build/packages/FSharp.Configuration/lib/net40/FSharp.Configuration.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="SharpYaml">
+          <HintPath>$(SolutionDir)/.full-build/packages/FSharp.Configuration/lib/net40/SharpYaml.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FullBuild_FSharp_Configuration_Pkg_Warning>Y</FullBuild_FSharp_Configuration_Pkg_Warning>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Target Name="FullBuild_FSharp_Configuration_Pkg_Check">
+    <Error Text="Warning! Can't find compatible package &quot;FSharp.Configuration&quot; for requested FrameworkVersion $(FrameworkVersion)" Condition="'$(FullBuild_FSharp_Configuration_Pkg_Warning)' != ''" />
+  </Target>
+</Project>

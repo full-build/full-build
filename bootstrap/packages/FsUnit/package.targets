@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Condition="'$(FullBuild_fsunit_Pkg)' == ''" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FullBuild_fsunit_Pkg>Y</FullBuild_fsunit_Pkg>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)/.full-build/packages/NUnit/package.targets" Condition="'$(FullBuild_NUnit_Pkg)' == ''" />
+  <PropertyGroup>
+    <CompileDependsOn>FullBuild_fsunit_Pkg_Check; $(CompileDependsOn)</CompileDependsOn>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="True">
+      <ItemGroup>
+        <Reference Include="FsUnit.CustomMatchers">
+          <HintPath>$(SolutionDir)/.full-build/packages/fsunit/lib/FsUnit.CustomMatchers.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="FsUnit.NUnit">
+          <HintPath>$(SolutionDir)/.full-build/packages/fsunit/lib/FsUnit.NUnit.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FullBuild_fsunit_Pkg_Warning>Y</FullBuild_fsunit_Pkg_Warning>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Target Name="FullBuild_fsunit_Pkg_Check">
+    <Error Text="Warning! Can't find compatible package &quot;fsunit&quot; for requested FrameworkVersion $(FrameworkVersion)" Condition="'$(FullBuild_fsunit_Pkg_Warning)' != ''" />
+  </Target>
+</Project>

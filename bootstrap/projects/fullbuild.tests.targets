@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
+  <ItemGroup>
+    <ProjectReference Include="$(FBWorkspaceDir)/dotnet/FullBuild.Tests/FullBuild.Tests.fsproj" Condition="'$(FullBuild_fullbuild_tests)' != ''">
+      <Project>{faaf3b40-ea78-4eaf-9859-863ff16f6058}</Project>
+      <Name>fullbuild.tests</Name>
+    </ProjectReference>
+    <Reference Include="$(FBWorkspaceDir)/.full-build/bin/fullbuild.tests.dll" Condition="'$(FullBuild_fullbuild_tests)' == ''">
+      <Private>true</Private>
+    </Reference>
+    <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/bin/fullbuild.tests.dll;$(FBWorkspaceDir)/.full-build/bin/fullbuild.tests.pdb" Condition="'$(FullBuild_fullbuild_tests)' == ''" />
+  </ItemGroup>
+</Project>
