@@ -1,0 +1,34 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "FullBuild.Tests", "dotnet/FullBuild.Tests/FullBuild.Tests.fsproj", "{faaf3b40-ea78-4eaf-9859-863ff16f6058}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5fde3939-c144-4287-bc57-a96ec2d1a9da} = {5fde3939-c144-4287-bc57-a96ec2d1a9da}
+	EndProjectSection
+EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "FullBuild", "dotnet/FullBuild/FullBuild.fsproj", "{5fde3939-c144-4287-bc57-a96ec2d1a9da}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet", "dotnet", "{2293c685-6e75-fd01-4a7a-22de55e19743}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{faaf3b40-ea78-4eaf-9859-863ff16f6058}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{faaf3b40-ea78-4eaf-9859-863ff16f6058}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{faaf3b40-ea78-4eaf-9859-863ff16f6058}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{faaf3b40-ea78-4eaf-9859-863ff16f6058}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5fde3939-c144-4287-bc57-a96ec2d1a9da}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5fde3939-c144-4287-bc57-a96ec2d1a9da}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5fde3939-c144-4287-bc57-a96ec2d1a9da}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5fde3939-c144-4287-bc57-a96ec2d1a9da}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{faaf3b40-ea78-4eaf-9859-863ff16f6058} = {2293c685-6e75-fd01-4a7a-22de55e19743}
+		{5fde3939-c144-4287-bc57-a96ec2d1a9da} = {2293c685-6e75-fd01-4a7a-22de55e19743}
+	EndGlobalSection
+EndGlobal

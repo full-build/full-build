@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Condition="'$(FullBuild_NUnit_Pkg)' == ''" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FullBuild_NUnit_Pkg>Y</FullBuild_NUnit_Pkg>
+  </PropertyGroup>
+  <PropertyGroup>
+    <CompileDependsOn>FullBuild_NUnit_Pkg_Check; $(CompileDependsOn)</CompileDependsOn>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="True">
+      <ItemGroup>
+        <Reference Include="nunit.framework">
+          <HintPath>$(SolutionDir)/.full-build/packages/NUnit/lib/nunit.framework.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FullBuild_NUnit_Pkg_Warning>Y</FullBuild_NUnit_Pkg_Warning>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Target Name="FullBuild_NUnit_Pkg_Check">
+    <Error Text="Warning! Can't find compatible package &quot;NUnit&quot; for requested FrameworkVersion $(FrameworkVersion)" Condition="'$(FullBuild_NUnit_Pkg_Warning)' != ''" />
+  </Target>
+</Project>

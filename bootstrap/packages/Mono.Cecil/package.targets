@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Condition="'$(FullBuild_Mono_Cecil_Pkg)' == ''" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FullBuild_Mono_Cecil_Pkg>Y</FullBuild_Mono_Cecil_Pkg>
+  </PropertyGroup>
+  <PropertyGroup>
+    <CompileDependsOn>FullBuild_Mono_Cecil_Pkg_Check; $(CompileDependsOn)</CompileDependsOn>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v3.0')">
+      <ItemGroup>
+        <Reference Include="Mono.Cecil.Mdb">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net20/Mono.Cecil.Mdb.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil.Pdb">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net20/Mono.Cecil.Pdb.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net20/Mono.Cecil.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v3.5'">
+      <ItemGroup>
+        <Reference Include="Mono.Cecil.Mdb">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net35/Mono.Cecil.Mdb.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil.Pdb">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net35/Mono.Cecil.Pdb.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil.Rocks">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net35/Mono.Cecil.Rocks.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net35/Mono.Cecil.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0')">
+      <ItemGroup>
+        <Reference Include="Mono.Cecil.Mdb">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net40/Mono.Cecil.Mdb.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil.Pdb">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net40/Mono.Cecil.Pdb.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil.Rocks">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net40/Mono.Cecil.Rocks.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net40/Mono.Cecil.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
+      <ItemGroup>
+        <Reference Include="Mono.Cecil.Mdb">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net45/Mono.Cecil.Mdb.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil.Pdb">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net45/Mono.Cecil.Pdb.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil.Rocks">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net45/Mono.Cecil.Rocks.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net45/Mono.Cecil.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == 'Silverlight' And $(TargetFrameworkVersion) == 'v5.0'">
+      <ItemGroup>
+        <Reference Include="Mono.Cecil.Rocks">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/sl5/Mono.Cecil.Rocks.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil">
+          <HintPath>$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/sl5/Mono.Cecil.dll</HintPath>
+          <Private>true</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FullBuild_Mono_Cecil_Pkg_Warning>Y</FullBuild_Mono_Cecil_Pkg_Warning>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Target Name="FullBuild_Mono_Cecil_Pkg_Check">
+    <Error Text="Warning! Can't find compatible package &quot;Mono.Cecil&quot; for requested FrameworkVersion $(FrameworkVersion)" Condition="'$(FullBuild_Mono_Cecil_Pkg_Warning)' != ''" />
+  </Target>
+</Project>
