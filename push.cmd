@@ -10,7 +10,7 @@ echo APPVEYOR_BUILD_NUMBER  %APPVEYOR_BUILD_NUMBER%
 7z a %HERE%\full-build.zip %HERE%\apps\full-build\*
 
 %HERE%tools/github-release.exe release ^
-                         --user pchalamet ^
+                         --user full-build ^
                          --repo full-build ^
 						 --tag %APPVEYOR_BUILD_VERSION% ^
 						 --name "%APPVEYOR_PROJECT_NAME% %APPVEYOR_BUILD_VERSION%" ^
@@ -18,7 +18,7 @@ echo APPVEYOR_BUILD_NUMBER  %APPVEYOR_BUILD_NUMBER%
                          --pre-release || goto :ko
 
 %HERE%tools/github-release.exe upload ^
-                     --user pchalamet ^
+                     --user full-build ^
 					 --repo full-build ^
                      --tag %APPVEYOR_BUILD_VERSION% ^
                      --name "%APPVEYOR_PROJECT_NAME%-net45-anycpu-%APPVEYOR_BUILD_NUMBER%.zip" ^
