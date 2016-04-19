@@ -1,5 +1,5 @@
 # full-build: smart build system for .net
-master branch [![build status](https://ci.appveyor.com/api/projects/status/github/pchalamet/full-build?branch=master)](https://ci.appveyor.com/project/pchalamet/full-build/branch/master)
+master branch [![build status](https://ci.appveyor.com/api/projects/status/github/full-build/full-build?branch=master)](https://ci.appveyor.com/project/pchalamet/full-build/branch/master)
 
 Check out [full-build.io](http://full-build.io)
 
