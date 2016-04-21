@@ -50,7 +50,15 @@ let ComputeProjectSelectionClosure (allProjects : Project set) (goal : ProjectId
 
 
 let rec public ComputeProjectSelectionClosureSourceOnly (allProjects : Project set) (goal : ProjectId set) =
-    let findParents = referencingProjects allProjects
+    let findParents =
+        let child2parents = allProjects 
+                            |> Seq.map (fun x -> (x.ProjectId, referencingProjects allProjects x.ProjectId))
+                            |> Map.ofSeq
+
+        let findAllParents (current : ProjectId) =
+            child2parents.Item current
+
+        findAllParents
 
     let transitiveClosure = allProjects |> Set.map (computePath findParents goal)
                                         |> Set.unionMany
