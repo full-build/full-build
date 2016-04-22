@@ -256,12 +256,17 @@ let commandHistory (args : string list) =
     | [] -> Command.History
     | _ -> Command.Error
 
+let commandUpgrade (args : string list) =
+    match args with
+    | [] -> Command.Upgrade
+    | _ -> Command.Error
+
 
 let ParseCommandLine (args : string list) : Command = 
     match args with
     | [Token Token.Version] -> Command.Version
     | [Token Token.Help] -> Command.Usage
-    | [Token Token.Upgrade] -> Command.Upgrade
+    | Token Token.Upgrade :: cmdArgs -> cmdArgs |> commandUpgrade
     | Token Token.Setup :: cmdArgs -> cmdArgs |> commandSetup 
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
@@ -355,6 +360,7 @@ let UsageContent() =
         "  bind <projectId-wildcard>+ : update bindings"
         "  clean : DANGER! reset and clean workspace (interactive command)"
         "  history : display history since last baseline"
+        "  upgrade : upgrade full-build to latest available version"
         ""
         "  update package : update packages"
         "  outdated package : display outdated packages"
