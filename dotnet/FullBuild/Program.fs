@@ -70,7 +70,7 @@ let tryMain argv =
     | BindProject prjInfo -> Application.BindProject prjInfo.Filters
 
     // misc
-    | Upgrade -> Upgrade.upgrade ()
+    | Upgrade -> Upgrade.Upgrade ()
     | Version -> DisplayVersion ()
     | Usage -> DisplayUsage ()
     | Error -> DisplayUsage ()
