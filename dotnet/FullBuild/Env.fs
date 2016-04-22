@@ -57,7 +57,7 @@ let getFullBuildAssembly () =
     let fbAssembly = typeof<DummyType>.GetTypeInfo().Assembly
     fbAssembly
 
-let private getInstallationFolder () =
+let getInstallationFolder () =
     let fbAssembly = getFullBuildAssembly ()
     let fbAssFI = fbAssembly.Location |> FileInfo
     fbAssFI.Directory

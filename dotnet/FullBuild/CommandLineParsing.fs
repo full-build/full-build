@@ -261,6 +261,7 @@ let ParseCommandLine (args : string list) : Command =
     match args with
     | [Token Token.Version] -> Command.Version
     | [Token Token.Help] -> Command.Usage
+    | [Token Token.Upgrade] -> Command.Upgrade
     | Token Token.Setup :: cmdArgs -> cmdArgs |> commandSetup 
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
