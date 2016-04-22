@@ -1,5 +1,6 @@
 ﻿module Upgrade
 
+open IoHelpers
 open FSharp.Data
 open System.IO
 open System.IO.Compression
@@ -91,30 +92,32 @@ let downloadZip zipUrl =
     new FileInfo(zipFile)
 
 let backupFile (file:FileInfo) = 
-        System.IO.File.Move(file.FullName, file.FullName+"_bkp")
+        System.IO.File.Move(file.FullName, file.FullName + "_bkp")
 
-let upgrade () =
+let Upgrade () =
     let installDir = Env.getInstallationFolder ()
     
     let backupFiles = installDir.GetFiles("*_bkp")
 
     if backupFiles.Length>0 then
         printfn "Cleaning installation folder from backup files"
-        backupFiles |> Seq.iter(fun x->File.Delete(x.FullName))
+        backupFiles |> Seq.iter (fun x -> File.Delete(x.FullName))
     else
         printfn "Upgrading"
         
         let zipUrl = getLatestReleaseUrl ()
         let downloadedZip = downloadZip zipUrl
         
-        installDir.GetFiles() |> Seq.iter(fun x->backupFile x)
+        installDir.GetFiles() |> Seq.iter (fun x->backupFile x)
 
-        let unzipFolder = installDir.FullName+"/tmp" |> DirectoryInfo
+        let unzipFolder = installDir |> GetSubDirectory "tmp"
         let archive = System.IO.Compression.ZipFile.ExtractToDirectory(downloadedZip.FullName, unzipFolder.FullName)
     
         let destinationFilePath tempFilePath = 
-            Path.Combine(installDir.FullName, Path.GetFileName(tempFilePath))
-        Directory.EnumerateFiles(unzipFolder.FullName) |> Seq.iter(fun x->File.Copy(x,destinationFilePath x,true))
-    
-        unzipFolder.Delete(true)
+                let file = installDir |> GetFile (Path.GetFileName(tempFilePath))
+                file.FullName
+
+        Directory.EnumerateFiles(unzipFolder.FullName) |> Seq.iter (fun x -> File.Copy(x, destinationFilePath x, true))
+
+        unzipFolder |> ForceDelete
 
