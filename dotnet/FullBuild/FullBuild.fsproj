@@ -110,6 +110,7 @@
     <Compile Include="BuildArtifacts.fs" />
     <Compile Include="Workspace.fs" />
     <Compile Include="Application.fs" />
+    <Compile Include="Upgrade.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="baseline.yaml" />
@@ -137,5 +138,6 @@
   </ItemGroup>
   <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Configuration/package.targets" Condition="'$(FullBuild_FSharp_Configuration_Pkg)' == ''" />
   <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Core/package.targets" Condition="'$(FullBuild_FSharp_Core_Pkg)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Data/package.targets" Condition="'$(FullBuild_FSharp_Data_Pkg)' == ''" />
   <Import Project="$(FBWorkspaceDir)/.full-build/packages/Mono.Cecil/package.targets" Condition="'$(FullBuild_Mono_Cecil_Pkg)' == ''" />
 </Project>
