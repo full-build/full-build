@@ -112,8 +112,9 @@ type BindProject =
 type Command = 
     | Version
     | Usage
+    | Upgrade
     | Error
-
+    
     // workspace
     | SetupWorkspace of SetupWorkspace
     | InitWorkspace of InitWorkspace

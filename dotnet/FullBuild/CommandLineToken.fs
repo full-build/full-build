@@ -52,6 +52,7 @@ type Token =
     | Version
     | Workspace
     | Help
+    | Upgrade
     | Setup
     | Init
     | Clone
@@ -98,6 +99,7 @@ let (|Token|) (token : string) =
     | "workspace" -> Workspace
 
     | "help" -> Help
+    | "upgrade" -> Upgrade
     | "setup" -> Setup
     | "init" -> Init
     | "clone" -> Clone
