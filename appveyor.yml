@@ -8,19 +8,34 @@ skip_tags: true
 
 version: 2.2.{build}
 
+clone_depth: 1
+
 build_script:
   - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION%.*
   
 test:
   assemblies:
   
-deploy_script:
-  - cmd: push.cmd
+#deploy_script:
+#  - cmd: push.cmd
   
 artifacts:
   path: apps/full-build.zip
   name: full-build
 
+deploy:
+  release: 'full-build v$(appveyor_build_version)'
+  description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
+  provider: GitHub
+  auth_token:
+    secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
+  artifact: apps/full-build.zip
+  draft: false
+  prerelease: true
+  on:
+    branch: master
+    appveyor_repo_tag: false
+  
 notifications:
   - provider: GitHubPullRequest
     auth_token:
