@@ -7,7 +7,7 @@ call :dopublish || goto :ko
 goto :ok
 
 :dopublish
-%HERE%\dotnet\fullbuild\bin\fullbuild publish * || goto :ko
+%HERE%\src\fullbuild\bin\fullbuild publish * || goto :ko
 robocopy %HERE%\apps\full-build %HERE%\refbin /MIR
 verify >nul
 goto :eof
