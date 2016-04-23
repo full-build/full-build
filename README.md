@@ -35,7 +35,7 @@ Then:
 
 Once build is done, binaries are in refbin folder.
 
-Note that before using Visual Studio or Xamarin Studio, you have to compile first as this setup development environment. Solution bootstrap.sln can then be used.
+Note that before using Visual Studio or Xamarin Studio, you have to compile first as this setup development environment. Solution fullbuild.sln can then be used.
 
 # contribution
 Contributions are welcomed. Ensure you have read CONTRIBUTING.md and LICENSE.txt before sending PR.
