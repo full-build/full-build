@@ -8,13 +8,15 @@ open FSharp.Data
 type Tags = JsonProvider<"ghreleasefeed.json">
 
 let getLatestReleaseUrl () = 
-    let path = @"https://api.github.com/repos/full-build/full-build/releases"
-    let result = Http.RequestString(path,customizeHttpRequest=fun x->x.UserAgent<-"fullbuild";x)
+    let path = @"https://api.github.com/repos/full-build/full-build/releases/latest"
+    let result = Http.RequestString(path, 
+                                    customizeHttpRequest = fun x -> x.UserAgent<-"fullbuild"; x)
     let tags = Tags.Parse(result)
     tags.[0].Assets.[0].BrowserDownloadUrl
 
 let downloadZip zipUrl = 
-    let response = Http.Request(zipUrl,customizeHttpRequest=fun x->x.UserAgent<-"fullbuild";x)
+    let response = Http.Request(zipUrl, 
+                                customizeHttpRequest = fun x -> x.UserAgent <- "fullbuild"; x)
     let zipFile = Path.GetTempFileName()
     match response.Body with
         | Binary bytes -> System.IO.File.WriteAllBytes(zipFile, bytes)
@@ -22,7 +24,7 @@ let downloadZip zipUrl =
     new FileInfo(zipFile)
 
 let backupFile (file:FileInfo) = 
-        System.IO.File.Move(file.FullName, file.FullName + "_bkp")
+    System.IO.File.Move(file.FullName, file.FullName + "_bkp")
 
 let Upgrade () =
     let installDir = Env.getInstallationFolder ()
@@ -38,7 +40,7 @@ let Upgrade () =
         let zipUrl = getLatestReleaseUrl ()
         let downloadedZip = downloadZip zipUrl
         
-        installDir.GetFiles() |> Seq.iter (fun x->backupFile x)
+        installDir.GetFiles() |> Seq.iter backupFile
 
         let unzipFolder = installDir |> GetSubDirectory "tmp"
         let archive = System.IO.Compression.ZipFile.ExtractToDirectory(downloadedZip.FullName, unzipFolder.FullName)
