@@ -16,6 +16,9 @@ build_script:
 test:
   assemblies:
   
+after_test:
+  - ps: pushtestresult.ps1
+
 #deploy_script:
 #  - cmd: push.cmd
   
