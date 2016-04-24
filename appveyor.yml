@@ -17,7 +17,7 @@ test:
   assemblies:
   
 after_test:
-  - ps: (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit2/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\TestResult.xml))
+  - ps: (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit2/$(appveyor_job_id)", (Resolve-Path .\TestResult.xml))
 
 artifacts:
   path: apps/full-build.zip
