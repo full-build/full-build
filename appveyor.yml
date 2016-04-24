@@ -8,13 +8,13 @@ skip_tags: true
 
 version: 2.2.{build}
 
-clone_depth: 1
+shallow_clone: true
 
 build_script:
   - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION%.*
   
 test_script:
-  - ps: . pushtestresult.ps1
+  - ps: . .\pushtestresult.ps1
 
 artifacts:
   path: apps/full-build.zip
