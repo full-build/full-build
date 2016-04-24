@@ -13,11 +13,8 @@ clone_depth: 1
 build_script:
   - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION%.*
   
-test:
-  assemblies:
-  
-after_test:
-  - ps: (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit2/$(appveyor_job_id)", (Resolve-Path .\TestResult.xml))
+test_script:
+  - ps: . pushtestresult.ps1
 
 artifacts:
   path: apps/full-build.zip
