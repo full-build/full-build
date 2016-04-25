@@ -38,7 +38,10 @@ let Exec checkErrorCode (command : string) (args : string) (dir : DirectoryInfo)
 let ExecVerb (command : string) (verb : string) =
     let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Verb = verb)
     Process.Start (psi) |> ignore
-    
+ 
+let ExecWithArguments (command : string) (args : string) =
+    let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Arguments = args)
+    Process.Start (psi) |> ignore   
 
 let ExecReadLine checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) = 
     let mutable psi = defaultPSI command args dir

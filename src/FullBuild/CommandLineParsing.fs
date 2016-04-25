@@ -259,6 +259,7 @@ let commandHistory (args : string list) =
 let commandUpgrade (args : string list) =
     match args with
     | [] -> Command.Upgrade
+    | processId::[] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))
     | _ -> Command.Error
 
 
