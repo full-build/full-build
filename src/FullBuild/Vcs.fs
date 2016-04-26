@@ -104,7 +104,7 @@ let private gitClone (isGerrit : bool) (shallow : bool) (branch : BranchId optio
                  | None -> "--no-single-branch"
                  | Some x -> sprintf "--branch %s --single-branch" x.toString
 
-    let depth = shallow ? ("--depth=3", "")
+    let depth = shallow ?/ ("--depth=3", "")
 
     let args = sprintf @"clone %s --quiet %s %s %A" url bronly depth target.FullName
 
