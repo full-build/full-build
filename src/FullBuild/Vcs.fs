@@ -17,6 +17,7 @@ module Vcs
 open Anthology
 open System.IO
 open IoHelpers
+open Collections
 
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
@@ -103,8 +104,7 @@ let private gitClone (isGerrit : bool) (shallow : bool) (branch : BranchId optio
                  | None -> "--no-single-branch"
                  | Some x -> sprintf "--branch %s --single-branch" x.toString
 
-    let depth = if shallow then "--depth=3"
-                else ""
+    let depth = shallow ? ("--depth=3", "")
 
     let args = sprintf @"clone %s --quiet %s %s %A" url bronly depth target.FullName
 
