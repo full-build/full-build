@@ -28,7 +28,7 @@ deploy:
     secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
   artifact: apps/full-build.zip
   draft: false
-  prerelease: true
+  prerelease: false
   on:
     branch: master
     appveyor_repo_tag: false
