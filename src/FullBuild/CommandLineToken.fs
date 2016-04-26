@@ -28,7 +28,7 @@ type TokenOption =
     | Version
     | Sticky
     | Rebase
-    | Optimize
+    | Reset
     | Unknown
 
 let (|TokenOption|) (token : string) =
@@ -45,6 +45,7 @@ let (|TokenOption|) (token : string) =
     | "--version" -> TokenOption.Version
     | "--sticky" -> TokenOption.Sticky
     | "--rebase" -> TokenOption.Rebase
+    | "--reset" -> TokenOption.Reset
     | _ -> Unknown
 
 
@@ -69,6 +70,7 @@ type Token =
     | Publish
     | Pull
     | Checkout
+    | Branch
     | Exec
     | Test
     | Alter
@@ -115,6 +117,7 @@ let (|Token|) (token : string) =
     | "publish" -> Publish
     | "pull" -> Pull
     | "checkout" -> Checkout
+    | "branch" -> Branch
     | "exec" -> Exec
     | "clean" -> Clean
     | "test" -> Test
