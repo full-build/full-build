@@ -13,6 +13,7 @@ let getLatestReleaseUrl () =
     let result = Http.RequestString(path, 
                                     customizeHttpRequest = fun x -> x.UserAgent<-"fullbuild"; x)
     let releases = GitRelease.Parse(result)
+    printfn "Latest version: %s" releases.Name
     releases.Assets.[0].BrowserDownloadUrl
 
 let downloadZip zipUrl = 
