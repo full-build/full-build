@@ -99,14 +99,13 @@ let private hgIs (uri : RepositoryUrl) =
 
 
 let private gitClone (isGerrit : bool) (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
-    let bronly = match branch with
-                 | None -> ""
-                 | Some x -> sprintf "--branch %s" x.toString
+    let brco = match branch with
+               | Some x when not shallow -> sprintf "--branch %s --single-branch" x.toString
+               | Some x when shallow -> sprintf "--depth=3 --branch %s --single-branch" x.toString
+               | None when shallow -> "--depth=3"
+               | _ -> ""
 
-    let depth = if shallow then "--depth=3 --single-branch"
-                else ""
-
-    let args = sprintf @"clone %s --quiet %s %s %A" url depth bronly target.FullName
+    let args = sprintf @"clone %s --quiet %s %A" url brco target.FullName
 
     let currDir = IoHelpers.CurrentFolder ()
     checkedExec "git" args currDir
