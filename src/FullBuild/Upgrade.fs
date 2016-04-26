@@ -32,9 +32,13 @@ let deleteBackupFiles (dir:DirectoryInfo) =
     dir.GetFiles("*_bkp")|> Seq.iter (fun x -> File.Delete(x.FullName))    
 
 let waitProcessToExit processId = 
-    let processInfo = Process.GetProcessById(processId)
-    if not (processInfo=null) then
-        processInfo.WaitForExit()
+    try
+        let processInfo = Process.GetProcessById(processId)
+        if not (processInfo=null) then
+            processInfo.WaitForExit()
+    with
+        | :? System.ArgumentException -> ()
+        | _ -> reraise()
 
 let FinalizeUpgrade processId =
     printfn "Cleaning installation folder from backup files"
