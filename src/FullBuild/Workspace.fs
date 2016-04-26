@@ -137,20 +137,25 @@ let Checkout (version : BookmarkVersion) =
     // update binaries with observable baseline
     BuildArtifacts.PullReferenceBinaries version.toString
 
-let Branch (branch : BookmarkVersion) =
+let Branch (branch : BookmarkVersion option) =
     // checkout repositories
     DisplayHighlight ".full-build"
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
     let mainRepo = antho.MasterRepository
-    Vcs.VcsCheckout wsDir antho.Vcs mainRepo (Some branch) false
+    Vcs.VcsCheckout wsDir antho.Vcs mainRepo branch false
 
     // checkout each repository now
     let antho = Configuration.LoadAnthology ()
     let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
     for repo in clonedRepos do
         DisplayHighlight repo.Name.toString
-        Vcs.VcsCheckout wsDir antho.Vcs repo (Some branch) true
+        let repoVer = match branch with
+                      | None -> match repo.Branch with
+                                | None -> None
+                                | Some x -> Some (BookmarkVersion.from x.toString)
+                      | Some x -> Some x
+        Vcs.VcsCheckout wsDir antho.Vcs repo repoVer true
 
 
 let Pull (src : bool) (bin : bool) (rebase : bool) =

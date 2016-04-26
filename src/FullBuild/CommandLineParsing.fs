@@ -126,7 +126,8 @@ let commandCheckout (args : string list) =
 
 let commandBranch (args : string list) =
     match args with
-    | [MatchBookmarkVersion version] -> Command.BranchWorkspace {Version = version}
+    | [MatchBookmarkVersion version] -> Command.BranchWorkspace {Branch = Some version}
+    | [] -> Command.BranchWorkspace {Branch = None}
     | _ -> Command.Error
 
 let commandPush (args : string list) =
@@ -351,7 +352,7 @@ let UsageContent() =
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
         "  clone [--shallow] [--all] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
-        "  branch <branch> : checkout workspace to branch"
+        "  branch [<branch>] : checkout workspace to branch"
         "  install : install packages"
         "  view [--src] <view-name> <view-wildcard>+ : add repositories to view"
         "  open [--src] <viewName> : open view with your favorite ide"
