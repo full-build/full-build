@@ -113,6 +113,7 @@ type Command =
     | Version
     | Usage
     | Upgrade
+    | FinalizeUpgrade of int
     | Error
     
     // workspace

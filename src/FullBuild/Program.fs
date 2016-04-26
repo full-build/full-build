@@ -71,6 +71,7 @@ let tryMain argv =
 
     // misc
     | Upgrade -> Upgrade.Upgrade ()
+    | FinalizeUpgrade processId -> Upgrade.FinalizeUpgrade processId
     | Version -> DisplayVersion ()
     | Usage -> DisplayUsage ()
     | Error -> DisplayUsage ()
