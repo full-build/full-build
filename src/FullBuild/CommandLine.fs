@@ -31,6 +31,9 @@ type InitWorkspace =
 type CheckoutWorkspace = 
     { Version : string }
 
+type BranchWorkspace = 
+    { Branch : string }
+
 type CloneRepositories = 
     { Filters : RepositoryId set 
       Shallow : bool
@@ -123,6 +126,7 @@ type Command =
     | ConvertRepositories of ConvertRepositories
     | PushWorkspace of PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
+    | BranchWorkspace of CheckoutVersion
     | PullWorkspace of PullWorkspace
     | Exec of Exec
     | CleanWorkspace

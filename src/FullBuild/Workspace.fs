@@ -121,7 +121,7 @@ let Checkout (version : BookmarkVersion) =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
     let mainRepo = antho.MasterRepository
-    Vcs.VcsCheckout wsDir antho.Vcs mainRepo (Some version)
+    Vcs.VcsCheckout wsDir antho.Vcs mainRepo (Some version) false
 
     // checkout each repository now
     let antho = Configuration.LoadAnthology ()
@@ -131,11 +131,27 @@ let Checkout (version : BookmarkVersion) =
         DisplayHighlight repo.Name.toString
         let repoVersion = baseline.Bookmarks |> Seq.tryFind (fun x -> x.Repository = repo.Name)
         match repoVersion with
-        | Some x -> Vcs.VcsCheckout wsDir antho.Vcs repo (Some x.Version)
-        | None -> Vcs.VcsCheckout wsDir antho.Vcs repo None
+        | Some x -> Vcs.VcsCheckout wsDir antho.Vcs repo (Some x.Version) false
+        | None -> Vcs.VcsCheckout wsDir antho.Vcs repo None false
 
     // update binaries with observable baseline
     BuildArtifacts.PullReferenceBinaries version.toString
+
+let Branch (branch : BookmarkVersion) =
+    // checkout repositories
+    DisplayHighlight ".full-build"
+    let antho = Configuration.LoadAnthology ()
+    let wsDir = Env.GetFolder Env.Workspace
+    let mainRepo = antho.MasterRepository
+    Vcs.VcsCheckout wsDir antho.Vcs mainRepo (Some branch) false
+
+    // checkout each repository now
+    let antho = Configuration.LoadAnthology ()
+    let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
+    for repo in clonedRepos do
+        DisplayHighlight repo.Name.toString
+        Vcs.VcsCheckout wsDir antho.Vcs repo (Some branch) true
+
 
 let Pull (src : bool) (bin : bool) (rebase : bool) =
     let antho = Configuration.LoadAnthology ()

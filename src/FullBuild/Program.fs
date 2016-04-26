@@ -29,6 +29,7 @@ let tryMain argv =
     | ConvertRepositories convInfo -> Workspace.Convert convInfo.Filters
     | PushWorkspace buildInfo -> Workspace.Push buildInfo.BuildNumber
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
+    | BranchWorkspace branch -> Workspace.Branch branch.Version
     | PullWorkspace pullInfo -> Workspace.Pull pullInfo.Src pullInfo.Bin pullInfo.Rebase
     | Exec cmd -> Workspace.Exec cmd.Command cmd.All
     | CleanWorkspace -> Workspace.Clean ()

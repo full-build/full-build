@@ -17,12 +17,20 @@ module Vcs
 open Anthology
 open System.IO
 open IoHelpers
+open Collections
 
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
 
+let private checkIgnore err =
+    ()
+
 let private checkedExec = 
     Exec.Exec checkErrorCode
+
+let private checkedExecMaybeIgnore ignoreError = 
+    let check = if ignoreError then checkIgnore else checkErrorCode
+    Exec.Exec check
 
 let private checkedExecReadLine =
     Exec.ExecReadLine checkErrorCode
@@ -130,21 +138,21 @@ let private hgClone (branch : BranchId option) (target : DirectoryInfo) (url : s
     checkedExec "hg" args currDir
 
 
-let private gitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) = 
+let private gitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ignoreError : bool) = 
     let rev = match version with
               | Some (BookmarkVersion x) -> x
               | None -> "master"
 
     let args = sprintf "checkout %A" rev
-    checkedExec "git" args repoDir
+    checkedExecMaybeIgnore ignoreError "git" args repoDir
 
-let private hgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) = 
+let private hgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ignoreError : bool) = 
     let rev = match version with
               | Some (BookmarkVersion x) -> x
               | None -> "tip"
 
     let args = sprintf "update -r %A" rev
-    checkedExec "hg" args repoDir
+    checkedExecMaybeIgnore ignoreError "hg" args repoDir
 
 let private gitHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =     
     let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version.toString
@@ -191,8 +199,8 @@ let VcsTip (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
     chooseVcs wsDir vcsType repo gitTip hgTip
 
 // version : None ==> master
-let VcsCheckout (wsDir : DirectoryInfo) (vcsType : VcsType) repo (version : BookmarkVersion option) = 
-    (chooseVcs wsDir vcsType repo gitCheckout hgCheckout) version
+let VcsCheckout (wsDir : DirectoryInfo) (vcsType : VcsType) repo (version : BookmarkVersion option) (ignore : bool) = 
+    (chooseVcs wsDir vcsType repo gitCheckout hgCheckout) version ignore
 
 let VcsIgnore (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
     chooseVcs wsDir vcsType repo  gitIgnore hgIgnore

@@ -69,6 +69,7 @@ type Token =
     | Publish
     | Pull
     | Checkout
+    | Branch
     | Exec
     | Test
     | Alter
@@ -115,6 +116,7 @@ let (|Token|) (token : string) =
     | "publish" -> Publish
     | "pull" -> Pull
     | "checkout" -> Checkout
+    | "branch" -> Branch
     | "exec" -> Exec
     | "clean" -> Clean
     | "test" -> Test
