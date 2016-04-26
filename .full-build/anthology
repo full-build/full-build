@@ -5,7 +5,6 @@ anthology:
   test: nunit
   vcs: git
   mainrepository:
-    branch: master
     uri: http://www.google.com/
   repositories:
     - repo: src

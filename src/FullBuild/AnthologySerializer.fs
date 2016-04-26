@@ -50,9 +50,6 @@ let Serialize (antho : Anthology) =
 
     let cmainrepo = config.anthology.mainrepository
     cmainrepo.uri <- Uri (antho.MasterRepository.Url.toString)
-    match antho.MasterRepository.Branch with
-    | None -> cmainrepo.branch <- null
-    | Some x -> cmainrepo.branch <- x.toString
 
     config.anthology.projects.Clear()
     for project in antho.Projects do
@@ -97,10 +94,8 @@ let Deserialize (content) =
         | x :: tail -> (RepositoryUrl.from (x.nuget)) :: convertToNuGets tail
 
     let convertToRepository (item : AnthologyConfig.anthology_Type.mainrepository_Type) : Repository =  
-        let maybeBranch = if String.IsNullOrEmpty(item.branch) then None
-                          else item.branch |> BranchId.from |> Some
         { Url = RepositoryUrl.from (item.uri)
-          Branch = maybeBranch 
+          Branch = None 
           Name = RepositoryId.from Env.MASTER_REPO }
 
     let rec convertToBuildableRepositories (items : AnthologyConfig.anthology_Type.repositories_Item_Type list) =
