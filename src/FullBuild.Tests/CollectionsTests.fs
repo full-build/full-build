@@ -6,6 +6,6 @@ open Collections
 
 [<Test>]
 let CheckTernary () =
-    true ?/ ("a", "b") |> should equal ("a")
-    false ?/ ("a", "b") |> should equal ("b")
+    true ? ("a", "b") |> should equal ("a")
+    false ? ("a", "b") |> should equal ("b")
 
