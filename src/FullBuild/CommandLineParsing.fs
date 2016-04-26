@@ -126,7 +126,7 @@ let commandCheckout (args : string list) =
 
 let commandBranch (args : string list) =
     match args with
-    | [MatchBookmarkVersion version] -> Command.CheckoutWorkspace {Version = version}
+    | [MatchBookmarkVersion version] -> Command.BranchWorkspace {Version = version}
     | _ -> Command.Error
 
 let commandPush (args : string list) =
