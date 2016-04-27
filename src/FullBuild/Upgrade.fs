@@ -44,6 +44,9 @@ let FinalizeUpgrade processId =
     printfn "Cleaning installation folder from backup files"
     waitProcessToExit processId
     Env.getInstallationFolder () |> deleteBackupFiles
+
+let getSameFiles (firstDir:DirectoryInfo) (secondDir:DirectoryInfo) =
+    firstDir.GetFiles() |> Seq.where(fun x-> (secondDir |> IoHelpers.GetFile x.Name).Exists)
     
 let Upgrade () =
     printfn "Upgrading"
@@ -53,11 +56,11 @@ let Upgrade () =
     let zipUrl = getLatestReleaseUrl ()
     let downloadedZip = downloadZip zipUrl
         
-    installDir.GetFiles() |> Seq.iter backupFile
-
     let unzipFolder = installDir |> GetSubDirectory "tmp"
-    let archive = System.IO.Compression.ZipFile.ExtractToDirectory(downloadedZip.FullName, unzipFolder.FullName)
+    System.IO.Compression.ZipFile.ExtractToDirectory(downloadedZip.FullName, unzipFolder.FullName)
     
+    getSameFiles installDir unzipFolder |> Seq.iter backupFile
+
     let destinationFilePath tempFilePath = 
             let file = installDir |> GetFile (Path.GetFileName(tempFilePath))
             file.FullName
