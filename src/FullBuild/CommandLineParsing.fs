@@ -124,6 +124,12 @@ let commandCheckout (args : string list) =
     | [MatchBookmarkVersion version] -> Command.CheckoutWorkspace {Version = version}
     | _ -> Command.Error
 
+let commandBranch (args : string list) =
+    match args with
+    | [MatchBookmarkVersion version] -> Command.BranchWorkspace {Branch = Some version}
+    | [] -> Command.BranchWorkspace {Branch = None}
+    | _ -> Command.Error
+
 let commandPush (args : string list) =
     match args with
     | [buildNumber] -> Command.PushWorkspace { BuildNumber = buildNumber }
@@ -280,6 +286,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
+    | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
     | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
@@ -345,6 +352,7 @@ let UsageContent() =
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
         "  clone [--shallow] [--all] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
+        "  branch [<branch>] : checkout workspace to branch"
         "  install : install packages"
         "  view [--src] <view-name> <view-wildcard>+ : add repositories to view"
         "  open [--src] <viewName> : open view with your favorite ide"
