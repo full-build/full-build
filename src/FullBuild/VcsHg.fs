@@ -16,7 +16,6 @@ module VcsHg
 
 open Anthology
 open System.IO
-open IoHelpers
 
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
@@ -27,16 +26,15 @@ let private checkedExec =
 let private checkedExecReadLine =
     Exec.ExecReadLine checkErrorCode
 
+
 let HgCommit (repoDir : DirectoryInfo) (comment : string) =
     checkedExec "git" "add -S *" repoDir
     let args = sprintf "commit -A -m %A" comment
     checkedExec "hg" args repoDir
 
-
 let HgPush (repoDir : DirectoryInfo) =
     checkedExec "hg" "push" repoDir
     
-
 let HgPull (repoDir : DirectoryInfo) =
     checkedExec "hg" "pull -u" repoDir
 
@@ -44,7 +42,6 @@ let HgTip (repoDir : DirectoryInfo) =
     let args = @"id -i"
     let res = checkedExecReadLine "hg" args repoDir
     res
-
 
 let HgClean (repoDir : DirectoryInfo) (repo : Repository) =
     checkedExec "hg" "purge" repoDir
@@ -67,7 +64,6 @@ let HgClone (branch : BranchId option) (target : DirectoryInfo) (url : string) =
     let currDir = IoHelpers.CurrentFolder ()
     checkedExec "hg" args currDir
 
-
 let HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) = 
     let rev = match version with
               | Some (BookmarkVersion x) -> x
@@ -75,7 +71,6 @@ let HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) =
 
     let args = sprintf "update -r %A" rev
     checkedExec "hg" args repoDir
-
 
 let HgHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
     null

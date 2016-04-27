@@ -16,7 +16,6 @@ module VcsGit
 
 open Anthology
 open System.IO
-open IoHelpers
 
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
@@ -32,16 +31,13 @@ let GitCommit (repoDir : DirectoryInfo) (comment : string) =
     let args = sprintf "commit -m %A" comment
     checkedExec "git" args repoDir
 
-
 let GitPush (repoDir : DirectoryInfo) =
     checkedExec "git" "push --quiet" repoDir
-
 
 let GitPull (rebase : bool) (repoDir : DirectoryInfo) =
     let dorebase = if rebase then "--rebase" else "--ff-only"
     let args = sprintf "pull %s" dorebase
     checkedExec "git" args  repoDir
-
 
 let GitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=%H"
@@ -57,7 +53,6 @@ let GitClean (repoDir : DirectoryInfo) (repo : Repository) =
     checkedExec "git" "clean -fxd" repoDir
     checkedExec "git" (sprintf "checkout %s" br) repoDir
 
-
 let GitIs (uri : RepositoryUrl) =
     try
         let currDir = IoHelpers.CurrentFolder()
@@ -66,7 +61,6 @@ let GitIs (uri : RepositoryUrl) =
         true
     with
         _ -> false
-
 
 let GitClone (isGerrit : bool) (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
     let bronly = match branch with
@@ -89,7 +83,6 @@ let GitClone (isGerrit : bool) (shallow : bool) (branch : BranchId option) (targ
                             |> IoHelpers.GetFile "commit-msg"
         commitMsgFile.CopyTo (target.FullName) |> ignore
 
-
 let GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) = 
     let rev = match version with
               | Some (BookmarkVersion x) -> x
@@ -108,7 +101,6 @@ let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
     let res = checkedExecReadLine "git" args repoDir
     let ver = BookmarkVersion.from res
     Some ver
-    
 
 let GitIgnore (repoDir : DirectoryInfo) =
     let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"
