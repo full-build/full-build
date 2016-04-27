@@ -87,7 +87,7 @@ let CollectRepoHash wsDir vcsType (repos : Repository set) =
     repos |> Set.map getRepoHash
 
 
-let Push buildnum = 
+let Push (branch : string option) buildnum = 
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
     let allRepos = antho.Repositories
@@ -103,7 +103,7 @@ let Push buildnum =
 
     // copy bin content
     let hash = Vcs.VcsTip wsDir antho.Vcs mainRepo
-    BuildArtifacts.Publish buildnum hash
+    BuildArtifacts.Publish branch buildnum hash
 
 let CloneStickyRepositories (wsDir : DirectoryInfo) =
     let currDir = System.Environment.CurrentDirectory

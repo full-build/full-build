@@ -107,7 +107,8 @@ type PullWorkspace =
       Rebase : bool }
 
 type PushWorkspace =
-    { BuildNumber : string }
+    { BuildNumber : string 
+      Branch : string option }
 
 type BindProject =
     { Filters : string list }
