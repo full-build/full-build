@@ -62,7 +62,7 @@ let GitIs (uri : RepositoryUrl) =
     with
         _ -> false
 
-let GitClone (isGerrit : bool) (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
+let GitClone (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
     let bronly = match branch with
                  | None -> "--no-single-branch"
                  | Some x -> sprintf "--branch %s --single-branch" x.toString
@@ -75,13 +75,28 @@ let GitClone (isGerrit : bool) (shallow : bool) (branch : BranchId option) (targ
     let currDir = IoHelpers.CurrentFolder ()
     checkedExec "git" args currDir
 
-    if isGerrit then
-        let installDir = Env.GetFolder Env.Installation
-        let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
-        let target = target |> IoHelpers.GetSubDirectory ".git"
-                            |> IoHelpers.GetSubDirectory "hooks" 
-                            |> IoHelpers.GetFile "commit-msg"
-        commitMsgFile.CopyTo (target.FullName) |> ignore
+let GerritClone (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
+    let bronly = match branch with
+                 | None -> "--no-single-branch"
+                 | Some x -> sprintf "--branch %s --single-branch" x.toString
+
+    let depth = if shallow then "--depth=3"
+                else ""
+
+    let args = sprintf @"clone %s --quiet %s %s %A" url bronly depth target.FullName
+
+    let currDir = IoHelpers.CurrentFolder ()
+    checkedExec "git" args currDir
+
+    let installDir = Env.GetFolder Env.Installation
+    let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
+    let target = target |> IoHelpers.GetSubDirectory ".git"
+                        |> IoHelpers.GetSubDirectory "hooks" 
+                        |> IoHelpers.GetFile "commit-msg"
+    commitMsgFile.CopyTo (target.FullName) |> ignore
+
+
+
 
 let GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) = 
     let rev = match version with

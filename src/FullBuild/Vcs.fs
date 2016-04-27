@@ -29,7 +29,8 @@ let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gi
     f repoDir
 
 let VcsClone (wsDir : DirectoryInfo) (vcsType : VcsType) (shallow : bool) (repo : Repository) =
-    let gitCloneFunc =  GitClone (vcsType = VcsType.Gerrit) shallow repo.Branch
+    let gitCloneFunc = if vcsType = VcsType.Gerrit then GitClone shallow repo.Branch
+                                                   else GerritClone shallow repo.Branch
     let hgCloneFunc = HgClone repo.Branch
     (chooseVcs wsDir vcsType repo gitCloneFunc hgCloneFunc) repo.Url.toString
 
