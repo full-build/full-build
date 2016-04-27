@@ -20,12 +20,18 @@ open System.IO
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
 
+let private checkIgnore err =
+    ()
+
 let private checkedExec = 
     Exec.Exec checkErrorCode
 
+let private checkedExecMaybeIgnore ignoreError = 
+    let check = if ignoreError then checkIgnore else checkErrorCode
+    Exec.Exec check
+
 let private checkedExecReadLine =
     Exec.ExecReadLine checkErrorCode
-
 
 let HgCommit (repoDir : DirectoryInfo) (comment : string) =
     checkedExec "git" "add -S *" repoDir
@@ -64,13 +70,13 @@ let HgClone (branch : BranchId option) (target : DirectoryInfo) (url : string) =
     let currDir = IoHelpers.CurrentFolder ()
     checkedExec "hg" args currDir
 
-let HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) = 
+let HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ignoreError : bool) = 
     let rev = match version with
               | Some (BookmarkVersion x) -> x
               | None -> "tip"
 
     let args = sprintf "update -r %A" rev
-    checkedExec "hg" args repoDir
+    checkedExecMaybeIgnore ignoreError "hg" args repoDir
 
 let HgHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
     null

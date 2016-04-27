@@ -20,11 +20,18 @@ open System.IO
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
 
+let private checkIgnore err =
+    ()
+
 let private checkedExec = 
     Exec.Exec checkErrorCode
 
 let private checkedExecReadLine =
     Exec.ExecReadLine checkErrorCode
+
+let private checkedExecMaybeIgnore ignoreError = 
+    let check = if ignoreError then checkIgnore else checkErrorCode
+    Exec.Exec check
 
 let GitCommit (repoDir : DirectoryInfo) (comment : string) =
     checkedExec "git" "add --all" repoDir
@@ -95,16 +102,13 @@ let GerritClone (shallow : bool) (branch : BranchId option) (target : DirectoryI
                         |> IoHelpers.GetFile "commit-msg"
     commitMsgFile.CopyTo (target.FullName) |> ignore
 
-
-
-
-let GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) = 
+let GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ignoreError : bool) = 
     let rev = match version with
               | Some (BookmarkVersion x) -> x
               | None -> "master"
 
     let args = sprintf "checkout %A" rev
-    checkedExec "git" args repoDir
+    checkedExecMaybeIgnore ignoreError "git" args repoDir
 
 let GitHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =     
     let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version.toString

@@ -63,6 +63,9 @@ type PublishApplications =
 type CheckoutVersion =
     { Version : BookmarkVersion }
 
+type BranchWorkspace = 
+    { Branch : BookmarkVersion option }
+
 type AddApplication =
     { Name : ApplicationId
       Publisher : PublisherType
@@ -104,7 +107,8 @@ type PullWorkspace =
       Rebase : bool }
 
 type PushWorkspace =
-    { BuildNumber : string }
+    { BuildNumber : string 
+      Branch : string option }
 
 type BindProject =
     { Filters : string list }
@@ -123,6 +127,7 @@ type Command =
     | ConvertRepositories of ConvertRepositories
     | PushWorkspace of PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
+    | BranchWorkspace of BranchWorkspace
     | PullWorkspace of PullWorkspace
     | Exec of Exec
     | CleanWorkspace

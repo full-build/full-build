@@ -124,9 +124,16 @@ let commandCheckout (args : string list) =
     | [MatchBookmarkVersion version] -> Command.CheckoutWorkspace {Version = version}
     | _ -> Command.Error
 
-let commandPush (args : string list) =
+let commandBranch (args : string list) =
     match args with
-    | [buildNumber] -> Command.PushWorkspace { BuildNumber = buildNumber }
+    | [MatchBookmarkVersion version] -> Command.BranchWorkspace {Branch = Some version}
+    | [] -> Command.BranchWorkspace {Branch = None}
+    | _ -> Command.Error
+
+let rec commandPush (branch : string option) (args : string list) =
+    match args with
+    | TokenOption TokenOption.Branch :: branch :: tail -> tail |> commandPush (Some branch)
+    | [buildNumber] -> Command.PushWorkspace {Branch = branch; BuildNumber = buildNumber }
     | _ -> Command.Error
 
 let rec commandPull (src : bool) (bin : bool) (rebase : bool) (args : string list) =
@@ -280,7 +287,8 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
-    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush
+    | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
+    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush None
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
@@ -345,6 +353,7 @@ let UsageContent() =
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
         "  clone [--shallow] [--all] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
+        "  branch [<branch>] : checkout workspace to branch"
         "  install : install packages"
         "  view [--src] <view-name> <view-wildcard>+ : add repositories to view"
         "  open [--src] <viewName> : open view with your favorite ide"
@@ -356,7 +365,7 @@ let UsageContent() =
         "  index <repo-wildcard>+ : index repositories"
         "  convert <repo-wildcard> : convert projects in repositories"
         "  pull [--src|--bin] [--rebase] : update to latest version - rebase if requested (ff is default)"
-        "  push <buildNumber> : push a baseline from current repositories version and display version"
+        "  push [--branch <branch>] <buildNumber> : push a baseline from current repositories version and display version"
         "  publish <app> : publish application"
         "  bind <projectId-wildcard>+ : update bindings"
         "  clean : DANGER! reset and clean workspace (interactive command)"

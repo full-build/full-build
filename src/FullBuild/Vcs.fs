@@ -18,6 +18,7 @@ open Anthology
 open System.IO
 open VcsHg
 open VcsGit
+open Collections
 
 
 let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gitFun hgFun =
@@ -38,8 +39,8 @@ let VcsTip (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
     chooseVcs wsDir vcsType repo GitTip HgTip
 
 // version : None ==> master
-let VcsCheckout (wsDir : DirectoryInfo) (vcsType : VcsType) repo (version : BookmarkVersion option) = 
-    (chooseVcs wsDir vcsType repo GitCheckout HgCheckout) version
+let VcsCheckout (wsDir : DirectoryInfo) (vcsType : VcsType) repo (version : BookmarkVersion option) (ignore : bool) = 
+    (chooseVcs wsDir vcsType repo GitCheckout HgCheckout) version ignore
 
 let VcsIgnore (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
     chooseVcs wsDir vcsType repo  GitIgnore HgIgnore
