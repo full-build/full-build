@@ -31,10 +31,15 @@ let filterClonedRepositories (wsDir : System.IO.DirectoryInfo) (repo : Repositor
     let exists = repoDir.Exists
     exists
 
+
+let private adaptViewFilter (filter : string) =
+    if filter.Contains("/") || filter.Contains("*") then filter
+    else filter + "/*"
+
 let findViewProjects (view : View) =
     // load back filter & generate view accordingly
     let wsDir = Env.GetFolder Folder.Workspace
-    let repoFilters = view.Filters |> Set
+    let repoFilters = view.Filters |> Set.map adaptViewFilter
 
     let antho = Configuration.LoadAnthology ()
 
