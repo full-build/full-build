@@ -85,6 +85,8 @@
     <Compile Include="MsBuildHelpers.fs" />
     <Compile Include="PaketInterface.fs" />
     <Compile Include="ProjectParsing.fs" />
+    <Compile Include="VcsHg.fs" />
+    <Compile Include="VcsGit.fs" />
     <Compile Include="Vcs.fs" />
     <Compile Include="CommandLine.fs" />
     <Compile Include="CommandLineToken.fs" />

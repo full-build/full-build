@@ -19,7 +19,7 @@ open Anthology
 
 
 
-let Publish buildnum hash =
+let Publish (branch : string option) buildnum hash =
     let antho = Configuration.LoadAnthology ()
     let mainRepo = antho.MasterRepository
     let wsDir = Env.GetFolder Env.Workspace
@@ -47,7 +47,9 @@ let Publish buildnum hash =
             printfn "[WARNING] Build output already exists - skipping"
 
         let latestVersionFile = DirectoryInfo(antho.Artifacts) |> GetFile "versions"
-        let version = sprintf "%s:%s" buildnum hash
+        let version = match branch with
+                      | None -> sprintf "%s:%s:default" buildnum hash
+                      | Some br -> sprintf "%s:%s:%s" buildnum hash br
         File.AppendAllLines(latestVersionFile.FullName, [version])
         printfn "[version] %s" hash
     with
