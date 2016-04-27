@@ -19,6 +19,7 @@ Check out [full-build.io](http://full-build.io)
 # build status
 
 Platform|Status
+--------|------
 .net 4.5|[![build status](https://ci.appveyor.com/api/projects/status/github/full-build/full-build?branch=master)](https://ci.appveyor.com/project/pchalamet/full-build/branch/master)
 
 # how to build
