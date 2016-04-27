@@ -16,171 +16,10 @@ module Vcs
 
 open Anthology
 open System.IO
-open IoHelpers
+open VcsHg
+open VcsGit
 open Collections
 
-let private checkErrorCode err =
-    if err <> 0 then failwithf "Process failed with error %d" err
-
-let private checkIgnore err =
-    ()
-
-let private checkedExec = 
-    Exec.Exec checkErrorCode
-
-let private checkedExecMaybeIgnore ignoreError = 
-    let check = if ignoreError then checkIgnore else checkErrorCode
-    Exec.Exec check
-
-let private checkedExecReadLine =
-    Exec.ExecReadLine checkErrorCode
-
-let private gitCommit (repoDir : DirectoryInfo) (comment : string) =
-    checkedExec "git" "add --all" repoDir
-    let args = sprintf "commit -m %A" comment
-    checkedExec "git" args repoDir
-
-let private hgCommit (repoDir : DirectoryInfo) (comment : string) =
-    checkedExec "git" "add -S *" repoDir
-    let args = sprintf "commit -A -m %A" comment
-    checkedExec "hg" args repoDir
-
-
-let private gitPush (repoDir : DirectoryInfo) =
-    checkedExec "git" "push --quiet" repoDir
-
-let private hgPush (repoDir : DirectoryInfo) =
-    checkedExec "hg" "push" repoDir
-    
-
-let private gitPull (rebase : bool) (repoDir : DirectoryInfo) =
-    let dorebase = if rebase then "--rebase" else "--ff-only"
-    let args = sprintf "pull %s" dorebase
-    checkedExec "git" args  repoDir
-
-let private hgPull (repoDir : DirectoryInfo) =
-    checkedExec "hg" "pull -u" repoDir
-
-let private gitTip (repoDir : DirectoryInfo) =
-    let args = @"log -1 --format=%H"
-    let res = checkedExecReadLine "git" args repoDir
-    res
-
-let private hgTip (repoDir : DirectoryInfo) =
-    let args = @"id -i"
-    let res = checkedExecReadLine "hg" args repoDir
-    res
-
-
-let private gitClean (repoDir : DirectoryInfo) (repo : Repository) =
-    let br = match repo.Branch with
-             | Some x -> x.toString
-             | None -> "master"
-
-    checkedExec "git" "reset --hard" repoDir
-    checkedExec "git" "clean -fxd" repoDir
-    checkedExec "git" (sprintf "checkout %s" br) repoDir
-
-let private hgClean (repoDir : DirectoryInfo) (repo : Repository) =
-    checkedExec "hg" "purge" repoDir
-
-
-let private gitIs (uri : RepositoryUrl) =
-    try
-        let currDir = IoHelpers.CurrentFolder()
-        let args = sprintf @"ls-remote -h %s" uri.toString
-        checkedExecReadLine "git" args currDir |> ignore
-        true
-    with
-        _ -> false
-
-let private hgIs (uri : RepositoryUrl) =
-    try
-        let currDir = IoHelpers.CurrentFolder()
-        let args = sprintf @"id -i -R %A" uri.toLocalOrUrl
-        checkedExecReadLine "hg" args currDir |> ignore
-        true
-    with
-        _ -> false
-
-
-
-
-let private gitClone (isGerrit : bool) (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
-    let bronly = match branch with
-                 | None -> "--no-single-branch"
-                 | Some x -> sprintf "--branch %s --single-branch" x.toString
-
-    let depth = if shallow then "--depth=3"
-                else ""
-
-    let args = sprintf @"clone %s --quiet %s %s %A" url bronly depth target.FullName
-
-    let currDir = IoHelpers.CurrentFolder ()
-    checkedExec "git" args currDir
-
-    if isGerrit then
-        let installDir = Env.GetFolder Env.Installation
-        let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
-        let target = target |> IoHelpers.GetSubDirectory ".git"
-                            |> IoHelpers.GetSubDirectory "hooks" 
-                            |> IoHelpers.GetFile "commit-msg"
-        commitMsgFile.CopyTo (target.FullName) |> ignore
-
-
-let private hgClone (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
-    let bronly = match branch with
-                 | None -> ""
-                 | Some x -> sprintf "-r %s" x.toString
-
-    let args = sprintf @"clone %s %A %A" bronly url target.FullName
-    let currDir = IoHelpers.CurrentFolder ()
-    checkedExec "hg" args currDir
-
-
-let private gitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ignoreError : bool) = 
-    let rev = match version with
-              | Some (BookmarkVersion x) -> x
-              | None -> "master"
-
-    let args = sprintf "checkout %A" rev
-    checkedExecMaybeIgnore ignoreError "git" args repoDir
-
-let private hgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ignoreError : bool) = 
-    let rev = match version with
-              | Some (BookmarkVersion x) -> x
-              | None -> "tip"
-
-    let args = sprintf "update -r %A" rev
-    checkedExecMaybeIgnore ignoreError "hg" args repoDir
-
-let private gitHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =     
-    let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version.toString
-    let res = checkedExecReadLine "git" args repoDir
-    res
-
-let private hgHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
-    null
-
-let private gitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =     
-    let args = sprintf @"log -1 --format=%%H %s" relativeFile
-    let res = checkedExecReadLine "git" args repoDir
-    let ver = BookmarkVersion.from res
-    Some ver
-    
-let private hgLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =     
-    None
-
-let private gitIgnore (repoDir : DirectoryInfo) =
-    let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"
-
-    let installDir = Env.GetFolder Env.Installation
-    let srcGitIgnore = installDir |> IoHelpers.GetFile "gitignore"
-    srcGitIgnore.CopyTo(dstGitIgnore.FullName) |> ignore
-
-let private hgIgnore (repoDir : DirectoryInfo) =
-    // FIXME
-    ()
 
 let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gitFun hgFun =
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name.toString
@@ -191,34 +30,35 @@ let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gi
     f repoDir
 
 let VcsClone (wsDir : DirectoryInfo) (vcsType : VcsType) (shallow : bool) (repo : Repository) =
-    let gitCloneFunc =  gitClone (vcsType = VcsType.Gerrit) shallow repo.Branch
-    let hgCloneFunc = hgClone repo.Branch
+    let gitCloneFunc = if vcsType = VcsType.Gerrit then GitClone shallow repo.Branch
+                                                   else GerritClone shallow repo.Branch
+    let hgCloneFunc = HgClone repo.Branch
     (chooseVcs wsDir vcsType repo gitCloneFunc hgCloneFunc) repo.Url.toString
 
 let VcsTip (wsDir : DirectoryInfo) (vcsType : VcsType) repo = 
-    chooseVcs wsDir vcsType repo gitTip hgTip
+    chooseVcs wsDir vcsType repo GitTip HgTip
 
 // version : None ==> master
 let VcsCheckout (wsDir : DirectoryInfo) (vcsType : VcsType) repo (version : BookmarkVersion option) (ignore : bool) = 
-    (chooseVcs wsDir vcsType repo gitCheckout hgCheckout) version ignore
+    (chooseVcs wsDir vcsType repo GitCheckout HgCheckout) version ignore
 
 let VcsIgnore (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
-    chooseVcs wsDir vcsType repo  gitIgnore hgIgnore
+    chooseVcs wsDir vcsType repo  GitIgnore HgIgnore
 
 let VcsPull (rebase : bool) (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
-    chooseVcs wsDir vcsType repo (gitPull rebase) hgPull 
+    chooseVcs wsDir vcsType repo (GitPull rebase) HgPull 
 
 let VcsCommit (wsDir : DirectoryInfo) (vcsType : VcsType) repo (comment : string) =
-    (chooseVcs wsDir vcsType repo gitCommit hgCommit) comment
+    (chooseVcs wsDir vcsType repo GitCommit HgCommit) comment
 
 let VcsPush (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
-    (chooseVcs wsDir vcsType repo gitPush hgPush)
+    (chooseVcs wsDir vcsType repo GitPush HgPush)
 
 let VcsClean (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
-    (chooseVcs wsDir vcsType repo gitClean hgClean) repo
+    (chooseVcs wsDir vcsType repo GitClean HgClean) repo
 
 let VcsLog (wsDir : DirectoryInfo) (vcsType : VcsType) repo (version : BookmarkVersion) =
-    (chooseVcs wsDir vcsType repo gitHistory hgHistory) version
+    (chooseVcs wsDir vcsType repo GitHistory HgHistory) version
 
 let VcsLastCommit (wsDir : DirectoryInfo) (vcsType : VcsType) repo (relativeFile : string) =
-    (chooseVcs wsDir vcsType repo gitLastCommit hgLastCommit) relativeFile
+    (chooseVcs wsDir vcsType repo GitLastCommit HgLastCommit) relativeFile
