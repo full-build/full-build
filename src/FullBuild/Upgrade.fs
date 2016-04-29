@@ -14,7 +14,7 @@ let getLatestReleaseUrl () =
                                     customizeHttpRequest = fun x -> x.UserAgent<-"fullbuild"; x)
     let releases = GitRelease.Parse(result)
     printfn "Latest version: %s" releases.Name
-    releases.Assets.[0].BrowserDownloadUrl
+    (releases.Assets.[0].BrowserDownloadUrl, releases.TagName)
 
 let downloadZip zipUrl = 
     let response = Http.Request(zipUrl, 
@@ -34,26 +34,28 @@ let deleteBackupFiles (dir:DirectoryInfo) =
 let waitProcessToExit processId = 
     try
         let processInfo = Process.GetProcessById(processId)
-        if not (processInfo=null) then
+        if not (processInfo = null) then
             processInfo.WaitForExit()
     with
         | :? System.ArgumentException -> ()
         | _ -> reraise()
 
 let FinalizeUpgrade processId =
-    printfn "Cleaning installation folder from backup files"
+    printfn "Finalizing installation"
     waitProcessToExit processId
     Env.getInstallationFolder () |> deleteBackupFiles
+    printfn "Done"
 
 let getSameFiles (firstDir:DirectoryInfo) (secondDir:DirectoryInfo) =
     firstDir.GetFiles() |> Seq.where(fun x-> (secondDir |> IoHelpers.GetFile x.Name).Exists)
     
 let Upgrade () =
-    printfn "Upgrading"
+    let (zipUrl, tag) = getLatestReleaseUrl ()
+    printfn "Upgrading to version %s" tag
+
     let installDir = Env.getInstallationFolder ()
     deleteBackupFiles installDir
 
-    let zipUrl = getLatestReleaseUrl ()
     let downloadedZip = downloadZip zipUrl
         
     let unzipFolder = installDir |> GetSubDirectory "tmp"
@@ -70,4 +72,4 @@ let Upgrade () =
     unzipFolder |> ForceDelete
 
     let processId = Process.GetCurrentProcess().Id
-    Exec.ExecWithArguments (installDir |> GetFile "fullbuild.exe").FullName (processId |> sprintf "upgrade %i")
+    Exec.Spawn (installDir |> GetFile "fullbuild.exe").FullName (processId |> sprintf "upgrade %i")

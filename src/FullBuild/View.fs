@@ -187,7 +187,7 @@ let OpenView (viewId : ViewId) (forceSrc : bool) =
         generate viewId newView
 
     let viewFile = getViewFile viewId
-    Exec.ExecVerb viewFile.FullName "open"
+    Exec.SpawnWithVerb viewFile.FullName "open"
 
 
 let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (multithread : bool) (version : string option) =

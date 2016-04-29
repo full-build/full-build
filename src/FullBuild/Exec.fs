@@ -35,12 +35,12 @@ let ExecWithVars checkErrorCode (command : string) (args : string) (dir : Direct
 let Exec checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) = 
     ExecWithVars checkErrorCode command args dir Map.empty
 
-let ExecVerb (command : string) (verb : string) =
+let SpawnWithVerb (command : string) (verb : string) =
     let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Verb = verb)
     Process.Start (psi) |> ignore
  
-let ExecWithArguments (command : string) (args : string) =
-    let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Arguments = args)
+let Spawn (command : string) (args : string) =
+    let psi = ProcessStartInfo (FileName = command, UseShellExecute = false, Arguments = args)
     Process.Start (psi) |> ignore   
 
 let ExecReadLine checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) = 
