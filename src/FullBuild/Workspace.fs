@@ -283,7 +283,6 @@ let History () =
     | _ -> ()
 
 
-
 let availableRepositories (filters : RepositoryId set) =
     let antho = Configuration.LoadAnthology()
     let wsDir = Env.GetFolder Env.Folder.Workspace
