@@ -72,7 +72,7 @@ let GitIs (uri : RepositoryUrl) =
 let GitClone (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
     let bronly = match branch with
                  | None -> "--no-single-branch"
-                 | Some x -> sprintf "--branch %s --single-branch" x.toString
+                 | Some x -> sprintf "--branch %s --no-single-branch" x.toString
 
     let depth = if shallow then "--depth=3"
                 else ""
@@ -85,7 +85,7 @@ let GitClone (shallow : bool) (branch : BranchId option) (target : DirectoryInfo
 let GerritClone (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
     let bronly = match branch with
                  | None -> "--no-single-branch"
-                 | Some x -> sprintf "--branch %s --single-branch" x.toString
+                 | Some x -> sprintf "--branch %s --no-single-branch" x.toString
 
     let depth = if shallow then "--depth=3"
                 else ""
