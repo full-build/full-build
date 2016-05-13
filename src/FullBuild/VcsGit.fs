@@ -112,8 +112,11 @@ let GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ig
 
 let GitHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =     
     let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version.toString
-    let res = checkedExecReadLine "git" args repoDir
-    res
+    try
+        let res = checkedExecReadLine "git" args repoDir
+        res
+    with
+        exn -> sprintf "Failed to get history for repository %A from version %A (%s)" repoDir.Name version.toString (exn.ToString())
 
 let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =     
     let args = sprintf @"log -1 --format=%%H %s" relativeFile
