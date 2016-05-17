@@ -83,17 +83,7 @@ let GitClone (shallow : bool) (branch : BranchId option) (target : DirectoryInfo
     checkedExec "git" args currDir
 
 let GerritClone (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
-    let bronly = match branch with
-                 | None -> "--no-single-branch"
-                 | Some x -> sprintf "--branch %s --no-single-branch" x.toString
-
-    let depth = if shallow then "--depth=3"
-                else ""
-
-    let args = sprintf @"clone %s --quiet %s %s %A" url bronly depth target.FullName
-
-    let currDir = IoHelpers.CurrentFolder ()
-    checkedExec "git" args currDir
+    GitClone shallow branch target url
 
     let installDir = Env.GetFolder Env.Installation
     let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
