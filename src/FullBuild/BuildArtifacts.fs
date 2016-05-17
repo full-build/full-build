@@ -78,5 +78,5 @@ let PullLatestReferenceBinaries () =
     let antho = Configuration.LoadAnthology ()
     let versionsFile = DirectoryInfo(antho.Artifacts) |> GetFile "versions"
     let version = File.ReadAllLines(versionsFile.FullName) |> Seq.last
-    let hash = version.Split(':') |> Seq.last
-    PullReferenceBinaries hash
+    let hash = version.Split(':') |> Seq.toArray
+    PullReferenceBinaries hash.[1]
