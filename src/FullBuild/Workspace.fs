@@ -143,7 +143,10 @@ let Branch (branch : BookmarkVersion option) =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
     let mainRepo = antho.MasterRepository
-    Vcs.VcsCheckout wsDir antho.Vcs mainRepo branch false
+    try
+        Vcs.VcsCheckout wsDir antho.Vcs mainRepo branch false
+    with
+        _ -> printfn "WARNING: No branch on .full-build repository. Is this intended ?"
 
     // checkout each repository now
     let antho = Configuration.LoadAnthology ()
