@@ -24,7 +24,7 @@ open StringHelpers
 type ViewId = ViewId of string
 with
     member this.toString = (fun (ViewId x) -> x)this
-
+    static member from s = ViewId s
 
 type OutputType = 
     | Exe
