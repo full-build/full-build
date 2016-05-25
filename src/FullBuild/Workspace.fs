@@ -111,6 +111,8 @@ let CloneStickyRepositories (wsDir : DirectoryInfo) =
         System.Environment.CurrentDirectory <- wsDir.FullName
         let antho = Configuration.LoadAnthology()
         antho.Repositories |> Set.filter (fun x -> x.Sticky)
+                           |> Set.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Repository.Name.toString
+                                                   not <| subDir.Exists)
                            |> Seq.iter (fun x -> VcsClone wsDir antho.Vcs false x.Repository)
     finally
         System.Environment.CurrentDirectory <- currDir
