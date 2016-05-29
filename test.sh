@@ -1,4 +1,4 @@
 #! /bin/bash
 
-mono refbin/fullbuild.exe test "*" || exit 5
+mono refbin/fullbuild.exe test fullbuild || exit 5
 
