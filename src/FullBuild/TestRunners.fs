@@ -15,7 +15,7 @@
 module TestRunners
 open Anthology
 open Env
-
+open Collections
 
 
 
@@ -35,22 +35,17 @@ let excludeListToArgs (excludes : string list) =
 
 
 
-let runnerNUnit (includes : string list) (excludes : string list) =
+let runnerNUnit (includes : string set) (excludes : string list) =
     let wsDir = GetFolder Env.Workspace
-    let files = includes |> List.fold (fun s t -> sprintf @"%s %A" s t) ""
+    let files = includes |> Set.fold (fun s t -> sprintf @"%s %A" s t) ""
     let excludeArgs = excludeListToArgs excludes
     let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs 
     checkedExec "nunit3-console.exe" args wsDir
 
-let runnerFake (includes : string list) (excludes : string list) =
-    let args = sprintf @".full-build\build.fsx target=Test includes=%A excludes=%A" includes excludes
-    let wsDir = Env.GetFolder Env.Workspace
-    checkedExec "fake" args wsDir
-
-let chooseTestRunner (runnerType : TestRunnerType) nunitRunner fakeRunner =
+let chooseTestRunner (runnerType : TestRunnerType) nunitRunner =
     let runner = match runnerType with
                  | TestRunnerType.NUnit -> nunitRunner
     runner
 
 let TestWithTestRunner (runnerType : TestRunnerType) =
-    chooseTestRunner runnerType runnerNUnit runnerFake
+    chooseTestRunner runnerType runnerNUnit

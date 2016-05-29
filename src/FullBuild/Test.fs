@@ -20,40 +20,20 @@ open Anthology
 
 
 let TestAssemblies (filters : string list) (excludes : string list) =
-    // enumerate all views and load projects
     let viewFolder = Env.GetFolder Env.Folder.View
-    let matches = viewFolder.EnumerateFiles ("*" |> IoHelpers.AddExt IoHelpers.Extension.View)
-                  |> Seq.map (fun x -> x.Name)
-                  |> Seq.map (fun x -> Path.GetFileNameWithoutExtension(x) |> ViewId.from)
-                  |> Seq.map (Configuration.LoadView)
-                  |> Seq.map (View.FindViewProjects)
+    let views = viewFolder.EnumerateFiles ("*" |> IoHelpers.AddExt IoHelpers.Extension.View)
+                |> Seq.map (fun x -> x.Name)
+                |> Seq.map (fun x -> Path.GetFileNameWithoutExtension(x))
+
+    let matchViews filter = views |> Seq.filter (fun x -> PatternMatching.Match x filter)
+
+    let matches = filters 
+                  |> Seq.map matchViews
+                  |> Seq.collect id
+                  |> Seq.map (View.FindViewProjects << Configuration.LoadView << ViewId.from)
                   |> Set
                   |> Set.unionMany
                   |> Set.map (fun x -> x.Output.toString)
-                  |> List.ofSeq
-// TODO  keep only test assemblies
 
     let anthology = Configuration.LoadAnthology ()
-
-//    let wsDir = Env.GetFolder Env.Workspace
-//    let fullPathForProject (x : Project) = wsDir |> IoHelpers.GetSubDirectory (x.relativeProjectFolderFromWorkspace)
-//                                           |> IoHelpers.GetSubDirectory "bin"
-//
-//    let anthology = Configuration.LoadAnthology ()
-//    let prjNames = anthology.Projects 
-//                    |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, fullPathForProject x))
-//                    |> Seq.filter (fun (_, y) -> y.Exists)
-//                    |> Seq.toList
-//
-//    let matchProjects filter = prjNames |> Seq.filter (fun x -> PatternMatching.Match (fst x) filter)
-//
-//    let matches = filters |> Seq.map matchProjects
-//                          |> Seq.collect id
-//                          |> Seq.map (fun (_,y) -> y.EnumerateFiles("*.test*.dll", SearchOption.AllDirectories))
-//                          |> Seq.collect id
-//                          |> Seq.map (fun x -> x.FullName)
-//                          |> Seq.toList
-
-    match matches.Length with
-    | 0 -> printfn "[WARNING] No test found"
-    | _ -> (TestRunners.TestWithTestRunner anthology.Tester) matches excludes
+    (TestRunners.TestWithTestRunner anthology.Tester) matches excludes
