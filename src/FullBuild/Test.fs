@@ -33,7 +33,8 @@ let TestAssemblies (filters : string list) (excludes : string list) =
                   |> Seq.map (View.FindViewProjects << Configuration.LoadView << ViewId.from)
                   |> Set
                   |> Set.unionMany
-                  |> Set.map (fun x -> x.Output.toString)
+                  |> Set.filter (fun x -> PatternMatching.Match (x.Output.toString) "*.test*")
+                  |> Set.map (fun x -> sprintf "%s/bin/%s" x.relativeProjectFolderFromWorkspace x.outputFile)
 
     let anthology = Configuration.LoadAnthology ()
     (TestRunners.TestWithTestRunner anthology.Tester) matches excludes

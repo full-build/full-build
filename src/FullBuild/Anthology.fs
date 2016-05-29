@@ -163,6 +163,13 @@ with
         let relativePath = this.RelativeProjectFile.toString |> System.IO.Path.GetDirectoryName
         let path = sprintf "%s/%s" this.Repository.toString  relativePath
         path
+    member this.outputFile =
+        let output = this.Output.toString
+        let ext = match this.OutputType with
+                  | OutputType.Dll -> "dll"
+                  | OutputType.Exe -> "exe"
+        let binFile = sprintf "%s.%s" output ext
+        binFile
 
 type ApplicationId = private ApplicationId of string
 with
