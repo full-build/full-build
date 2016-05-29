@@ -36,7 +36,7 @@ let private adaptViewFilter (filter : string) =
     if filter.Contains("/") || filter.Contains("*") then filter
     else filter + "/*"
 
-let findViewProjects (view : View) =
+let FindViewProjects (view : View) =
     // load back filter & generate view accordingly
     let wsDir = Env.GetFolder Folder.Workspace
     let repoFilters = view.Filters |> Set.map adaptViewFilter
@@ -76,7 +76,7 @@ let findViewProjects (view : View) =
 
 
 let generate (viewId : ViewId) (view : View) =
-    let projects = findViewProjects view
+    let projects = FindViewProjects view
 
     // generate solution defines
     let slnDefines = GenerateSolutionDefines projects
@@ -126,7 +126,7 @@ let Describe (viewId : ViewId) =
 let Graph (viewId : ViewId) (all : bool) =
     let antho = Configuration.LoadAnthology ()
     let view = Configuration.LoadView viewId
-    let projects = findViewProjects view |> Set
+    let projects = FindViewProjects view |> Set
     let graph = Dgml.GraphContent antho projects all
 
     let wsDir = Env.GetFolder Env.Workspace
