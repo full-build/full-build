@@ -22,8 +22,7 @@ open Anthology
 let TestAssemblies (filters : string list) (excludes : string list) =
     let viewFolder = Env.GetFolder Env.Folder.View
     let views = viewFolder.EnumerateFiles ("*" |> IoHelpers.AddExt IoHelpers.Extension.View)
-                |> Seq.map (fun x -> x.Name)
-                |> Seq.map (fun x -> Path.GetFileNameWithoutExtension(x))
+                |> Seq.map (fun x -> Path.GetFileNameWithoutExtension(x.Name))
 
     let matchViews filter = views |> Seq.filter (fun x -> PatternMatching.Match x filter)
 
