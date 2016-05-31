@@ -33,7 +33,7 @@ let TestAssemblies (filters : string list) (excludes : string list) =
                   |> Seq.map (View.FindViewProjects << Configuration.LoadView << ViewId.from)
                   |> Set
                   |> Set.unionMany
-                  |> Set.filter (fun x -> PatternMatching.Match (x.Output.toString) "*.test*")
+                  |> Set.filter (fun x -> PatternMatching.Match (x.outputFile) "*.test*.dll")
                   |> Set.map (fun x -> sprintf "%s/bin/%s" x.relativeProjectFolderFromWorkspace x.outputFile)
 
     let anthology = Configuration.LoadAnthology ()
