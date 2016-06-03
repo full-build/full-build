@@ -6,3 +6,4 @@
     parameters: 
         - parameter: --mt
     sourceonly: true
+    parents: true
