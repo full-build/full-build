@@ -63,12 +63,15 @@ let FindViewProjects (view : View) =
     let selectedProjectGuids = projects |> Map.filter (fun k _ -> Set.contains k matches)
                                         |> Seq.map (fun x -> x.Value)
                                         |> Set
-
+    let parents = if view.Parents then AnthologyGraph.CollectAllParents antho.Projects selectedProjectGuids 
+                  else Set.empty
+    let allProjectSet = selectedProjectGuids |> Set.union parents
+    
     // find projects
     let antho = Configuration.LoadAnthology ()
     let projectRefs = match view.SourceOnly with
-                      | true -> AnthologyGraph.ComputeProjectSelectionClosureSourceOnly antho.Projects selectedProjectGuids |> Set
-                      | _ -> AnthologyGraph.ComputeProjectSelectionClosure antho.Projects selectedProjectGuids |> Set
+                      | true -> AnthologyGraph.ComputeProjectSelectionClosureSourceOnly antho.Projects allProjectSet |> Set
+                      | _ -> AnthologyGraph.ComputeProjectSelectionClosure antho.Projects allProjectSet |> Set
 
     let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectId)
     projects
@@ -133,14 +136,15 @@ let Graph (viewId : ViewId) (all : bool) =
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewId.toString)
     graph.Save graphFile.FullName
 
-let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) =
+let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forceParents : bool) =
     if filters.Length = 0 then
         failwith "Expecting at least one filter"
 
     let view = { Filters = filters |> Set
                  Builder = BuilderType.MSBuild
                  Parameters = Set.empty 
-                 SourceOnly = forceSrc }
+                 SourceOnly = forceSrc 
+                 Parents = forceParents }
     Configuration.SaveView viewId view
     generate viewId view
 

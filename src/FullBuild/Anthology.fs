@@ -212,4 +212,5 @@ type View =
     { Filters : string set
       Builder : BuilderType
       Parameters : string set 
-      SourceOnly : bool }
+      SourceOnly : bool 
+      Parents : bool }

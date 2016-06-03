@@ -9,7 +9,8 @@ let CheckSaveLoadBaseline () =
     let view1 = { Filters = ["cassandra-sharp/*"] |> Set
                   Builder = BuilderType.MSBuild
                   Parameters = ["--mt"; "--debug" ] |> Set 
-                  SourceOnly = true }
+                  SourceOnly = true 
+                  Parents = false }
 
     let res = ViewSerializer.SerializeView view1
     printfn "%s" res

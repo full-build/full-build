@@ -74,3 +74,16 @@ let ComputeRepositoriesDependencies (allProjects : Project set) (selectedRepos :
     repositories
 
 
+let rec private collectParents (findParents : ProjectId -> Project set) (nodes : ProjectId set) =
+    if nodes = Set.empty then 
+        Set.empty
+    else  
+        nodes |> Set.map findParents
+              |> Set.unionMany
+              |> Set.map (fun x -> x.ProjectId)
+              |> collectParents findParents
+              |> Set.union nodes
+
+let CollectAllParents (allProjects : Project set) (startNodes : ProjectId set) =
+    let findParents = referencingProjects allProjects
+    collectParents findParents startNodes

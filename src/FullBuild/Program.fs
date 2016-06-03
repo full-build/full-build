@@ -44,7 +44,7 @@ let tryMain argv =
     | DropRepository repo -> Repo.Drop repo
 
     // view
-    | AddView viewInfo -> View.Create viewInfo.Name viewInfo.Filters viewInfo.SourceOnly
+    | AddView viewInfo -> View.Create viewInfo.Name viewInfo.Filters viewInfo.SourceOnly viewInfo.Parents
     | DropView viewInfo -> View.Drop viewInfo.Name
     | ListViews -> View.List ()
     | DescribeView viewInfo -> View.Describe viewInfo.Name
