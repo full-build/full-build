@@ -83,10 +83,10 @@ let BindProject (filters : string list) =
                                             |> Set.filter (filterClonedRepositories wsDir)
                                             |> Set.map(fun x -> x.Name)
 
-    // build: <project>
+    // build: <repository>/<project>
     let projects = antho.Projects 
                    |> Seq.filter (fun x -> availableRepos |> Set.contains x.Repository)
-                   |> Seq.map (fun x -> (x.Output.toString, x.ProjectId))
+                   |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, x.ProjectId))
                    |> Map
     let projectNames = projects |> Seq.map (fun x -> x.Key) |> set
 
