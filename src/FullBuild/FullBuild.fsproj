@@ -26,8 +26,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>view --all servicebus siriona.library/Siriona.Library.ServiceBus</StartArguments>
-    <StartWorkingDirectory>c:\src\avp</StartWorkingDirectory>
+    <StartArguments>publish *</StartArguments>
+    <StartWorkingDirectory>c:\src\full-build\full-build</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>0077</NoWarn>
