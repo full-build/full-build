@@ -20,6 +20,11 @@ open Env
 open PatternMatching
 
 
+let asyncPublish (app : Application) =
+    async {
+        (Publishers.PublishWithPublisher app.Publisher) app
+    }
+
 
 let Publish (filters : string list) =
     let antho = Configuration.LoadAnthology ()
@@ -31,10 +36,10 @@ let Publish (filters : string list) =
                              |> Set.unionMany
                              |> Set.map ApplicationId.from
 
-    for appName in matches do
-        DisplayHighlight appName.toString
-        let app = antho.Applications |> Seq.find (fun x -> x.Name = appName)
-        (Publishers.PublishWithPublisher app.Publisher) app
+    let apps = antho.Applications |> Set.filter (fun x -> matches |> Set.contains x.Name)
+                                  |> Seq.map asyncPublish    
+
+    apps |> Threading.throttle 2 |> Async.Parallel |> Async.RunSynchronously |> ignore
 
 let List () =
     let antho = Configuration.LoadAnthology ()
