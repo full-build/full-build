@@ -39,7 +39,7 @@ let Publish (filters : string list) =
     let apps = antho.Applications |> Set.filter (fun x -> matches |> Set.contains x.Name)
                                   |> Seq.map asyncPublish    
 
-    apps |> Threading.throttle 2 |> Async.Parallel |> Async.RunSynchronously |> ignore
+    apps |> Threading.throttle 4 |> Async.Parallel |> Async.RunSynchronously |> ignore
 
 let List () =
     let antho = Configuration.LoadAnthology ()
