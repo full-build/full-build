@@ -32,6 +32,7 @@ let Publish (filters : string list) =
                              |> Set.map ApplicationId.from
 
     for appName in matches do
+        DisplayHighlight appName.toString
         let app = antho.Applications |> Seq.find (fun x -> x.Name = appName)
         (Publishers.PublishWithPublisher app.Publisher) app
 

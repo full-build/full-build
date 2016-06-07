@@ -32,49 +32,53 @@ let publishCopy (app : Anthology.Application) =
     let project = antho.Projects |> Seq.find (fun x -> x.ProjectId = app.Project)
     let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
     if repoDir.Exists then
-        let projFile = repoDir |> GetFile project.RelativeProjectFile.toString 
-        let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name.toString projFile.FullName
-
-        if Env.IsMono () then checkedExec "xbuild" args wsDir
-        else checkedExec "msbuild" args wsDir
-
+        let wsDir = GetFolder Env.Workspace
+        let projectDir = wsDir |> GetSubDirectory (project.relativeProjectFolderFromWorkspace)
+        let sourceFolder = projectDir |> GetSubDirectory "bin"
         let appDir = GetFolder Env.AppOutput
         let artifactDir = appDir |> GetSubDirectory app.Name.toString
-        Bindings.UpdateArtifactBindingRedirects artifactDir
+        Bindings.UpdateArtifactBindingRedirects sourceFolder
+
+        IoHelpers.CopyFolder sourceFolder artifactDir false
     else
         printfn "[WARNING] Can't publish application %A without repository" app.Name.toString
 
 let publishZip (app : Anthology.Application) =
-    let tmpApp = { app
-                   with Name = ApplicationId.from "tmpzip"
-                        Publisher = PublisherType.Copy }
+    let antho = Configuration.LoadAnthology ()
 
-    publishCopy tmpApp
+    let project = antho.Projects |> Seq.find (fun x -> x.ProjectId = app.Project)
+    let wsDir = GetFolder Env.Workspace
+    let projectDir = wsDir |> GetSubDirectory (project.relativeProjectFolderFromWorkspace)
+    let sourceFolder = projectDir |> GetSubDirectory "bin"
+    Bindings.UpdateArtifactBindingRedirects sourceFolder
 
     let appDir = GetFolder Env.AppOutput
-    let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name.toString)
     let targetFile = appDir |> GetFile app.Name.toString
     if targetFile.Exists then targetFile.Delete()
 
     System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Optimal, false)
-    sourceFolder.Delete(true)
 
 
 let publishDocker (app : Anthology.Application) =
-    let tmpApp = { app
-                   with Name = ApplicationId.from "tmpdocker"
-                        Publisher = PublisherType.Copy }
+    failwith "not implemented"
 
-    publishCopy tmpApp
-
-    let appDir = GetFolder Env.AppOutput
-    let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name.toString)
-    let targetFile = appDir |> GetFile app.Name.toString
-    if targetFile.Exists then targetFile.Delete()
-
-    let dockerArgs = sprintf "build -t %s ." app.Name.toString
-    Exec.Exec checkErrorCode "docker" dockerArgs sourceFolder
-    sourceFolder.Delete(true)        
+//    let tmpApp = { app
+//                   with Name = ApplicationId.from "tmpdocker"
+//                        Publisher = PublisherType.Copy }
+//
+//    publishCopy tmpApp
+//
+//    let wsDir = GetFolder Env.Workspace
+//    let prjDir = wsDir |> GetSubDirectory (app.Project.relativeProjectFolderFromWorkspace
+//
+//    let appDir = GetFolder Env.AppOutput
+//    let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name.toString)
+//    let targetFile = appDir |> GetFile app.Name.toString
+//    if targetFile.Exists then targetFile.Delete()
+//
+//    let dockerArgs = sprintf "build -t %s ." app.Name.toString
+//    Exec.Exec checkErrorCode "docker" dockerArgs sourceFolder
+//    sourceFolder.Delete(true)        
 
 let choosePublisher (pubType : PublisherType) appCopy appZip appDocker =
     let publish = match pubType with
