@@ -14,13 +14,19 @@
 
 module Conversion
 open Anthology
+open IoHelpers
+
+
+let generateProjectArtifacts repos =
+    let antho = Configuration.LoadAnthology ()
+    let projects = antho.Projects |> Set.filter (fun x -> repos |> Set.contains x.Repository)
+
+    MsBuildConversion.GenerateProjects projects IoHelpers.XDocSaver
 
 
 let convertMsBuild repos =
     let antho = Configuration.LoadAnthology ()
     let projects = antho.Projects |> Set.filter (fun x -> repos |> Set.contains x.Repository)
-
-    MsBuildConversion.GenerateProjects projects IoHelpers.XDocSaver
     MsBuildConversion.ConvertProjects projects IoHelpers.XDocLoader IoHelpers.XDocSaver
     MsBuildConversion.RemoveUselessStuff projects
 
@@ -28,3 +34,14 @@ let convertMsBuild repos =
 let Convert builder repos =
     match builder with
     | BuilderType.MSBuild -> convertMsBuild repos
+
+let GenerateProjectArtifacts () =
+    let antho = Configuration.LoadAnthology ()
+    let repos = antho.Repositories
+
+    let builder2repos = repos |> Seq.groupBy (fun x -> x.Builder)
+
+    for builder2repo in builder2repos do
+        let (builder, brepos) = builder2repo
+        let repos = brepos |> Seq.map (fun x -> x.Repository.Name) |> Set.ofSeq
+        generateProjectArtifacts repos

@@ -117,7 +117,7 @@ let getPaketPackages (prjDoc : XDocument)  =
     paketPkgs
 
 let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryId) (file : FileInfo) =
-    let relativeProjectFile = IoHelpers.ComputeRelativePath repoDir file
+    let relativeProjectFile = IoHelpers.ComputeRelativeFilePath repoDir file
     let xprj = match xdocLoader file with
                | Some x -> x
                | _ -> failwithf "Failed to load project %A" file.FullName
