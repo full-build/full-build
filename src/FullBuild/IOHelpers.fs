@@ -75,15 +75,19 @@ let GetFile (fileName : string) (dir : DirectoryInfo) : FileInfo =
     let fullFileName = Path.Combine(dir.FullName, fileName)
     FileInfo (fullFileName)
 
-let rec private ComputeRelativePathInc (topDir : DirectoryInfo) (childDir : DirectoryInfo) (path : string) = 
+let rec private computeRelativePathInc (topDir : DirectoryInfo) (childDir : DirectoryInfo) (path : string) = 
     if topDir.FullName = childDir.FullName then path |> ToUnix
     else 
         let newPath = Path.Combine(childDir.Name, path)
-        ComputeRelativePathInc topDir childDir.Parent newPath
+        computeRelativePathInc topDir childDir.Parent newPath
 
-let ComputeRelativePath (dir : DirectoryInfo) (file : FileInfo) : string = 
+let ComputeRelativeFilePath (dir : DirectoryInfo) (file : FileInfo) : string = 
     let path = file.Name
-    ComputeRelativePathInc dir file.Directory path
+    computeRelativePathInc dir file.Directory path
+
+let ComputeRelativeDirPath (dir : DirectoryInfo) (target : DirectoryInfo) : string = 
+    let path = ""
+    computeRelativePathInc dir target path
 
 let rec genHops (count : int) (path : string) =
     match count with

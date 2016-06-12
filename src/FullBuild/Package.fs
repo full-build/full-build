@@ -28,13 +28,24 @@ let GenerateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo seq) =
     seq {
         for file in files do
             let assemblyName = Path.GetFileNameWithoutExtension (file.FullName)
-            let relativePath = ComputeRelativePath pkgDir file
+            let relativePath = ComputeRelativeFilePath pkgDir file
             let hintPath = sprintf "%s%s" MSBUILD_PACKAGE_FOLDER relativePath |> ToUnix
             yield XElement(NsMsBuild + "Reference",
                     XAttribute(NsNone + "Include", assemblyName),
                     XElement(NsMsBuild + "HintPath", hintPath),
                     XElement(NsMsBuild + "Private", "true"))
     }
+
+
+
+let GenerateItemGroupCopyContent (pkgDir : DirectoryInfo) (fxLibs : DirectoryInfo) =
+    let relativePath = ComputeRelativeDirPath pkgDir fxLibs
+    let files = sprintf "$(FBWorkspaceDir)/%s/**/*.*" relativePath
+    let copyFiles = XElement(NsMsBuild + "FBCopyFiles",
+                        XAttribute(NsNone + "Include", files))
+    copyFiles        
+
+
 
 let GenerateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
     let pkgDir = Env.GetFolder Env.Package
@@ -47,7 +58,17 @@ let GenerateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
             XElement(NsMsBuild + "ItemGroup", 
                 itemGroup))
 
-let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
+
+let GenerateItemGroupCopy (fxLibs : DirectoryInfo) (condition : string) =
+    let pkgDir = Env.GetFolder Env.Package
+    let itemGroup = GenerateItemGroupCopyContent pkgDir fxLibs
+    XElement(NsMsBuild + "When",
+        XAttribute(NsNone + "Condition", condition),
+            XElement(NsMsBuild + "ItemGroup", 
+                itemGroup))
+
+
+let GenerateChooseRefContent (libDir : DirectoryInfo) (package : PackageId) =
     let pkgProp = PackagePropertyName package
 
     let whens = seq {    
@@ -70,8 +91,39 @@ let GenerateChooseContent (libDir : DirectoryInfo) (package : PackageId) =
         if whens.Any() then
             yield XElement (NsMsBuild + "Choose", whens)
     }
+
+
+
+let GenerateChooseCopyContent (libDir : DirectoryInfo) (package : PackageId) =
+    let pkgProp = PackagePropertyName package
+
+    let whens = seq {    
+        if libDir.Exists then
+            let foundDirs = libDir.EnumerateDirectories() |> Seq.map (fun x -> x.Name) |> List.ofSeq
+            // for very old nugets we do not have folder per platform
+            let dirs = if foundDirs.Length = 0 then [""]
+                       else foundDirs
+            let path2platforms = Paket.PlatformMatching.getSupportedTargetProfiles dirs
+
+            for path2pf in path2platforms do
+                let pathLib = libDir |> IoHelpers.GetSubDirectory path2pf.Key
+                let condition = Paket.PlatformMatching.getCondition None (List.ofSeq path2pf.Value)
+                let whenCondition = if condition = "$(TargetFrameworkIdentifier) == 'true'" then "True"
+                                    else condition
+                yield GenerateItemGroupCopy pathLib whenCondition
+    }
+
+    seq {
+        if whens.Any() then
+            yield XElement (NsMsBuild + "Choose", whens)
+    }
+
+
+
+
+
     
-let GenerateDependenciesContent (dependencies : PackageId seq) =
+let GenerateDependenciesRefContent (dependencies : PackageId seq) =
     seq {
         for dependency in dependencies do
             let depId = dependency.toString
@@ -84,7 +136,25 @@ let GenerateDependenciesContent (dependencies : PackageId seq) =
                       XAttribute(NsNone + "Condition", condition))
     }
 
-let GenerateProjectContent (package : PackageId) (imports : XElement seq) (choose : XElement seq) =
+
+
+let GenerateDependenciesCopyContent (dependencies : PackageId seq) =
+    seq {
+        for dependency in dependencies do
+            let depId = dependency.toString
+            let dependencyTargets = sprintf "%s%s/packagecopy.targets" MSBUILD_PACKAGE_FOLDER depId
+            let pkgProperty = PackagePropertyName dependency
+            let condition = sprintf "'$(%sCopy)' == ''" pkgProperty
+    
+            yield XElement(NsMsBuild + "Import",
+                      XAttribute(NsNone + "Project", dependencyTargets),
+                      XAttribute(NsNone + "Condition", condition))
+    }
+
+
+
+
+let GenerateProjectRefContent (package : PackageId) (imports : XElement seq) (choose : XElement seq) =
     let defineName = PackagePropertyName package
     let propCondition = sprintf "'$(%s)' == ''" defineName
     let project = XElement (NsMsBuild + "Project",
@@ -96,10 +166,33 @@ let GenerateProjectContent (package : PackageId) (imports : XElement seq) (choos
     project
 
 
+let GenerateProjectCopyContent (package : PackageId) (imports : XElement seq) (choose : XElement seq) =
+    let defineName = sprintf "%sCopy" (PackagePropertyName package)
+    let propCondition = sprintf "'$(%s)' == ''" defineName
+    let project = XElement (NsMsBuild + "Project",
+                    XAttribute (NsNone + "Condition", propCondition),
+                    XElement (NsMsBuild + "PropertyGroup",
+                        XElement (NsMsBuild + defineName, "Y")),
+                    imports,
+                    choose)
+    project
 
 
+let GenerateProjectContent (package : PackageId) =
+    let defineName = PackagePropertyName package
+    let propConditionRef = sprintf "'$(%s)' == ''" defineName
+    let propConditionCopy = sprintf "'$(%sCopy)' == ''" defineName
+                    
+    let refFile = sprintf "%s%s/packageref.targets" MSBUILD_PACKAGE_FOLDER (package.toString)
+    let copyFile = sprintf "%s%s/packagecopy.targets" MSBUILD_PACKAGE_FOLDER (package.toString)
 
-let GenerateTargetForPackage (package : PackageId) =
+    let project = XElement (NsMsBuild + "Project",
+                    XElement(NsMsBuild + "Import", new XAttribute(NsNone + "Project", refFile), new XAttribute(NsNone + "Condition", propConditionRef)),
+                    XElement(NsMsBuild + "Import", new XAttribute(NsNone + "Project", copyFile), new XAttribute(NsNone + "Condition", propConditionCopy)))
+    project
+
+
+let GenerateTargetForPackageRef (package : PackageId) =
     let pkgsDir = Env.GetFolder Env.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
     let libDir = pkgDir |> GetSubDirectory "lib" 
@@ -108,12 +201,35 @@ let GenerateTargetForPackage (package : PackageId) =
     let xnuspec = XDocument.Load (nuspecFile.FullName)
     let dependencies = NuGets.GetPackageDependencies xnuspec
 
-    let imports = GenerateDependenciesContent dependencies
-    let choose = GenerateChooseContent libDir package
-    let project = GenerateProjectContent package imports choose
+    let imports = GenerateDependenciesRefContent dependencies
+    let choose = GenerateChooseRefContent libDir package
+    let project = GenerateProjectRefContent package imports choose
 
     let targetFile = pkgDir |> GetFile "package.targets" 
     project.Save (targetFile.FullName)
+
+let GenerateTargetForPackageCopy (package : PackageId) =
+    let pkgsDir = Env.GetFolder Env.Package
+    let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
+    let libDir = pkgDir |> GetSubDirectory "lib" 
+    
+    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))
+    let xnuspec = XDocument.Load (nuspecFile.FullName)
+    let dependencies = NuGets.GetPackageDependencies xnuspec
+
+    let imports = GenerateDependenciesCopyContent dependencies
+    let choose = GenerateChooseCopyContent libDir package
+    let project = GenerateProjectCopyContent package imports choose
+
+    let targetFile = pkgDir |> GetFile "packagecopy.targets" 
+    project.Save (targetFile.FullName)
+
+
+let GenerateTargetsForPackage (package : PackageId) =
+    GenerateTargetForPackageRef package
+    GenerateTargetForPackageCopy package
+
+
 
 let GatherAllAssemblies (package : PackageId) : AssemblyId set =
     let pkgsDir = Env.GetFolder Env.Package
@@ -135,7 +251,7 @@ let GeneratePackageImports () =
         |> NuGets.BuildPackageDependencies
         |> Map.toList
         |> Seq.map fst
-        |> Seq.iter GenerateTargetForPackage
+        |> Seq.iter GenerateTargetsForPackage
 
 let InstallPackages (nugets : RepositoryUrl list) =
     PaketInterface.UpdateSources nugets
@@ -146,16 +262,13 @@ let RestorePackages () =
     PaketInterface.PaketRestore ()
     GeneratePackageImports()
 
-let Install () =
-    RestorePackages ()
-
 let Update () =
     PaketInterface.PaketUpdate ()
     
     let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
                       |> Map.toList
                       |> Seq.map fst
-    allPackages |> Seq.iter GenerateTargetForPackage
+    allPackages |> Seq.iter GenerateTargetForPackageRef
 
 let Outdated () =
     PaketInterface.PaketOutdated ()

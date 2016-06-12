@@ -24,6 +24,14 @@ open Anthology
 open Collections
 
 
+let generatePackageCopy (packageref : PackageId) =
+    let defineName = PackagePropertyName packageref
+    let propCondition = sprintf "'$(%sCopy)' == ''" defineName
+    let project = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/packagecopy.targets" packageref.toString
+    let import = XElement(NsMsBuild + "Import",
+                       XAttribute(NsNone + "Project", project),
+                       XAttribute(NsNone + "Condition", propCondition))
+    import
 
 let generateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project.ProjectId
@@ -36,6 +44,8 @@ let generateProjectTarget (project : Project) =
               | OutputType.Exe -> "exe"
     let binFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
     let pdbFile = sprintf "%s/%s.pdb" MSBUILD_BIN_FOLDER output
+    let pkgFiles = project.PackageReferences |> Seq.map generatePackageCopy
+
 
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -57,7 +67,8 @@ let generateProjectTarget (project : Project) =
                     XElement (NsMsBuild + "Private", "true")),
                 XElement (NsMsBuild + "FBCopyFiles", 
                     XAttribute(NsNone + "Include", sprintf "%s;%s" binFile pdbFile),
-                    XAttribute(NsNone + "Condition", binCondition)))))
+                    XAttribute(NsNone + "Condition", binCondition))),
+                pkgFiles))
 
 
 let cleanupProject (xproj : XDocument) (project : Project) : XDocument =

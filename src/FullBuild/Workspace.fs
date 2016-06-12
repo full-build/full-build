@@ -309,18 +309,24 @@ let Index (filters : RepositoryId set) =
         |> Package.Simplify
         |> Configuration.SaveAnthology
 
+
+
+let Install () =
+    Package.RestorePackages ()
+    Conversion.GenerateProjectArtifacts ()
+
 let Convert (filters : RepositoryId set) = 
     let repos = filters
                 |> availableRepositories
     repos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Repository.Name.toString)
 
-    let builder2repos = repos
-                        |> Seq.groupBy (fun x -> x.Builder)
-
+    let builder2repos = repos |> Seq.groupBy (fun x -> x.Builder)
     for builder2repo in builder2repos do
         let (builder, brepos) = builder2repo
         let repos = brepos |> Seq.map (fun x -> x.Repository.Name) |> Set.ofSeq
         Conversion.Convert builder repos
+
+    Conversion.GenerateProjectArtifacts ()
 
     // setup additional files for views to work correctly
     let confDir = Env.GetFolder Env.Config

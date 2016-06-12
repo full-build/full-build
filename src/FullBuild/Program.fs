@@ -42,6 +42,7 @@ let tryMain argv =
     | CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters repoInfo.Shallow repoInfo.All
     | ListRepositories -> Repo.List ()
     | DropRepository repo -> Repo.Drop repo
+    | InstallPackages -> Workspace.Install ()
 
     // view
     | AddView viewInfo -> View.Create viewInfo.Name viewInfo.Filters viewInfo.SourceOnly viewInfo.Parents
@@ -58,7 +59,6 @@ let tryMain argv =
     | ListNuGets -> NuGets.List ()
 
     // package
-    | InstallPackages -> Package.Install ()
     | UpdatePackages -> Package.Update ()
     | OutdatedPackages -> Package.Outdated ()
     | ListPackages -> Package.List ()
