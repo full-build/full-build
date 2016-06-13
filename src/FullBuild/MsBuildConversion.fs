@@ -25,16 +25,14 @@ open Collections
 
 
 let generatePackageCopy (condition : string) (packageref : PackageId) =
-//    let defineName = PackagePropertyName packageref
-//    let propCondition = sprintf "'$(%sCopy)' == ''" defineName
-    let project = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/packagecopy.targets" packageref.toString
+    let project = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/package-copy.targets" packageref.toString
     let import = XElement(NsMsBuild + "Import",
                        XAttribute(NsNone + "Project", project))
     import
 
 
 let generateProjectCopy (condition : string) (projectRef : ProjectId) =
-    let project = sprintf "$(FBWorkspaceDir)/.full-build/projects/%scopy.targets" projectRef.toString
+    let project = sprintf "$(FBWorkspaceDir)/.full-build/projects/%s-copy.targets" projectRef.toString
     let import = XElement(NsMsBuild + "Import",
                        XAttribute(NsNone + "Project", project))
     import
@@ -50,12 +48,7 @@ let generateProjectTarget (project : Project) =
               | OutputType.Dll -> "dll"
               | OutputType.Exe -> "exe"
     let binFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
-
-    let refFile = sprintf "%s/.full-build/projects/%scopy.targets" MSBUILD_SOLUTION_DIR project.ProjectId.toString
-
-//    let prjFiles = project.ProjectReferences |> Seq.map (generateProjectCopy binCondition)
-//    let pkgFiles = project.PackageReferences |> Seq.map (generatePackageCopy binCondition)
-
+    let refFile = sprintf "%s/.full-build/projects/%s-copy.targets" MSBUILD_SOLUTION_DIR project.ProjectId.toString
 
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -298,7 +291,7 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
         xdocSaver projectFile refProjectContent
 
         let refProjectCopyContent = generateProjectCopyTarget project
-        let projectCopyFile = prjDir |> GetFile (AddExt Targets (project.Output.toString + "copy"))
+        let projectCopyFile = prjDir |> GetFile (AddExt Targets (project.Output.toString + "-copy"))
         xdocSaver projectCopyFile refProjectCopyContent
 
 let RemoveUselessStuff (projects : Project set) =

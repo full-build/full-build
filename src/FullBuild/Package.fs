@@ -138,7 +138,7 @@ let GenerateDependenciesCopyContent (dependencies : PackageId seq) =
     seq {
         for dependency in dependencies do
             let depId = dependency.toString
-            let dependencyTargets = sprintf "%s%s/packagecopy.targets" MSBUILD_PACKAGE_FOLDER depId
+            let dependencyTargets = sprintf "%s%s/package-copy.targets" MSBUILD_PACKAGE_FOLDER depId
     
             yield XElement(NsMsBuild + "Import",
                       XAttribute(NsNone + "Project", dependencyTargets))
@@ -201,7 +201,7 @@ let GenerateTargetForPackageCopy (package : PackageId) =
     let choose = GenerateChooseCopyContent libDir package
     let project = GenerateProjectCopyContent package imports choose
 
-    let targetFile = pkgDir |> GetFile "packagecopy.targets" 
+    let targetFile = pkgDir |> GetFile "package-copy.targets" 
     project.Save (targetFile.FullName)
 
 
