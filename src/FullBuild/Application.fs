@@ -22,6 +22,7 @@ open PatternMatching
 
 let asyncPublish (app : Application) =
     async {
+        DisplayHighlight app.Name.toString
         (Publishers.PublishWithPublisher app.Publisher) app
     }
 
