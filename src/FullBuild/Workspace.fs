@@ -313,7 +313,6 @@ let Index (filters : RepositoryId set) =
 
 let Install () =
     Package.RestorePackages ()
-    Conversion.GenerateProjectArtifacts ()
 
 let Convert (filters : RepositoryId set) = 
     let repos = filters
@@ -325,8 +324,6 @@ let Convert (filters : RepositoryId set) =
         let (builder, brepos) = builder2repo
         let repos = brepos |> Seq.map (fun x -> x.Repository.Name) |> Set.ofSeq
         Conversion.Convert builder repos
-
-    Conversion.GenerateProjectArtifacts ()
 
     // setup additional files for views to work correctly
     let confDir = Env.GetFolder Env.Config

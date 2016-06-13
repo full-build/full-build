@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <ItemGroup>
@@ -10,8 +11,4 @@
     </Reference>
     <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/bin/fullbuild.exe;$(FBWorkspaceDir)/.full-build/bin/fullbuild.pdb" Condition="'$(FullBuild_fullbuild)' == ''" />
   </ItemGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Configuration/packagecopy.targets" Condition="'$(FullBuild_FSharp_Configuration_PkgCopy)' == ''" />
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Core/packagecopy.targets" Condition="'$(FullBuild_FSharp_Core_PkgCopy)' == ''" />
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Data/packagecopy.targets" Condition="'$(FullBuild_FSharp_Data_PkgCopy)' == ''" />
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/Mono.Cecil/packagecopy.targets" Condition="'$(FullBuild_Mono_Cecil_PkgCopy)' == ''" />
 </Project>
