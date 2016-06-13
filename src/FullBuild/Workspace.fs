@@ -313,6 +313,7 @@ let Index (filters : RepositoryId set) =
 
 let Install () =
     Package.RestorePackages ()
+    Conversion.GenerateProjectArtifacts()
 
 let Convert (filters : RepositoryId set) = 
     let repos = filters
