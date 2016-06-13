@@ -24,14 +24,21 @@ open Anthology
 open Collections
 
 
-let generatePackageCopy (packageref : PackageId) =
-    let defineName = PackagePropertyName packageref
-    let propCondition = sprintf "'$(%sCopy)' == ''" defineName
+let generatePackageCopy (condition : string) (packageref : PackageId) =
+//    let defineName = PackagePropertyName packageref
+//    let propCondition = sprintf "'$(%sCopy)' == ''" defineName
     let project = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/packagecopy.targets" packageref.toString
     let import = XElement(NsMsBuild + "Import",
-                       XAttribute(NsNone + "Project", project),
-                       XAttribute(NsNone + "Condition", propCondition))
+                       XAttribute(NsNone + "Project", project))
     import
+
+
+let generateProjectCopy (condition : string) (projectRef : ProjectId) =
+    let project = sprintf "$(FBWorkspaceDir)/.full-build/projects/%scopy.targets" projectRef.toString
+    let import = XElement(NsMsBuild + "Import",
+                       XAttribute(NsNone + "Project", project))
+    import
+
 
 let generateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project.ProjectId
@@ -43,8 +50,11 @@ let generateProjectTarget (project : Project) =
               | OutputType.Dll -> "dll"
               | OutputType.Exe -> "exe"
     let binFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
-    let pdbFile = sprintf "%s/%s.pdb" MSBUILD_BIN_FOLDER output
-    let pkgFiles = project.PackageReferences |> Seq.map generatePackageCopy
+
+    let refFile = sprintf "%s/.full-build/projects/%scopy.targets" MSBUILD_SOLUTION_DIR project.ProjectId.toString
+
+//    let prjFiles = project.ProjectReferences |> Seq.map (generateProjectCopy binCondition)
+//    let pkgFiles = project.PackageReferences |> Seq.map (generatePackageCopy binCondition)
 
 
     // This is the import targets that will be Import'ed inside a proj file.
@@ -64,11 +74,43 @@ let generateProjectTarget (project : Project) =
                 XElement (NsMsBuild + "Reference",
                     XAttribute (NsNone + "Include", binFile),
                     XAttribute (NsNone + "Condition", binCondition),
-                    XElement (NsMsBuild + "Private", "true")),
-                XElement (NsMsBuild + "FBCopyFiles", 
-                    XAttribute(NsNone + "Include", sprintf "%s;%s" binFile pdbFile),
-                    XAttribute(NsNone + "Condition", binCondition))),
+                    XElement (NsMsBuild + "Private", "true"))),
+                XElement(NsMsBuild + "Import", 
+                    XAttribute(NsNone + "Project", refFile),
+                    XAttribute(NsNone + "Condition", binCondition))))
+
+
+let generateProjectCopyTarget (project : Project) =
+    let projectProperty = ProjectPropertyName project.ProjectId
+    let projectCopyProperty = projectProperty + "Copy"
+    let binCondition = sprintf "'$(%s)' == ''" projectProperty
+    let copyCondition = sprintf "'$(%s)' == ''" projectCopyProperty
+    let prjFiles = project.ProjectReferences |> Seq.map (generateProjectCopy binCondition)
+    let pkgFiles = project.PackageReferences |> Seq.map (generatePackageCopy binCondition)
+
+    let output = (project.Output.toString)
+    let ext = match project.OutputType with
+                | OutputType.Dll -> "dll"
+                | OutputType.Exe -> "exe"
+    let binFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
+    let pdbFile = sprintf "%s/%s.pdb" MSBUILD_BIN_FOLDER output
+    let incFile = sprintf "%s;%s" binFile pdbFile
+
+    // This is the import targets that will be Import'ed inside a proj file.
+    // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
+    // Then we end up either importing output assembly or project depending on view configuration
+    XDocument (
+        XElement(NsMsBuild + "Project", 
+                XAttribute (NsNone + "Condition", copyCondition),
+                XElement(NsMsBuild + "PropertyGroup",
+                    XElement(NsMsBuild + projectCopyProperty, "Y"),
+                    XAttribute (NsNone + "Condition", copyCondition)),
+                XElement (NsMsBuild + "ItemGroup", 
+                    XElement(NsMsBuild + "FBCopyFiles", 
+                        XAttribute(NsNone + "Include", incFile))),
+                prjFiles,
                 pkgFiles))
+
 
 
 let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
@@ -258,6 +300,9 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
         let projectFile = prjDir |> GetFile (AddExt Targets (project.Output.toString))
         xdocSaver projectFile refProjectContent
 
+        let refProjectCopyContent = generateProjectCopyTarget project
+        let projectCopyFile = prjDir |> GetFile (AddExt Targets (project.Output.toString + "copy"))
+        xdocSaver projectCopyFile refProjectCopyContent
 
 let RemoveUselessStuff (projects : Project set) =
     let wsDir = Env.GetFolder Env.Workspace

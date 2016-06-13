@@ -1,0 +1,9 @@
+<Project Condition="'$(FullBuild_fullbuild_tests)' == ''" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
+  <ItemGroup>
+    <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/bin/fullbuild.tests.dll;$(FBWorkspaceDir)/.full-build/bin/fullbuild.tests.pdb" />
+  </ItemGroup>
+  <Import Project="$(FBWorkspaceDir)/.full-build/projects/fullbuildcopy.targets" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Core/packagecopy.targets" Condition="'$(FullBuild_FSharp_Core_PkgCopy)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/fsunit/packagecopy.targets" Condition="'$(FullBuild_fsunit_PkgCopy)' == ''" />
+</Project>

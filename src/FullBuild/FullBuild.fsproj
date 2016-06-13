@@ -26,7 +26,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>view --all servicebus siriona.library/Siriona.Library.ServiceBus</StartArguments>
+    <StartArguments>convert distributors.actiwell</StartArguments>
     <StartWorkingDirectory>c:\src\avp</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
