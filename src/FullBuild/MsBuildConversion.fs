@@ -103,8 +103,7 @@ let generateProjectCopyTarget (project : Project) =
         XElement(NsMsBuild + "Project", 
                 XAttribute (NsNone + "Condition", copyCondition),
                 XElement(NsMsBuild + "PropertyGroup",
-                    XElement(NsMsBuild + projectCopyProperty, "Y"),
-                    XAttribute (NsNone + "Condition", copyCondition)),
+                    XElement(NsMsBuild + projectCopyProperty, "Y")),
                 XElement (NsMsBuild + "ItemGroup", 
                     XElement(NsMsBuild + "FBCopyFiles", 
                         XAttribute(NsNone + "Include", incFile))),
@@ -268,10 +267,8 @@ let convertProject (xproj : XDocument) (project : Project) =
         let pkgId = packageReference.toString
         let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER pkgId
         let pkgProperty = PackagePropertyName packageReference
-        let condition = sprintf "'$(%s)' == ''" pkgProperty
         let import = XElement (NsMsBuild + "Import",
-                        XAttribute (NsNone + "Project", importFile),
-                        XAttribute(NsNone + "Condition", condition))
+                        XAttribute (NsNone + "Project", importFile))
         cproj.Root.LastNode.AddAfterSelf(import)
     cproj
 

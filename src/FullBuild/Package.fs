@@ -128,12 +128,8 @@ let GenerateDependenciesRefContent (dependencies : PackageId seq) =
         for dependency in dependencies do
             let depId = dependency.toString
             let dependencyTargets = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER depId
-            let pkgProperty = PackagePropertyName dependency
-            let condition = sprintf "'$(%s)' == ''" pkgProperty
-    
             yield XElement(NsMsBuild + "Import",
-                      XAttribute(NsNone + "Project", dependencyTargets),
-                      XAttribute(NsNone + "Condition", condition))
+                      XAttribute(NsNone + "Project", dependencyTargets))
     }
 
 
@@ -143,12 +139,9 @@ let GenerateDependenciesCopyContent (dependencies : PackageId seq) =
         for dependency in dependencies do
             let depId = dependency.toString
             let dependencyTargets = sprintf "%s%s/packagecopy.targets" MSBUILD_PACKAGE_FOLDER depId
-            let pkgProperty = PackagePropertyName dependency
-            let condition = sprintf "'$(%sCopy)' == ''" pkgProperty
     
             yield XElement(NsMsBuild + "Import",
-                      XAttribute(NsNone + "Project", dependencyTargets),
-                      XAttribute(NsNone + "Condition", condition))
+                      XAttribute(NsNone + "Project", dependencyTargets))
     }
 
 
@@ -177,19 +170,6 @@ let GenerateProjectCopyContent (package : PackageId) (imports : XElement seq) (c
                     choose)
     project
 
-
-let GenerateProjectContent (package : PackageId) =
-    let defineName = PackagePropertyName package
-    let propConditionRef = sprintf "'$(%s)' == ''" defineName
-    let propConditionCopy = sprintf "'$(%sCopy)' == ''" defineName
-                    
-    let refFile = sprintf "%s%s/packageref.targets" MSBUILD_PACKAGE_FOLDER (package.toString)
-    let copyFile = sprintf "%s%s/packagecopy.targets" MSBUILD_PACKAGE_FOLDER (package.toString)
-
-    let project = XElement (NsMsBuild + "Project",
-                    XElement(NsMsBuild + "Import", new XAttribute(NsNone + "Project", refFile), new XAttribute(NsNone + "Condition", propConditionRef)),
-                    XElement(NsMsBuild + "Import", new XAttribute(NsNone + "Project", copyFile), new XAttribute(NsNone + "Condition", propConditionCopy)))
-    project
 
 
 let GenerateTargetForPackageRef (package : PackageId) =
