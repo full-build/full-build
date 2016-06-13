@@ -123,14 +123,16 @@ let GetFilewithoutRootDirectory (file : string) =
     let idx = file.IndexOf('/')
     file.Substring(idx+1)
    
+
+let consoleLock = System.Object()
 let DisplayHighlight s =
-    let oldColor = Console.ForegroundColor
-    Console.ForegroundColor <- ConsoleColor.Cyan
-    printfn "==> %s" s
-    Console.ForegroundColor <- oldColor
+    let display () = 
+        let oldColor = Console.ForegroundColor
+        Console.ForegroundColor <- ConsoleColor.Cyan
+        Console.WriteLine("==> {0}", [|s|])
+        Console.ForegroundColor <- oldColor
 
-
-
+    lock consoleLock display
 
 
 let Try action =
