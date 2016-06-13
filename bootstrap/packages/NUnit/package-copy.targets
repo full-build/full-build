@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Condition="'$(FullBuild_NUnit_PkgCopy)' == ''" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FullBuild_NUnit_PkgCopy>Y</FullBuild_NUnit_PkgCopy>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="True">
+      <ItemGroup>
+        <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/packages/NUnit/lib/**/*.*" />
+      </ItemGroup>
+    </When>
+  </Choose>
+</Project>

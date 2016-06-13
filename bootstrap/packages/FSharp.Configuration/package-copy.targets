@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Condition="'$(FullBuild_FSharp_Configuration_PkgCopy)' == ''" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FullBuild_FSharp_Configuration_PkgCopy>Y</FullBuild_FSharp_Configuration_PkgCopy>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
+      <ItemGroup>
+        <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/packages/FSharp.Configuration/lib/net40/**/*.*" />
+      </ItemGroup>
+    </When>
+  </Choose>
+</Project>

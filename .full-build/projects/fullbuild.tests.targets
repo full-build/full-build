@@ -1,4 +1,3 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <ItemGroup>
@@ -9,6 +8,6 @@
     <Reference Include="$(FBWorkspaceDir)/.full-build/bin/fullbuild.tests.dll" Condition="'$(FullBuild_fullbuild_tests)' == ''">
       <Private>true</Private>
     </Reference>
-    <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/bin/fullbuild.tests.dll;$(FBWorkspaceDir)/.full-build/bin/fullbuild.tests.pdb" Condition="'$(FullBuild_fullbuild_tests)' == ''" />
   </ItemGroup>
+  <Import Project="$(FBWorkspaceDir)/.full-build/projects/fullbuild.tests-copy.targets" Condition="'$(FullBuild_fullbuild_tests)' == ''" />
 </Project>
