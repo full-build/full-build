@@ -39,7 +39,7 @@ let tryMain argv =
 
     // repository
     | AddRepository repoInfo -> Repo.Add repoInfo.Repo repoInfo.Url repoInfo.Branch repoInfo.Builder repoInfo.Sticky
-    | CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters repoInfo.Shallow repoInfo.All
+    | CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters repoInfo.Shallow repoInfo.All repoInfo.Multithread
     | ListRepositories -> Repo.List ()
     | DropRepository repo -> Repo.Drop repo
     | InstallPackages -> Workspace.Install ()
@@ -67,7 +67,7 @@ let tryMain argv =
     | ListApplications -> Application.List ()
     | AddApplication appInfo -> Application.Add appInfo.Name appInfo.Project appInfo.Publisher
     | DropApplication name -> Application.Drop name
-    | PublishApplications pubInfo -> Application.Publish pubInfo.Filters
+    | PublishApplications pubInfo -> Application.Publish pubInfo.Filters pubInfo.Multithread
     | BindProject prjInfo -> Application.BindProject prjInfo.Filters
 
     // misc

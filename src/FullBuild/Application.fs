@@ -27,7 +27,7 @@ let asyncPublish (app : Application) =
     }
 
 
-let Publish (filters : string list) =
+let Publish (filters : string list) (mt : bool) =
     let antho = Configuration.LoadAnthology ()
     let appNames = antho.Applications |> Set.map (fun x -> x.Name.toString)
 
@@ -40,7 +40,8 @@ let Publish (filters : string list) =
     let apps = antho.Applications |> Set.filter (fun x -> matches |> Set.contains x.Name)
                                   |> Seq.map asyncPublish    
 
-    apps |> Threading.throttle 4 |> Async.Parallel |> Async.RunSynchronously |> ignore
+    let maxThrottle = if mt then (System.Environment.ProcessorCount*2) else 1
+    apps |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
 
 let List () =
     let antho = Configuration.LoadAnthology ()
