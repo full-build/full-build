@@ -39,7 +39,7 @@ let cloneRepoAndInit wsDir vcs shallow (repo : Repository) =
         Vcs.VcsClone wsDir vcs shallow repo
     }
 
-let Clone (filters : RepositoryId set) (shallow : bool) (all : bool) = 
+let Clone (filters : RepositoryId set) (shallow : bool) (all : bool) (mt : bool) = 
     let antho = LoadAnthology()
     let wsDir = Env.GetFolder Env.Workspace
 
@@ -48,10 +48,12 @@ let Clone (filters : RepositoryId set) (shallow : bool) (all : bool) =
                        | true -> AnthologyGraph.ComputeRepositoriesDependencies antho.Projects selectedRepos
                        | _ -> selectedRepos
     let cloneRepos = antho.Repositories |> Set.filter (fun x -> cloneReposId |> Set.contains x.Repository.Name)
+
+    let maxThrottle = if mt then (System.Environment.ProcessorCount*2) else 1
     cloneRepos |> Set.filter (fun x -> let subDir = wsDir |> GetSubDirectory x.Repository.Name.toString
                                        not <| subDir.Exists)
                |> Seq.map (fun x -> cloneRepoAndInit wsDir antho.Vcs shallow x.Repository)
-               |> Threading.throttle 4 |> Async.Parallel |> Async.RunSynchronously |> ignore
+               |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
 
 let Add (name : RepositoryId) (url : RepositoryUrl) (branch : BranchId option) (builder : BuilderType) (sticky : bool) =
     let antho = LoadAnthology ()

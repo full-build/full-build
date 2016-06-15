@@ -34,7 +34,8 @@ type CheckoutWorkspace =
 type CloneRepositories = 
     { Filters : RepositoryId set 
       Shallow : bool
-      All : bool }
+      All : bool 
+      Multithread : bool }
 
 type IndexRepositories = 
     { Filters : RepositoryId set }
@@ -59,7 +60,8 @@ type ViewName =
     { Name : ViewId }
 
 type PublishApplications = 
-    { Filters : string list }
+    { Filters : string list 
+      Multithread : bool }
 
 type CheckoutVersion =
     { Version : BookmarkVersion }

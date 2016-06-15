@@ -86,13 +86,14 @@ let commandConvert (args : string list) =
     | filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
                  ConvertRepositories { Filters = repoFilters }
 
-let rec commandClone (shallow : bool) (all : bool) (args : string list) =
+let rec commandClone (shallow : bool) (all : bool) (mt : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Shallow :: tail -> tail |> commandClone true all
-    | TokenOption TokenOption.All :: tail -> tail |> commandClone shallow true
+    | TokenOption TokenOption.Shallow :: tail -> tail |> commandClone true all mt
+    | TokenOption TokenOption.All :: tail -> tail |> commandClone shallow true mt
+    | TokenOption TokenOption.Multithread :: tail -> tail |> commandClone shallow all true
     | [] -> Command.Error
     | filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                 CloneRepositories { Filters = repoFilters; Shallow = shallow; All = all }
+                 CloneRepositories { Filters = repoFilters; Shallow = shallow; All = all; Multithread = mt }
 
 
 
@@ -103,10 +104,11 @@ let rec commandGraph (all : bool) (args : string list) =
     | [MatchViewId name] -> Command.GraphView { Name = name ; All = all }
     | _ -> Command.Error
 
-let commandPublish (args : string list) =
+let rec commandPublish (mt : bool) (args : string list) =
     match args with
     | [] -> Command.Error
-    | filters -> PublishApplications {Filters = filters}
+    | TokenOption TokenOption.Multithread :: tail -> tail |> commandPublish mt
+    | filters -> PublishApplications {Filters = filters; Multithread = mt}
 
 
 
@@ -281,9 +283,9 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Test :: cmdArgs -> cmdArgs |> commandTest []
     | Token Token.Index :: cmdArgs -> cmdArgs |> commandIndex
     | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert
-    | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false
+    | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false false
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
-    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish
+    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish false
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
@@ -351,14 +353,14 @@ let UsageContent() =
         "  version : display full-build version"
         "  setup <git|gerrit|hg> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         "  init <master-repository> <local-path> : initialize a new workspace in given path"
-        "  clone [--shallow] [--all] <repo-wildcard>+ : clone repositories using provided wildcards"
+        "  clone [--mt] [--shallow] [--all] <repo-wildcard>+ : clone repositories using provided wildcards"
         "  checkout <version> : checkout workspace to version"
         "  branch [<branch>] : checkout workspace to branch"
         "  install : install packages"
         "  view [--src] [--all] <view-name> <view-wildcard>+ : add repositories to view"
         "  open [--src] <viewName> : open view with your favorite ide"
-        "  build [--debug] [--version <version>] [--mt] [<view-name>] : build view"
-        "  rebuild [--debug] [--version <version>] [--mt] [<view-name>] : rebuild view (clean & build)"
+        "  build [--mt] [--debug] [--version <version>] [<view-name>] : build view"
+        "  rebuild [--mt] [--debug] [--version <version>] [<view-name>] : rebuild view (clean & build)"
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
         "  graph [--all] <view-name> : graph view content (project, packages, assemblies)"
         "  exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
@@ -366,7 +368,7 @@ let UsageContent() =
         "  convert <repo-wildcard> : convert projects in repositories"
         "  pull [--src|--bin] [--rebase] : update to latest version - rebase if requested (ff is default)"
         "  push [--branch <branch>] <buildNumber> : push a baseline from current repositories version and display version"
-        "  publish <app> : publish application"
+        "  publish [--mt] <app> : publish application"
         "  bind <projectId-wildcard>+ : update bindings"
         "  clean : DANGER! reset and clean workspace (interactive command)"
         "  history : display history since last baseline"
