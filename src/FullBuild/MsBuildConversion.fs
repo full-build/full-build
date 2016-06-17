@@ -48,6 +48,7 @@ let generateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project.ProjectId
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
+    let cpyCondition = sprintf "%s And '$(%sCopy)' == ''" binCondition projectProperty
     let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.toString) project.RelativeProjectFile.toString
     let output = (project.Output.toString)
     let ext = match project.OutputType with
@@ -76,7 +77,7 @@ let generateProjectTarget (project : Project) =
                     XElement (NsMsBuild + "Private", "true"))),
                 XElement(NsMsBuild + "Import", 
                     XAttribute(NsNone + "Project", refFile),
-                    XAttribute(NsNone + "Condition", binCondition))))
+                    XAttribute(NsNone + "Condition", cpyCondition))))
 
 
 let generateProjectCopyTarget (project : Project) =
