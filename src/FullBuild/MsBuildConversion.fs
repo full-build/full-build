@@ -24,17 +24,23 @@ open Anthology
 open Collections
 
 
-let generatePackageCopy (condition : string) (packageref : PackageId) =
-    let project = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/package-copy.targets" packageref.toString
+let generatePackageCopy (packageRef : PackageId) =
+    let propName = PackagePropertyName packageRef
+    let condition = sprintf "'$(%sCopy)' == ''" propName
+    let project = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/package-copy.targets" packageRef.toString
     let import = XElement(NsMsBuild + "Import",
-                       XAttribute(NsNone + "Project", project))
+                       XAttribute(NsNone + "Project", project),
+                       XAttribute(NsNone + "Condition", condition))
     import
 
 
-let generateProjectCopy (condition : string) (projectRef : ProjectId) =
+let generateProjectCopy (projectRef : ProjectId) =
+    let propName = ProjectPropertyName projectRef
+    let condition = sprintf "'$(%sCopy)' == ''" propName
     let project = sprintf "$(FBWorkspaceDir)/.full-build/projects/%s-copy.targets" projectRef.toString
     let import = XElement(NsMsBuild + "Import",
-                       XAttribute(NsNone + "Project", project))
+                       XAttribute(NsNone + "Project", project),
+                       XAttribute(NsNone + "Condition", condition))
     import
 
 
@@ -78,8 +84,8 @@ let generateProjectCopyTarget (project : Project) =
     let projectCopyProperty = projectProperty + "Copy"
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let copyCondition = sprintf "'$(%s)' == ''" projectCopyProperty
-    let prjFiles = project.ProjectReferences |> Seq.map (generateProjectCopy binCondition)
-    let pkgFiles = project.PackageReferences |> Seq.map (generatePackageCopy binCondition)
+    let prjFiles = project.ProjectReferences |> Seq.map generateProjectCopy
+    let pkgFiles = project.PackageReferences |> Seq.map generatePackageCopy
 
     let output = (project.Output.toString)
     let ext = match project.OutputType with

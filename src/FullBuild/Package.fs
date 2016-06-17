@@ -126,10 +126,14 @@ let GenerateChooseCopyContent (libDir : DirectoryInfo) (package : PackageId) =
 let GenerateDependenciesRefContent (dependencies : PackageId seq) =
     seq {
         for dependency in dependencies do
+            let defineName = PackagePropertyName dependency
+            let condition = sprintf "'$(%s)' == ''" defineName
+
             let depId = dependency.toString
             let dependencyTargets = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER depId
             yield XElement(NsMsBuild + "Import",
-                      XAttribute(NsNone + "Project", dependencyTargets))
+                      XAttribute(NsNone + "Project", dependencyTargets),
+                      XAttribute(NsNone + "Condition", condition))
     }
 
 
@@ -137,11 +141,15 @@ let GenerateDependenciesRefContent (dependencies : PackageId seq) =
 let GenerateDependenciesCopyContent (dependencies : PackageId seq) =
     seq {
         for dependency in dependencies do
+            let defineName = PackagePropertyName dependency
+            let condition = sprintf "'$(%sCopy)' == ''" defineName
+
             let depId = dependency.toString
             let dependencyTargets = sprintf "%s%s/package-copy.targets" MSBUILD_PACKAGE_FOLDER depId
     
             yield XElement(NsMsBuild + "Import",
-                      XAttribute(NsNone + "Project", dependencyTargets))
+                      XAttribute(NsNone + "Project", dependencyTargets),
+                      XAttribute(NsNone + "Condition", condition))
     }
 
 
