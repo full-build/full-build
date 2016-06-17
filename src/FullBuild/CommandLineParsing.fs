@@ -107,7 +107,7 @@ let rec commandGraph (all : bool) (args : string list) =
 let rec commandPublish (mt : bool) (args : string list) =
     match args with
     | [] -> Command.Error
-    | TokenOption TokenOption.Multithread :: tail -> tail |> commandPublish mt
+    | TokenOption TokenOption.Multithread :: tail -> tail |> commandPublish true
     | filters -> PublishApplications {Filters = filters; Multithread = mt}
 
 
