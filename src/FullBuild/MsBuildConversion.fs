@@ -24,7 +24,7 @@ open Anthology
 open Collections
 
 
-let generatePackageCopy (packageRef : PackageId) =
+let private generatePackageCopy (packageRef : PackageId) =
     let propName = PackagePropertyName packageRef
     let condition = sprintf "'$(%sCopy)' == ''" propName
     let project = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/package-copy.targets" packageRef.toString
@@ -34,7 +34,7 @@ let generatePackageCopy (packageRef : PackageId) =
     import
 
 
-let generateProjectCopy (projectRef : ProjectId) =
+let private generateProjectCopy (projectRef : ProjectId) =
     let propName = ProjectPropertyName projectRef
     let condition = sprintf "'$(%sCopy)' == ''" propName
     let project = sprintf "$(FBWorkspaceDir)/.full-build/projects/%s-copy.targets" projectRef.toString
@@ -44,7 +44,7 @@ let generateProjectCopy (projectRef : ProjectId) =
     import
 
 
-let generateProjectTarget (project : Project) =
+let private generateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project.ProjectId
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
@@ -79,8 +79,7 @@ let generateProjectTarget (project : Project) =
                     XAttribute(NsNone + "Project", refFile),
                     XAttribute(NsNone + "Condition", cpyCondition))))
 
-
-let generateProjectCopyTarget (project : Project) =
+let private generateProjectCopyTarget (project : Project) =
     let projectProperty = ProjectPropertyName project.ProjectId
     let projectCopyProperty = projectProperty + "Copy"
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
@@ -112,7 +111,7 @@ let generateProjectCopyTarget (project : Project) =
 
 
 
-let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
+let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
     let filterFullBuildProject (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
@@ -203,7 +202,7 @@ let cleanupProject (xproj : XDocument) (project : Project) : XDocument =
     cproj
 
 
-let convertProject (xproj : XDocument) (project : Project) =
+let private convertProject (xproj : XDocument) (project : Project) =
     let setOutputPath (xel : XElement) =
         xel.Value <- BIN_FOLDER
 
@@ -266,17 +265,14 @@ let convertProject (xproj : XDocument) (project : Project) =
     for packageReference in project.PackageReferences do
         let pkgId = packageReference.toString
         let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER pkgId
-        let pkgProperty = PackagePropertyName packageReference
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
         cproj.Root.LastNode.AddAfterSelf(import)
     cproj
 
-let convertProjectContent (xproj : XDocument) (project : Project) =
+let private convertProjectContent (xproj : XDocument) (project : Project) =
     let convxproj = convertProject xproj project
     convxproj
-
-
 
 let ConvertProjects projects xdocLoader xdocSaver =
     let wsDir = Env.GetFolder Env.Workspace
