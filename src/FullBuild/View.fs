@@ -63,7 +63,7 @@ let GetModifiedFilter (view : View) =
     else
         Set.empty
 
-let FindViewProjects (view : View) =
+let findViewProjects (view : View) =
     let wsDir = Env.GetFolder Folder.Workspace
     let antho = Configuration.LoadAnthology ()
 
@@ -105,10 +105,8 @@ let FindViewProjects (view : View) =
     let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectId)
     projects
 
-
-
-let generate (viewId : ViewId) (view : View) =
-    let projects = FindViewProjects view
+let private generate (viewId : ViewId) (view : View) =
+    let projects = findViewProjects view
 
     // generate solution defines
     let slnDefines = GenerateSolutionDefines projects
@@ -121,6 +119,11 @@ let generate (viewId : ViewId) (view : View) =
     let slnFile = wsDir |> GetFile (AddExt Solution viewId.toString)
     let slnContent = GenerateSolutionContent projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
     SaveFileIfNecessary slnFile slnContent
+
+    let fakeFile = wsDir |> GetFile (AddExt Fsx viewId.toString)
+    let fakeContent = GenerateFakeContent projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
+    SaveFileIfNecessary fakeFile fakeContent
+
 
 let Drop (viewName : ViewId) =
     let vwDir = GetFolder Env.Folder.View
@@ -147,18 +150,16 @@ let List () =
 
     vwDir.EnumerateFiles (AddExt View "*") |> Seq.iter (fun x -> printViewInfo (System.IO.Path.GetFileNameWithoutExtension x.Name))
 
-
 let Describe (viewId : ViewId) =
     let view = Configuration.LoadView viewId
     let builderInfo = view.Parameters |> Seq.fold (+) (sprintf "[%s] " view.Builder.toString)
     printfn "%s" builderInfo
     view.Filters |> Seq.iter (fun x -> printfn "%s" x)
 
-
 let Graph (viewId : ViewId) (all : bool) =
     let antho = Configuration.LoadAnthology ()
     let view = Configuration.LoadView viewId
-    let projects = FindViewProjects view |> Set
+    let projects = findViewProjects view |> Set
     let graph = Dgml.GraphContent antho projects all
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
@@ -181,20 +182,20 @@ let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forcePar
 // ---------------------------------------------------------------------------------------
 
 
-let defaultView () =
+let private defaultView () =
     let vwDir = GetFolder Env.Folder.View
     let defaultFile = vwDir |> GetFile "default"
     if not defaultFile.Exists then failwith "No default view defined"
     let viewName = System.IO.File.ReadAllText (defaultFile.FullName)
     viewName |> ViewId
 
-let getViewName (maybeViewName : ViewId option) =
+let private getViewName (maybeViewName : ViewId option) =
     let viewName = match maybeViewName with
                    | Some x -> x
                    | None -> defaultView()
     viewName
 
-let getViewFile (view : ViewId) =
+let private getViewFile (view : ViewId) =
     let vwDir = Env.GetFolder Env.Folder.View 
     let vwFile = vwDir |> GetFile (AddExt View view.toString)
     if vwFile.Exists |> not then failwithf "Unknown view name %A" view.toString
@@ -202,11 +203,6 @@ let getViewFile (view : ViewId) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let viewFile = wsDir |> GetFile (AddExt Solution view.toString)
     viewFile
-
-let GenerateView (viewId : ViewId) =
-    let view = Configuration.LoadView viewId
-    generate viewId view
-
 
 let AlterView (viewId : ViewId) (forceDefault : bool option) (forceSource : bool option) (forceParents : bool option) =
     match forceDefault with
@@ -225,7 +221,7 @@ let AlterView (viewId : ViewId) (forceDefault : bool option) (forceSource : bool
     | _ -> ()
 
     Configuration.SaveView viewId view
-    GenerateView viewId
+    generate viewId view
         
 
 let OpenView (viewId : ViewId) =

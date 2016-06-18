@@ -29,7 +29,7 @@ let TestAssemblies (filters : string list) (excludes : string list) =
     let matches = filters 
                   |> Seq.map matchViews
                   |> Seq.collect id
-                  |> Seq.map (View.FindViewProjects << Configuration.LoadView << ViewId.from)
+                  |> Seq.map (View.findViewProjects << Configuration.LoadView << ViewId.from)
                   |> Set
                   |> Set.unionMany
                   |> Set.filter (fun x -> x.HasTests)

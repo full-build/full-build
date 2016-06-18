@@ -30,6 +30,42 @@ let ProjectToProjectType (filename : string) =
     prjType
     
 
+let GenerateFakeContent (projects : Project seq) =
+    seq {
+        let wsDir = Env.GetFolder Env.Folder.Workspace
+        yield @"#r ""FakeLib.dll"""
+        yield "open Fake"
+        yield ""
+        for project in projects do
+            let target = project.ProjectId.toString
+            let projectFile = wsDir |> IoHelpers.GetSubDirectory project.Repository.toString
+                                    |> IoHelpers.GetFile project.RelativeProjectFile.toString
+            yield sprintf "Target %A (fun _ ->" target
+            yield sprintf " !! %A " projectFile.FullName
+            yield sprintf @"    |> MSBuild """" ""Build"" [(""SolutionDir"", %A)]" wsDir.FullName
+            yield sprintf @"    |> Log %A" target
+            yield ")"
+            yield ""
+
+        yield @"Target ""All"" (fun _ -> ())"
+
+        for project in projects do
+            let target = project.ProjectId.toString
+            yield sprintf "%A <== [" target
+            for dependency in project.ProjectReferences do
+                yield sprintf "    %A" dependency.toString
+            yield sprintf "  ]"
+            yield ""
+
+        yield sprintf @"""All"" <== ["
+        for project in projects do
+            yield sprintf "    %A" project.ProjectId.toString
+        yield sprintf "  ]"
+        yield ""
+        yield @"RunTargetOrDefault ""All"""
+    }
+
+
 let GenerateSolutionContent (projects : Project seq) =
     seq {
         yield ""
