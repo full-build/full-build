@@ -36,16 +36,12 @@ let private generateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo 
                     XElement(NsMsBuild + "Private", "true"))
     }
 
-
-
 let private generateItemGroupCopyContent (pkgDir : DirectoryInfo) (fxLibs : DirectoryInfo) =
     let relativePath = ComputeRelativeDirPath pkgDir fxLibs
     let files = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/**/*.*" relativePath
     let copyFiles = XElement(NsMsBuild + "FBCopyFiles",
                         XAttribute(NsNone + "Include", files))
     copyFiles        
-
-
 
 let private generateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
     let pkgDir = Env.GetFolder Env.Package
@@ -58,7 +54,6 @@ let private generateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
             XElement(NsMsBuild + "ItemGroup", 
                 itemGroup))
 
-
 let private generateItemGroupCopy (fxLibs : DirectoryInfo) (condition : string) =
     let pkgDir = Env.GetFolder Env.Package
     let itemGroup = generateItemGroupCopyContent pkgDir fxLibs
@@ -66,7 +61,6 @@ let private generateItemGroupCopy (fxLibs : DirectoryInfo) (condition : string) 
         XAttribute(NsNone + "Condition", condition),
             XElement(NsMsBuild + "ItemGroup", 
                 itemGroup))
-
 
 let private generateChooseRefContent (libDir : DirectoryInfo) (package : PackageId) =
     let whens = seq {    
@@ -90,8 +84,6 @@ let private generateChooseRefContent (libDir : DirectoryInfo) (package : Package
             yield XElement (NsMsBuild + "Choose", whens)
     }
 
-
-
 let private generateChooseCopyContent (libDir : DirectoryInfo) (package : PackageId) =
     let whens = seq {    
         if libDir.Exists then
@@ -113,11 +105,6 @@ let private generateChooseCopyContent (libDir : DirectoryInfo) (package : Packag
         if whens.Any() then
             yield XElement (NsMsBuild + "Choose", whens)
     }
-
-
-
-
-
     
 let private generateDependenciesRefContent (dependencies : PackageId seq) =
     seq {
@@ -131,8 +118,6 @@ let private generateDependenciesRefContent (dependencies : PackageId seq) =
                       XAttribute(NsNone + "Project", dependencyTargets),
                       XAttribute(NsNone + "Condition", condition))
     }
-
-
 
 let private generateDependenciesCopyContent (dependencies : PackageId seq) =
     seq {
@@ -148,9 +133,6 @@ let private generateDependenciesCopyContent (dependencies : PackageId seq) =
                       XAttribute(NsNone + "Condition", condition))
     }
 
-
-
-
 let private generateProjectRefContent (package : PackageId) (imports : XElement seq) (choose : XElement seq) =
     let defineName = PackagePropertyName package
     let propCondition = sprintf "'$(%s)' == ''" defineName
@@ -162,7 +144,6 @@ let private generateProjectRefContent (package : PackageId) (imports : XElement 
                     choose)
     project
 
-
 let private generateProjectCopyContent (package : PackageId) (imports : XElement seq) (choose : XElement seq) =
     let defineName = sprintf "%sCopy" (PackagePropertyName package)
     let propCondition = sprintf "'$(%s)' == ''" defineName
@@ -173,7 +154,6 @@ let private generateProjectCopyContent (package : PackageId) (imports : XElement
                     imports,
                     choose)
     project
-
 
 
 let private generateTargetForPackageRef (package : PackageId) =
@@ -213,8 +193,6 @@ let private generateTargetsForPackage (package : PackageId) =
     generateTargetForPackageRef package
     generateTargetForPackageCopy package
 
-
-
 let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
     let pkgsDir = Env.GetFolder Env.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
@@ -228,7 +206,6 @@ let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
     let files = Seq.append dlls exes |> Seq.map AssemblyId.from 
                                      |> Set
     Set.difference files fxDependencies
-
 
 let private generatePackageImports () =
     PaketInterface.ParsePaketDependencies ()
