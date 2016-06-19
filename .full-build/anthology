@@ -24,6 +24,7 @@ anthology:
       file: src/FullBuild.Tests/FullBuild.Tests.fsproj
       out: fullbuild.tests.dll
       fx: v4.6
+      tests: true
       assemblies:
         - assembly: system
         - assembly: system.core
@@ -40,6 +41,7 @@ anthology:
       file: src/FullBuild/FullBuild.fsproj
       out: fullbuild.exe
       fx: v4.6
+      tests: false
       assemblies:
         - assembly: system
         - assembly: system.core

@@ -25,6 +25,7 @@
           file: src/Project.csproj
           out: fullbuild.tests
           fx: ver
+          tests: true
           assemblies:
               - assembly: id1
           packages:

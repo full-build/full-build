@@ -21,6 +21,7 @@ let CheckProjectPropertyName () =
                     UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                     RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                     FxTarget = FrameworkVersion "v4.5"
+                    HasTests = false
                     ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set
                     PackageReferences = Set.empty
                     AssemblyReferences = [ AssemblyId.from("System") ; AssemblyId.from("System.Xml") ] |> set

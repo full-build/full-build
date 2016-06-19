@@ -3,7 +3,7 @@
   <PropertyGroup>
     <FullBuild_FSharp_Data_PkgCopy>Y</FullBuild_FSharp_Data_PkgCopy>
   </PropertyGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/Zlib.Portable/package-copy.targets" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/Zlib.Portable/package-copy.targets" Condition="'$(FullBuild_Zlib_Portable_PkgCopy)' == ''" />
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
       <ItemGroup>

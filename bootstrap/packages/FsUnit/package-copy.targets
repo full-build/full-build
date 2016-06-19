@@ -3,7 +3,7 @@
   <PropertyGroup>
     <FullBuild_fsunit_PkgCopy>Y</FullBuild_fsunit_PkgCopy>
   </PropertyGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/NUnit/package-copy.targets" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/NUnit/package-copy.targets" Condition="'$(FullBuild_NUnit_PkgCopy)' == ''" />
   <Choose>
     <When Condition="True">
       <ItemGroup>

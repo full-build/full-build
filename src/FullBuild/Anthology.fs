@@ -155,6 +155,7 @@ type Project =
       ProjectId : ProjectId
       OutputType : OutputType
       FxTarget : FrameworkVersion
+      HasTests : bool
       AssemblyReferences : AssemblyId set
       PackageReferences : PackageId set
       ProjectReferences : ProjectId set }

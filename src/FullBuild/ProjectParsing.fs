@@ -147,6 +147,7 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let packages = nugetPackages |> Set.union fbPackages 
                                  |> Set.union paketPackages
     let pkgRefs = packages |> Set.map (fun x -> x.Id)
+    let hasTests = assemblyRef.toString.EndsWith(".tests")
 
     { Packages = packages
       Project = { Repository = repoRef
@@ -156,6 +157,7 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                   Output = assemblyRef
                   OutputType = extension
                   FxTarget = FrameworkVersion fxTarget
+                  HasTests = hasTests
                   AssemblyReferences = assemblies
                   PackageReferences = pkgRefs
                   ProjectReferences = prjRefs } }
