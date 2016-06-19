@@ -58,6 +58,7 @@ let Serialize (antho : Anthology) =
         cproject.fx <- project.FxTarget.toString
         cproject.out <- sprintf "%s.%s" project.Output.toString project.OutputType.toString
         cproject.file <- sprintf "%s/%s" project.Repository.toString project.RelativeProjectFile.toString
+        cproject.tests <- project.HasTests
         cproject.assemblies.Clear ()
         for assembly in project.AssemblyReferences do
             let cass = AnthologyConfig.anthology_Type.projects_Item_Type.assemblies_Item_Type()
@@ -132,6 +133,7 @@ let Deserialize (content) =
                        let out = Path.GetFileNameWithoutExtension(x.out)
                        let repo = IoHelpers.GetRootDirectory (x.file)
                        let file = IoHelpers.GetFilewithoutRootDirectory (x.file)
+                       let hastests = x.tests 
                        convertToProjects tail |> Set.add  { Repository = RepositoryId.from repo
                                                             RelativeProjectFile = ProjectRelativeFile file
                                                             UniqueProjectId = ProjectUniqueId.from (ParseGuid x.guid)
@@ -139,6 +141,7 @@ let Deserialize (content) =
                                                             Output = AssemblyId.from out
                                                             OutputType = OutputType.from ext
                                                             FxTarget = FrameworkVersion x.fx
+                                                            HasTests = hastests
                                                             AssemblyReferences = convertToAssemblies (x.assemblies |> List.ofSeq)
                                                             PackageReferences = convertToPackages (x.packages |> List.ofSeq)
                                                             ProjectReferences = convertToProjectRefs (x.projects |> List.ofSeq) }

@@ -23,6 +23,7 @@ let CheckSaveLoadAnthology () =
                        UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                        RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                        FxTarget = FrameworkVersion "v4.5"
+                       HasTests = false
                        ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set
                        AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Data"; AssemblyId.from "System.Xml"] |> set
                        PackageReferences = [ PackageId.from "NLog" ; PackageId.from "Rx-Main" ] |> Set

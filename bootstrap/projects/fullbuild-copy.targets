@@ -5,8 +5,8 @@
   <ItemGroup>
     <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/bin/fullbuild.exe;$(FBWorkspaceDir)/.full-build/bin/fullbuild.pdb" />
   </ItemGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Configuration/package-copy.targets" />
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Core/package-copy.targets" />
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Data/package-copy.targets" />
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/Mono.Cecil/package-copy.targets" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Configuration/package-copy.targets" Condition="'$(FullBuild_FSharp_Configuration_PkgCopy)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Core/package-copy.targets" Condition="'$(FullBuild_FSharp_Core_PkgCopy)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Data/package-copy.targets" Condition="'$(FullBuild_FSharp_Data_PkgCopy)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/Mono.Cecil/package-copy.targets" Condition="'$(FullBuild_Mono_Cecil_PkgCopy)' == ''" />
 </Project>

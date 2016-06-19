@@ -47,6 +47,13 @@ let CheckBasicParsingCSharp () =
     let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
     prjDescriptor.Project.UniqueProjectId |> should equal (ProjectUniqueId.from (ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396"))
     prjDescriptor.Packages |> should equal expectedPackages
+    prjDescriptor.Project.HasTests |> should equal false
+
+[<Test>]
+let CheckTestsProject () =
+    let file = FileInfo ("./CSharpProjectSample1.Tests.csproj")
+    let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
+    prjDescriptor.Project.HasTests |> should equal true
 
 [<Test>]
 let CheckBasicParsingFSharp () =
@@ -88,6 +95,7 @@ let CheckParseConvertedProject () =
                             Output = AssemblyId.from "CassandraSharp"
                             OutputType = OutputType.Dll
                             FxTarget = FrameworkVersion "v4.5"
+                            HasTests = false
                             AssemblyReferences = Set [ AssemblyId.from "System"
                                                        AssemblyId.from "System.Numerics"
                                                        AssemblyId.from "System.Xml"
@@ -126,6 +134,7 @@ let CheckParseConvertedProjectWithoutPackagesConfig () =
                             Output = AssemblyId.from "CassandraSharp"
                             OutputType = OutputType.Dll
                             FxTarget = FrameworkVersion "v4.5"
+                            HasTests = false
                             AssemblyReferences = Set [ AssemblyId.from "System"
                                                        AssemblyId.from "System.Numerics"
                                                        AssemblyId.from "System.Xml"

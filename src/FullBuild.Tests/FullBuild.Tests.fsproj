@@ -72,6 +72,9 @@
     <Compile Include="SimplifyTests.fs" />
     <Compile Include="IndexationTests.fs" />
     <None Include="app.config" />
+    <None Include="CSharpProjectSample1.Tests.csproj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="ProjectWithInvalidRefs.fsproj" />
     <None Include="anthology-indexed.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -91,9 +94,6 @@
     <None Include="packages.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="CSharpProjectSample1.csproj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="ConvertedProject.csproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -104,6 +104,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Paket.fsproj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="CSharpProjectSample1.csproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

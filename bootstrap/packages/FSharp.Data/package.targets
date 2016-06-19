@@ -4,9 +4,6 @@
     <FullBuild_FSharp_Data_Pkg>Y</FullBuild_FSharp_Data_Pkg>
   </PropertyGroup>
   <Import Project="$(FBWorkspaceDir)/.full-build/packages/Zlib.Portable/package.targets" Condition="'$(FullBuild_Zlib_Portable_Pkg)' == ''" />
-  <PropertyGroup>
-    <CompileDependsOn>FullBuild_FSharp_Data_Pkg_Check; $(CompileDependsOn)</CompileDependsOn>
-  </PropertyGroup>
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
       <ItemGroup>
@@ -32,13 +29,5 @@
         </Reference>
       </ItemGroup>
     </When>
-    <Otherwise>
-      <PropertyGroup>
-        <FullBuild_FSharp_Data_Pkg_Warning>Y</FullBuild_FSharp_Data_Pkg_Warning>
-      </PropertyGroup>
-    </Otherwise>
   </Choose>
-  <Target Name="FullBuild_FSharp_Data_Pkg_Check">
-    <Error Text="Warning! Can't find compatible package &quot;FSharp.Data&quot; for requested FrameworkVersion $(FrameworkVersion)" Condition="'$(FullBuild_FSharp_Data_Pkg_Warning)' != ''" />
-  </Target>
 </Project>

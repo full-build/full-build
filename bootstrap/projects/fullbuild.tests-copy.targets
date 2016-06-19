@@ -5,7 +5,7 @@
   <ItemGroup>
     <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/bin/fullbuild.tests.dll;$(FBWorkspaceDir)/.full-build/bin/fullbuild.tests.pdb" />
   </ItemGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/projects/fullbuild-copy.targets" />
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Core/package-copy.targets" />
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/fsunit/package-copy.targets" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/projects/fullbuild-copy.targets" Condition="'$(FullBuild_fullbuildCopy)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Core/package-copy.targets" Condition="'$(FullBuild_FSharp_Core_PkgCopy)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/fsunit/package-copy.targets" Condition="'$(FullBuild_fsunit_PkgCopy)' == ''" />
 </Project>

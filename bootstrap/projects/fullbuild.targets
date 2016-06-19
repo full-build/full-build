@@ -9,5 +9,5 @@
       <Private>true</Private>
     </Reference>
   </ItemGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/projects/fullbuild-copy.targets" Condition="'$(FullBuild_fullbuild)' == ''" />
+  <Import Project="$(FBWorkspaceDir)/.full-build/projects/fullbuild-copy.targets" Condition="'$(FullBuild_fullbuild)' == '' And '$(FullBuild_fullbuildCopy)' == ''" />
 </Project>
