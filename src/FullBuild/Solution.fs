@@ -18,6 +18,7 @@ open System.IO
 open System.Xml.Linq
 open StringHelpers
 open MsBuildHelpers
+open Collections
 
 
 
@@ -41,26 +42,48 @@ let GenerateFakeContent (projects : Project seq) =
             let projectFile = wsDir |> IoHelpers.GetSubDirectory project.Repository.toString
                                     |> IoHelpers.GetFile project.RelativeProjectFile.toString
             yield sprintf "Target %A (fun _ ->" target
-            yield sprintf " !! %A " projectFile.FullName
-            yield sprintf @"    |> MSBuild """" ""Build"" [(""SolutionDir"", %A)]" wsDir.FullName
+            yield sprintf "  [%A] " (projectFile.FullName |> IoHelpers.ToUnix)
+            yield sprintf @"    |> MSBuild """" ""Build"" [(""SolutionDir"", %A)]" (wsDir.FullName |> IoHelpers.ToUnix)
             yield sprintf @"    |> Log %A" target
             yield ")"
             yield ""
 
-        yield @"Target ""All"" (fun _ -> ())"
-
         for project in projects do
-            let target = project.ProjectId.toString
-            yield sprintf "%A <== [" target
-            for dependency in project.ProjectReferences do
-                yield sprintf "    %A" dependency.toString
-            yield sprintf "  ]"
-            yield ""
+            if project.HasTests then
+                let target = project.ProjectId.toString + "-tests"
+                let assemblyFile = wsDir |> IoHelpers.GetSubDirectory project.relativeProjectFolderFromWorkspace
+                                         |> IoHelpers.GetSubDirectory "bin"
+                                         |> IoHelpers.GetFile (project.outputFile)
+                let testFile = wsDir |> IoHelpers.GetFile (project.Output.toString + ".xml")
+                yield sprintf "Target %A (fun _ ->" target
+                yield sprintf "  [%A] " (assemblyFile.FullName |> IoHelpers.ToUnix)
+                yield sprintf @"    |> NUnit3 (fun p -> { p with DisableShadowCopy = true; OutputFile = %A })" (testFile.FullName |> IoHelpers.ToUnix)
+                yield ")"
+                yield ""
 
-        yield sprintf @"""All"" <== ["
+        // TODO: create app here
+
+        yield @"Target ""All"" (fun _ -> ())"
+        yield ""
+
+        let projectIds = projects |> Seq.map (fun x -> x.ProjectId) |> Set.ofSeq
+        for project in projects do
+            let depProjects = project.ProjectReferences |> Set.filter (fun x -> projectIds |> Set.contains x)
+
+            if 0 < depProjects.Count then
+                let target = project.ProjectId.toString
+                yield sprintf "%A <== [" target
+                for dependency in depProjects do
+                    yield sprintf "    %A" dependency.toString
+                yield sprintf "  ]"
+                yield ""
+
+        yield sprintf @"""All"" <== ([|"
         for project in projects do
             yield sprintf "    %A" project.ProjectId.toString
-        yield sprintf "  ]"
+            if project.HasTests then
+                yield sprintf "    %A" (project.ProjectId.toString + "-tests")
+        yield sprintf "  |] |> List.ofArray)"
         yield ""
         yield @"RunTargetOrDefault ""All"""
     }
