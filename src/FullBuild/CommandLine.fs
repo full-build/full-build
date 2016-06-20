@@ -83,11 +83,12 @@ type BuildView =
 
 type AlterView =
     { Name : ViewId
-      Default : bool }
+      Default : bool option
+      Source : bool option 
+      Parents : bool option }
 
 type OpenView =
-    { Name : ViewId 
-      ForceSrc : bool }
+    { Name : ViewId }
 
 type GraphView =
     { Name : ViewId

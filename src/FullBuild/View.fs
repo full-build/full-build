@@ -178,18 +178,28 @@ let GenerateView (viewId : ViewId) =
     generate viewId view
 
 
-let AlterView (viewId : ViewId) (isDefault : bool) =
-    if isDefault then 
-        let vwDir = GetFolder Env.View
-        let defaultFile = vwDir |> GetFile "default"
-        System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
+let AlterView (viewId : ViewId) (forceDefault : bool option) (forceSource : bool option) (forceParents : bool option) =
+    match forceDefault with
+    | Some true ->  let vwDir = GetFolder Env.View
+                    let defaultFile = vwDir |> GetFile "default"
+                    System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
+    | _ -> ()
+    
+    let mutable view = Configuration.LoadView viewId
+    match forceSource with
+    | Some source -> view <- { view with SourceOnly = source }
+    | _ -> ()
 
-let OpenView (viewId : ViewId) (forceSrc : bool) =
+    match forceParents with
+    | Some parents -> view <- { view with Parents = parents }
+    | _ -> ()
+
+    Configuration.SaveView viewId view
+    GenerateView viewId
+        
+
+let OpenView (viewId : ViewId) =
     let view = Configuration.LoadView viewId
-    if forceSrc && (view.SourceOnly <> forceSrc) then
-        let newView = { view with SourceOnly = forceSrc }
-        generate viewId newView
-
     let viewFile = getViewFile viewId
     Exec.SpawnWithVerb viewFile.FullName "open"
 
