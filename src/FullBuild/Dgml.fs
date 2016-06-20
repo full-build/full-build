@@ -19,7 +19,7 @@ open Collections
 open MsBuildHelpers
 
 let GenerateProjectNode (project : Project) =
-    let isTest = project.RelativeProjectFile.toString.Contains(".Test.") || project.RelativeProjectFile.toString.Contains(".Tests.")
+    let isTest = project.HasTests
     let cat = if isTest then "TestProject"
               else "Project"
 
