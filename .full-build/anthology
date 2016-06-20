@@ -10,7 +10,6 @@ anthology:
     - repo: src
       branch: master
       build: msbuild
-      sticky: false
       uri: https://github.com/pchalamet/full-build
   apps:
     - name: full-build

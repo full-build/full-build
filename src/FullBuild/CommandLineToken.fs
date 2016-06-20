@@ -26,7 +26,6 @@ type TokenOption =
     | Default
     | Branch
     | Version
-    | Sticky
     | Rebase
     | Reset
     | View
@@ -44,7 +43,6 @@ let (|TokenOption|) (token : string) =
     | "--default" -> TokenOption.Default
     | "--branch" -> TokenOption.Branch
     | "--version" -> TokenOption.Version
-    | "--sticky" -> TokenOption.Sticky
     | "--rebase" -> TokenOption.Rebase
     | "--reset" -> TokenOption.Reset
     | "--view" -> TokenOption.View

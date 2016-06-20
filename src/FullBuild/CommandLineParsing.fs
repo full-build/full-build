@@ -167,15 +167,13 @@ let commandOutdated (args : string list) =
     | [] -> Command.OutdatedPackages
     | _ -> Command.Error
 
-let rec commandAddRepo (branch : BranchId option) (builder : BuilderType) (sticky : bool) (args : string list) =
+let rec commandAddRepo (branch : BranchId option) (builder : BuilderType) (args : string list) =
     match args with
-    | TokenOption TokenOption.Sticky :: tail -> tail |> commandAddRepo branch builder true
-    | TokenOption TokenOption.Branch :: MatchBranchId branch :: tail -> tail |> commandAddRepo (Some branch) builder sticky
+    | TokenOption TokenOption.Branch :: MatchBranchId branch :: tail -> tail |> commandAddRepo (Some branch) builder
     | name :: [url] -> Command.AddRepository { Repo = RepositoryId.from name
                                                Url = RepositoryUrl.from url
                                                Branch = branch
-                                               Builder = builder 
-                                               Sticky = sticky }
+                                               Builder = builder }
     | _ -> Command.Error
 
 let commandDropRepo (args : string list) =
@@ -303,7 +301,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Outdated :: Token Token.Package :: cmdArgs -> cmdArgs |> commandOutdated
     | Token Token.List :: Token Token.Package :: cmdArgs -> cmdArgs |> commandListPackage
 
-    | Token Token.Add :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandAddRepo None BuilderType.MSBuild false
+    | Token Token.Add :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandAddRepo None BuilderType.MSBuild
     | Token Token.Drop :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandDropRepo
     | Token Token.List :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandListRepo
 
@@ -380,7 +378,7 @@ let UsageContent() =
         "  outdated package : display outdated packages"
         "  list package : list packages"
         ""
-        "  add repo [--branch <branchId>] [--sticky] <repoId> <repo-uri> : declare a new repository"
+        "  add repo [--branch <branch>] [--sticky] <repoId> <repo-uri> : declare a new repository"
         "  drop repo <repoId> : drop repository"
         "  list repo : list repositories"
         ""
