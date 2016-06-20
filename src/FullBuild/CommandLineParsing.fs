@@ -220,16 +220,17 @@ let commandDescribeView (args : string list) =
     | [MatchViewId name] -> Command.DescribeView { Name = name }
     | _ -> Command.Error
 
-let rec commandAlterView (isDefault : bool) (args : string list) =
+let rec commandAlterView (forceDefault : bool option) (forceSrc : bool option) (forceParents : bool option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Default :: tail -> tail |> commandAlterView true
-    | [MatchViewId name] -> Command.AlterView { Name = name ; Default = isDefault }
+    | TokenOption TokenOption.Default :: tail -> tail |> commandAlterView (Some true) forceSrc forceParents
+    | TokenOption TokenOption.Src :: tail -> tail |> commandAlterView forceDefault (Some true) forceParents
+    | TokenOption TokenOption.Bin :: tail -> tail |> commandAlterView forceDefault (Some false) forceParents
+    | [MatchViewId name] -> Command.AlterView { Name = name ; Default = forceDefault; Source = forceSrc; Parents = forceParents }
     | _ -> Command.Error
 
-let rec commandOpenView (forceSrc : bool) (args : string list) =
+let commandOpenView (args : string list) =
     match args with
-    | TokenOption TokenOption.Src :: tail -> tail |> commandOpenView true
-    | [MatchViewId name] -> Command.OpenView { Name = name; ForceSrc = forceSrc }
+    | [MatchViewId name] -> Command.OpenView { Name = name }
     | _ -> Command.Error
 
 let commandAddApp (args : string list) =
@@ -313,8 +314,8 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
     | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
     | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
-    | Token Token.Alter :: Token Token.View :: cmdArgs -> cmdArgs |> commandAlterView false
-    | Token Token.Open :: cmdArgs -> cmdArgs |> commandOpenView false
+    | Token Token.Alter :: Token Token.View :: cmdArgs -> cmdArgs |> commandAlterView None None None
+    | Token Token.Open :: cmdArgs -> cmdArgs |> commandOpenView
     
     | Token Token.Add :: Token Token.App :: cmdArgs -> cmdArgs |> commandAddApp
     | Token Token.Drop :: Token Token.App :: cmdArgs -> cmdArgs |> commandDropApp
@@ -359,7 +360,7 @@ let UsageContent() =
         "  branch [<branch>] : checkout workspace to branch"
         "  install : install packages"
         "  view [--src] [--all] <view-name> <view-wildcard>+ : add repositories to view"
-        "  open [--src] <viewName> : open view with your favorite ide"
+        "  open <viewName> : open view with your favorite ide"
         "  build [--mt] [--debug] [--version <version>] [<view-name>] : build view"
         "  rebuild [--mt] [--debug] [--version <version>] [<view-name>] : rebuild view (clean & build)"
         "  test [--exclude <category>]* <test-wildcard>+ : test assemblies (match repository/project)"
@@ -389,7 +390,7 @@ let UsageContent() =
         "  drop view <view-name> : drop view"
         "  list view : list views"
         "  describe view <name> : describe view"
-        "  alter view [--default] <viewName> : alter view"
+        "  alter view [--default] [--src|--bin] [--all] <viewName> : alter view"
         ""
         "  add app <app-name> <copy|zip> <project-id>+ : create new application from given project ids"
         "  drop app <app-name> : drop application"
