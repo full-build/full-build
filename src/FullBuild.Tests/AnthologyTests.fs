@@ -33,10 +33,8 @@ let CheckEqualityWithPermutation () =
         NuGets = []
         MasterRepository = { Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" ; Branch = None}
         Repositories = [ { Builder = BuilderType.MSBuild
-                           Sticky = false
                            Repository = { Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" ; Branch = None} }
                          { Builder = BuilderType.MSBuild
-                           Sticky = true
                            Repository = { Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" ; Branch = None} } ] |> set
         Projects = [ { Output = AssemblyId.from "cqlplus"
                        ProjectId = ProjectId.from "cqlplus"
@@ -58,10 +56,8 @@ let CheckEqualityWithPermutation () =
         NuGets = []
         MasterRepository = { Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" ; Branch = None}
         Repositories = [ { Builder = BuilderType.MSBuild
-                           Sticky = false
                            Repository = { Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" ; Branch = None} }
                          { Builder = BuilderType.MSBuild
-                           Sticky = true
                            Repository = { Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" ; Branch = None} } ] |> set
         Projects = [ { Output = AssemblyId.from "cqlplus"
                        ProjectId = ProjectId.from "cqlplus"

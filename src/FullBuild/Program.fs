@@ -38,7 +38,7 @@ let tryMain argv =
     | History -> Workspace.History ()
 
     // repository
-    | AddRepository repoInfo -> Repo.Add repoInfo.Repo repoInfo.Url repoInfo.Branch repoInfo.Builder repoInfo.Sticky
+    | AddRepository repoInfo -> Repo.Add repoInfo.Repo repoInfo.Url repoInfo.Branch repoInfo.Builder
     | CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters repoInfo.Shallow repoInfo.All repoInfo.Multithread
     | ListRepositories -> Repo.List ()
     | DropRepository repo -> Repo.Drop repo

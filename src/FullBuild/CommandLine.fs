@@ -102,8 +102,7 @@ type AddRepository =
     { Repo : RepositoryId
       Url : RepositoryUrl
       Branch : BranchId option
-      Builder : BuilderType
-      Sticky : bool }
+      Builder : BuilderType }
 
 type PullWorkspace =
     { Src : bool

@@ -55,10 +55,10 @@ let Clone (filters : RepositoryId set) (shallow : bool) (all : bool) (mt : bool)
                |> Seq.map (fun x -> cloneRepoAndInit wsDir antho.Vcs shallow x.Repository)
                |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
 
-let Add (name : RepositoryId) (url : RepositoryUrl) (branch : BranchId option) (builder : BuilderType) (sticky : bool) =
+let Add (name : RepositoryId) (url : RepositoryUrl) (branch : BranchId option) (builder : BuilderType) =
     let antho = LoadAnthology ()
     let repo = { Name = name; Url = url; Branch = branch }
-    let buildableRepo = { Repository = repo; Builder = builder; Sticky = sticky }
+    let buildableRepo = { Repository = repo; Builder = builder }
     let repos = antho.Repositories |> Set.add buildableRepo
                                    |> Seq.distinctBy (fun x -> x.Repository.Name)
                                    |> Set
