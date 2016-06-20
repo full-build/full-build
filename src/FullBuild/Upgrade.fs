@@ -32,8 +32,8 @@ let deleteBackupFiles (dir:DirectoryInfo) =
 
 let waitProcessToExit processId = 
     try
-        let processInfo = Process.GetProcessById(processId)
-        if not (processInfo = null) then
+        use processInfo = Process.GetProcessById(processId)
+        if processInfo <> null then
             processInfo.WaitForExit()
     with
         | :? System.ArgumentException -> ()
@@ -70,5 +70,6 @@ let Upgrade () =
 
     unzipFolder |> ForceDelete
 
-    let processId = Process.GetCurrentProcess().Id
+    use currentProcess = Process.GetCurrentProcess()
+    let processId = currentProcess.Id
     Exec.Spawn (installDir |> GetFile "fullbuild.exe").FullName (processId |> sprintf "upgrade %i")
