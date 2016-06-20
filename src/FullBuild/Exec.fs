@@ -37,11 +37,13 @@ let Exec checkErrorCode (command : string) (args : string) (dir : DirectoryInfo)
 
 let SpawnWithVerb (command : string) (verb : string) =
     let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Verb = verb)
-    Process.Start (psi) |> ignore
+    use proc = Process.Start (psi)
+    ()
  
 let Spawn (command : string) (args : string) =
     let psi = ProcessStartInfo (FileName = command, UseShellExecute = false, Arguments = args)
-    Process.Start (psi) |> ignore   
+    use proc = Process.Start (psi)
+    ()
 
 let ExecReadLine checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) = 
     let mutable psi = defaultPSI command args dir
