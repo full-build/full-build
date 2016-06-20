@@ -30,7 +30,7 @@ let tryMain argv =
     | PushWorkspace buildInfo -> Workspace.Push buildInfo.Branch buildInfo.BuildNumber
     | CheckoutWorkspace version -> Workspace.Checkout version.Version
     | BranchWorkspace branch -> Workspace.Branch branch.Branch
-    | PullWorkspace pullInfo -> Workspace.Pull pullInfo.Src pullInfo.Bin pullInfo.Rebase
+    | PullWorkspace pullInfo -> Workspace.Pull pullInfo.Src pullInfo.Bin pullInfo.Rebase pullInfo.View
     | Exec cmd -> Workspace.Exec cmd.Command cmd.All
     | CleanWorkspace -> Workspace.Clean ()
     | UpdateGuids name -> Workspace.UpdateGuid name
