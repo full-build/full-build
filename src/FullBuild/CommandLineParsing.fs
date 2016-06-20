@@ -378,7 +378,7 @@ let UsageContent() =
         "  outdated package : display outdated packages"
         "  list package : list packages"
         ""
-        "  add repo [--branch <branch>] [--sticky] <repoId> <repo-uri> : declare a new repository"
+        "  add repo [--branch <branch>] <repoId> <repo-uri> : declare a new repository"
         "  drop repo <repoId> : drop repository"
         "  list repo : list repositories"
         ""
