@@ -138,12 +138,13 @@ let rec commandPush (branch : string option) (args : string list) =
     | [buildNumber] -> Command.PushWorkspace {Branch = branch; BuildNumber = buildNumber }
     | _ -> Command.Error
 
-let rec commandPull (src : bool) (bin : bool) (rebase : bool) (args : string list) =
+let rec commandPull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Src :: tail -> tail |> commandPull true false rebase
-    | TokenOption TokenOption.Bin :: tail -> tail |> commandPull false true rebase
-    | TokenOption TokenOption.Rebase :: tail -> tail |> commandPull src bin true
-    | [] -> Command.PullWorkspace { Src = src ; Bin = bin; Rebase = rebase }
+    | TokenOption TokenOption.Src :: tail -> tail |> commandPull true false rebase view
+    | TokenOption TokenOption.Bin :: tail -> tail |> commandPull false true rebase view
+    | TokenOption TokenOption.Rebase :: tail -> tail |> commandPull src bin true view
+    | TokenOption TokenOption.View :: MatchViewId name :: tail -> tail |> commandPull true true rebase (Some name)
+    | [] -> Command.PullWorkspace { Src = src ; Bin = bin; Rebase = rebase; View = view }
     | _ -> Command.Error
 
 let commandClean (args : string list) =
@@ -291,7 +292,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
     | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush None
-    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false
+    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
     | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory
@@ -366,7 +367,7 @@ let UsageContent() =
         "  exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         "  index <repo-wildcard>+ : index repositories"
         "  convert <repo-wildcard> : convert projects in repositories"
-        "  pull [--src|--bin] [--rebase] : update to latest version - rebase if requested (ff is default)"
+        "  pull [--src|--bin] [--rebase] [--view <view-name>]: update to latest version - rebase if requested (ff is default)"
         "  push [--branch <branch>] <buildNumber> : push a baseline from current repositories version and display version"
         "  publish [--mt] <app> : publish application"
         "  bind <projectId-wildcard>+ : update bindings"

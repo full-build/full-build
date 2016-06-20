@@ -163,7 +163,7 @@ let Branch (branch : BookmarkVersion option) =
         Vcs.VcsCheckout wsDir antho.Vcs repo repoVer true
 
 
-let Pull (src : bool) (bin : bool) (rebase : bool) =
+let Pull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
 
@@ -177,7 +177,14 @@ let Pull (src : bool) (bin : bool) (rebase : bool) =
         // install sticky repositories as one could have popped up
         CloneStickyRepositories wsDir
 
-        let clonedRepos = antho.Repositories |> ClonedRepositories wsDir
+        let clonedRepos = match view with
+                          | None -> antho.Repositories |> ClonedRepositories wsDir
+                          | Some viewName -> let repos = Configuration.LoadView viewName
+                                                         |> View.FindViewProjects
+                                                         |> Set.map (fun x -> x.Repository)
+                                             antho.Repositories |> Set.map (fun x -> x.Repository)
+                                                                |> Set.filter (fun x -> repos |> Set.contains x.Name)
+
         for repo in clonedRepos do
             DisplayHighlight repo.Name.toString
 

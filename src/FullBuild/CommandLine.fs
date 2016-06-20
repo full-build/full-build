@@ -107,7 +107,8 @@ type AddRepository =
 type PullWorkspace =
     { Src : bool
       Bin : bool
-      Rebase : bool }
+      Rebase : bool 
+      View : ViewId option }
 
 type PushWorkspace =
     { BuildNumber : string 
