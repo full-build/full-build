@@ -40,10 +40,8 @@ let waitProcessToExit processId =
         | _ -> reraise()
 
 let FinalizeUpgrade processId =
-    printfn "Finalizing installation"
     waitProcessToExit processId
     Env.getInstallationFolder () |> deleteBackupFiles
-    printfn "Done"
 
 let getSameFiles (firstDir:DirectoryInfo) (secondDir:DirectoryInfo) =
     firstDir.GetFiles() |> Seq.where(fun x-> (secondDir |> IoHelpers.GetFile x.Name).Exists)
