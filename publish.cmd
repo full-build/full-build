@@ -2,7 +2,7 @@
 setlocal
 
 set VERSION=%1
-if [%VERSION%] == [] set VERSION=0.0.0.0 
+if [%VERSION%] == [] set VERSION=0.0.0
 echo publishing version %VERSION%
 
 set HERE=%~dp0
@@ -13,7 +13,9 @@ goto :ok
 :dopublish
 %HERE%\src\fullbuild\bin\fullbuild publish * || goto :ko
 robocopy %HERE%\apps\full-build %HERE%\refbin /MIR
-nuget pack -NoDefaultExcludes -NoPackageAnalysis -NonInteractive -OutputDirectory apps -Version %VERSION% full-build.nuspec
+
+nuget pack -NoDefaultExcludes -NoPackageAnalysis -NonInteractive -OutputDirectory apps -Version %VERSION% full-build.nuspec || goto :ko
+move apps\full-build.%VERSION%.nupkg apps\full-build.nupkg || goto :ko
 verify >nul
 goto :eof
 

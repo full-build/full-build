@@ -17,8 +17,11 @@ test_script:
   - ps: . .\pushtestresult.ps1
 
 artifacts:
-  path: apps/full-build.zip
-  name: full-build
+  - path: apps/full-build.zip
+    name: app
+
+  - path: apps/full-build.nupkg
+    name: nuget
 
 deploy:
   - provider: GitHub
@@ -36,9 +39,9 @@ deploy:
   - provider: NuGet
     api_key:
       secure: 497rsDkO6DO9dnd9LoozwZeWYxLWzq8avJ0yAIka+wBOnrYhw54yUQknWJ7XQm7S
-    skip_symbols: false
+    skip_symbols: true
     symbol_server:
-    artifacts: apps/full-build.$(appveyor_build_version).nupkg
+    artifacts: apps/full-build.nupkg
 
 notifications:
   - provider: GitHubPullRequest
