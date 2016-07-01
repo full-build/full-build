@@ -2,8 +2,9 @@ echo on
 setlocal
 
 set VERSION=%1
-if [%VERSION%] == [] set VERSION=0.0.0.* 
+if [%VERSION%] == [] set VERSION=0.0.0
 echo building version %VERSION%
+set VERSION=%VERSION%.*
 
 set HERE=%~dp0
 set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%;%HERE%\tools
