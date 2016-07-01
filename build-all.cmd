@@ -17,7 +17,7 @@ goto :eof
 
 :build
 call build.cmd %1 || goto :ko
-call publish.cmd || goto :ko
+call publish.cmd %1 || goto :ko
 goto :eof
 
 :test

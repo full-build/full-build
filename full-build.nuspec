@@ -1,0 +1,18 @@
+<package>
+  <metadata>
+    <id>full-build</id>
+    <version>$version$</version>
+	<title>full-build - smart build system for .net</title>
+    <authors>Pierre Chalamet</authors>
+    <owners>Pierre Chalamet</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>https://github.com/full-build/full-build</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <summary>full-build - smart build system for .net</summary>
+    <description>full-build - smart build system for .net</description>
+    <tags>net partial full build system developer productivity</tags>
+  </metadata>
+  <files>
+    <file src="apps\full-build\*.*" target="tools" />
+  </files>
+</package>
