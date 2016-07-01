@@ -11,7 +11,7 @@ version: 2.3.{build}
 shallow_clone: true
 
 build_script:
-  - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION%.*
+  - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION%
   
 test_script:
   - ps: . .\pushtestresult.ps1
