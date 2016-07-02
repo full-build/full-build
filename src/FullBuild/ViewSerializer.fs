@@ -39,6 +39,7 @@ let SerializeView (view : View) =
         config.view.parameters.Add paramItem
     config.view.sourceonly <- view.SourceOnly
     config.view.parents <- view.Parents
+    config.view.modified <- view.AddNew
 
     config.ToString()
 
@@ -54,7 +55,8 @@ let DeserializeView content =
                    |> Set.ofSeq
       Builder = BuilderType.from config.view.builder 
       SourceOnly = config.view.sourceonly 
-      Parents = config.view.parents }
+      Parents = config.view.parents 
+      AddNew = config.view.modified }
 
 
 let Save (filename : FileInfo) (view : View) =

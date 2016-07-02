@@ -219,4 +219,5 @@ type View =
       Builder : BuilderType
       Parameters : string set 
       SourceOnly : bool 
-      Parents : bool }
+      Parents : bool 
+      AddNew : bool }

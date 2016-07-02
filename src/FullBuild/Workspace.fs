@@ -79,20 +79,13 @@ let ClonedRepositories (wsDir : DirectoryInfo) (repos : BuildableRepository set)
           |> Set.filter (fun x -> let repoDir = wsDir |> GetSubDirectory x.Name.toString
                                   repoDir.Exists)
 
-let CollectRepoHash wsDir vcsType (repos : Repository set) =
-    let getRepoHash (repo : Repository) =
-        let tip = Vcs.VcsTip wsDir vcsType repo
-        { Repository = repo.Name; Version = BookmarkVersion tip}
-
-    repos |> Set.map getRepoHash
-
 
 let Push (branch : string option) buildnum = 
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Workspace
     let allRepos = antho.Repositories
     let clonedRepos = allRepos |> ClonedRepositories wsDir
-    let bookmarks = CollectRepoHash wsDir antho.Vcs clonedRepos
+    let bookmarks = Repo.CollectRepoHash wsDir antho.Vcs clonedRepos
     let baseline = { Bookmarks = bookmarks }
     Configuration.SaveBaseline baseline
 

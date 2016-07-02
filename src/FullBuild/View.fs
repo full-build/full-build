@@ -36,17 +36,46 @@ let private adaptViewFilter (filter : string) =
     if filter.Contains("/") || filter.Contains("*") then filter
     else filter + "/*"
 
-let FindViewProjects (view : View) =
-    // load back filter & generate view accordingly
-    let wsDir = Env.GetFolder Folder.Workspace
-    let repoFilters = view.Filters |> Set.map adaptViewFilter
 
+let ComputeModifiedRepositories (availableRepos : RepositoryId set) (old : Bookmark set) (current : Bookmark set) =
+    seq {
+        let oldBookmarks = old |> Seq.map (fun x -> (x.Repository, x.Version)) |> Map
+        for currBook in current do
+            let oldBook = oldBookmarks |> Map.tryFind currBook.Repository
+            match oldBook with
+            | Some x -> if x <> currBook.Version && availableRepos.Contains(currBook.Repository) then
+                            yield currBook.Repository.toString // modified
+            | _ -> yield currBook.Repository.toString // new
+    } |> Set.ofSeq
+
+let GetModifiedFilter (view : View) =
+    let wsDir = Env.GetFolder Folder.Workspace
+    let antho = Configuration.LoadAnthology ()
+
+    if view.AddNew then
+        let clonedRepos = antho.Repositories |> Set.map (fun x -> x.Repository)
+                                             |> Set.filter (filterClonedRepositories wsDir)
+        let availableRepos = clonedRepos |> Set.map (fun x -> x.Name)
+
+        let current = Repo.CollectRepoHash wsDir antho.Vcs clonedRepos
+        let baseline = Configuration.LoadBaseline ()
+        ComputeModifiedRepositories availableRepos baseline.Bookmarks current
+    else
+        Set.empty
+
+let FindViewProjects (view : View) =
+    let wsDir = Env.GetFolder Folder.Workspace
     let antho = Configuration.LoadAnthology ()
 
     // select only available repositories
     let availableRepos = antho.Repositories |> Set.map (fun x -> x.Repository)
                                             |> Set.filter (filterClonedRepositories wsDir)
                                             |> Set.map(fun x -> x.Name)
+
+    // load back filter & generate view accordingly
+    let repoFilters = view.Filters
+    let modifiedFilters = GetModifiedFilter view 
+    let selectionFilters = repoFilters |> Set.union modifiedFilters |> Set.map adaptViewFilter
 
     // build: <repository>/<project>
     let projects = antho.Projects 
@@ -58,8 +87,8 @@ let FindViewProjects (view : View) =
     let matchRepoProject filter =
         projectNames |> Set.filter (fun x -> PatternMatching.Match x filter)
 
-    let matches = repoFilters |> Set.map matchRepoProject
-                              |> Set.unionMany
+    let matches = selectionFilters |> Set.map matchRepoProject
+                                   |> Set.unionMany
     let selectedProjectGuids = projects |> Map.filter (fun k _ -> Set.contains k matches)
                                         |> Seq.map (fun x -> x.Value)
                                         |> Set
@@ -136,15 +165,16 @@ let Graph (viewId : ViewId) (all : bool) =
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewId.toString)
     graph.Save graphFile.FullName
 
-let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forceParents : bool) =
-    if filters.Length = 0 then
+let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forceParents : bool) (addNew : bool) =
+    if filters.Length = 0 && not addNew then
         failwith "Expecting at least one filter"
 
     let view = { Filters = filters |> Set
                  Builder = BuilderType.MSBuild
                  Parameters = Set.empty 
                  SourceOnly = forceSrc 
-                 Parents = forceParents }
+                 Parents = forceParents 
+                 AddNew = addNew }
     Configuration.SaveView viewId view
     generate viewId view
 

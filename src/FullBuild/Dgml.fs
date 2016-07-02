@@ -149,7 +149,9 @@ let GraphCategories (repos : RepositoryId set) =
     }
 
 let GraphProperties () =
-    let allProperties = [ ("Fx", "Target Framework Version", "System.String")
+    let allProperties = [ ("FxVersion", "Target Framework Version", "System.String")
+                          ("FxProfile", "Target Framework Profile", "System.String")
+                          ("FxIdentifier", "Target Framework Identifier", "System.String")
                           ("Guid", "Project Guid", "System.Guid") 
                           ("IsTest", "Test Project", "System.Boolean")
                           ("Output", "Project Output", "System.String") 

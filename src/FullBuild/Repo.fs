@@ -80,3 +80,11 @@ let Drop (name : RepositoryId) =
                          with Projects = Set.difference antho.Projects projectsInRepo
                               Repositories = antho.Repositories |> Set.filter (fun x -> x.Repository.Name <> name) }
         Configuration.SaveAnthology newAntho
+
+let CollectRepoHash wsDir vcsType (repos : Repository set) =
+    let getRepoHash (repo : Repository) =
+        let tip = Vcs.VcsTip wsDir vcsType repo
+        { Repository = repo.Name; Version = BookmarkVersion tip}
+
+    repos |> Set.map getRepoHash
+

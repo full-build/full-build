@@ -29,6 +29,7 @@ type TokenOption =
     | Rebase
     | Reset
     | View
+    | Modified
     | Unknown
 
 let (|TokenOption|) (token : string) =
@@ -46,6 +47,7 @@ let (|TokenOption|) (token : string) =
     | "--rebase" -> TokenOption.Rebase
     | "--reset" -> TokenOption.Reset
     | "--view" -> TokenOption.View
+    | "--modified" -> TokenOption.Modified
     | _ -> Unknown
 
 
