@@ -50,10 +50,6 @@ with
                            | PackageVersion x -> x
                            | Unspecified -> "<unspecified>"
 
-type PackageFramework = PackageFramework of string
-with
-    member this.toString = (fun (PackageFramework x) -> x)this
-
 type PackageId = private PackageId of string
 with
     member this.toString = (fun (PackageId x) -> x)this
@@ -145,6 +141,14 @@ with
     member this.toString = (fun (ProjectType x) -> x.ToString("D")) this
     static member from (guid : Guid) = ProjectType guid
 
+type FxInfo = private FxInfo of string option
+with 
+    member this.toString = (fun (FxInfo x) -> match x with
+                                              | None -> null
+                                              | Some v -> v) this
+
+    static member from (info : string) = String.IsNullOrEmpty(info) ? (None, Some info) |> FxInfo
+
 
 type Project = 
     { Repository : RepositoryId
@@ -153,7 +157,9 @@ type Project =
       Output : AssemblyId
       ProjectId : ProjectId
       OutputType : OutputType
-      FxTarget : FrameworkVersion
+      FxVersion : FxInfo
+      FxProfile : FxInfo
+      FxIdentifier : FxInfo
       HasTests : bool
       AssemblyReferences : AssemblyId set
       PackageReferences : PackageId set
