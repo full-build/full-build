@@ -131,9 +131,12 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                      | "Library" -> OutputType.Dll
                      | _ -> OutputType.Exe
     
-    let sfxTarget = !> xprj.Descendants(NsMsBuild + "TargetFrameworkVersion").SingleOrDefault() : string
-    let fxTarget = if sfxTarget <> null then sfxTarget
-                   else "v4.5"
+    let sfxVersion = !> xprj.Descendants(NsMsBuild + "TargetFrameworkVersion").SingleOrDefault() : string
+    let sfxProfile = !> xprj.Descendants(NsMsBuild + "TargetFrameworkProfile").SingleOrDefault() : string
+    let sfxIdentifier = !> xprj.Descendants(NsMsBuild + "TargetFrameworkIdentifier").SingleOrDefault() : string
+    let fxVersion = FxInfo.from sfxVersion
+    let fxProfile = FxInfo.from sfxProfile
+    let fxIdentifier = FxInfo.from sfxIdentifier
 
     let prjRefs = getProjectReferences file.Directory xprj
     
@@ -156,7 +159,9 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                   ProjectId = projectRef
                   Output = assemblyRef
                   OutputType = extension
-                  FxTarget = FrameworkVersion fxTarget
+                  FxVersion = fxVersion
+                  FxProfile = fxProfile
+                  FxIdentifier = fxIdentifier
                   HasTests = hasTests
                   AssemblyReferences = assemblies
                   PackageReferences = pkgRefs
