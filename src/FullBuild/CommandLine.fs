@@ -54,7 +54,8 @@ type AddView =
     { Name : ViewId
       Filters : string list 
       SourceOnly : bool 
-      Parents : bool }
+      Parents : bool 
+      AddNew : bool }
 
 type ViewName = 
     { Name : ViewId }

@@ -196,11 +196,12 @@ let commandListNuGet (args : string list) =
     | [] -> Command.ListNuGets
     | _ -> Command.Error
 
-let rec commandAddView (sourceOnly : bool) (parents : bool) (args : string list) =
+let rec commandAddView (sourceOnly : bool) (parents : bool) (addNew : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Src :: tail -> tail |> commandAddView true parents
-    | TokenOption TokenOption.All :: tail -> tail |> commandAddView sourceOnly true
-    | MatchViewId name :: one :: more -> Command.AddView { Name = name; Filters = one::more ; SourceOnly = sourceOnly; Parents = parents }
+    | TokenOption TokenOption.Src :: tail -> tail |> commandAddView true parents addNew
+    | TokenOption TokenOption.All :: tail -> tail |> commandAddView sourceOnly true addNew
+    | TokenOption TokenOption.Modified :: tail -> tail |> commandAddView sourceOnly parents true
+    | MatchViewId name :: filters -> Command.AddView { Name = name; Filters = filters; SourceOnly = sourceOnly; Parents = parents; AddNew = addNew }
     | _ -> Command.Error
 
 let commandDropView (args : string list) =
@@ -308,7 +309,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Add :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandAddNuGet
     | Token Token.List :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandListNuGet
 
-    | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false
+    | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false
     | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
     | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
     | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
@@ -357,7 +358,7 @@ let UsageContent() =
         "  checkout <version> : checkout workspace to version"
         "  branch [<branch>] : checkout workspace to branch"
         "  install : install packages"
-        "  view [--src] [--all] <viewId> <viewId-wildcard>+ : add repositories to view"
+        "  view [--src] [--all] [--modified] <viewId> <viewId-wildcard>+ : add repositories to view"
         "  open <viewId> : open view with your favorite ide"
         "  build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
         "  rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"

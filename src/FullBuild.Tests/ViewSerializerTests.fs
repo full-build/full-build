@@ -10,7 +10,8 @@ let CheckSaveLoadBaseline () =
                   Builder = BuilderType.MSBuild
                   Parameters = ["--mt"; "--debug" ] |> Set 
                   SourceOnly = true 
-                  Parents = false }
+                  Parents = false 
+                  AddNew = false }
 
     let res = ViewSerializer.SerializeView view1
     printfn "%s" res

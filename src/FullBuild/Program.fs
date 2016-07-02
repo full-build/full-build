@@ -45,7 +45,7 @@ let tryMain argv =
     | InstallPackages -> Workspace.Install ()
 
     // view
-    | AddView viewInfo -> View.Create viewInfo.Name viewInfo.Filters viewInfo.SourceOnly viewInfo.Parents
+    | AddView viewInfo -> View.Create viewInfo.Name viewInfo.Filters viewInfo.SourceOnly viewInfo.Parents viewInfo.AddNew
     | DropView viewInfo -> View.Drop viewInfo.Name
     | ListViews -> View.List ()
     | DescribeView viewInfo -> View.Describe viewInfo.Name
