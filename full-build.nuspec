@@ -7,6 +7,7 @@
     <owners>Pierre Chalamet</owners>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <projectUrl>https://github.com/full-build/full-build</projectUrl>
+    <iconUrl>http://www.full-build.io/img/FullBuildNuGet.png</iconUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <summary>full-build - smart build system for .net</summary>
     <description>full-build - smart build system for .net</description>
