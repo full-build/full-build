@@ -85,7 +85,7 @@ let GitClone (shallow : bool) (branch : BranchId option) (target : DirectoryInfo
 let GerritClone (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
     GitClone shallow branch target url
 
-    let installDir = Env.GetFolder Env.Installation
+    let installDir = Env.GetFolder Env.Folder.Installation
     let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
     let target = target |> IoHelpers.GetSubDirectory ".git"
                         |> IoHelpers.GetSubDirectory "hooks" 
@@ -117,6 +117,6 @@ let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
 let GitIgnore (repoDir : DirectoryInfo) =
     let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"
 
-    let installDir = Env.GetFolder Env.Installation
+    let installDir = Env.GetFolder Env.Folder.Installation
     let srcGitIgnore = installDir |> IoHelpers.GetFile "gitignore"
     srcGitIgnore.CopyTo(dstGitIgnore.FullName) |> ignore

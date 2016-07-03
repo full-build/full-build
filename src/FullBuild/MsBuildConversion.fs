@@ -282,7 +282,7 @@ let private convertProjectContent (xproj : XDocument) (project : Project) =
     convxproj
 
 let ConvertProjects projects xdocLoader xdocSaver =
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     for project in projects do
         let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
         if repoDir.Exists then
@@ -294,7 +294,7 @@ let ConvertProjects projects xdocLoader xdocSaver =
             | _ -> failwithf "Project %A does not exist" projFile
 
 let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument -> Unit) =
-    let prjDir = Env.GetFolder Env.Project
+    let prjDir = Env.GetFolder Env.Folder.Project
     for project in projects do
         let refProjectContent = generateProjectTarget project
         let projectFile = prjDir |> GetFile (AddExt Targets (project.Output.toString))
@@ -305,7 +305,7 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
         xdocSaver projectCopyFile refProjectCopyContent
 
 let RemoveUselessStuff (projects : Project set) =
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     let seekAndDestroyFiles = [
                                 "*.sln"
                                 "packages.config"

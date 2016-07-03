@@ -122,6 +122,7 @@ type BindProject =
 
 
 
+[<RequireQualifiedAccess>]
 type MainCommand =
     | Version
     | Usage
@@ -166,6 +167,7 @@ type MainCommand =
     | Unknown
 
 
+[<RequireQualifiedAccess>]
 type Command = 
     | Error of MainCommand
 

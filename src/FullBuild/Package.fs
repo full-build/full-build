@@ -44,7 +44,7 @@ let private generateItemGroupCopyContent (pkgDir : DirectoryInfo) (fxLibs : Dire
     copyFiles        
 
 let private generateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
-    let pkgDir = Env.GetFolder Env.Package
+    let pkgDir = Env.GetFolder Env.Folder.Package
     let dlls = fxLibs.EnumerateFiles("*.dll")
     let exes = fxLibs.EnumerateFiles("*.exes")
     let files = Seq.append dlls exes
@@ -55,7 +55,7 @@ let private generateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
                 itemGroup))
 
 let private generateItemGroupCopy (fxLibs : DirectoryInfo) (condition : string) =
-    let pkgDir = Env.GetFolder Env.Package
+    let pkgDir = Env.GetFolder Env.Folder.Package
     let itemGroup = generateItemGroupCopyContent pkgDir fxLibs
     XElement(NsMsBuild + "When",
         XAttribute(NsNone + "Condition", condition),
@@ -157,7 +157,7 @@ let private generateProjectCopyContent (package : PackageId) (imports : XElement
 
 
 let private generateTargetForPackageRef (package : PackageId) =
-    let pkgsDir = Env.GetFolder Env.Package
+    let pkgsDir = Env.GetFolder Env.Folder.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
     let libDir = pkgDir |> GetSubDirectory "lib" 
     
@@ -173,7 +173,7 @@ let private generateTargetForPackageRef (package : PackageId) =
     project.Save (targetFile.FullName)
 
 let private generateTargetForPackageCopy (package : PackageId) =
-    let pkgsDir = Env.GetFolder Env.Package
+    let pkgsDir = Env.GetFolder Env.Folder.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
     let libDir = pkgDir |> GetSubDirectory "lib" 
     
@@ -194,7 +194,7 @@ let private generateTargetsForPackage (package : PackageId) =
     generateTargetForPackageCopy package
 
 let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
-    let pkgsDir = Env.GetFolder Env.Package
+    let pkgsDir = Env.GetFolder Env.Folder.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
 
     let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))

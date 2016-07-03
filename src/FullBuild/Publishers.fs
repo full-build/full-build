@@ -27,7 +27,7 @@ let private checkedExec =
 
 
 let publishCopy (app : Anthology.Application) =
-    let wsDir = GetFolder Env.Workspace
+    let wsDir = GetFolder Env.Folder.Workspace
     let antho = Configuration.LoadAnthology ()
     let project = antho.Projects |> Seq.find (fun x -> x.ProjectId = app.Project)
     let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
@@ -38,7 +38,7 @@ let publishCopy (app : Anthology.Application) =
         if Env.IsMono () then checkedExec "xbuild" args wsDir
         else checkedExec "msbuild" args wsDir
 
-        let appDir = GetFolder Env.AppOutput
+        let appDir = GetFolder Env.Folder.AppOutput
         let artifactDir = appDir |> GetSubDirectory app.Name.toString
         Bindings.UpdateArtifactBindingRedirects artifactDir
     else
@@ -51,7 +51,7 @@ let publishZip (app : Anthology.Application) =
 
     publishCopy tmpApp
 
-    let appDir = GetFolder Env.AppOutput
+    let appDir = GetFolder Env.Folder.AppOutput
     let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name.toString)
     let targetFile = appDir |> GetFile app.Name.toString
     if targetFile.Exists then targetFile.Delete()
@@ -67,7 +67,7 @@ let publishDocker (app : Anthology.Application) =
 
     publishCopy tmpApp
 
-    let appDir = GetFolder Env.AppOutput
+    let appDir = GetFolder Env.Folder.AppOutput
     let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name.toString)
     let targetFile = appDir |> GetFile app.Name.toString
     if targetFile.Exists then targetFile.Delete()

@@ -35,13 +35,13 @@ let CheckCastString () =
 
 [<Test>]
 let CheckBasicParsingCSharp () =
-    let expectedPackages = Set [ { Id=PackageId.from "FSharp.Data"; Version=PackageVersion "2.2.5" }
-                                 { Id=PackageId.from "FsUnit"; Version=PackageVersion "1.3.0.1" }
-                                 { Id=PackageId.from "Mini"; Version=PackageVersion "0.4.2.0" }
-                                 { Id=PackageId.from "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
-                                 { Id=PackageId.from "NLog"; Version=PackageVersion "4.0.1" }
-                                 { Id=PackageId.from "NUnit"; Version=PackageVersion "2.6.3" }
-                                 { Id=PackageId.from "xunit"; Version=PackageVersion "1.9.1" } ]
+    let expectedPackages = Set [ { Id=PackageId.from "FSharp.Data"; Version=PackageVersion.PackageVersion "2.2.5" }
+                                 { Id=PackageId.from "FsUnit"; Version=PackageVersion.PackageVersion "1.3.0.1" }
+                                 { Id=PackageId.from "Mini"; Version=PackageVersion.PackageVersion "0.4.2.0" }
+                                 { Id=PackageId.from "Newtonsoft.Json"; Version=PackageVersion.PackageVersion "7.0.1" }
+                                 { Id=PackageId.from "NLog"; Version=PackageVersion.PackageVersion "4.0.1" }
+                                 { Id=PackageId.from "NUnit"; Version=PackageVersion.PackageVersion "2.6.3" }
+                                 { Id=PackageId.from "xunit"; Version=PackageVersion.PackageVersion "1.9.1" } ]
     
     let file = FileInfo ("./CSharpProjectSample1.csproj")
     let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
@@ -76,17 +76,17 @@ let CheckParsePaketizedProject () =
 
 [<Test>]
 let CheckParseConvertedProject () =
-    let expectedPackages = Set [ { Id=PackageId.from "Rx-Core"; Version=Unspecified }
-                                 { Id=PackageId.from "Rx-Interfaces"; Version=Unspecified }
-                                 { Id=PackageId.from "Rx-Linq"; Version=Unspecified }
-                                 { Id=PackageId.from "Rx-PlatformServices"; Version=Unspecified }
-                                 { Id=PackageId.from "FSharp.Data"; Version=PackageVersion "2.2.5" }
-                                 { Id=PackageId.from "FsUnit"; Version=PackageVersion "1.3.0.1" }
-                                 { Id=PackageId.from "Mini"; Version=PackageVersion "0.4.2.0" }
-                                 { Id=PackageId.from "Newtonsoft.Json"; Version=PackageVersion "7.0.1" }
-                                 { Id=PackageId.from "NLog"; Version=PackageVersion "4.0.1" }
-                                 { Id=PackageId.from "NUnit"; Version=PackageVersion "2.6.3" }
-                                 { Id=PackageId.from "xunit"; Version=PackageVersion "1.9.1" } ]
+    let expectedPackages = Set [ { Id=PackageId.from "Rx-Core"; Version=PackageVersion.Unspecified }
+                                 { Id=PackageId.from "Rx-Interfaces"; Version=PackageVersion.Unspecified }
+                                 { Id=PackageId.from "Rx-Linq"; Version=PackageVersion.Unspecified }
+                                 { Id=PackageId.from "Rx-PlatformServices"; Version=PackageVersion.Unspecified }
+                                 { Id=PackageId.from "FSharp.Data"; Version=PackageVersion.PackageVersion "2.2.5" }
+                                 { Id=PackageId.from "FsUnit"; Version=PackageVersion.PackageVersion "1.3.0.1" }
+                                 { Id=PackageId.from "Mini"; Version=PackageVersion.PackageVersion "0.4.2.0" }
+                                 { Id=PackageId.from "Newtonsoft.Json"; Version=PackageVersion.PackageVersion "7.0.1" }
+                                 { Id=PackageId.from "NLog"; Version=PackageVersion.PackageVersion "4.0.1" }
+                                 { Id=PackageId.from "NUnit"; Version=PackageVersion.PackageVersion "2.6.3" }
+                                 { Id=PackageId.from "xunit"; Version=PackageVersion.PackageVersion "1.9.1" } ]
 
     let expectedProject = { Repository = RepositoryId.from "Test"
                             ProjectId = ProjectId.from "CassandraSharp"
@@ -124,10 +124,10 @@ let CheckParseConvertedProject () =
 
 [<Test>]
 let CheckParseConvertedProjectWithoutPackagesConfig () =
-    let expectedPackages = Set [ { Id=PackageId.from "Rx-Core"; Version=Unspecified }
-                                 { Id=PackageId.from "Rx-Interfaces"; Version=Unspecified }
-                                 { Id=PackageId.from "Rx-Linq"; Version=Unspecified }
-                                 { Id=PackageId.from "Rx-PlatformServices"; Version=Unspecified } ]
+    let expectedPackages = Set [ { Id=PackageId.from "Rx-Core"; Version=PackageVersion.Unspecified }
+                                 { Id=PackageId.from "Rx-Interfaces"; Version=PackageVersion.Unspecified }
+                                 { Id=PackageId.from "Rx-Linq"; Version=PackageVersion.Unspecified }
+                                 { Id=PackageId.from "Rx-PlatformServices"; Version=PackageVersion.Unspecified } ]
 
     let expectedProject = { Repository = RepositoryId.from "Test"
                             ProjectId = ProjectId.from "CassandraSharp"

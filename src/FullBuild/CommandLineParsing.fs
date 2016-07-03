@@ -108,14 +108,14 @@ let rec commandIndex (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Index
     | Params filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                        IndexRepositories { Filters = repoFilters }
+                        Command.IndexRepositories { Filters = repoFilters }
     | _ -> Command.Error MainCommand.Index
 
 let commandConvert (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Convert
     | Params filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                        ConvertRepositories { Filters = repoFilters }
+                        Command.ConvertRepositories { Filters = repoFilters }
     | _ -> Command.Error MainCommand.Convert
 
 let rec commandClone (shallow : bool) (all : bool) (mt : bool) (args : string list) =
@@ -128,7 +128,7 @@ let rec commandClone (shallow : bool) (all : bool) (mt : bool) (args : string li
       :: tail -> tail |> commandClone shallow all true
     | [] -> Command.Error MainCommand.CloneRepository
     | Params filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                        CloneRepositories { Filters = repoFilters; Shallow = shallow; All = all; Multithread = mt }
+                        Command.CloneRepositories { Filters = repoFilters; Shallow = shallow; All = all; Multithread = mt }
     | _ -> Command.Error MainCommand.CloneRepository
 
 
@@ -145,7 +145,7 @@ let rec commandPublish (mt : bool) (args : string list) =
     | [] -> Command.Error MainCommand.PublishApp
     | TokenOption TokenOption.Multithread 
       :: tail -> tail |> commandPublish true
-    | Params filters -> PublishApplications {Filters = filters; Multithread = mt}
+    | Params filters -> Command.PublishApplications {Filters = filters; Multithread = mt}
     | _ -> Command.Error MainCommand.PublishApp
 
 
@@ -235,7 +235,7 @@ let commandDropRepo (args : string list) =
 
 let commandListRepo (args : string list) =
     match args with
-    | [] -> ListRepositories
+    | [] -> Command.ListRepositories
     | _ -> Command.Error MainCommand.ListRepository
 
 let commandAddNuGet (args : string list) =
@@ -305,7 +305,7 @@ let commandDropApp (args : string list) =
 
 let commandListApp (args : string list) =
     match args with
-    | [] -> ListApplications
+    | [] -> Command.ListApplications
     | _ -> Command.Error MainCommand.ListApp
 
 let commandListPackage (args : string list) =

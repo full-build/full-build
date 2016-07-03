@@ -22,7 +22,7 @@ open Anthology
 let Publish (branch : string option) buildnum hash =
     let antho = Configuration.LoadAnthology ()
     let mainRepo = antho.MasterRepository
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
     let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
     if tmpVersionDir.Exists then
@@ -31,12 +31,12 @@ let Publish (branch : string option) buildnum hash =
     try
         let doPublish = not versionDir.Exists
         if doPublish then            
-            let sourceBinDir = Env.GetFolder Env.Bin
+            let sourceBinDir = Env.GetFolder Env.Folder.Bin
             let targetBinDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
             IoHelpers.CopyFolder sourceBinDir targetBinDir true
 
             let appTargetDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_APPS_FOLDER
-            let appDir = Env.GetFolder Env.AppOutput
+            let appDir = Env.GetFolder Env.Folder.AppOutput
             IoHelpers.CopyFolder appDir appTargetDir true
 
             // publish
@@ -69,7 +69,7 @@ let PullReferenceBinaries version =
     if versionDir.Exists then
         DisplayHighlight (sprintf "Getting binaries %s" version)
         let sourceBinDir = versionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
-        let targetBinDir = Env.GetFolder Env.Bin
+        let targetBinDir = Env.GetFolder Env.Folder.Bin
         IoHelpers.CopyFolder sourceBinDir targetBinDir false
     else
         DisplayHighlight "[WARNING] No reference binaries found"

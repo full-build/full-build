@@ -69,14 +69,14 @@ let parseNuGetPackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "id")
     let pkgVer = !> pkgRef.Attribute(XNamespace.None + "version") : string
     { Id = PackageId.from pkgId
-      Version = PackageVersion pkgVer }
+      Version = PackageVersion.PackageVersion pkgVer }
 
 let parseFullBuildPackage (fileName : string) : Package =
     let fi = FileInfo (fileName)
     let fo = fi.Directory.Name
 
     { Id = PackageId.from fo
-      Version = Unspecified }
+      Version = PackageVersion.Unspecified }
 
 let getNuGetPackages (nugetDoc : XDocument) =
     let nugetPkgs = nugetDoc.Descendants(XNamespace.None + "package") |> Seq.map parseNuGetPackage 
@@ -98,7 +98,7 @@ let getPackageFromPaketReference (xel : XElement) =
     let hintPath = !> xhintPath : string
     match hintPath with
     | MatchPackage pkg -> { Id = PackageId.from pkg
-                            Version = Unspecified }
+                            Version = PackageVersion.Unspecified }
     | _ -> failwith "Failed to find package"
 
 let getFullBuildPackages (prjDoc : XDocument)  =

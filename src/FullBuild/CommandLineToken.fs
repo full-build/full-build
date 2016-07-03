@@ -14,7 +14,6 @@
 
 module CommandLineToken
 
-
 type TokenOption =
     | Debug
     | All

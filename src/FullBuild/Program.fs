@@ -23,62 +23,62 @@ let tryMain argv =
     let cmd = ParseCommandLine (argv |> Seq.toList)
     match cmd with
     // workspace
-    | SetupWorkspace wsInfo -> Workspace.Create wsInfo.Path wsInfo.MasterRepository wsInfo.MasterArtifacts wsInfo.Type
-    | InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository wsInfo.Type
-    | IndexRepositories idxInfo -> Workspace.Index idxInfo.Filters
-    | ConvertRepositories convInfo -> Workspace.Convert convInfo.Filters
-    | PushWorkspace buildInfo -> Workspace.Push buildInfo.Branch buildInfo.BuildNumber
-    | CheckoutWorkspace version -> Workspace.Checkout version.Version
-    | BranchWorkspace branch -> Workspace.Branch branch.Branch
-    | PullWorkspace pullInfo -> Workspace.Pull pullInfo.Src pullInfo.Bin pullInfo.Rebase pullInfo.View
-    | Exec cmd -> Workspace.Exec cmd.Command cmd.All
-    | CleanWorkspace -> Workspace.Clean ()
-    | UpdateGuids name -> Workspace.UpdateGuid name
-    | TestAssemblies testInfo -> Test.TestAssemblies testInfo.Filters testInfo.Excludes
-    | History -> Workspace.History ()
+    | Command.SetupWorkspace wsInfo -> Workspace.Create wsInfo.Path wsInfo.MasterRepository wsInfo.MasterArtifacts wsInfo.Type
+    | Command.InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository wsInfo.Type
+    | Command.IndexRepositories idxInfo -> Workspace.Index idxInfo.Filters
+    | Command.ConvertRepositories convInfo -> Workspace.Convert convInfo.Filters
+    | Command.PushWorkspace buildInfo -> Workspace.Push buildInfo.Branch buildInfo.BuildNumber
+    | Command.CheckoutWorkspace version -> Workspace.Checkout version.Version
+    | Command.BranchWorkspace branch -> Workspace.Branch branch.Branch
+    | Command.PullWorkspace pullInfo -> Workspace.Pull pullInfo.Src pullInfo.Bin pullInfo.Rebase pullInfo.View
+    | Command.Exec cmd -> Workspace.Exec cmd.Command cmd.All
+    | Command.CleanWorkspace -> Workspace.Clean ()
+    | Command.UpdateGuids name -> Workspace.UpdateGuid name
+    | Command.TestAssemblies testInfo -> Test.TestAssemblies testInfo.Filters testInfo.Excludes
+    | Command.History -> Workspace.History ()
 
     // repository
-    | AddRepository repoInfo -> Repo.Add repoInfo.Repo repoInfo.Url repoInfo.Branch repoInfo.Builder
-    | CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters repoInfo.Shallow repoInfo.All repoInfo.Multithread
-    | ListRepositories -> Repo.List ()
-    | DropRepository repo -> Repo.Drop repo
-    | InstallPackages -> Workspace.Install ()
+    | Command.AddRepository repoInfo -> Repo.Add repoInfo.Repo repoInfo.Url repoInfo.Branch repoInfo.Builder
+    | Command.CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters repoInfo.Shallow repoInfo.All repoInfo.Multithread
+    | Command.ListRepositories -> Repo.List ()
+    | Command.DropRepository repo -> Repo.Drop repo
+    | Command.InstallPackages -> Workspace.Install ()
 
     // view
-    | AddView viewInfo -> View.Create viewInfo.Name viewInfo.Filters viewInfo.SourceOnly viewInfo.Parents viewInfo.AddNew
-    | DropView viewInfo -> View.Drop viewInfo.Name
-    | ListViews -> View.List ()
-    | DescribeView viewInfo -> View.Describe viewInfo.Name
-    | GraphView viewInfo -> View.Graph viewInfo.Name viewInfo.All
-    | BuildView viewInfo -> View.Build viewInfo.Name viewInfo.Config viewInfo.Clean viewInfo.Multithread viewInfo.Version
-    | AlterView viewInfo -> View.AlterView viewInfo.Name viewInfo.Default viewInfo.Source viewInfo.Parents
-    | OpenView viewInfo -> View.OpenView viewInfo.Name
+    | Command.AddView viewInfo -> View.Create viewInfo.Name viewInfo.Filters viewInfo.SourceOnly viewInfo.Parents viewInfo.AddNew
+    | Command.DropView viewInfo -> View.Drop viewInfo.Name
+    | Command.ListViews -> View.List ()
+    | Command.DescribeView viewInfo -> View.Describe viewInfo.Name
+    | Command.GraphView viewInfo -> View.Graph viewInfo.Name viewInfo.All
+    | Command.BuildView viewInfo -> View.Build viewInfo.Name viewInfo.Config viewInfo.Clean viewInfo.Multithread viewInfo.Version
+    | Command.AlterView viewInfo -> View.AlterView viewInfo.Name viewInfo.Default viewInfo.Source viewInfo.Parents
+    | Command.OpenView viewInfo -> View.OpenView viewInfo.Name
 
     // nuget
-    | AddNuGet url -> NuGets.Add url
-    | ListNuGets -> NuGets.List ()
+    | Command.AddNuGet url -> NuGets.Add url
+    | Command.ListNuGets -> NuGets.List ()
 
     // package
-    | UpdatePackages -> Package.Update ()
-    | OutdatedPackages -> Package.Outdated ()
-    | ListPackages -> Package.List ()
+    | Command.UpdatePackages -> Package.Update ()
+    | Command.OutdatedPackages -> Package.Outdated ()
+    | Command.ListPackages -> Package.List ()
 
     // applications
-    | ListApplications -> Application.List ()
-    | AddApplication appInfo -> Application.Add appInfo.Name appInfo.Project appInfo.Publisher
-    | DropApplication name -> Application.Drop name
-    | PublishApplications pubInfo -> Application.Publish pubInfo.Filters pubInfo.Multithread
-    | BindProject prjInfo -> Application.BindProject prjInfo.Filters
+    | Command.ListApplications -> Application.List ()
+    | Command.AddApplication appInfo -> Application.Add appInfo.Name appInfo.Project appInfo.Publisher
+    | Command.DropApplication name -> Application.Drop name
+    | Command.PublishApplications pubInfo -> Application.Publish pubInfo.Filters pubInfo.Multithread
+    | Command.BindProject prjInfo -> Application.BindProject prjInfo.Filters
 
     // misc
-    | Upgrade -> Upgrade.Upgrade ()
-    | FinalizeUpgrade processId -> Upgrade.FinalizeUpgrade processId
-    | Version -> DisplayVersion ()
-    | Usage -> DisplayUsage MainCommand.Unknown
-    | Error errInfo -> DisplayUsage errInfo
+    | Command.Upgrade -> Upgrade.Upgrade ()
+    | Command.FinalizeUpgrade processId -> Upgrade.FinalizeUpgrade processId
+    | Command.Version -> DisplayVersion ()
+    | Command.Usage -> DisplayUsage MainCommand.Unknown
+    | Command.Error errInfo -> DisplayUsage errInfo
 
     let retCode = match cmd with
-                  | Error _ -> 5
+                  | Command.Error _ -> 5
                   | _ -> 0
     retCode
 
