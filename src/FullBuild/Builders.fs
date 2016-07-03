@@ -52,7 +52,8 @@ let versionMsbuild version =
     File.WriteAllLines(csFile.FullName, generateVersionCs version)
 
 
-
+let buildSkip (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
+    ()
 
 let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
     match version with
@@ -75,10 +76,11 @@ let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multith
     if Env.IsMono () then checkedExec "xbuild" args wsDir
     else checkedExec "msbuild" args wsDir
 
-let chooseBuilder (builderType : BuilderType) msbuildBuilder =
+let chooseBuilder (builderType : BuilderType) msbuildBuilder skipBuilder =
     let builder = match builderType with
                   | BuilderType.MSBuild -> msbuildBuilder
+                  | BuilderType.Skip -> skipBuilder
     builder
 
 let BuildWithBuilder (builder : BuilderType) =
-    chooseBuilder builder buildMsbuild
+    chooseBuilder builder buildMsbuild buildSkip

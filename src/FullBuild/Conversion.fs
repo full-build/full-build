@@ -26,6 +26,7 @@ let convertMsBuild repos =
 let Convert builder repos =
     match builder with
     | BuilderType.MSBuild -> convertMsBuild repos
+    | BuilderType.Skip -> ()
 
 let GenerateProjectArtifacts () =
     let antho = Configuration.LoadAnthology ()
