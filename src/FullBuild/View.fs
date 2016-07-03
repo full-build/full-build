@@ -112,30 +112,30 @@ let generate (viewId : ViewId) (view : View) =
 
     // generate solution defines
     let slnDefines = GenerateSolutionDefines projects
-    let viewDir = GetFolder Env.View
+    let viewDir = GetFolder Env.Folder.View
     let slnDefineFile = viewDir |> GetFile (AddExt Targets viewId.toString)
     SaveFileIfNecessary slnDefineFile (slnDefines.ToString())
 
     // generate solution file
-    let wsDir = GetFolder Env.Workspace
+    let wsDir = GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> GetFile (AddExt Solution viewId.toString)
     let slnContent = GenerateSolutionContent projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
     SaveFileIfNecessary slnFile slnContent
 
 let Drop (viewName : ViewId) =
-    let vwDir = GetFolder Env.View
+    let vwDir = GetFolder Env.Folder.View
     let vwFile = vwDir |> GetFile (AddExt View viewName.toString)
     if vwFile.Exists then vwFile.Delete()
 
     let vwDefineFile = vwDir |> GetFile (AddExt Targets viewName.toString)
     if vwDefineFile.Exists then vwDefineFile.Delete()
 
-    let wsDir = GetFolder Env.Workspace
+    let wsDir = GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> GetFile (AddExt Solution viewName.toString)
     if slnFile.Exists then slnFile.Delete()
 
 let List () =
-    let vwDir = GetFolder Env.View
+    let vwDir = GetFolder Env.Folder.View
     let defaultFile = vwDir |> GetFile "default"
     let defaultView = if defaultFile.Exists then System.IO.File.ReadAllText (defaultFile.FullName)
                       else ""
@@ -161,7 +161,7 @@ let Graph (viewId : ViewId) (all : bool) =
     let projects = FindViewProjects view |> Set
     let graph = Dgml.GraphContent antho projects all
 
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewId.toString)
     graph.Save graphFile.FullName
 
@@ -182,7 +182,7 @@ let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forcePar
 
 
 let defaultView () =
-    let vwDir = GetFolder Env.View
+    let vwDir = GetFolder Env.Folder.View
     let defaultFile = vwDir |> GetFile "default"
     if not defaultFile.Exists then failwith "No default view defined"
     let viewName = System.IO.File.ReadAllText (defaultFile.FullName)
@@ -195,11 +195,11 @@ let getViewName (maybeViewName : ViewId option) =
     viewName
 
 let getViewFile (view : ViewId) =
-    let vwDir = Env.GetFolder Env.View 
+    let vwDir = Env.GetFolder Env.Folder.View 
     let vwFile = vwDir |> GetFile (AddExt View view.toString)
     if vwFile.Exists |> not then failwithf "Unknown view name %A" view.toString
 
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     let viewFile = wsDir |> GetFile (AddExt Solution view.toString)
     viewFile
 
@@ -210,7 +210,7 @@ let GenerateView (viewId : ViewId) =
 
 let AlterView (viewId : ViewId) (forceDefault : bool option) (forceSource : bool option) (forceParents : bool option) =
     match forceDefault with
-    | Some true ->  let vwDir = GetFolder Env.View
+    | Some true ->  let vwDir = GetFolder Env.Folder.View
                     let defaultFile = vwDir |> GetFile "default"
                     System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
     | _ -> ()

@@ -26,6 +26,7 @@ with
     member this.toString = (fun (ViewId x) -> x)this
     static member from s = ViewId s
 
+[<RequireQualifiedAccess>]
 type OutputType = 
     | Exe
     | Dll
@@ -42,6 +43,7 @@ with
     static member from (assName : AssemblyName) = AssemblyId.from (assName.Name)
     static member from (file : FileInfo) =  AssemblyId.from (Path.GetFileNameWithoutExtension(file.Name))
 
+[<RequireQualifiedAccess>]
 type PackageVersion = 
     | PackageVersion of string
     | Unspecified
@@ -59,6 +61,7 @@ type Package =
     { Id : PackageId
       Version : PackageVersion }
 
+[<RequireQualifiedAccess>]
 type VcsType = 
     | Gerrit
     | Git
@@ -93,6 +96,7 @@ with
                                              if uri.IsWellFormedOriginalString() then RepositoryUrl (maybeUri.ToLowerInvariant())
                                              else failwithf "Invalid uri %A" uri
 
+[<RequireQualifiedAccess>]
 type BuilderType =
     | MSBuild
     | Skip
@@ -183,6 +187,7 @@ with
     member this.toString = (fun (ApplicationId x) -> x)this
     static member from (name : string) = ApplicationId (name.ToLowerInvariant())
 
+[<RequireQualifiedAccess>]
 type PublisherType =
     | Copy
     | Zip

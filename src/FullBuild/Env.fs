@@ -62,6 +62,7 @@ let getInstallationFolder () =
     let fbAssFI = fbAssembly.Location |> FileInfo
     fbAssFI.Directory
 
+[<RequireQualifiedAccess>]
 type Folder = 
        | Workspace
        | AppOutput
@@ -75,30 +76,30 @@ type Folder =
 
 let rec GetFolder folder =
     match folder with
-    | Workspace -> CurrentFolder() |> workspaceFolderSearch 
-    | AppOutput -> GetFolder Workspace |> CreateSubDirectory MSBUILD_APP_OUTPUT
-    | Config -> GetFolder Workspace |> CreateSubDirectory MASTER_REPO
-    | View -> GetFolder Config |> CreateSubDirectory VIEW_FOLDER
-    | Project -> GetFolder Config |> CreateSubDirectory PROJECT_FOLDER
-    | Package -> GetFolder Config |> CreateSubDirectory PACKAGE_FOLDER
-    | Bin -> GetFolder Config |> CreateSubDirectory BIN_FOLDER
-    | Installation -> getInstallationFolder()
+    | Folder.Workspace -> CurrentFolder() |> workspaceFolderSearch 
+    | Folder.AppOutput -> GetFolder Folder.Workspace |> CreateSubDirectory MSBUILD_APP_OUTPUT
+    | Folder.Config -> GetFolder Folder.Workspace |> CreateSubDirectory MASTER_REPO
+    | Folder.View -> GetFolder Folder.Config |> CreateSubDirectory VIEW_FOLDER
+    | Folder.Project -> GetFolder Folder.Config |> CreateSubDirectory PROJECT_FOLDER
+    | Folder.Package -> GetFolder Folder.Config |> CreateSubDirectory PACKAGE_FOLDER
+    | Folder.Bin -> GetFolder Folder.Config |> CreateSubDirectory BIN_FOLDER
+    | Folder.Installation -> getInstallationFolder()
 
 let GetAnthologyFileName() = 
-    GetFolder Config |> GetFile ANTHOLOGY_FILENAME
+    GetFolder Folder.Config |> GetFile ANTHOLOGY_FILENAME
 
 let GetBaselineFileName() = 
-    GetFolder Config  |> GetFile BASELINE_FILENAME
+    GetFolder Folder.Config  |> GetFile BASELINE_FILENAME
 
 let GetViewFileName viewName =
-    GetFolder View |> GetFile (AddExt Extension.View viewName)
+    GetFolder Folder.View |> GetFile (AddExt Extension.View viewName)
 
 let IsMono () =
     let monoRuntime = System.Type.GetType ("Mono.Runtime") 
     monoRuntime <> null
 
 let CheckLicense () =
-    let fbInstallDir = GetFolder Installation
+    let fbInstallDir = GetFolder Folder.Installation
     let licFile = fbInstallDir |> GetFile "LICENSE.txt"
     if not (licFile.Exists) then failwithf "Please ensure original LICENSE.txt is available."
 

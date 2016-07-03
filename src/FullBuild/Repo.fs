@@ -41,7 +41,7 @@ let cloneRepoAndInit wsDir vcs shallow (repo : Repository) =
 
 let Clone (filters : RepositoryId set) (shallow : bool) (all : bool) (mt : bool) = 
     let antho = LoadAnthology()
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
 
     let selectedRepos = FilterRepos filters |> Set.map (fun x -> x.Repository.Name)
     let cloneReposId = match all with

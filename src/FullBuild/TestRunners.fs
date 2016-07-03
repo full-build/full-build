@@ -36,7 +36,7 @@ let excludeListToArgs (excludes : string list) =
 
 
 let runnerNUnit (includes : string set) (excludes : string list) =
-    let wsDir = GetFolder Env.Workspace
+    let wsDir = GetFolder Env.Folder.Workspace
     let files = includes |> Set.fold (fun s t -> sprintf @"%s %A" s t) ""
     let excludeArgs = excludeListToArgs excludes
     let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs 

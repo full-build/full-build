@@ -50,7 +50,7 @@ let updateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
     }
 
 let UpdateSources (sources : RepositoryUrl seq) =
-    let confDir = Env.GetFolder Env.Config
+    let confDir = Env.GetFolder Env.Folder.Config
     let paketDep = confDir |> GetFile "paket.dependencies" 
     let oldContent = if paketDep.Exists then File.ReadAllLines (paketDep.FullName) |> Array.toSeq
                      else Seq.empty
@@ -58,7 +58,7 @@ let UpdateSources (sources : RepositoryUrl seq) =
     File.WriteAllLines (paketDep.FullName, content)
 
 let ParsePaketDependencies () =
-    let confDir = Env.GetFolder Env.Config
+    let confDir = Env.GetFolder Env.Folder.Config
     let paketDep = confDir |> GetFile "paket.dependencies" 
     if paketDep.Exists then
         let lines = File.ReadAllLines (paketDep.FullName)
@@ -71,12 +71,12 @@ let generateDependenciesContent (packages : Package seq) =
     seq {
         for package in packages do
             match package.Version with
-            | PackageVersion x -> yield sprintf "nuget %s ~> %s" (package.Id.toString) x
-            | Unspecified -> yield sprintf "nuget %s" (package.Id.toString)
+            | PackageVersion.PackageVersion x -> yield sprintf "nuget %s ~> %s" (package.Id.toString) x
+            | PackageVersion.Unspecified -> yield sprintf "nuget %s" (package.Id.toString)
     }
 
 let AppendDependencies (packages : Package seq) = 
-    let confDir = Env.GetFolder Env.Config
+    let confDir = Env.GetFolder Env.Folder.Config
     let paketDep = confDir |> GetFile "paket.dependencies" 
 
 
@@ -94,14 +94,14 @@ let removeDependenciesContent (lines : string seq) (packages : PackageId set) =
     }
 
 let RemoveDependencies (packages : PackageId set) =
-    let confDir = Env.GetFolder Env.Config
+    let confDir = Env.GetFolder Env.Folder.Config
     let paketDep = confDir |> GetFile "paket.dependencies" 
     let content = File.ReadAllLines (paketDep.FullName)
     let newContent = removeDependenciesContent content packages
     File.WriteAllLines (paketDep.FullName, newContent)
 
 let executePaketCommand cmd =
-    let confDir = Env.GetFolder Env.Config
+    let confDir = Env.GetFolder Env.Folder.Config
     checkedExec "paket.exe" cmd confDir
 
 

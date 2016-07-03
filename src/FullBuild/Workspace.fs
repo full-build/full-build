@@ -54,7 +54,7 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
                       Vcs = vcsType }
         VcsClone wsDir vcsType true repo
 
-        let confDir = Env.GetFolder Env.Config
+        let confDir = Env.GetFolder Env.Folder.Config
         let anthoFile = confDir |> GetFile Env.ANTHOLOGY_FILENAME
         AnthologySerializer.Save anthoFile antho
 
@@ -63,7 +63,7 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
         BaselineSerializer.Save baselineFile baseline
 
         // setup additional files for views to work correctly
-        let installDir = Env.GetFolder Env.Installation
+        let installDir = Env.GetFolder Env.Folder.Installation
         let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
         let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
         publishSource.CopyTo(publishTarget.FullName) |> ignore
@@ -82,7 +82,7 @@ let ClonedRepositories (wsDir : DirectoryInfo) (repos : BuildableRepository set)
 
 let Push (branch : string option) buildnum = 
     let antho = Configuration.LoadAnthology ()
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     let allRepos = antho.Repositories
     let clonedRepos = allRepos |> ClonedRepositories wsDir
     let bookmarks = Repo.CollectRepoHash wsDir antho.Vcs clonedRepos
@@ -102,7 +102,7 @@ let Checkout (version : BookmarkVersion) =
     // checkout repositories
     DisplayHighlight ".full-build"
     let antho = Configuration.LoadAnthology ()
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = antho.MasterRepository
     Vcs.VcsCheckout wsDir antho.Vcs mainRepo (Some version) false
 
@@ -124,7 +124,7 @@ let Branch (branch : BookmarkVersion option) =
     // checkout repositories
     DisplayHighlight ".full-build"
     let antho = Configuration.LoadAnthology ()
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = antho.MasterRepository
     try
         Vcs.VcsCheckout wsDir antho.Vcs mainRepo branch false
@@ -146,7 +146,7 @@ let Branch (branch : BookmarkVersion option) =
 
 let Pull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) =
     let antho = Configuration.LoadAnthology ()
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
 
     if src then
         let mainRepo = antho.MasterRepository
@@ -184,7 +184,7 @@ let Init (path : string) (uri : RepositoryUrl) (vcsType : VcsType) : Unit =
    
 let Exec cmd master =
     let antho = Configuration.LoadAnthology()
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     let repos = antho.Repositories |> Set.map (fun x -> x.Repository)
     let execRepos = match master with
                     | true -> repos |> Set.add antho.MasterRepository 
@@ -214,7 +214,7 @@ let Clean () =
         // if the cleanup fails we can still continue again this operation
         // master repository will be cleaned again as final step
         let oldAntho = Configuration.LoadAnthology ()
-        let wsDir = Env.GetFolder Env.Workspace
+        let wsDir = Env.GetFolder Env.Folder.Workspace
         Vcs.VcsClean wsDir oldAntho.Vcs oldAntho.MasterRepository
         let newAntho = Configuration.LoadAnthology()
         Configuration.SaveAnthology oldAntho
@@ -240,7 +240,7 @@ let UpdateGuid (repo : RepositoryId) =
     let res = Console.ReadLine()
     if res = "Yes" then
         let antho = Configuration.LoadAnthology ()
-        let wsDir = Env.GetFolder Env.Workspace
+        let wsDir = Env.GetFolder Env.Folder.Workspace
         let repoDir = wsDir |> GetSubDirectory repo.toString
         let projects = IoHelpers.FindKnownProjects repoDir
         for project in projects do
@@ -252,7 +252,7 @@ let UpdateGuid (repo : RepositoryId) =
 let History () =
     let antho = Configuration.LoadAnthology()
     let baseline = Configuration.LoadBaseline()
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     for bookmark in baseline.Bookmarks do
         let repoDir = wsDir |> GetSubDirectory bookmark.Repository.toString
         if repoDir.Exists then
@@ -309,8 +309,8 @@ let Convert (filters : RepositoryId set) =
         Conversion.Convert builder repos
 
     // setup additional files for views to work correctly
-    let confDir = Env.GetFolder Env.Config
-    let installDir = Env.GetFolder Env.Installation
+    let confDir = Env.GetFolder Env.Folder.Config
+    let installDir = Env.GetFolder Env.Folder.Installation
     let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
     let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
     publishSource.CopyTo(publishTarget.FullName, true) |> ignore

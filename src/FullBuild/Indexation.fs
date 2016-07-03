@@ -135,7 +135,7 @@ let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
 // * update paket.dependencies (both sources and packages)
 // * anthology
 let IndexWorkspace (repos : Repository set) = 
-    let wsDir = Env.GetFolder Env.Workspace
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     let antho = Configuration.LoadAnthology()
     let parsedProjects = parseWorkspaceProjects ProjectParsing.ParseProject wsDir repos
 
