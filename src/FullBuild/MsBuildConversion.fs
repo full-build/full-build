@@ -245,9 +245,12 @@ let private convertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "AutoGenerateBindingRedirects") |> Seq.iter (fun x -> x.Value <- "false")
 
     // TODO: both 3 fields are optional - must discard everything and reset everything if not null or empty
-    cproj.Descendants(NsMsBuild + "TargetFrameworkVersion") |> Seq.iter (fun x -> x.Value <- project.FxVersion.toString)
-    cproj.Descendants(NsMsBuild + "TargetFrameworkProfile") |> Seq.iter (fun x -> x.Value <- project.FxProfile.toString)
-    cproj.Descendants(NsMsBuild + "TargetFrameworkIdentifier") |> Seq.iter (fun x -> x.Value <- project.FxIdentifier.toString)
+    if project.FxVersion.toString <> null then
+        cproj.Descendants(NsMsBuild + "TargetFrameworkVersion") |> Seq.iter (fun x -> x.Value <- project.FxVersion.toString)
+    if project.FxProfile.toString <> null then
+        cproj.Descendants(NsMsBuild + "TargetFrameworkProfile") |> Seq.iter (fun x -> x.Value <- project.FxProfile.toString)
+    if project.FxIdentifier.toString <> null then
+        cproj.Descendants(NsMsBuild + "TargetFrameworkIdentifier") |> Seq.iter (fun x -> x.Value <- project.FxIdentifier.toString)
 
     // import fb target
     let wbRelative = ComputeHops (sprintf "%s/%s" project.Repository.toString project.RelativeProjectFile.toString)
