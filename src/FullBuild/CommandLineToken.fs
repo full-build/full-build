@@ -30,25 +30,24 @@ type TokenOption =
     | Reset
     | View
     | Modified
-    | Unknown
 
-let (|TokenOption|) (token : string) =
+let (|TokenOption|_|) (token : string) =
     match token with
-    | "--debug" -> TokenOption.Debug
-    | "--all" -> TokenOption.All
-    | "--bin" -> TokenOption.Bin
-    | "--src" -> TokenOption.Src
-    | "--exclude" -> TokenOption.Exclude
-    | "--mt" -> TokenOption.Multithread
-    | "--shallow" -> TokenOption.Shallow
-    | "--default" -> TokenOption.Default
-    | "--branch" -> TokenOption.Branch
-    | "--version" -> TokenOption.Version
-    | "--rebase" -> TokenOption.Rebase
-    | "--reset" -> TokenOption.Reset
-    | "--view" -> TokenOption.View
-    | "--modified" -> TokenOption.Modified
-    | _ -> Unknown
+    | "--debug" -> Some TokenOption.Debug
+    | "--all" -> Some TokenOption.All
+    | "--bin" -> Some TokenOption.Bin
+    | "--src" -> Some TokenOption.Src
+    | "--exclude" -> Some TokenOption.Exclude
+    | "--mt" -> Some TokenOption.Multithread
+    | "--shallow" -> Some TokenOption.Shallow
+    | "--default" -> Some TokenOption.Default
+    | "--branch" -> Some TokenOption.Branch
+    | "--version" -> Some TokenOption.Version
+    | "--rebase" -> Some TokenOption.Rebase
+    | "--reset" -> Some TokenOption.Reset
+    | "--view" -> Some TokenOption.View
+    | "--modified" -> Some TokenOption.Modified
+    | _ -> None
 
 
 type Token = 
@@ -94,51 +93,50 @@ type Token =
     | Clean
     | UpdateGuids
     | Migrate
-    | Unknown
 
 
-let (|Token|) (token : string) = 
+let (|Token|_|) (token : string) = 
     match token with
-    | "version" -> Version
-    | "workspace" -> Workspace
+    | "version" -> Some Version
+    | "workspace" -> Some Workspace
 
-    | "help" -> Help
-    | "upgrade" -> Upgrade
-    | "setup" -> Setup
-    | "init" -> Init
-    | "clone" -> Clone
-    | "update" -> Update
-    | "build" -> Build
-    | "rebuild" -> Rebuild
-    | "index" -> Index
-    | "convert" -> Convert
-    | "push" -> Push
-    | "graph" -> Graph
-    | "install" -> Install
-    | "outdated" -> Outdated
-    | "publish" -> Publish
-    | "pull" -> Pull
-    | "checkout" -> Checkout
-    | "branch" -> Branch
-    | "exec" -> Exec
-    | "clean" -> Clean
-    | "test" -> Test
-    | "alter" -> Alter
-    | "open" -> Open
-    | "bind" -> Bind
-    | "history" -> History
+    | "help" -> Some Help
+    | "upgrade" -> Some Upgrade
+    | "setup" -> Some Setup
+    | "init" -> Some Init
+    | "clone" -> Some Clone
+    | "update" -> Some Update
+    | "build" -> Some Build
+    | "rebuild" -> Some Rebuild
+    | "index" -> Some Index
+    | "convert" -> Some Convert
+    | "push" -> Some Push
+    | "graph" -> Some Graph
+    | "install" -> Some Install
+    | "outdated" -> Some Outdated
+    | "publish" -> Some Publish
+    | "pull" -> Some Pull
+    | "checkout" -> Some Checkout
+    | "branch" -> Some Branch
+    | "exec" -> Some Exec
+    | "clean" -> Some Clean
+    | "test" -> Some Test
+    | "alter" -> Some Alter
+    | "open" -> Some Open
+    | "bind" -> Some Bind
+    | "history" -> Some History
 
-    | "add" -> Add
-    | "drop" -> Drop
-    | "list" -> List
-    | "describe" -> Describe
+    | "add" -> Some Add
+    | "drop" -> Some Drop
+    | "list" -> Some List
+    | "describe" -> Some Describe
 
-    | "view" -> View
-    | "repo" -> Repo
-    | "package" -> Package
-    | "nuget" -> NuGet
-    | "app" -> App
+    | "view" -> Some View
+    | "repo" -> Some Repo
+    | "package" -> Some Package
+    | "nuget" -> Some NuGet
+    | "app" -> Some App
 
-    | "update-guids" -> UpdateGuids
-    | "migrate" -> Migrate
-    | _ -> Unknown
+    | "update-guids" -> Some UpdateGuids
+    | "migrate" -> Some Migrate
+    | _ -> None

@@ -17,6 +17,7 @@ open Anthology
 open Collections
 
 
+
 type SetupWorkspace = 
     { MasterRepository : RepositoryUrl
       MasterArtifacts : string
@@ -118,12 +119,60 @@ type PushWorkspace =
 type BindProject =
     { Filters : string list }
 
+
+
+
+type MainCommand =
+    | Version
+    | Usage
+    | Upgrade
+    | Setup
+    | Init
+    | Index
+    | Convert
+    | Push
+    | Checkout
+    | Branch
+    | Pull
+    | Exec
+    | Clean
+    | UpgradeGuids
+    | Test
+    | History
+    | ListRepository
+    | AddRepository
+    | CloneRepository
+    | DropRepository
+    | ListView
+    | AddView
+    | DropView
+    | DescribeView
+    | GraphView
+    | BuildView
+    | RebuildView
+    | AlterView
+    | OpenView
+    | AddNuGet
+    | ListNuget
+    | ListPackage
+    | InstallPackage
+    | UpdatePackage
+    | OutdatedPackage
+    | ListApp
+    | AddApp
+    | DropApp
+    | PublishApp
+    | Bind
+    | Unknown
+
+
 type Command = 
+    | Error of MainCommand
+
     | Version
     | Usage
     | Upgrade
     | FinalizeUpgrade of int
-    | Error
     
     // workspace
     | SetupWorkspace of SetupWorkspace
