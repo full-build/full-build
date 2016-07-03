@@ -74,11 +74,12 @@ let tryMain argv =
     | Upgrade -> Upgrade.Upgrade ()
     | FinalizeUpgrade processId -> Upgrade.FinalizeUpgrade processId
     | Version -> DisplayVersion ()
-    | Usage -> DisplayUsage ()
-    | Error -> DisplayUsage ()
+    | Usage -> DisplayUsage MainCommand.Unknown
+    | Error errInfo -> DisplayUsage errInfo
 
-    let retCode = if cmd = Error then 5
-                  else 0
+    let retCode = match cmd with
+                  | Error _ -> 5
+                  | _ -> 0
     retCode
 
 [<EntryPoint>]

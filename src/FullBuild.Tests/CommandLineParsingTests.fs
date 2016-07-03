@@ -9,7 +9,7 @@ open Anthology
 [<Test>]
 let CheckErrorInvoked () =
     let result = ParseCommandLine [ "workspace"; "blah blah" ]
-    let expected = Command.Error
+    let expected = Command.Error MainCommand.Unknown
     result |> should equal expected
 
 [<Test>]
