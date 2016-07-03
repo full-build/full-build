@@ -95,6 +95,7 @@ with
 
 type BuilderType =
     | MSBuild
+    | Skip
 with
      member this.toString = toString this
      static member from s = fromString<BuilderType> s
