@@ -249,26 +249,63 @@ let UpdateGuid (repo : RepositoryId) =
             guid.Value <- Guid.NewGuid().ToString("B")
             xdoc.Save(project.FullName)
 
-let History () =
+
+let textHeader (version : string) =
+    ()
+
+let textFooter () =
+    ()
+
+let htmlHeader (version : string) =
+    printfn "<html>"
+    printfn "<head><title>%s</title></head>" version
+    printfn "<body>"
+
+let htmlFooter () =
+    printfn "</body>"
+
+let textBody (repo : string) (content : string) =
+    DisplayHighlight repo
+    printfn "%s" content
+    
+let htmlBody (repo : string) (content : string) =
+    printfn "<b>%s</b><br>" repo
+    let htmlContent = content.Replace(System.Environment.NewLine, "<br>")
+    printfn "%s<br><br>" htmlContent
+
+
+let History (html : bool) =
+    let header = html ? (htmlHeader, textHeader)
+    let body = html ? (htmlBody, textBody)
+    let footer = html ? (htmlFooter, textFooter)
+
     let antho = Configuration.LoadAnthology()
     let baseline = Configuration.LoadBaseline()
+
+
     let wsDir = Env.GetFolder Env.Folder.Workspace
+
+    // header
+    let baselineTip = Vcs.VcsTip wsDir antho.Vcs antho.MasterRepository
+    header baselineTip
+
+    // body
+    let lastCommit = Vcs.VcsLastCommit wsDir antho.Vcs antho.MasterRepository "baseline"
+    match lastCommit with 
+    | Some version -> let revision = Vcs.VcsLog wsDir antho.Vcs antho.MasterRepository version
+                      if revision <> null then 
+                          body antho.MasterRepository.Name.toString revision
+    | _ -> ()
+
     for bookmark in baseline.Bookmarks do
         let repoDir = wsDir |> GetSubDirectory bookmark.Repository.toString
         if repoDir.Exists then
             let repo = antho.Repositories |> Seq.find (fun x -> x.Repository.Name = bookmark.Repository)
             let revision = Vcs.VcsLog wsDir antho.Vcs repo.Repository bookmark.Version
             if revision <> null then 
-                DisplayHighlight repo.Repository.Name.toString
-                printfn "%s" revision
-    let lastCommit = Vcs.VcsLastCommit wsDir antho.Vcs antho.MasterRepository "baseline"
-    match lastCommit with 
-    | Some version -> let revision = Vcs.VcsLog wsDir antho.Vcs antho.MasterRepository version
-                      if revision <> null then 
-                          DisplayHighlight antho.MasterRepository.Name.toString
-                          printfn "%s" revision
-    | _ -> ()
+                body repo.Repository.Name.toString revision
 
+    footer ()
 
 let availableRepositories (filters : RepositoryId set) =
     let antho = Configuration.LoadAnthology()

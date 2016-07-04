@@ -53,8 +53,7 @@ let generateBinding (allAssemblies : AssemblyId set) (file : FileInfo) =
     try
         generateBindingUnsafe allAssemblies file
     with
-        _ -> printfn "WARNING: failure to load %A" file.FullName
-             null
+        :? System.BadImageFormatException -> null
 
 let getAssemblyConfig (file : FileInfo) =
     file.FullName |> IoHelpers.AddExt IoHelpers.Extension.Config |> FileInfo

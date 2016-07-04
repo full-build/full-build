@@ -119,7 +119,8 @@ type PushWorkspace =
 type BindProject =
     { Filters : string list }
 
-
+type History =
+    { Html : bool }
 
 
 [<RequireQualifiedAccess>]
@@ -189,7 +190,7 @@ type Command =
     | CleanWorkspace
     | UpdateGuids of RepositoryId
     | TestAssemblies of TestAssemblies
-    | History
+    | History of History
 
     // repository
     | ListRepositories

@@ -323,9 +323,10 @@ let commandBind (args : string list) =
     | Params filters -> Command.BindProject { Filters = filters }
     | _ -> Command.Error MainCommand.Bind
 
-let commandHistory (args : string list) =
+let rec commandHistory (html : bool) (args : string list) =
     match args with
-    | [] -> Command.History
+    | TokenOption TokenOption.Html :: tail -> tail |> commandHistory true
+    | [] -> Command.History { Html = html }
     | _ -> Command.Error MainCommand.History
 
 let commandUpgrade (args : string list) =
@@ -356,7 +357,7 @@ let ParseCommandLine (args : string list) : Command =
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
-    | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory
+    | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory false
 
     | Token Token.Install :: cmdArgs -> cmdArgs |> commandInstall
     | Token Token.Update :: Token Token.Package :: cmdArgs -> cmdArgs |> commandUpdate
@@ -433,7 +434,7 @@ let UsageContent() =
         MainCommand.PublishApp, "publish [--mt] <appId-wildcard> : publish application"
         MainCommand.Bind, "bind <projectId-wildcard>+ : update bindings"
         MainCommand.Clean, "clean : DANGER! reset and clean workspace (interactive command)"
-        MainCommand.History, "history : display history since last baseline"
+        MainCommand.History, "history [--html] : display history since last baseline"
         MainCommand.Upgrade, "upgrade : upgrade full-build to latest available version"
         MainCommand.Unknown, ""
         MainCommand.UpdatePackage, "update package : update packages"

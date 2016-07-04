@@ -29,6 +29,7 @@ type TokenOption =
     | Reset
     | View
     | Modified
+    | Html
 
 let (|TokenOption|_|) (token : string) =
     match token with
@@ -46,6 +47,7 @@ let (|TokenOption|_|) (token : string) =
     | "--reset" -> Some TokenOption.Reset
     | "--view" -> Some TokenOption.View
     | "--modified" -> Some TokenOption.Modified
+    | "--html" -> Some TokenOption.Html
     | _ -> None
 
 
