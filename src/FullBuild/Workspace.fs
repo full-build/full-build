@@ -258,8 +258,8 @@ let textFooter () =
 
 let htmlHeader (version : string) =
     printfn "<html>"
-    printfn "<head><title>%s</title></head>" version
     printfn "<body>"
+    printfn "<h2>version %s</h2>" version
 
 let htmlFooter () =
     printfn "</body>"
