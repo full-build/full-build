@@ -23,7 +23,7 @@ open MsBuildHelpers
 open Collections
 
 
-let generateBinding (allAssemblies : AssemblyId set) (file : FileInfo) =
+let generateBindingUnsafe (allAssemblies : AssemblyId set) (file : FileInfo) =
     let assId = AssemblyId.from file
     if not (allAssemblies |> Set.contains assId) then
         let ass = Mono.Cecil.AssemblyDefinition.ReadAssembly(file.FullName)
@@ -48,6 +48,12 @@ let generateBinding (allAssemblies : AssemblyId set) (file : FileInfo) =
         else null
     else null
 
+
+let generateBinding (allAssemblies : AssemblyId set) (file : FileInfo) =
+    try
+        generateBindingUnsafe allAssemblies file
+    with
+        _ -> failwithf "Failure to load %A" file.FullName
 
 let getAssemblyConfig (file : FileInfo) =
     file.FullName |> IoHelpers.AddExt IoHelpers.Extension.Config |> FileInfo
