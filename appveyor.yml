@@ -48,7 +48,8 @@ notifications:
     auth_token:
       secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
     template: '{{#passed}}:white_check_mark:{{/passed}}{{#failed}}:x:{{/failed}} [Build {{&projectName}} {{buildVersion}} {{status}}]({{buildUrl}}) (commit {{commitUrl}} by @{{&commitAuthorUsername}})'
+
   - provider: Slack
-    auth_token:
+    incoming_webhook:
       secure: w7TtD+2R6TPM1sPDSgXpkPWBzKsuOdQ1VA89MVRrQz1hyDYxmKe4MXK9UuebkoZ76yiqqqPdjPa8KsS2Flj0Whh/BXYPiw2pH+C56dhq8TM=
     channel: '#builds'
