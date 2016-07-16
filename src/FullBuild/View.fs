@@ -63,7 +63,7 @@ let GetModifiedFilter (view : View) =
     else
         Set.empty
 
-let findViewProjects (view : View) =
+let FindViewProjects (view : View) =
     let wsDir = Env.GetFolder Folder.Workspace
     let antho = Configuration.LoadAnthology ()
 
@@ -106,7 +106,7 @@ let findViewProjects (view : View) =
     projects
 
 let private generate (viewId : ViewId) (view : View) =
-    let projects = findViewProjects view
+    let projects = FindViewProjects view
 
     // generate solution defines
     let slnDefines = GenerateSolutionDefines projects
@@ -159,7 +159,7 @@ let Describe (viewId : ViewId) =
 let Graph (viewId : ViewId) (all : bool) =
     let antho = Configuration.LoadAnthology ()
     let view = Configuration.LoadView viewId
-    let projects = findViewProjects view |> Set
+    let projects = FindViewProjects view |> Set
     let graph = Dgml.GraphContent antho projects all
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
