@@ -174,6 +174,9 @@ with
         let relativePath = this.RelativeProjectFile.toString |> System.IO.Path.GetDirectoryName
         let path = sprintf "%s/%s" this.Repository.toString  relativePath
         path
+    member this.relativeProjectFromWorkspace =
+        let path = sprintf "%s/%s" this.Repository.toString this.RelativeProjectFile.toString
+        path
     member this.outputFile =
         let output = this.Output.toString
         let ext = match this.OutputType with

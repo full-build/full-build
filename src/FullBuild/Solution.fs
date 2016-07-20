@@ -36,28 +36,30 @@ let GenerateFakeContent (projects : Project seq) =
         let wsDir = Env.GetFolder Env.Folder.Workspace
         yield @"#r ""FakeLib.dll"""
         yield "open Fake"
+        yield "open Fake.Testing.NUnit3"
         yield ""
+        yield sprintf @"let fbWorkspace = %A" wsDir.FullName |> IoHelpers.ToUnix
+        yield ""
+
         for project in projects do
             let target = project.ProjectId.toString
-            let projectFile = wsDir |> IoHelpers.GetSubDirectory project.Repository.toString
-                                    |> IoHelpers.GetFile project.RelativeProjectFile.toString
             yield sprintf "Target %A (fun _ ->" target
-            yield sprintf "  [%A] " (projectFile.FullName |> IoHelpers.ToUnix)
-            yield sprintf @"    |> MSBuild """" ""Build"" [(""SolutionDir"", %A)]" (wsDir.FullName |> IoHelpers.ToUnix)
-            yield sprintf @"    |> Log %A" target
+            yield sprintf @"    [%A]" (project.relativeProjectFromWorkspace |> IoHelpers.ToUnix)
+            yield @"    |> MSBuild """" ""Build"" [(""SolutionDir"", fbWorkspace)]"
+            yield sprintf @"    |> Log %A" (target + ".log")
             yield ")"
             yield ""
 
         for project in projects do
             if project.HasTests then
-                let target = project.ProjectId.toString + "-tests"
+                let target = project.ProjectId.toString + "-unittests"
                 let assemblyFile = wsDir |> IoHelpers.GetSubDirectory project.relativeProjectFolderFromWorkspace
                                          |> IoHelpers.GetSubDirectory "bin"
                                          |> IoHelpers.GetFile (project.outputFile)
                 let testFile = wsDir |> IoHelpers.GetFile (project.Output.toString + ".xml")
                 yield sprintf "Target %A (fun _ ->" target
-                yield sprintf "  [%A] " (assemblyFile.FullName |> IoHelpers.ToUnix)
-                yield sprintf @"    |> NUnit3 (fun p -> { p with DisableShadowCopy = true; OutputFile = %A })" (testFile.FullName |> IoHelpers.ToUnix)
+                yield sprintf @"    [%A] " (assemblyFile.FullName |> IoHelpers.ToUnix)
+                yield sprintf @"    |> NUnit3 (fun p -> { p with ResultSpecs = [%A] })" (testFile.FullName |> IoHelpers.ToUnix)
                 yield ")"
                 yield ""
 
@@ -66,24 +68,30 @@ let GenerateFakeContent (projects : Project seq) =
         yield @"Target ""All"" (fun _ -> ())"
         yield ""
 
+
+
+
+
         let projectIds = projects |> Seq.map (fun x -> x.ProjectId) |> Set.ofSeq
         for project in projects do
             let depProjects = project.ProjectReferences |> Set.filter (fun x -> projectIds |> Set.contains x)
 
             if 0 < depProjects.Count then
                 let target = project.ProjectId.toString
-                yield sprintf "%A <== [" target
+                yield sprintf "%A <==" target
+                yield @"    ["
                 for dependency in depProjects do
-                    yield sprintf "    %A" dependency.toString
-                yield sprintf "  ]"
+                    yield sprintf "        %A" dependency.toString
+                yield sprintf "    ]"
                 yield ""
 
-        yield sprintf @"""All"" <== ([|"
+        yield sprintf @"""All"" <== ("
+        yield sprintf @"    [|"
         for project in projects do
-            yield sprintf "    %A" project.ProjectId.toString
+            yield sprintf "        %A" project.ProjectId.toString
             if project.HasTests then
-                yield sprintf "    %A" (project.ProjectId.toString + "-tests")
-        yield sprintf "  |] |> List.ofArray)"
+                yield sprintf "        %A" (project.ProjectId.toString + "-unittests")
+        yield sprintf "    |] |> List.ofArray)"
         yield ""
         yield @"RunTargetOrDefault ""All"""
     }
