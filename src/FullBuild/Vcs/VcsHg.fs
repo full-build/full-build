@@ -41,7 +41,7 @@ let HgCommit (repoDir : DirectoryInfo) (comment : string) =
 let HgPush (repoDir : DirectoryInfo) =
     checkedExec "hg" "push" repoDir
     
-let HgPull (repoDir : DirectoryInfo) =
+let HgPull (repoDir : DirectoryInfo) (rebase : bool) =
     checkedExec "hg" "pull -u" repoDir
 
 let HgTip (repoDir : DirectoryInfo) =
@@ -61,7 +61,7 @@ let HgIs (uri : RepositoryUrl) =
     with
         _ -> false
 
-let HgClone (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
+let HgClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (shallow : bool) = 
     let bronly = match branch with
                  | None -> ""
                  | Some x -> sprintf "-r %s" x.toString
