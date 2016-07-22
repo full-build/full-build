@@ -57,7 +57,7 @@ let GetModifiedFilter (view : View) =
                                              |> Set.filter (filterClonedRepositories wsDir)
         let availableRepos = clonedRepos |> Set.map (fun x -> x.Name)
 
-        let current = Repo.CollectRepoHash wsDir antho.Vcs clonedRepos
+        let current = Repo.CollectRepoHash antho.Vcs wsDir clonedRepos
         let baseline = Configuration.LoadBaseline ()
         ComputeModifiedRepositories availableRepos baseline.Bookmarks current
     else

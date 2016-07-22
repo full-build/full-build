@@ -41,7 +41,7 @@ let GitCommit (repoDir : DirectoryInfo) (comment : string) =
 let GitPush (repoDir : DirectoryInfo) =
     checkedExec "git" "push --quiet" repoDir
 
-let GitPull (rebase : bool) (repoDir : DirectoryInfo) =
+let GitPull (repoDir : DirectoryInfo) (rebase : bool) =
     let dorebase = if rebase then "--rebase" else "--ff-only"
     let args = sprintf "pull %s" dorebase
     checkedExec "git" args  repoDir
@@ -69,7 +69,7 @@ let GitIs (uri : RepositoryUrl) =
     with
         _ -> false
 
-let GitClone (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
+let GitClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (shallow : bool) = 
     let bronly = match branch with
                  | None -> "--no-single-branch"
                  | Some x -> sprintf "--branch %s --no-single-branch" x.toString
@@ -82,8 +82,8 @@ let GitClone (shallow : bool) (branch : BranchId option) (target : DirectoryInfo
     let currDir = IoHelpers.CurrentFolder ()
     checkedExec "git" args currDir
 
-let GerritClone (shallow : bool) (branch : BranchId option) (target : DirectoryInfo) (url : string) = 
-    GitClone shallow branch target url
+let GerritClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (shallow : bool) = 
+    GitClone branch target url shallow
 
     let installDir = Env.GetFolder Env.Folder.Installation
     let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"

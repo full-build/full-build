@@ -36,7 +36,7 @@ let FilterRepos (filters : RepositoryId set) =
 let cloneRepoAndInit wsDir vcs shallow (repo : Repository) =
     async {
         DisplayHighlight repo.Name.toString
-        Vcs.VcsClone wsDir vcs shallow repo
+        Vcs.Clone vcs wsDir repo shallow 
     }
 
 let Clone (filters : RepositoryId set) (shallow : bool) (all : bool) (mt : bool) = 
@@ -83,7 +83,7 @@ let Drop (name : RepositoryId) =
 
 let CollectRepoHash wsDir vcsType (repos : Repository set) =
     let getRepoHash (repo : Repository) =
-        let tip = Vcs.VcsTip wsDir vcsType repo
+        let tip = Vcs.Tip wsDir vcsType repo
         { Repository = repo.Name; Version = BookmarkVersion tip}
 
     repos |> Set.map getRepoHash

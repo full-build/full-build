@@ -18,7 +18,6 @@ open Anthology
 open System.IO
 open VcsHg
 open VcsGit
-open Collections
 
 
 let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gitFun hgFun =
@@ -29,36 +28,38 @@ let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gi
             | VcsType.Hg -> hgFun
     f repoDir
 
-let VcsClone (wsDir : DirectoryInfo) (vcsType : VcsType) (shallow : bool) (repo : Repository) =
-    let gitCloneFunc = if vcsType = VcsType.Gerrit then GerritClone shallow repo.Branch
-                                                   else GitClone shallow repo.Branch
-    let hgCloneFunc = HgClone repo.Branch
-    (chooseVcs wsDir vcsType repo gitCloneFunc hgCloneFunc) repo.Url.toString
 
-let VcsTip (wsDir : DirectoryInfo) (vcsType : VcsType) repo = 
+
+let Clone (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) =
+    let gitCloneFunc = if vcsType = VcsType.Gerrit then GerritClone repo.Branch
+                                                   else GitClone repo.Branch
+    let hgCloneFunc = HgClone repo.Branch
+    (chooseVcs wsDir vcsType repo gitCloneFunc hgCloneFunc) repo.Url.toString shallow
+
+let Tip (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) = 
     chooseVcs wsDir vcsType repo GitTip HgTip
 
 // version : None ==> master
-let VcsCheckout (wsDir : DirectoryInfo) (vcsType : VcsType) repo (version : BookmarkVersion option) (ignore : bool) = 
+let Checkout (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion option) (ignore : bool) = 
     (chooseVcs wsDir vcsType repo GitCheckout HgCheckout) version ignore
 
-let VcsIgnore (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
+let Ignore (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) =
     chooseVcs wsDir vcsType repo  GitIgnore HgIgnore
 
-let VcsPull (rebase : bool) (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
-    chooseVcs wsDir vcsType repo (GitPull rebase) HgPull 
+let Pull (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) (rebase : bool) =
+    (chooseVcs wsDir vcsType repo GitPull HgPull) rebase
 
-let VcsCommit (wsDir : DirectoryInfo) (vcsType : VcsType) repo (comment : string) =
+let Commit (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) (comment : string) =
     (chooseVcs wsDir vcsType repo GitCommit HgCommit) comment
 
-let VcsPush (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
+let Push (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) =
     (chooseVcs wsDir vcsType repo GitPush HgPush)
 
-let VcsClean (wsDir : DirectoryInfo) (vcsType : VcsType) repo =
+let Clean (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) =
     (chooseVcs wsDir vcsType repo GitClean HgClean) repo
 
-let VcsLog (wsDir : DirectoryInfo) (vcsType : VcsType) repo (version : BookmarkVersion) =
+let Log (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion) =
     (chooseVcs wsDir vcsType repo GitHistory HgHistory) version
 
-let VcsLastCommit (wsDir : DirectoryInfo) (vcsType : VcsType) repo (relativeFile : string) =
+let LastCommit (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) (relativeFile : string) =
     (chooseVcs wsDir vcsType repo GitLastCommit HgLastCommit) relativeFile

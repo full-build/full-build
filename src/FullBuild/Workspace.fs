@@ -17,7 +17,6 @@ module Workspace
 open System.IO
 open IoHelpers
 open Env
-open Vcs
 open Anthology
 open MsBuildHelpers
 open System.Linq
@@ -52,7 +51,7 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
                       Applications = Set.empty 
                       Tester = TestRunnerType.NUnit 
                       Vcs = vcsType }
-        VcsClone wsDir vcsType true repo
+        Vcs.Clone vcsType wsDir repo true 
 
         let confDir = Env.GetFolder Env.Folder.Config
         let anthoFile = confDir |> GetFile Env.ANTHOLOGY_FILENAME
@@ -68,8 +67,8 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
         let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
         publishSource.CopyTo(publishTarget.FullName) |> ignore
 
-        Vcs.VcsIgnore wsDir vcsType repo
-        Vcs.VcsCommit wsDir vcsType repo "setup"
+        Vcs.Ignore vcsType wsDir repo
+        Vcs.Commit vcsType wsDir repo "setup"
     finally
         Environment.CurrentDirectory <- currDir
 
@@ -85,17 +84,17 @@ let Push (branch : string option) buildnum =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let allRepos = antho.Repositories
     let clonedRepos = allRepos |> ClonedRepositories wsDir
-    let bookmarks = Repo.CollectRepoHash wsDir antho.Vcs clonedRepos
+    let bookmarks = Repo.CollectRepoHash antho.Vcs wsDir clonedRepos
     let baseline = { Bookmarks = bookmarks }
     Configuration.SaveBaseline baseline
 
     let mainRepo = antho.MasterRepository
 
     // commit
-    Try (fun () -> Vcs.VcsCommit wsDir antho.Vcs mainRepo "bookmark")
+    Try (fun () -> Vcs.Commit antho.Vcs wsDir mainRepo "bookmark")
 
     // copy bin content
-    let hash = Vcs.VcsTip wsDir antho.Vcs mainRepo
+    let hash = Vcs.Tip antho.Vcs wsDir mainRepo
     BuildArtifacts.Publish branch buildnum hash
 
 let Checkout (version : BookmarkVersion) =
@@ -104,7 +103,7 @@ let Checkout (version : BookmarkVersion) =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = antho.MasterRepository
-    Vcs.VcsCheckout wsDir antho.Vcs mainRepo (Some version) false
+    Vcs.Checkout antho.Vcs wsDir mainRepo (Some version) false
 
     // checkout each repository now
     let antho = Configuration.LoadAnthology ()
@@ -114,8 +113,8 @@ let Checkout (version : BookmarkVersion) =
         DisplayHighlight repo.Name.toString
         let repoVersion = baseline.Bookmarks |> Seq.tryFind (fun x -> x.Repository = repo.Name)
         match repoVersion with
-        | Some x -> Vcs.VcsCheckout wsDir antho.Vcs repo (Some x.Version) false
-        | None -> Vcs.VcsCheckout wsDir antho.Vcs repo None false
+        | Some x -> Vcs.Checkout antho.Vcs wsDir repo (Some x.Version) false
+        | None -> Vcs.Checkout antho.Vcs wsDir repo None false
 
     // update binaries with observable baseline
     BuildArtifacts.PullReferenceBinaries version.toString
@@ -127,7 +126,7 @@ let Branch (branch : BookmarkVersion option) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = antho.MasterRepository
     try
-        Vcs.VcsCheckout wsDir antho.Vcs mainRepo branch false
+        Vcs.Checkout antho.Vcs wsDir mainRepo branch false
     with
         _ -> printfn "WARNING: No branch on .full-build repository. Is this intended ?"
 
@@ -141,7 +140,7 @@ let Branch (branch : BookmarkVersion option) =
                                 | None -> None
                                 | Some x -> Some (BookmarkVersion.from x.toString)
                       | Some x -> Some x
-        Vcs.VcsCheckout wsDir antho.Vcs repo repoVer true
+        Vcs.Checkout antho.Vcs wsDir repo repoVer true
 
 
 let Pull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) =
@@ -151,7 +150,7 @@ let Pull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) =
     if src then
         let mainRepo = antho.MasterRepository
         DisplayHighlight mainRepo.Name.toString
-        Vcs.VcsPull rebase wsDir antho.Vcs mainRepo
+        Vcs.Pull antho.Vcs wsDir mainRepo rebase 
 
         let antho = Configuration.LoadAnthology ()
         let clonedRepos = match view with
@@ -167,7 +166,7 @@ let Pull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) =
 
             let repoDir = wsDir |> GetSubDirectory repo.Name.toString
             if repoDir.Exists then
-                Vcs.VcsPull rebase wsDir antho.Vcs repo
+                Vcs.Pull antho.Vcs wsDir repo rebase 
 
     if bin then
         BuildArtifacts.PullLatestReferenceBinaries ()
@@ -180,7 +179,7 @@ let Init (path : string) (uri : RepositoryUrl) (vcsType : VcsType) : Unit =
         printf "[WARNING] Workspace already exists - skipping"
     else
         let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Branch = None }
-        VcsClone wsDir vcsType true repo
+        Vcs.Clone vcsType wsDir repo true 
    
 let Exec cmd master =
     let antho = Configuration.LoadAnthology()
@@ -215,7 +214,7 @@ let Clean () =
         // master repository will be cleaned again as final step
         let oldAntho = Configuration.LoadAnthology ()
         let wsDir = Env.GetFolder Env.Folder.Workspace
-        Vcs.VcsClean wsDir oldAntho.Vcs oldAntho.MasterRepository
+        Vcs.Clean oldAntho.Vcs wsDir oldAntho.MasterRepository
         let newAntho = Configuration.LoadAnthology()
         Configuration.SaveAnthology oldAntho
          
@@ -230,10 +229,10 @@ let Clean () =
             let repoDir = wsDir |> GetSubDirectory repo.Repository.Name.toString
             if repoDir.Exists then
                 DisplayHighlight repo.Repository.Name.toString
-                Vcs.VcsClean wsDir newAntho.Vcs repo.Repository
+                Vcs.Clean newAntho.Vcs wsDir repo.Repository
 
         DisplayHighlight newAntho.MasterRepository.Name.toString
-        Vcs.VcsClean wsDir newAntho.Vcs newAntho.MasterRepository
+        Vcs.Clean newAntho.Vcs wsDir newAntho.MasterRepository
 
 let UpdateGuid (repo : RepositoryId) =
     printfn "DANGER ! You will change all project guids for selected repository. Do you want to continue [Yes to confirm] ?"
@@ -286,13 +285,13 @@ let History (html : bool) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     // header
-    let baselineTip = Vcs.VcsTip wsDir antho.Vcs antho.MasterRepository
+    let baselineTip = Vcs.Tip antho.Vcs wsDir antho.MasterRepository
     header baselineTip
 
     // body
-    let lastCommit = Vcs.VcsLastCommit wsDir antho.Vcs antho.MasterRepository "baseline"
+    let lastCommit = Vcs.LastCommit antho.Vcs wsDir antho.MasterRepository "baseline"
     match lastCommit with 
-    | Some version -> let revision = Vcs.VcsLog wsDir antho.Vcs antho.MasterRepository version
+    | Some version -> let revision = Vcs.Log antho.Vcs wsDir antho.MasterRepository version
                       if revision <> null then 
                           body antho.MasterRepository.Name.toString revision
     | _ -> ()
@@ -301,7 +300,7 @@ let History (html : bool) =
         let repoDir = wsDir |> GetSubDirectory bookmark.Repository.toString
         if repoDir.Exists then
             let repo = antho.Repositories |> Seq.find (fun x -> x.Repository.Name = bookmark.Repository)
-            let revision = Vcs.VcsLog wsDir antho.Vcs repo.Repository bookmark.Version
+            let revision = Vcs.Log antho.Vcs wsDir repo.Repository bookmark.Version
             if revision <> null then 
                 body repo.Repository.Name.toString revision
 
