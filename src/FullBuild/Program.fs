@@ -13,14 +13,12 @@
 //   limitations under the License.
 
 module Main
-
-open CommandLine
-open CommandLineParsing
+open Commands
 
 let tryMain argv = 
     Env.CheckLicense ()
 
-    let cmd = ParseCommandLine (argv |> Seq.toList)
+    let cmd = CommandLine.Parse (argv |> Seq.toList)
     match cmd with
     // workspace
     | Command.SetupWorkspace wsInfo -> Workspace.Create wsInfo.Path wsInfo.MasterRepository wsInfo.MasterArtifacts wsInfo.Type
@@ -73,9 +71,9 @@ let tryMain argv =
     // misc
     | Command.Upgrade -> Upgrade.Upgrade ()
     | Command.FinalizeUpgrade processId -> Upgrade.FinalizeUpgrade processId
-    | Command.Version -> DisplayVersion ()
-    | Command.Usage -> DisplayUsage MainCommand.Unknown
-    | Command.Error errInfo -> DisplayUsage errInfo
+    | Command.Version -> CommandLine.PrintVersion ()
+    | Command.Usage -> CommandLine.PrintUsage MainCommand.Unknown
+    | Command.Error errInfo -> CommandLine.PrintUsage errInfo
 
     let retCode = match cmd with
                   | Command.Error _ -> 5

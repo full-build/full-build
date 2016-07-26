@@ -90,9 +90,9 @@
     <Compile Include="Vcs/VcsHg.fs" />
     <Compile Include="Vcs/VcsGit.fs" />
     <Compile Include="Vcs/Vcs.fs" />
-    <Compile Include="CommandLine.fs" />
-    <Compile Include="CommandLineToken.fs" />
-    <Compile Include="CommandLineParsing.fs" />
+    <Compile Include="CLI\Commands.fs" />
+    <Compile Include="CLI\CommandLine.fsi" />
+    <Compile Include="CLI\CommandLine.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="AnthologyGraph.fs" />
     <Compile Include="Repo.fs" />
