@@ -12,12 +12,149 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module CommandLineParsing
+module CommandLine
 
-open Anthology
-open CommandLineToken
+open Commands
 open Collections
-open CommandLine
+open Anthology
+
+
+
+
+type TokenOption =
+    | Debug
+    | All
+    | Bin
+    | Src
+    | Exclude
+    | Multithread
+    | Shallow
+    | Default
+    | Branch
+    | Version
+    | Rebase
+    | Reset
+    | View
+    | Modified
+    | Html
+
+let (|TokenOption|_|) (token : string) =
+    match token with
+    | "--debug" -> Some TokenOption.Debug
+    | "--all" -> Some TokenOption.All
+    | "--bin" -> Some TokenOption.Bin
+    | "--src" -> Some TokenOption.Src
+    | "--exclude" -> Some TokenOption.Exclude
+    | "--mt" -> Some TokenOption.Multithread
+    | "--shallow" -> Some TokenOption.Shallow
+    | "--default" -> Some TokenOption.Default
+    | "--branch" -> Some TokenOption.Branch
+    | "--version" -> Some TokenOption.Version
+    | "--rebase" -> Some TokenOption.Rebase
+    | "--reset" -> Some TokenOption.Reset
+    | "--view" -> Some TokenOption.View
+    | "--modified" -> Some TokenOption.Modified
+    | "--html" -> Some TokenOption.Html
+    | _ -> None
+
+
+type Token = 
+    | Version
+    | Workspace
+    | Help
+    | Upgrade
+    | Setup
+    | Init
+    | Clone
+    | Update
+    | Build
+    | Rebuild
+    | Index
+    | Convert
+    | Push
+    | Graph
+    | Install
+    | Simplify
+    | Outdated
+    | Publish
+    | Pull
+    | Checkout
+    | Branch
+    | Exec
+    | Test
+    | Alter
+    | Open
+    | Bind
+    | History
+
+    | Add
+    | Drop
+    | List
+    | Describe
+
+    | View
+    | Repo
+    | Package
+    | NuGet
+    | App
+
+    | Clean
+    | UpdateGuids
+    | Migrate
+
+
+let (|Token|_|) (token : string) = 
+    match token with
+    | "version" -> Some Version
+    | "workspace" -> Some Workspace
+
+    | "help" -> Some Help
+    | "upgrade" -> Some Upgrade
+    | "setup" -> Some Setup
+    | "init" -> Some Init
+    | "clone" -> Some Clone
+    | "update" -> Some Update
+    | "build" -> Some Build
+    | "rebuild" -> Some Rebuild
+    | "index" -> Some Index
+    | "convert" -> Some Convert
+    | "push" -> Some Push
+    | "graph" -> Some Graph
+    | "install" -> Some Install
+    | "outdated" -> Some Outdated
+    | "publish" -> Some Publish
+    | "pull" -> Some Pull
+    | "checkout" -> Some Checkout
+    | "branch" -> Some Branch
+    | "exec" -> Some Exec
+    | "clean" -> Some Clean
+    | "test" -> Some Test
+    | "alter" -> Some Alter
+    | "open" -> Some Open
+    | "bind" -> Some Bind
+    | "history" -> Some History
+
+    | "add" -> Some Add
+    | "drop" -> Some Drop
+    | "list" -> Some List
+    | "describe" -> Some Describe
+
+    | "view" -> Some View
+    | "repo" -> Some Repo
+    | "package" -> Some Package
+    | "nuget" -> Some NuGet
+    | "app" -> Some App
+
+    | "update-guids" -> Some UpdateGuids
+    | "migrate" -> Some Migrate
+    | _ -> None
+
+
+
+
+
+
+
 
 
 let (|Param|_|) (prm : string) =
@@ -335,7 +472,7 @@ let commandUpgrade (args : string list) =
     | [Param processId] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))
     | _ -> Command.Error MainCommand.Upgrade
 
-let ParseCommandLine (args : string list) : Command = 
+let Parse (args : string list) : Command = 
     match args with
     | [Token Token.Version] -> Command.Version
     | [Token Token.Help] -> Command.Usage
@@ -463,7 +600,7 @@ let UsageContent() =
 
 
 
-let DisplayUsage (what : MainCommand) = 
+let PrintUsage (what : MainCommand) = 
     let lines = UsageContent () |> Seq.filter (fun (cmd, _) -> cmd = what || what = MainCommand.Unknown)
                                 |> Seq.map (fun (_, desc) -> desc)
     
@@ -471,5 +608,5 @@ let DisplayUsage (what : MainCommand) =
     for line in lines do
         printfn "  %s" line
 
-let DisplayVersion() =
+let PrintVersion () =
     VersionContent() |> Seq.iter (fun x -> printfn "%s" x)
