@@ -29,7 +29,14 @@ let GetFrameworkDependencies (xnuspec : XDocument) =
         |> set
 
 let GetPackageDependencies (xnuspec : XDocument) =
-    xnuspec.Descendants().Where(fun x -> x.Name.LocalName = "dependency") 
+    let isNetFrameworkGroup (element:XElement) = 
+        if element.Parent.Name.LocalName = "group" then
+            let attr = element.Parent.Attribute(XName.Get("targetFramework"))
+            attr <> null && attr.Value.StartsWith(".NETFramework")
+        else 
+            true
+
+    xnuspec.Descendants().Where(fun x -> x.Name.LocalName = "dependency" && x |> isNetFrameworkGroup) 
         |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
         |> Seq.map PackageId.from
         |> set
