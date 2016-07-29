@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Package 
+module Package
 open Anthology
 open IoHelpers
 open System.IO
@@ -41,7 +41,7 @@ let private generateItemGroupCopyContent (pkgDir : DirectoryInfo) (fxLibs : Dire
     let files = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/**/*.*" relativePath
     let copyFiles = XElement(NsMsBuild + "FBCopyFiles",
                         XAttribute(NsNone + "Include", files))
-    copyFiles        
+    copyFiles
 
 let private generateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
     let pkgDir = Env.GetFolder Env.Folder.Package
@@ -51,7 +51,7 @@ let private generateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
     let itemGroup = generateItemGroupContent pkgDir files
     XElement(NsMsBuild + "When",
         XAttribute(NsNone + "Condition", condition),
-            XElement(NsMsBuild + "ItemGroup", 
+            XElement(NsMsBuild + "ItemGroup",
                 itemGroup))
 
 let private generateItemGroupCopy (fxLibs : DirectoryInfo) (condition : string) =
@@ -59,11 +59,11 @@ let private generateItemGroupCopy (fxLibs : DirectoryInfo) (condition : string) 
     let itemGroup = generateItemGroupCopyContent pkgDir fxLibs
     XElement(NsMsBuild + "When",
         XAttribute(NsNone + "Condition", condition),
-            XElement(NsMsBuild + "ItemGroup", 
+            XElement(NsMsBuild + "ItemGroup",
                 itemGroup))
 
 let private generateChooseRefContent (libDir : DirectoryInfo) (package : PackageId) =
-    let whens = seq {    
+    let whens = seq {
         if libDir.Exists then
             let foundDirs = libDir.EnumerateDirectories() |> Seq.map (fun x -> x.Name) |> List.ofSeq
             // for very old nugets we do not have folder per platform
@@ -85,7 +85,7 @@ let private generateChooseRefContent (libDir : DirectoryInfo) (package : Package
     }
 
 let private generateChooseCopyContent (libDir : DirectoryInfo) (package : PackageId) =
-    let whens = seq {    
+    let whens = seq {
         if libDir.Exists then
             let foundDirs = libDir.EnumerateDirectories() |> Seq.map (fun x -> x.Name) |> List.ofSeq
             // for very old nugets we do not have folder per platform
@@ -105,7 +105,7 @@ let private generateChooseCopyContent (libDir : DirectoryInfo) (package : Packag
         if whens.Any() then
             yield XElement (NsMsBuild + "Choose", whens)
     }
-    
+
 let private generateDependenciesRefContent (dependencies : PackageId seq) =
     seq {
         for dependency in dependencies do
@@ -127,7 +127,7 @@ let private generateDependenciesCopyContent (dependencies : PackageId seq) =
 
             let depId = dependency.toString
             let dependencyTargets = sprintf "%s%s/package-copy.targets" MSBUILD_PACKAGE_FOLDER depId
-    
+
             yield XElement(NsMsBuild + "Import",
                       XAttribute(NsNone + "Project", dependencyTargets),
                       XAttribute(NsNone + "Condition", condition))
@@ -159,8 +159,8 @@ let private generateProjectCopyContent (package : PackageId) (imports : XElement
 let private generateTargetForPackageRef (package : PackageId) =
     let pkgsDir = Env.GetFolder Env.Folder.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
-    let libDir = pkgDir |> GetSubDirectory "lib" 
-    
+    let libDir = pkgDir |> GetSubDirectory "lib"
+
     let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))
     let xnuspec = XDocument.Load (nuspecFile.FullName)
     let dependencies = NuGets.GetPackageDependencies xnuspec
@@ -169,14 +169,14 @@ let private generateTargetForPackageRef (package : PackageId) =
     let choose = generateChooseRefContent libDir package
     let project = generateProjectRefContent package imports choose
 
-    let targetFile = pkgDir |> GetFile "package.targets" 
+    let targetFile = pkgDir |> GetFile "package.targets"
     project.Save (targetFile.FullName)
 
 let private generateTargetForPackageCopy (package : PackageId) =
     let pkgsDir = Env.GetFolder Env.Folder.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
-    let libDir = pkgDir |> GetSubDirectory "lib" 
-    
+    let libDir = pkgDir |> GetSubDirectory "lib"
+
     let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))
     let xnuspec = XDocument.Load (nuspecFile.FullName)
     let dependencies = NuGets.GetPackageDependencies xnuspec
@@ -185,7 +185,7 @@ let private generateTargetForPackageCopy (package : PackageId) =
     let choose = generateChooseCopyContent libDir package
     let project = generateProjectCopyContent package imports choose
 
-    let targetFile = pkgDir |> GetFile "package-copy.targets" 
+    let targetFile = pkgDir |> GetFile "package-copy.targets"
     project.Save (targetFile.FullName)
 
 
@@ -203,7 +203,7 @@ let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
 
     let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
     let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
-    let files = Seq.append dlls exes |> Seq.map AssemblyId.from 
+    let files = Seq.append dlls exes |> Seq.map AssemblyId.from
                                      |> Set
     Set.difference files fxDependencies
 
@@ -225,7 +225,7 @@ let RestorePackages () =
 
 let Update () =
     PaketInterface.PaketUpdate ()
-    
+
     let allPackages = NuGets.BuildPackageDependencies (PaketInterface.ParsePaketDependencies ())
                       |> Map.toList
                       |> Seq.map fst
@@ -250,8 +250,8 @@ let simplifyAnthologyWithPackages (antho) =
     let packages = promotedPackageAntho.Projects |> Set.map (fun x -> x.PackageReferences)
                                                  |> Set.unionMany
     let package2packages = NuGets.BuildPackageDependencies packages
-    let allPackages = package2packages |> Seq.map (fun x -> x.Key) 
-    let package2files = allPackages |> Seq.map (fun x -> (x, gatherAllAssemblies x)) 
+    let allPackages = package2packages |> Seq.map (fun x -> x.Key)
+    let package2files = allPackages |> Seq.map (fun x -> (x, gatherAllAssemblies x))
                                     |> Map
     let newAntho = SimplifyAnthologyWithPackages antho package2files package2packages
     removeUnusedPackages newAntho
@@ -259,6 +259,6 @@ let simplifyAnthologyWithPackages (antho) =
 
 let Simplify (antho : Anthology) =
     installPackages antho.NuGets
-    
+
     let newAntho = simplifyAnthologyWithPackages antho
     newAntho

@@ -30,7 +30,7 @@ let Publish (branch : string option) buildnum hash =
 
     try
         let doPublish = not versionDir.Exists
-        if doPublish then            
+        if doPublish then
             let sourceBinDir = Env.GetFolder Env.Folder.Bin
             let targetBinDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
             IoHelpers.CopyFolder sourceBinDir targetBinDir true

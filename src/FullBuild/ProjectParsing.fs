@@ -25,38 +25,38 @@ open Env
 open Collections
 open System.Text.RegularExpressions
 
-type ProjectDescriptor = 
+type ProjectDescriptor =
     { Packages : Package set
       Project : Project }
 
-let extractOutput(xdoc : XDocument) = 
+let extractOutput(xdoc : XDocument) =
     let xoutput = xdoc.Descendants(NsMsBuild + "AssemblyName").Single()
     let soutput = !> xoutput : string
     soutput
 
-let getProjectOutput (dir : DirectoryInfo) (relFile : string) = 
+let getProjectOutput (dir : DirectoryInfo) (relFile : string) =
     let file = dir |> IoHelpers.GetFile relFile
     let xdoc = XDocument.Load(file.FullName)
     extractOutput xdoc
 
-let getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) = 
+let getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     // VS project references
     let prjRefs = xdoc.Descendants(NsMsBuild + "ProjectReference")
                   |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
                   |> Seq.map (fun x -> getProjectOutput prjDir x |> ProjectId.from)
                   |> Set
-    
+
     // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER) || x.StartsWith(MSBUILD_PROJECT_FOLDER2))
                  |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectId.from)
                  |> Set
-    
+
     prjRefs |> Set.union fbRefs
 
-let getAssemblies(xdoc : XDocument) : AssemblyId set = 
-    let res = seq { 
+let getAssemblies(xdoc : XDocument) : AssemblyId set =
+    let res = seq {
         for binRef in xdoc.Descendants(NsMsBuild + "Reference") do
             let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
             let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
@@ -79,13 +79,13 @@ let parseFullBuildPackage (fileName : string) : Package =
       Version = PackageVersion.Unspecified }
 
 let getNuGetPackages (nugetDoc : XDocument) =
-    let nugetPkgs = nugetDoc.Descendants(XNamespace.None + "package") |> Seq.map parseNuGetPackage 
+    let nugetPkgs = nugetDoc.Descendants(XNamespace.None + "package") |> Seq.map parseNuGetPackage
                                                                       |> Set
     nugetPkgs
 
 let isPaketReference (xel : XElement) =
-    let hasPaket = xel.Descendants(NsMsBuild + "Paket").Any() 
-    let hasHintPath = xel.Descendants(NsMsBuild + "HintPath").Any() 
+    let hasPaket = xel.Descendants(NsMsBuild + "Paket").Any()
+    let hasHintPath = xel.Descendants(NsMsBuild + "HintPath").Any()
     hasPaket && hasHintPath
 
 let (|MatchPackage|_|) hintpath =
@@ -126,11 +126,11 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let assemblyName = !> xprj.Descendants(NsMsBuild + "AssemblyName").Single() : string
     let assemblyRef = AssemblyId.from assemblyName
     let projectRef = ProjectId.from assemblyName
-    
+
     let extension =  match !> xprj.Descendants(NsMsBuild + "OutputType").Single() : string with
                      | "Library" -> OutputType.Dll
                      | _ -> OutputType.Exe
-    
+
     let sfxVersion = !> xprj.Descendants(NsMsBuild + "TargetFrameworkVersion").SingleOrDefault() : string
     let sfxProfile = !> xprj.Descendants(NsMsBuild + "TargetFrameworkProfile").SingleOrDefault() : string
     let sfxIdentifier = !> xprj.Descendants(NsMsBuild + "TargetFrameworkIdentifier").SingleOrDefault() : string
@@ -139,7 +139,7 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let fxIdentifier = FxInfo.from sfxIdentifier
 
     let prjRefs = getProjectReferences file.Directory xprj
-    
+
     let assemblies = getAssemblies xprj
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
     let nugetPackages = match xdocLoader pkgFile with
@@ -147,7 +147,7 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                         | _ -> Set.empty
     let fbPackages = getFullBuildPackages xprj
     let paketPackages = getPaketPackages xprj
-    let packages = nugetPackages |> Set.union fbPackages 
+    let packages = nugetPackages |> Set.union fbPackages
                                  |> Set.union paketPackages
     let pkgRefs = packages |> Set.map (fun x -> x.Id)
     let hasTests = assemblyRef.toString.EndsWith(".tests")
@@ -167,8 +167,8 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                   PackageReferences = pkgRefs
                   ProjectReferences = prjRefs } }
 
-let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (file : FileInfo) : ProjectDescriptor = 
+let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (file : FileInfo) : ProjectDescriptor =
     try
         parseProjectContent IoHelpers.XDocLoader repoDir repoRef file
-    with 
+    with
         e -> exn(sprintf "Failed to parse project %A" (file.FullName), e) |> raise

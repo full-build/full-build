@@ -23,7 +23,7 @@ open Collections
 let checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
 
-let private checkedExec = 
+let private checkedExec =
     Exec.Exec checkErrorCode
 
 
@@ -51,7 +51,7 @@ let updateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
 
 let UpdateSources (sources : RepositoryUrl seq) =
     let confDir = Env.GetFolder Env.Folder.Config
-    let paketDep = confDir |> GetFile "paket.dependencies" 
+    let paketDep = confDir |> GetFile "paket.dependencies"
     let oldContent = if paketDep.Exists then File.ReadAllLines (paketDep.FullName) |> Array.toSeq
                      else Seq.empty
     let content = updateSourceContent oldContent sources
@@ -59,7 +59,7 @@ let UpdateSources (sources : RepositoryUrl seq) =
 
 let ParsePaketDependencies () =
     let confDir = Env.GetFolder Env.Folder.Config
-    let paketDep = confDir |> GetFile "paket.dependencies" 
+    let paketDep = confDir |> GetFile "paket.dependencies"
     if paketDep.Exists then
         let lines = File.ReadAllLines (paketDep.FullName)
         let packageRefs =  parseContent lines
@@ -75,9 +75,9 @@ let generateDependenciesContent (packages : Package seq) =
             | PackageVersion.Unspecified -> yield sprintf "nuget %s" (package.Id.toString)
     }
 
-let AppendDependencies (packages : Package seq) = 
+let AppendDependencies (packages : Package seq) =
     let confDir = Env.GetFolder Env.Folder.Config
-    let paketDep = confDir |> GetFile "paket.dependencies" 
+    let paketDep = confDir |> GetFile "paket.dependencies"
 
 
     let content = generateDependenciesContent packages
@@ -95,7 +95,7 @@ let removeDependenciesContent (lines : string seq) (packages : PackageId set) =
 
 let RemoveDependencies (packages : PackageId set) =
     let confDir = Env.GetFolder Env.Folder.Config
-    let paketDep = confDir |> GetFile "paket.dependencies" 
+    let paketDep = confDir |> GetFile "paket.dependencies"
     let content = File.ReadAllLines (paketDep.FullName)
     let newContent = removeDependenciesContent content packages
     File.WriteAllLines (paketDep.FullName, newContent)

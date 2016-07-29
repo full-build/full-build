@@ -16,7 +16,7 @@ module CommandLine
 open Commands
 
 val Parse : args : string list
-         -> Command 
+         -> Command
 
 val PrintUsage : what : MainCommand
                 -> unit

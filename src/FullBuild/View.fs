@@ -74,11 +74,11 @@ let FindViewProjects (view : View) =
 
     // load back filter & generate view accordingly
     let repoFilters = view.Filters
-    let modifiedFilters = GetModifiedFilter view 
+    let modifiedFilters = GetModifiedFilter view
     let selectionFilters = repoFilters |> Set.union modifiedFilters |> Set.map adaptViewFilter
 
     // build: <repository>/<project>
-    let projects = antho.Projects 
+    let projects = antho.Projects
                    |> Seq.filter (fun x -> availableRepos |> Set.contains x.Repository)
                    |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, x.ProjectId))
                    |> Map
@@ -92,10 +92,10 @@ let FindViewProjects (view : View) =
     let selectedProjectGuids = projects |> Map.filter (fun k _ -> Set.contains k matches)
                                         |> Seq.map (fun x -> x.Value)
                                         |> Set
-    let parents = if view.Parents then AnthologyGraph.CollectAllParents antho.Projects selectedProjectGuids 
+    let parents = if view.Parents then AnthologyGraph.CollectAllParents antho.Projects selectedProjectGuids
                   else Set.empty
     let allProjectSet = selectedProjectGuids |> Set.union parents
-    
+
     // find projects
     let antho = Configuration.LoadAnthology ()
     let projectRefs = match view.SourceOnly with
@@ -140,7 +140,7 @@ let List () =
     let defaultView = if defaultFile.Exists then System.IO.File.ReadAllText (defaultFile.FullName)
                       else ""
 
-    let printViewInfo viewName = 
+    let printViewInfo viewName =
         let defaultInfo = if viewName = defaultView then "[default]"
                           else ""
         printfn "%s %s" viewName defaultInfo
@@ -171,9 +171,9 @@ let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forcePar
 
     let view = { Filters = filters |> Set
                  Builder = BuilderType.MSBuild
-                 Parameters = Set.empty 
-                 SourceOnly = forceSrc 
-                 Parents = forceParents 
+                 Parameters = Set.empty
+                 SourceOnly = forceSrc
+                 Parents = forceParents
                  AddNew = addNew }
     Configuration.SaveView viewId view
     generate viewId view
@@ -195,7 +195,7 @@ let getViewName (maybeViewName : ViewId option) =
     viewName
 
 let getViewFile (view : ViewId) =
-    let vwDir = Env.GetFolder Env.Folder.View 
+    let vwDir = Env.GetFolder Env.Folder.View
     let vwFile = vwDir |> GetFile (AddExt View view.toString)
     if vwFile.Exists |> not then failwithf "Unknown view name %A" view.toString
 
@@ -214,7 +214,7 @@ let AlterView (viewId : ViewId) (forceDefault : bool option) (forceSource : bool
                     let defaultFile = vwDir |> GetFile "default"
                     System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
     | _ -> ()
-    
+
     let mutable view = Configuration.LoadView viewId
     match forceSource with
     | Some source -> view <- { view with SourceOnly = source }
@@ -226,7 +226,7 @@ let AlterView (viewId : ViewId) (forceDefault : bool option) (forceSource : bool
 
     Configuration.SaveView viewId view
     GenerateView viewId
-        
+
 
 let OpenView (viewId : ViewId) =
     let view = Configuration.LoadView viewId

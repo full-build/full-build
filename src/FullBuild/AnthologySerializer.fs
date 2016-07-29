@@ -95,9 +95,9 @@ let Deserialize (content) =
         | [] -> []
         | x :: tail -> (RepositoryUrl.from (x.nuget)) :: convertToNuGets tail
 
-    let convertToRepository (item : AnthologyConfig.anthology_Type.mainrepository_Type) : Repository =  
+    let convertToRepository (item : AnthologyConfig.anthology_Type.mainrepository_Type) : Repository =
         { Url = RepositoryUrl.from (item.uri)
-          Branch = None 
+          Branch = None
           Name = RepositoryId.from Env.MASTER_REPO }
 
     let rec convertToBuildableRepositories (items : AnthologyConfig.anthology_Type.repositories_Item_Type list) =
@@ -106,7 +106,7 @@ let Deserialize (content) =
         | x :: tail -> let maybeBranch = if String.IsNullOrEmpty(x.branch) then None
                                          else x.branch |> BranchId.from |> Some
                        convertToBuildableRepositories tail |> Set.add { Repository = { Branch = maybeBranch
-                                                                                       Url = RepositoryUrl.from (x.uri) 
+                                                                                       Url = RepositoryUrl.from (x.uri)
                                                                                        Name = RepositoryId.from x.repo }
                                                                         Builder = BuilderType.from x.build }
 
@@ -132,7 +132,7 @@ let Deserialize (content) =
                        let out = Path.GetFileNameWithoutExtension(x.out)
                        let repo = IoHelpers.GetRootDirectory (x.file)
                        let file = IoHelpers.GetFilewithoutRootDirectory (x.file)
-                       let hastests = x.tests 
+                       let hastests = x.tests
                        convertToProjects tail |> Set.add  { Repository = RepositoryId.from repo
                                                             RelativeProjectFile = ProjectRelativeFile file
                                                             UniqueProjectId = ProjectUniqueId.from (ParseGuid x.guid)
@@ -172,8 +172,8 @@ let Deserialize (content) =
       NuGets = convertToNuGets (config.anthology.nugets |> List.ofSeq)
       MasterRepository = mainRepo
       Repositories = repos
-      Projects = convertToProjects (config.anthology.projects |> List.ofSeq) 
-      Applications = convertToApplications (config.anthology.apps |> List.ofSeq) 
+      Projects = convertToProjects (config.anthology.projects |> List.ofSeq)
+      Applications = convertToApplications (config.anthology.apps |> List.ofSeq)
       Tester = convertToTestRunner (config.anthology.test) }
 
 let Save (filename : FileInfo) (antho : Anthology) =

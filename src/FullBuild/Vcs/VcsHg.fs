@@ -23,10 +23,10 @@ let private checkErrorCode err =
 let private checkIgnore err =
     ()
 
-let private checkedExec = 
+let private checkedExec =
     Exec.Exec checkErrorCode
 
-let private checkedExecMaybeIgnore ignoreError = 
+let private checkedExecMaybeIgnore ignoreError =
     let check = if ignoreError then checkIgnore else checkErrorCode
     Exec.Exec check
 
@@ -40,7 +40,7 @@ let HgCommit (repoDir : DirectoryInfo) (comment : string) =
 
 let HgPush (repoDir : DirectoryInfo) =
     checkedExec "hg" "push" repoDir
-    
+
 let HgPull (repoDir : DirectoryInfo) (rebase : bool) =
     checkedExec "hg" "pull -u" repoDir
 
@@ -61,7 +61,7 @@ let HgIs (uri : RepositoryUrl) =
     with
         _ -> false
 
-let HgClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (shallow : bool) = 
+let HgClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (shallow : bool) =
     let bronly = match branch with
                  | None -> ""
                  | Some x -> sprintf "-r %s" x.toString
@@ -70,7 +70,7 @@ let HgClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (
     let currDir = IoHelpers.CurrentFolder ()
     checkedExec "hg" args currDir
 
-let HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ignoreError : bool) = 
+let HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ignoreError : bool) =
     let rev = match version with
               | Some (BookmarkVersion x) -> x
               | None -> "tip"
@@ -78,10 +78,10 @@ let HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ign
     let args = sprintf "update -r %A" rev
     checkedExecMaybeIgnore ignoreError "hg" args repoDir
 
-let HgHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) = 
+let HgHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =
     null
 
-let HgLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =     
+let HgLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
     None
 
 let HgIgnore (repoDir : DirectoryInfo) =

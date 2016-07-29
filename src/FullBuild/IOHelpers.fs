@@ -22,7 +22,7 @@ open System.Xml.Linq
 let private checkErrorCode err =
     if err > 7 then failwithf "Process failed with error %d" err
 
-let private checkedExec = 
+let private checkedExec =
     Exec.Exec checkErrorCode
 
 
@@ -42,7 +42,7 @@ type Extension =
     | Config
 
 let AddExt (ext : Extension) (fileName : string) : string =
-    let sext = match ext with 
+    let sext = match ext with
                | View -> "view"
                | Solution -> "sln"
                | Targets -> "targets"
@@ -62,7 +62,7 @@ let ToUnix (f : string) : string =
     if f = null then f
     else f.Replace(@"\", "/")
 
-let GetSubDirectory (subDir : string) (dir : DirectoryInfo) : DirectoryInfo = 
+let GetSubDirectory (subDir : string) (dir : DirectoryInfo) : DirectoryInfo =
     let newPath = Path.Combine(dir.FullName, subDir)
     DirectoryInfo (newPath)
 
@@ -71,21 +71,21 @@ let CreateSubDirectory (dirName : string) (parentDir : DirectoryInfo) : Director
     dir.Create ()
     dir
 
-let GetFile (fileName : string) (dir : DirectoryInfo) : FileInfo = 
+let GetFile (fileName : string) (dir : DirectoryInfo) : FileInfo =
     let fullFileName = Path.Combine(dir.FullName, fileName)
     FileInfo (fullFileName)
 
-let rec private computeRelativePathInc (topDir : DirectoryInfo) (childDir : DirectoryInfo) (path : string) = 
+let rec private computeRelativePathInc (topDir : DirectoryInfo) (childDir : DirectoryInfo) (path : string) =
     if topDir.FullName = childDir.FullName then path |> ToUnix
-    else 
+    else
         let newPath = Path.Combine(childDir.Name, path)
         computeRelativePathInc topDir childDir.Parent newPath
 
-let ComputeRelativeFilePath (dir : DirectoryInfo) (file : FileInfo) : string = 
+let ComputeRelativeFilePath (dir : DirectoryInfo) (file : FileInfo) : string =
     let path = file.Name
     computeRelativePathInc dir file.Directory path
 
-let ComputeRelativeDirPath (dir : DirectoryInfo) (target : DirectoryInfo) : string = 
+let ComputeRelativeDirPath (dir : DirectoryInfo) (target : DirectoryInfo) : string =
     let path = ""
     computeRelativePathInc dir target path
 
@@ -98,7 +98,7 @@ let ComputeHops (file : string) : string =
     let count = file.Split('/').Length
     genHops count ""
 
-let CurrentFolder() : DirectoryInfo = 
+let CurrentFolder() : DirectoryInfo =
     Directory.GetCurrentDirectory () |> DirectoryInfo
 
 
@@ -122,11 +122,11 @@ let GetRootDirectory (file : string) =
 let GetFilewithoutRootDirectory (file : string) =
     let idx = file.IndexOf('/')
     file.Substring(idx+1)
-   
+
 
 let consoleLock = System.Object()
 let DisplayHighlight s =
-    let display () = 
+    let display () =
         let oldColor = Console.ForegroundColor
         Console.ForegroundColor <- ConsoleColor.Cyan
         Console.WriteLine("==> {0}", [|s|])
@@ -145,7 +145,7 @@ let Try action =
 let FindKnownProjects (repoDir : DirectoryInfo) =
     [AddExt CsProj "*"
      AddExt VbProj "*"
-     AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)) 
+     AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories))
                         |> Seq.concat
 
 
@@ -160,7 +160,7 @@ let XDocLoader (fileName : FileInfo) : XDocument option =
 
 let XDocSaver (fileName : FileInfo) (xdoc : XDocument) =
     xdoc.ToString()
-        |> SaveFileIfNecessary fileName            
+        |> SaveFileIfNecessary fileName
 
 let ForceDelete (dir : DirectoryInfo) =
     if dir.Exists then dir.Delete(true)

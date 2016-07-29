@@ -23,13 +23,15 @@ open Collections
 
 
 let GetFrameworkDependencies (xnuspec : XDocument) =
-    xnuspec.Descendants().Where(fun x -> x.Name.LocalName = "frameworkAssembly") 
+    xnuspec.Descendants()
+        |> Seq.filter (fun x -> x.Name.LocalName = "frameworkAssembly")
         |> Seq.map (fun x -> !> x.Attribute(NsNone + "assemblyName") : string)
         |> Seq.map AssemblyId.from
         |> set
 
 let GetPackageDependencies (xnuspec : XDocument) =
-    xnuspec.Descendants().Where(fun x -> x.Name.LocalName = "dependency").Where(fun x -> (!> x.Attribute(NsNone + "exclude") : string) <> "Compile")
+    xnuspec.Descendants()
+        |> Seq.filter (fun x -> x.Name.LocalName = "dependency" && (!> x.Attribute(NsNone + "exclude") : string) <> "Compile")
         |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
         |> Seq.map PackageId.from
         |> set
@@ -38,7 +40,7 @@ let rec BuildPackageDependencies (packages : PackageId seq) =
     let pkgsDir = Env.GetFolder Env.Folder.Package
 
     let rec buildDependencies (packages : PackageId seq) = seq {
-        for package in packages do    
+        for package in packages do
             let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
             let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))
             let xnuspec = XDocument.Load (nuspecFile.FullName)
@@ -47,8 +49,8 @@ let rec BuildPackageDependencies (packages : PackageId seq) =
             yield! buildDependencies dependencies
     }
 
-    packages 
-        |> buildDependencies 
+    packages
+        |> buildDependencies
         |> Map
 
 

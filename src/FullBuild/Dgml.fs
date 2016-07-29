@@ -140,17 +140,17 @@ let GraphCategories (repos : RepositoryId set) =
 
     let generateCategory (cat) =
         let (key, value) = cat
-        XElement(NsDgml + "Category", 
-            XAttribute(NsNone + "Id", key), 
+        XElement(NsDgml + "Category",
+            XAttribute(NsNone + "Id", key),
             XAttribute(NsNone + "Background", value))
 
     seq {
         yield! (allCategories |> Seq.map generateCategory)
 
         for repo in repos do
-            yield XElement(NsDgml + "Category", 
-                XAttribute(NsNone + "Id", repo.toString), 
-                XAttribute(NsNone + "Label", repo.toString), 
+            yield XElement(NsDgml + "Category",
+                XAttribute(NsNone + "Id", repo.toString),
+                XAttribute(NsNone + "Label", repo.toString),
                 XAttribute(NsNone + "IsContainment", "True"),
                 XAttribute(NsNone + "CanBeDataDriven", "False"),
                 XAttribute(NsNone + "CanLinkedNodesBeDataDriven", "True"),
@@ -162,15 +162,15 @@ let GraphProperties () =
     let allProperties = [ ("FxVersion", "Target Framework Version", "System.String")
                           ("FxProfile", "Target Framework Profile", "System.String")
                           ("FxIdentifier", "Target Framework Identifier", "System.String")
-                          ("Guid", "Project Guid", "System.Guid") 
+                          ("Guid", "Project Guid", "System.Guid")
                           ("IsTest", "Test Project", "System.Boolean")
-                          ("Output", "Project Output", "System.String") 
+                          ("Output", "Project Output", "System.String")
                           ("OutputType", "Project Output Type", "System.String") ]
 
     let generateProperty (prop) =
         let (id, label, dataType) = prop
-        XElement(NsDgml + "Property", 
-            XAttribute(NsNone + "Id", id), 
+        XElement(NsDgml + "Property",
+            XAttribute(NsNone + "Id", id),
             XAttribute(NsNone + "Label", label),
             XAttribute(NsNone + "DataType", dataType))
 
@@ -209,11 +209,11 @@ let GraphContent (antho : Anthology) (projects : Project set) (all : bool) =
     let xGraphDir = XAttribute(NsNone + "GraphDirection", "TopToBottom")
     let xLayout = XAttribute(NsNone + "Layout", "Sugiyama")
     XDocument(
-        XElement(NsDgml + "DirectedGraph", 
-            xLayout, 
-            xGraphDir, 
-            xNodes, 
-            xLinks, 
-            xCategories, 
-            xProperties, 
+        XElement(NsDgml + "DirectedGraph",
+            xLayout,
+            xGraphDir,
+            xNodes,
+            xLinks,
+            xCategories,
+            xProperties,
             xStyles))

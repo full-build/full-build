@@ -43,7 +43,7 @@ let DeserializeBaseline content =
         | x :: tail -> convertToBookmark tail |> Set.add { Repository=RepositoryId.from x.repo ; Version=BookmarkVersion x.version }
 
     let config = new BaselineConfig()
-    config.LoadText content    
+    config.LoadText content
     { Bookmarks = convertToBookmark (config.baseline |> List.ofSeq) }
 
 

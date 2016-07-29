@@ -23,13 +23,13 @@ let private checkErrorCode err =
 let private checkIgnore err =
     ()
 
-let private checkedExec = 
+let private checkedExec =
     Exec.Exec checkErrorCode
 
 let private checkedExecReadLine =
     Exec.ExecReadLine checkErrorCode
 
-let private checkedExecMaybeIgnore ignoreError = 
+let private checkedExecMaybeIgnore ignoreError =
     let check = if ignoreError then checkIgnore else checkErrorCode
     Exec.Exec check
 
@@ -69,7 +69,7 @@ let GitIs (uri : RepositoryUrl) =
     with
         _ -> false
 
-let GitClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (shallow : bool) = 
+let GitClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (shallow : bool) =
     let bronly = match branch with
                  | None -> "--no-single-branch"
                  | Some x -> sprintf "--branch %s --no-single-branch" x.toString
@@ -82,17 +82,17 @@ let GitClone (branch : BranchId option) (target : DirectoryInfo) (url : string) 
     let currDir = IoHelpers.CurrentFolder ()
     checkedExec "git" args currDir
 
-let GerritClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (shallow : bool) = 
+let GerritClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (shallow : bool) =
     GitClone branch target url shallow
 
     let installDir = Env.GetFolder Env.Folder.Installation
     let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
     let target = target |> IoHelpers.GetSubDirectory ".git"
-                        |> IoHelpers.GetSubDirectory "hooks" 
+                        |> IoHelpers.GetSubDirectory "hooks"
                         |> IoHelpers.GetFile "commit-msg"
     commitMsgFile.CopyTo (target.FullName) |> ignore
 
-let GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ignoreError : bool) = 
+let GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ignoreError : bool) =
     let rev = match version with
               | Some (BookmarkVersion x) -> x
               | None -> "master"
@@ -100,7 +100,7 @@ let GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ig
     let args = sprintf "checkout %A" rev
     checkedExecMaybeIgnore ignoreError "git" args repoDir
 
-let GitHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =     
+let GitHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =
     let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version.toString
     try
         let res = checkedExecReadLine "git" args repoDir
@@ -108,7 +108,7 @@ let GitHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =
     with
         exn -> sprintf "Failed to get history for repository %A from version %A (%s)" repoDir.Name version.toString (exn.ToString())
 
-let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =     
+let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
     let args = sprintf @"log -1 --format=%%H %s" relativeFile
     let res = checkedExecReadLine "git" args repoDir
     let ver = BookmarkVersion.from res
