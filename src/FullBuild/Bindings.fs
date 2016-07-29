@@ -38,12 +38,12 @@ let generateBindingUnsafe (allAssemblies : AssemblyId set) (file : FileInfo) =
                 let publicKeyToken = publicKey |> Seq.map (fun x -> x.ToString("x2")) |> System.String.Concat
                 let depAss = XElement(NsRuntime + "dependentAssembly",
                                         XElement(NsRuntime + "assemblyIdentity",
-                                            XAttribute(NsNone + "name", name.Name), 
+                                            XAttribute(NsNone + "name", name.Name),
                                             XAttribute(NsNone + "publicKeyToken", publicKeyToken)),
-                                        XElement(NsRuntime + "bindingRedirect", 
-                                            XAttribute(NsNone + "oldVersion", "0.0.0.0-65535.65535.65535.65535"), 
+                                        XElement(NsRuntime + "bindingRedirect",
+                                            XAttribute(NsNone + "oldVersion", "0.0.0.0-65535.65535.65535.65535"),
                                             XAttribute(NsNone + "newVersion", name.Version.ToString())))
-                depAss 
+                depAss
             else null
         else null
     else null
@@ -68,8 +68,8 @@ let forceBindings (bindings : XElement) (appConfig : FileInfo) =
         runtime <- XElement(NsNone + "runtime")
         config.Root.Add(runtime)
 
-    config.Descendants(NsRuntime + "assemblyBinding").Remove()    
-    runtime.Add (bindings)      
+    config.Descendants(NsRuntime + "assemblyBinding").Remove()
+    runtime.Add (bindings)
 
     // <assemblyBinding>
     //   <assemblyIdentity name="protobuf-net" publicKeyToken="257b51d87d2e4d67"/>
@@ -84,7 +84,7 @@ let anthologyAssemblies () =
     assemblies
 
 let generateBindings (allAssemblies : AssemblyId set) (artifactDir : DirectoryInfo) =
-    let dependentAssemblies = artifactDir.GetFiles ("*.dll")  
+    let dependentAssemblies = artifactDir.GetFiles ("*.dll")
                               |> Seq.map (generateBinding allAssemblies)
                               |> Seq.filter (fun x -> x <> null)
     let bindings = XElement(NsRuntime + "assemblyBinding", dependentAssemblies)
@@ -92,21 +92,21 @@ let generateBindings (allAssemblies : AssemblyId set) (artifactDir : DirectoryIn
 
 let UpdateArtifactBindingRedirects (artifactDir : DirectoryInfo) =
     let assemblies = anthologyAssemblies()
-    let bindings = generateBindings assemblies artifactDir 
+    let bindings = generateBindings assemblies artifactDir
 
     let dllConfigs = artifactDir.GetFiles ("*.dll") |> Seq.map getAssemblyConfig
-    let exeConfigs = artifactDir.GetFiles ("*.exe") |> Seq.map getAssemblyConfig 
+    let exeConfigs = artifactDir.GetFiles ("*.exe") |> Seq.map getAssemblyConfig
     let templateConfig = artifactDir |> GetFile "app.template.config" |> Seq.singleton
 
-    exeConfigs 
-        |> Seq.append dllConfigs 
-        |> Seq.append templateConfig 
+    exeConfigs
+        |> Seq.append dllConfigs
+        |> Seq.append templateConfig
         |> Seq.filter (fun x -> x.Exists)
         |> Seq.iter (forceBindings bindings)
 
 let UpdateProjectBindingRedirects (projectDir : DirectoryInfo) =
     let assemblies = anthologyAssemblies()
     let artifactDir = projectDir |> GetSubDirectory "bin"
-    let bindings = generateBindings assemblies artifactDir 
+    let bindings = generateBindings assemblies artifactDir
     let appConfig = projectDir |> GetFile "app.config"
     forceBindings bindings appConfig

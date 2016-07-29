@@ -36,11 +36,11 @@ let Clone (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) (shall
     let hgCloneFunc = HgClone repo.Branch
     (chooseVcs wsDir vcsType repo gitCloneFunc hgCloneFunc) repo.Url.toString shallow
 
-let Tip (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) = 
+let Tip (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) =
     chooseVcs wsDir vcsType repo GitTip HgTip
 
 // version : None ==> master
-let Checkout (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion option) (ignore : bool) = 
+let Checkout (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) (version : BookmarkVersion option) (ignore : bool) =
     (chooseVcs wsDir vcsType repo GitCheckout HgCheckout) version ignore
 
 let Ignore (vcsType : VcsType) (wsDir : DirectoryInfo) (repo : Repository) =

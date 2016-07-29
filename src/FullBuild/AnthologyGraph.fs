@@ -51,7 +51,7 @@ let ComputeProjectSelectionClosure (allProjects : Project set) (goal : ProjectId
 
 let rec public ComputeProjectSelectionClosureSourceOnly (allProjects : Project set) (goal : ProjectId set) =
     let findParents =
-        let child2parents = allProjects 
+        let child2parents = allProjects
                             |> Seq.map (fun x -> (x.ProjectId, referencingProjects allProjects x.ProjectId))
                             |> Map.ofSeq
 
@@ -75,9 +75,9 @@ let ComputeRepositoriesDependencies (allProjects : Project set) (selectedRepos :
 
 
 let rec private collectParents (findParents : ProjectId -> Project set) (nodes : ProjectId set) =
-    if nodes = Set.empty then 
+    if nodes = Set.empty then
         Set.empty
-    else  
+    else
         nodes |> Set.map findParents
               |> Set.unionMany
               |> Set.map (fun x -> x.ProjectId)

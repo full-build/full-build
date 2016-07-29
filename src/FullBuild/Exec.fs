@@ -21,7 +21,7 @@ let defaultPSI (command : string) (args : string) (dir : DirectoryInfo) =
     let psi = ProcessStartInfo (FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir.FullName, LoadUserProfile = true)
     psi
 
-let ExecWithVars checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) = 
+let ExecWithVars checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
     let psi = defaultPSI command args dir
 
     for var in vars do
@@ -32,20 +32,20 @@ let ExecWithVars checkErrorCode (command : string) (args : string) (dir : Direct
     proc.WaitForExit()
     checkErrorCode proc.ExitCode
 
-let Exec checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) = 
+let Exec checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) =
     ExecWithVars checkErrorCode command args dir Map.empty
 
 let SpawnWithVerb (command : string) (verb : string) =
     let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Verb = verb)
     use proc = Process.Start (psi)
     ()
- 
+
 let Spawn (command : string) (args : string) =
     let psi = ProcessStartInfo (FileName = command, UseShellExecute = false, Arguments = args)
     use proc = Process.Start (psi)
     ()
 
-let ExecReadLine checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) = 
+let ExecReadLine checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) =
     let mutable psi = defaultPSI command args dir
     psi.RedirectStandardOutput <- true
 

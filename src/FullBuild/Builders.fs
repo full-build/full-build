@@ -22,7 +22,7 @@ open Env
 let checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
 
-let private checkedExec = 
+let private checkedExec =
     Exec.Exec checkErrorCode
 
 

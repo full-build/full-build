@@ -26,7 +26,7 @@ let TestAssemblies (filters : string list) (excludes : string list) =
 
     let matchViews filter = views |> Seq.filter (fun x -> PatternMatching.Match x filter)
 
-    let matches = filters 
+    let matches = filters
                   |> Seq.map matchViews
                   |> Seq.collect id
                   |> Seq.map (View.FindViewProjects << Configuration.LoadView << ViewId.from)

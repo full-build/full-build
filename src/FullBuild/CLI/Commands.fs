@@ -17,57 +17,57 @@ open Anthology
 open Collections
 
 
-type SetupWorkspace = 
+type SetupWorkspace =
     { MasterRepository : RepositoryUrl
       MasterArtifacts : string
       Type : VcsType
       Path : string }
 
-type InitWorkspace = 
+type InitWorkspace =
     { MasterRepository : RepositoryUrl
       Type : VcsType
       Path : string }
 
-type CheckoutWorkspace = 
+type CheckoutWorkspace =
     { Version : string }
 
-type CloneRepositories = 
-    { Filters : RepositoryId set 
+type CloneRepositories =
+    { Filters : RepositoryId set
       Shallow : bool
-      All : bool 
+      All : bool
       Multithread : bool }
 
-type IndexRepositories = 
+type IndexRepositories =
     { Filters : RepositoryId set }
 
-type ConvertRepositories = 
+type ConvertRepositories =
     { Filters : RepositoryId set }
 
-type TestAssemblies = 
-    { Filters : string list 
+type TestAssemblies =
+    { Filters : string list
       Excludes : string list }
 
-type NuGetUrl = 
+type NuGetUrl =
     { Url : string }
 
-type AddView = 
+type AddView =
     { Name : ViewId
-      Filters : string list 
-      SourceOnly : bool 
-      Parents : bool 
+      Filters : string list
+      SourceOnly : bool
+      Parents : bool
       AddNew : bool }
 
-type ViewName = 
+type ViewName =
     { Name : ViewId }
 
-type PublishApplications = 
-    { Filters : string list 
+type PublishApplications =
+    { Filters : string list
       Multithread : bool }
 
 type CheckoutVersion =
     { Version : BookmarkVersion }
 
-type BranchWorkspace = 
+type BranchWorkspace =
     { Branch : BookmarkVersion option }
 
 type AddApplication =
@@ -77,15 +77,15 @@ type AddApplication =
 
 type BuildView =
     { Name : ViewId option
-      Config : string 
+      Config : string
       Clean : bool
-      Multithread : bool 
+      Multithread : bool
       Version : string option }
 
 type AlterView =
     { Name : ViewId
       Default : bool option
-      Source : bool option 
+      Source : bool option
       Parents : bool option }
 
 type OpenView =
@@ -95,8 +95,8 @@ type GraphView =
     { Name : ViewId
       All : bool }
 
-type Exec = 
-    { Command : string 
+type Exec =
+    { Command : string
       All : bool }
 
 type AddRepository =
@@ -108,11 +108,11 @@ type AddRepository =
 type PullWorkspace =
     { Src : bool
       Bin : bool
-      Rebase : bool 
+      Rebase : bool
       View : ViewId option }
 
 type PushWorkspace =
-    { BuildNumber : string 
+    { BuildNumber : string
       Branch : string option }
 
 type BindProject =
@@ -168,14 +168,14 @@ type MainCommand =
 
 
 [<RequireQualifiedAccess>]
-type Command = 
+type Command =
     | Error of MainCommand
 
     | Version
     | Usage
     | Upgrade
     | FinalizeUpgrade of int
-    
+
     // workspace
     | SetupWorkspace of SetupWorkspace
     | InitWorkspace of InitWorkspace

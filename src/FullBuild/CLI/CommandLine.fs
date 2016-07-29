@@ -58,7 +58,7 @@ let (|TokenOption|_|) (token : string) =
     | _ -> None
 
 
-type Token = 
+type Token =
     | Version
     | Workspace
     | Help
@@ -103,7 +103,7 @@ type Token =
     | Migrate
 
 
-let (|Token|_|) (token : string) = 
+let (|Token|_|) (token : string) =
     match token with
     | "version" -> Some Version
     | "workspace" -> Some Workspace
@@ -162,8 +162,8 @@ let (|Param|_|) (prm : string) =
     else Some prm
 
 let (|Params|_|) (prms : string list) =
-    let hasNotParam = prms |> List.exists (fun x -> match x with 
-                                                    | Param _ -> false 
+    let hasNotParam = prms |> List.exists (fun x -> match x with
+                                                    | Param _ -> false
                                                     | _ -> true)
     if hasNotParam then None
     else Some prms
@@ -205,9 +205,9 @@ let (|PublisherType|_|) name =
 
 let commandSetup (args : string list) =
     match args with
-    | Param vcs 
-      :: Param masterRepository 
-      :: Param masterArtifacts 
+    | Param vcs
+      :: Param masterRepository
+      :: Param masterArtifacts
       :: [Param path] -> Command.SetupWorkspace { MasterRepository = RepositoryUrl.from masterRepository
                                                   MasterArtifacts = masterArtifacts
                                                   Type = VcsType.from vcs
@@ -215,9 +215,9 @@ let commandSetup (args : string list) =
     | _ -> Command.Error MainCommand.Setup
 
 let commandInit (args : string list) =
-    match args with 
-    | Param vcs 
-      :: Param masterRepository 
+    match args with
+    | Param vcs
+      :: Param masterRepository
       :: [Param path] -> Command.InitWorkspace { MasterRepository = RepositoryUrl.from masterRepository
                                                  Type = VcsType.from vcs
                                                  Path = path }
@@ -225,16 +225,16 @@ let commandInit (args : string list) =
 
 
 let rec commandExec (all : bool) (args : string list) =
-    match args with 
-    | TokenOption TokenOption.All 
+    match args with
+    | TokenOption TokenOption.All
       :: tail -> tail |> commandExec true
     | [Param cmd] -> Command.Exec { Command = cmd; All = all }
     | _ -> Command.Error MainCommand.Exec
 
 let rec commandTest (excludes : string list) (args : string list) =
     match args with
-    | TokenOption TokenOption.Exclude 
-      :: Param category 
+    | TokenOption TokenOption.Exclude
+      :: Param category
       :: tail -> tail |> commandTest (category :: excludes)
     | [] -> Command.Error MainCommand.Test
     | Params filters -> Command.TestAssemblies { Filters = filters; Excludes = excludes }
@@ -257,11 +257,11 @@ let commandConvert (args : string list) =
 
 let rec commandClone (shallow : bool) (all : bool) (mt : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Shallow 
+    | TokenOption TokenOption.Shallow
       :: tail -> tail |> commandClone true all mt
-    | TokenOption TokenOption.All 
+    | TokenOption TokenOption.All
       :: tail -> tail |> commandClone shallow true mt
-    | TokenOption TokenOption.Multithread 
+    | TokenOption TokenOption.Multithread
       :: tail -> tail |> commandClone shallow all true
     | [] -> Command.Error MainCommand.CloneRepository
     | Params filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
@@ -272,7 +272,7 @@ let rec commandClone (shallow : bool) (all : bool) (mt : bool) (args : string li
 
 let rec commandGraph (all : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.All 
+    | TokenOption TokenOption.All
       :: tail -> tail |> commandGraph true
     | [ViewId name] -> Command.GraphView { Name = name ; All = all }
     | _ -> Command.Error MainCommand.GraphView
@@ -280,7 +280,7 @@ let rec commandGraph (all : bool) (args : string list) =
 let rec commandPublish (mt : bool) (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.PublishApp
-    | TokenOption TokenOption.Multithread 
+    | TokenOption TokenOption.Multithread
       :: tail -> tail |> commandPublish true
     | Params filters -> Command.PublishApplications {Filters = filters; Multithread = mt}
     | _ -> Command.Error MainCommand.PublishApp
@@ -289,12 +289,12 @@ let rec commandPublish (mt : bool) (args : string list) =
 
 let rec commandBuild (config : string) (clean : bool) (multithread : bool) (version : string option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Version 
-      :: Param ver 
+    | TokenOption TokenOption.Version
+      :: Param ver
       :: tail -> tail |> commandBuild config clean multithread (Some ver)
-    | TokenOption TokenOption.Debug 
+    | TokenOption TokenOption.Debug
       :: tail -> tail |> commandBuild "Debug" clean multithread version
-    | TokenOption TokenOption.Multithread 
+    | TokenOption TokenOption.Multithread
       :: tail -> tail |> commandBuild config clean true version
     | [] -> Command.BuildView { Name = None ; Config = config; Clean = clean; Multithread = multithread; Version = version }
     | [ViewId name] -> Command.BuildView { Name = Some name ; Config = config; Clean = clean; Multithread = multithread; Version = version }
@@ -313,22 +313,22 @@ let commandBranch (args : string list) =
 
 let rec commandPush (branch : string option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Branch 
-      :: Param branch 
+    | TokenOption TokenOption.Branch
+      :: Param branch
       :: tail -> tail |> commandPush (Some branch)
     | [Param buildNumber] -> Command.PushWorkspace {Branch = branch; BuildNumber = buildNumber }
     | _ -> Command.Error MainCommand.Push
 
 let rec commandPull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Src 
+    | TokenOption TokenOption.Src
       :: tail -> tail |> commandPull true false rebase view
-    | TokenOption TokenOption.Bin 
+    | TokenOption TokenOption.Bin
       :: tail -> tail |> commandPull false true rebase view
-    | TokenOption TokenOption.Rebase 
+    | TokenOption TokenOption.Rebase
       :: tail -> tail |> commandPull src bin true view
-    | TokenOption TokenOption.View 
-      :: ViewId name 
+    | TokenOption TokenOption.View
+      :: ViewId name
       :: tail -> tail |> commandPull true true rebase (Some name)
     | [] -> Command.PullWorkspace { Src = src ; Bin = bin; Rebase = rebase; View = view }
     | _ -> Command.Error MainCommand.Pull
@@ -355,10 +355,10 @@ let commandOutdated (args : string list) =
 
 let rec commandAddRepo (branch : BranchId option) (builder : BuilderType) (args : string list) =
     match args with
-    | TokenOption TokenOption.Branch 
-      :: BranchId branch 
+    | TokenOption TokenOption.Branch
+      :: BranchId branch
       :: tail -> tail |> commandAddRepo (Some branch) builder
-    | Param name 
+    | Param name
       :: [Param url] -> Command.AddRepository { Repo = RepositoryId.from name
                                                 Url = RepositoryUrl.from url
                                                 Branch = branch
@@ -387,13 +387,13 @@ let commandListNuGet (args : string list) =
 
 let rec commandAddView (sourceOnly : bool) (parents : bool) (addNew : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Src 
+    | TokenOption TokenOption.Src
       :: tail -> tail |> commandAddView true parents addNew
-    | TokenOption TokenOption.All 
+    | TokenOption TokenOption.All
       :: tail -> tail |> commandAddView sourceOnly true addNew
-    | TokenOption TokenOption.Modified 
+    | TokenOption TokenOption.Modified
       :: tail -> tail |> commandAddView sourceOnly parents true
-    | ViewId name 
+    | ViewId name
       :: Params filters -> Command.AddView { Name = name; Filters = filters; SourceOnly = sourceOnly; Parents = parents; AddNew = addNew }
     | _ -> Command.Error MainCommand.AddView
 
@@ -414,11 +414,11 @@ let commandDescribeView (args : string list) =
 
 let rec commandAlterView (forceDefault : bool option) (forceSrc : bool option) (forceParents : bool option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Default 
+    | TokenOption TokenOption.Default
       :: tail -> tail |> commandAlterView (Some true) forceSrc forceParents
-    | TokenOption TokenOption.Src 
+    | TokenOption TokenOption.Src
       :: tail -> tail |> commandAlterView forceDefault (Some true) forceParents
-    | TokenOption TokenOption.Bin 
+    | TokenOption TokenOption.Bin
       :: tail -> tail |> commandAlterView forceDefault (Some false) forceParents
     | [ViewId name] -> Command.AlterView { Name = name ; Default = forceDefault; Source = forceSrc; Parents = forceParents }
     | _ -> Command.Error MainCommand.AlterView
@@ -430,8 +430,8 @@ let commandOpenView (args : string list) =
 
 let commandAddApp (args : string list) =
     match args with
-    | ApplicationId name 
-      :: PublisherType pub 
+    | ApplicationId name
+      :: PublisherType pub
       :: [ProjectId prj] -> Command.AddApplication { Name = name; Publisher = pub; Project = prj }
     | _ -> Command.Error MainCommand.AddApp
 
@@ -472,12 +472,12 @@ let commandUpgrade (args : string list) =
     | [Param processId] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))
     | _ -> Command.Error MainCommand.Upgrade
 
-let Parse (args : string list) : Command = 
+let Parse (args : string list) : Command =
     match args with
     | [Token Token.Version] -> Command.Version
     | [Token Token.Help] -> Command.Usage
     | Token Token.Upgrade :: cmdArgs -> cmdArgs |> commandUpgrade
-    | Token Token.Setup :: cmdArgs -> cmdArgs |> commandSetup 
+    | Token Token.Setup :: cmdArgs -> cmdArgs |> commandSetup
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
     | Token Token.Test :: cmdArgs -> cmdArgs |> commandTest []
@@ -514,7 +514,7 @@ let Parse (args : string list) : Command =
     | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
     | Token Token.Alter :: Token Token.View :: cmdArgs -> cmdArgs |> commandAlterView None None None
     | Token Token.Open :: cmdArgs -> cmdArgs |> commandOpenView
-    
+
     | Token Token.Add :: Token Token.App :: cmdArgs -> cmdArgs |> commandAddApp
     | Token Token.Drop :: Token Token.App :: cmdArgs -> cmdArgs |> commandDropApp
     | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp
@@ -524,7 +524,7 @@ let Parse (args : string list) : Command =
 
 
 let VersionContent() =
-    let version = Env.FullBuildVersion()    
+    let version = Env.FullBuildVersion()
     let fbVersion = sprintf "full-build %s" (version.ToString())
 
     [
@@ -592,7 +592,7 @@ let UsageContent() =
         MainCommand.Unknown, ""
         MainCommand.AddApp, "add app <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         MainCommand.DropApp, "drop app <appId> : drop application"
-        MainCommand.ListApp, "list app : list applications" 
+        MainCommand.ListApp, "list app : list applications"
         MainCommand.Unknown, ""
         MainCommand.UpgradeGuids, "update-guids : DANGER! change guids of all projects in given repository (interactive command)" ]
 
@@ -600,10 +600,10 @@ let UsageContent() =
 
 
 
-let PrintUsage (what : MainCommand) = 
+let PrintUsage (what : MainCommand) =
     let lines = UsageContent () |> Seq.filter (fun (cmd, _) -> cmd = what || what = MainCommand.Unknown)
                                 |> Seq.map (fun (_, desc) -> desc)
-    
+
     printfn "Usage:"
     for line in lines do
         printfn "  %s" line

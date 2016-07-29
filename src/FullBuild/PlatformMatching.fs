@@ -5,10 +5,10 @@ open System
 [<Literal>]
 let MaxPenalty = 1000
 
-let inline split (path : string) = 
+let inline split (path : string) =
     path.Split('+')
     |> Array.map (fun s -> s.Replace("portable-", ""))
-    
+
 let inline extractPlatforms path = split path |> Array.choose FrameworkDetection.Extract
 
 let private platformPenalties = System.Collections.Concurrent.ConcurrentDictionary<_,_>()
@@ -35,7 +35,7 @@ let private pathPenalties = System.Collections.Concurrent.ConcurrentDictionary<_
 let getPathPenalty (path:string) (platform:FrameworkIdentifier) =
     if String.IsNullOrWhiteSpace path then
         match platform with
-        | Native(_) -> MaxPenalty // an empty path is inconsidered compatible with native targets            
+        | Native(_) -> MaxPenalty // an empty path is inconsidered compatible with native targets
         | _ -> 10 // an empty path is considered compatible with every .NET target, but with a high penalty so explicit paths are preferred
     else
         let key = path,platform
@@ -50,7 +50,7 @@ let getPathPenalty (path:string) (platform:FrameworkIdentifier) =
             pathPenalties.[key] <- penalty
             penalty
 
-// Checks wether a list of target platforms is supported by this path and with which penalty. 
+// Checks wether a list of target platforms is supported by this path and with which penalty.
 let getPenalty (requiredPlatforms:FrameworkIdentifier list) (path:string) =
     requiredPlatforms
     |> List.sumBy (getPathPenalty path)
@@ -79,14 +79,14 @@ let comparePaths (p1 : PathPenalty) (p2 : PathPenalty) =
     else
         0
 
-let rec findBestMatch (paths : #seq<string>) (targetProfile : TargetProfile) = 
-    let requiredPlatforms = 
+let rec findBestMatch (paths : #seq<string>) (targetProfile : TargetProfile) =
+    let requiredPlatforms =
         match targetProfile with
         | PortableProfile(_, platforms) -> platforms
         | SinglePlatform(platform) -> [ platform ]
 
     match
-        paths 
+        paths
         |> Seq.map (fun path -> path, (getPenalty requiredPlatforms path))
         |> Seq.filter (fun (_, penalty) -> penalty < MaxPenalty)
         |> Seq.sortWith comparePaths
@@ -96,8 +96,8 @@ let rec findBestMatch (paths : #seq<string>) (targetProfile : TargetProfile) =
         // Fallback Portable Library
         KnownTargetProfiles.AllProfiles
         |> Seq.choose (fun p ->
-            if p.ProfilesCompatibleWithPortableProfile 
-               |> Seq.map SinglePlatform 
+            if p.ProfilesCompatibleWithPortableProfile
+               |> Seq.map SinglePlatform
                |> Seq.exists ((=)targetProfile)
             then findBestMatch paths p
             else None
@@ -109,8 +109,8 @@ let rec findBestMatch (paths : #seq<string>) (targetProfile : TargetProfile) =
 let private matchedCache = System.Collections.Concurrent.ConcurrentDictionary<_,_>()
 
 // For a given list of paths and target profiles return tuples of paths with their supported target profiles.
-// Every target profile will only be listed for own path - the one that best supports it. 
-let getSupportedTargetProfiles (paths : string list) =    
+// Every target profile will only be listed for own path - the one that best supports it.
+let getSupportedTargetProfiles (paths : string list) =
     let key = paths
     match matchedCache.TryGetValue key with
     | true, supportedFrameworks -> supportedFrameworks
@@ -118,7 +118,7 @@ let getSupportedTargetProfiles (paths : string list) =
         let supportedFrameworks =
             KnownTargetProfiles.AllProfiles
             |> Seq.map (fun target -> findBestMatch paths target, target)
-            |> Seq.collect (fun (path, target) -> 
+            |> Seq.collect (fun (path, target) ->
                     match path with
                     | Some p -> [ p, target ]
                     | _ -> [])
@@ -131,7 +131,7 @@ let getSupportedTargetProfiles (paths : string list) =
 
 let getTargetCondition (target:TargetProfile) =
     match target with
-    | SinglePlatform(platform) -> 
+    | SinglePlatform(platform) ->
         match platform with
         | DotNetFramework(version) ->"$(TargetFrameworkIdentifier) == '.NETFramework'", sprintf "$(TargetFrameworkVersion) == '%O'" version
         | DNX(version) ->"$(TargetFrameworkIdentifier) == 'DNX'", sprintf "$(TargetFrameworkVersion) == '%O'" version
@@ -152,8 +152,8 @@ let getTargetCondition (target:TargetProfile) =
 
 let getCondition (referenceCondition:string option) (targets : TargetProfile list) =
     let inline CheckIfFullyInGroup typeName matchF (processed,targets) =
-        let fullyContained = 
-            KnownTargetProfiles.AllDotNetProfiles 
+        let fullyContained =
+            KnownTargetProfiles.AllDotNetProfiles
             |> List.filter matchF
             |> List.forall (fun p -> targets |> Seq.exists ((=) p))
 
@@ -171,19 +171,19 @@ let getCondition (referenceCondition:string option) (targets : TargetProfile lis
         |> CheckIfFullyInGroup "WindowsPhoneApp" (fun x -> match x with | SinglePlatform(WindowsPhoneApp(_)) -> true | _ -> false)
         |> CheckIfFullyInGroup "WindowsPhone" (fun x -> match x with | SinglePlatform(WindowsPhoneSilverlight(_)) -> true | _ -> false)
 
-    let conditions =        
-        if targets = [SinglePlatform(Native("",""))] then 
-            targets 
-        else 
+    let conditions =
+        if targets = [SinglePlatform(Native("",""))] then
             targets
-            |> List.filter (fun x -> match x with | SinglePlatform(Native("","")) -> false | _ -> true  ) 
+        else
+            targets
+            |> List.filter (fun x -> match x with | SinglePlatform(Native("","")) -> false | _ -> true  )
         |> List.map getTargetCondition
         |> List.filter (fun (_,v) -> v <> "false")
         |> List.append grouped
         |> List.groupBy fst
 
     let conditionString =
-        let andString = 
+        let andString =
             conditions
             |> List.map (fun (group,conditions) ->
                 match List.ofSeq conditions with
@@ -197,13 +197,13 @@ let getCondition (referenceCondition:string option) (targets : TargetProfile lis
                         |> Set.ofSeq
                         |> fun cs -> String.Join(" Or ",cs)
                     sprintf "%s And (%s)" group detail)
-        
+
         match andString with
         | [] -> ""
         | [x] -> x
         | xs -> String.Join(" Or ", List.map (fun cs -> sprintf "(%s)" cs) xs)
-    
-    match referenceCondition with 
+
+    match referenceCondition with
     | None -> conditionString
     | Some condition ->
         // msbuild triggers a warning MSB4130 when we leave out the quotes around the condition

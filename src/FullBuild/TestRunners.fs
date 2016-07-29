@@ -22,7 +22,7 @@ open Collections
 let checkErrorCode err =
     if err < 0 then failwithf "Process failed with error %d" err
 
-let private checkedExec = 
+let private checkedExec =
     Exec.Exec checkErrorCode
 
 let excludeListToArgs (excludes : string list) =
@@ -39,7 +39,7 @@ let runnerNUnit (includes : string set) (excludes : string list) =
     let wsDir = GetFolder Env.Folder.Workspace
     let files = includes |> Set.fold (fun s t -> sprintf @"%s %A" s t) ""
     let excludeArgs = excludeListToArgs excludes
-    let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs 
+    let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs
     printfn "ARGS %A" args
     checkedExec "nunit3-console.exe" args wsDir
 

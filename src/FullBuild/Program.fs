@@ -15,7 +15,7 @@
 module Main
 open Commands
 
-let tryMain argv = 
+let tryMain argv =
     Env.CheckLicense ()
 
     let cmd = CommandLine.Parse (argv |> Seq.toList)
@@ -81,7 +81,7 @@ let tryMain argv =
     retCode
 
 [<EntryPoint>]
-let main argv = 
+let main argv =
     try
         tryMain argv
     with

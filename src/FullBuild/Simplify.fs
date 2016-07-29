@@ -17,7 +17,7 @@ open Anthology
 open NuGets
 open Collections
 
-let (|MatchProject|_|) (projects : Project set) (assName : AssemblyId) = 
+let (|MatchProject|_|) (projects : Project set) (assName : AssemblyId) =
     let replacementProject = projects |> Seq.tryFind (fun x -> x.Output = assName)
     match replacementProject with
     | Some x -> Some x.ProjectId
@@ -48,13 +48,13 @@ let TransformSingleAssemblyToProjectOrPackage (package2files : Map<PackageId, As
                                      |> Map
 
     let rec convertAssemblies (projects : Project set) (assemblies : AssemblyId list) (project : Project) : Project =
-        match assemblies with 
+        match assemblies with
         | assName::tail -> let nextConversion = convertAssemblies projects tail
                            match assName with
-                           | MatchProject projects newProjectRef -> nextConversion { project 
+                           | MatchProject projects newProjectRef -> nextConversion { project
                                                                                      with AssemblyReferences = Set.remove assName project.AssemblyReferences
                                                                                           ProjectReferences = Set.add newProjectRef project.ProjectReferences }
-                           | MatchPackage file2package newPackageRef -> nextConversion { project 
+                           | MatchPackage file2package newPackageRef -> nextConversion { project
                                                                                          with AssemblyReferences = Set.remove assName project.AssemblyReferences
                                                                                               PackageReferences = Set.add newPackageRef project.PackageReferences }
                            | _ -> nextConversion project
@@ -97,7 +97,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
                                      |> Seq.map (fun (id, nugetFiles) -> (nugetFiles |> Seq.head, id))
                                      |> Map
 
-    // convert assemblies to 
+    // convert assemblies to
     let rec convertPackageFiles (file2packageScoped : Map<AssemblyId, PackageId>) (newProjects : ProjectId set) (newPackages : PackageId set) (files : AssemblyId list) =
         match files with
         | assName::tail -> match assName with
@@ -141,7 +141,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
                                             |> Seq.map (fun x -> x.Output)
                                             |> Set
             let newProject = { project
-                               with PackageReferences = simplifiedPackagesRoot 
+                               with PackageReferences = simplifiedPackagesRoot
                                     AssemblyReferences = Set.difference project.AssemblyReferences removeAssemblies
                                     ProjectReferences = Set.union project.ProjectReferences newProjects }
             yield newProject

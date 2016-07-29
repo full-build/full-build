@@ -28,7 +28,7 @@ let ProjectToProjectType (filename : string) =
                              (".vbproj", "f184b08f-c81c-45f6-a57f-5abd9991f28f") ]
     let prjType = ext2projType.[file.Extension]
     prjType
-    
+
 
 let GenerateSolutionContent (projects : Project seq) =
     seq {
@@ -37,7 +37,7 @@ let GenerateSolutionContent (projects : Project seq) =
         yield "# Visual Studio 2013"
 
         for project in projects do
-            yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""{%s}""" 
+            yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""{%s}"""
                   (ProjectToProjectType (project.RelativeProjectFile.toString))
                   (Path.GetFileNameWithoutExtension (project.RelativeProjectFile.toString))
                   (sprintf "%s/%s" (project.Repository.toString) project.RelativeProjectFile.toString)

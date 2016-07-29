@@ -17,14 +17,14 @@ module StringHelpers
 open System
 open Microsoft.FSharp.Reflection
 
-let ParseGuid(s : string) = 
+let ParseGuid(s : string) =
     match Guid.TryParseExact(s, "B") with // C# guid
     | true, value -> value
     | _ ->  match Guid.TryParseExact(s, "D") with // F# guid
             | true, value -> value
             | _ -> failwithf "string %A is not a Guid" s
 
-let toString (x:'a) = 
+let toString (x:'a) =
     match FSharpValue.GetUnionFields(x, typeof<'a>) with
     | case, _ -> case.Name.ToLowerInvariant()
 
@@ -34,13 +34,13 @@ let fromString<'a> (s:string) =
     | Some x -> FSharpValue.MakeUnion(x,[||]) :?> 'a
     | _ -> failwithf "failed to parse %s as %A" s typeof<'a>
 
-let GenerateGuidFromString (input : string) = 
+let GenerateGuidFromString (input : string) =
     use provider = new System.Security.Cryptography.MD5CryptoServiceProvider()
     let inputBytes = System.Text.Encoding.GetEncoding(0).GetBytes(input)
-    let hashBytes = provider.ComputeHash(inputBytes) 
+    let hashBytes = provider.ComputeHash(inputBytes)
     let hashGuid = Guid(hashBytes)
     hashGuid
-    
+
 let containsIgnoreCase (x : string) (y : string) =
     x.IndexOf(y, System.StringComparison.CurrentCultureIgnoreCase) <> -1
 

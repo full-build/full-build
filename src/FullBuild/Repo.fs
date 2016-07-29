@@ -20,14 +20,14 @@ open Configuration
 open Collections
 open IoHelpers
 
-let List() = 
+let List() =
     let antho = LoadAnthology()
     antho.Repositories |> Seq.iter (fun x -> printfn "%s : %s [%A]" x.Repository.Name.toString x.Repository.Url.toString x.Builder)
 
-let MatchRepo (repo : BuildableRepository set) (filter : RepositoryId) = 
+let MatchRepo (repo : BuildableRepository set) (filter : RepositoryId) =
     repo |> Set.filter (fun x -> Match x.Repository.Name.toString filter.toString)
 
-let FilterRepos (filters : RepositoryId set) = 
+let FilterRepos (filters : RepositoryId set) =
     let antho = LoadAnthology()
     filters |> Seq.map (MatchRepo antho.Repositories)
             |> Seq.concat
@@ -36,10 +36,10 @@ let FilterRepos (filters : RepositoryId set) =
 let cloneRepoAndInit wsDir vcs shallow (repo : Repository) =
     async {
         DisplayHighlight repo.Name.toString
-        Vcs.Clone vcs wsDir repo shallow 
+        Vcs.Clone vcs wsDir repo shallow
     }
 
-let Clone (filters : RepositoryId set) (shallow : bool) (all : bool) (mt : bool) = 
+let Clone (filters : RepositoryId set) (shallow : bool) (all : bool) (mt : bool) =
     let antho = LoadAnthology()
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
@@ -62,17 +62,17 @@ let Add (name : RepositoryId) (url : RepositoryUrl) (branch : BranchId option) (
     let repos = antho.Repositories |> Set.add buildableRepo
                                    |> Seq.distinctBy (fun x -> x.Repository.Name)
                                    |> Set
-    let newAntho = {antho 
+    let newAntho = {antho
                     with Repositories = repos}
     SaveAnthology newAntho
 
 let Drop (name : RepositoryId) =
     let antho = LoadAnthology ()
-    let projectsInRepo = antho.Projects |> Set.filter (fun x -> x.Repository = name) 
+    let projectsInRepo = antho.Projects |> Set.filter (fun x -> x.Repository = name)
     let projectOutputsInRepo = projectsInRepo |> Set.map (fun x -> x.ProjectId)
 
     let refOutsideRepo = antho.Projects |> Set.filter (fun x -> x.Repository <> name && Set.intersect x.ProjectReferences projectOutputsInRepo <> Set.empty)
-    if refOutsideRepo <> Set.empty then 
+    if refOutsideRepo <> Set.empty then
         printfn "Repository %s is referenced from following projects:" name.toString
         refOutsideRepo |> Set.iter (fun x -> printfn " - %s/%s" x.Repository.toString x.RelativeProjectFile.toString)
     else

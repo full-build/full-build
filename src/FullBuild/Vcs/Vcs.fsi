@@ -18,59 +18,59 @@ open System.IO
 open Anthology
 
 
-val Clone : vcsType : VcsType 
-         -> wsDir : DirectoryInfo 
-         -> repo : Repository 
-         -> shallow : bool 
+val Clone : vcsType : VcsType
+         -> wsDir : DirectoryInfo
+         -> repo : Repository
+         -> shallow : bool
          -> unit
 
-val Tip : vcsType : VcsType 
-       -> wsDir : DirectoryInfo 
-       -> repo : Repository 
+val Tip : vcsType : VcsType
+       -> wsDir : DirectoryInfo
+       -> repo : Repository
        -> string
 
-val Checkout : vcsType : VcsType 
-            -> wsDir : DirectoryInfo 
-            -> repo : Repository 
-            -> version : BookmarkVersion option 
-            -> ignore : bool 
+val Checkout : vcsType : VcsType
+            -> wsDir : DirectoryInfo
+            -> repo : Repository
+            -> version : BookmarkVersion option
+            -> ignore : bool
             -> unit
 
-val Ignore : vcsType : VcsType 
-          -> wsDir : DirectoryInfo 
-          -> repo : Repository 
+val Ignore : vcsType : VcsType
+          -> wsDir : DirectoryInfo
+          -> repo : Repository
           -> unit
 
-val Pull : vcsType : VcsType 
-        -> wsDir : DirectoryInfo 
-        -> repo : Repository 
+val Pull : vcsType : VcsType
+        -> wsDir : DirectoryInfo
+        -> repo : Repository
         -> rebase : bool
         -> unit
 
-val Commit : vcsType : VcsType 
-          -> wsDir : DirectoryInfo 
-          -> repo : Repository 
-          -> comment : string 
+val Commit : vcsType : VcsType
+          -> wsDir : DirectoryInfo
+          -> repo : Repository
+          -> comment : string
           -> unit
 
-val Push : vcsType : VcsType 
-        -> wsDir : DirectoryInfo 
-        -> repo : Repository 
+val Push : vcsType : VcsType
+        -> wsDir : DirectoryInfo
+        -> repo : Repository
         -> unit
 
-val Clean : vcsType : VcsType 
-         -> wsDir : DirectoryInfo 
-         -> repo : Repository 
+val Clean : vcsType : VcsType
+         -> wsDir : DirectoryInfo
+         -> repo : Repository
          -> unit
 
-val Log : vcsType : VcsType 
-       -> wsDir : DirectoryInfo 
-       -> repo : Repository 
-       -> version : BookmarkVersion 
+val Log : vcsType : VcsType
+       -> wsDir : DirectoryInfo
+       -> repo : Repository
+       -> version : BookmarkVersion
        -> string
 
-val LastCommit : vcsType : VcsType 
-              -> wsDir : DirectoryInfo 
-              -> repo : Repository 
-              -> relativeFile : string 
+val LastCommit : vcsType : VcsType
+              -> wsDir : DirectoryInfo
+              -> repo : Repository
+              -> relativeFile : string
               -> BookmarkVersion option

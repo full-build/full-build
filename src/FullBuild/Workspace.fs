@@ -28,12 +28,12 @@ open System
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
 
-let private checkedExecWithVars = 
+let private checkedExecWithVars =
     Exec.ExecWithVars checkErrorCode
 
 
 
-let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsType) : Unit = 
+let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsType) : Unit =
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
@@ -47,11 +47,11 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
                       NuGets = []
                       MasterRepository = repo
                       Repositories = Set.empty
-                      Projects = Set.empty 
-                      Applications = Set.empty 
-                      Tester = TestRunnerType.NUnit 
+                      Projects = Set.empty
+                      Applications = Set.empty
+                      Tester = TestRunnerType.NUnit
                       Vcs = vcsType }
-        Vcs.Clone vcsType wsDir repo true 
+        Vcs.Clone vcsType wsDir repo true
 
         let confDir = Env.GetFolder Env.Folder.Config
         let anthoFile = confDir |> GetFile Env.ANTHOLOGY_FILENAME
@@ -74,12 +74,12 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
 
 
 let ClonedRepositories (wsDir : DirectoryInfo) (repos : BuildableRepository set) =
-    repos |> Set.map (fun x -> x.Repository)    
+    repos |> Set.map (fun x -> x.Repository)
           |> Set.filter (fun x -> let repoDir = wsDir |> GetSubDirectory x.Name.toString
                                   repoDir.Exists)
 
 
-let Push (branch : string option) buildnum = 
+let Push (branch : string option) buildnum =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let allRepos = antho.Repositories
@@ -150,7 +150,7 @@ let Pull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) =
     if src then
         let mainRepo = antho.MasterRepository
         DisplayHighlight mainRepo.Name.toString
-        Vcs.Pull antho.Vcs wsDir mainRepo rebase 
+        Vcs.Pull antho.Vcs wsDir mainRepo rebase
 
         let antho = Configuration.LoadAnthology ()
         let clonedRepos = match view with
@@ -166,27 +166,27 @@ let Pull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) =
 
             let repoDir = wsDir |> GetSubDirectory repo.Name.toString
             if repoDir.Exists then
-                Vcs.Pull antho.Vcs wsDir repo rebase 
+                Vcs.Pull antho.Vcs wsDir repo rebase
 
     if bin then
         BuildArtifacts.PullLatestReferenceBinaries ()
 
 
-let Init (path : string) (uri : RepositoryUrl) (vcsType : VcsType) : Unit = 
+let Init (path : string) (uri : RepositoryUrl) (vcsType : VcsType) : Unit =
     let wsDir = DirectoryInfo(path)
     wsDir.Create()
-    if IsWorkspaceFolder wsDir then 
+    if IsWorkspaceFolder wsDir then
         printf "[WARNING] Workspace already exists - skipping"
     else
         let repo = { Name = RepositoryId.from Env.MASTER_REPO; Url = uri; Branch = None }
-        Vcs.Clone vcsType wsDir repo true 
-   
+        Vcs.Clone vcsType wsDir repo true
+
 let Exec cmd master =
     let antho = Configuration.LoadAnthology()
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repos = antho.Repositories |> Set.map (fun x -> x.Repository)
     let execRepos = match master with
-                    | true -> repos |> Set.add antho.MasterRepository 
+                    | true -> repos |> Set.add antho.MasterRepository
                     | _ -> repos
 
     for repo in execRepos do
@@ -194,13 +194,13 @@ let Exec cmd master =
         if repoDir.Exists then
             let vars = [ "FB_NAME", repo.Name.toString
                          "FB_PATH", repoDir.FullName
-                         "FB_URL", repo.Url.toLocalOrUrl 
+                         "FB_URL", repo.Url.toLocalOrUrl
                          "FB_WKS", wsDir.FullName ] |> Map.ofSeq
             let args = sprintf @"/c ""%s""" cmd
 
             try
                 DisplayHighlight repo.Name.toString
-    
+
                 if Env.IsMono () then checkedExecWithVars "sh" ("-c " + args) repoDir vars
                 else checkedExecWithVars "cmd" args repoDir vars
             with e -> printfn "*** %s" e.Message
@@ -217,7 +217,7 @@ let Clean () =
         Vcs.Clean oldAntho.Vcs wsDir oldAntho.MasterRepository
         let newAntho = Configuration.LoadAnthology()
         Configuration.SaveAnthology oldAntho
-         
+
         // remove repositories
         let reposToRemove = Set.difference oldAntho.Repositories newAntho.Repositories
         for repo in reposToRemove do
@@ -266,7 +266,7 @@ let htmlFooter () =
 let textBody (repo : string) (content : string) =
     DisplayHighlight repo
     printfn "%s" content
-    
+
 let htmlBody (repo : string) (content : string) =
     printfn "<b>%s</b><br>" repo
     let htmlContent = content.Replace(System.Environment.NewLine, "<br>")
@@ -290,9 +290,9 @@ let History (html : bool) =
 
     // body
     let lastCommit = Vcs.LastCommit antho.Vcs wsDir antho.MasterRepository "baseline"
-    match lastCommit with 
+    match lastCommit with
     | Some version -> let revision = Vcs.Log antho.Vcs wsDir antho.MasterRepository version
-                      if revision <> null then 
+                      if revision <> null then
                           body antho.MasterRepository.Name.toString revision
     | _ -> ()
 
@@ -301,7 +301,7 @@ let History (html : bool) =
         if repoDir.Exists then
             let repo = antho.Repositories |> Seq.find (fun x -> x.Repository.Name = bookmark.Repository)
             let revision = Vcs.Log antho.Vcs wsDir repo.Repository bookmark.Version
-            if revision <> null then 
+            if revision <> null then
                 body repo.Repository.Name.toString revision
 
     footer ()
@@ -315,14 +315,14 @@ let availableRepositories (filters : RepositoryId set) =
                                        subDir.Exists)
 
 
-let Index (filters : RepositoryId set) =    
+let Index (filters : RepositoryId set) =
     let repos = filters
                 |> availableRepositories
     repos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Repository.Name.toString)
 
     repos
         |> Set.map (fun x -> x.Repository)
-        |> Indexation.IndexWorkspace 
+        |> Indexation.IndexWorkspace
         |> Indexation.Optimize
         |> Package.Simplify
         |> Configuration.SaveAnthology
@@ -333,7 +333,7 @@ let Install () =
     Package.RestorePackages ()
     Conversion.GenerateProjectArtifacts()
 
-let Convert (filters : RepositoryId set) = 
+let Convert (filters : RepositoryId set) =
     let repos = filters
                 |> availableRepositories
     repos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Repository.Name.toString)

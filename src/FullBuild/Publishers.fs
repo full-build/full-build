@@ -22,7 +22,7 @@ open System.IO
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
 
-let private checkedExec = 
+let private checkedExec =
     Exec.Exec checkErrorCode
 
 
@@ -32,7 +32,7 @@ let publishCopy (app : Anthology.Application) =
     let project = antho.Projects |> Seq.find (fun x -> x.ProjectId = app.Project)
     let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
     if repoDir.Exists then
-        let projFile = repoDir |> GetFile project.RelativeProjectFile.toString 
+        let projFile = repoDir |> GetFile project.RelativeProjectFile.toString
         let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name.toString projFile.FullName
 
         if Env.IsMono () then checkedExec "xbuild" args wsDir
@@ -74,7 +74,7 @@ let publishDocker (app : Anthology.Application) =
 
     let dockerArgs = sprintf "build -t %s ." app.Name.toString
     Exec.Exec checkErrorCode "docker" dockerArgs sourceFolder
-    sourceFolder.Delete(true)        
+    sourceFolder.Delete(true)
 
 let choosePublisher (pubType : PublisherType) appCopy appZip appDocker =
     let publish = match pubType with

@@ -27,7 +27,7 @@ with
     static member from s = ViewId s
 
 [<RequireQualifiedAccess>]
-type OutputType = 
+type OutputType =
     | Exe
     | Dll
 with
@@ -44,7 +44,7 @@ with
     static member from (file : FileInfo) =  AssemblyId.from (Path.GetFileNameWithoutExtension(file.Name))
 
 [<RequireQualifiedAccess>]
-type PackageVersion = 
+type PackageVersion =
     | PackageVersion of string
     | Unspecified
 with
@@ -57,12 +57,12 @@ with
     member this.toString = (fun (PackageId x) -> x)this
     static member from (id : string) = PackageId (id)
 
-type Package = 
+type Package =
     { Id : PackageId
       Version : PackageVersion }
 
 [<RequireQualifiedAccess>]
-type VcsType = 
+type VcsType =
     | Gerrit
     | Git
     | Hg
@@ -104,8 +104,8 @@ with
      member this.toString = toString this
      static member from s = fromString<BuilderType> s
 
-type Repository = 
-    { Url : RepositoryUrl 
+type Repository =
+    { Url : RepositoryUrl
       Name : RepositoryId
       Branch : BranchId option }
 
@@ -118,7 +118,7 @@ with
     member this.toString = (fun (BookmarkVersion x) -> x)this
     static member from (version : string) = BookmarkVersion (version)
 
-type Bookmark = 
+type Bookmark =
     { Repository : RepositoryId
       Version : BookmarkVersion }
 
@@ -147,7 +147,7 @@ with
     static member from (guid : Guid) = ProjectType guid
 
 type FxInfo = private FxInfo of string option
-with 
+with
     member this.toString = (fun (FxInfo x) -> match x with
                                               | None -> null
                                               | Some v -> v) this
@@ -155,7 +155,7 @@ with
     static member from (info : string) = String.IsNullOrEmpty(info) ? (None, Some info) |> FxInfo
 
 
-type Project = 
+type Project =
     { Repository : RepositoryId
       RelativeProjectFile : ProjectRelativeFile
       UniqueProjectId : ProjectUniqueId
@@ -202,28 +202,28 @@ with
      member this.toString = toString this
      static member from s = fromString<TestRunnerType> s
 
-type Application = 
+type Application =
     { Name : ApplicationId
       Publisher : PublisherType
       Project : ProjectId }
 
-type Anthology = 
+type Anthology =
     { Artifacts : string
-      NuGets : RepositoryUrl list 
+      NuGets : RepositoryUrl list
       Vcs : VcsType
       MasterRepository : Repository
       Repositories : BuildableRepository set
-      Projects : Project set 
-      Applications : Application set 
+      Projects : Project set
+      Applications : Application set
       Tester : TestRunnerType }
 
-type Baseline = 
+type Baseline =
     { Bookmarks : Bookmark set  }
 
 type View =
     { Filters : string set
       Builder : BuilderType
-      Parameters : string set 
-      SourceOnly : bool 
-      Parents : bool 
+      Parameters : string set
+      SourceOnly : bool
+      Parents : bool
       AddNew : bool }

@@ -38,7 +38,7 @@ let Publish (filters : string list) (mt : bool) =
                              |> Set.map ApplicationId.from
 
     let apps = antho.Applications |> Set.filter (fun x -> matches |> Set.contains x.Name)
-                                  |> Seq.map asyncPublish    
+                                  |> Seq.map asyncPublish
 
     let maxThrottle = if mt then (System.Environment.ProcessorCount*2) else 1
     apps |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
@@ -92,7 +92,7 @@ let BindProject (filters : string list) =
                                             |> Set.map(fun x -> x.Name)
 
     // build: <repository>/<project>
-    let projects = antho.Projects 
+    let projects = antho.Projects
                    |> Seq.filter (fun x -> availableRepos |> Set.contains x.Repository)
                    |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, x.ProjectId))
                    |> Map

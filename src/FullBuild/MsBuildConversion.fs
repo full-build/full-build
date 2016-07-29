@@ -61,7 +61,7 @@ let private generateProjectTarget (project : Project) =
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
     // Then we end up either importing output assembly or project depending on view configuration
     XDocument (
-        XElement(NsMsBuild + "Project", 
+        XElement(NsMsBuild + "Project",
             XElement (NsMsBuild + "Import",
                 XAttribute (NsNone + "Project", "$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets"),
                 XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
@@ -75,7 +75,7 @@ let private generateProjectTarget (project : Project) =
                     XAttribute (NsNone + "Include", binFile),
                     XAttribute (NsNone + "Condition", binCondition),
                     XElement (NsMsBuild + "Private", "true"))),
-                XElement(NsMsBuild + "Import", 
+                XElement(NsMsBuild + "Import",
                     XAttribute(NsNone + "Project", refFile),
                     XAttribute(NsNone + "Condition", cpyCondition))))
 
@@ -99,12 +99,12 @@ let private generateProjectCopyTarget (project : Project) =
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
     // Then we end up either importing output assembly or project depending on view configuration
     XDocument (
-        XElement(NsMsBuild + "Project", 
+        XElement(NsMsBuild + "Project",
                 XAttribute (NsNone + "Condition", copyCondition),
                 XElement(NsMsBuild + "PropertyGroup",
                     XElement(NsMsBuild + projectCopyProperty, "Y")),
-                XElement (NsMsBuild + "ItemGroup", 
-                    XElement(NsMsBuild + "FBCopyFiles", 
+                XElement (NsMsBuild + "ItemGroup",
+                    XElement(NsMsBuild + "FBCopyFiles",
                         XAttribute(NsNone + "Include", incFile))),
                 prjFiles,
                 pkgFiles))
@@ -165,7 +165,7 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
     let cproj = XDocument (xproj)
 
     let seekAndDestroy =
-        [ 
+        [
             // paket
             "None", filterPaketReference
             "Import", filterPaketTarget
@@ -173,7 +173,7 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
 
             // project references
             "ProjectReference", always
-            
+
             // unknown assembly references
             "Reference", filterAssemblies project.AssemblyReferences
 
@@ -190,7 +190,7 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
             "Content", filterNugetPackage
 
             // cleanup project
-            "BaseIntermediateOutputPath", always 
+            "BaseIntermediateOutputPath", always
             "SolutionDir", always
             "RestorePackages", always
             "NuGetPackageImportStamp", always
@@ -216,17 +216,17 @@ let private convertProject (xproj : XDocument) (project : Project) =
 
     let rec patchAssemblyVersion (lines : string list) =
         match lines with
-        | line :: tail -> if line.Contains("AssemblyVersion") || line.Contains("AssemblyFileVersion") then 
+        | line :: tail -> if line.Contains("AssemblyVersion") || line.Contains("AssemblyFileVersion") then
                               patchAssemblyVersion tail
-                          else 
+                          else
                               line :: patchAssemblyVersion tail
         | [] -> []
 
     let patchAssemblyInfo (xel : XElement) =
         let fileName = !> xel.Attribute(XNamespace.None + "Include") : string
         let repoDir = Env.GetFolder Folder.Workspace |> GetSubDirectory project.Repository.toString
-        let prjFile = repoDir |> GetFile project.RelativeProjectFile.toString 
-        let prjDir = Path.GetDirectoryName (prjFile.FullName) |> DirectoryInfo                       
+        let prjFile = repoDir |> GetFile project.RelativeProjectFile.toString
+        let prjDir = Path.GetDirectoryName (prjFile.FullName) |> DirectoryInfo
         let infoFile = prjDir |> GetFile fileName
         let content = File.ReadAllLines (infoFile.FullName) |> List.ofSeq
                                                             |> patchAssemblyVersion
@@ -235,8 +235,9 @@ let private convertProject (xproj : XDocument) (project : Project) =
     let cproj = cleanupProject xproj project
 
     // set assembly info
-    cproj.Descendants(NsMsBuild + "Compile").Where(filterAssemblyInfo)
-                                            |> Seq.iter patchAssemblyInfo
+    cproj.Descendants(NsMsBuild + "Compile")
+        |> Seq.filter filterAssemblyInfo
+        |> Seq.iter patchAssemblyInfo
 
     // set OutputPath
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
@@ -256,7 +257,7 @@ let private convertProject (xproj : XDocument) (project : Project) =
     let wbRelative = ComputeHops (sprintf "%s/%s" project.Repository.toString project.RelativeProjectFile.toString)
     let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     let importFB = XElement (NsMsBuild + "Import",
-                       XAttribute (NsNone + "Project", 
+                       XAttribute (NsNone + "Project",
                                    sprintf "%s.full-build/full-build.targets" wbRelative))
     firstItemGroup.AddBeforeSelf (importFB)
 
@@ -286,7 +287,7 @@ let ConvertProjects projects xdocLoader xdocSaver =
     for project in projects do
         let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
         if repoDir.Exists then
-            let projFile = repoDir |> GetFile project.RelativeProjectFile.toString 
+            let projFile = repoDir |> GetFile project.RelativeProjectFile.toString
             let maybexproj = xdocLoader projFile
             match maybexproj with
             | Some xproj -> let convxproj = convertProjectContent xproj project
@@ -330,7 +331,7 @@ let RemoveUselessStuff (projects : Project set) =
 
     for project in projects do
         let prjDir = wsDir |> GetSubDirectory (project.relativeProjectFolderFromWorkspace)
-        if prjDir.Exists then 
+        if prjDir.Exists then
             let binDir = prjDir |> GetSubDirectory BIN_FOLDER
             let objDir = prjDir |> GetSubDirectory OBJ_FOLDER
             binDir |> IoHelpers.ForceDelete

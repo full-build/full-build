@@ -5,7 +5,7 @@ open System
 
 [<RequireQualifiedAccess>]
 /// The Framework version.
-type FrameworkVersion = 
+type FrameworkVersion =
     | V1
     | V1_1
     | V2
@@ -73,7 +73,7 @@ module KnownAliases =
 
 
 /// Framework Identifier type.
-type FrameworkIdentifier = 
+type FrameworkIdentifier =
     | DotNetFramework of FrameworkVersion
     | DNX of FrameworkVersion
     | DNXCore of FrameworkVersion
@@ -88,8 +88,8 @@ type FrameworkIdentifier =
     | WindowsPhoneApp of string
     | Silverlight of string
 
-    
-    override x.ToString() = 
+
+    override x.ToString() =
         match x with
         | DotNetFramework v -> "net" + v.ShortString()
         | DNX v -> "dnx" + v.ShortString()
@@ -174,13 +174,13 @@ module FrameworkDetection =
         match cache.TryGetValue path with
         | true,x -> x
         | _ ->
-            let path = 
+            let path =
                 let sb = new Text.StringBuilder(path.ToLower())
                 for pattern,replacement in KnownAliases.Data do
                      sb.Replace(pattern,replacement) |> ignore
                 sb.ToString()
 
-            let result = 
+            let result =
                 match path with
                 | "net10" | "net1" | "10" -> Some (DotNetFramework FrameworkVersion.V1)
                 | "net11" | "11" -> Some (DotNetFramework FrameworkVersion.V1_1)
@@ -229,13 +229,13 @@ module FrameworkDetection =
     let DetectFromPath(path : string) : FrameworkIdentifier option =
         let path = path.Replace("\\", "/").ToLower()
         let fi = new FileInfo(path)
-        
+
         if StringHelpers.containsIgnoreCase ("lib/" + fi.Name) path then Some(DotNetFramework(FrameworkVersion.V1))
-        else 
+        else
             let startPos = path.LastIndexOf("lib/")
             let endPos = path.LastIndexOf(fi.Name,StringComparison.OrdinalIgnoreCase)
             if startPos < 0 || endPos < 0 then None
-            else 
+            else
                 Extract(path.Substring(startPos + 4, endPos - startPos - 5))
 
 
@@ -337,8 +337,8 @@ module KnownTargetProfiles =
         SinglePlatform(WindowsPhoneSilverlight "v8.1")]
 
     let AllDotNetProfiles =
-       DotNetFrameworkProfiles @ 
-       WindowsProfiles @ 
+       DotNetFrameworkProfiles @
+       WindowsProfiles @
        SilverlightProfiles @
        WindowsPhoneSilverlightProfiles @
        [SinglePlatform(MonoAndroid)

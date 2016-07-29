@@ -42,11 +42,11 @@ let MSBUILD_FULLBUILD_TARGETS2 = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR2 MASTER
 let PUBLISH_BIN_FOLDER = BIN_FOLDER
 let PUBLISH_APPS_FOLDER = MSBUILD_APP_OUTPUT
 
-let IsWorkspaceFolder(wsDir : DirectoryInfo) = 
+let IsWorkspaceFolder(wsDir : DirectoryInfo) =
     let subDir = wsDir |> GetSubDirectory MASTER_REPO
     subDir.Exists
 
-let rec private workspaceFolderSearch(dir : DirectoryInfo) = 
+let rec private workspaceFolderSearch(dir : DirectoryInfo) =
     if dir = null || not dir.Exists then failwith "Can't find workspace root directory. Check you are in a workspace."
     if IsWorkspaceFolder dir then dir
     else workspaceFolderSearch dir.Parent
@@ -63,7 +63,7 @@ let getInstallationFolder () =
     fbAssFI.Directory
 
 [<RequireQualifiedAccess>]
-type Folder = 
+type Folder =
        | Workspace
        | AppOutput
        | Config
@@ -76,7 +76,7 @@ type Folder =
 
 let rec GetFolder folder =
     match folder with
-    | Folder.Workspace -> CurrentFolder() |> workspaceFolderSearch 
+    | Folder.Workspace -> CurrentFolder() |> workspaceFolderSearch
     | Folder.AppOutput -> GetFolder Folder.Workspace |> CreateSubDirectory MSBUILD_APP_OUTPUT
     | Folder.Config -> GetFolder Folder.Workspace |> CreateSubDirectory MASTER_REPO
     | Folder.View -> GetFolder Folder.Config |> CreateSubDirectory VIEW_FOLDER
@@ -85,17 +85,17 @@ let rec GetFolder folder =
     | Folder.Bin -> GetFolder Folder.Config |> CreateSubDirectory BIN_FOLDER
     | Folder.Installation -> getInstallationFolder()
 
-let GetAnthologyFileName() = 
+let GetAnthologyFileName() =
     GetFolder Folder.Config |> GetFile ANTHOLOGY_FILENAME
 
-let GetBaselineFileName() = 
+let GetBaselineFileName() =
     GetFolder Folder.Config  |> GetFile BASELINE_FILENAME
 
 let GetViewFileName viewName =
     GetFolder Folder.View |> GetFile (AddExt Extension.View viewName)
 
 let IsMono () =
-    let monoRuntime = System.Type.GetType ("Mono.Runtime") 
+    let monoRuntime = System.Type.GetType ("Mono.Runtime")
     monoRuntime <> null
 
 let CheckLicense () =
@@ -112,4 +112,3 @@ let FullBuildVersion () =
     let fbAssembly = getFullBuildAssembly ()
     let version = fbAssembly.GetName().Version
     version
-       

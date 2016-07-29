@@ -29,13 +29,13 @@ let private projectCanBeProcessed (fileName : FileInfo) =
     | _ -> true
 
 let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) =
-    repoDir |> IoHelpers.FindKnownProjects 
+    repoDir |> IoHelpers.FindKnownProjects
             |> Seq.filter projectCanBeProcessed
             |> Seq.map (parser repoDir repoRef)
 
-let parseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) = 
-    repos |> Seq.map (fun x -> GetSubDirectory x.Name.toString wsDir) 
-          |> Seq.filter (fun x -> x.Exists) 
+let parseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) =
+    repos |> Seq.map (fun x -> GetSubDirectory x.Name.toString wsDir)
+          |> Seq.filter (fun x -> x.Exists)
           |> Seq.map (fun x -> parseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
           |> Seq.concat
 
@@ -56,7 +56,7 @@ let findConflictsForProject (project1 : Project) (otherProjects : Project list) 
                     yield SameGuid (project1, project2)
                 else if project1.UniqueProjectId <> project2.UniqueProjectId && project1.Output = project2.Output then
                     yield SameOutput (project1, project2)
-    }      
+    }
 
 let rec findConflicts (projects : Project list) =
     seq {
@@ -74,7 +74,7 @@ let rec findConflicts (projects : Project list) =
 let rec displayConflicts (conflicts : ConflictType list) =
     let displayConflict (p1 : Project) (p2 : Project) (msg : string) =
         printfn "Conflict detected between projects (%s) : " msg
-        printfn " - %s/%s" p1.Repository.toString p1.RelativeProjectFile.toString 
+        printfn " - %s/%s" p1.Repository.toString p1.RelativeProjectFile.toString
         printfn " - %s/%s" p2.Repository.toString p2.RelativeProjectFile.toString
 
     match conflicts with
@@ -89,7 +89,7 @@ let rec displayConflicts (conflicts : ConflictType list) =
 
 let detectNewDependencies (projects : ProjectParsing.ProjectDescriptor seq) =
     // add new packages (with correct version requirement)
-    let foundPackages = projects |> Seq.map (fun x -> x.Packages) 
+    let foundPackages = projects |> Seq.map (fun x -> x.Packages)
                                  |> Seq.concat
     let existingPackages = PaketInterface.ParsePaketDependencies ()
     let packagesToAdd = foundPackages |> Seq.filter (fun x -> Set.contains x.Id existingPackages |> not)
@@ -101,7 +101,7 @@ let detectNewDependencies (projects : ProjectParsing.ProjectDescriptor seq) =
 
 let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
     // this is the repositories we are dealing with
-    let foundRepos = newProjects |> Seq.map (fun x -> x.Repository) 
+    let foundRepos = newProjects |> Seq.map (fun x -> x.Repository)
                                  |> Set
 
     // this is the projects that will be removed from current anthology
@@ -125,7 +125,7 @@ let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
         printfn "Failure to deleted still referenced projects:"
         for referenceOnRemovedProject in referencesOnRemovedProjects do
             printfn "  %s" referenceOnRemovedProject.toString
-        failwithf "Failure to deleted still referenced projects"    
+        failwithf "Failure to deleted still referenced projects"
 
     // we can safely replace now
     Set.union remainingProjects newProjects
@@ -134,7 +134,7 @@ let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
 // this function has 2 side effects:
 // * update paket.dependencies (both sources and packages)
 // * anthology
-let IndexWorkspace (repos : Repository set) = 
+let IndexWorkspace (repos : Repository set) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let antho = Configuration.LoadAnthology()
     let parsedProjects = parseWorkspaceProjects ProjectParsing.ParseProject wsDir repos
@@ -150,7 +150,7 @@ let IndexWorkspace (repos : Repository set) =
         displayConflicts conflicts
         failwith "Conflict(s) detected"
 
-    let newAntho = { antho 
+    let newAntho = { antho
                      with Projects = allProjects |> Set.ofList }
     newAntho
 
