@@ -13,22 +13,7 @@
 //   limitations under the License.
 
 module Graph
-
-open System
-open System.IO
 open Collections
-open StringHelpers
-
-
-
-
-
-type Project =
-    { UnderlyingProject : Anthology.Project
-      ProjectReferences : Project set }
-
-
-
 
 // Graph model is as follow:
 // - Repository references projects
@@ -47,7 +32,9 @@ type Project =
 //      |         |             |        |          |
 //      Repository1             Repository2     <---+
 
-
+type Project =
+    { UnderlyingProject : Anthology.Project
+      ProjectReferences : Project set }
 
 type Repository =
     { UnderlyingRepository : Anthology.BuildableRepository
@@ -63,10 +50,7 @@ type Graph =
       Applications : Application set }
 
 
-
-
-
-let toGraph (antho : Anthology.Anthology) =    
+let toGraph (antho : Anthology.Anthology) : Graph =    
     // projectId -> project
     let projectId2project = antho.Projects 
                             |> Set.map (fun x -> x.ProjectId, x)
