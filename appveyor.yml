@@ -42,6 +42,8 @@ deploy:
     skip_symbols: true
     symbol_server:
     artifacts: apps/full-build.nupkg
+    on:
+      branch: master
 
 notifications:
   - provider: GitHubPullRequest
