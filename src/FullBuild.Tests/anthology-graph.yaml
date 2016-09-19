@@ -2,10 +2,9 @@ anthology:
   artifacts: C:\Binaries
   nugets:
     - nuget: https://www.nuget.org/api/v2/
+  mainrepository:
+    uri: https://github.com/pchalamet/cassandra-sharp-full-build
   repositories:
-    - repo: .full-build
-      type: git
-      uri: https://github.com/pchalamet/cassandra-sharp-full-build
     - repo: cassandra-sharp
       type: git
       uri: https://github.com/pchalamet/cassandra-sharp
