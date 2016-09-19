@@ -272,19 +272,21 @@ let rec commandClone (shallow : bool) (all : bool) (mt : bool) (args : string li
 
 let rec commandGraph (all : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.All
+    | TokenOption TokenOption.View
       :: tail -> tail |> commandGraph true
     | [ViewId name] -> Command.GraphView { Name = name ; All = all }
     | _ -> Command.Error MainCommand.GraphView
 
-let rec commandPublish (mt : bool) (args : string list) =
+let rec commandPublish (mt : bool) view (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.PublishApp
     | TokenOption TokenOption.Multithread
-      :: tail -> tail |> commandPublish true
-    | Params filters -> Command.PublishApplications {Filters = filters; Multithread = mt}
+      :: tail -> tail |> commandPublish true view
+    | TokenOption TokenOption.View
+      :: ViewId name
+      :: tail -> tail |> commandPublish mt (Some name)
+    | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = mt}
     | _ -> Command.Error MainCommand.PublishApp
-
 
 
 let rec commandBuild (config : string) (clean : bool) (multithread : bool) (version : string option) (args : string list) =
@@ -485,7 +487,7 @@ let Parse (args : string list) : Command =
     | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false false
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
-    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish false
+    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish false None
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout

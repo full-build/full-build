@@ -27,7 +27,7 @@ let asyncPublish (app : Application) =
     }
 
 
-let Publish (filters : string list) (mt : bool) =
+let Publish (view:ViewId option) (filters : string list) (mt : bool) =
     let antho = Configuration.LoadAnthology ()
     let appNames = antho.Applications |> Set.map (fun x -> x.Name.toString)
 

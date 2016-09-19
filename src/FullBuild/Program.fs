@@ -65,7 +65,7 @@ let tryMain argv =
     | Command.ListApplications -> Application.List ()
     | Command.AddApplication appInfo -> Application.Add appInfo.Name appInfo.Project appInfo.Publisher
     | Command.DropApplication name -> Application.Drop name
-    | Command.PublishApplications pubInfo -> Application.Publish pubInfo.Filters pubInfo.Multithread
+    | Command.PublishApplications pubInfo -> Application.Publish pubInfo.View pubInfo.Filters pubInfo.Multithread
     | Command.BindProject prjInfo -> Application.BindProject prjInfo.Filters
 
     // misc
