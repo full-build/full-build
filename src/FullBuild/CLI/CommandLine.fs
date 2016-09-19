@@ -89,6 +89,7 @@ type Token =
 
     | Add
     | Drop
+    | Pending
     | List
     | Describe
 
@@ -136,6 +137,7 @@ let (|Token|_|) (token : string) =
 
     | "add" -> Some Add
     | "drop" -> Some Drop
+    | "pending" -> Some Pending
     | "list" -> Some List
     | "describe" -> Some Describe
 
@@ -387,6 +389,12 @@ let commandListNuGet (args : string list) =
     | [] -> Command.ListNuGets
     | _ -> Command.Error MainCommand.ListNuget
 
+let commandPendingView (args : string list) =
+    match args with
+    | ViewId name
+      :: Params filters -> Command.PendingBuildView { Name = name }
+    | _ -> Command.Error MainCommand.AddView
+
 let rec commandAddView (sourceOnly : bool) (parents : bool) (addNew : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Src
@@ -511,6 +519,7 @@ let Parse (args : string list) : Command =
     | Token Token.List :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandListNuGet
 
     | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false
+    | Token Token.Pending :: Token Token.View :: cmdArgs -> cmdArgs |> commandAddView true true true
     | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
     | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
     | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView

@@ -172,6 +172,9 @@ let Graph (viewId : ViewId) (all : bool) =
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewId.toString)
     graph.Save graphFile.FullName
 
+let CreatePending (viewId : ViewId) =
+    failwith "not yet"
+
 let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forceParents : bool) (addNew : bool) =
     if filters.Length = 0 && not addNew then
         failwith "Expecting at least one filter"
