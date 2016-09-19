@@ -53,8 +53,9 @@ let Publish (branch : string option) buildnum hash =
         
         File.AppendAllLines(latestVersionFile.FullName, [buildTag])
         for app in appDir |> EnumarateFiles do
-                let versionFile = DirectoryInfo(antho.Artifacts) |> GetFile app.Name
-                File.AppendAllLines(versionFile.FullName, [buildTag])
+            printfn "[version] %s %s" app.Name hash
+            let versionFile = DirectoryInfo(antho.Artifacts) |> GetFile (sprintf "%s.versions" app.Name)
+            File.AppendAllLines(versionFile.FullName, [buildTag])
         printfn "[version] %s" hash
     with
         _ -> versionDir.Refresh ()
