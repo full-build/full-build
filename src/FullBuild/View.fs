@@ -106,6 +106,13 @@ let FindViewProjects (view : View) =
     projects
 
 
+let FindViewApplications viewId =
+    let antho = Configuration.LoadAnthology ()
+    let viewProjectIds = viewId |> Configuration.LoadView 
+                              |> FindViewProjects 
+                              |> Set.map(fun x->x.ProjectId)
+    antho.Applications |> Set.filter(fun x -> viewProjectIds |> Set.contains(x.Project))
+
 
 let generate (viewId : ViewId) (view : View) =
     let projects = FindViewProjects view
