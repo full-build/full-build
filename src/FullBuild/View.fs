@@ -106,6 +106,13 @@ let FindViewProjects (view : View) =
     projects
 
 
+let FindViewApplications viewId =
+    let antho = Configuration.LoadAnthology ()
+    let viewProjectIds = viewId |> Configuration.LoadView 
+                              |> FindViewProjects 
+                              |> Set.map(fun x->x.ProjectId)
+    antho.Applications |> Set.filter(fun x -> viewProjectIds |> Set.contains(x.Project))
+
 
 let generate (viewId : ViewId) (view : View) =
     let projects = FindViewProjects view
@@ -165,6 +172,8 @@ let Graph (viewId : ViewId) (all : bool) =
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewId.toString)
     graph.Save graphFile.FullName
 
+
+
 let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forceParents : bool) (addNew : bool) =
     if filters.Length = 0 && not addNew then
         failwith "Expecting at least one filter"
@@ -177,6 +186,23 @@ let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forcePar
                  AddNew = addNew }
     Configuration.SaveView viewId view
     generate viewId view
+
+let CreatePending (viewId : ViewId) =
+    let getPendingRepositories () = seq {
+        let antho = Configuration.LoadAnthology()
+        let baseline = Configuration.LoadBaseline()
+        let wsDir = Env.GetFolder Env.Folder.Workspace
+    
+        for bookmark in baseline.Bookmarks do
+            let repoDir = wsDir |> GetSubDirectory bookmark.Repository.toString
+            if repoDir.Exists then
+                let repo = antho.Repositories |> Seq.find (fun x -> x.Repository.Name = bookmark.Repository)
+                let revision = Vcs.Log antho.Vcs wsDir repo.Repository bookmark.Version
+                if revision <> null then
+                    yield repo.Repository
+    }
+    let modifiedReposFilter = getPendingRepositories () |> Seq.map(fun x -> x.Name.toString |> sprintf "%s/*") |> Seq.toList
+    Create viewId modifiedReposFilter false true true
 
 // ---------------------------------------------------------------------------------------
 

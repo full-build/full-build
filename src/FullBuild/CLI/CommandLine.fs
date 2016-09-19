@@ -89,6 +89,7 @@ type Token =
 
     | Add
     | Drop
+    | Pending
     | List
     | Describe
 
@@ -136,6 +137,7 @@ let (|Token|_|) (token : string) =
 
     | "add" -> Some Add
     | "drop" -> Some Drop
+    | "pending" -> Some Pending
     | "list" -> Some List
     | "describe" -> Some Describe
 
@@ -387,6 +389,12 @@ let commandListNuGet (args : string list) =
     | [] -> Command.ListNuGets
     | _ -> Command.Error MainCommand.ListNuget
 
+let commandPendingView (args : string list) =
+    match args with
+    | ViewId name
+      :: Params filters -> Command.PendingBuildView { Name = name }
+    | _ -> Command.Error MainCommand.AddView
+
 let rec commandAddView (sourceOnly : bool) (parents : bool) (addNew : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Src
@@ -511,6 +519,7 @@ let Parse (args : string list) : Command =
     | Token Token.List :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandListNuGet
 
     | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false
+    | Token Token.Pending :: Token Token.View :: cmdArgs -> cmdArgs |> commandAddView true true true
     | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
     | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
     | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
@@ -570,7 +579,7 @@ let UsageContent() =
         MainCommand.Convert, "convert <repoId-wildcard> : convert projects in repositories"
         MainCommand.Pull, "pull [--src|--bin] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
         MainCommand.Push, "push [--branch <branch>] <buildNumber> : push a baseline from current repositories version and display version"
-        MainCommand.PublishApp, "publish [--mt] <appId-wildcard> : publish application"
+        MainCommand.PublishApp, "publish [--mt] [--view <viewId>] <appId-wildcard> : publish application"
         MainCommand.Bind, "bind <projectId-wildcard>+ : update bindings"
         MainCommand.Clean, "clean : DANGER! reset and clean workspace (interactive command)"
         MainCommand.History, "history [--html] : display history since last baseline"
@@ -587,6 +596,7 @@ let UsageContent() =
         MainCommand.AddNuGet, "add nuget <nuget-uri> : add nuget uri"
         MainCommand.ListNuget, "list nuget : list NuGet feeds"
         MainCommand.Unknown, ""
+        MainCommand.DropView, "pending view <viewId> : create view with modified and depending repos"
         MainCommand.DropView, "drop view <viewId> : drop view"
         MainCommand.ListView, "list view : list views"
         MainCommand.DescribeView, "describe view <name> : describe view"
