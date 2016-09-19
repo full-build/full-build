@@ -570,7 +570,7 @@ let UsageContent() =
         MainCommand.Convert, "convert <repoId-wildcard> : convert projects in repositories"
         MainCommand.Pull, "pull [--src|--bin] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
         MainCommand.Push, "push [--branch <branch>] <buildNumber> : push a baseline from current repositories version and display version"
-        MainCommand.PublishApp, "publish [--mt] <appId-wildcard> : publish application"
+        MainCommand.PublishApp, "publish [--mt] [--view <viewId>] <appId-wildcard> : publish application"
         MainCommand.Bind, "bind <projectId-wildcard>+ : update bindings"
         MainCommand.Clean, "clean : DANGER! reset and clean workspace (interactive command)"
         MainCommand.History, "history [--html] : display history since last baseline"
