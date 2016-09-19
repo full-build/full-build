@@ -18,25 +18,28 @@ open IoHelpers
 open Anthology
 
 
-
 let Publish (branch : string option) buildnum hash =
     let antho = Configuration.LoadAnthology ()
     let mainRepo = antho.MasterRepository
     let wsDir = Env.GetFolder Env.Folder.Workspace
+    let appDir = Env.GetFolder Env.Folder.AppOutput
     let versionDir = DirectoryInfo(antho.Artifacts) |> GetSubDirectory hash
     let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
-    if tmpVersionDir.Exists then
-        tmpVersionDir.Delete(true)
+    let buildTag = match branch with
+                      | None -> sprintf "%s:%s:default" buildnum hash
+                      | Some br -> sprintf "%s:%s:%s" buildnum hash br
 
     try
         let doPublish = not versionDir.Exists
         if doPublish then
+            if tmpVersionDir.Exists then
+                tmpVersionDir.Delete(true)
+
             let sourceBinDir = Env.GetFolder Env.Folder.Bin
             let targetBinDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
             IoHelpers.CopyFolder sourceBinDir targetBinDir true
 
             let appTargetDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_APPS_FOLDER
-            let appDir = Env.GetFolder Env.Folder.AppOutput
             IoHelpers.CopyFolder appDir appTargetDir true
 
             // publish
@@ -47,10 +50,11 @@ let Publish (branch : string option) buildnum hash =
             printfn "[WARNING] Build output already exists - skipping"
 
         let latestVersionFile = DirectoryInfo(antho.Artifacts) |> GetFile "versions"
-        let version = match branch with
-                      | None -> sprintf "%s:%s:default" buildnum hash
-                      | Some br -> sprintf "%s:%s:%s" buildnum hash br
-        File.AppendAllLines(latestVersionFile.FullName, [version])
+        
+        File.AppendAllLines(latestVersionFile.FullName, [buildTag])
+        for app in appDir |> EnumarateFiles do
+                let versionFile = DirectoryInfo(antho.Artifacts) |> GetFile app.Name
+                File.AppendAllLines(versionFile.FullName, [buildTag])
         printfn "[version] %s" hash
     with
         _ -> versionDir.Refresh ()

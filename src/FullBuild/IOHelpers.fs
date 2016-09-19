@@ -148,6 +148,8 @@ let FindKnownProjects (repoDir : DirectoryInfo) =
      AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories))
                         |> Seq.concat
 
+let EnumarateFiles (dir : DirectoryInfo) =
+    dir.EnumerateFiles()
 
 let SaveFileIfNecessary (file : FileInfo) (content : string) =
     let overwrite = (file.Exists |> not) || File.ReadAllText(file.FullName) <> content
