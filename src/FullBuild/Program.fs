@@ -43,6 +43,7 @@ let tryMain argv =
     | Command.InstallPackages -> Workspace.Install ()
 
     // view
+    | Command.PendingBuildView viewInfo -> View.CreatePending viewInfo.Name
     | Command.AddView viewInfo -> View.Create viewInfo.Name viewInfo.Filters viewInfo.SourceOnly viewInfo.Parents viewInfo.AddNew
     | Command.DropView viewInfo -> View.Drop viewInfo.Name
     | Command.ListViews -> View.List ()

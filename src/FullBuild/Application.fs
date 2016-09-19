@@ -26,13 +26,18 @@ let asyncPublish (app : Application) =
         (Publishers.PublishWithPublisher app.Publisher) app
     }
 
-
 let Publish (view:ViewId option) (filters : string list) (mt : bool) =
     let antho = Configuration.LoadAnthology ()
-    let appNames = antho.Applications |> Set.map (fun x -> x.Name.toString)
+    let applications =
+        match view with
+        | None -> 
+            antho.Applications
+        | Some view ->
+            view |> View.FindViewApplications
 
     let appFilters = filters |> Set
-    let matchApps filter = appNames |> Set.filter (fun x -> PatternMatching.Match x filter)
+    let matchApps filter = applications |> Set.map(fun x -> x.Name.toString) 
+                                        |> Set.filter (fun x -> PatternMatching.Match x filter)
     let matches = appFilters |> Set.map matchApps
                              |> Set.unionMany
                              |> Set.map ApplicationId.from
