@@ -596,6 +596,7 @@ let UsageContent() =
         MainCommand.AddNuGet, "add nuget <nuget-uri> : add nuget uri"
         MainCommand.ListNuget, "list nuget : list NuGet feeds"
         MainCommand.Unknown, ""
+        MainCommand.DropView, "pending view <viewId> : create view with modified and depending repos"
         MainCommand.DropView, "drop view <viewId> : drop view"
         MainCommand.ListView, "list view : list views"
         MainCommand.DescribeView, "describe view <name> : describe view"
