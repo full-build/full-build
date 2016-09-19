@@ -61,7 +61,8 @@ type ViewName =
     { Name : ViewId }
 
 type PublishApplications =
-    { Filters : string list
+    { View: ViewId option
+      Filters : string list
       Multithread : bool }
 
 type CheckoutVersion =
