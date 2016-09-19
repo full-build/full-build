@@ -15,12 +15,12 @@ let ConvertToGraph () =
 
     let graph = Graph.from anthology
 
-    let apps = graph.Applications() |> Seq.map (fun x -> x.UnderlyingApplication().Name) |> set
+    let apps = graph.Applications |> Seq.map (fun x -> x.UnderlyingApplication.Name) |> set
     let expectedApps = [ ApplicationId.from "cassandrasharp-log4net"
                          ApplicationId.from "cqlplus" ] |> set
     apps |> should equal expectedApps
 
-    let repos = graph.Repositories() |> Seq.map (fun x -> x.UnderlyingRepository() .Repository.Name, x.Projects() |> Seq.map (fun x -> x.UnderlyingProject().ProjectId) |> set) |> set
+    let repos = graph.Repositories |> Seq.map (fun x -> x.UnderlyingRepository.Repository.Name, x.Projects |> Seq.map (fun x -> x.UnderlyingProject.ProjectId) |> set) |> set
     let expectedRepos = [ RepositoryId.from "cassandra-sharp", [ ProjectId.from "apache.cassandra"
                                                                  ProjectId.from "cassandrasharp.interfaces"
                                                                  ProjectId.from "cassandrasharp"
@@ -33,13 +33,13 @@ let ConvertToGraph () =
     repos |> should equal expectedRepos
 
 
-    let projects = graph.Projects()
-    let cassandrasharpProject = projects |> Seq.find (fun x -> x.UnderlyingProject().ProjectId = ProjectId.from "cassandrasharp")
-    let cassandrasharpReferencies = cassandrasharpProject.References() |> Seq.map (fun x -> x.UnderlyingProject().ProjectId) |> set
+    let projects = graph.Projects
+    let cassandrasharpProject = projects |> Seq.find (fun x -> x.UnderlyingProject.ProjectId = ProjectId.from "cassandrasharp")
+    let cassandrasharpReferencies = cassandrasharpProject.References |> Seq.map (fun x -> x.UnderlyingProject.ProjectId) |> set
     let expectedDependencies = [ ProjectId.from "cassandrasharp.interfaces"] |> set
     cassandrasharpReferencies |> should equal expectedDependencies
 
-    let cassandrasharpReferencedBy = cassandrasharpProject.ReferencedBy() |> Seq.map (fun x -> x.UnderlyingProject().ProjectId) |> set
+    let cassandrasharpReferencedBy = cassandrasharpProject.ReferencedBy |> Seq.map (fun x -> x.UnderlyingProject.ProjectId) |> set
     let expectedReferencedBy = [ ProjectId.from "cqlplus"
                                  ProjectId.from "cassandrasharpunittests" 
                                  ProjectId.from "samples"

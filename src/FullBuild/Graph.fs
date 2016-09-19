@@ -91,9 +91,9 @@ type Application =
     { Anthology : Anthology.Anthology
       Application : Anthology.Application } 
     with
-        member this.UnderlyingApplication () : Anthology.Application = this.Application
+        member this.UnderlyingApplication : Anthology.Application = this.Application
 
-        member this.Project () : Project =
+        member this.Project : Project =
             { Anthology = this.Anthology
               Project = this.Anthology.Projects |> Seq.find (fun x -> x.ProjectId = this.Application.Project) }
 
@@ -101,9 +101,9 @@ and Repository =
     { Anthology : Anthology.Anthology
       Repository : Anthology.BuildableRepository }
     with
-        member this.UnderlyingRepository () : Anthology.BuildableRepository = this.Repository
+        member this.UnderlyingRepository : Anthology.BuildableRepository = this.Repository
 
-        member this.Projects () : Project seq =
+        member this.Projects : Project seq =
             this.Anthology.Projects |> Seq.filter (fun x -> x.Repository = this.Repository.Repository.Name)
                                     |> Seq.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
@@ -112,25 +112,25 @@ and Project =
     { Anthology : Anthology.Anthology
       Project : Anthology.Project }
     with
-        member this.UnderlyingProject () : Anthology.Project = this.Project
+        member this.UnderlyingProject : Anthology.Project = this.Project
 
-        member this.Repository () : Repository =
+        member this.Repository : Repository =
             { Anthology = this.Anthology
               Repository = this.Anthology.Repositories |> Seq.find (fun x -> x.Repository.Name = this.Project.Repository) }
 
-        member this.Application () : Application option =
+        member this.Application : Application option =
             let app = this.Anthology.Applications |> Seq.tryFind (fun x -> x.Project = this.Project.ProjectId)
             match app with
             | Some x -> Some { Anthology = this.Anthology
                                Application = x }
             | _ -> None
 
-        member this.References () : Project seq =
+        member this.References : Project seq =
             this.Anthology.Projects |> Set.filter (fun x -> this.Project.ProjectReferences |> Set.contains x.ProjectId) 
                                     |> Seq.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
 
-        member this.ReferencedBy () : Project seq =
+        member this.ReferencedBy : Project seq =
             this.Anthology.Projects |> Set.filter (fun x -> x.ProjectReferences |> Set.contains this.Project.ProjectId) 
                                     |> Seq.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
@@ -138,18 +138,18 @@ and Project =
 and Graph =
     { Anthology : Anthology.Anthology }
     with
-        static member from ( antho : Anthology.Anthology) : Graph =
+        static member from (antho : Anthology.Anthology) : Graph =
             { Anthology = antho }
 
-        member this.Projects () : Project seq =
+        member this.Projects : Project seq =
             this.Anthology.Projects |> Seq.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
 
-        member this.Applications () : Application seq =
+        member this.Applications : Application seq =
             this.Anthology.Applications |> Seq.map (fun x -> { Anthology = this.Anthology
                                                                Application = x })
 
-        member this.Repositories () : Repository seq =
+        member this.Repositories : Repository seq =
             this.Anthology.Repositories |> Seq.map (fun x -> { Anthology = this.Anthology
                                                                Repository = x })
 
