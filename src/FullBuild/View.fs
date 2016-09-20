@@ -186,6 +186,23 @@ let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forcePar
                  Modified = modified }
     Configuration.SaveView viewId view
     generate viewId view
+let CreatePending (viewId : ViewId) =
+    let getPendingRepositories () = seq {
+        let antho = Configuration.LoadAnthology()
+        let baseline = Configuration.LoadBaseline()
+        let wsDir = Env.GetFolder Env.Folder.Workspace
+    
+        for bookmark in baseline.Bookmarks do
+            let repoDir = wsDir |> GetSubDirectory bookmark.Repository.toString
+            if repoDir.Exists then
+                let repo = antho.Repositories |> Seq.find (fun x -> x.Repository.Name = bookmark.Repository)
+                let revision = Vcs.Log antho.Vcs wsDir repo.Repository bookmark.Version
+                if revision <> null then
+                    yield repo.Repository
+    }
+    let modifiedReposFilter = getPendingRepositories () |> Seq.map(fun x -> x.Name.toString |> sprintf "%s/*") |> Seq.toList
+    Create viewId modifiedReposFilter false true true
+
 // ---------------------------------------------------------------------------------------
 
 
