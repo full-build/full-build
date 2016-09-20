@@ -201,7 +201,6 @@ type Command =
     // view
     | ListViews
     | AddView of AddView
-    | PendingBuildView of ViewName
     | DropView of ViewName
     | DescribeView of ViewName
     | GraphView of GraphView
