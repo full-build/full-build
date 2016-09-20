@@ -389,22 +389,16 @@ let commandListNuGet (args : string list) =
     | [] -> Command.ListNuGets
     | _ -> Command.Error MainCommand.ListNuget
 
-let commandPendingView (args : string list) =
-    match args with
-    | ViewId name
-      :: Params filters -> Command.PendingBuildView { Name = name }
-    | _ -> Command.Error MainCommand.AddView
-
-let rec commandAddView (sourceOnly : bool) (parents : bool) (addNew : bool) (args : string list) =
+let rec commandAddView (sourceOnly : bool) (parents : bool) (modified : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Src
-      :: tail -> tail |> commandAddView true parents addNew
+      :: tail -> tail |> commandAddView true parents modified
     | TokenOption TokenOption.All
-      :: tail -> tail |> commandAddView sourceOnly true addNew
+      :: tail -> tail |> commandAddView sourceOnly true modified
     | TokenOption TokenOption.Modified
       :: tail -> tail |> commandAddView sourceOnly parents true
     | ViewId name
-      :: Params filters -> Command.AddView { Name = name; Filters = filters; SourceOnly = sourceOnly; Parents = parents; AddNew = addNew }
+      :: Params filters -> Command.AddView { Name = name; Filters = filters; SourceOnly = sourceOnly; Parents = parents; Modified = modified }
     | _ -> Command.Error MainCommand.AddView
 
 let commandDropView (args : string list) =
