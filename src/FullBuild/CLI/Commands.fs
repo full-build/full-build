@@ -114,7 +114,8 @@ type PullWorkspace =
 
 type PushWorkspace =
     { BuildNumber : string
-      Branch : string option }
+      Branch : string option 
+      Incremental : bool }
 
 type BindProject =
     { Filters : string list }
