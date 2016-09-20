@@ -35,7 +35,7 @@ let ConvertToGraph () =
 
     let projects = graph.Projects
     let cassandrasharpProject = projects |> Seq.find (fun x -> x.UnderlyingProject.ProjectId = ProjectId.from "cassandrasharp")
-    let cassandrasharpReferencies = cassandrasharpProject.References |> Seq.map (fun x -> x.UnderlyingProject.ProjectId) |> set
+    let cassandrasharpReferencies = cassandrasharpProject.ProjectReferences |> Seq.map (fun x -> x.UnderlyingProject.ProjectId) |> set
     let expectedDependencies = [ ProjectId.from "cassandrasharp.interfaces"] |> set
     cassandrasharpReferencies |> should equal expectedDependencies
 

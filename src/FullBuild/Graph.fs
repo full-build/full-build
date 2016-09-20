@@ -87,6 +87,21 @@ open Collections
 
 
 
+[<RequireQualifiedAccess>]
+type PackageVersion =
+    | PackageVersion of string
+    | Unspecified
+
+and Package =
+    { Anthology : Anthology.Anthology
+      Package : Anthology.Application }
+    with
+        member this.Name : string = this.Package.Name
+        member this.Version : PackageVersion = this.Package.PackageVers
+
+    member Name : string
+    member Version : PackageVersion
+
 type Application =
     { Anthology : Anthology.Anthology
       Application : Anthology.Application } 
@@ -125,7 +140,7 @@ and Project =
                                Application = x }
             | _ -> None
 
-        member this.References : Project seq =
+        member this.ProjectReferences : Project seq =
             this.Anthology.Projects |> Set.filter (fun x -> this.Project.ProjectReferences |> Set.contains x.ProjectId) 
                                     |> Seq.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
