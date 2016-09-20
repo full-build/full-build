@@ -25,7 +25,7 @@ let tryMain argv =
     | Command.InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository wsInfo.Type
     | Command.IndexRepositories idxInfo -> Workspace.Index idxInfo.Filters
     | Command.ConvertRepositories convInfo -> Workspace.Convert convInfo.Filters
-    | Command.PushWorkspace buildInfo -> Workspace.Push buildInfo.Branch buildInfo.BuildNumber
+    | Command.PushWorkspace buildInfo -> Workspace.Push buildInfo.Branch buildInfo.BuildNumber buildInfo.Incremental
     | Command.CheckoutWorkspace version -> Workspace.Checkout version.Version
     | Command.BranchWorkspace branch -> Workspace.Branch branch.Branch
     | Command.PullWorkspace pullInfo -> Workspace.Pull pullInfo.Src pullInfo.Bin pullInfo.Rebase pullInfo.View

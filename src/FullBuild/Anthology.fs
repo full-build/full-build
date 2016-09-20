@@ -218,7 +218,8 @@ type Anthology =
       Tester : TestRunnerType }
 
 type Baseline =
-    { Bookmarks : Bookmark set  }
+    { Incremental : bool
+      Bookmarks : Bookmark set }
 
 type View =
     { Filters : string set

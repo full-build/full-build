@@ -315,12 +315,14 @@ let commandBranch (args : string list) =
     | [] -> Command.BranchWorkspace {Branch = None}
     | _ -> Command.Error MainCommand.Branch
 
-let rec commandPush (branch : string option) (args : string list) =
+let rec commandPush (branch : string option) (all : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Branch
       :: Param branch
-      :: tail -> tail |> commandPush (Some branch)
-    | [Param buildNumber] -> Command.PushWorkspace {Branch = branch; BuildNumber = buildNumber }
+      :: tail -> tail |> commandPush (Some branch) all
+    | TokenOption TokenOption.All
+      :: tail -> tail |> commandPush branch true
+    | [Param buildNumber] -> Command.PushWorkspace {Branch = branch; BuildNumber = buildNumber; Incremental = not all }
     | _ -> Command.Error MainCommand.Push
 
 let rec commandPull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) (args : string list) =
@@ -494,7 +496,7 @@ let Parse (args : string list) : Command =
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
-    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush None
+    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush None false
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
@@ -572,7 +574,7 @@ let UsageContent() =
         MainCommand.Index, "index <repoId-wildcard>+ : index repositories"
         MainCommand.Convert, "convert <repoId-wildcard> : convert projects in repositories"
         MainCommand.Pull, "pull [--src|--bin] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
-        MainCommand.Push, "push [--branch <branch>] <buildNumber> : push a baseline from current repositories version and display version"
+        MainCommand.Push, "push [--branch <branch>] [--all] <buildNumber> : push a baseline from current repositories version and display version"
         MainCommand.PublishApp, "publish [--mt] [--view <viewId>] <appId-wildcard> : publish application"
         MainCommand.Bind, "bind <projectId-wildcard>+ : update bindings"
         MainCommand.Clean, "clean : DANGER! reset and clean workspace (interactive command)"

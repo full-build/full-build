@@ -26,25 +26,27 @@ type private BaselineConfig = FSharp.Configuration.YamlConfig<"Baseline.yaml">
 
 let SerializeBaseline (baseline : Baseline) =
     let config = new BaselineConfig()
-    config.baseline.Clear()
+    config.baseline.repositories.Clear()
     for bookmark in baseline.Bookmarks do
-        let item = new BaselineConfig.baseline_Item_Type ()
+        let item = new BaselineConfig.baseline_Type.repositories_Item_Type ()
         item.repo <- bookmark.Repository.toString
         item.version <- bookmark.Version.toString
-        config.baseline.Add item
+        config.baseline.repositories.Add item
+    config.baseline.incremental <- baseline.Incremental
 
     config.ToString()
 
 
 let DeserializeBaseline content =
-    let rec convertToBookmark (items : BaselineConfig.baseline_Item_Type list) =
+    let rec convertToBookmark (items : BaselineConfig.baseline_Type.repositories_Item_Type list) =
         match items with
         | [] -> Set.empty
         | x :: tail -> convertToBookmark tail |> Set.add { Repository=RepositoryId.from x.repo ; Version=BookmarkVersion x.version }
 
     let config = new BaselineConfig()
     config.LoadText content
-    { Bookmarks = convertToBookmark (config.baseline |> List.ofSeq) }
+    { Bookmarks = convertToBookmark (config.baseline.repositories |> List.ofSeq)
+      Incremental = config.baseline.incremental }
 
 
 
