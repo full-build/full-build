@@ -89,7 +89,6 @@ type Token =
 
     | Add
     | Drop
-    | Pending
     | List
     | Describe
 
@@ -137,7 +136,6 @@ let (|Token|_|) (token : string) =
 
     | "add" -> Some Add
     | "drop" -> Some Drop
-    | "pending" -> Some Pending
     | "list" -> Some List
     | "describe" -> Some Describe
 
@@ -389,22 +387,16 @@ let commandListNuGet (args : string list) =
     | [] -> Command.ListNuGets
     | _ -> Command.Error MainCommand.ListNuget
 
-let commandPendingView (args : string list) =
-    match args with
-    | ViewId name
-      :: Params filters -> Command.PendingBuildView { Name = name }
-    | _ -> Command.Error MainCommand.AddView
-
-let rec commandAddView (sourceOnly : bool) (parents : bool) (addNew : bool) (args : string list) =
+let rec commandAddView (sourceOnly : bool) (parents : bool) (modified : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Src
-      :: tail -> tail |> commandAddView true parents addNew
+      :: tail -> tail |> commandAddView true parents modified
     | TokenOption TokenOption.All
-      :: tail -> tail |> commandAddView sourceOnly true addNew
+      :: tail -> tail |> commandAddView sourceOnly true modified
     | TokenOption TokenOption.Modified
       :: tail -> tail |> commandAddView sourceOnly parents true
     | ViewId name
-      :: Params filters -> Command.AddView { Name = name; Filters = filters; SourceOnly = sourceOnly; Parents = parents; AddNew = addNew }
+      :: Params filters -> Command.AddView { Name = name; Filters = filters; SourceOnly = sourceOnly; Parents = parents; Modified = modified }
     | _ -> Command.Error MainCommand.AddView
 
 let commandDropView (args : string list) =
@@ -519,7 +511,6 @@ let Parse (args : string list) : Command =
     | Token Token.List :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandListNuGet
 
     | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false
-    | Token Token.Pending :: Token Token.View :: cmdArgs -> cmdArgs |> commandAddView true true true
     | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
     | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
     | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
@@ -596,7 +587,6 @@ let UsageContent() =
         MainCommand.AddNuGet, "add nuget <nuget-uri> : add nuget uri"
         MainCommand.ListNuget, "list nuget : list NuGet feeds"
         MainCommand.Unknown, ""
-        MainCommand.DropView, "pending view <viewId> : create view with modified and depending repos"
         MainCommand.DropView, "drop view <viewId> : drop view"
         MainCommand.ListView, "list view : list views"
         MainCommand.DescribeView, "describe view <name> : describe view"

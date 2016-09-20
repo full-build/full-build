@@ -52,7 +52,7 @@ let GetModifiedFilter (view : View) =
     let wsDir = Env.GetFolder Folder.Workspace
     let antho = Configuration.LoadAnthology ()
 
-    if view.AddNew then
+    if view.Modified then
         let clonedRepos = antho.Repositories |> Set.map (fun x -> x.Repository)
                                              |> Set.filter (filterClonedRepositories wsDir)
         let availableRepos = clonedRepos |> Set.map (fun x -> x.Name)
@@ -174,8 +174,8 @@ let Graph (viewId : ViewId) (all : bool) =
 
 
 
-let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forceParents : bool) (addNew : bool) =
-    if filters.Length = 0 && not addNew then
+let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forceParents : bool) (modified : bool) =
+    if filters.Length = 0 && not modified then
         failwith "Expecting at least one filter"
 
     let view = { Filters = filters |> Set
@@ -183,27 +183,9 @@ let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forcePar
                  Parameters = Set.empty
                  SourceOnly = forceSrc
                  Parents = forceParents
-                 AddNew = addNew }
+                 Modified = modified }
     Configuration.SaveView viewId view
     generate viewId view
-
-let CreatePending (viewId : ViewId) =
-    let getPendingRepositories () = seq {
-        let antho = Configuration.LoadAnthology()
-        let baseline = Configuration.LoadBaseline()
-        let wsDir = Env.GetFolder Env.Folder.Workspace
-    
-        for bookmark in baseline.Bookmarks do
-            let repoDir = wsDir |> GetSubDirectory bookmark.Repository.toString
-            if repoDir.Exists then
-                let repo = antho.Repositories |> Seq.find (fun x -> x.Repository.Name = bookmark.Repository)
-                let revision = Vcs.Log antho.Vcs wsDir repo.Repository bookmark.Version
-                if revision <> null then
-                    yield repo.Repository
-    }
-    let modifiedReposFilter = getPendingRepositories () |> Seq.map(fun x -> x.Name.toString |> sprintf "%s/*") |> Seq.toList
-    Create viewId modifiedReposFilter false true true
-
 // ---------------------------------------------------------------------------------------
 
 
