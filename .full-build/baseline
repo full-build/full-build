@@ -1,3 +1,5 @@
 baseline:
-  - repo: src
-    version: 9eb73c1414fb0259f6663dbc080184b7f1cab906
+    incremental: false
+    repositories:
+      - repo: src
+        version: 9eb73c1414fb0259f6663dbc080184b7f1cab906
