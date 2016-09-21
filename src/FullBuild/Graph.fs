@@ -92,6 +92,23 @@ type [<RequireQualifiedAccess>] PackageVersion =
     | PackageVersion of string
     | Unspecified
 
+
+[<RequireQualifiedAccess>]
+type OutputType =
+    | Exe
+    | Dll
+
+[<RequireQualifiedAccess>]
+type PublisherType =
+    | Copy
+    | Zip
+    | Docker
+
+[<RequireQualifiedAccess>]
+type BuilderType =
+    | MSBuild
+    | Skip
+
 type Package =
     { Anthology : Anthology.Anthology
       Package : Anthology.PackageId }
@@ -110,7 +127,10 @@ type Application =
     with
         member this.Name = this.Application.Name.toString
 
-        member this.Publisher = this.Application.Publisher
+        member this.Publisher = match this.Application.Publisher with
+                                | Anthology.PublisherType.Copy -> PublisherType.Copy
+                                | Anthology.PublisherType.Zip -> PublisherType.Zip
+                                | Anthology.PublisherType.Docker -> PublisherType.Docker
 
         member this.Project : Project =
             { Anthology = this.Anthology
@@ -120,7 +140,11 @@ and Repository =
     { Anthology : Anthology.Anthology
       Repository : Anthology.BuildableRepository }
     with
-        member this.UnderlyingRepository : Anthology.BuildableRepository = this.Repository
+        member this.Name = this.Repository.Repository.Name.toString
+
+        member this.Builder = match this.Repository.Builder with
+                              | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
+                              | Anthology.BuilderType.Skip -> BuilderType.Skip
 
         member this.Projects : Project seq =
             this.Anthology.Projects |> Seq.filter (fun x -> x.Repository = this.Repository.Repository.Name)
@@ -131,8 +155,6 @@ and Project =
     { Anthology : Anthology.Anthology
       Project : Anthology.Project }
     with
-        member this.UnderlyingProject : Anthology.Project = this.Project
-
         member this.Repository : Repository =
             { Anthology = this.Anthology
               Repository = this.Anthology.Repositories |> Seq.find (fun x -> x.Repository.Name = this.Project.Repository) }
@@ -154,11 +176,14 @@ and Project =
                                     |> Seq.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
 
-        member this.RelativeProjectFile = this.Project.RelativeProjectFile
-        member this.UniqueProjectId = this.Project.UniqueProjectId
-        member this.Output = this.Project.Output
-        member this.ProjectId = this.Project.ProjectId
-        member this.OutputType = this.Project.OutputType
+        member this.RelativeProjectFile = this.Project.RelativeProjectFile.toString
+        member this.UniqueProjectId = this.Project.UniqueProjectId.toString
+        member this.Output = { Anthology = this.Anthology
+                               Assembly = this.Project.Output }
+        member this.ProjectId = this.Project.ProjectId.toString
+        member this.OutputType = match this.Project.OutputType with
+                                 | Anthology.OutputType.Dll -> OutputType.Dll
+                                 | Anthology.OutputType.Exe -> OutputType.Exe
         member this.FxVersion = this.Project.FxVersion.toString
         member this.FxProfile = this.Project.FxProfile.toString
         member this.FxIdentifier = this.Project.FxIdentifier.toString
@@ -187,28 +212,3 @@ and Graph =
             this.Anthology.Repositories |> Seq.map (fun x -> { Anthology = this.Anthology
                                                                Repository = x })
 
-        
-
-//and [<Sealed>] Repository =
-//    member UnderlyingRepository : unit -> Anthology.BuildableRepository    
-//    member Projects : unit -> Project seq
-//and [<Sealed>] Project =
-//    member UnderlyingProject : unit -> Anthology.Project
-//    member Repository : unit -> Repository
-//    member Application : unit -> Application option
-//    member Consumers : unit -> Project seq
-//    member Dependencies : unit -> Project seq
-//
-//
-//type Graph =
-//    { Repositories : Repository set
-//      Projects : Map<Anthology.ProjectId, Project>
-//      Applications : Application set }
-//
-//
-//    member Projects : unit -> Project seq
-//    member Applications : unit -> Application seq    
-//    member Repositories : unit -> Repository seq   
-//    static member from : Anthology.Anthology -> Graph 
-//
-//

@@ -20,29 +20,29 @@ let ConvertToGraph () =
                          "cqlplus" ] |> set
     apps |> should equal expectedApps
 
-    let repos = graph.Repositories |> Seq.map (fun x -> x.UnderlyingRepository.Repository.Name, x.Projects |> Seq.map (fun x -> x.UnderlyingProject.ProjectId) |> set) |> set
-    let expectedRepos = [ RepositoryId.from "cassandra-sharp", [ ProjectId.from "apache.cassandra"
-                                                                 ProjectId.from "cassandrasharp.interfaces"
-                                                                 ProjectId.from "cassandrasharp"
-                                                                 ProjectId.from "cassandrasharpunittests"
-                                                                 ProjectId.from "samples"
-                                                                 ProjectId.from "thrift"
-                                                                 ProjectId.from "cqlplus" ] |> set
-                          RepositoryId.from "cassandra-sharp-contrib", [ ProjectId.from "cassandrasharp.contrib.log4net"
-                                                                         ProjectId.from "cassandrasharp.contrib.log4netunittests" ] |> set ] |> set
+    let repos = graph.Repositories |> Seq.map (fun x -> x.Name, x.Projects |> Seq.map (fun x -> x.ProjectId) |> set) |> set
+    let expectedRepos = [ "cassandra-sharp", [ "apache.cassandra"
+                                               "cassandrasharp.interfaces"
+                                               "cassandrasharp"
+                                               "cassandrasharpunittests"
+                                               "samples"
+                                               "thrift"
+                                               "cqlplus" ] |> set
+                          "cassandra-sharp-contrib", [ "cassandrasharp.contrib.log4net"
+                                                       "cassandrasharp.contrib.log4netunittests" ] |> set ] |> set
     repos |> should equal expectedRepos
 
 
     let projects = graph.Projects
-    let cassandrasharpProject = projects |> Seq.find (fun x -> x.ProjectId = ProjectId.from "cassandrasharp")
+    let cassandrasharpProject = projects |> Seq.find (fun x -> x.ProjectId = "cassandrasharp")
     let cassandrasharpReferencies = cassandrasharpProject.ProjectReferences |> Seq.map (fun x -> x.ProjectId) |> set
-    let expectedDependencies = [ ProjectId.from "cassandrasharp.interfaces"] |> set
+    let expectedDependencies = [ "cassandrasharp.interfaces"] |> set
     cassandrasharpReferencies |> should equal expectedDependencies
 
     let cassandrasharpReferencedBy = cassandrasharpProject.ReferencedBy |> Seq.map (fun x -> x.ProjectId) |> set
-    let expectedReferencedBy = [ ProjectId.from "cqlplus"
-                                 ProjectId.from "cassandrasharpunittests" 
-                                 ProjectId.from "samples"
-                                 ProjectId.from "cassandrasharp.contrib.log4netunittests" ] |> set
+    let expectedReferencedBy = [ "cqlplus"
+                                 "cassandrasharpunittests" 
+                                 "samples"
+                                 "cassandrasharp.contrib.log4netunittests" ] |> set
     cassandrasharpReferencedBy |> should equal expectedReferencedBy
 
