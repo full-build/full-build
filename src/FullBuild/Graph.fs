@@ -87,26 +87,30 @@ open Collections
 
 
 
-[<RequireQualifiedAccess>]
-type PackageVersion =
+
+type [<RequireQualifiedAccess>] PackageVersion =
     | PackageVersion of string
     | Unspecified
 
-and Package =
+type Package =
     { Anthology : Anthology.Anthology
-      Package : Anthology.Application }
+      Package : Anthology.PackageId }
     with
-        member this.Name : string = this.Package.Name
-        member this.Version : PackageVersion = this.Package.PackageVers
+        member this.Name = this.Package.toString
 
-    member Name : string
-    member Version : PackageVersion
+type Assembly = 
+    { Anthology : Anthology.Anthology
+      Assembly : Anthology.AssemblyId }
+    with
+        member this.Name = this.Assembly.toString
 
 type Application =
     { Anthology : Anthology.Anthology
       Application : Anthology.Application } 
     with
-        member this.UnderlyingApplication : Anthology.Application = this.Application
+        member this.Name = this.Application.Name.toString
+
+        member this.Publisher = this.Application.Publisher
 
         member this.Project : Project =
             { Anthology = this.Anthology
@@ -149,6 +153,21 @@ and Project =
             this.Anthology.Projects |> Set.filter (fun x -> x.ProjectReferences |> Set.contains this.Project.ProjectId) 
                                     |> Seq.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
+
+        member this.RelativeProjectFile = this.Project.RelativeProjectFile
+        member this.UniqueProjectId = this.Project.UniqueProjectId
+        member this.Output = this.Project.Output
+        member this.ProjectId = this.Project.ProjectId
+        member this.OutputType = this.Project.OutputType
+        member this.FxVersion = this.Project.FxVersion.toString
+        member this.FxProfile = this.Project.FxProfile.toString
+        member this.FxIdentifier = this.Project.FxIdentifier.toString
+        member this.HasTests = this.Project.HasTests
+        member this.AssemblyReferences = this.Project.AssemblyReferences |> Seq.map (fun x -> { Anthology = this.Anthology
+                                                                                                Assembly = x })
+        member this.PackageReferences = this.Project.PackageReferences |> Seq.map (fun x -> { Anthology = this.Anthology
+                                                                                              Package = x })
+
 
 and Graph =
     { Anthology : Anthology.Anthology }

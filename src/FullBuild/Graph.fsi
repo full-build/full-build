@@ -3,20 +3,17 @@ module Graph
 
 open Collections
 
-
-[<RequireQualifiedAccess>]
-type PackageVersion =
+type [<RequireQualifiedAccess>] PackageVersion =
     | PackageVersion of string
     | Unspecified
 
-and [<Sealed>] Package = 
-    member Name : string
-    member Version : PackageVersion
-
-and [<Sealed>] Assembly = 
+type [<Sealed>] Package = 
     member Name : string
 
-and [<Sealed>] Application =
+type [<Sealed>] Assembly = 
+    member Name : string
+
+type [<Sealed>] Application =
     member Name : string
     member Publisher : Anthology.PublisherType
     member Project : Project
@@ -37,13 +34,14 @@ and [<Sealed>] Project =
     member Output : Anthology.AssemblyId
     member ProjectId : Anthology.ProjectId
     member OutputType : Anthology.OutputType
-    member FxVersion : Anthology.FxInfo
-    member FxProfile : Anthology.FxInfo
-    member FxIdentifier : Anthology.FxInfo
+    member FxVersion : string
+    member FxProfile : string
+    member FxIdentifier : string
     member HasTests : bool
     member AssemblyReferences : Assembly seq
     member PackageReferences : Package seq
-and[<Sealed>] Graph =
+
+type [<Sealed>] Graph =
     static member from : Anthology.Anthology -> Graph 
     member Projects : Project seq
     member Applications : Application seq    
