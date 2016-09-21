@@ -65,6 +65,7 @@
     <Compile Include="BaselineSerializerTests.fs" />
     <Compile Include="AnthologySerializerTests.fs" />
     <Compile Include="ViewSerializerTests.fs" />
+    <Compile Include="GraphTests.fs" />
     <Compile Include="ProjectParsingTests.fs" />
     <Compile Include="CommandLineParsingTests.fs" />
     <Compile Include="RepoTests.fs" />
@@ -73,14 +74,14 @@
     <Compile Include="SimplifyTests.fs" />
     <Compile Include="IndexationTests.fs" />
     <None Include="app.config" />
+    <None Include="anthology-graph.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="CSharpProjectSample1.Tests.csproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="ProjectWithInvalidRefs.fsproj" />
     <None Include="anthology-indexed.yaml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="anthology-simplified.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="paket-simplified.dependencies">
@@ -105,6 +106,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="CSharpProjectSample1.csproj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="anthology-simplified.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
