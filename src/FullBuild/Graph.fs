@@ -166,7 +166,7 @@ and Project =
                                Application = x }
             | _ -> None
 
-        member this.ProjectReferences =
+        member this.References =
             this.Anthology.Projects |> Set.filter (fun x -> this.Project.ProjectReferences |> Set.contains x.ProjectId) 
                                     |> Set.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
