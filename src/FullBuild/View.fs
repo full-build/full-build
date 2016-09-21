@@ -182,7 +182,7 @@ let Create (viewId : ViewId) (filters : string list) (forceSrc : bool) (forcePar
                  Builder = BuilderType.MSBuild
                  Parameters = Set.empty
                  SourceOnly = forceSrc
-                 Parents = forceParents
+                 Parents = forceParents || modified
                  Modified = modified }
     Configuration.SaveView viewId view
     generate viewId view

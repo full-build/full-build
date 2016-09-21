@@ -57,7 +57,7 @@ let Create (path : string) (uri : RepositoryUrl) (bin : string) (vcsType : VcsTy
         let anthoFile = confDir |> GetFile Env.ANTHOLOGY_FILENAME
         AnthologySerializer.Save anthoFile antho
 
-        let baseline = { Bookmarks = Set.empty }
+        let baseline = { Bookmarks = Set.empty; Incremental = false }
         let baselineFile = confDir |> GetFile Env.BASELINE_FILENAME
         BaselineSerializer.Save baselineFile baseline
 
@@ -79,13 +79,13 @@ let ClonedRepositories (wsDir : DirectoryInfo) (repos : BuildableRepository set)
                                   repoDir.Exists)
 
 
-let Push (branch : string option) buildnum =
+let Push (branch : string option) buildnum incremental =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let allRepos = antho.Repositories
     let clonedRepos = allRepos |> ClonedRepositories wsDir
     let bookmarks = Repo.CollectRepoHash antho.Vcs wsDir clonedRepos
-    let baseline = { Bookmarks = bookmarks }
+    let baseline = { Bookmarks = bookmarks; Incremental = incremental }
     Configuration.SaveBaseline baseline
 
     let mainRepo = antho.MasterRepository

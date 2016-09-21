@@ -1,3 +1,5 @@
 ﻿baseline:
-  - repo: id1
-    version: hash01x
+    incremental: true
+    repositories:
+      - repo: id1
+        version: hash01x
