@@ -3,7 +3,8 @@ module Graph
 
 open Collections
 
-type [<RequireQualifiedAccess>] PackageVersion =
+[<RequireQualifiedAccess>] 
+type PackageVersion =
     | PackageVersion of string
     | Unspecified
 
@@ -23,15 +24,18 @@ type BuilderType =
     | MSBuild
     | Skip
 
-type [<Sealed>] Package  = interface System.IComparable
+[<Sealed>]
+type Package  = interface System.IComparable
 with
     member Name : string
 
-type [<Sealed>] Assembly = interface System.IComparable
+[<Sealed>] 
+type Assembly = interface System.IComparable
 with
     member Name : string
 
-type [<Sealed>] Application = interface System.IComparable
+[<Sealed>]
+type Application = interface System.IComparable
 with
     member Name : string
     member Publisher : PublisherType
@@ -47,8 +51,8 @@ and [<Sealed>] Project = interface System.IComparable
 with
     member Repository : Repository
     member Application : Application option
-    member ReferencedBy : Project seq
-    member ProjectReferences : Project seq
+    member ReferencedBy : Project set
+    member ProjectReferences : Project set
     member RelativeProjectFile : string
     member UniqueProjectId : string
     member Output : Assembly
