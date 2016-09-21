@@ -26,8 +26,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>view --modified nnm</StartArguments>
-    <StartWorkingDirectory>c:\src\avp</StartWorkingDirectory>
+    <StartArguments>view --modified wks</StartArguments>
+    <StartWorkingDirectory>C:\Development\fullbuild</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>0077</NoWarn>

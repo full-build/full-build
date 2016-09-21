@@ -11,7 +11,7 @@ let CheckSaveLoadBaseline () =
                   Parameters = ["--mt"; "--debug" ] |> Set 
                   SourceOnly = true 
                   Parents = false 
-                  AddNew = false }
+                  Modified = false }
 
     let res = ViewSerializer.SerializeView view1
     printfn "%s" res

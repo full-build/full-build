@@ -55,7 +55,7 @@ type AddView =
       Filters : string list
       SourceOnly : bool
       Parents : bool
-      AddNew : bool }
+      Modified : bool }
 
 type ViewName =
     { Name : ViewId }
@@ -201,7 +201,6 @@ type Command =
     // view
     | ListViews
     | AddView of AddView
-    | PendingBuildView of ViewName
     | DropView of ViewName
     | DescribeView of ViewName
     | GraphView of GraphView
