@@ -49,10 +49,6 @@ with
 
 and [<Sealed>] Project = interface System.IComparable
 with
-    member Repository : Repository
-    member Application : Application option
-    member ReferencedBy : Project set
-    member ProjectReferences : Project set
     member RelativeProjectFile : string
     member UniqueProjectId : string
     member Output : Assembly
@@ -62,6 +58,10 @@ with
     member FxProfile : string
     member FxIdentifier : string
     member HasTests : bool
+    member Repository : Repository
+    member Application : Application option
+    member ReferencedBy : Project set
+    member References : Project set
     member AssemblyReferences : Assembly set
     member PackageReferences : Package set
 
