@@ -23,23 +23,28 @@ type BuilderType =
     | MSBuild
     | Skip
 
-type [<Sealed>] Package = 
+type [<Sealed>] Package  = interface System.IComparable
+with
     member Name : string
 
-type [<Sealed>] Assembly = 
+type [<Sealed>] Assembly = interface System.IComparable
+with
     member Name : string
 
-type [<Sealed>] Application =
+type [<Sealed>] Application = interface System.IComparable
+with
     member Name : string
     member Publisher : PublisherType
     member Project : Project
 
-and [<Sealed>] Repository =
+and [<Sealed>] Repository = interface System.IComparable
+with
     member Name : string
     member Builder : BuilderType
-    member Projects : Project seq
+    member Projects : Project set
 
-and [<Sealed>] Project =
+and [<Sealed>] Project = interface System.IComparable
+with
     member Repository : Repository
     member Application : Application option
     member ReferencedBy : Project seq
@@ -53,11 +58,11 @@ and [<Sealed>] Project =
     member FxProfile : string
     member FxIdentifier : string
     member HasTests : bool
-    member AssemblyReferences : Assembly seq
-    member PackageReferences : Package seq
+    member AssemblyReferences : Assembly set
+    member PackageReferences : Package set
 
 type [<Sealed>] Graph =
     static member from : Anthology.Anthology -> Graph 
-    member Projects : Project seq
-    member Applications : Application seq    
-    member Repositories : Repository seq   
+    member Projects : Project set
+    member Applications : Application set    
+    member Repositories : Repository set   

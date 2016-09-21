@@ -146,9 +146,9 @@ and Repository =
                               | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
                               | Anthology.BuilderType.Skip -> BuilderType.Skip
 
-        member this.Projects : Project seq =
-            this.Anthology.Projects |> Seq.filter (fun x -> x.Repository = this.Repository.Repository.Name)
-                                    |> Seq.map (fun x -> { Anthology = this.Anthology
+        member this.Projects =
+            this.Anthology.Projects |> Set.filter (fun x -> x.Repository = this.Repository.Repository.Name)
+                                    |> Set.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
 
 and Project =
@@ -188,9 +188,9 @@ and Project =
         member this.FxProfile = this.Project.FxProfile.toString
         member this.FxIdentifier = this.Project.FxIdentifier.toString
         member this.HasTests = this.Project.HasTests
-        member this.AssemblyReferences = this.Project.AssemblyReferences |> Seq.map (fun x -> { Anthology = this.Anthology
+        member this.AssemblyReferences = this.Project.AssemblyReferences |> Set.map (fun x -> { Anthology = this.Anthology
                                                                                                 Assembly = x })
-        member this.PackageReferences = this.Project.PackageReferences |> Seq.map (fun x -> { Anthology = this.Anthology
+        member this.PackageReferences = this.Project.PackageReferences |> Set.map (fun x -> { Anthology = this.Anthology
                                                                                               Package = x })
 
 
@@ -200,15 +200,15 @@ and Graph =
         static member from (antho : Anthology.Anthology) : Graph =
             { Anthology = antho }
 
-        member this.Projects : Project seq =
-            this.Anthology.Projects |> Seq.map (fun x -> { Anthology = this.Anthology
+        member this.Projects =
+            this.Anthology.Projects |> Set.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
 
-        member this.Applications : Application seq =
-            this.Anthology.Applications |> Seq.map (fun x -> { Anthology = this.Anthology
+        member this.Applications =
+            this.Anthology.Applications |> Set.map (fun x -> { Anthology = this.Anthology
                                                                Application = x })
 
-        member this.Repositories : Repository seq =
-            this.Anthology.Repositories |> Seq.map (fun x -> { Anthology = this.Anthology
+        member this.Repositories =
+            this.Anthology.Repositories |> Set.map (fun x -> { Anthology = this.Anthology
                                                                Repository = x })
 
