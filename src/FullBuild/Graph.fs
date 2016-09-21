@@ -87,8 +87,8 @@ open Collections
 
 
 
-
-type [<RequireQualifiedAccess>] PackageVersion =
+[<RequireQualifiedAccess>] 
+type PackageVersion =
     | PackageVersion of string
     | Unspecified
 
@@ -155,25 +155,25 @@ and Project =
     { Anthology : Anthology.Anthology
       Project : Anthology.Project }
     with
-        member this.Repository : Repository =
+        member this.Repository =
             { Anthology = this.Anthology
               Repository = this.Anthology.Repositories |> Seq.find (fun x -> x.Repository.Name = this.Project.Repository) }
 
-        member this.Application : Application option =
+        member this.Application =
             let app = this.Anthology.Applications |> Seq.tryFind (fun x -> x.Project = this.Project.ProjectId)
             match app with
             | Some x -> Some { Anthology = this.Anthology
                                Application = x }
             | _ -> None
 
-        member this.ProjectReferences : Project seq =
+        member this.ProjectReferences =
             this.Anthology.Projects |> Set.filter (fun x -> this.Project.ProjectReferences |> Set.contains x.ProjectId) 
-                                    |> Seq.map (fun x -> { Anthology = this.Anthology
+                                    |> Set.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
 
-        member this.ReferencedBy : Project seq =
+        member this.ReferencedBy =
             this.Anthology.Projects |> Set.filter (fun x -> x.ProjectReferences |> Set.contains this.Project.ProjectId) 
-                                    |> Seq.map (fun x -> { Anthology = this.Anthology
+                                    |> Set.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
 
         member this.RelativeProjectFile = this.Project.RelativeProjectFile.toString
