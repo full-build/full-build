@@ -16,82 +16,10 @@ module Graph
 open Collections
 
 
-
-//let toGraph (antho : Anthology.Anthology) : Graph =    
-//    // projectId -> project
-//    let projectId2project = antho.Projects 
-//                            |> Set.map (fun x -> x.ProjectId, x)
-//                            |> Map
-//    // find all roots
-//    let projectIds = projectId2project 
-//                     |> Seq.map (fun kvp -> kvp.Key) 
-//                     |> Set
-//    let referencedProjectIds = antho.Projects 
-//                               |> Set.map (fun x -> x.ProjectReferences)
-//                               |> Set.unionMany
-//
-//    let roots = Set.difference projectIds referencedProjectIds
-//                |> Set.map (fun x -> projectId2project.[x]) 
-//
-//    let leafs = antho.Projects
-//                |> Set.filter (fun x -> x.ProjectReferences = Set.empty)
-//
-//    // recursively construct projects using fold
-//    let rec build refs (convertedProjects : Map<Anthology.ProjectId, BuildProject>) (project : Anthology.Project) : Map<Anthology.ProjectId, BuildProject> =
-//        let convertedProjectIds = convertedProjects |> Seq.map (fun kvp -> kvp.Key) 
-//                                                    |> Set
-//        let dependencies = refs project
-//        let projectsToConvert = Set.difference dependencies convertedProjectIds  
-//                                |> Set.map (fun x -> projectId2project.[x])      
-//        let newConvertedProjects = projectsToConvert 
-//                                   |> Set.fold (build (refs)) convertedProjects
-//        let newProject = { UnderlyingProject = project
-//                           Dependencies = dependencies }
-//        newConvertedProjects |> Map.add project.ProjectId newProject
-//
-//    let getReferences (project : Anthology.Project) = project.ProjectReferences
-//    let getConsumers (project : Anthology.Project) = antho.Projects 
-//                                                     |> Set.filter (fun x -> x.ProjectReferences |> Set.contains project.ProjectId)
-//                                                     |> Set.map (fun x -> x.ProjectId)
-//
-//    let buildReferences = build getReferences
-//    let buildConsumers = build getConsumers
-//
-//    let allConvertedReferences = roots |> Set.fold buildReferences Map.empty
-//    let allConvertedConsumers = leafs |> Set.fold buildConsumers Map.empty
-//
-//    let allConvertedProjects = allConvertedReferences |> Map.map (fun k v -> { UnderlyingProject = v.UnderlyingProject
-//                                                                               References = v.Dependencies
-//                                                                               Consumers = allConvertedConsumers.[k].Dependencies } )
-//
-//    // gather all projects
-//    let allProjects = allConvertedProjects |> Seq.map (fun kvp -> kvp.Value) |> Set
-//
-//    // gather all repositories
-//    let repositoryId2repository = antho.Repositories |> Set.map (fun x -> x.Repository.Name, x) |> Map
-//    let allRepositories = allProjects |> Seq.groupBy (fun x -> x.UnderlyingProject.Repository)
-//                                      |> Seq.map (fun (rid, prjs) -> { UnderlyingRepository = repositoryId2repository.[rid]
-//                                                                       Projects = prjs |> Set })
-//                                      |> Set
-//
-//    // gather all apps
-//    let allApps = antho.Applications |> Set.map (fun x -> { UnderlyingApplication = x
-//                                                            Project = allConvertedProjects.[x.Project] })
-//
-//    // done !
-//    let graph = { Projects = allConvertedProjects 
-//                  Repositories = allRepositories 
-//                  Applications = allApps }
-//    graph
-
-
-
-
 [<RequireQualifiedAccess>] 
 type PackageVersion =
     | PackageVersion of string
     | Unspecified
-
 
 [<RequireQualifiedAccess>]
 type OutputType =
