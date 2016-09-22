@@ -57,7 +57,7 @@ let publishZip (app : Anthology.Application) =
     if targetFile.Exists then targetFile.Delete()
 
     System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Optimal, false)
-    IoHelpers.EnsureForceDelete sourceFolder
+    IoHelpers.EnsureForceDelete sourceFolder 3
 
 let publishDocker (app : Anthology.Application) =
     let tmpApp = { app
