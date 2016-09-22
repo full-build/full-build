@@ -169,8 +169,11 @@ let ForceDelete (dir : DirectoryInfo) =
 
 let rec EnsureForceDelete (dir : DirectoryInfo) (limit : int) =
     try
-        if dir.Exists && 0 < limit then dir.Delete(true)
+        if dir.Exists then dir.Delete(true)
     with
-        _ -> System.Threading.Thread.Sleep(5 * 1000)
-             GC.Collect ()
-             EnsureForceDelete dir (limit - 1)
+        _ -> if 0 < limit then
+                System.Threading.Thread.Sleep(5 * 1000)
+                GC.Collect ()
+                EnsureForceDelete dir (limit - 1)
+             else
+                reraise()
