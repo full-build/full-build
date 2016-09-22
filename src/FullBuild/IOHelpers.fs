@@ -166,3 +166,11 @@ let XDocSaver (fileName : FileInfo) (xdoc : XDocument) =
 
 let ForceDelete (dir : DirectoryInfo) =
     if dir.Exists then dir.Delete(true)
+
+let rec EnsureForceDelete (dir : DirectoryInfo) =
+    try
+        if dir.Exists then dir.Delete(true)
+    with
+        _ -> System.Threading.Thread.Sleep(5 * 1000)
+             GC.Collect ()
+             EnsureForceDelete dir
