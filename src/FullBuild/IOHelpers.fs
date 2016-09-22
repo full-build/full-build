@@ -171,9 +171,10 @@ let rec EnsureForceDelete (dir : DirectoryInfo) (limit : int) =
     try
         if dir.Exists then dir.Delete(true)
     with
-        _ -> if 0 < limit then
-                System.Threading.Thread.Sleep(5 * 1000)
-                GC.Collect ()
-                EnsureForceDelete dir (limit - 1)
-             else
-                reraise()
+        exn -> if 0 < limit then
+                  printfn "Failure to delete folder %A" dir.FullName
+                  System.Threading.Thread.Sleep(5 * 1000)
+                  GC.Collect ()
+                  EnsureForceDelete dir (limit - 1)
+               else
+                  reraise()
