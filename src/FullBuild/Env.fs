@@ -112,3 +112,4 @@ let FullBuildVersion () =
     let fbAssembly = getFullBuildAssembly ()
     let version = fbAssembly.GetName().Version
     version
+        

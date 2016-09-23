@@ -17,6 +17,7 @@ open Commands
 
 let tryMain argv =
     Env.CheckLicense ()
+    Configuration.CheckMinVersion ()
 
     let cmd = CommandLine.Parse (argv |> Seq.toList)
     match cmd with
