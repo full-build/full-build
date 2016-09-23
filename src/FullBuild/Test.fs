@@ -26,13 +26,19 @@ let TestAssemblies (filters : string list) (excludes : string list) =
 
     let matchViews filter = views |> Seq.filter (fun x -> PatternMatching.Match x filter)
 
-    let matches = filters
+    let projects = filters
                   |> Seq.map matchViews
                   |> Seq.collect id
                   |> Seq.map (View.FindViewProjects << Configuration.LoadView << ViewId.from)
                   |> Set
                   |> Set.unionMany
                   |> Set.filter (fun x -> x.HasTests)
+
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    projects |> Seq.map (fun x -> wsDir |> IoHelpers.GetSubDirectory (sprintf "%s/bin/" x.relativeProjectFolderFromWorkspace))
+             |> Seq.iter Bindings.UpdateArtifactBindingRedirects
+
+    let matches = projects
                   |> Set.map (fun x -> sprintf "%s/bin/%s" x.relativeProjectFolderFromWorkspace x.outputFile)
 
     let anthology = Configuration.LoadAnthology ()
