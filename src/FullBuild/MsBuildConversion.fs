@@ -48,7 +48,7 @@ let private generateProjectTarget (project : Project) =
     let projectProperty = ProjectPropertyName project.ProjectId
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
-    let cpyCondition = sprintf "%s And '$(%sCopy)' == ''" binCondition projectProperty
+    let cpyCondition = sprintf "'$(%sCopy)' == ''" projectProperty
     let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.toString) project.RelativeProjectFile.toString
     let output = (project.Output.toString)
     let ext = match project.OutputType with
