@@ -52,9 +52,13 @@ let ViewExists (viewId : ViewId) =
 
 
 let CheckMinVersion () =
-    let fbVersion = Env.FullBuildVersion ()
-    let antho = LoadAnthology ()
-    let minVersion = System.Version.Parse antho.MinVersion
+    try
+        let fbVersion = Env.FullBuildVersion ()
+        let antho = LoadAnthology ()
+        let minVersion = System.Version.Parse antho.MinVersion
 
-    if fbVersion < minVersion then
-        failwithf "Minimum full-build version requirement: %s" antho.MinVersion
+        if fbVersion < minVersion then
+            failwithf "Minimum full-build version requirement: %s" antho.MinVersion
+    with
+        // we are probably not in a workspace
+        _ -> ()
