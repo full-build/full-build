@@ -143,6 +143,11 @@ let Branch (branch : BookmarkVersion option) =
         Vcs.Checkout antho.Vcs wsDir repo repoVer true
 
 
+let Install () =
+    Package.RestorePackages ()
+    Conversion.GenerateProjectArtifacts()
+
+
 let Pull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) =
     let antho = Configuration.LoadAnthology ()
     let wsDir = Env.GetFolder Env.Folder.Workspace
@@ -167,6 +172,8 @@ let Pull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) =
             let repoDir = wsDir |> GetSubDirectory repo.Name.toString
             if repoDir.Exists then
                 Vcs.Pull antho.Vcs wsDir repo rebase
+
+        Install ()
 
     if bin then
         BuildArtifacts.PullLatestReferenceBinaries ()
@@ -328,10 +335,6 @@ let Index (filters : RepositoryId set) =
         |> Configuration.SaveAnthology
 
 
-
-let Install () =
-    Package.RestorePackages ()
-    Conversion.GenerateProjectArtifacts()
 
 let Convert (filters : RepositoryId set) =
     let repos = filters
