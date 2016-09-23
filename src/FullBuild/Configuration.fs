@@ -48,3 +48,13 @@ let SaveView (viewId : ViewId) =
 let ViewExists (viewId : ViewId) =
     let viewFile = GetViewFileName viewId.toString 
     viewFile.Exists
+
+
+
+let CheckMinVersion () =
+    let fbVersion = Env.FullBuildVersion ()
+    let antho = LoadAnthology ()
+    let minVersion = System.Version.Parse antho.MinVersion
+
+    if fbVersion < minVersion then
+        failwithf "Minimum full-build version requirement: %s" antho.MinVersion

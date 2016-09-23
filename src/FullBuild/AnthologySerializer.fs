@@ -27,6 +27,7 @@ let Serialize (antho : Anthology) =
     let config = new AnthologyConfig()
     config.anthology.artifacts <- antho.Artifacts
     config.anthology.vcs <- antho.Vcs.toString
+    config.anthology.minversion <- antho.MinVersion
 
     config.anthology.nugets.Clear()
     for nuget in antho.NuGets do
@@ -167,7 +168,8 @@ let Deserialize (content) =
 
     let repos = convertToBuildableRepositories (config.anthology.repositories |> List.ofSeq)
     let mainRepo = convertToRepository (config.anthology.mainrepository)
-    { Artifacts = config.anthology.artifacts
+    { MinVersion = config.anthology.minversion
+      Artifacts = config.anthology.artifacts
       Vcs = VcsType.from config.anthology.vcs
       NuGets = convertToNuGets (config.anthology.nugets |> List.ofSeq)
       MasterRepository = mainRepo

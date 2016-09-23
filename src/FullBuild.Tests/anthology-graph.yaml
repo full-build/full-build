@@ -1,4 +1,5 @@
 anthology:
+  minversion: 0.0.0.0
   artifacts: C:\Binaries
   nugets:
     - nuget: https://www.nuget.org/api/v2/

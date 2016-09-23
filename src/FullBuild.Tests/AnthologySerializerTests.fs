@@ -8,6 +8,7 @@ open StringHelpers
 [<Test>]
 let CheckSaveLoadAnthology () =
     let antho1 = {
+        MinVersion = "1.2.3.4"
         Artifacts = @"c:\toto"
         NuGets = [ RepositoryUrl.from "https://www.nuget.org/api/v2/"; RepositoryUrl.from "file:///C:/src/full-build-packages/"]
         MasterRepository = { Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build"; Branch = None }

@@ -208,7 +208,8 @@ type Application =
       Project : ProjectId }
 
 type Anthology =
-    { Artifacts : string
+    { MinVersion : string
+      Artifacts : string
       NuGets : RepositoryUrl list
       Vcs : VcsType
       MasterRepository : Repository
