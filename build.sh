@@ -17,7 +17,7 @@ function build
 
 VERSION=$1
 if [ -z "$VERSION" ]; then 
-  VERSION=0.0.0.*
+  VERSION=999.0.0.*
 fi 
 
 echo building version $VERSION
