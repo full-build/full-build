@@ -7,7 +7,7 @@
 bin
 obj
 /apps
-/tests/*
+/tests/cs-*
 packages
 views
 !/bootstrap/packages

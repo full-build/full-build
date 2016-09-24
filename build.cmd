@@ -14,7 +14,7 @@ goto :ok
 
 :dobuild
 refbin\fullbuild install || goto :ko
-refbin\fullbuild view fullbuild * || goto :ko
+refbin\fullbuild view fullbuild src/* || goto :ko
 refbin\fullbuild rebuild --version %VERSION% fullbuild || goto :ko
 goto :eof
 
