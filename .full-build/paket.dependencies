@@ -4,3 +4,4 @@ nuget FSharp.Configuration ~> 0.5.7
 nuget FSharp.Core
 nuget Mono.Cecil ~> 0.9.6.1
 nuget FSharp.Data ~> 2.2.5
+nuget NUnit
