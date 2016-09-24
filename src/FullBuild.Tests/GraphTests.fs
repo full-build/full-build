@@ -6,11 +6,12 @@ open NUnit.Framework
 open FsUnit
 open Anthology
 open Graph
+open TestHelpers
 
 
 [<Test>]
 let ConvertToGraph () =
-    let fileSimplified = FileInfo("anthology-graph.yaml")
+    let fileSimplified = FileInfo(testFile "anthology-graph.yaml")
     let anthology = AnthologySerializer.Load fileSimplified
 
     let graph = Graph.from anthology

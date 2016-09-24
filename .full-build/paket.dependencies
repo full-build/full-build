@@ -1,7 +1,7 @@
 source https://www.nuget.org/api/v2/
-nuget fsunit ~> 1.3.1.0
-nuget FSharp.Configuration ~> 0.5.7
+nuget fsunit
+nuget FSharp.Configuration
 nuget FSharp.Core
-nuget Mono.Cecil ~> 0.9.6.1
-nuget FSharp.Data ~> 2.2.5
+nuget Mono.Cecil
+nuget FSharp.Data
 nuget NUnit
