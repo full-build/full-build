@@ -1,0 +1,13 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
+  <ItemGroup>
+    <ProjectReference Include="$(FBWorkspaceDir)/tests/MainProjectTests/MainProjectTests.csproj" Condition="'$(FullBuild_mainprojecttests)' != ''">
+      <Project>{9a7f2e1a-0ebd-4172-b7f2-14d6db180f4e}</Project>
+      <Name>mainprojecttests</Name>
+    </ProjectReference>
+    <Reference Include="$(FBWorkspaceDir)/.full-build/bin/mainprojecttests.dll" Condition="'$(FullBuild_mainprojecttests)' == ''">
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(FBWorkspaceDir)/.full-build/projects/mainprojecttests-copy.targets" Condition="'$(FullBuild_mainprojecttestsCopy)' == ''" />
+</Project>

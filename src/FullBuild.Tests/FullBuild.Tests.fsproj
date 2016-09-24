@@ -54,6 +54,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <Import Project="../../.full-build/full-build.targets" />
   <ItemGroup>
+    <Compile Include="TestHelpers.fs" />
     <Compile Include="CollectionsTests.fs" />
     <Compile Include="StringHelpersTests.fs" />
     <Compile Include="IoHelpersTests.fs" />

@@ -3,16 +3,17 @@
   <PropertyGroup>
     <FullBuild_fsunit_Pkg>Y</FullBuild_fsunit_Pkg>
   </PropertyGroup>
+  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Core/package.targets" Condition="'$(FullBuild_FSharp_Core_Pkg)' == ''" />
   <Import Project="$(FBWorkspaceDir)/.full-build/packages/NUnit/package.targets" Condition="'$(FullBuild_NUnit_Pkg)' == ''" />
   <Choose>
-    <When Condition="True">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
       <ItemGroup>
-        <Reference Include="FsUnit.CustomMatchers">
-          <HintPath>$(FBWorkspaceDir)/.full-build/packages/fsunit/lib/FsUnit.CustomMatchers.dll</HintPath>
+        <Reference Include="FsUnit.NUnit">
+          <HintPath>$(FBWorkspaceDir)/.full-build/packages/fsunit/lib/net45/FsUnit.NUnit.dll</HintPath>
           <Private>true</Private>
         </Reference>
-        <Reference Include="FsUnit.NUnit">
-          <HintPath>$(FBWorkspaceDir)/.full-build/packages/fsunit/lib/FsUnit.NUnit.dll</HintPath>
+        <Reference Include="NHamcrest">
+          <HintPath>$(FBWorkspaceDir)/.full-build/packages/fsunit/lib/net45/NHamcrest.dll</HintPath>
           <Private>true</Private>
         </Reference>
       </ItemGroup>

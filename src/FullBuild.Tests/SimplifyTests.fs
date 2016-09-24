@@ -5,11 +5,12 @@ open NUnit.Framework
 open Anthology
 open StringHelpers
 open System.IO
+open TestHelpers
 
 
 [<Test>]
 let CheckSimplifyAssemblies () =
-    let file = FileInfo("anthology-indexed.yaml")
+    let file = FileInfo(testFile "anthology-indexed.yaml")
     let anthology = AnthologySerializer.Load file
 
     let package2Files = Map.empty
@@ -36,10 +37,10 @@ let CheckSimplifyAssemblies () =
 
 [<Test>]
 let CheckSimplifyAnthology () =
-    let fileIndexed = FileInfo("anthology-indexed.yaml")
+    let fileIndexed = FileInfo(testFile "anthology-indexed.yaml")
     let anthology = AnthologySerializer.Load fileIndexed
 
-    let fileSimplified = FileInfo("anthology-simplified.yaml")
+    let fileSimplified = FileInfo(testFile "anthology-simplified.yaml")
     let expectedAnthology = AnthologySerializer.Load fileSimplified
 
     let package2files = Map [ (PackageId.from "log4net", Set [AssemblyId.from "log4net"])

@@ -10,12 +10,13 @@ open FsUnit
 open Anthology
 open StringHelpers
 open MsBuildHelpers
+open TestHelpers
 
 let XDocumentLoader (loadPackagesConfig : bool) (fi : FileInfo) : XDocument option =
     match fi.Name with
-    | "packages.config" -> if loadPackagesConfig then Some (XDocument.Load ("packages.xml"))
+    | "packages.config" -> if loadPackagesConfig then Some (XDocument.Load (testFile "packages.xml"))
                            else None
-    | x -> if fi.Exists then Some (XDocument.Load (x))
+    | x -> if fi.Exists then Some (XDocument.Load (testFile x))
            else None
 
 [<Test>]
@@ -43,7 +44,7 @@ let CheckBasicParsingCSharp () =
                                  { Id=PackageId.from "NUnit"; Version=PackageVersion.PackageVersion "2.6.3" }
                                  { Id=PackageId.from "xunit"; Version=PackageVersion.PackageVersion "1.9.1" } ]
     
-    let file = FileInfo ("./CSharpProjectSample1.csproj")
+    let file = FileInfo (testFile "./CSharpProjectSample1.csproj")
     let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
     prjDescriptor.Project.UniqueProjectId |> should equal (ProjectUniqueId.from (ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396"))
     prjDescriptor.Packages |> should equal expectedPackages
@@ -51,25 +52,25 @@ let CheckBasicParsingCSharp () =
 
 [<Test>]
 let CheckTestsProject () =
-    let file = FileInfo ("./CSharpProjectSample1.Tests.csproj")
+    let file = FileInfo (testFile "./CSharpProjectSample1.Tests.csproj")
     let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
     prjDescriptor.Project.HasTests |> should equal true
 
 [<Test>]
 let CheckBasicParsingFSharp () =
-    let file = FileInfo ("./FSharpProjectSample1.fsproj")
+    let file = FileInfo (testFile "./FSharpProjectSample1.fsproj")
     let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
     prjDescriptor.Project.UniqueProjectId |> should equal (ProjectUniqueId.from (ParseGuid "5fde3939-c144-4287-bc57-a96ec2d1a9da"))
 
 [<Test>]
 let CheckParseVirginProject () =
-    let file = FileInfo ("./VirginProject.csproj")
+    let file = FileInfo (testFile "./VirginProject.csproj")
     let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from "CassandraSharp"]
 
 [<Test>]
 let CheckParsePaketizedProject () =
-    let file = FileInfo ("./Paket.fsproj")
+    let file = FileInfo (testFile "./Paket.fsproj")
     let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader false) file.Directory (RepositoryId.from "Test") file
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from "CassandraSharp"]
     prjDescriptor.Project.PackageReferences |> should equal (Set [ PackageId.from "FSharp.Core"; PackageId.from "UnionArgParser" ])
@@ -115,7 +116,7 @@ let CheckParseConvertedProject () =
                                                       PackageId.from "xunit" ]
                             ProjectReferences = Set [ ProjectId.from "cassandrasharp.interfaces" ] }
 
-    let projectFile = FileInfo ("./ConvertedProject.csproj")
+    let projectFile = FileInfo (testFile "./ConvertedProject.csproj")
     let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader true) projectFile.Directory (RepositoryId.from "Test") projectFile
 
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from "cassandrasharp.interfaces"]
@@ -149,7 +150,7 @@ let CheckParseConvertedProjectWithoutPackagesConfig () =
                                                       PackageId.from "Rx-PlatformServices" ]
                             ProjectReferences = Set [ ProjectId.from "cassandrasharp.interfaces" ] }
 
-    let projectFile = FileInfo ("./ConvertedProject.csproj")
+    let projectFile = FileInfo (testFile "./ConvertedProject.csproj")
     let prjDescriptor = ProjectParsing.parseProjectContent (XDocumentLoader false) projectFile.Directory (RepositoryId.from "Test") projectFile
     prjDescriptor.Project.ProjectReferences |> should equal [ProjectId.from "cassandrasharp.interfaces"]
 
@@ -158,6 +159,6 @@ let CheckParseConvertedProjectWithoutPackagesConfig () =
 
 [<Test>]
 let CheckParseInvalidProject () =
-    let projectFile = FileInfo ("./ProjectWithInvalidRefs.csproj")
+    let projectFile = FileInfo (testFile "./ProjectWithInvalidRefs.csproj")
     let getPrjDescriptor = (fun () -> ProjectParsing.parseProjectContent (XDocumentLoader true) projectFile.Directory (RepositoryId.from "Test") projectFile |> ignore)
     getPrjDescriptor |> should throw typeof<System.Exception>
