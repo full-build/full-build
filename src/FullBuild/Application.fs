@@ -48,6 +48,9 @@ let Publish (view:ViewId option) (filters : string list) (mt : bool) =
     let maxThrottle = if mt then (System.Environment.ProcessorCount*2) else 1
     apps |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
 
+    let appFolder = Env.GetFolder Env.Folder.AppOutput
+    appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter IoHelpers.ForceDelete
+
 let List () =
     let antho = Configuration.LoadAnthology ()
     antho.Applications |> Seq.iter (fun x -> printfn "%s" (x.Name.toString))
