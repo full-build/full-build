@@ -73,6 +73,7 @@
     <Compile Include="NuGetTests.fs" />
     <Compile Include="SimplifyTests.fs" />
     <Compile Include="IndexationTests.fs" />
+    <Compile Include="Integration.fs" />
     <None Include="app.config" />
     <None Include="anthology-graph.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
