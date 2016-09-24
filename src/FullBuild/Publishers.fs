@@ -46,9 +46,8 @@ let publishCopy (app : Anthology.Application) =
 
 let publishZip (app : Anthology.Application) =
     let tmpApp = { app
-                   with Name = ApplicationId.from (System.Guid.NewGuid().ToString("B"))
+                   with Name = ApplicationId.from (".tmp-" + System.Guid.NewGuid().ToString("B"))
                         Publisher = PublisherType.Copy }
-
     publishCopy tmpApp
 
     let appDir = GetFolder Env.Folder.AppOutput
@@ -57,7 +56,6 @@ let publishZip (app : Anthology.Application) =
     if targetFile.Exists then targetFile.Delete()
 
     System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Optimal, false)
-    IoHelpers.EnsureForceDelete sourceFolder 3
 
 let publishDocker (app : Anthology.Application) =
     let tmpApp = { app
