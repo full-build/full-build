@@ -55,11 +55,11 @@ let List () =
     let antho = Configuration.LoadAnthology ()
     antho.Applications |> Seq.iter (fun x -> printfn "%s" (x.Name.toString))
 
-let Add (appName : ApplicationId) (project : ProjectId) (publisher : Anthology.PublisherType) =
+let Add (appName : ApplicationId) (projects : ProjectId list) (publisher : Anthology.PublisherType) =
     let antho = Configuration.LoadAnthology ()
     let app = { Name = appName
                 Publisher = publisher
-                Project = project }
+                Projects = projects |> set }
 
     let newAntho = { antho
                      with Applications = antho.Applications |> Set.add app }

@@ -205,7 +205,7 @@ with
 type Application =
     { Name : ApplicationId
       Publisher : PublisherType
-      Project : ProjectId }
+      Projects : ProjectId set }
 
 type Anthology =
     { MinVersion : string

@@ -29,24 +29,25 @@ let private checkedExec =
 let publishCopy (app : Anthology.Application) =
     let wsDir = GetFolder Env.Folder.Workspace
     let antho = Configuration.LoadAnthology ()
-    let project = antho.Projects |> Seq.find (fun x -> x.ProjectId = app.Project)
-    let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
-    if repoDir.Exists then
-        let projFile = repoDir |> GetFile project.RelativeProjectFile.toString
-        let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name.toString projFile.FullName
+    let projects = antho.Projects |> Set.filter (fun x -> app.Projects |> Set.contains x.ProjectId)
+    for project in projects do
+        let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
+        if repoDir.Exists then
+            let projFile = repoDir |> GetFile project.RelativeProjectFile.toString
+            let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name.toString projFile.FullName
 
-        if Env.IsMono () then checkedExec "xbuild" args wsDir
-        else checkedExec "msbuild" args wsDir
+            if Env.IsMono () then checkedExec "xbuild" args wsDir
+            else checkedExec "msbuild" args wsDir
 
-        let appDir = GetFolder Env.Folder.AppOutput
-        let artifactDir = appDir |> GetSubDirectory app.Name.toString
-        Bindings.UpdateArtifactBindingRedirects artifactDir
-    else
-        printfn "[WARNING] Can't publish application %A without repository" app.Name.toString
+            let appDir = GetFolder Env.Folder.AppOutput
+            let artifactDir = appDir |> GetSubDirectory app.Name.toString
+            Bindings.UpdateArtifactBindingRedirects artifactDir
+        else
+            printfn "[WARNING] Can't publish application %A without repository" app.Name.toString
 
 let publishZip (app : Anthology.Application) =
     let tmpApp = { app
-                   with Name = ApplicationId.from (".tmp-" + System.Guid.NewGuid().ToString("B"))
+                   with Name = ApplicationId.from (".tmp-" + app.Name.toString)
                         Publisher = PublisherType.Copy }
     publishCopy tmpApp
 

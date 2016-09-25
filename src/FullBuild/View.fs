@@ -111,7 +111,7 @@ let FindViewApplications viewId =
     let viewProjectIds = viewId |> Configuration.LoadView 
                               |> FindViewProjects 
                               |> Set.map(fun x->x.ProjectId)
-    antho.Applications |> Set.filter(fun x -> viewProjectIds |> Set.contains(x.Project))
+    antho.Applications |> Set.filter(fun x -> x.Projects |> Set.intersect viewProjectIds <> Set.empty)
 
 
 let generate (viewId : ViewId) (view : View) =

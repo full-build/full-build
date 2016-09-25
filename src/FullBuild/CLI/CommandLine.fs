@@ -438,7 +438,8 @@ let commandAddApp (args : string list) =
     match args with
     | ApplicationId name
       :: PublisherType pub
-      :: [ProjectId prj] -> Command.AddApplication { Name = name; Publisher = pub; Project = prj }
+      :: projects -> let projectIds = projects |> List.map ProjectId.from
+                     Command.AddApplication { Name = name; Publisher = pub; Projects = projectIds }
     | _ -> Command.Error MainCommand.AddApp
 
 let commandDropApp (args : string list) =

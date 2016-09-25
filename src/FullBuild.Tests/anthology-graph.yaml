@@ -15,10 +15,12 @@ anthology:
   apps:
     - name: cqlplus
       type: zip
-      project: cqlplus
+      projects: 
+        - project: cqlplus
     - name: cassandrasharp-log4net
       type: zip
-      project: cassandrasharp.contrib.log4net
+      projects: 
+        - project: cassandrasharp.contrib.log4net
   projects:
     - guid: 984a4b04-c71a-4550-9193-817cfacba30a
       file: cassandra-sharp/Apache.Cassandra/Apache.Cassandra-net45.csproj

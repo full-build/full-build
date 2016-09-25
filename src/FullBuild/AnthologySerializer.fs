@@ -83,7 +83,11 @@ let Serialize (antho : Anthology) =
         let capp = AnthologyConfig.anthology_Type.apps_Item_Type()
         capp.name <- app.Name.toString
         capp.``type`` <- app.Publisher.toString
-        capp.project <- app.Project.toString
+        capp.projects.Clear ()
+        for project in app.Projects do
+            let cproject = AnthologyConfig.anthology_Type.apps_Item_Type.projects_Item_Type()
+            cproject.project <- project.toString
+            capp.projects.Add (cproject)
         config.anthology.apps.Add (capp)
 
     config.anthology.test <- antho.Tester.toString
@@ -153,8 +157,8 @@ let Deserialize (content) =
         | [] -> Set.empty
         | x :: tail -> let appName = ApplicationId.from x.name
                        let publishType = PublisherType.from x.``type``
-                       let project = x.project |> ProjectId.from
-                       let app = { Name = appName ; Publisher = publishType; Project = project }
+                       let projects = x.projects |> Seq.map (fun x -> ProjectId.from x.project) |> Set
+                       let app = { Name = appName ; Publisher = publishType; Projects = projects }
                        convertToApplications tail |> Set.add app
 
     let convertToTestRunner (item : string) =

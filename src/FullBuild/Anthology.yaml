@@ -18,7 +18,9 @@
     apps:
         - name: FullBuild
           type: copy
-          project: fullbuild
+          projects:
+            - project: fullbuild1
+            - project: fullbuild2
     projects:
         - guid: f2a71f9b-5d33-465a-a702-920d77279786
           file: src/Project.csproj
