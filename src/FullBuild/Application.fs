@@ -51,9 +51,15 @@ let Publish (view:ViewId option) (filters : string list) (mt : bool) =
     let appFolder = Env.GetFolder Env.Folder.AppOutput
     appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter IoHelpers.ForceDelete
 
+let displayApp (app : Anthology.Application) =
+    printf "%s [" app.Name.toString
+    for project in app.Projects do
+        printf "%s" project.toString
+    printfn "] => %s" app.Publisher.toString
+
 let List () =
     let antho = Configuration.LoadAnthology ()
-    antho.Applications |> Seq.iter (fun x -> printfn "%s" (x.Name.toString))
+    antho.Applications |> Seq.iter displayApp
 
 let Add (appName : ApplicationId) (projects : ProjectId list) (publisher : Anthology.PublisherType) =
     let antho = Configuration.LoadAnthology ()
