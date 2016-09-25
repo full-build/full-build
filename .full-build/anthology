@@ -19,10 +19,12 @@ anthology:
   apps:
     - name: full-build
       type: copy
-      project: fullbuild
+      projects:
+        - project: fullbuild
     - name: full-build.zip
       type: zip
-      project: fullbuild
+      projects: 
+        - project: fullbuild
   projects:
     - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
       file: src/FullBuild.Tests/FullBuild.Tests.fsproj

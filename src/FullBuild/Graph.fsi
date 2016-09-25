@@ -52,7 +52,7 @@ type Application = interface System.IComparable
 with
     member Name : string
     member Publisher : PublisherType
-    member Project : Project
+    member Projects : Project set
 
 and [<Sealed>] Repository = interface System.IComparable
 with
@@ -72,7 +72,7 @@ with
     member FxIdentifier : string
     member HasTests : bool
     member Repository : Repository
-    member Application : Application option
+    member Applications : Application set
     member ReferencedBy : Project set
     member References : Project set
     member AssemblyReferences : Assembly set

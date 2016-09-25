@@ -74,7 +74,7 @@ type BranchWorkspace =
 type AddApplication =
     { Name : ApplicationId
       Publisher : PublisherType
-      Project : ProjectId }
+      Projects : ProjectId list }
 
 type BuildView =
     { Name : ViewId option

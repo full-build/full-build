@@ -60,9 +60,10 @@ type Application =
                                 | Anthology.PublisherType.Zip -> PublisherType.Zip
                                 | Anthology.PublisherType.Docker -> PublisherType.Docker
 
-        member this.Project : Project =
-            { Anthology = this.Anthology
-              Project = this.Anthology.Projects |> Seq.find (fun x -> x.ProjectId = this.Application.Project) }
+        member this.Projects : Project set =
+            this.Anthology.Projects |> Set.filter (fun x -> this.Application.Projects |> Set.contains x.ProjectId)
+                                    |> Set.map (fun x -> { Anthology = this.Anthology
+                                                           Project = x })
 
 and Repository =
     { Anthology : Anthology.Anthology
@@ -87,12 +88,10 @@ and Project =
             { Anthology = this.Anthology
               Repository = this.Anthology.Repositories |> Seq.find (fun x -> x.Repository.Name = this.Project.Repository) }
 
-        member this.Application =
-            let app = this.Anthology.Applications |> Seq.tryFind (fun x -> x.Project = this.Project.ProjectId)
-            match app with
-            | Some x -> Some { Anthology = this.Anthology
-                               Application = x }
-            | _ -> None
+        member this.Applications =
+            this.Anthology.Applications |> Set.filter (fun x -> x.Projects |> Set.contains this.Project.ProjectId)
+                                        |> Set.map (fun x -> { Anthology = this.Anthology
+                                                               Application = x })
 
         member this.References =
             this.Anthology.Projects |> Set.filter (fun x -> this.Project.ProjectReferences |> Set.contains x.ProjectId) 
