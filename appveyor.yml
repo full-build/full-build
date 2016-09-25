@@ -6,7 +6,7 @@ environment:
 
 skip_tags: true
 
-version: 2.5.{build}
+version: 2.6.{build}
 
 shallow_clone: true
 
