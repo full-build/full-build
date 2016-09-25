@@ -67,7 +67,6 @@ anthology:
         - package: FSharp.Configuration
         - package: FSharp.Core
         - package: FSharp.Data
-        - package: Mono.Cecil
       projects: []
     - guid: 4198a8ad-aa7a-45b2-8086-646b8715bec6
       file: tests/LibProject/LibProject.csproj
