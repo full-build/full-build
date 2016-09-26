@@ -54,7 +54,7 @@ let Publish (view:ViewId option) (filters : string list) (mt : bool) =
 let displayApp (app : Anthology.Application) =
     printf "%s [" app.Name.toString
     for project in app.Projects do
-        printf "%s" project.toString
+        printf "%s " project.toString
     printfn "] => %s" app.Publisher.toString
 
 let List () =
