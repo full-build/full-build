@@ -123,17 +123,32 @@ and Project =
                                                            Project = x })
 
         member this.RelativeProjectFile = this.Project.RelativeProjectFile.toString
+
         member this.UniqueProjectId = this.Project.UniqueProjectId.toString
+
         member this.Output = { Anthology = this.Anthology
                                Assembly = this.Project.Output }
+
         member this.ProjectId = this.Project.ProjectId.toString
+
         member this.OutputType = match this.Project.OutputType with
                                  | Anthology.OutputType.Dll -> OutputType.Dll
                                  | Anthology.OutputType.Exe -> OutputType.Exe
-        member this.FxVersion = this.Project.FxVersion.toString
-        member this.FxProfile = this.Project.FxProfile.toString
-        member this.FxIdentifier = this.Project.FxIdentifier.toString
+
+        member this.FxVersion = match this.Project.FxVersion.toString with
+                                | null -> None
+                                | x -> Some x
+
+        member this.FxProfile = match this.Project.FxProfile.toString with
+                                | null -> None
+                                | x -> Some x
+
+        member this.FxIdentifier = match this.Project.FxIdentifier.toString with
+                                   | null -> None
+                                   | x -> Some x
+
         member this.HasTests = this.Project.HasTests
+
         member this.AssemblyReferences = this.Project.AssemblyReferences |> Set.map (fun x -> { Anthology = this.Anthology
                                                                                                 Assembly = x })
         member this.PackageReferences = this.Project.PackageReferences |> Set.map (fun x -> { Anthology = this.Anthology
