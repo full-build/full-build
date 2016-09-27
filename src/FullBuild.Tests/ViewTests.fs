@@ -4,7 +4,6 @@ open System.IO
 open NUnit.Framework
 open FsUnit
 open Anthology
-open View
 open StringHelpers
 open Solution
 
@@ -228,36 +227,51 @@ let CheckSelectAllProjectSourceOnly () =
 
 [<Test>]
 let CheckGenerateSolution () =
-    let projects = [ { Repository = RepositoryId.from "cassandra-sharp-contrib"
-                       ProjectId = ProjectId.from "CassandraSharp.Contrib.log4net"
-                       RelativeProjectFile = ProjectRelativeFile "CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj"
-                       UniqueProjectId = ProjectUniqueId.from (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
-                       Output = AssemblyId.from "CassandraSharp.Contrib.log4net"
-                       OutputType = OutputType.Dll
-                       FxVersion = FxInfo.from "v4.5"
-                       FxProfile = FxInfo.from null
-                       FxIdentifier = FxInfo.from null
-                       HasTests = false
-                       AssemblyReferences = [ AssemblyId.from "System" ] |> set
-                       PackageReferences = [ PackageId.from "log4net"
-                                             PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"; PackageId.from "Rx-Linq"; PackageId.from "Rx-Main"; PackageId.from "Rx-PlatformServices" ] |> set
-                       ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces" ] |> set}
-                     { Repository = RepositoryId.from "cassandra-sharp-contrib"
-                       ProjectId = ProjectId.from "CassandraSharp.Contrib.log4netUnitTests"
-                       RelativeProjectFile = ProjectRelativeFile "CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"
-                       UniqueProjectId = ProjectUniqueId.from (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
-                       Output = AssemblyId.from "CassandraSharp.Contrib.log4netUnitTests"
-                       OutputType = OutputType.Dll
-                       FxVersion = FxInfo.from "v4.5"
-                       FxProfile = FxInfo.from null
-                       FxIdentifier = FxInfo.from null
-                       HasTests = false
-                       AssemblyReferences = [ AssemblyId.from "System"; AssemblyId.from "System.Core" ] |> set
-                       PackageReferences = [ PackageId.from "log4net" 
-                                             PackageId.from "NUnit"; PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"; PackageId.from "Rx-Linq"; PackageId.from "Rx-Main"; PackageId.from "Rx-PlatformServices" ] |> set
-                       ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.contrib.log4net" ] |> set } ]
+    let anthoProjects = [ { Repository = RepositoryId.from "cassandra-sharp-contrib"
+                            ProjectId = ProjectId.from "CassandraSharp.Contrib.log4net"
+                            RelativeProjectFile = ProjectRelativeFile "CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj"
+                            UniqueProjectId = ProjectUniqueId.from (ParseGuid "925833ed-8653-4e90-9c37-b5b6cb693cf4")
+                            Output = AssemblyId.from "CassandraSharp.Contrib.log4net"
+                            OutputType = OutputType.Dll
+                            FxVersion = FxInfo.from "v4.5"
+                            FxProfile = FxInfo.from null
+                            FxIdentifier = FxInfo.from null
+                            HasTests = false
+                            AssemblyReferences = [ AssemblyId.from "System" ] |> set
+                            PackageReferences = [ PackageId.from "log4net"
+                                                  PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"; PackageId.from "Rx-Linq"; PackageId.from "Rx-Main"; PackageId.from "Rx-PlatformServices" ] |> set
+                            ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces" ] |> set}
+                          { Repository = RepositoryId.from "cassandra-sharp-contrib"
+                            ProjectId = ProjectId.from "CassandraSharp.Contrib.log4netUnitTests"
+                            RelativeProjectFile = ProjectRelativeFile "CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj"
+                            UniqueProjectId = ProjectUniqueId.from (ParseGuid "9e8648a4-d25a-4cfa-aaee-20d9d63ff571")
+                            Output = AssemblyId.from "CassandraSharp.Contrib.log4netUnitTests"
+                            OutputType = OutputType.Dll
+                            FxVersion = FxInfo.from "v4.5"
+                            FxProfile = FxInfo.from null
+                            FxIdentifier = FxInfo.from null
+                            HasTests = false
+                            AssemblyReferences = [ AssemblyId.from "System"; AssemblyId.from "System.Core" ] |> set
+                            PackageReferences = [ PackageId.from "log4net" 
+                                                  PackageId.from "NUnit"; PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"; PackageId.from "Rx-Linq"; PackageId.from "Rx-Main"; PackageId.from "Rx-PlatformServices" ] |> set
+                            ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.contrib.log4net" ] |> set } ] |> set
 
-    let content = GenerateSolutionContent projects
+    let antho = {
+        MinVersion = "1.2.3.4"
+        Artifacts = @"c:\toto"
+        NuGets = []
+        MasterRepository = { Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" ; Branch = None}
+        Repositories = [ { Builder = BuilderType.MSBuild
+                           Repository = { Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" ; Branch = None} }
+                         { Builder = BuilderType.MSBuild
+                           Repository = { Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib" ; Branch = None} } ] |> set
+        Projects = anthoProjects
+        Applications = Set.empty 
+        Tester = TestRunnerType.NUnit 
+        Vcs = VcsType.Git }
+
+    let graph = antho |> Graph.from 
+    let content = GenerateSolutionContent graph.Projects
 
     // NOTE: CassandraSharp.Contrib.log4netUnitTests must depend on CassandraSharp.Contrib.log4net
     //       other dependencies must not be set as outside solution scope (ie: no build order to be specified)
