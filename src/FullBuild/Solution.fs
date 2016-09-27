@@ -21,7 +21,7 @@ open Graph
 open Collections
 
 
-let ProjectToProjectType (filename : string) =
+let projectToProjectType (filename : string) =
     let file = FileInfo(filename)
     let ext2projType = Map [ (".csproj", "fae04ec0-301f-11d3-bf4b-00c04f79efbc")
                              (".fsproj", "f2a71f9b-5d33-465a-a702-920d77279786")
@@ -38,7 +38,7 @@ let GenerateSolutionContent (projects : Project set) =
 
         for project in projects do
             yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""{%s}"""
-                  (ProjectToProjectType (project.RelativeProjectFile))
+                  (projectToProjectType (project.RelativeProjectFile))
                   (Path.GetFileNameWithoutExtension (project.RelativeProjectFile))
                   (sprintf "%s/%s" (project.Repository.Name) project.RelativeProjectFile)
                   (project.UniqueProjectId)
@@ -86,8 +86,9 @@ let GenerateSolutionContent (projects : Project set) =
     }
 
 let GenerateSolutionDefines (projects : Project set) =
-    XElement (NsMsBuild + "Project",
-        XAttribute(NsNone + "Condition", "'$(FullBuild_Config)' == ''"),
-        XElement (NsMsBuild + "PropertyGroup",
-            XElement(NsMsBuild + "FullBuild_Config", "Y"),
-                projects |> Seq.map (fun x -> XElement (NsMsBuild + (MsBuildProjectPropertyName x), "Y") ) ) )
+    XDocument (
+        XElement(NsMsBuild + "Project",
+            XAttribute(NsNone + "Condition", "'$(FullBuild_Config)' == ''"),
+                XElement (NsMsBuild + "PropertyGroup",
+                    XElement(NsMsBuild + "FullBuild_Config", "Y"),
+                        projects |> Seq.map (fun x -> XElement (NsMsBuild + (MsBuildProjectPropertyName x), "Y") ) ) ) )
