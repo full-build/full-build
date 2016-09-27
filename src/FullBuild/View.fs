@@ -119,7 +119,8 @@ let generate (viewId : ViewId) (view : View) =
 
     // HACK BEGIN
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let projects = graph.Projects |> Set.filter (fun x -> legacyProjects |> Set.exists (fun y -> y.ProjectId.toString = x.ProjectId))
+    let projects = graph.Projects |> Seq.filter (fun x -> legacyProjects |> Set.exists (fun y -> y.ProjectId.toString = x.ProjectId))
+                                  |> set
     // HACK END
 
     // generate solution defines
@@ -173,7 +174,8 @@ let Graph (viewId : ViewId) (all : bool) =
 
     // HACK BEGIN
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let projects = graph.Projects |> Set.filter (fun x -> legacyProjects |> Set.exists (fun y -> y.ProjectId.toString = x.ProjectId))
+    let projects = graph.Projects |> Seq.filter (fun x -> legacyProjects |> Set.exists (fun y -> y.ProjectId.toString = x.ProjectId))
+                                  |> set
     // HACK END
 
     let graph = Dgml.GraphContent projects all

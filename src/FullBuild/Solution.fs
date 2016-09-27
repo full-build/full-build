@@ -91,4 +91,4 @@ let GenerateSolutionDefines (projects : Project set) =
             XAttribute(NsNone + "Condition", "'$(FullBuild_Config)' == ''"),
                 XElement (NsMsBuild + "PropertyGroup",
                     XElement(NsMsBuild + "FullBuild_Config", "Y"),
-                        projects |> Seq.map (fun x -> XElement (NsMsBuild + (MsBuildProjectPropertyName x), "Y") ) ) ) )
+                    projects |> Seq.map (fun x -> XElement (NsMsBuild + (MsBuildProjectPropertyName x), "Y") ) ) ) )
