@@ -168,10 +168,15 @@ let Describe (viewId : ViewId) =
 
 
 let Graph (viewId : ViewId) (all : bool) =
-    let antho = Configuration.LoadAnthology ()
     let view = Configuration.LoadView viewId
-    let projects = FindViewProjects view |> Set
-    let graph = Dgml.GraphContent antho projects all
+    let legacyProjects = FindViewProjects view |> Set
+
+    // HACK BEGIN
+    let graph = Configuration.LoadAnthology() |> Graph.from
+    let projects = graph.Projects |> Set.filter (fun x -> legacyProjects |> Set.exists (fun y -> y.ProjectId.toString = x.ProjectId))
+    // HACK END
+
+    let graph = Dgml.GraphContent projects all
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml viewId.toString)
