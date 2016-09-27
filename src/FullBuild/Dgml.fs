@@ -14,37 +14,37 @@
 
 module Dgml
 open System.Xml.Linq
-open Anthology
 open Collections
 open MsBuildHelpers
+open Graph
 
 let GenerateProjectNode (project : Project) =
     let isTest = project.HasTests
     let cat = if isTest then "TestProject"
               else "Project"
 
-    let label = System.IO.Path.GetFileNameWithoutExtension(project.RelativeProjectFile.toString)
-    let output = project.Output.toString
-    let outputType = project.OutputType.toString
+    let label = System.IO.Path.GetFileNameWithoutExtension(project.RelativeProjectFile)
+    let output = project.Output
+    let outputType = project.OutputType
 
-    let fxVersion = match project.FxVersion.toString with
-                    | null -> null
-                    | x -> XAttribute(NsNone + "FxVersion", x)
+    let fxVersion = match project.FxVersion with
+                    | Some x -> XAttribute(NsNone + "FxVersion", x)
+                    | None -> null
 
-    let fxProfile = match project.FxProfile.toString with
-                    | null -> null
-                    | x -> XAttribute(NsNone + "FxProfile", x)
+    let fxProfile = match project.FxProfile with
+                    | Some x -> XAttribute(NsNone + "FxProfile", x)
+                    | None -> null
 
-    let fxId = match project.FxIdentifier.toString with
-               | null -> null
-               | x -> XAttribute(NsNone + "FxIdentifier", x)
+    let fxId = match project.FxIdentifier with
+               | Some x -> XAttribute(NsNone + "FxIdentifier", x)
+               | None -> null
 
     XElement(NsDgml + "Node",
-        XAttribute(NsNone + "Id", project.UniqueProjectId.toString),
+        XAttribute(NsNone + "Id", project.UniqueProjectId),
         XAttribute(NsNone + "Label", label),
         XAttribute(NsNone + "Category", cat),
         fxVersion, fxProfile, fxId,
-        XAttribute(NsNone + "Guid", project.UniqueProjectId.toString),
+        XAttribute(NsNone + "Guid", project.UniqueProjectId),
         XAttribute(NsNone + "IsTest", isTest),
         XAttribute(NsNone + "Output", output),
         XAttribute(NsNone + "OutputType", outputType))
@@ -61,7 +61,7 @@ let GenerateLink (source : string) (target : string) (category : string) =
         XAttribute(NsNone + "Target", target),
         XAttribute(NsNone + "Category", category))
 
-let GraphNodes (projects : Project set) (allProjects : Project set) (packages : PackageId set) (assemblies : AssemblyId set) (repos : RepositoryId set) =
+let GraphNodes (projects : Project set) (allProjects : Project set) (packages : Package set) (assemblies : Assembly set) (repos : Repository set) =
     let importedProjects = Set.difference allProjects projects
 
     seq {
@@ -81,19 +81,19 @@ let GraphNodes (projects : Project set) (allProjects : Project set) (packages : 
             yield GenerateProjectNode project
 
         for project in importedProjects do
-            yield GenerateNode (project.UniqueProjectId.toString) (project.Output.toString) "ProjectImport"
+            yield GenerateNode (project.UniqueProjectId) (project.Output.Name) "ProjectImport"
 
         for repo in repos do
             yield XElement(NsDgml + "Node",
-                XAttribute(NsNone + "Id", repo.toString),
-                XAttribute(NsNone + "Label", repo.toString),
+                XAttribute(NsNone + "Id", repo.Name),
+                XAttribute(NsNone + "Label", repo),
                 XAttribute(NsNone + "Group", "Expanded"))
 
         for package in packages do
-            yield GenerateNode (package.toString) (package.toString) "Package"
+            yield GenerateNode (package.Name) (package.Name) "Package"
 
         for assembly in assemblies do
-            yield GenerateNode (assembly.toString) (assembly.toString) "Assembly"
+            yield GenerateNode (assembly.Name) (assembly.Name) "Assembly"
     }
 
 let GraphLinks (projects : Project set) (allProjects : Project set) =
@@ -101,34 +101,33 @@ let GraphLinks (projects : Project set) (allProjects : Project set) =
 
     seq {
         for project in projects do
-            yield GenerateLink (project.Repository.toString) (project.UniqueProjectId.toString) "Contains"
+            yield GenerateLink (project.Repository.Name) (project.UniqueProjectId) "Contains"
 
         for project in importedProjects do
-            yield GenerateLink (project.Repository.toString) (project.UniqueProjectId.toString) "Contains"
+            yield GenerateLink (project.Repository.Name) (project.UniqueProjectId) "Contains"
 
         for project in projects do
-            for projectRef in project.ProjectReferences do
-                let target = allProjects |> Seq.find (fun x -> x.ProjectId = projectRef)
-                yield GenerateLink (project.UniqueProjectId.toString) (target.UniqueProjectId.toString) "ProjectRef"
-
-        for project in projects do
-            for package in project.PackageReferences do
-                yield GenerateLink (project.UniqueProjectId.toString) (package.toString) "PackageRef"
-
-        for project in projects do
-            for assembly in project.AssemblyReferences do
-                yield GenerateLink (project.UniqueProjectId.toString) (assembly.toString) "AssemblyRef"
+            for reference in project.References do
+                yield GenerateLink (project.UniqueProjectId) (reference.UniqueProjectId) "ProjectRef"
 
         for project in projects do
             for package in project.PackageReferences do
-                yield GenerateLink "Packages" (package.toString) "Contains"
+                yield GenerateLink (project.UniqueProjectId) (package.Name) "PackageRef"
 
         for project in projects do
             for assembly in project.AssemblyReferences do
-                yield GenerateLink "Assemblies" (assembly.toString) "Contains"
+                yield GenerateLink (project.UniqueProjectId) (assembly.Name) "AssemblyRef"
+
+        for project in projects do
+            for package in project.PackageReferences do
+                yield GenerateLink "Packages" (package.Name) "Contains"
+
+        for project in projects do
+            for assembly in project.AssemblyReferences do
+                yield GenerateLink "Assemblies" (assembly.Name) "Contains"
     }
 
-let GraphCategories (repos : RepositoryId set) =
+let GraphCategories (repos : Repository set) =
     let allCategories = [ ("Project", "Green")
                           ("TestProject", "Purple")
                           ("ProjectImport", "Navy")
@@ -149,8 +148,8 @@ let GraphCategories (repos : RepositoryId set) =
 
         for repo in repos do
             yield XElement(NsDgml + "Category",
-                XAttribute(NsNone + "Id", repo.toString),
-                XAttribute(NsNone + "Label", repo.toString),
+                XAttribute(NsNone + "Id", repo.Name),
+                XAttribute(NsNone + "Label", repo.Name),
                 XAttribute(NsNone + "IsContainment", "True"),
                 XAttribute(NsNone + "CanBeDataDriven", "False"),
                 XAttribute(NsNone + "CanLinkedNodesBeDataDriven", "True"),
@@ -188,21 +187,16 @@ let GraphStyles () =
             XElement(NsDgml + "Setter", XAttribute(NsNone + "Property", "Icon"), XAttribute(NsNone + "Value", "CodeSchema_Method"))))
 
 
-let GraphContent (antho : Anthology) (projects : Project set) (all : bool) =
-    let nonExeProjects = if all then projects
-                         else projects |> Set.filter (fun x -> x.ProjectId.toString.IndexOf(".test", System.StringComparison.InvariantCultureIgnoreCase) = -1)
-
-    let allProjects = nonExeProjects |> Set.map (fun x -> x.ProjectReferences)
-                                     |> Set.unionMany
-                                     |> Set.union (nonExeProjects |> Set.map(fun x -> x.ProjectId))
-                                     |> Set.map (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectId = x))
-    let repos = allProjects |> Set.map (fun x -> x.Repository)
-    let packages = nonExeProjects |> Set.map (fun x -> x.PackageReferences)
-                                  |> Set.unionMany
-    let assemblies = nonExeProjects |> Set.map (fun x -> x.AssemblyReferences)
-                                    |> Set.unionMany
-    let xNodes = XElement(NsDgml + "Nodes", GraphNodes nonExeProjects allProjects packages assemblies repos)
-    let xLinks = XElement(NsDgml+"Links", GraphLinks nonExeProjects allProjects)
+let GraphContent (projects : Project set) (all : bool) =
+    let srcProjects = if all then projects
+                      else projects |> Set.filter (fun x -> x.HasTests |> not)
+    let repos = srcProjects |> Set.map (fun x -> x.Repository)
+    let packages = srcProjects |> Set.map (fun x -> x.PackageReferences)
+                               |> Set.unionMany
+    let assemblies = srcProjects |> Set.map (fun x -> x.AssemblyReferences)
+                                 |> Set.unionMany
+    let xNodes = XElement(NsDgml + "Nodes", GraphNodes srcProjects projects packages assemblies repos)
+    let xLinks = XElement(NsDgml+"Links", GraphLinks srcProjects projects)
     let xCategories = XElement(NsDgml + "Categories", GraphCategories repos)
     let xProperties = XElement(NsDgml + "Properties", GraphProperties ())
     let xStyles = GraphStyles ()
