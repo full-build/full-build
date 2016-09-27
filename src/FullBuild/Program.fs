@@ -20,6 +20,8 @@ let tryMain argv =
     Configuration.CheckMinVersion ()
 
     let cmd = CommandLine.Parse (argv |> Seq.toList)
+
+    let stopWatch = System.Diagnostics.Stopwatch.StartNew()
     match cmd with
     // workspace
     | Command.SetupWorkspace wsInfo -> Workspace.Create wsInfo.Path wsInfo.MasterRepository wsInfo.MasterArtifacts wsInfo.Type
@@ -75,6 +77,9 @@ let tryMain argv =
     | Command.Version -> CommandLine.PrintVersion ()
     | Command.Usage -> CommandLine.PrintUsage MainCommand.Unknown
     | Command.Error errInfo -> CommandLine.PrintUsage errInfo
+
+    stopWatch.Stop()
+    printfn "Completed in %d seconds." ((int)stopWatch.Elapsed.TotalSeconds)
 
     let retCode = match cmd with
                   | Command.Error _ -> 5
