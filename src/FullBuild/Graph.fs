@@ -66,9 +66,9 @@ type Application =
                                 | Anthology.PublisherType.Zip -> PublisherType.Zip
                                 | Anthology.PublisherType.Docker -> PublisherType.Docker
 
-        member this.Projects : Project set =
-            this.Anthology.Projects |> Set.filter (fun x -> this.Application.Projects |> Set.contains x.ProjectId)
-                                    |> Set.map (fun x -> { Anthology = this.Anthology
+        member this.Projects =
+            this.Anthology.Projects |> Seq.filter (fun x -> this.Application.Projects |> Set.contains x.ProjectId)
+                                    |> Seq.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
 
 and Repository =
@@ -95,8 +95,8 @@ and Repository =
         member this.Uri = this.Repository.Repository.Url.toString
 
         member this.Projects =
-            this.Anthology.Projects |> Set.filter (fun x -> x.Repository = this.Repository.Repository.Name)
-                                    |> Set.map (fun x -> { Anthology = this.Anthology
+            this.Anthology.Projects |> Seq.filter (fun x -> x.Repository = this.Repository.Repository.Name)
+                                    |> Seq.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
 
 and Project =
@@ -108,18 +108,18 @@ and Project =
               Repository = this.Anthology.Repositories |> Seq.find (fun x -> x.Repository.Name = this.Project.Repository) }
 
         member this.Applications =
-            this.Anthology.Applications |> Set.filter (fun x -> x.Projects |> Set.contains this.Project.ProjectId)
-                                        |> Set.map (fun x -> { Anthology = this.Anthology
+            this.Anthology.Applications |> Seq.filter (fun x -> x.Projects |> Set.contains this.Project.ProjectId)
+                                        |> Seq.map (fun x -> { Anthology = this.Anthology
                                                                Application = x })
 
         member this.References =
-            this.Anthology.Projects |> Set.filter (fun x -> this.Project.ProjectReferences |> Set.contains x.ProjectId) 
-                                    |> Set.map (fun x -> { Anthology = this.Anthology
+            this.Anthology.Projects |> Seq.filter (fun x -> this.Project.ProjectReferences |> Set.contains x.ProjectId) 
+                                    |> Seq.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
 
         member this.ReferencedBy =
-            this.Anthology.Projects |> Set.filter (fun x -> x.ProjectReferences |> Set.contains this.Project.ProjectId) 
-                                    |> Set.map (fun x -> { Anthology = this.Anthology
+            this.Anthology.Projects |> Seq.filter (fun x -> x.ProjectReferences |> Set.contains this.Project.ProjectId) 
+                                    |> Seq.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
 
         member this.RelativeProjectFile = this.Project.RelativeProjectFile.toString
@@ -149,25 +149,27 @@ and Project =
 
         member this.HasTests = this.Project.HasTests
 
-        member this.AssemblyReferences = this.Project.AssemblyReferences |> Set.map (fun x -> { Anthology = this.Anthology
-                                                                                                Assembly = x })
-        member this.PackageReferences = this.Project.PackageReferences |> Set.map (fun x -> { Anthology = this.Anthology
-                                                                                              Package = x })
+        member this.AssemblyReferences = 
+            this.Project.AssemblyReferences |> Seq.map (fun x -> { Anthology = this.Anthology
+                                                                   Assembly = x })
+        member this.PackageReferences = 
+            this.Project.PackageReferences |> Seq.map (fun x -> { Anthology = this.Anthology
+                                                                  Package = x })
 
 
 and Graph =
     { Anthology : Anthology.Anthology }
     with
         member this.Projects =
-            this.Anthology.Projects |> Set.map (fun x -> { Anthology = this.Anthology
+            this.Anthology.Projects |> Seq.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
 
         member this.Applications =
-            this.Anthology.Applications |> Set.map (fun x -> { Anthology = this.Anthology
+            this.Anthology.Applications |> Seq.map (fun x -> { Anthology = this.Anthology
                                                                Application = x })
 
         member this.Repositories =
-            this.Anthology.Repositories |> Set.map (fun x -> { Anthology = this.Anthology
+            this.Anthology.Repositories |> Seq.map (fun x -> { Anthology = this.Anthology
                                                                Repository = x })
 
 let from (antho : Anthology.Anthology) : Graph =

@@ -14,8 +14,6 @@
 
 module Graph
 
-open Collections
-
 [<RequireQualifiedAccess>] 
 type PackageVersion =
     | PackageVersion of string
@@ -58,13 +56,13 @@ type Application = interface System.IComparable
 with
     member Name : string
     member Publisher : PublisherType
-    member Projects : Project set
+    member Projects : Project seq
 
 and [<Sealed>] Repository = interface System.IComparable
 with
     member Name : string
     member Builder : BuilderType
-    member Projects : Project set
+    member Projects : Project seq
     member Vcs : VcsType
     member Branch : string
     member Uri : string
@@ -81,15 +79,15 @@ with
     member FxIdentifier : string option
     member HasTests : bool
     member Repository : Repository
-    member Applications : Application set
-    member ReferencedBy : Project set
-    member References : Project set
-    member AssemblyReferences : Assembly set
-    member PackageReferences : Package set
+    member Applications : Application seq
+    member ReferencedBy : Project seq
+    member References : Project seq
+    member AssemblyReferences : Assembly seq
+    member PackageReferences : Package seq
 
 type [<Sealed>] Graph =
-    member Projects : Project set
-    member Applications : Application set    
-    member Repositories : Repository set   
+    member Projects : Project seq
+    member Applications : Application seq    
+    member Repositories : Repository seq   
 
 val from : Anthology.Anthology -> Graph 

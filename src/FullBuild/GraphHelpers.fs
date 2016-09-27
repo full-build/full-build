@@ -4,13 +4,13 @@ open Collections
 
 let ComputeTransitiveReferences (seeds : Project set) : Project set =
     let rec collectChildren (project : Project) =
-        let allChildren = project.References
+        let allChildren = project.References |> set
         allChildren |> Set.fold (fun s t -> collectChildren t |> Set.union s) allChildren
     seeds |> Set.fold (fun s t -> s |> Set.union (collectChildren t)) seeds            
 
 let ComputeTransitiveReferencedBy (seeds : Project set) : Project set =
     let rec collectParents (project : Project) =
-        let allParents = project.ReferencedBy
+        let allParents = project.ReferencedBy |> set
         allParents |> Set.fold (fun s t -> collectParents t |> Set.union s) allParents
     seeds |> Set.fold (fun s t -> s |> Set.union (collectParents t)) seeds            
 
@@ -42,7 +42,7 @@ let ComputeClosure (seeds : Project set) : Project set =
             else if greenProjects |> Set.contains project then
                 (Set.empty, exploration)
             else
-                let linkProjects = project.References |> Set.union project.ReferencedBy
+                let linkProjects = project.References |> set |> Set.union (project.ReferencedBy |> set)
                 exploreProjects linkProjects linkProjects redProjects greenProjects
 
         let mutable allRedProjects = redProjects

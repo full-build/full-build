@@ -191,9 +191,9 @@ let GraphContent (projects : Project set) (all : bool) =
     let srcProjects = if all then projects
                       else projects |> Set.filter (fun x -> x.HasTests |> not)
     let repos = srcProjects |> Set.map (fun x -> x.Repository)
-    let packages = srcProjects |> Set.map (fun x -> x.PackageReferences)
+    let packages = srcProjects |> Set.map (fun x -> x.PackageReferences |> set)
                                |> Set.unionMany
-    let assemblies = srcProjects |> Set.map (fun x -> x.AssemblyReferences)
+    let assemblies = srcProjects |> Seq.map (fun x -> x.AssemblyReferences |> set)
                                  |> Set.unionMany
     let xNodes = XElement(NsDgml + "Nodes", GraphNodes srcProjects projects packages assemblies repos)
     let xLinks = XElement(NsDgml+"Links", GraphLinks srcProjects projects)

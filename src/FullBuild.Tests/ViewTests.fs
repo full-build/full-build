@@ -271,7 +271,8 @@ let CheckGenerateSolution () =
         Vcs = VcsType.Git }
 
     let graph = antho |> Graph.from 
-    let content = GenerateSolutionContent graph.Projects
+    let content = graph.Projects |> set
+                                 |> GenerateSolutionContent
 
     // NOTE: CassandraSharp.Contrib.log4netUnitTests must depend on CassandraSharp.Contrib.log4net
     //       other dependencies must not be set as outside solution scope (ie: no build order to be specified)
