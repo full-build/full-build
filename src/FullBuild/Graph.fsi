@@ -37,6 +37,12 @@ type BuilderType =
     | MSBuild
     | Skip
 
+[<RequireQualifiedAccess>]
+type VcsType =
+    | Gerrit
+    | Git
+    | Hg
+
 [<Sealed>]
 type Package  = interface System.IComparable
 with
@@ -59,6 +65,9 @@ with
     member Name : string
     member Builder : BuilderType
     member Projects : Project set
+    member Vcs : VcsType
+    member Branch : string
+    member Uri : string
 
 and [<Sealed>] Project = interface System.IComparable
 with
@@ -79,7 +88,8 @@ with
     member PackageReferences : Package set
 
 type [<Sealed>] Graph =
-    static member from : Anthology.Anthology -> Graph 
     member Projects : Project set
     member Applications : Application set    
     member Repositories : Repository set   
+
+val from : Anthology.Anthology -> Graph 

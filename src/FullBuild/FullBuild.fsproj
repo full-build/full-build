@@ -82,6 +82,10 @@
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="BaselineSerializer.fs" />
     <Compile Include="ViewSerializer.fs" />
+    <Compile Include="Graph.fsi" />
+    <Compile Include="Graph.fs" />
+    <Compile Include="GraphHelpers.fsi" />
+    <Compile Include="GraphHelpers.fs" />
     <Compile Include="MsBuildHelpers.fs" />
     <Compile Include="PaketInterface.fs" />
     <Compile Include="ProjectParsing.fs" />
@@ -94,8 +98,6 @@
     <Compile Include="CLI\CommandLine.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="AnthologyGraph.fs" />
-    <Compile Include="Graph.fsi" />
-    <Compile Include="Graph.fs" />
     <Compile Include="Repo.fs" />
     <Compile Include="Solution.fs" />
     <Compile Include="Dgml.fs" />
