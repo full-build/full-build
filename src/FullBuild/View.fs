@@ -115,7 +115,12 @@ let FindViewApplications viewId =
 
 
 let generate (viewId : ViewId) (view : View) =
-    let projects = FindViewProjects view
+    let legacyProjects = FindViewProjects view
+
+    // HACK BEGIN
+    let graph = Configuration.LoadAnthology() |> Graph.from
+    let projects = graph.Projects |> Set.filter (fun x -> legacyProjects |> Set.exists (fun y -> y.ProjectId.toString = x.ProjectId))
+    // HACK END
 
     // generate solution defines
     let slnDefines = GenerateSolutionDefines projects

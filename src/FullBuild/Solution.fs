@@ -13,12 +13,12 @@
 //   limitations under the License.
 
 module Solution
-open Anthology
 open System.IO
 open System.Xml.Linq
 open StringHelpers
 open MsBuildHelpers
-
+open Graph
+open Collections
 
 
 let ProjectToProjectType (filename : string) =
@@ -30,7 +30,7 @@ let ProjectToProjectType (filename : string) =
     prjType
 
 
-let GenerateSolutionContent (projects : Project seq) =
+let GenerateSolutionContent (projects : Project set) =
     seq {
         yield ""
         yield "Microsoft Visual Studio Solution File, Format Version 12.00"
@@ -38,31 +38,26 @@ let GenerateSolutionContent (projects : Project seq) =
 
         for project in projects do
             yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""{%s}"""
-                  (ProjectToProjectType (project.RelativeProjectFile.toString))
-                  (Path.GetFileNameWithoutExtension (project.RelativeProjectFile.toString))
-                  (sprintf "%s/%s" (project.Repository.toString) project.RelativeProjectFile.toString)
-                  (project.UniqueProjectId.toString)
-
+                  (ProjectToProjectType (project.RelativeProjectFile))
+                  (Path.GetFileNameWithoutExtension (project.RelativeProjectFile))
+                  (sprintf "%s/%s" (project.Repository.Name) project.RelativeProjectFile)
+                  (project.UniqueProjectId)
 
             yield "\tProjectSection(ProjectDependencies) = postProject"
-            for dependency in project.ProjectReferences do
-                let depProject = projects |> Seq.tryFind (fun x -> x.ProjectId = dependency)
-                match depProject with
-                | Some x -> let dependencyName = sprintf "{%s}" x.UniqueProjectId.toString
-                            yield sprintf "\t\t%s = %s" dependencyName dependencyName
-                | None -> ()
+            for reference in project.References do
+                if projects |> Set.contains reference then
+                    let dependencyName = sprintf "{%s}" reference.UniqueProjectId
+                    yield sprintf "\t\t%s = %s" dependencyName dependencyName
             yield "\tEndProjectSection"
             yield "EndProject"
 
-        let repositories = projects |> Seq.map (fun x -> (x.Repository, GenerateGuidFromString (x.Repository.toString) |> ProjectUniqueId.from))
-                                    |> Set
+        let repositories = projects |> Set.map (fun x -> (x.Repository, (GenerateGuidFromString (x.Repository.Name)).ToString("D")))
                                     |> Map
-
         for repository in repositories do
-            let repo = repository.Key
+            let repo = repository.Key.Name
             let guid = repository.Value
 
-            yield sprintf @"Project(""{2150E333-8FDC-42A3-9474-1A3956D46DE8}"") = %A, %A, ""{%s}""" repo.toString repo.toString guid.toString
+            yield sprintf @"Project(""{2150E333-8FDC-42A3-9474-1A3956D46DE8}"") = %A, %A, ""{%s}""" repo repo guid
             yield "EndProject"
 
         yield "Global"
@@ -73,7 +68,7 @@ let GenerateSolutionContent (projects : Project seq) =
         yield "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution"
 
         for project in projects do
-            let guid = project.UniqueProjectId.toString
+            let guid = project.UniqueProjectId
             yield sprintf "\t\t{%s}.Debug|Any CPU.ActiveCfg = Debug|Any CPU" guid
             yield sprintf "\t\t{%s}.Debug|Any CPU.Build.0 = Debug|Any CPU" guid
             yield sprintf "\t\t{%s}.Release|Any CPU.ActiveCfg = Release|Any CPU" guid
@@ -83,16 +78,16 @@ let GenerateSolutionContent (projects : Project seq) =
 
         yield "\tGlobalSection(NestedProjects) = preSolution"
         for project in projects do
-            let guid = project.UniqueProjectId.toString
-            yield sprintf "\t\t{%s} = {%s}" guid repositories.[project.Repository].toString
+            let guid = project.UniqueProjectId
+            yield sprintf "\t\t{%s} = {%s}" guid repositories.[project.Repository]
         yield "\tEndGlobalSection"
 
         yield "EndGlobal"
     }
 
-let GenerateSolutionDefines (projects : Project seq) =
+let GenerateSolutionDefines (projects : Project set) =
     XElement (NsMsBuild + "Project",
         XAttribute(NsNone + "Condition", "'$(FullBuild_Config)' == ''"),
         XElement (NsMsBuild + "PropertyGroup",
             XElement(NsMsBuild + "FullBuild_Config", "Y"),
-                projects |> Seq.map (fun x -> XElement (NsMsBuild + (ProjectPropertyName x.ProjectId), "Y") ) ) )
+                projects |> Seq.map (fun x -> XElement (NsMsBuild + (MsBuildProjectPropertyName x), "Y") ) ) )
