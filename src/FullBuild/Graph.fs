@@ -37,6 +37,12 @@ type BuilderType =
     | MSBuild
     | Skip
 
+[<RequireQualifiedAccess>]
+type VcsType =
+    | Gerrit
+    | Git
+    | Hg
+
 type Package =
     { Anthology : Anthology.Anthology
       Package : Anthology.PackageId }
@@ -74,6 +80,19 @@ and Repository =
         member this.Builder = match this.Repository.Builder with
                               | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
                               | Anthology.BuilderType.Skip -> BuilderType.Skip
+
+        member this.Vcs = match this.Anthology.Vcs with
+                          | Anthology.VcsType.Gerrit -> VcsType.Gerrit
+                          | Anthology.VcsType.Git -> VcsType.Git
+                          | Anthology.VcsType.Hg -> VcsType.Hg
+
+        member this.Branch = match this.Repository.Repository.Branch with
+                             | Some x -> x.toString
+                             | None -> match this.Vcs with
+                                       | VcsType.Gerrit | VcsType.Git -> "master"
+                                       | VcsType.Hg -> "default"
+
+        member this.Uri = this.Repository.Repository.Url.toString
 
         member this.Projects =
             this.Anthology.Projects |> Set.filter (fun x -> x.Repository = this.Repository.Repository.Name)
@@ -124,9 +143,6 @@ and Project =
 and Graph =
     { Anthology : Anthology.Anthology }
     with
-        static member from (antho : Anthology.Anthology) : Graph =
-            { Anthology = antho }
-
         member this.Projects =
             this.Anthology.Projects |> Set.map (fun x -> { Anthology = this.Anthology
                                                            Project = x })
@@ -139,3 +155,5 @@ and Graph =
             this.Anthology.Repositories |> Set.map (fun x -> { Anthology = this.Anthology
                                                                Repository = x })
 
+let from (antho : Anthology.Anthology) : Graph =
+    { Anthology = antho }
