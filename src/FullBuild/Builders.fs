@@ -14,10 +14,9 @@
 
 module Builders
 open System.IO
-open Anthology
 open IoHelpers
 open Env
-
+open Graph
 
 let checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
@@ -82,5 +81,6 @@ let chooseBuilder (builderType : BuilderType) msbuildBuilder skipBuilder =
                   | BuilderType.Skip -> skipBuilder
     builder
 
-let BuildWithBuilder (builder : BuilderType) =
-    chooseBuilder builder buildMsbuild buildSkip
+let BuildWithBuilder (builder : BuilderType) (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
+    (chooseBuilder builder buildMsbuild buildSkip) viewFile config clean multithread version
+
