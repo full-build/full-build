@@ -274,4 +274,4 @@ let OpenView (viewId : ViewId) =
 let Build (maybeViewName : ViewId option) (config : string) (clean : bool) (multithread : bool) (version : string option) =
     let viewId = getViewName maybeViewName
     let viewFile = getViewFile viewId
-    (Builders.BuildWithBuilder BuilderType.MSBuild) viewFile config clean multithread version
+    Builders.BuildWithBuilder (global.Graph.BuilderType.MSBuild) viewFile config clean multithread version
