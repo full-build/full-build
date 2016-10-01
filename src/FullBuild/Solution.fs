@@ -32,26 +32,26 @@ let projectToProjectType (filename : string) =
 
 let GenerateSolutionContent (projects : Project set) =
     seq {
-        yield ""
+//        yield ""
         yield "Microsoft Visual Studio Solution File, Format Version 12.00"
-        yield "# Visual Studio 2013"
+        yield "# Visual Studio 14"
 
         for project in projects do
             yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""{%s}"""
                   (projectToProjectType (project.RelativeProjectFile))
                   (Path.GetFileNameWithoutExtension (project.RelativeProjectFile))
-                  (sprintf "%s/%s" (project.Repository.Name) project.RelativeProjectFile)
+                  (sprintf "%s/%s" (project.Repository().Name) project.RelativeProjectFile)
                   (project.UniqueProjectId)
 
             yield "\tProjectSection(ProjectDependencies) = postProject"
-            for reference in project.References do
+            for reference in project.References() do
                 if projects |> Set.contains reference then
                     let dependencyName = sprintf "{%s}" reference.UniqueProjectId
                     yield sprintf "\t\t%s = %s" dependencyName dependencyName
             yield "\tEndProjectSection"
             yield "EndProject"
 
-        let repositories = projects |> Set.map (fun x -> (x.Repository, (GenerateGuidFromString (x.Repository.Name)).ToString("D")))
+        let repositories = projects |> Set.map (fun x -> (x.Repository(), (GenerateGuidFromString (x.Repository().Name)).ToString("D")))
                                     |> Map
         for repository in repositories do
             let repo = repository.Key.Name
@@ -79,7 +79,7 @@ let GenerateSolutionContent (projects : Project set) =
         yield "\tGlobalSection(NestedProjects) = preSolution"
         for project in projects do
             let guid = project.UniqueProjectId
-            yield sprintf "\t\t{%s} = {%s}" guid repositories.[project.Repository]
+            yield sprintf "\t\t{%s} = {%s}" guid repositories.[project.Repository()]
         yield "\tEndGlobalSection"
 
         yield "EndGlobal"

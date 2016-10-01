@@ -56,13 +56,13 @@ type Application = interface System.IComparable
 with
     member Name : string
     member Publisher : PublisherType
-    member Projects : Project seq
+    member Projects: Project seq
 
 and [<Sealed>] Repository = interface System.IComparable
 with
     member Name : string
     member Builder : BuilderType
-    member Projects : Project seq
+    member Projects: unit -> Project seq
     member Vcs : VcsType
     member Branch : string
     member Uri : string
@@ -78,16 +78,17 @@ with
     member FxProfile : string option
     member FxIdentifier : string option
     member HasTests : bool
-    member Repository : Repository
-    member Applications : Application seq
-    member ReferencedBy : Project seq
-    member References : Project seq
-    member AssemblyReferences : Assembly seq
-    member PackageReferences : Package seq
+    member Repository: unit -> Repository
+    member Applications: unit -> Application seq
+    member ReferencedBy: unit -> Project seq
+    member References: unit -> Project seq
+    member AssemblyReferences: unit -> Assembly seq
+    member PackageReferences: unit -> Package seq
 
 type [<Sealed>] Graph =
+    member Repositories : Repository seq  
+    member Assemblies : Assembly seq    
+    member Applications : Application seq
     member Projects : Project seq
-    member Applications : Application seq    
-    member Repositories : Repository seq   
 
 val from : Anthology.Anthology -> Graph 
