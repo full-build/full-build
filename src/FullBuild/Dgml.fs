@@ -101,29 +101,29 @@ let GraphLinks (projects : Project set) (allProjects : Project set) =
 
     seq {
         for project in projects do
-            yield GenerateLink (project.Repository.Name) (project.UniqueProjectId) "Contains"
+            yield GenerateLink (project.Repository().Name) (project.UniqueProjectId) "Contains"
 
         for project in importedProjects do
-            yield GenerateLink (project.Repository.Name) (project.UniqueProjectId) "Contains"
+            yield GenerateLink (project.Repository().Name) (project.UniqueProjectId) "Contains"
 
         for project in projects do
-            for reference in project.References do
+            for reference in project.References() do
                 yield GenerateLink (project.UniqueProjectId) (reference.UniqueProjectId) "ProjectRef"
 
         for project in projects do
-            for package in project.PackageReferences do
+            for package in project.PackageReferences() do
                 yield GenerateLink (project.UniqueProjectId) (package.Name) "PackageRef"
 
         for project in projects do
-            for assembly in project.AssemblyReferences do
+            for assembly in project.AssemblyReferences() do
                 yield GenerateLink (project.UniqueProjectId) (assembly.Name) "AssemblyRef"
 
         for project in projects do
-            for package in project.PackageReferences do
+            for package in project.PackageReferences() do
                 yield GenerateLink "Packages" (package.Name) "Contains"
 
         for project in projects do
-            for assembly in project.AssemblyReferences do
+            for assembly in project.AssemblyReferences() do
                 yield GenerateLink "Assemblies" (assembly.Name) "Contains"
     }
 
@@ -190,10 +190,10 @@ let GraphStyles () =
 let GraphContent (projects : Project set) (all : bool) =
     let srcProjects = if all then projects
                       else projects |> Set.filter (fun x -> x.HasTests |> not)
-    let repos = srcProjects |> Set.map (fun x -> x.Repository)
-    let packages = srcProjects |> Set.map (fun x -> x.PackageReferences |> set)
+    let repos = srcProjects |> Set.map (fun x -> x.Repository())
+    let packages = srcProjects |> Set.map (fun x -> x.PackageReferences() |> set)
                                |> Set.unionMany
-    let assemblies = srcProjects |> Seq.map (fun x -> x.AssemblyReferences |> set)
+    let assemblies = srcProjects |> Seq.map (fun x -> x.AssemblyReferences() |> set)
                                  |> Set.unionMany
     let xNodes = XElement(NsDgml + "Nodes", GraphNodes srcProjects projects packages assemblies repos)
     let xLinks = XElement(NsDgml+"Links", GraphLinks srcProjects projects)

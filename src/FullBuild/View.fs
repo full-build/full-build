@@ -120,7 +120,7 @@ let generate (viewId : ViewId) (view : View) =
     // HACK BEGIN
     let graph = Configuration.LoadAnthology() |> Graph.from
     let projects = graph.Projects |> Seq.filter (fun x -> legacyProjects |> Set.exists (fun y -> y.ProjectId.toString = x.ProjectId))
-                                  |> set
+                                   |> set
     // HACK END
 
     // generate solution defines

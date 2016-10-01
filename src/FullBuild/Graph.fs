@@ -43,134 +43,230 @@ type VcsType =
     | Git
     | Hg
 
+//[<CustomEquality; CustomComparison>]
+[<CustomEquality; CustomComparison>]
 type Package =
-    { Anthology : Anthology.Anthology
-      Package : Anthology.PackageId }
-    with
-        member this.Name = this.Package.toString
+    { Graph : Graph
+      Package :Anthology.PackageId }
 
-type Assembly = 
-    { Anthology : Anthology.Anthology
+    override this.Equals(other : System.Object) =
+        System.Object.ReferenceEquals(this, other)
+
+    override this.GetHashCode() : int =
+        this.Package.GetHashCode()
+
+    interface System.IComparable with
+        member this.CompareTo(other) =
+            match other with
+            | :? Package as x -> System.Collections.Generic.Comparer<Anthology.PackageId>.Default.Compare(this.Package, x.Package)
+            | _ -> failwith "Can't compare values with different types"
+
+    member this.Name = this.Package.toString
+
+and [<CustomEquality; CustomComparison>] Assembly = 
+    { Graph : Graph
       Assembly : Anthology.AssemblyId }
-    with
-        member this.Name = this.Assembly.toString
+    override this.Equals(other : System.Object) =
+        System.Object.ReferenceEquals(this, other)
 
-type Application =
-    { Anthology : Anthology.Anthology
+    override this.GetHashCode() : int =
+        this.Assembly.GetHashCode()
+
+    interface System.IComparable with
+        member this.CompareTo(other) =
+            match other with
+            | :? Assembly as x -> System.Collections.Generic.Comparer<Anthology.AssemblyId>.Default.Compare(this.Assembly, x.Assembly)
+            | _ -> failwith "Can't compare values with different types"
+
+    member this.Name = this.Assembly.toString
+
+and [<CustomEquality; CustomComparison>] Application =
+    { Graph : Graph
       Application : Anthology.Application } 
-    with
-        member this.Name = this.Application.Name.toString
 
-        member this.Publisher = match this.Application.Publisher with
-                                | Anthology.PublisherType.Copy -> PublisherType.Copy
-                                | Anthology.PublisherType.Zip -> PublisherType.Zip
-                                | Anthology.PublisherType.Docker -> PublisherType.Docker
+    override this.Equals(other : System.Object) =
+        System.Object.ReferenceEquals(this, other)
 
-        member this.Projects =
-            this.Anthology.Projects |> Seq.filter (fun x -> this.Application.Projects |> Set.contains x.ProjectId)
-                                    |> Seq.map (fun x -> { Anthology = this.Anthology
-                                                           Project = x })
+    override this.GetHashCode() : int =
+        this.Application.GetHashCode()
 
-and Repository =
-    { Anthology : Anthology.Anthology
+    interface System.IComparable with
+        member this.CompareTo(other) =
+            match other with
+            | :? Application as x -> System.Collections.Generic.Comparer<Anthology.ApplicationId>.Default.Compare(this.Application.Name, x.Application.Name)
+            | _ -> failwith "Can't compare values with different types"
+
+    member this.Name = this.Application.Name.toString
+
+    member this.Publisher = match this.Application.Publisher with
+                            | Anthology.PublisherType.Copy -> PublisherType.Copy
+                            | Anthology.PublisherType.Zip -> PublisherType.Zip
+                            | Anthology.PublisherType.Docker -> PublisherType.Docker
+
+    member this.Projects =
+        this.Application.Projects |> Seq.map (fun x -> this.Graph.ProjectMap.[x])
+
+and [<CustomEquality; CustomComparison>] Repository =
+    { Graph : Graph
       Repository : Anthology.BuildableRepository }
-    with
-        member this.Name = this.Repository.Repository.Name.toString
 
-        member this.Builder = match this.Repository.Builder with
-                              | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
-                              | Anthology.BuilderType.Skip -> BuilderType.Skip
+    override this.Equals(other : System.Object) =
+        System.Object.ReferenceEquals(this, other)
 
-        member this.Vcs = match this.Anthology.Vcs with
-                          | Anthology.VcsType.Gerrit -> VcsType.Gerrit
-                          | Anthology.VcsType.Git -> VcsType.Git
-                          | Anthology.VcsType.Hg -> VcsType.Hg
+    override this.GetHashCode() : int =
+        this.Repository.GetHashCode()
 
-        member this.Branch = match this.Repository.Repository.Branch with
-                             | Some x -> x.toString
-                             | None -> match this.Vcs with
-                                       | VcsType.Gerrit | VcsType.Git -> "master"
-                                       | VcsType.Hg -> "default"
+    interface System.IComparable with
+        member this.CompareTo(other) =
+            match other with
+            | :? Repository as x -> System.Collections.Generic.Comparer<Anthology.RepositoryId>.Default.Compare(this.Repository.Repository.Name, x.Repository.Repository.Name)
+            | _ -> failwith "Can't compare values with different types"
 
-        member this.Uri = this.Repository.Repository.Url.toString
+    member this.Name : string = this.Repository.Repository.Name.toString
 
-        member this.Projects =
-            this.Anthology.Projects |> Seq.filter (fun x -> x.Repository = this.Repository.Repository.Name)
-                                    |> Seq.map (fun x -> { Anthology = this.Anthology
-                                                           Project = x })
+    member this.Builder = match this.Repository.Builder with
+                          | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
+                          | Anthology.BuilderType.Skip -> BuilderType.Skip
 
-and Project =
-    { Anthology : Anthology.Anthology
+    member this.Vcs = match this.Graph.Anthology.Vcs with
+                      | Anthology.VcsType.Gerrit -> VcsType.Gerrit
+                      | Anthology.VcsType.Git -> VcsType.Git
+                      | Anthology.VcsType.Hg -> VcsType.Hg
+
+    member this.Branch = match this.Repository.Repository.Branch with
+                         | Some x -> x.toString
+                         | None -> match this.Vcs with
+                                   | VcsType.Gerrit | VcsType.Git -> "master"
+                                   | VcsType.Hg -> "default"
+
+    member this.Uri = this.Repository.Repository.Url.toString
+
+    member this.Projects() =
+        let repositoryId = this.Repository.Repository.Name
+        this.Graph.Anthology.Projects |> Seq.filter (fun x -> x.Repository = repositoryId)
+                                      |> Seq.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
+
+and [<CustomEquality; CustomComparison>] Project =
+    { Graph : Graph
       Project : Anthology.Project }
-    with
-        member this.Repository =
-            { Anthology = this.Anthology
-              Repository = this.Anthology.Repositories |> Seq.find (fun x -> x.Repository.Name = this.Project.Repository) }
 
-        member this.Applications =
-            this.Anthology.Applications |> Seq.filter (fun x -> x.Projects |> Set.contains this.Project.ProjectId)
-                                        |> Seq.map (fun x -> { Anthology = this.Anthology
-                                                               Application = x })
+    override this.Equals(other : System.Object) =
+        System.Object.ReferenceEquals(this, other)
 
-        member this.References =
-            this.Anthology.Projects |> Seq.filter (fun x -> this.Project.ProjectReferences |> Set.contains x.ProjectId) 
-                                    |> Seq.map (fun x -> { Anthology = this.Anthology
-                                                           Project = x })
+    override this.GetHashCode() : int =
+        this.Project.GetHashCode()
 
-        member this.ReferencedBy =
-            this.Anthology.Projects |> Seq.filter (fun x -> x.ProjectReferences |> Set.contains this.Project.ProjectId) 
-                                    |> Seq.map (fun x -> { Anthology = this.Anthology
-                                                           Project = x })
+    interface System.IComparable with
+        member this.CompareTo(other) =
+            match other with
+            | :? Project as x -> System.Collections.Generic.Comparer<Anthology.ProjectId>.Default.Compare(this.Project.ProjectId, x.Project.ProjectId)
+            | _ -> failwith "Can't compare values with different types"
 
-        member this.RelativeProjectFile = this.Project.RelativeProjectFile.toString
+    member this.Repository() =
+        this.Graph.RepositoryMap.[this.Project.Repository]
 
-        member this.UniqueProjectId = this.Project.UniqueProjectId.toString
+    member this.Applications() =
+        let projectId = this.Project.ProjectId
+        this.Graph.Anthology.Applications |> Seq.filter (fun x -> x.Projects |> Set.contains projectId)
+                                          |> Seq.map (fun x -> this.Graph.ApplicationMap.[x.Name])
 
-        member this.Output = { Anthology = this.Anthology
-                               Assembly = this.Project.Output }
+    member this.References() =
+        let referenceIds = this.Project.ProjectReferences
+        referenceIds |> Seq.map (fun x -> this.Graph.ProjectMap.[x])
 
-        member this.ProjectId = this.Project.ProjectId.toString
+    member this.ReferencedBy() =
+        let projectId = this.Project.ProjectId
+        this.Graph.Anthology.Projects |> Seq.filter (fun x -> x.ProjectReferences |> Set.contains projectId)
+                                      |> Seq.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
 
-        member this.OutputType = match this.Project.OutputType with
-                                 | Anthology.OutputType.Dll -> OutputType.Dll
-                                 | Anthology.OutputType.Exe -> OutputType.Exe
+    member this.RelativeProjectFile = this.Project.RelativeProjectFile.toString
 
-        member this.FxVersion = match this.Project.FxVersion.toString with
-                                | null -> None
-                                | x -> Some x
+    member this.UniqueProjectId = this.Project.UniqueProjectId.toString
 
-        member this.FxProfile = match this.Project.FxProfile.toString with
-                                | null -> None
-                                | x -> Some x
+    member this.Output = this.Graph.AssemblyMap.[this.Project.Output]
 
-        member this.FxIdentifier = match this.Project.FxIdentifier.toString with
-                                   | null -> None
-                                   | x -> Some x
+    member this.ProjectId = this.Project.ProjectId.toString
 
-        member this.HasTests = this.Project.HasTests
+    member this.OutputType = match this.Project.OutputType with
+                             | Anthology.OutputType.Dll -> OutputType.Dll
+                             | Anthology.OutputType.Exe -> OutputType.Exe
 
-        member this.AssemblyReferences = 
-            this.Project.AssemblyReferences |> Seq.map (fun x -> { Anthology = this.Anthology
-                                                                   Assembly = x })
-        member this.PackageReferences = 
-            this.Project.PackageReferences |> Seq.map (fun x -> { Anthology = this.Anthology
-                                                                  Package = x })
+    member this.FxVersion = match this.Project.FxVersion.toString with
+                            | null -> None
+                            | x -> Some x
+
+    member this.FxProfile = match this.Project.FxProfile.toString with
+                            | null -> None
+                            | x -> Some x
+
+    member this.FxIdentifier = match this.Project.FxIdentifier.toString with
+                               | null -> None
+                               | x -> Some x
+
+    member this.HasTests = this.Project.HasTests
+
+    member this.AssemblyReferences() = 
+        this.Project.AssemblyReferences |> Seq.map (fun x -> this.Graph.AssemblyMap.[x])
+
+    member this.PackageReferences() = 
+        this.Project.PackageReferences |> Seq.map (fun x -> this.Graph.PackageMap.[x])
 
 
-and Graph =
-    { Anthology : Anthology.Anthology }
-    with
-        member this.Projects =
-            this.Anthology.Projects |> Seq.map (fun x -> { Anthology = this.Anthology
-                                                           Project = x })
+and [<Sealed>] Graph(anthology : Anthology.Anthology) =
+    let mutable assemblyMap : System.Collections.Generic.IDictionary<Anthology.AssemblyId, Assembly> = null
+    let mutable packageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> = null
+    let mutable repositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> = null
+    let mutable applicationMap : System.Collections.Generic.IDictionary<Anthology.ApplicationId, Application> = null
+    let mutable projectMap : System.Collections.Generic.IDictionary<Anthology.ProjectId, Project> = null
 
-        member this.Applications =
-            this.Anthology.Applications |> Seq.map (fun x -> { Anthology = this.Anthology
-                                                               Application = x })
+    member this.Anthology : Anthology.Anthology = anthology
 
-        member this.Repositories =
-            this.Anthology.Repositories |> Seq.map (fun x -> { Anthology = this.Anthology
-                                                               Repository = x })
+    member this.PackageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> =
+        if packageMap |> isNull then
+            packageMap <- anthology.Projects |> Set.map (fun x -> x.PackageReferences)
+                                             |> Set.unionMany
+                                             |> Seq.map (fun x -> x, { Graph = this; Package = x})
+                                             |> dict
+        packageMap
+
+    member this.AssemblyMap : System.Collections.Generic.IDictionary<Anthology.AssemblyId, Assembly> =
+        if assemblyMap |> isNull then 
+            let outputAss = anthology.Projects |> Seq.map (fun x -> x.Output)
+                                               |> Set
+            assemblyMap <- anthology.Projects |> Set.map (fun x -> x.AssemblyReferences)
+                                              |> Set.unionMany
+                                              |> Set.union outputAss
+                                              |> Seq.map (fun x -> x, { Graph = this; Assembly = x})
+                                              |> dict
+        assemblyMap
+
+    member this.RepositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> =
+        if repositoryMap |> isNull then 
+            repositoryMap <- anthology.Repositories |> Seq.map (fun x -> x.Repository.Name, { Graph = this; Repository = x})                                 
+                                                    |> dict
+        repositoryMap
+
+    member this.ApplicationMap : System.Collections.Generic.IDictionary<Anthology.ApplicationId, Application> =
+        if applicationMap |> isNull then
+            applicationMap <- anthology.Applications |> Seq.map (fun x -> x.Name, { Graph = this; Application = x } )
+                                                     |> dict
+        applicationMap
+
+    member this.ProjectMap : System.Collections.Generic.IDictionary<Anthology.ProjectId, Project> = 
+        if projectMap |> isNull then
+            projectMap <- anthology.Projects |> Seq.map (fun x -> x.ProjectId, { Graph = this; Project = x } )
+                                             |> dict
+        projectMap
+
+    member this.Repositories = this.RepositoryMap.Values |> seq
+
+    member this.Assemblies = this.AssemblyMap.Values |> seq
+
+    member this.Packages = this.PackageMap.Values |> seq
+
+    member this.Applications = this.ApplicationMap.Values |> seq
+
+    member this.Projects = this.ProjectMap.Values |> seq
 
 let from (antho : Anthology.Anthology) : Graph =
-    { Anthology = antho }
+    Graph(antho)
