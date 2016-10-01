@@ -13,27 +13,30 @@
 //   limitations under the License.
 
 module Application
-open Anthology
 open Collections
 open IoHelpers
 open Env
 open PatternMatching
-
+open View
+open Anthology
+open Baseline
 
 let asyncPublish (app : Application) =
     async {
-        DisplayHighlight app.Name.toString
-        (Publishers.PublishWithPublisher app.Publisher) app
+        // HACK BEGIN
+        let graph = Configuration.LoadAnthology() |> Graph.from
+        let realApp = graph.Applications |> Seq.find (fun x -> x.Name = app.Name.toString)
+        // HACK END
+
+        DisplayHighlight realApp.Name
+        Publishers.PublishWithPublisher realApp
     }
 
-let Publish (view:ViewId option) (filters : string list) (mt : bool) =
+let Publish (view : ViewId option) (filters : string list) (mt : bool) =
     let antho = Configuration.LoadAnthology ()
-    let applications =
-        match view with
-        | None -> 
-            antho.Applications
-        | Some view ->
-            view |> View.FindViewApplications
+    let applications = match view with
+                       | None -> antho.Applications
+                       | Some view -> view |> ViewCommands.FindViewApplications
 
     let appFilters = filters |> Set
     let matchApps filter = applications |> Set.map(fun x -> x.Name.toString) 

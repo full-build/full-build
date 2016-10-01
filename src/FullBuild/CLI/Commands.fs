@@ -14,6 +14,8 @@
 
 module Commands
 open Anthology
+open View
+open Baseline
 open Collections
 
 

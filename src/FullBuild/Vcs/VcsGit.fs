@@ -15,6 +15,7 @@
 module VcsGit
 
 open Anthology
+open Baseline
 open System.IO
 
 let private checkErrorCode err =

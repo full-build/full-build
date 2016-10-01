@@ -16,6 +16,7 @@ module Vcs
 
 open System.IO
 open Anthology
+open Baseline
 
 
 val Clone : vcsType : VcsType

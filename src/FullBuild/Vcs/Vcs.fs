@@ -15,6 +15,7 @@
 module Vcs
 
 open Anthology
+open Baseline
 open System.IO
 open VcsHg
 open VcsGit

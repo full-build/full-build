@@ -23,6 +23,8 @@ open System.Linq
 open System.Xml.Linq
 open Collections
 open System
+open Baseline
+open View
 
 
 let private checkErrorCode err =
@@ -162,7 +164,7 @@ let Pull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) =
         let clonedRepos = match view with
                           | None -> antho.Repositories |> ClonedRepositories wsDir
                           | Some viewName -> let repos = Configuration.LoadView viewName
-                                                         |> View.FindViewProjects
+                                                         |> ViewCommands.FindViewProjects
                                                          |> Set.map (fun x -> x.Repository)
                                              antho.Repositories |> Set.map (fun x -> x.Repository)
                                                                 |> Set.filter (fun x -> repos |> Set.contains x.Name)

@@ -46,14 +46,14 @@ let tryMain argv =
     | Command.InstallPackages -> Workspace.Install ()
 
     // view
-    | Command.AddView viewInfo -> View.Create viewInfo.Name viewInfo.Filters viewInfo.SourceOnly viewInfo.Parents viewInfo.Modified
-    | Command.DropView viewInfo -> View.Drop viewInfo.Name
-    | Command.ListViews -> View.List ()
-    | Command.DescribeView viewInfo -> View.Describe viewInfo.Name
-    | Command.GraphView viewInfo -> View.Graph viewInfo.Name viewInfo.All
-    | Command.BuildView viewInfo -> View.Build viewInfo.Name viewInfo.Config viewInfo.Clean viewInfo.Multithread viewInfo.Version
-    | Command.AlterView viewInfo -> View.AlterView viewInfo.Name viewInfo.Default viewInfo.Source viewInfo.Parents
-    | Command.OpenView viewInfo -> View.OpenView viewInfo.Name
+    | Command.AddView viewInfo -> ViewCommands.Create viewInfo.Name viewInfo.Filters viewInfo.SourceOnly viewInfo.Parents viewInfo.Modified
+    | Command.DropView viewInfo -> ViewCommands.Drop viewInfo.Name
+    | Command.ListViews -> ViewCommands.List ()
+    | Command.DescribeView viewInfo -> ViewCommands.Describe viewInfo.Name
+    | Command.GraphView viewInfo -> ViewCommands.Graph viewInfo.Name viewInfo.All
+    | Command.BuildView viewInfo -> ViewCommands.Build viewInfo.Name viewInfo.Config viewInfo.Clean viewInfo.Multithread viewInfo.Version
+    | Command.AlterView viewInfo -> ViewCommands.AlterView viewInfo.Name viewInfo.Default viewInfo.Source viewInfo.Parents
+    | Command.OpenView viewInfo -> ViewCommands.OpenView viewInfo.Name
 
     // nuget
     | Command.AddNuGet url -> NuGets.Add url
