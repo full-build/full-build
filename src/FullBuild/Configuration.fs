@@ -15,6 +15,8 @@
 module Configuration
 
 open Anthology
+open View
+open Baseline
 open Env
 
 type WorkspaceConfiguration = 
@@ -39,11 +41,11 @@ let SaveBaseline =
 let LoadView (viewId :ViewId) : View =
     let viewFile = GetViewFileName viewId.toString 
     if not viewFile.Exists then failwithf "View %A does not exist" viewId.toString
-    ViewSerializer.Load viewFile
+    View.Load viewFile
 
 let SaveView (viewId : ViewId) =
     let viewFile = GetViewFileName viewId.toString 
-    ViewSerializer.Save viewFile
+    View.Save viewFile
 
 let ViewExists (viewId : ViewId) =
     let viewFile = GetViewFileName viewId.toString 

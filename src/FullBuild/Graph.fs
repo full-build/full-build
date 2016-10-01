@@ -141,7 +141,7 @@ and [<CustomEquality; CustomComparison>] Repository =
 
     member this.Uri = this.Repository.Repository.Url.toString
 
-    member this.Projects() =
+    member this.Projects =
         let repositoryId = this.Repository.Repository.Name
         this.Graph.Anthology.Projects |> Seq.filter (fun x -> x.Repository = repositoryId)
                                       |> Seq.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
@@ -162,19 +162,19 @@ and [<CustomEquality; CustomComparison>] Project =
             | :? Project as x -> System.Collections.Generic.Comparer<Anthology.ProjectId>.Default.Compare(this.Project.ProjectId, x.Project.ProjectId)
             | _ -> failwith "Can't compare values with different types"
 
-    member this.Repository() =
+    member this.Repository =
         this.Graph.RepositoryMap.[this.Project.Repository]
 
-    member this.Applications() =
+    member this.Applications =
         let projectId = this.Project.ProjectId
         this.Graph.Anthology.Applications |> Seq.filter (fun x -> x.Projects |> Set.contains projectId)
                                           |> Seq.map (fun x -> this.Graph.ApplicationMap.[x.Name])
 
-    member this.References() =
+    member this.References =
         let referenceIds = this.Project.ProjectReferences
         referenceIds |> Seq.map (fun x -> this.Graph.ProjectMap.[x])
 
-    member this.ReferencedBy() =
+    member this.ReferencedBy =
         let projectId = this.Project.ProjectId
         this.Graph.Anthology.Projects |> Seq.filter (fun x -> x.ProjectReferences |> Set.contains projectId)
                                       |> Seq.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
@@ -205,10 +205,10 @@ and [<CustomEquality; CustomComparison>] Project =
 
     member this.HasTests = this.Project.HasTests
 
-    member this.AssemblyReferences() = 
+    member this.AssemblyReferences = 
         this.Project.AssemblyReferences |> Seq.map (fun x -> this.Graph.AssemblyMap.[x])
 
-    member this.PackageReferences() = 
+    member this.PackageReferences = 
         this.Project.PackageReferences |> Seq.map (fun x -> this.Graph.PackageMap.[x])
 
 

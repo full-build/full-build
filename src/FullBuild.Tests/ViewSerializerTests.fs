@@ -2,6 +2,7 @@
 
 open FsUnit
 open NUnit.Framework
+open View
 open Anthology
 
 [<Test>]
@@ -13,8 +14,8 @@ let CheckSaveLoadBaseline () =
                   Parents = false 
                   Modified = false }
 
-    let res = ViewSerializer.SerializeView view1
+    let res = View.SerializeView view1
     printfn "%s" res
 
-    let view2 = ViewSerializer.DeserializeView res
+    let view2 = View.DeserializeView res
     view2 |> should equal view1

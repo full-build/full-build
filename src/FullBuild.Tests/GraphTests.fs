@@ -21,7 +21,7 @@ let ConvertToGraph () =
                          "cqlplus" ] |> set
     apps |> should equal expectedApps
 
-    let repos = graph.Repositories |> Seq.map (fun x -> x.Name, x.Projects() |> Seq.map (fun x -> x.ProjectId) |> set) |> set
+    let repos = graph.Repositories |> Seq.map (fun x -> x.Name, x.Projects |> Seq.map (fun x -> x.ProjectId) |> set) |> set
     let expectedRepos = [ "cassandra-sharp", [ "apache.cassandra"
                                                "cassandrasharp.interfaces"
                                                "cassandrasharp"
@@ -36,11 +36,11 @@ let ConvertToGraph () =
 
     let projects = graph.Projects
     let cassandrasharpProject = projects |> Seq.find (fun x -> x.ProjectId = "cassandrasharp")
-    let cassandrasharpReferencies = cassandrasharpProject.References() |> Seq.map (fun x -> x.ProjectId) |> set
+    let cassandrasharpReferencies = cassandrasharpProject.References |> Seq.map (fun x -> x.ProjectId) |> set
     let expectedDependencies = [ "cassandrasharp.interfaces"] |> set
     cassandrasharpReferencies |> should equal expectedDependencies
 
-    let cassandrasharpReferencedBy = cassandrasharpProject.ReferencedBy() |> Seq.map (fun x -> x.ProjectId) |> set
+    let cassandrasharpReferencedBy = cassandrasharpProject.ReferencedBy |> Seq.map (fun x -> x.ProjectId) |> set
     let expectedReferencedBy = [ "cqlplus"
                                  "cassandrasharpunittests" 
                                  "samples"

@@ -15,6 +15,7 @@
 module Repo
 
 open Anthology
+open Baseline
 open PatternMatching
 open Configuration
 open Collections

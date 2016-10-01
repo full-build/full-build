@@ -17,6 +17,8 @@ module CommandLine
 open Commands
 open Collections
 open Anthology
+open Baseline
+open View
 
 
 

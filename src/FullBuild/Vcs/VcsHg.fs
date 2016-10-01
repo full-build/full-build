@@ -15,6 +15,7 @@
 module VcsHg
 
 open Anthology
+open Baseline
 open System.IO
 
 let private checkErrorCode err =

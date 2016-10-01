@@ -16,6 +16,7 @@ module Test
 open Env
 open System.IO
 open Anthology
+open View
 
 
 
@@ -29,7 +30,7 @@ let TestAssemblies (filters : string list) (excludes : string list) =
     let projects = filters
                   |> Seq.map matchViews
                   |> Seq.collect id
-                  |> Seq.map (View.FindViewProjects << Configuration.LoadView << ViewId.from)
+                  |> Seq.map (ViewCommands.FindViewProjects << Configuration.LoadView << ViewId.from)
                   |> Set
                   |> Set.unionMany
                   |> Set.filter (fun x -> x.HasTests)

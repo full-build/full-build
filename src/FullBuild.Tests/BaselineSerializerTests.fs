@@ -1,5 +1,6 @@
 ﻿module BaselineSerializerTests
 
+open Baseline
 open BaselineSerializer
 open FsUnit
 open NUnit.Framework

@@ -13,11 +13,10 @@
 //   limitations under the License.
 
 module Publishers
-open Anthology
 open IoHelpers
 open Env
 open System.IO
-
+open Graph
 
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
@@ -26,51 +25,53 @@ let private checkedExec =
     Exec.Exec checkErrorCode
 
 
-let publishCopy (app : Anthology.Application) =
+type PublishApp =
+    { Name : string
+      App : Application }
+
+
+let publishCopy (app : PublishApp) =
     let wsDir = GetFolder Env.Folder.Workspace
     let antho = Configuration.LoadAnthology ()
-    let projects = antho.Projects |> Set.filter (fun x -> app.Projects |> Set.contains x.ProjectId)
+    let projects = app.App.Projects
     for project in projects do
-        let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
+        let repoDir = wsDir |> GetSubDirectory (project.Repository.Name)
         if repoDir.Exists then
-            let projFile = repoDir |> GetFile project.RelativeProjectFile.toString
-            let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name.toString projFile.FullName
+            let projFile = repoDir |> GetFile project.RelativeProjectFile
+            let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name projFile.FullName
 
             if Env.IsMono () then checkedExec "xbuild" args wsDir
             else checkedExec "msbuild" args wsDir
 
             let appDir = GetFolder Env.Folder.AppOutput
-            let artifactDir = appDir |> GetSubDirectory app.Name.toString
+            let artifactDir = appDir |> GetSubDirectory app.Name
             Bindings.UpdateArtifactBindingRedirects artifactDir
         else
-            printfn "[WARNING] Can't publish application %A without repository" app.Name.toString
+            printfn "[WARNING] Can't publish application %A without repository" app.Name
 
-let publishZip (app : Anthology.Application) =
-    let tmpApp = { app
-                   with Name = ApplicationId.from (".tmp-" + app.Name.toString)
-                        Publisher = PublisherType.Copy }
+let publishZip (app : PublishApp) =
+    let tmpApp = { Name = ".tmp-" + app.Name
+                   App = app.App }
     publishCopy tmpApp
 
     let appDir = GetFolder Env.Folder.AppOutput
-    let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name.toString)
-    let targetFile = appDir |> GetFile app.Name.toString
+    let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name)
+    let targetFile = appDir |> GetFile app.Name
     if targetFile.Exists then targetFile.Delete()
 
     System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Optimal, false)
 
-let publishDocker (app : Anthology.Application) =
-    let tmpApp = { app
-                   with Name = ApplicationId.from "tmpdocker"
-                        Publisher = PublisherType.Copy }
-
+let publishDocker (app : PublishApp) =
+    let tmpApp = { Name = ".tmp-docker"
+                   App = app.App }
     publishCopy tmpApp
 
     let appDir = GetFolder Env.Folder.AppOutput
-    let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name.toString)
-    let targetFile = appDir |> GetFile app.Name.toString
+    let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name)
+    let targetFile = appDir |> GetFile app.Name
     if targetFile.Exists then targetFile.Delete()
 
-    let dockerArgs = sprintf "build -t %s ." app.Name.toString
+    let dockerArgs = sprintf "build -t %s ." app.Name
     Exec.Exec checkErrorCode "docker" dockerArgs sourceFolder
     sourceFolder.Delete(true)
 
@@ -82,6 +83,9 @@ let choosePublisher (pubType : PublisherType) appCopy appZip appDocker =
     publish
 
 
-let PublishWithPublisher (pubType : PublisherType) =
-    choosePublisher pubType publishCopy publishZip publishDocker
+let PublishWithPublisher (app : Application) =
+    let pubApp = { Name = app.Name
+                   App = app }
+    (choosePublisher app.Publisher publishCopy publishZip publishDocker) pubApp
+
 
