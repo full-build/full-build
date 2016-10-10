@@ -38,9 +38,9 @@ let GenerateSolutionContent (projects : Project set) =
 
         for project in projects do
             yield sprintf @"Project(""{%s}"") = ""%s"", ""%s"", ""{%s}"""
-                  (projectToProjectType (project.RelativeProjectFile))
-                  (Path.GetFileNameWithoutExtension (project.RelativeProjectFile))
-                  (sprintf "%s/%s" (project.Repository.Name) project.RelativeProjectFile)
+                  (projectToProjectType (project.ProjectFile))
+                  (Path.GetFileNameWithoutExtension (project.ProjectFile))
+                  (sprintf "%s/%s" (project.Repository.Name) project.ProjectFile)
                   (project.UniqueProjectId)
 
             yield "\tProjectSection(ProjectDependencies) = postProject"

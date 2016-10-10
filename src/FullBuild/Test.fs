@@ -13,34 +13,14 @@
 //   limitations under the License.
 
 module Test
-open Env
-open System.IO
-open Anthology
-open View
+open Collections
 
+let TestAssemblies (filters : string set) (excludes : string set) =
+    let graph = Configuration.LoadAnthology() |> Graph.from
+    let selectedViews = PatternMatching.FilterMatch graph.Views (fun x -> x.Name) filters
+    let assemblies = selectedViews |> Set.map (fun x -> x.Projects)
+                                   |> Set.unionMany
+                                   |> Set.filter (fun x -> x.HasTests)
+                                   |> Set.map (fun x -> x.BinFile)
 
-
-let TestAssemblies (filters : string list) (excludes : string list) =
-    let viewFolder = Env.GetFolder Env.Folder.View
-    let views = viewFolder.EnumerateFiles ("*" |> IoHelpers.AddExt IoHelpers.Extension.View)
-                |> Seq.map (fun x -> Path.GetFileNameWithoutExtension(x.Name))
-
-    let matchViews filter = views |> Seq.filter (fun x -> PatternMatching.Match x filter)
-
-    let projects = filters
-                  |> Seq.map matchViews
-                  |> Seq.collect id
-                  |> Seq.map (ViewCommands.FindViewProjects << Configuration.LoadView << ViewId.from)
-                  |> Set
-                  |> Set.unionMany
-                  |> Set.filter (fun x -> x.HasTests)
-
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    projects |> Seq.map (fun x -> wsDir |> IoHelpers.GetSubDirectory (sprintf "%s/bin/" x.relativeProjectFolderFromWorkspace))
-             |> Seq.iter Bindings.UpdateArtifactBindingRedirects
-
-    let matches = projects
-                  |> Set.map (fun x -> sprintf "%s/bin/%s" x.relativeProjectFolderFromWorkspace x.outputFile)
-
-    let anthology = Configuration.LoadAnthology ()
-    (TestRunners.TestWithTestRunner anthology.Tester) matches excludes
+    (TestRunners.TestWithTestRunner graph.TestRunner) assemblies excludes

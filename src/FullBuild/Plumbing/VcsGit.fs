@@ -12,11 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module VcsGit
+module Plumbing.VcsGit
 
-open Anthology
-open Baseline
 open System.IO
+open Graph
 
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
@@ -53,28 +52,21 @@ let GitTip (repoDir : DirectoryInfo) =
     res
 
 let GitClean (repoDir : DirectoryInfo) (repo : Repository) =
-    let br = match repo.Branch with
-             | Some x -> x.toString
-             | None -> "master"
-
     checkedExec "git" "reset --hard" repoDir
     checkedExec "git" "clean -fxd" repoDir
-    checkedExec "git" (sprintf "checkout %s" br) repoDir
+    checkedExec "git" (sprintf "checkout %s" repo.Branch) repoDir
 
-let GitIs (uri : RepositoryUrl) =
+let GitIs (repo : Repository) =
     try
         let currDir = IoHelpers.CurrentFolder()
-        let args = sprintf @"ls-remote -h %s" uri.toString
+        let args = sprintf @"ls-remote -h %s" repo.Uri
         checkedExecReadLine "git" args currDir |> ignore
         true
     with
         _ -> false
 
-let GitClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (shallow : bool) =
-    let bronly = match branch with
-                 | None -> "--no-single-branch"
-                 | Some x -> sprintf "--branch %s --no-single-branch" x.toString
-
+let GitClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
+    let bronly = sprintf "--branch %s --no-single-branch" repo.Branch
     let depth = if shallow then "--depth=3"
                 else ""
 
@@ -83,8 +75,8 @@ let GitClone (branch : BranchId option) (target : DirectoryInfo) (url : string) 
     let currDir = IoHelpers.CurrentFolder ()
     checkedExec "git" args currDir
 
-let GerritClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (shallow : bool) =
-    GitClone branch target url shallow
+let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
+    GitClone repo target url shallow
 
     let installDir = Env.GetFolder Env.Folder.Installation
     let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
@@ -93,27 +85,26 @@ let GerritClone (branch : BranchId option) (target : DirectoryInfo) (url : strin
                         |> IoHelpers.GetFile "commit-msg"
     commitMsgFile.CopyTo (target.FullName) |> ignore
 
-let GitCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ignoreError : bool) =
+let GitCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError : bool) =
     let rev = match version with
-              | Some (BookmarkVersion x) -> x
-              | None -> "master"
+              | Some x -> x
+              | None -> "HEAD"
 
     let args = sprintf "checkout %A" rev
     checkedExecMaybeIgnore ignoreError "git" args repoDir
 
-let GitHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =
-    let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version.toString
+let GitHistory (repoDir : DirectoryInfo) (version : string) =
+    let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version
     try
         let res = checkedExecReadLine "git" args repoDir
         res
     with
-        exn -> sprintf "Failed to get history for repository %A from version %A (%s)" repoDir.Name version.toString (exn.ToString())
+        exn -> sprintf "Failed to get history for repository %A from version %A (%s)" repoDir.Name version (exn.ToString())
 
 let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
     let args = sprintf @"log -1 --format=%%H %s" relativeFile
     let res = checkedExecReadLine "git" args repoDir
-    let ver = BookmarkVersion.from res
-    Some ver
+    res
 
 let GitIgnore (repoDir : DirectoryInfo) =
     let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"

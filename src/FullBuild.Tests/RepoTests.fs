@@ -3,7 +3,6 @@
 open NUnit.Framework
 open FsUnit
 open Anthology
-open Repo
 
 [<Test>]
 let CheckFilter () =
@@ -11,5 +10,7 @@ let CheckFilter () =
                         Repository = { Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"; Branch = Some (BranchId.from "fullbuild") } }
                       { Builder = BuilderType.MSBuild
                         Repository = { Name = RepositoryId.from "cassandra-sharp-contrib"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-contrib"; Branch = None } } ]
-  
-    MatchRepo repos (RepositoryId.from "cassandra*") |> should equal repos
+    let filters = set ["cassandra*"]
+    let filteredRepos = PatternMatching.FilterMatch repos (fun x -> x.Repository.Name.toString) filters
+
+    filteredRepos |> should equal repos

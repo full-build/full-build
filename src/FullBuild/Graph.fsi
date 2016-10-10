@@ -12,7 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+
 module Graph
+
+open Collections
 
 [<RequireQualifiedAccess>] 
 type PackageVersion =
@@ -41,6 +44,10 @@ type VcsType =
     | Git
     | Hg
 
+[<RequireQualifiedAccess>]
+type TestRunnerType =
+    | NUnit
+
 [<Sealed>]
 type Package  = interface System.IComparable
 with
@@ -56,20 +63,25 @@ type Application = interface System.IComparable
 with
     member Name : string
     member Publisher : PublisherType
-    member Projects: Project seq
+    member Projects: Project set
 
 and [<Sealed>] Repository = interface System.IComparable
 with
     member Name : string
     member Builder : BuilderType
-    member Projects: Project seq
+    member Projects: Project set
     member Vcs : VcsType
     member Branch : string
     member Uri : string
+    member IsCloned: bool
+
+//    member Head: unit
+//              -> string
 
 and [<Sealed>] Project = interface System.IComparable
 with
-    member RelativeProjectFile : string
+    member BinFile : string
+    member ProjectFile : string
     member UniqueProjectId : string
     member Output : Assembly
     member ProjectId : string
@@ -79,16 +91,74 @@ with
     member FxIdentifier : string option
     member HasTests : bool
     member Repository:  Repository
-    member Applications: Application seq
-    member ReferencedBy: Project seq
-    member References: Project seq
-    member AssemblyReferences: Assembly seq
-    member PackageReferences: Package seq
+    member Applications: Application set
+    member ReferencedBy: Project set
+    member References: Project set
+    member AssemblyReferences: Assembly set
+    member PackageReferences: Package set
+
+and [<Sealed>] Bookmark = interface System.IComparable
+with
+    member Repository : Repository
+    member Version : string
+
+and [<Sealed>] Baseline = interface System.IComparable
+with
+    member IsIncremental: bool
+    member Bookmarks: Bookmark set
+    member Save: unit
+              -> unit
+
+and [<Sealed>] View = interface System.IComparable
+with
+    member Name: string
+    member Filters: string set
+    member Parameters: string set
+    member Dependencies: bool
+    member ReferencedBy: bool
+    member Modified : bool
+    member Builder: BuilderType
+    member Projects: Project set
+    member Save: isDefault : bool option
+              -> unit
+    member Delete: unit
+                -> unit
 
 type [<Sealed>] Graph =
-    member Repositories : Repository seq  
-    member Assemblies : Assembly seq    
-    member Applications : Application seq
-    member Projects : Project seq
+    member MasterRepository : Repository
+    member Repositories : Repository set  
+    member Assemblies : Assembly set  
+    member Applications : Application set
+    member Projects : Project set
+    member TestRunner : TestRunnerType
+
+    member ArtifactsDir : string
+
+    member Baseline : Baseline
+    member CreateBaseline: incremental : bool
+                        -> Baseline
+
+    member DefaultView : View option
+    member Views : View set
+    member CreateView: name : string
+                    -> filters : string set
+                    -> parameters: string set
+                    -> dependencies : bool
+                    -> referencedBy : bool
+                    -> modified : bool
+                    -> builder : BuilderType
+                    -> View
+    member Save: unit
+              -> unit
 
 val from : Anthology.Anthology -> Graph 
+
+val create: uri : string
+         -> artifacts : string
+         -> vcs : VcsType
+         -> runner : TestRunnerType
+         -> Graph
+
+val init: uri : string
+       -> vcs : VcsType
+       -> Graph

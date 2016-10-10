@@ -37,7 +37,7 @@ let publishCopy (app : PublishApp) =
     for project in projects do
         let repoDir = wsDir |> GetSubDirectory (project.Repository.Name)
         if repoDir.Exists then
-            let projFile = repoDir |> GetFile project.RelativeProjectFile
+            let projFile = repoDir |> GetFile project.ProjectFile
             let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name projFile.FullName
 
             if Env.IsMono () then checkedExec "xbuild" args wsDir

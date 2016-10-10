@@ -12,66 +12,58 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Vcs
+module Plumbing.Vcs
 
 open System.IO
-open Anthology
-open Baseline
+open Graph
 
+val Unclone: wsDir : DirectoryInfo
+          -> repo : Repository
+          -> unit
 
-val Clone : vcsType : VcsType
-         -> wsDir : DirectoryInfo
+val Clone : wsDir : DirectoryInfo
          -> repo : Repository
          -> shallow : bool
          -> unit
 
-val Tip : vcsType : VcsType
-       -> wsDir : DirectoryInfo
+val Tip : wsDir : DirectoryInfo
        -> repo : Repository
        -> string
 
-val Checkout : vcsType : VcsType
-            -> wsDir : DirectoryInfo
+val Checkout : wsDir : DirectoryInfo
             -> repo : Repository
-            -> version : BookmarkVersion option
+            -> version : string option
             -> ignore : bool
             -> unit
 
-val Ignore : vcsType : VcsType
-          -> wsDir : DirectoryInfo
+val Ignore : wsDir : DirectoryInfo
           -> repo : Repository
           -> unit
 
-val Pull : vcsType : VcsType
-        -> wsDir : DirectoryInfo
+val Pull : wsDir : DirectoryInfo
         -> repo : Repository
         -> rebase : bool
         -> unit
 
-val Commit : vcsType : VcsType
-          -> wsDir : DirectoryInfo
+val Commit : wsDir : DirectoryInfo
           -> repo : Repository
           -> comment : string
           -> unit
 
-val Push : vcsType : VcsType
-        -> wsDir : DirectoryInfo
+val Push : wsDir : DirectoryInfo
         -> repo : Repository
         -> unit
 
-val Clean : vcsType : VcsType
-         -> wsDir : DirectoryInfo
+val Clean : wsDir : DirectoryInfo
          -> repo : Repository
          -> unit
 
-val Log : vcsType : VcsType
-       -> wsDir : DirectoryInfo
+val Log : wsDir : DirectoryInfo
        -> repo : Repository
-       -> version : BookmarkVersion
+       -> version : string
        -> string
 
-val LastCommit : vcsType : VcsType
-              -> wsDir : DirectoryInfo
+val LastCommit : wsDir : DirectoryInfo
               -> repo : Repository
               -> relativeFile : string
-              -> BookmarkVersion option
+              -> string

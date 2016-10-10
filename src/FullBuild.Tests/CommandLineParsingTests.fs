@@ -21,5 +21,5 @@ let CheckUsageInvoked () =
 [<Test>]
 let CheckRepositoriesConvert () =
     let result = CommandLine.Parse [ "convert"; "*" ]
-    let expected = Command.ConvertRepositories { Filters = [RepositoryId.from "*"] |> Set.ofSeq }
+    let expected = Command.ConvertRepositories { Filters = set ["*"] }
     result |> should equal expected

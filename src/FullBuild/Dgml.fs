@@ -23,7 +23,7 @@ let GenerateProjectNode (project : Project) =
     let cat = if isTest then "TestProject"
               else "Project"
 
-    let label = System.IO.Path.GetFileNameWithoutExtension(project.RelativeProjectFile)
+    let label = System.IO.Path.GetFileNameWithoutExtension(project.ProjectFile)
     let output = project.Output
     let outputType = project.OutputType
 
