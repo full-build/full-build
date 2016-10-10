@@ -17,8 +17,6 @@ module CommandLine
 open Commands
 open Collections
 open Anthology
-open Baseline
-open View
 
 
 
@@ -179,7 +177,7 @@ let (|BookmarkVersion|_|) version =
 
 let (|ViewId|_|) view =
     match view with
-    | Param _ -> Some (ViewId.from view)
+    | Param _ -> Some view
     | _ -> None
 
 let (|RepositoryId|_|) name =
@@ -212,9 +210,9 @@ let commandSetup (args : string list) =
     | Param vcs
       :: Param masterRepository
       :: Param masterArtifacts
-      :: [Param path] -> Command.SetupWorkspace { MasterRepository = RepositoryUrl.from masterRepository
+      :: [Param path] -> Command.SetupWorkspace { MasterRepository = masterRepository
                                                   MasterArtifacts = masterArtifacts
-                                                  Type = VcsType.from vcs
+                                                  Type = StringHelpers.fromString<Graph.VcsType> vcs
                                                   Path = path }
     | _ -> Command.Error MainCommand.Setup
 
@@ -222,8 +220,8 @@ let commandInit (args : string list) =
     match args with
     | Param vcs
       :: Param masterRepository
-      :: [Param path] -> Command.InitWorkspace { MasterRepository = RepositoryUrl.from masterRepository
-                                                 Type = VcsType.from vcs
+      :: [Param path] -> Command.InitWorkspace { MasterRepository = masterRepository
+                                                 Type = StringHelpers.fromString<Graph.VcsType> vcs
                                                  Path = path }
     | _ -> Command.Error MainCommand.Init
 
@@ -241,22 +239,20 @@ let rec commandTest (excludes : string list) (args : string list) =
       :: Param category
       :: tail -> tail |> commandTest (category :: excludes)
     | [] -> Command.Error MainCommand.Test
-    | Params filters -> Command.TestAssemblies { Filters = filters; Excludes = excludes }
+    | Params filters -> Command.TestAssemblies { Filters = set filters; Excludes = set excludes }
     | _ -> Command.Error MainCommand.Test
 
 
 let rec commandIndex (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Index
-    | Params filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                        Command.IndexRepositories { Filters = repoFilters }
+    | Params filters -> Command.IndexRepositories { Filters = set filters }
     | _ -> Command.Error MainCommand.Index
 
 let commandConvert (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Convert
-    | Params filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                        Command.ConvertRepositories { Filters = repoFilters }
+    | Params filters -> Command.ConvertRepositories { Filters = set filters }
     | _ -> Command.Error MainCommand.Convert
 
 let rec commandClone (shallow : bool) (all : bool) (mt : bool) (args : string list) =
@@ -308,12 +304,12 @@ let rec commandBuild (config : string) (clean : bool) (multithread : bool) (vers
 
 let commandCheckout (args : string list) =
     match args with
-    | [BookmarkVersion version] -> Command.CheckoutWorkspace {Version = version}
+    | [version] -> Command.CheckoutWorkspace {Version = version}
     | _ -> Command.Error MainCommand.Checkout
 
 let commandBranch (args : string list) =
     match args with
-    | [BookmarkVersion version] -> Command.BranchWorkspace {Branch = Some version}
+    |  [version] -> Command.BranchWorkspace {Branch = Some version}
     | [] -> Command.BranchWorkspace {Branch = None}
     | _ -> Command.Error MainCommand.Branch
 
@@ -327,7 +323,7 @@ let rec commandPush (branch : string option) (all : bool) (args : string list) =
     | [Param buildNumber] -> Command.PushWorkspace {Branch = branch; BuildNumber = buildNumber; Incremental = not all }
     | _ -> Command.Error MainCommand.Push
 
-let rec commandPull (src : bool) (bin : bool) (rebase : bool) (view : ViewId option) (args : string list) =
+let rec commandPull (src : bool) (bin : bool) (rebase : bool) (view : string option) (args : string list) =
     match args with
     | TokenOption TokenOption.Src
       :: tail -> tail |> commandPull true false rebase view
@@ -375,7 +371,7 @@ let rec commandAddRepo (branch : BranchId option) (builder : BuilderType) (args 
 
 let commandDropRepo (args : string list) =
     match args with
-    | [RepositoryId repo] -> Command.DropRepository repo
+    | [repo] -> Command.DropRepository repo
     | _ -> Command.Error MainCommand.DropRepository
 
 let commandListRepo (args : string list) =

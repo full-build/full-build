@@ -17,36 +17,31 @@ open Collections
 open IoHelpers
 open Env
 open PatternMatching
-open View
 open Anthology
-open Baseline
 
-let asyncPublish (app : Application) =
+let asyncPublish (app : Graph.Application) =
     async {
-        // HACK BEGIN
-        let graph = Configuration.LoadAnthology() |> Graph.from
-        let realApp = graph.Applications |> Seq.find (fun x -> x.Name = app.Name.toString)
-        // HACK END
-
-        DisplayHighlight realApp.Name
-        Publishers.PublishWithPublisher realApp
+        DisplayHighlight app.Name
+        Publishers.PublishWithPublisher app
     }
 
-let Publish (view : ViewId option) (filters : string list) (mt : bool) =
-    let antho = Configuration.LoadAnthology ()
-    let applications = match view with
-                       | None -> antho.Applications
-                       | Some view -> view |> ViewCommands.FindViewApplications
+let Publish (viewName : string option) (filters : string list) (mt : bool) =
+    let graph = Configuration.LoadAnthology () |> Graph.from
+    let applications = match viewName with
+                       | None -> graph.Applications |> set
+                       | Some viewId -> let view = graph.Views |> Seq.find (fun x -> x.Name = viewId)
+                                        view.Projects |> set
+                                                      |> Set.map (fun x -> x.Applications |> Set)
+                                                      |> Set.unionMany
 
     let appFilters = filters |> Set
-    let matchApps filter = applications |> Set.map(fun x -> x.Name.toString) 
+    let matchApps filter = applications |> Set.map(fun x -> x.Name)
                                         |> Set.filter (fun x -> PatternMatching.Match x filter)
     let matches = appFilters |> Set.map matchApps
                              |> Set.unionMany
-                             |> Set.map ApplicationId.from
 
-    let apps = antho.Applications |> Set.filter (fun x -> matches |> Set.contains x.Name)
-                                  |> Seq.map asyncPublish
+    let apps = applications |> Set.filter (fun x -> matches |> Set.contains x.Name)
+                            |> Seq.map asyncPublish
 
     let maxThrottle = if mt then (System.Environment.ProcessorCount*2) else 1
     apps |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore

@@ -30,6 +30,12 @@ with
 
 
 
+type ViewId = ViewId of string
+with
+    member this.toString = (fun (ViewId x) -> x)this
+    static member from s = ViewId s
+
+
 type AssemblyId = private AssemblyId of string
 with
     member this.toString = (fun (AssemblyId x) -> x)this
@@ -106,6 +112,15 @@ type Repository =
 type BuildableRepository =
     { Repository : Repository
       Builder : BuilderType }
+
+type BookmarkVersion = BookmarkVersion of string
+with
+    member this.toString = (fun (BookmarkVersion x) -> x)this
+    static member from (version : string) = BookmarkVersion (version)
+
+type Bookmark =
+    { Repository : RepositoryId
+      Version : BookmarkVersion }
 
 type ProjectRelativeFile = ProjectRelativeFile of string
 with
@@ -202,3 +217,16 @@ type Anthology =
       Projects : Project set
       Applications : Application set
       Tester : TestRunnerType }
+
+type Baseline =
+    { Incremental : bool
+      Bookmarks : Bookmark set }
+
+type View =
+    { Name : string
+      Filters : string set
+      Builder : BuilderType
+      Parameters : string set
+      SourceOnly : bool
+      Parents : bool
+      Modified : bool }

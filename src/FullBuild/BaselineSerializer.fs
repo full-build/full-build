@@ -19,7 +19,6 @@ open System.IO
 open System
 open Collections
 open System.Text
-open Baseline
 
 
 type private BaselineConfig = FSharp.Configuration.YamlConfig<"Baseline.yaml">

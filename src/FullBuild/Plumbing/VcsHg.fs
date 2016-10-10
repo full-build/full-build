@@ -12,11 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module VcsHg
+module Plumbing.VcsHg
 
-open Anthology
-open Baseline
 open System.IO
+open Graph
 
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
@@ -53,37 +52,34 @@ let HgTip (repoDir : DirectoryInfo) =
 let HgClean (repoDir : DirectoryInfo) (repo : Repository) =
     checkedExec "hg" "purge" repoDir
 
-let HgIs (uri : RepositoryUrl) =
+let HgIs (repo : Repository) =
     try
         let currDir = IoHelpers.CurrentFolder()
-        let args = sprintf @"id -i -R %A" uri.toLocalOrUrl
+        let args = sprintf @"id -i -R %A" repo.Uri
         checkedExecReadLine "hg" args currDir |> ignore
         true
     with
         _ -> false
 
-let HgClone (branch : BranchId option) (target : DirectoryInfo) (url : string) (shallow : bool) =
-    let bronly = match branch with
-                 | None -> ""
-                 | Some x -> sprintf "-r %s" x.toString
-
+let HgClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
+    let bronly = sprintf "-r %s" repo.Branch
     let args = sprintf @"clone %s %A %A" bronly url target.FullName
     let currDir = IoHelpers.CurrentFolder ()
     checkedExec "hg" args currDir
 
-let HgCheckout (repoDir : DirectoryInfo) (version : BookmarkVersion option) (ignoreError : bool) =
+let HgCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError : bool) =
     let rev = match version with
-              | Some (BookmarkVersion x) -> x
+              | Some x -> x
               | None -> "tip"
 
     let args = sprintf "update -r %A" rev
     checkedExecMaybeIgnore ignoreError "hg" args repoDir
 
-let HgHistory (repoDir : DirectoryInfo) (version : BookmarkVersion) =
+let HgHistory (repoDir : DirectoryInfo) (version : string) =
     null
 
 let HgLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
-    None
+    ""
 
 let HgIgnore (repoDir : DirectoryInfo) =
     // FIXME

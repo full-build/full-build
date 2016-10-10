@@ -16,6 +16,7 @@ module Graph
 open Collections
 
 
+
 [<RequireQualifiedAccess>] 
 type PackageVersion =
     | PackageVersion of string
@@ -43,7 +44,13 @@ type VcsType =
     | Git
     | Hg
 
-//[<CustomEquality; CustomComparison>]
+[<RequireQualifiedAccess>]
+type TestRunnerType =
+    | NUnit
+
+
+// =====================================================================================================
+
 [<CustomEquality; CustomComparison>]
 type Package =
     { Graph : Graph
@@ -63,6 +70,8 @@ type Package =
 
     member this.Name = this.Package.toString
 
+// =====================================================================================================
+
 and [<CustomEquality; CustomComparison>] Assembly = 
     { Graph : Graph
       Assembly : Anthology.AssemblyId }
@@ -79,6 +88,8 @@ and [<CustomEquality; CustomComparison>] Assembly =
             | _ -> failwith "Can't compare values with different types"
 
     member this.Name = this.Assembly.toString
+
+// =====================================================================================================
 
 and [<CustomEquality; CustomComparison>] Application =
     { Graph : Graph
@@ -104,11 +115,13 @@ and [<CustomEquality; CustomComparison>] Application =
                             | Anthology.PublisherType.Docker -> PublisherType.Docker
 
     member this.Projects =
-        this.Application.Projects |> Seq.map (fun x -> this.Graph.ProjectMap.[x])
+        this.Application.Projects |> Set.map (fun x -> this.Graph.ProjectMap.[x])
+
+// =====================================================================================================
 
 and [<CustomEquality; CustomComparison>] Repository =
     { Graph : Graph
-      Repository : Anthology.BuildableRepository }
+      Repository : Anthology.Repository }
 
     override this.Equals(other : System.Object) =
         System.Object.ReferenceEquals(this, other)
@@ -119,32 +132,43 @@ and [<CustomEquality; CustomComparison>] Repository =
     interface System.IComparable with
         member this.CompareTo(other) =
             match other with
-            | :? Repository as x -> System.Collections.Generic.Comparer<Anthology.RepositoryId>.Default.Compare(this.Repository.Repository.Name, x.Repository.Repository.Name)
+            | :? Repository as x -> System.Collections.Generic.Comparer<Anthology.RepositoryId>.Default.Compare(this.Repository.Name, x.Repository.Name)
             | _ -> failwith "Can't compare values with different types"
 
-    member this.Name : string = this.Repository.Repository.Name.toString
+    member this.Name : string = this.Repository.Name.toString
 
-    member this.Builder = match this.Repository.Builder with
-                          | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
-                          | Anthology.BuilderType.Skip -> BuilderType.Skip
+    member this.Builder = 
+        let buildableRepo = this.Graph.Anthology.Repositories |> Seq.tryFind (fun x -> x.Repository.Name = this.Repository.Name)
+        match buildableRepo with
+        | Some repo -> match repo.Builder with
+                       | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
+                       | Anthology.BuilderType.Skip -> BuilderType.Skip
+        | _ -> BuilderType.Skip
 
     member this.Vcs = match this.Graph.Anthology.Vcs with
                       | Anthology.VcsType.Gerrit -> VcsType.Gerrit
                       | Anthology.VcsType.Git -> VcsType.Git
                       | Anthology.VcsType.Hg -> VcsType.Hg
 
-    member this.Branch = match this.Repository.Repository.Branch with
+    member this.Branch = match this.Repository.Branch with
                          | Some x -> x.toString
                          | None -> match this.Vcs with
                                    | VcsType.Gerrit | VcsType.Git -> "master"
                                    | VcsType.Hg -> "default"
 
-    member this.Uri = this.Repository.Repository.Url.toString
+    member this.Uri = this.Repository.Url.toString
 
     member this.Projects =
-        let repositoryId = this.Repository.Repository.Name
-        this.Graph.Anthology.Projects |> Seq.filter (fun x -> x.Repository = repositoryId)
-                                      |> Seq.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
+        let repositoryId = this.Repository.Name
+        this.Graph.Anthology.Projects |> Set.filter (fun x -> x.Repository = repositoryId)
+                                      |> Set.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
+
+    member this.IsCloned =
+        let wsDir = Env.GetFolder Env.Folder.Workspace
+        let repoDir = wsDir |> IoHelpers.GetSubDirectory this.Name
+        repoDir.Exists
+
+// =====================================================================================================
 
 and [<CustomEquality; CustomComparison>] Project =
     { Graph : Graph
@@ -167,23 +191,33 @@ and [<CustomEquality; CustomComparison>] Project =
 
     member this.Applications =
         let projectId = this.Project.ProjectId
-        this.Graph.Anthology.Applications |> Seq.filter (fun x -> x.Projects |> Set.contains projectId)
-                                          |> Seq.map (fun x -> this.Graph.ApplicationMap.[x.Name])
+        this.Graph.Anthology.Applications |> Set.filter (fun x -> x.Projects |> Set.contains projectId)
+                                          |> Set.map (fun x -> this.Graph.ApplicationMap.[x.Name])
 
     member this.References =
         let referenceIds = this.Project.ProjectReferences
-        referenceIds |> Seq.map (fun x -> this.Graph.ProjectMap.[x])
+        referenceIds |> Set.map (fun x -> this.Graph.ProjectMap.[x])
 
     member this.ReferencedBy =
         let projectId = this.Project.ProjectId
-        this.Graph.Anthology.Projects |> Seq.filter (fun x -> x.ProjectReferences |> Set.contains projectId)
-                                      |> Seq.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
+        this.Graph.Anthology.Projects |> Set.filter (fun x -> x.ProjectReferences |> Set.contains projectId)
+                                      |> Set.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
 
-    member this.RelativeProjectFile = this.Project.RelativeProjectFile.toString
-
-    member this.UniqueProjectId = this.Project.UniqueProjectId.toString
+    member this.ProjectFile = 
+        this.Project.RelativeProjectFile.toString
 
     member this.Output = this.Graph.AssemblyMap.[this.Project.Output]
+
+    member this.BinFile = 
+        let repo = this.Repository.Name
+        let path = System.IO.Path.GetDirectoryName(this.ProjectFile)
+        let ass = this.Output.Name
+        let ext = match this.OutputType with
+                  | OutputType.Dll -> "dll"
+                  | OutputType.Exe -> "exe"
+        sprintf "%s/%s/bin/%s.%s" repo path ass ext
+
+    member this.UniqueProjectId = this.Project.UniqueProjectId.toString
 
     member this.ProjectId = this.Project.ProjectId.toString
 
@@ -206,11 +240,192 @@ and [<CustomEquality; CustomComparison>] Project =
     member this.HasTests = this.Project.HasTests
 
     member this.AssemblyReferences = 
-        this.Project.AssemblyReferences |> Seq.map (fun x -> this.Graph.AssemblyMap.[x])
+        this.Project.AssemblyReferences |> Set.map (fun x -> this.Graph.AssemblyMap.[x])
 
     member this.PackageReferences = 
-        this.Project.PackageReferences |> Seq.map (fun x -> this.Graph.PackageMap.[x])
+        this.Project.PackageReferences |> Set.map (fun x -> this.Graph.PackageMap.[x])
 
+// =====================================================================================================
+
+and [<CustomEquality; CustomComparison>] Bookmark =
+    { Graph : Graph
+      Bookmark : Anthology.Bookmark }
+with
+    override this.Equals(other : System.Object) =
+        System.Object.ReferenceEquals(this, other)
+
+    override this.GetHashCode() : int =
+        this.Bookmark.GetHashCode()
+
+    interface System.IComparable with
+        member this.CompareTo(other) =
+            match other with
+            | :? Bookmark as x -> System.Collections.Generic.Comparer<Anthology.RepositoryId>.Default.Compare(this.Bookmark.Repository, x.Bookmark.Repository)
+            | _ -> failwith "Can't compare values with different types"
+
+    member this.Repository =
+        this.Graph.RepositoryMap.[this.Bookmark.Repository]
+    member this.Version = this.Bookmark.Version.toString
+
+// =====================================================================================================
+
+and [<CustomEquality; CustomComparison>] Baseline =
+    { Graph : Graph 
+      Baseline : Anthology.Baseline }
+with
+    override this.Equals(other : System.Object) =
+        System.Object.ReferenceEquals(this, other)
+
+    override this.GetHashCode() : int =
+        this.Baseline.GetHashCode()
+
+    interface System.IComparable with
+        member this.CompareTo(other) =
+            match other with
+            | :? Baseline as x -> System.Collections.Generic.Comparer<Anthology.Baseline>.Default.Compare(this.Baseline, x.Baseline)
+            | _ -> failwith "Can't compare values with different types"
+
+    member this.IsIncremental = false
+    
+    member this.Bookmarks = 
+        this.Baseline.Bookmarks |> Set.map (fun x -> { Graph = this.Graph; Bookmark = x})
+    
+    member this.ModifiedRepositories : Repository set = 
+        Set.empty
+
+    member this.Save () = 
+        Configuration.SaveBaseline this.Baseline
+
+// =====================================================================================================
+
+and [<CustomEquality; CustomComparison>] View =
+    { Graph : Graph
+      View : Anthology.View }
+with
+    override this.Equals(other : System.Object) =
+        System.Object.ReferenceEquals(this, other)
+
+    override this.GetHashCode() : int =
+        this.View.GetHashCode()
+
+    interface System.IComparable with
+        member this.CompareTo(other) =
+            match other with
+            | :? View as x -> System.Collections.Generic.Comparer<Anthology.View>.Default.Compare(this.View, x.View)
+            | _ -> failwith "Can't compare values with different types"
+
+    member this.Name = this.View.Name
+    member this.Filters = this.View.Filters
+    member this.Parameters = this.View.Parameters
+    member this.Dependencies = this.View.SourceOnly
+    member this.ReferencedBy = this.View.Parents
+    member this.Modified = this.View.Modified
+    member this.Builder = match this.View.Builder with
+                          | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
+                          | Anthology.BuilderType.Skip -> BuilderType.Skip
+
+    member this.Projects : Project set =
+        let projects = PatternMatching.FilterMatch<Project> this.Graph.Projects 
+                                                            (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) 
+                                                            this.View.Filters
+        projects
+
+    member this.Save (isDefault : bool option) = 
+        let viewId = Anthology.ViewId this.View.Name
+        Configuration.SaveView viewId this.View isDefault
+
+    member this.Delete () =
+        Configuration.DeleteView (Anthology.ViewId this.View.Name)
+
+
+
+
+
+
+//    static member serialize (view : View) =
+//        let config = new ViewConfig()
+//        config.view.builder <- StringHelpers.toString view.Builder
+//        config.view.modified <- view.Modified
+//
+//        config.view.filters.Clear()
+//        for filter in view.Filters do
+//            let filterItem = ViewConfig.view_Type.filters_Item_Type()
+//            filterItem.filter <- filter
+//            config.view.filters.Add filterItem
+//
+//        config.view.parameters.Clear()
+//        for parameter in view.Parameters do
+//            let paramItem = ViewConfig.view_Type.parameters_Item_Type()
+//            paramItem.parameter <- parameter
+//            config.view.parameters.Add paramItem
+//        config.view.sourceonly <- view.Dependencies
+//        config.view.parents <- view.ReferencedBy
+//        config.ToString()
+
+//    static member deserialize graph content =
+//        let config = new ViewConfig()
+//        config.LoadText content
+//           
+//        { AName = config.view.name
+//          AFilters = config.view.filters |> Seq.map (fun x -> x.filter)
+//                                         |> Set.ofSeq
+//          AParameters = config.view.parameters |> Seq.map (fun x -> x.parameter)
+//                                               |> Set.ofSeq
+//          ADependencies = config.view.sourceonly
+//          AReferencedBy = config.view.parents
+//          AModified = config.view.modified
+//          ABuilder = StringHelpers.fromString<BuilderType> config.view.builder }
+//
+//    static member Load graph name =
+//        let viewFolder = Env.GetFolder Env.Folder.View
+//        let viewFile = viewFolder |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.View name)
+//        let content = System.IO.File.ReadAllText viewFile.FullName
+//        View.deserialize graph content
+//
+//    member this.Save () =
+//        let viewFolder = Env.GetFolder Env.Folder.View
+//        let viewFile = viewFolder |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.View this.Name)
+//        let content = View.serialize this
+//        System.IO.File.WriteAllText(viewFile.FullName, content)
+
+//    member this.Projects : Project seq = Seq.empty
+//        // select only available repositories
+//        let availableRespos = graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
+//                                                 |> set
+//
+//        // load back filter & generate view accordingly
+//        let modifiedFilters = GetModifiedFilter view
+//        let selectionFilters = filters |> Set.union modifiedFilters |> Set.map adaptViewFilter
+//
+//        // build: <repository>/<project>
+//        let projects = antho.Projects
+//                       |> Seq.filter (fun x -> availableRepos |> Set.contains x.Repository)
+//                       |> Seq.map (fun x -> (sprintf "%s/%s" x.Repository.toString x.Output.toString, x.ProjectId))
+//                       |> Map
+//        let projectNames = projects |> Seq.map (fun x -> x.Key) |> set
+//
+//        let matchRepoProject filter =
+//            projectNames |> Set.filter (fun x -> PatternMatching.Match x filter)
+//
+//        let matches = selectionFilters |> Set.map matchRepoProject
+//                                       |> Set.unionMany
+//        let selectedProjectGuids = projects |> Map.filter (fun k _ -> Set.contains k matches)
+//                                            |> Seq.map (fun x -> x.Value)
+//                                            |> Set
+//        let parents = if view.ReferencedBy then AnthologyGraph.CollectAllParents antho.Projects selectedProjectGuids
+//                      else Set.empty
+//        let allProjectSet = selectedProjectGuids |> Set.union parents
+//
+//        // find projects
+//        let antho = Configuration.LoadAnthology ()
+//        let projectRefs = match view.Dependencies with
+//                          | true -> AnthologyGraph.ComputeProjectSelectionClosureSourceOnly antho.Projects allProjectSet |> Set
+//                          | _ -> AnthologyGraph.ComputeProjectSelectionClosure antho.Projects allProjectSet |> Set
+//
+//        let projects = antho.Projects |> Set.filter (fun x -> projectRefs |> Set.contains x.ProjectId)
+//        projects
+
+// =====================================================================================================
 
 and [<Sealed>] Graph(anthology : Anthology.Anthology) =
     let mutable assemblyMap : System.Collections.Generic.IDictionary<Anthology.AssemblyId, Assembly> = null
@@ -218,6 +433,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
     let mutable repositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> = null
     let mutable applicationMap : System.Collections.Generic.IDictionary<Anthology.ApplicationId, Application> = null
     let mutable projectMap : System.Collections.Generic.IDictionary<Anthology.ProjectId, Project> = null
+    let mutable viewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> = null
 
     member this.Anthology : Anthology.Anthology = anthology
 
@@ -242,7 +458,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
 
     member this.RepositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> =
         if repositoryMap |> isNull then 
-            repositoryMap <- anthology.Repositories |> Seq.map (fun x -> x.Repository.Name, { Graph = this; Repository = x})                                 
+            repositoryMap <- anthology.Repositories |> Seq.map (fun x -> x.Repository.Name, { Graph = this; Repository = x.Repository})                                 
                                                     |> dict
         repositoryMap
 
@@ -258,15 +474,96 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
                                              |> dict
         projectMap
 
-    member this.Repositories = this.RepositoryMap.Values |> seq
+    member this.ViewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> = 
+        if viewMap |> isNull then
+            let vwDir = Env.GetFolder Env.Folder.View
+            viewMap <- vwDir.EnumerateFiles("*.view") |> Seq.map (fun x -> System.IO.Path.GetFileNameWithoutExtension(x.Name) |> Anthology.ViewId)
+                                                      |> Seq.map Configuration.LoadView
+                                                      |> Seq.map (fun x -> x.Name |> Anthology.ViewId, { Graph = this; View = x })
+                                                      |> dict
+        viewMap
 
-    member this.Assemblies = this.AssemblyMap.Values |> seq
+    member this.MasterRepository = { Graph = this; Repository = this.Anthology.MasterRepository }
 
-    member this.Packages = this.PackageMap.Values |> seq
+    member this.Repositories = this.RepositoryMap.Values |> set
 
-    member this.Applications = this.ApplicationMap.Values |> seq
+    member this.Assemblies = this.AssemblyMap.Values |> set
 
-    member this.Projects = this.ProjectMap.Values |> seq
+    member this.Packages = this.PackageMap.Values |> set
+
+    member this.Applications = this.ApplicationMap.Values |> set
+
+    member this.Projects = this.ProjectMap.Values |> set
+
+    member this.Views = this.ViewMap.Values |> set
+
+    member this.DefaultView =
+        let viewId = Configuration.DefaultView ()
+        match viewId with
+        | None -> None
+        | Some x -> Some this.ViewMap.[x]
+
+    member this.Baseline = 
+        let baseline = Configuration.LoadBaseline()
+        { Graph = this; Baseline = baseline }
+
+    member this.CreateBaseline (incremental : bool) =
+        this.Baseline
+
+    member this.TestRunner =
+        match this.Anthology.Tester with
+        | Anthology.TestRunnerType.NUnit -> TestRunnerType.NUnit
+
+    member this.ArtifactsDir = this.Anthology.Artifacts
+
+    member this.CreateView name filters parameters dependencies referencedBy modified builder =
+        let view = { Anthology.View.Name = name 
+                     Anthology.View.Filters = filters
+                     Anthology.View.Parameters = parameters
+                     Anthology.View.SourceOnly = dependencies
+                     Anthology.View.Parents = referencedBy
+                     Anthology.View.Modified = modified
+                     Anthology.View.Builder = match builder with
+                                              | BuilderType.MSBuild -> Anthology.BuilderType.MSBuild
+                                              | BuilderType.Skip -> Anthology.BuilderType.Skip }
+
+        { Graph = this
+          View = view }
+
+    member this.Save () =
+        Configuration.SaveAnthology this.Anthology
+
+
+// =====================================================================================================
+
 
 let from (antho : Anthology.Anthology) : Graph =
     Graph(antho)
+
+let create (uri : string) (artifacts : string) vcs runner =
+    let repo = { Anthology.Name = Anthology.RepositoryId.from Env.MASTER_REPO
+                 Anthology.Url = Anthology.RepositoryUrl.from uri
+                 Anthology.Branch = None }
+
+    let anthoVcs = match vcs with
+                   | VcsType.Gerrit -> Anthology.VcsType.Gerrit
+                   | VcsType.Git -> Anthology.VcsType.Git
+                   | VcsType.Hg -> Anthology.VcsType.Hg
+
+    let anthoRunner = match runner with
+                      | TestRunnerType.NUnit -> Anthology.TestRunnerType.NUnit
+
+    let antho = { Anthology.Anthology.MinVersion = Env.FullBuildVersion().ToString()
+                  Anthology.Anthology.Artifacts = artifacts
+                  Anthology.Anthology.NuGets = []
+                  Anthology.Anthology.MasterRepository = repo
+                  Anthology.Anthology.Repositories = Set.empty
+                  Anthology.Anthology.Projects = Set.empty
+                  Anthology.Anthology.Applications = Set.empty
+                  Anthology.Anthology.Tester = anthoRunner
+                  Anthology.Anthology.Vcs = anthoVcs }
+    from antho
+
+
+let init uri vcs =
+    create uri "dummy" vcs TestRunnerType.NUnit

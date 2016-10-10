@@ -26,8 +26,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>graph providers</StartArguments>
-    <StartWorkingDirectory>c:\src\avp</StartWorkingDirectory>
+    <StartArguments>test fullbuild</StartArguments>
+    <StartWorkingDirectory>c:\src\full-build\full-build</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>0077</NoWarn>
@@ -80,49 +80,51 @@
     <Compile Include="IoHelpers.fs" />
     <Compile Include="Env.fs" />
     <Compile Include="Anthology.fs" />
-    <Compile Include="Baseline.fs" />
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="BaselineSerializer.fs" />
+    <Compile Include="ViewSerializer.fs" />
+    <Compile Include="Configuration.fs" />
     <Compile Include="Graph.fsi" />
     <Compile Include="Graph.fs" />
     <Compile Include="GraphHelpers.fsi" />
     <Compile Include="GraphHelpers.fs" />
-    <Compile Include="View.fs" />
     <Compile Include="MsBuildHelpers.fs" />
     <Compile Include="Solution.fsi" />
     <Compile Include="Solution.fs" />
-    <Compile Include="Configuration.fs" />
     <Compile Include="AnthologyGraph.fs" />
     <Compile Include="Dgml.fsi" />
     <Compile Include="Dgml.fs" />
-    <Compile Include="Builders.fsi" />
-    <Compile Include="Builders.fs" />
-    <Compile Include="PaketInterface.fs" />
     <Compile Include="ProjectParsing.fs" />
-    <Compile Include="Vcs/Vcs.fsi" />
-    <Compile Include="Vcs/VcsHg.fs" />
-    <Compile Include="Vcs/VcsGit.fs" />
-    <Compile Include="Vcs/Vcs.fs" />
     <Compile Include="CLI\Commands.fs" />
     <Compile Include="CLI\CommandLine.fsi" />
     <Compile Include="CLI\CommandLine.fs" />
-    <Compile Include="Repo.fs" />
-    <Compile Include="ViewCommands.fs" />
+    <Compile Include="Plumbing\Vcs.fsi" />
+    <Compile Include="Plumbing\VcsHg.fs" />
+    <Compile Include="Plumbing\VcsGit.fs" />
+    <Compile Include="Plumbing\Vcs.fs" />
+    <Compile Include="Plumbing\Builders.fsi" />
+    <Compile Include="Plumbing\Builders.fs" />
+    <Compile Include="Plumbing\BuildArtifacts.fs" />
+    <Compile Include="Plumbing\NuGets.fs" />
+    <Compile Include="Plumbing\Simplify.fs" />
+    <Compile Include="Plumbing\PaketInterface.fs" />
+    <Compile Include="Plumbing\MsBuildConversion.fs" />
+    <Compile Include="Plumbing\Conversion.fs" />
+    <Compile Include="Plumbing\Indexation.fs" />
+    <Compile Include="Plumbing\FrameworkHandling.fs" />
+    <Compile Include="Plumbing\PlatformMatching.fs" />
+    <Compile Include="Plumbing\Package.fs" />
+    <Compile Include="Commands\ViewCommands.fsi" />
+    <Compile Include="Commands\ViewCommands.fs" />
+    <Compile Include="Commands\RepoCommands.fsi" />
+    <Compile Include="Commands\RepoCommands.fs" />
+    <Compile Include="Commands\WorkspaceCommands.fsi" />
+    <Compile Include="Commands\WorkspaceCommands.fs" />
     <Compile Include="Bindings.fs" />
     <Compile Include="Publishers.fsi" />
     <Compile Include="Publishers.fs" />
     <Compile Include="TestRunners.fs" />
-    <Compile Include="NuGets.fs" />
-    <Compile Include="Simplify.fs" />
-    <Compile Include="FrameworkHandling.fs" />
-    <Compile Include="PlatformMatching.fs" />
-    <Compile Include="Package.fs" />
-    <Compile Include="MsBuildConversion.fs" />
-    <Compile Include="Conversion.fs" />
     <Compile Include="Test.fs" />
-    <Compile Include="Indexation.fs" />
-    <Compile Include="BuildArtifacts.fs" />
-    <Compile Include="Workspace.fs" />
     <Compile Include="Application.fs" />
     <Compile Include="Upgrade.fs" />
     <Compile Include="Program.fs" />

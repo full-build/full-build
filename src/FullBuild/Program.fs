@@ -24,36 +24,37 @@ let tryMain argv =
     let stopWatch = System.Diagnostics.Stopwatch.StartNew()
     match cmd with
     // workspace
-    | Command.SetupWorkspace wsInfo -> Workspace.Create wsInfo.Path wsInfo.MasterRepository wsInfo.MasterArtifacts wsInfo.Type
-    | Command.InitWorkspace wsInfo -> Workspace.Init wsInfo.Path wsInfo.MasterRepository wsInfo.Type
-    | Command.IndexRepositories idxInfo -> Workspace.Index idxInfo.Filters
-    | Command.ConvertRepositories convInfo -> Workspace.Convert convInfo.Filters
-    | Command.PushWorkspace buildInfo -> Workspace.Push buildInfo.Branch buildInfo.BuildNumber buildInfo.Incremental
-    | Command.CheckoutWorkspace version -> Workspace.Checkout version.Version
-    | Command.BranchWorkspace branch -> Workspace.Branch branch.Branch
-    | Command.PullWorkspace pullInfo -> Workspace.Pull pullInfo.Src pullInfo.Bin pullInfo.Rebase pullInfo.View
-    | Command.Exec cmd -> Workspace.Exec cmd.Command cmd.All
-    | Command.CleanWorkspace -> Workspace.Clean ()
-    | Command.UpdateGuids name -> Workspace.UpdateGuid name
+    | Command.SetupWorkspace setupInfo -> WorkspaceCommands.Create setupInfo
+    | Command.InitWorkspace initInfo -> WorkspaceCommands.Init initInfo
+    | Command.IndexRepositories indexInfo -> WorkspaceCommands.Index indexInfo
+    | Command.ConvertRepositories convertInfo -> WorkspaceCommands.Convert convertInfo
+    | Command.PushWorkspace pushInfo -> WorkspaceCommands.Push pushInfo
+    | Command.CheckoutWorkspace version -> WorkspaceCommands.Checkout version
+    | Command.BranchWorkspace branch -> WorkspaceCommands.Branch branch
+    | Command.PullWorkspace pullInfo -> WorkspaceCommands.Pull pullInfo
+    | Command.Exec cmdInfo -> WorkspaceCommands.Exec cmdInfo
+    | Command.CleanWorkspace -> WorkspaceCommands.Clean ()
+    | Command.UpdateGuids name -> WorkspaceCommands.UpdateGuid (name.toString)
+    | Command.History histInfo -> WorkspaceCommands.History histInfo
+    | Command.InstallPackages -> WorkspaceCommands.Install ()
+
     | Command.TestAssemblies testInfo -> Test.TestAssemblies testInfo.Filters testInfo.Excludes
-    | Command.History histInfo -> Workspace.History histInfo.Html
 
     // repository
-    | Command.AddRepository repoInfo -> Repo.Add repoInfo.Repo repoInfo.Url repoInfo.Branch repoInfo.Builder
-    | Command.CloneRepositories repoInfo -> Repo.Clone repoInfo.Filters repoInfo.Shallow repoInfo.All repoInfo.Multithread
-    | Command.ListRepositories -> Repo.List ()
-    | Command.DropRepository repo -> Repo.Drop repo
-    | Command.InstallPackages -> Workspace.Install ()
+    | Command.AddRepository addInfo -> RepoCommands.Add addInfo
+    | Command.CloneRepositories cloneInfo -> RepoCommands.Clone cloneInfo
+    | Command.ListRepositories -> RepoCommands.List ()
+    | Command.DropRepository dropInfo -> RepoCommands.Drop dropInfo
 
     // view
-    | Command.AddView viewInfo -> ViewCommands.Create viewInfo.Name viewInfo.Filters viewInfo.SourceOnly viewInfo.Parents viewInfo.Modified
+    | Command.AddView viewInfo -> ViewCommands.Add viewInfo
     | Command.DropView viewInfo -> ViewCommands.Drop viewInfo.Name
     | Command.ListViews -> ViewCommands.List ()
     | Command.DescribeView viewInfo -> ViewCommands.Describe viewInfo.Name
-    | Command.GraphView viewInfo -> ViewCommands.Graph viewInfo.Name viewInfo.All
-    | Command.BuildView viewInfo -> ViewCommands.Build viewInfo.Name viewInfo.Config viewInfo.Clean viewInfo.Multithread viewInfo.Version
-    | Command.AlterView viewInfo -> ViewCommands.AlterView viewInfo.Name viewInfo.Default viewInfo.Source viewInfo.Parents
-    | Command.OpenView viewInfo -> ViewCommands.OpenView viewInfo.Name
+    | Command.GraphView viewInfo -> ViewCommands.Graph viewInfo
+    | Command.BuildView viewInfo -> ViewCommands.Build viewInfo
+    | Command.AlterView viewInfo -> ViewCommands.Alter viewInfo
+    | Command.OpenView viewInfo -> ViewCommands.Open viewInfo
 
     // nuget
     | Command.AddNuGet url -> NuGets.Add url

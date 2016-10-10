@@ -14,20 +14,18 @@
 
 module Commands
 open Anthology
-open View
-open Baseline
 open Collections
 
 
 type SetupWorkspace =
-    { MasterRepository : RepositoryUrl
+    { MasterRepository : string
       MasterArtifacts : string
-      Type : VcsType
+      Type : Graph.VcsType
       Path : string }
 
 type InitWorkspace =
-    { MasterRepository : RepositoryUrl
-      Type : VcsType
+    { MasterRepository : string
+      Type : Graph.VcsType
       Path : string }
 
 type CheckoutWorkspace =
@@ -40,38 +38,38 @@ type CloneRepositories =
       Multithread : bool }
 
 type IndexRepositories =
-    { Filters : RepositoryId set }
+    { Filters : string set }
 
 type ConvertRepositories =
-    { Filters : RepositoryId set }
+    { Filters : string set }
 
 type TestAssemblies =
-    { Filters : string list
-      Excludes : string list }
+    { Filters : string set
+      Excludes : string set }
 
 type NuGetUrl =
     { Url : string }
 
 type AddView =
-    { Name : ViewId
+    { Name : string
       Filters : string list
       SourceOnly : bool
       Parents : bool
       Modified : bool }
 
 type ViewName =
-    { Name : ViewId }
+    { Name : string }
 
 type PublishApplications =
-    { View: ViewId option
+    { View: string option
       Filters : string list
       Multithread : bool }
 
 type CheckoutVersion =
-    { Version : BookmarkVersion }
+    { Version : string }
 
 type BranchWorkspace =
-    { Branch : BookmarkVersion option }
+    { Branch : string option }
 
 type AddApplication =
     { Name : ApplicationId
@@ -79,23 +77,23 @@ type AddApplication =
       Projects : ProjectId list }
 
 type BuildView =
-    { Name : ViewId option
+    { Name : string option
       Config : string
       Clean : bool
       Multithread : bool
       Version : string option }
 
 type AlterView =
-    { Name : ViewId
+    { Name : string
       Default : bool option
       Source : bool option
       Parents : bool option }
 
 type OpenView =
-    { Name : ViewId }
+    { Name : string }
 
 type GraphView =
-    { Name : ViewId
+    { Name : string
       All : bool }
 
 type Exec =
@@ -112,7 +110,7 @@ type PullWorkspace =
     { Src : bool
       Bin : bool
       Rebase : bool
-      View : ViewId option }
+      View : string option }
 
 type PushWorkspace =
     { BuildNumber : string
@@ -199,7 +197,7 @@ type Command =
     | ListRepositories
     | AddRepository of AddRepository
     | CloneRepositories of CloneRepositories
-    | DropRepository of RepositoryId
+    | DropRepository of string
 
     // view
     | ListViews

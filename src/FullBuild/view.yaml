@@ -1,4 +1,5 @@
 ﻿view:
+    name: viewname
     filters:
         - filter: toto/*
         - filter: titi/*

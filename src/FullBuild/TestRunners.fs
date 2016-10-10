@@ -13,9 +13,10 @@
 //   limitations under the License.
 
 module TestRunners
-open Anthology
+//open Anthology
 open Env
 open Collections
+open Graph
 
 
 
@@ -35,10 +36,10 @@ let excludeListToArgs (excludes : string list) =
 
 
 
-let runnerNUnit (includes : string set) (excludes : string list) =
+let runnerNUnit (includes : string set) (excludes : string set) =
     let wsDir = GetFolder Env.Folder.Workspace
     let files = includes |> Set.fold (fun s t -> sprintf @"%s %A" s t) ""
-    let excludeArgs = excludeListToArgs excludes
+    let excludeArgs = excludeListToArgs (excludes |> List.ofSeq)
     let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs
     checkedExec "nunit3-console.exe" args wsDir
 
@@ -47,5 +48,5 @@ let chooseTestRunner (runnerType : TestRunnerType) nunitRunner =
                  | TestRunnerType.NUnit -> nunitRunner
     runner
 
-let TestWithTestRunner (runnerType : TestRunnerType) =
-    chooseTestRunner runnerType runnerNUnit
+let TestWithTestRunner (runnerType : TestRunnerType) (includes : string set) (excludes : string set) =
+    (chooseTestRunner runnerType runnerNUnit) includes excludes
