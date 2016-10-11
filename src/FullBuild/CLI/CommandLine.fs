@@ -106,6 +106,11 @@ type private Token =
     | UpdateGuids
     | Migrate
 
+let (|FullBuildView|_|) (viewFile : string) =
+    if viewFile.EndsWith(IoHelpers.Extension.View |> IoHelpers.GetExtentionString |> sprintf ".%s") && System.IO.File.Exists(viewFile) then
+        Some viewFile
+    else 
+        None
 
 let private (|Token|_|) (token : string) =
     match token with
@@ -529,6 +534,7 @@ let Parse (args : string list) : Command =
     | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
+    | FullBuildView viewFile :: [] -> Command.FullBuildView { FilePath = viewFile }
     | _ -> Command.Error MainCommand.Unknown
 
 
