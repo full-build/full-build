@@ -12,29 +12,15 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module ViewCommands
+module Generators.Solution
 
+open System.Xml.Linq
+open Collections
+open Graph
 
-val Add: cmd : Commands.AddView
-      -> unit
+val GenerateSolutionDefines: projects : Project set 
+                          -> XDocument
 
-val Drop: name : string
-       -> unit
+val GenerateSolutionContent: projects : Project set 
+                          -> string seq
 
-val List: unit
-       -> unit
-
-val Describe: name : string
-           -> unit
-
-val Graph: cmd : Commands.GraphView
-        -> unit
-
-val Build: cmd : Commands.BuildView
-        -> unit
-
-val Alter: cmd : Commands.AlterView
-        -> unit
-
-val Open: cmd : Commands.OpenView
-      -> unit

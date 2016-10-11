@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module ViewCommands
+module Commands.View
 open Env
 open IoHelpers
 //open Anthology
@@ -183,7 +183,7 @@ open Graph
 //
 
 
-let Add (cmd : Commands.AddView) =
+let Add (cmd : CLI.Commands.AddView) =
     if cmd.Filters.Length = 0 && not cmd.Modified then
         failwith "Expecting at least one filter"
     
@@ -199,7 +199,7 @@ let Add (cmd : Commands.AddView) =
     view.Save None
 
     // generate solution defines
-    let slnDefines = Solution.GenerateSolutionDefines view.Projects
+    let slnDefines = Generators.Solution.GenerateSolutionDefines view.Projects
     let viewDir = GetFolder Env.Folder.View
     let slnDefineFile = viewDir |> GetFile (AddExt Targets view.Name)
     SaveFileIfNecessary slnDefineFile (slnDefines.ToString())
@@ -207,7 +207,7 @@ let Add (cmd : Commands.AddView) =
     // generate solution file
     let wsDir = GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> GetFile (AddExt Solution view.Name)
-    let slnContent = Solution.GenerateSolutionContent view.Projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
+    let slnContent = Generators.Solution.GenerateSolutionContent view.Projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
     SaveFileIfNecessary slnFile slnContent
 
 
@@ -238,7 +238,7 @@ let Describe name =
     view.Filters |> Seq.iter (fun x -> printfn "%s" x)
 
 
-let Build (cmd : Commands.BuildView) =
+let Build (cmd : CLI.Commands.BuildView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let view = match cmd.Name with
                | Some x -> graph.Views |> Seq.find (fun y -> y.Name = x)
@@ -250,7 +250,7 @@ let Build (cmd : Commands.BuildView) =
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
     Plumbing.Builders.BuildWithBuilder view.Builder slnFile cmd.Config cmd.Clean cmd.Multithread cmd.Version
 
-let Alter (cmd : Commands.AlterView) =
+let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let view = graph.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let depView = graph.CreateView view.Name
@@ -262,19 +262,19 @@ let Alter (cmd : Commands.AlterView) =
                                    view.Builder
     depView.Save cmd.Default
 
-let Open (cmd : Commands.OpenView) =
+let Open (cmd : CLI.Commands.OpenView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let view = graph.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
     Exec.SpawnWithVerb slnFile.FullName "open"
 
-let Graph (cmd : Commands.GraphView) =
+let Graph (cmd : CLI.Commands.GraphView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let view = graph.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let projects = view.Projects |> set
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml cmd.Name)
 
-    let xgraph = Dgml.GraphContent projects cmd.All
+    let xgraph = Generators.Dgml.GraphContent projects cmd.All
     xgraph.Save graphFile.FullName

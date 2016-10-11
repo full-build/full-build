@@ -12,15 +12,9 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Solution
-
-open System.Xml.Linq
+module Commands.Test
 open Collections
-open Graph
 
-val GenerateSolutionDefines: projects : Project set 
-                          -> XDocument
-
-val GenerateSolutionContent: projects : Project set 
-                          -> string seq
-
+val TestAssemblies: filters : string set
+                 -> excludes : string set
+                 -> unit

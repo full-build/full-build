@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module WorkspaceCommands
+module Commands.Workspace
 
 open System.IO
 open IoHelpers
@@ -33,7 +33,7 @@ let private checkedExecWithVars =
 
 
 
-let Create (createInfo : Commands.SetupWorkspace) =
+let Create (createInfo : CLI.Commands.SetupWorkspace) =
     let wsDir = DirectoryInfo(createInfo.Path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then failwith "Workspace already exists"
@@ -62,7 +62,7 @@ let Create (createInfo : Commands.SetupWorkspace) =
 
 
 
-let Init (initInfo : Commands.InitWorkspace) =
+let Init (initInfo : CLI.Commands.InitWorkspace) =
     let wsDir = DirectoryInfo(initInfo.Path)
     wsDir.Create()
     if IsWorkspaceFolder wsDir then
@@ -72,7 +72,7 @@ let Init (initInfo : Commands.InitWorkspace) =
         Plumbing.Vcs.Clone wsDir graph.MasterRepository true
 
 
-let Push (pushInfo : Commands.PushWorkspace) =
+let Push (pushInfo : CLI.Commands.PushWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let allRepos = graph.Repositories
@@ -87,7 +87,7 @@ let Push (pushInfo : Commands.PushWorkspace) =
     let hash = Plumbing.Vcs.Tip wsDir mainRepo
     Plumbing.BuildArtifacts.Publish pushInfo.Branch pushInfo.BuildNumber hash
 
-let Checkout (checkoutInfo : Commands.CheckoutVersion) =
+let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     // checkout repositories
     DisplayHighlight ".full-build"
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -107,7 +107,7 @@ let Checkout (checkoutInfo : Commands.CheckoutVersion) =
     // update binaries with observable baseline
     Plumbing.BuildArtifacts.PullReferenceBinaries checkoutInfo.Version
 
-let Branch (branchInfo : Commands.BranchWorkspace) =
+let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     // checkout repositories
     DisplayHighlight ".full-build"
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -131,7 +131,7 @@ let Install () =
     Conversion.GenerateProjectArtifacts()
 
 
-let Pull (pullInfo : Commands.PullWorkspace) =
+let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
@@ -157,7 +157,7 @@ let Pull (pullInfo : Commands.PullWorkspace) =
         Plumbing.BuildArtifacts.PullLatestReferenceBinaries ()
 
 
-let Exec (execInfo : Commands.Exec) =
+let Exec (execInfo : CLI.Commands.Exec) =
     let antho = Configuration.LoadAnthology()
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repos = antho.Repositories |> Set.map (fun x -> x.Repository)
@@ -208,19 +208,20 @@ let Clean () =
         DisplayHighlight newAntho.MasterRepository.Name
         Plumbing.Vcs.Clean wsDir newAntho.MasterRepository
 
-let UpdateGuid (repo : string) =
+let UpdateGuid (updInfo : CLI.Commands.UpdateGuids) =
     printfn "DANGER ! You will change all project guids for selected repository. Do you want to continue [Yes to confirm] ?"
     let res = Console.ReadLine()
     if res = "Yes" then
-        let antho = Configuration.LoadAnthology ()
+        let graph = Configuration.LoadAnthology () |> Graph.from
         let wsDir = Env.GetFolder Env.Folder.Workspace
-        let repoDir = wsDir |> GetSubDirectory repo
-        let projects = IoHelpers.FindKnownProjects repoDir
+        let selectedProjects = PatternMatching.FilterMatch (graph.Projects) (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) updInfo.Filters
+        let projects = selectedProjects |> Set.filter (fun x -> x.Repository.IsCloned)
         for project in projects do
-            let xdoc = XDocument.Load(project.FullName)
+            let prjFile = wsDir |> GetFile project.ProjectFile
+            let xdoc = XDocument.Load(prjFile.FullName)
             let guid = xdoc.Descendants(NsMsBuild + "ProjectGuid").Single()
             guid.Value <- Guid.NewGuid().ToString("B")
-            xdoc.Save(project.FullName)
+            xdoc.Save(prjFile.FullName)
 
 
 let textHeader (version : string) =
@@ -247,7 +248,7 @@ let htmlBody (repo : string) (content : string) =
     printfn "%s<br><br>" htmlContent
 
 
-let History (historyInfo : Commands.History) =
+let History (historyInfo : CLI.Commands.History) =
     let header = historyInfo.Html ? (htmlHeader, textHeader)
     let body = historyInfo.Html ? (htmlBody, textBody)
     let footer = historyInfo.Html ? (htmlFooter, textFooter)
@@ -273,7 +274,7 @@ let History (historyInfo : Commands.History) =
 
     footer ()
 
-let Index (indexInfo : Commands.IndexRepositories) =
+let Index (indexInfo : CLI.Commands.IndexRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) indexInfo.Filters
@@ -283,7 +284,7 @@ let Index (indexInfo : Commands.IndexRepositories) =
                   |> Package.Simplify
                   |> Configuration.SaveAnthology
 
-let Convert (convertInfo : Commands.ConvertRepositories) =
+let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) convertInfo.Filters

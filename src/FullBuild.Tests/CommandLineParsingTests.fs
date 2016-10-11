@@ -16,24 +16,24 @@ module CommandLineParsingTests
 
 open NUnit.Framework
 open FsUnit
-open Commands
+open CLI.Commands
 open Anthology
 
 [<Test>]
 let CheckErrorInvoked () =
-    let result = CommandLine.Parse [ "workspace"; "blah blah" ]
+    let result = CLI.CommandLine.Parse [ "workspace"; "blah blah" ]
     let expected = Command.Error MainCommand.Unknown
     result |> should equal expected
 
 [<Test>]
 let CheckUsageInvoked () =
-    let result = CommandLine.Parse [ "help" ]
+    let result = CLI.CommandLine.Parse [ "help" ]
     let expected = Command.Usage
     result |> should equal expected
 
 
 [<Test>]
 let CheckRepositoriesConvert () =
-    let result = CommandLine.Parse [ "convert"; "*" ]
+    let result = CLI.CommandLine.Parse [ "convert"; "*" ]
     let expected = Command.ConvertRepositories { Filters = set ["*"] }
     result |> should equal expected

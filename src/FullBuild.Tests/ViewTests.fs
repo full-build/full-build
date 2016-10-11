@@ -19,7 +19,7 @@ open NUnit.Framework
 open FsUnit
 open Anthology
 open StringHelpers
-open Solution
+open Generators.Solution
 open TestHelpers
 
 [<Test>]

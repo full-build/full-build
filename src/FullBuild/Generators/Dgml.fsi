@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Dgml
+module Generators.Dgml
 
 open System.Xml.Linq
 open Graph

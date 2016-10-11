@@ -12,44 +12,28 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module WorkspaceCommands
+module Commands.View
 
+val Add: cmd : CLI.Commands.AddView
+      -> unit
 
-val Create: Commands.SetupWorkspace
-         -> unit
-
-val Push: Commands.PushWorkspace
+val Drop: name : string
        -> unit
 
-val Checkout: Commands.CheckoutVersion
+val List: unit
+       -> unit
+
+val Describe: name : string
            -> unit
 
-val Branch: Commands.BranchWorkspace
-         -> unit
-
-val Install: unit
-          -> unit
-
-val Pull: Commands.PullWorkspace
-       -> unit
-
-val Init: Commands.InitWorkspace
-       -> unit
-
-val Exec: Commands.Exec
-       -> unit
-
-val Clean: unit
+val Graph: cmd : CLI.Commands.GraphView
         -> unit
 
-val UpdateGuid: repositoryId : string
-             -> unit
-
-val History: Commands.History
-          -> unit
-
-val Index: Commands.IndexRepositories
+val Build: cmd : CLI.Commands.BuildView
         -> unit
 
-val Convert: Commands.ConvertRepositories
-          -> unit
+val Alter: cmd : CLI.Commands.AlterView
+        -> unit
+
+val Open: cmd : CLI.Commands.OpenView
+      -> unit
