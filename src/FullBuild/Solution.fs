@@ -32,7 +32,6 @@ let projectToProjectType (filename : string) =
 
 let GenerateSolutionContent (projects : Project set) =
     seq {
-//        yield ""
         yield "Microsoft Visual Studio Solution File, Format Version 12.00"
         yield "# Visual Studio 14"
 
