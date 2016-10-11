@@ -37,7 +37,22 @@ type Extension =
     | Zip
     | Config
     | Text
-    | Html
+
+let GetExtentionString ext =
+    match ext with
+    | View -> "fbv"
+    | Solution -> "sln"
+    | Targets -> "targets"
+    | CsProj -> "csproj"
+    | FsProj -> "fsproj"
+    | VbProj -> "vbproj"
+    | NuSpec -> "nuspec"
+    | Dgml -> "dgml"
+    | App -> "app"
+    | Exe -> "exe"
+    | Dll -> "dll"
+    | Zip -> "zip"
+    | Config -> "config"
 
 let AddExt (ext : Extension) (fileName : string) : string =
     let sext = match ext with
