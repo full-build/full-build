@@ -192,14 +192,23 @@ let Add (cmd : CLI.Commands.AddView) =
     let view = graph.CreateView cmd.Name
                                 (cmd.Filters |> Set.ofList)
                                 Set.empty
-                                cmd.SourceOnly
-                                cmd.Parents
+                                cmd.References
+                                cmd.ReferencedBy
                                 cmd.Modified
                                 Graph.BuilderType.MSBuild
     view.Save None
 
+    let viewProjects = view.Projects
+    let depProjects = if cmd.References then GraphHelpers.ComputeTransitiveReferences viewProjects  
+                      else Set.empty
+    let refProjects = if cmd.ReferencedBy then GraphHelpers.ComputeTransitiveReferencedBy viewProjects
+                      else Set.empty
+    let projects = viewProjects |> Set.union depProjects
+                                   |> Set.union refProjects
+                                   |> GraphHelpers.ComputeClosure
+
     // generate solution defines
-    let slnDefines = Generators.Solution.GenerateSolutionDefines view.Projects
+    let slnDefines = Generators.Solution.GenerateSolutionDefines projects
     let viewDir = GetFolder Env.Folder.View
     let slnDefineFile = viewDir |> GetFile (AddExt Targets view.Name)
     SaveFileIfNecessary slnDefineFile (slnDefines.ToString())
@@ -207,7 +216,7 @@ let Add (cmd : CLI.Commands.AddView) =
     // generate solution file
     let wsDir = GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> GetFile (AddExt Solution view.Name)
-    let slnContent = Generators.Solution.GenerateSolutionContent view.Projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
+    let slnContent = Generators.Solution.GenerateSolutionContent projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
     SaveFileIfNecessary slnFile slnContent
 
 

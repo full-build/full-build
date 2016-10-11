@@ -6,6 +6,6 @@
     builder: msbuild
     parameters: 
         - parameter: --mt
-    sourceonly: true
-    parents: true
+    references: true
+    referencedBy: true
     modified: true

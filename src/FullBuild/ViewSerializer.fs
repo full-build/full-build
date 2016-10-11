@@ -37,8 +37,8 @@ let SerializeView (view : View) =
         let paramItem = ViewConfig.view_Type.parameters_Item_Type()
         paramItem.parameter <- parameter
         config.view.parameters.Add paramItem
-    config.view.sourceonly <- view.SourceOnly
-    config.view.parents <- view.Parents
+    config.view.references <- view.SourceOnly
+    config.view.referencedBy <- view.Parents
     config.view.modified <- view.Modified
 
     config.ToString()
@@ -55,8 +55,8 @@ let DeserializeView content =
                    |> Seq.map (fun x -> x.parameter)
                    |> Set.ofSeq
       Builder = BuilderType.from config.view.builder
-      SourceOnly = config.view.sourceonly
-      Parents = config.view.parents
+      SourceOnly = config.view.references
+      Parents = config.view.referencedBy
       Modified = config.view.modified }
 
 
