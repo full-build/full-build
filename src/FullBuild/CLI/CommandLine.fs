@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module CommandLine
+module CLI.CommandLine
 
 open Commands
 open Collections
@@ -264,8 +264,7 @@ let rec commandClone (shallow : bool) (all : bool) (mt : bool) (args : string li
     | TokenOption TokenOption.Multithread
       :: tail -> tail |> commandClone shallow all true
     | [] -> Command.Error MainCommand.CloneRepository
-    | Params filters -> let repoFilters = filters |> Seq.map RepositoryId.from |> Set
-                        Command.CloneRepositories { Filters = repoFilters; Shallow = shallow; All = all; Multithread = mt }
+    | Params filters -> Command.CloneRepositories { Filters = set filters; Shallow = shallow; All = all; Multithread = mt }
     | _ -> Command.Error MainCommand.CloneRepository
 
 
@@ -457,7 +456,7 @@ let commandListPackage (args : string list) =
 
 let commandUpdateGuids (args : string list) =
     match args with
-    | [Param name] -> Command.UpdateGuids (RepositoryId.from name)
+    | Params filters -> Command.UpdateGuids { Filters = set filters }
     | _ -> Command.Error MainCommand.UpgradeGuids
 
 let commandBind (args : string list) =

@@ -12,11 +12,9 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module RepoCommands
+module Commands.Repo
 
-open PatternMatching
 open Collections
-open IoHelpers
 open Graph
 
 let List() =
@@ -30,19 +28,15 @@ let List() =
 
 let cloneRepoAndInit wsDir shallow (repo : Repository) =
     async {
-        DisplayHighlight repo.Name
+        IoHelpers.DisplayHighlight repo.Name
         Plumbing.Vcs.Clone wsDir repo shallow
     }
 
-let Clone (cmd : Commands.CloneRepositories) =
+let Clone (cmd : CLI.Commands.CloneRepositories) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let filter (repos : Repository seq) (filter : string) = repos |> Seq.filter (fun x -> Match x.Name filter)                                                            
-    let filteredRepos = cmd.Filters |> Seq.map (fun x -> x.toString)
-                                    |> Seq.map (filter graph.Repositories)
-                                    |> Seq.concat
-                                    |> Set
-    let filteredProjects = filteredRepos |> Set.map (fun x -> x.Projects |> set)
+    let selectedRepos = PatternMatching.FilterMatch graph.Repositories (fun x -> x.Name) cmd.Filters
+    let filteredProjects = selectedRepos |> Set.map (fun x -> x.Projects |> set)
                                          |> Set.unionMany
 
     let selectedProjects = if cmd.All then GraphHelpers.ComputeTransitiveReferences filteredProjects
@@ -53,7 +47,7 @@ let Clone (cmd : Commands.CloneRepositories) =
     selectedRepos |> Seq.map (cloneRepoAndInit wsDir cmd.Shallow)
                   |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
 
-let Add (cmd : Commands.AddRepository) =
+let Add (cmd : CLI.Commands.AddRepository) =
     let antho = Configuration.LoadAnthology ()
     let repo = { Anthology.Name = cmd.Repo; Anthology.Url = cmd.Url; Anthology.Branch = cmd.Branch }
     let buildableRepo = { Anthology.Repository = repo; Anthology.Builder = cmd.Builder }
@@ -79,11 +73,3 @@ let Drop (name : string) =
                          with Projects = Set.difference antho.Projects projectsInRepo
                               Repositories = antho.Repositories |> Set.filter (fun x -> x.Repository.Name <> repoName) }
         Configuration.SaveAnthology newAntho
-
-//let CollectRepoHash wsDir vcsType (repos : Repository set) =
-//    let getRepoHash (repo : Repository) =
-//        let tip = Vcs.Tip wsDir repo
-//        { Repository = repo.Name; Version = BookmarkVersion tip}
-//
-//    repos |> Set.map getRepoHash
-//

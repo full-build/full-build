@@ -12,13 +12,18 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module CLI.CommandLine
-open Commands
+module Commands.Repo
 
-val Parse : args : string list
-         -> Command
 
-val PrintUsage : what : MainCommand
-                -> unit
+val List: unit
+       -> unit
 
-val PrintVersion : unit -> unit
+val Clone: cmd : CLI.Commands.CloneRepositories
+        -> unit
+
+val Add: cmd : CLI.Commands.AddRepository
+      -> unit
+
+val Drop: name : string
+       -> unit
+

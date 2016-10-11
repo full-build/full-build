@@ -12,18 +12,15 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module RepoCommands
+module Commands.Test
+open Collections
 
+let TestAssemblies (filters : string set) (excludes : string set) =
+    let graph = Configuration.LoadAnthology() |> Graph.from
+    let selectedViews = PatternMatching.FilterMatch graph.Views (fun x -> x.Name) filters
+    let assemblies = selectedViews |> Set.map (fun x -> x.Projects)
+                                   |> Set.unionMany
+                                   |> Set.filter (fun x -> x.HasTests)
+                                   |> Set.map (fun x -> x.BinFile)
 
-val List: unit
-       -> unit
-
-val Clone: cmd : Commands.CloneRepositories
-        -> unit
-
-val Add: cmd : Commands.AddRepository
-      -> unit
-
-val Drop: name : string
-       -> unit
-
+    (Plumbing.TestRunners.TestWithTestRunner graph.TestRunner) assemblies excludes

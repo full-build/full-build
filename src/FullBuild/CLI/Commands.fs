@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Commands
+module CLI.Commands
 open Anthology
 open Collections
 
@@ -32,10 +32,13 @@ type CheckoutWorkspace =
     { Version : string }
 
 type CloneRepositories =
-    { Filters : RepositoryId set
+    { Filters : string set
       Shallow : bool
       All : bool
       Multithread : bool }
+
+type UpdateGuids =
+    { Filters : string set }
 
 type IndexRepositories =
     { Filters : string set }
@@ -189,7 +192,7 @@ type Command =
     | PullWorkspace of PullWorkspace
     | Exec of Exec
     | CleanWorkspace
-    | UpdateGuids of RepositoryId
+    | UpdateGuids of UpdateGuids
     | TestAssemblies of TestAssemblies
     | History of History
 

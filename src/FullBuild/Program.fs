@@ -13,48 +13,48 @@
 //   limitations under the License.
 
 module Main
-open Commands
+open CLI.Commands
 
 let tryMain argv =
     Env.CheckLicense ()
     Configuration.CheckMinVersion ()
 
-    let cmd = CommandLine.Parse (argv |> Seq.toList)
+    let cmd = CLI.CommandLine.Parse (argv |> Seq.toList)
 
     let stopWatch = System.Diagnostics.Stopwatch.StartNew()
     match cmd with
     // workspace
-    | Command.SetupWorkspace setupInfo -> WorkspaceCommands.Create setupInfo
-    | Command.InitWorkspace initInfo -> WorkspaceCommands.Init initInfo
-    | Command.IndexRepositories indexInfo -> WorkspaceCommands.Index indexInfo
-    | Command.ConvertRepositories convertInfo -> WorkspaceCommands.Convert convertInfo
-    | Command.PushWorkspace pushInfo -> WorkspaceCommands.Push pushInfo
-    | Command.CheckoutWorkspace version -> WorkspaceCommands.Checkout version
-    | Command.BranchWorkspace branch -> WorkspaceCommands.Branch branch
-    | Command.PullWorkspace pullInfo -> WorkspaceCommands.Pull pullInfo
-    | Command.Exec cmdInfo -> WorkspaceCommands.Exec cmdInfo
-    | Command.CleanWorkspace -> WorkspaceCommands.Clean ()
-    | Command.UpdateGuids name -> WorkspaceCommands.UpdateGuid (name.toString)
-    | Command.History histInfo -> WorkspaceCommands.History histInfo
-    | Command.InstallPackages -> WorkspaceCommands.Install ()
+    | Command.SetupWorkspace setupInfo -> Commands.Workspace.Create setupInfo
+    | Command.InitWorkspace initInfo -> Commands.Workspace.Init initInfo
+    | Command.IndexRepositories indexInfo -> Commands.Workspace.Index indexInfo
+    | Command.ConvertRepositories convertInfo -> Commands.Workspace.Convert convertInfo
+    | Command.PushWorkspace pushInfo -> Commands.Workspace.Push pushInfo
+    | Command.CheckoutWorkspace version -> Commands.Workspace.Checkout version
+    | Command.BranchWorkspace branch -> Commands.Workspace.Branch branch
+    | Command.PullWorkspace pullInfo -> Commands.Workspace.Pull pullInfo
+    | Command.Exec cmdInfo -> Commands.Workspace.Exec cmdInfo
+    | Command.CleanWorkspace -> Commands.Workspace.Clean ()
+    | Command.UpdateGuids updInfo -> Commands.Workspace.UpdateGuid updInfo
+    | Command.History histInfo -> Commands.Workspace.History histInfo
+    | Command.InstallPackages -> Commands.Workspace.Install ()
 
-    | Command.TestAssemblies testInfo -> Test.TestAssemblies testInfo.Filters testInfo.Excludes
+    | Command.TestAssemblies testInfo -> Commands.Test.TestAssemblies testInfo.Filters testInfo.Excludes
 
     // repository
-    | Command.AddRepository addInfo -> RepoCommands.Add addInfo
-    | Command.CloneRepositories cloneInfo -> RepoCommands.Clone cloneInfo
-    | Command.ListRepositories -> RepoCommands.List ()
-    | Command.DropRepository dropInfo -> RepoCommands.Drop dropInfo
+    | Command.AddRepository addInfo -> Commands.Repo.Add addInfo
+    | Command.CloneRepositories cloneInfo -> Commands.Repo.Clone cloneInfo
+    | Command.ListRepositories -> Commands.Repo.List ()
+    | Command.DropRepository dropInfo -> Commands.Repo.Drop dropInfo
 
     // view
-    | Command.AddView viewInfo -> ViewCommands.Add viewInfo
-    | Command.DropView viewInfo -> ViewCommands.Drop viewInfo.Name
-    | Command.ListViews -> ViewCommands.List ()
-    | Command.DescribeView viewInfo -> ViewCommands.Describe viewInfo.Name
-    | Command.GraphView viewInfo -> ViewCommands.Graph viewInfo
-    | Command.BuildView viewInfo -> ViewCommands.Build viewInfo
-    | Command.AlterView viewInfo -> ViewCommands.Alter viewInfo
-    | Command.OpenView viewInfo -> ViewCommands.Open viewInfo
+    | Command.AddView viewInfo -> Commands.View.Add viewInfo
+    | Command.DropView viewInfo -> Commands.View.Drop viewInfo.Name
+    | Command.ListViews -> Commands.View.List ()
+    | Command.DescribeView viewInfo -> Commands.View.Describe viewInfo.Name
+    | Command.GraphView viewInfo -> Commands.View.Graph viewInfo
+    | Command.BuildView viewInfo -> Commands.View.Build viewInfo
+    | Command.AlterView viewInfo -> Commands.View.Alter viewInfo
+    | Command.OpenView viewInfo -> Commands.View.Open viewInfo
 
     // nuget
     | Command.AddNuGet url -> NuGets.Add url
@@ -75,9 +75,9 @@ let tryMain argv =
     // misc
     | Command.Upgrade -> Upgrade.Upgrade ()
     | Command.FinalizeUpgrade processId -> Upgrade.FinalizeUpgrade processId
-    | Command.Version -> CommandLine.PrintVersion ()
-    | Command.Usage -> CommandLine.PrintUsage MainCommand.Unknown
-    | Command.Error errInfo -> CommandLine.PrintUsage errInfo
+    | Command.Version -> CLI.CommandLine.PrintVersion ()
+    | Command.Usage -> CLI.CommandLine.PrintUsage MainCommand.Unknown
+    | Command.Error errInfo -> CLI.CommandLine.PrintUsage errInfo
 
     stopWatch.Stop()
     printfn "Completed in %d seconds." ((int)stopWatch.Elapsed.TotalSeconds)
