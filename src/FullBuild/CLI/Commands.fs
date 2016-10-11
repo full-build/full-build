@@ -96,6 +96,9 @@ type AlterView =
 type OpenView =
     { Name : string }
 
+type FullBuildView =
+    { FilePath : string }
+
 type GraphView =
     { Name : string
       All : bool }
@@ -213,6 +216,7 @@ type Command =
     | BuildView of BuildView
     | AlterView of AlterView
     | OpenView of OpenView
+    | FullBuildView of FullBuildView
 
     // nuget
     | AddNuGet of RepositoryUrl
