@@ -275,6 +275,7 @@ let Add (cmd : Commands.AddView) =
     if cmd.Filters.Length = 0 && not cmd.Modified then
         failwith "Expecting at least one filter"
     
+    // save view information first
     let graph = Configuration.LoadAnthology() |> Graph.from
     let view = graph.CreateView cmd.Name
                                 (cmd.Filters |> Set.ofList)
@@ -284,6 +285,21 @@ let Add (cmd : Commands.AddView) =
                                 cmd.Modified
                                 Graph.BuilderType.MSBuild
     view.Save None
+
+    // generate solution defines
+    let slnDefines = Solution.GenerateSolutionDefines view.Projects
+    let viewDir = GetFolder Env.Folder.View
+    let slnDefineFile = viewDir |> GetFile (AddExt Targets view.Name)
+    SaveFileIfNecessary slnDefineFile (slnDefines.ToString())
+
+    // generate solution file
+    let wsDir = GetFolder Env.Folder.Workspace
+    let slnFile = wsDir |> GetFile (AddExt Solution view.Name)
+    let slnContent = Solution.GenerateSolutionContent view.Projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
+    SaveFileIfNecessary slnFile slnContent
+
+
+
 
 let Drop name =
     let graph = Configuration.LoadAnthology() |> Graph.from
