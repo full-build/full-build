@@ -388,16 +388,16 @@ let commandListNuGet (args : string list) =
     | [] -> Command.ListNuGets
     | _ -> Command.Error MainCommand.ListNuget
 
-let rec commandAddView (sourceOnly : bool) (parents : bool) (modified : bool) (args : string list) =
+let rec commandAddView (references : bool) (referencedBy : bool) (modified : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Src
-      :: tail -> tail |> commandAddView true parents modified
+      :: tail -> tail |> commandAddView true referencedBy modified
     | TokenOption TokenOption.All
-      :: tail -> tail |> commandAddView sourceOnly true modified
+      :: tail -> tail |> commandAddView references true modified
     | TokenOption TokenOption.Modified
-      :: tail -> tail |> commandAddView sourceOnly parents true
+      :: tail -> tail |> commandAddView references referencedBy true
     | ViewId name
-      :: Params filters -> Command.AddView { Name = name; Filters = filters; SourceOnly = sourceOnly; Parents = parents; Modified = modified }
+      :: Params filters -> Command.AddView { Name = name; Filters = filters; References = references; ReferencedBy = referencedBy; Modified = modified }
     | _ -> Command.Error MainCommand.AddView
 
 let commandDropView (args : string list) =

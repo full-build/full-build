@@ -56,8 +56,8 @@ type NuGetUrl =
 type AddView =
     { Name : string
       Filters : string list
-      SourceOnly : bool
-      Parents : bool
+      References : bool
+      ReferencedBy : bool
       Modified : bool }
 
 type ViewName =

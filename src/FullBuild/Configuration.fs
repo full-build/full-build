@@ -60,7 +60,7 @@ let DeleteView (viewId : ViewId) =
     let vwDir = Env.GetFolder Env.Folder.View
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let viewFile = vwDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.View viewId.toString)
-    let targetFile = vwDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.View viewId.toString)
+    let targetFile = vwDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Targets viewId.toString)
     let slnFile =  wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution viewId.toString)
     let defaultFile = vwDir |> IoHelpers.GetFile "default"
     if viewFile.Exists then viewFile.Delete()
