@@ -183,11 +183,16 @@ open Graph
 //
 
 
+//let computeBaselineDifferences (oldBaseline : Graph.Baseline) (newBaseline : Graph.Baseline) =
+//    let changes = Set.difference newBaseline.Bookmarks oldBaseline.Bookmarks
+//    let projects = changes |> Set.map (fun x -> x.Repository.Projects)
+//                           |> Set.unionMany
+//    projects
+
 let Add (cmd : CLI.Commands.AddView) =
     if cmd.Filters.Length = 0 && not cmd.Modified then
         failwith "Expecting at least one filter"
     
-    // save view information first
     let graph = Configuration.LoadAnthology() |> Graph.from
     let view = graph.CreateView cmd.Name
                                 (cmd.Filters |> Set.ofList)
@@ -196,16 +201,19 @@ let Add (cmd : CLI.Commands.AddView) =
                                 cmd.ReferencedBy
                                 cmd.Modified
                                 Graph.BuilderType.MSBuild
-    view.Save None
 
-    let viewProjects = view.Projects
-    let depProjects = if cmd.References then GraphHelpers.ComputeTransitiveReferences viewProjects  
-                      else Set.empty
-    let refProjects = if cmd.ReferencedBy then GraphHelpers.ComputeTransitiveReferencedBy viewProjects
-                      else Set.empty
-    let projects = viewProjects |> Set.union depProjects
-                                   |> Set.union refProjects
-                                   |> GraphHelpers.ComputeClosure
+//    let modProjects = if cmd.Modified then computeBaselineDifferences graph.Baseline (graph.CreateBaseline false)
+//                      else Set.empty
+//    let viewProjects = GraphHelpers.ComputeClosure (view.Projects + modProjects)
+//    let depProjects = if cmd.References then GraphHelpers.ComputeTransitiveReferences viewProjects  
+//                      else Set.empty
+//    let refProjects = if cmd.ReferencedBy then GraphHelpers.ComputeTransitiveReferencedBy viewProjects
+//                      else Set.empty
+//    let projects = viewProjects + depProjects + refProjects + modProjects
+    let projects = view.Projects
+
+    // save view information first
+    view.Save None
 
     // generate solution defines
     let slnDefines = Generators.Solution.GenerateSolutionDefines projects
@@ -265,7 +273,7 @@ let Alter (cmd : CLI.Commands.AlterView) =
     let depView = graph.CreateView view.Name
                                    view.Filters
                                    view.Parameters
-                                   (cmd.Source = Some true) ? (true, view.Dependencies)
+                                   (cmd.Source = Some true) ? (true, view.References)
                                    (cmd.Parents = Some true) ? (true, view.ReferencedBy)
                                    view.Modified
                                    view.Builder

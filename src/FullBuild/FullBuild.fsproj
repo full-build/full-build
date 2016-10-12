@@ -86,8 +86,6 @@
     <Compile Include="Configuration.fs" />
     <Compile Include="Graph.fsi" />
     <Compile Include="Graph.fs" />
-    <Compile Include="GraphHelpers.fsi" />
-    <Compile Include="GraphHelpers.fs" />
     <Compile Include="MsBuildHelpers.fs" />
     <Compile Include="AnthologyGraph.fs" />
     <Compile Include="CLI\Commands.fs" />

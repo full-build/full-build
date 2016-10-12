@@ -114,7 +114,7 @@ with
     member Name: string
     member Filters: string set
     member Parameters: string set
-    member Dependencies: bool
+    member References: bool
     member ReferencedBy: bool
     member Modified : bool
     member Builder: BuilderType

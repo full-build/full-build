@@ -12,15 +12,17 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module GraphTests
+module GraphFactoryTests
 
 open System
 open System.IO
 open NUnit.Framework
 open FsUnit
-open Anthology
 open Graph
+open Collections
 open TestHelpers
+
+
 
 
 [<Test>]
@@ -60,4 +62,3 @@ let ConvertToGraph () =
                                  "samples"
                                  "cassandrasharp.contrib.log4netunittests" ] |> set
     cassandrasharpReferencedBy |> should equal expectedReferencedBy
-
