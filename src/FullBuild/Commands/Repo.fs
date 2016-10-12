@@ -35,13 +35,8 @@ let cloneRepoAndInit wsDir shallow (repo : Repository) =
 let Clone (cmd : CLI.Commands.CloneRepositories) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let selectedRepos = PatternMatching.FilterMatch graph.Repositories (fun x -> x.Name) cmd.Filters
-    let filteredProjects = selectedRepos |> Set.map (fun x -> x.Projects |> set)
-                                         |> Set.unionMany
-
-    let selectedProjects = if cmd.All then GraphHelpers.ComputeTransitiveReferences filteredProjects
-                           else filteredProjects
-    let selectedRepos = selectedProjects |> Set.map (fun x -> x.Repository)
+    let fakeView = graph.CreateView "clone" cmd.Filters Set.empty cmd.All false false Graph.BuilderType.MSBuild
+    let selectedRepos = fakeView.Projects |> Set.map (fun x -> x.Repository)
 
     let maxThrottle = cmd.Multithread ? (System.Environment.ProcessorCount*2, 1)
     selectedRepos |> Seq.map (cloneRepoAndInit wsDir cmd.Shallow)

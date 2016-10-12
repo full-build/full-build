@@ -13,5 +13,13 @@
 //   limitations under the License.
 
 module TestHelpers
+open Collections
+open Graph
 
 let testFile file = NUnit.Framework.TestContext.CurrentContext.TestDirectory + "/" + file
+
+let selectProjects (selection : string list) (projects : Project set) =
+    let mapProjects = projects |> Seq.map (fun x -> x.Output.Name, x) |> Map
+    mapProjects |> Seq.filter (fun kvp -> selection |> List.contains kvp.Key)
+                |> Seq.map (fun kvp -> kvp.Value)
+                |> set

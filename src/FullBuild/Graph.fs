@@ -245,6 +245,32 @@ and [<CustomEquality; CustomComparison>] Project =
     member this.PackageReferences = 
         this.Project.PackageReferences |> Set.map (fun x -> this.Graph.PackageMap.[x])
 
+    static member CollectProjects (collector : Project -> Project set) (projects : Project set) =
+        Set.fold (fun s t -> collector t |> Project.CollectProjects collector |> Set.union s) projects projects
+
+    static member ComputeTransitiveReferences (seeds : Project set) : Project set =
+        Project.CollectProjects (fun x -> x.References) seeds
+
+    static member ComputeTransitiveReferencedBy (seeds : Project set) : Project set =
+        Project.CollectProjects (fun x -> x.ReferencedBy) seeds
+
+    static member ComputeClosure (seeds : Project set) : Project set =
+        let rec exploreNext (node : Project) (next : Project -> Project set) (path : Project list) (boundaries : Project set) =
+            let nextNodes = next node
+            Set.fold (fun s n -> s + explore n next path s) boundaries nextNodes
+
+        and explore (node : Project) (next : Project -> Project set) (path : Project list) (boundaries : Project set) =
+            let currPath = node :: path
+            if boundaries |> Set.contains node then
+                currPath |> set
+            else
+                exploreNext node next currPath boundaries
+
+        let refBoundaries = Set.fold (fun s t -> exploreNext t (fun x -> x.References) [t] s) seeds seeds
+        let refByBoundaries = Set.fold (fun s t -> exploreNext t (fun x -> x.ReferencedBy) [t] s) refBoundaries seeds
+        refByBoundaries
+
+
 // =====================================================================================================
 
 and [<CustomEquality; CustomComparison>] Bookmark =
@@ -296,6 +322,15 @@ with
     member this.Save () = 
         Configuration.SaveBaseline this.Baseline
 
+    static member ComputeBaselineDifferences (oldBaseline : Baseline) (newBaseline : Baseline) =
+        let changes = Set.difference newBaseline.Bookmarks oldBaseline.Bookmarks
+        let projects = changes |> Set.map (fun x -> x.Repository.Projects)
+                               |> Set.unionMany
+        projects
+
+
+
+
 // =====================================================================================================
 
 and [<CustomEquality; CustomComparison>] View =
@@ -317,7 +352,7 @@ with
     member this.Name = this.View.Name
     member this.Filters = this.View.Filters
     member this.Parameters = this.View.Parameters
-    member this.Dependencies = this.View.SourceOnly
+    member this.References = this.View.SourceOnly
     member this.ReferencedBy = this.View.Parents
     member this.Modified = this.View.Modified
     member this.Builder = match this.View.Builder with
@@ -328,6 +363,15 @@ with
         let projects = PatternMatching.FilterMatch<Project> this.Graph.Projects 
                                                             (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) 
                                                             this.View.Filters
+
+        let modProjects = if this.Modified then Baseline.ComputeBaselineDifferences this.Graph.Baseline (this.Graph.CreateBaseline false)
+                          else Set.empty
+        let viewProjects = Project.ComputeClosure (projects + modProjects)
+        let depProjects = if this.References then Project.ComputeTransitiveReferences viewProjects  
+                          else Set.empty
+        let refProjects = if this.ReferencedBy then Project.ComputeTransitiveReferencedBy viewProjects
+                          else Set.empty
+        let projects = viewProjects + depProjects + refProjects + modProjects
         projects
 
     member this.Save (isDefault : bool option) = 
