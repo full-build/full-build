@@ -20,8 +20,7 @@ open Graph
 
 let GenerateProjectNode (project : Project) =
     let isTest = project.HasTests
-    let cat = if isTest then "TestProject"
-              else "Project"
+    let cat = isTest ? ( "TestProject", "Project")
 
     let label = System.IO.Path.GetFileNameWithoutExtension(project.ProjectFile)
     let output = project.Output
@@ -45,7 +44,7 @@ let GenerateProjectNode (project : Project) =
         XAttribute(NsNone + "Category", cat),
         fxVersion, fxProfile, fxId,
         XAttribute(NsNone + "Guid", project.UniqueProjectId),
-        XAttribute(NsNone + "IsTest", isTest),
+        XAttribute(NsNone + "IsTest", project.HasTests),
         XAttribute(NsNone + "Output", output),
         XAttribute(NsNone + "OutputType", outputType))
 
@@ -62,7 +61,7 @@ let GenerateLink (source : string) (target : string) (category : string) =
         XAttribute(NsNone + "Category", category))
 
 let GraphNodes (projects : Project set) (allProjects : Project set) (packages : Package set) (assemblies : Assembly set) (repos : Repository set) =
-    let importedProjects = Set.difference allProjects projects
+    let importedProjects = allProjects - projects
 
     seq {
         if packages.Count > 0 then
@@ -86,7 +85,7 @@ let GraphNodes (projects : Project set) (allProjects : Project set) (packages : 
         for repo in repos do
             yield XElement(NsDgml + "Node",
                 XAttribute(NsNone + "Id", repo.Name),
-                XAttribute(NsNone + "Label", repo),
+                XAttribute(NsNone + "Label", repo.Name),
                 XAttribute(NsNone + "Group", "Expanded"))
 
         for package in packages do
@@ -97,7 +96,7 @@ let GraphNodes (projects : Project set) (allProjects : Project set) (packages : 
     }
 
 let GraphLinks (projects : Project set) (allProjects : Project set) =
-    let importedProjects = Set.difference allProjects projects
+    let importedProjects = allProjects - projects
 
     seq {
         for project in projects do
@@ -189,14 +188,15 @@ let GraphStyles () =
 
 let GraphContent (projects : Project set) (all : bool) =
     let srcProjects = if all then projects
-                      else projects |> Set.filter (fun x -> x.HasTests |> not)
-    let repos = srcProjects |> Set.map (fun x -> x.Repository)
-    let packages = srcProjects |> Set.map (fun x -> x.PackageReferences |> set)
+                      else projects |> Set.filter (fun x -> not x.HasTests)
+    let allProjects = srcProjects |> Set.map (fun x -> x.References) |> Set.unionMany
+    let repos = allProjects |> Set.map (fun x -> x.Repository)
+    let packages = srcProjects |> Set.map (fun x -> x.PackageReferences)
                                |> Set.unionMany
-    let assemblies = srcProjects |> Seq.map (fun x -> x.AssemblyReferences |> set)
+    let assemblies = srcProjects |> Seq.map (fun x -> x.AssemblyReferences)
                                  |> Set.unionMany
-    let xNodes = XElement(NsDgml + "Nodes", GraphNodes srcProjects projects packages assemblies repos)
-    let xLinks = XElement(NsDgml+"Links", GraphLinks srcProjects projects)
+    let xNodes = XElement(NsDgml + "Nodes", GraphNodes srcProjects allProjects packages assemblies repos)
+    let xLinks = XElement(NsDgml+"Links", GraphLinks srcProjects allProjects)
     let xCategories = XElement(NsDgml + "Categories", GraphCategories repos)
     let xProperties = XElement(NsDgml + "Properties", GraphProperties ())
     let xStyles = GraphStyles ()
