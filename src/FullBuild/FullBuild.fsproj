@@ -126,7 +126,8 @@
     <Compile Include="Commands\Test.fs" />
     <Compile Include="Commands\Application.fsi" />
     <Compile Include="Commands\Application.fs" />
-    <Compile Include="Upgrade.fs" />
+    <Compile Include="Commands\Upgrade.fsi" />
+    <Compile Include="Commands\Upgrade.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="ghreleasefeed.json" />
