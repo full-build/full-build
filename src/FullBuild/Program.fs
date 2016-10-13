@@ -57,13 +57,13 @@ let tryMain argv =
     | Command.OpenView viewInfo -> Commands.View.Open viewInfo
 
     // nuget
-    | Command.AddNuGet url -> NuGets.Add url
-    | Command.ListNuGets -> NuGets.List ()
+    | Command.AddNuGet url -> Commands.NuGet.Add url.toString
+    | Command.ListNuGets -> Commands.NuGet.List ()
 
     // package
-    | Command.UpdatePackages -> Package.Update ()
-    | Command.OutdatedPackages -> Package.Outdated ()
-    | Command.ListPackages -> Package.List ()
+    | Command.UpdatePackages -> Commands.Package.Update ()
+    | Command.OutdatedPackages -> Commands.Package.Outdated ()
+    | Command.ListPackages -> Commands.Package.List ()
 
     // applications
     | Command.ListApplications -> Commands.Application.List ()

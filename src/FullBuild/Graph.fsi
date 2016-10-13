@@ -77,9 +77,6 @@ with
     member Uri : string
     member IsCloned: bool
 
-//    member Head: unit
-//              -> string
-
 and [<Sealed>] Project = interface System.IComparable
 with
     member BinFile : string

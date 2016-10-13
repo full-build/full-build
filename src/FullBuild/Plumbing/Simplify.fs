@@ -14,7 +14,6 @@
 
 module Simplify
 open Anthology
-open NuGets
 open Collections
 
 let (|MatchProject|_|) (projects : Project set) (assName : AssemblyId) =
@@ -126,7 +125,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
     let simplifiedProjects = seq {
         for project in projects do
             let usedPackages = package2packages |> Map.filter (fun k v -> project.PackageReferences |> Set.contains k)
-            let packagesRoot = ComputePackagesRoots usedPackages
+            let packagesRoot = Parsers.NuGet.ComputePackagesRoots usedPackages
             let mutable newProjects = project.ProjectReferences
             let mutable newPackages = Set.empty
             for package in packagesRoot do
@@ -136,7 +135,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
                 | Some (prjs, pkgs) -> newProjects <- newProjects |> Set.union prjs
                                        newPackages <- newPackages |> Set.union pkgs
             let simplifiedUsedPackages = package2packages |> Map.filter (fun k _ -> newPackages |> Set.contains k)
-            let simplifiedPackagesRoot = ComputePackagesRoots simplifiedUsedPackages
+            let simplifiedPackagesRoot = Parsers.NuGet.ComputePackagesRoots simplifiedUsedPackages
             let removeAssemblies = projects |> Seq.filter (fun x -> newProjects |> Set.contains x.ProjectId)
                                             |> Seq.map (fun x -> x.Output)
                                             |> Set
