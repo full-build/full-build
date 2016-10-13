@@ -66,11 +66,11 @@ let tryMain argv =
     | Command.ListPackages -> Package.List ()
 
     // applications
-    | Command.ListApplications -> Application.List ()
-    | Command.AddApplication appInfo -> Application.Add appInfo.Name appInfo.Projects appInfo.Publisher
-    | Command.DropApplication name -> Application.Drop name
-    | Command.PublishApplications pubInfo -> Application.Publish pubInfo.View pubInfo.Filters pubInfo.Multithread
-    | Command.BindProject prjInfo -> Application.BindProject prjInfo.Filters
+    | Command.ListApplications -> Commands.Application.List ()
+    | Command.AddApplication appInfo -> Commands.Application.Add appInfo
+    | Command.DropApplication name -> Commands.Application.Drop name.toString
+    | Command.PublishApplications pubInfo -> Commands.Application.Publish pubInfo
+    | Command.BindProject bindInfo -> Commands.Application.BindProject bindInfo
 
     // misc
     | Command.Upgrade -> Upgrade.Upgrade ()

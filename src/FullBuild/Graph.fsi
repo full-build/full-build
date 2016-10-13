@@ -64,6 +64,8 @@ with
     member Name : string
     member Publisher : PublisherType
     member Projects: Project set
+    member Delete: unit
+                -> Graph
 
 and [<Sealed>] Repository = interface System.IComparable
 with
@@ -124,7 +126,7 @@ with
     member Delete: unit
                 -> unit
 
-type [<Sealed>] Graph =
+and [<Sealed>] Graph =
     member MasterRepository : Repository
     member Repositories : Repository set  
     member Assemblies : Assembly set  
@@ -140,6 +142,12 @@ type [<Sealed>] Graph =
 
     member DefaultView : View option
     member Views : View set
+
+    member CreateApp: name : string
+                   -> publisher : PublisherType
+                   -> projects : Project set
+                   -> Graph
+
     member CreateView: name : string
                     -> filters : string set
                     -> parameters: string set

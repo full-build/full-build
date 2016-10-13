@@ -113,6 +113,9 @@
     <Compile Include="Plumbing\PlatformMatching.fs" />
     <Compile Include="Plumbing\Package.fs" />
     <Compile Include="Plumbing\TestRunners.fs" />
+    <Compile Include="Plumbing\Bindings.fs" />
+    <Compile Include="Plumbing\Publishers.fsi" />
+    <Compile Include="Plumbing\Publishers.fs" />
     <Compile Include="Commands\View.fsi" />
     <Compile Include="Commands\View.fs" />
     <Compile Include="Commands\Repo.fsi" />
@@ -121,10 +124,8 @@
     <Compile Include="Commands\Workspace.fs" />
     <Compile Include="Commands\Test.fsi" />
     <Compile Include="Commands\Test.fs" />
-    <Compile Include="Bindings.fs" />
-    <Compile Include="Publishers.fsi" />
-    <Compile Include="Publishers.fs" />
-    <Compile Include="Application.fs" />
+    <Compile Include="Commands\Application.fsi" />
+    <Compile Include="Commands\Application.fs" />
     <Compile Include="Upgrade.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
