@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Plumbing.Package
+module Core.Package
 open Anthology
 open IoHelpers
 open System.IO

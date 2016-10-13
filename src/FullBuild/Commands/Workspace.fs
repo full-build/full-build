@@ -85,7 +85,7 @@ let Push (pushInfo : CLI.Commands.PushWorkspace) =
 
     // copy bin content
     let hash = Plumbing.Vcs.Tip wsDir mainRepo
-    Plumbing.BuildArtifacts.Publish pushInfo.Branch pushInfo.BuildNumber hash
+    Core.BuildArtifacts.Publish pushInfo.Branch pushInfo.BuildNumber hash
 
 let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     // checkout repositories
@@ -105,7 +105,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
         Plumbing.Vcs.Checkout wsDir repo (Some repoVersion.Version) false
 
     // update binaries with observable baseline
-    Plumbing.BuildArtifacts.PullReferenceBinaries checkoutInfo.Version
+    Core.BuildArtifacts.PullReferenceBinaries checkoutInfo.Version
 
 let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     // checkout repositories
@@ -127,8 +127,8 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
 
 
 let Install () =
-    Plumbing.Package.RestorePackages ()
-    Conversion.GenerateProjectArtifacts()
+    Core.Package.RestorePackages ()
+    Core.Conversion.GenerateProjectArtifacts()
 
 
 let Pull (pullInfo : CLI.Commands.PullWorkspace) =
@@ -154,7 +154,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
         Install ()
 
     if pullInfo.Bin then
-        Plumbing.BuildArtifacts.PullLatestReferenceBinaries ()
+        Core.BuildArtifacts.PullLatestReferenceBinaries ()
 
 
 let Exec (execInfo : CLI.Commands.Exec) =
@@ -279,9 +279,9 @@ let Index (indexInfo : CLI.Commands.IndexRepositories) =
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) indexInfo.Filters
     selectedRepos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Name)
-    selectedRepos |> Indexation.IndexWorkspace
-                  |> Indexation.Optimize
-                  |> Plumbing.Package.Simplify
+    selectedRepos |> Core.Indexation.IndexWorkspace
+                  |> Core.Indexation.Optimize
+                  |> Core.Package.Simplify
                   |> Configuration.SaveAnthology
 
 let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
@@ -293,7 +293,7 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let builder2repos = repos |> Seq.groupBy (fun x -> x.Builder)
     for builder2repo in builder2repos do
         let (builder, repos) = builder2repo
-        Conversion.Convert builder (set repos)
+        Core.Conversion.Convert builder (set repos)
 
     // setup additional files for views to work correctly
     let confDir = Env.GetFolder Env.Folder.Config

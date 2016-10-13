@@ -21,7 +21,7 @@ open PatternMatching
 let asyncPublish (app : Graph.Application) =
     async {
         DisplayHighlight app.Name
-        Publishers.PublishWithPublisher app
+        Core.Publishers.PublishWithPublisher app
     }
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
@@ -68,7 +68,7 @@ let updateProjectBindings (project : Graph.Project) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let prjFile = wsDir |> GetFile project.ProjectFile
     let prjDir = prjFile.Directory
-    Bindings.UpdateProjectBindingRedirects prjDir
+    Core.Bindings.UpdateProjectBindingRedirects prjDir
 
 
 let BindProject (bindInfo : CLI.Commands.BindProject) =

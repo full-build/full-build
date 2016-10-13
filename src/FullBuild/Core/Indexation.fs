@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Indexation
+module Core.Indexation
 open System.IO
 open IoHelpers
 open System.Linq

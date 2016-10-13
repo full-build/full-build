@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Plumbing.BuildArtifacts
+module Core.BuildArtifacts
 open System.IO
 open IoHelpers
 
@@ -42,7 +42,7 @@ let Publish (branch : string option) buildnum hash =
             IoHelpers.CopyFolder appDir appTargetDir true
 
             // publish
-            Try (fun () -> Vcs.Push wsDir mainRepo)
+            Try (fun () -> Plumbing.Vcs.Push wsDir mainRepo)
 
             tmpVersionDir.MoveTo(versionDir.FullName)
         else
