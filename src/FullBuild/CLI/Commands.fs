@@ -75,9 +75,9 @@ type BranchWorkspace =
     { Branch : string option }
 
 type AddApplication =
-    { Name : ApplicationId
-      Publisher : PublisherType
-      Projects : ProjectId list }
+    { Name : string
+      Publisher : Graph.PublisherType
+      Projects : string set }
 
 type BuildView =
     { Name : string option
@@ -121,7 +121,7 @@ type PushWorkspace =
       Incremental : bool }
 
 type BindProject =
-    { Filters : string list }
+    { Filters : string set }
 
 type History =
     { Html : bool }

@@ -117,6 +117,11 @@ and [<CustomEquality; CustomComparison>] Application =
     member this.Projects =
         this.Application.Projects |> Set.map (fun x -> this.Graph.ProjectMap.[x])
 
+    member this.Delete () =
+        let newAntho = { this.Graph.Anthology 
+                         with Applications = this.Graph.Anthology.Applications |> Set.remove this.Application }
+        Graph(newAntho)
+
 // =====================================================================================================
 
 and [<CustomEquality; CustomComparison>] Repository =
@@ -473,6 +478,19 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
         | Anthology.TestRunnerType.NUnit -> TestRunnerType.NUnit
 
     member this.ArtifactsDir = this.Anthology.Artifacts
+
+    member this.CreateApp name publisher (projects : Project set) =
+        let pub = match publisher with
+                  | PublisherType.Zip -> Anthology.PublisherType.Zip
+                  | PublisherType.Copy -> Anthology.PublisherType.Copy
+                  | PublisherType.Docker -> Anthology.PublisherType.Docker
+        let projectIds = projects |> Set.map (fun x -> Anthology.ProjectId.from x.Output.Name)
+        let app = { Anthology.Application.Name = Anthology.ApplicationId.from name
+                    Anthology.Application.Publisher = pub
+                    Anthology.Application.Projects = projectIds }
+        let newAntho = { anthology 
+                         with Applications = anthology.Applications |> Set.add app }
+        Graph(newAntho)
 
     member this.CreateView name filters parameters dependencies referencedBy modified builder =
         let view = { Anthology.View.Name = name 

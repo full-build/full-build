@@ -202,7 +202,7 @@ let (|BranchId|_|) name =
 
 let (|PublisherType|_|) name =
     match name with
-    | Param _ -> Some (PublisherType.from name)
+    | Param _ -> Some (StringHelpers.fromString<Graph.PublisherType> name)
     | _ -> None
 
 let commandSetup (args : string list) =
@@ -433,10 +433,9 @@ let commandOpenView (args : string list) =
 
 let commandAddApp (args : string list) =
     match args with
-    | ApplicationId name
+    | Param name
       :: PublisherType pub
-      :: projects -> let projectIds = projects |> List.map ProjectId.from
-                     Command.AddApplication { Name = name; Publisher = pub; Projects = projectIds }
+      :: Params projects -> Command.AddApplication { Name = name; Publisher = pub; Projects = set projects }
     | _ -> Command.Error MainCommand.AddApp
 
 let commandDropApp (args : string list) =
@@ -461,7 +460,7 @@ let commandUpdateGuids (args : string list) =
 
 let commandBind (args : string list) =
     match args with
-    | Params filters -> Command.BindProject { Filters = filters }
+    | Params filters -> Command.BindProject { Filters = set filters }
     | _ -> Command.Error MainCommand.Bind
 
 let rec commandHistory (html : bool) (args : string list) =

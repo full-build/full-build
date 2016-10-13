@@ -13,7 +13,6 @@
 //   limitations under the License.
 
 module Bindings
-open Anthology
 open IoHelpers
 open Env
 open System.IO
@@ -23,8 +22,9 @@ open MsBuildHelpers
 open Collections
 
 
-let generateBindingUnsafe (allAssemblies : AssemblyId set) (file : FileInfo) =
-    let assId = AssemblyId.from file
+let generateBindingUnsafe (allAssemblies : string set) (file : FileInfo) =
+    // HACK
+    let assId = Path.GetFileNameWithoutExtension(file.FullName).ToLowerInvariant()
     if not (allAssemblies |> Set.contains assId) then
         let assName = System.Reflection.AssemblyName.GetAssemblyName(file.FullName)
         let publicKey = assName.GetPublicKeyToken()
@@ -46,7 +46,7 @@ let generateBindingUnsafe (allAssemblies : AssemblyId set) (file : FileInfo) =
     else null
 
 
-let generateBinding (allAssemblies : AssemblyId set) (file : FileInfo) =
+let generateBinding (allAssemblies : string set) (file : FileInfo) =
     try
         generateBindingUnsafe allAssemblies file
     with
@@ -75,12 +75,12 @@ let forceBindings (bindings : XElement) (appConfig : FileInfo) =
     config.Save(appConfig.FullName)
 
 let anthologyAssemblies () =
-    let antho = Configuration.LoadAnthology()
-    let assemblies = antho.Projects |> Seq.map (fun x -> x.Output)
+    let graph = Configuration.LoadAnthology() |> Graph.from
+    let assemblies = graph.Projects |> Seq.map (fun x -> x.Output.Name)
                                     |> Set
     assemblies
 
-let generateBindings (allAssemblies : AssemblyId set) (artifactDir : DirectoryInfo) =
+let generateBindings (allAssemblies : string set) (artifactDir : DirectoryInfo) =
     let dependentAssemblies = artifactDir.GetFiles ("*.dll")
                               |> Seq.map (generateBinding allAssemblies)
                               |> Seq.filter (fun x -> x <> null)
