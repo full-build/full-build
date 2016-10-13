@@ -360,9 +360,11 @@ with
                           | Anthology.BuilderType.Skip -> BuilderType.Skip
 
     member this.Projects : Project set =
+        let filters = this.View.Filters |> Set.map (fun x -> if x.IndexOfAny([|'/'; '\\' |]) = -1 then x + "/*" else x)
+                                        |> Set.map (fun x -> x.Replace('\\', '/'))
         let projects = PatternMatching.FilterMatch<Project> this.Graph.Projects 
                                                             (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) 
-                                                            this.View.Filters
+                                                            filters
 
         let modProjects = if this.Modified then Baseline.ComputeBaselineDifferences this.Graph.Baseline (this.Graph.CreateBaseline false)
                           else Set.empty
