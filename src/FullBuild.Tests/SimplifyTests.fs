@@ -41,7 +41,7 @@ let CheckSimplifyAssemblies () =
     lognetunittests.ProjectReferences |> should not' (contain cassandraSharpPrjRef)
     lognetunittests.ProjectReferences |> should not' (contain cassandraSharpItfPrjRef)
 
-    let simplifedProjects = Simplify.TransformSingleAssemblyToProjectOrPackage package2Files anthology.Projects
+    let simplifedProjects = Core.Simplify.TransformSingleAssemblyToProjectOrPackage package2Files anthology.Projects
     let simplifiedlognetunittests = simplifedProjects |> Seq.find (fun x -> x.UniqueProjectId = lognetunittestsRef)
 
     simplifiedlognetunittests.AssemblyReferences |> should not' (contain cassandraSharpAssName)
@@ -82,7 +82,7 @@ let CheckSimplifyAnthology () =
                                  (PackageId.from "cassandra-sharp-core", Set [PackageId.from "Rx-Main"])
                                  (PackageId.from "cassandra-sharp-interfaces", Set.empty) ]
 
-    let newAnthology = Simplify.SimplifyAnthologyWithPackages anthology package2files package2packages
+    let newAnthology = Core.Simplify.SimplifyAnthologyWithPackages anthology package2files package2packages
     let file = FileInfo (Path.GetRandomFileName())
     //printfn "Temporary file is %A" file.FullName
 
@@ -120,8 +120,8 @@ let CheckConflictsWithSameGuid () =
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }
 
-    let conflictsSameGuid = Indexation.findConflicts [p1; p2] |> List.ofSeq
-    conflictsSameGuid |> should equal [Indexation.SameGuid (p1, p2)]
+    let conflictsSameGuid = Core.Indexation.findConflicts [p1; p2] |> List.ofSeq
+    conflictsSameGuid |> should equal [Core.Indexation.SameGuid (p1, p2)]
 
 [<Test>]
 let CheckConflictsWithSameOutput () =
@@ -153,8 +153,8 @@ let CheckConflictsWithSameOutput () =
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }
 
-    let conflictsSameGuid = Indexation.findConflicts [p1; p2] |> List.ofSeq
-    conflictsSameGuid |> should equal [Indexation.SameOutput (p1, p2)]
+    let conflictsSameGuid = Core.Indexation.findConflicts [p1; p2] |> List.ofSeq
+    conflictsSameGuid |> should equal [Core.Indexation.SameOutput (p1, p2)]
 
 [<Test>]
 let CheckNoConflictsSameProjectName () =
@@ -186,5 +186,5 @@ let CheckNoConflictsSameProjectName () =
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }
 
-    let conflictsSameGuid = Indexation.findConflicts [p1; p2] |> List.ofSeq
+    let conflictsSameGuid = Core.Indexation.findConflicts [p1; p2] |> List.ofSeq
     conflictsSameGuid |> should equal []

@@ -1,7 +1,7 @@
 ﻿module Commands.Package
 
 let Update () =
-    Plumbing.Package.UpdatePackages()
+    Core.Package.UpdatePackages()
 
 let Outdated () =
     PaketInterface.PaketOutdated ()

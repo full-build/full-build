@@ -67,7 +67,7 @@ let CheckNoReplace () =
     let newProjects = [ p1 ] |> Set
     let existingProjects = [ p2; p3 ] |> Set
     let expected = [p1; p2; p3 ] |> Set
-    let result = Indexation.MergeProjects newProjects existingProjects
+    let result = Core.Indexation.MergeProjects newProjects existingProjects
     result |> should equal expected
 
 
@@ -119,7 +119,7 @@ let CheckReplace () =
     let newProjects = [ p1 ] |> Set
     let existingProjects = [ p2; p3 ] |> Set
     let expected = [p1; p3 ] |> Set
-    let result = Indexation.MergeProjects newProjects existingProjects
+    let result = Core.Indexation.MergeProjects newProjects existingProjects
     result |> should equal expected
 
 
@@ -169,5 +169,5 @@ let CheckStillReferenced () =
 
     let newProjects = [ p2 ] |> Set
     let existingProjects = [ p1; p3 ] |> Set
-    (fun () -> Indexation.MergeProjects newProjects existingProjects |> ignore) |> should throw typeof<System.Exception>
+    (fun () -> Core.Indexation.MergeProjects newProjects existingProjects |> ignore) |> should throw typeof<System.Exception>
 
