@@ -97,6 +97,7 @@
     <Compile Include="Plumbing\Vcs.fs" />
     <Compile Include="Plumbing\Builders.fsi" />
     <Compile Include="Plumbing\Builders.fs" />
+    <Compile Include="Plumbing\TestRunners.fs" />
     <Compile Include="CLI\Commands.fs" />
     <Compile Include="CLI\CommandLine.fsi" />
     <Compile Include="CLI\CommandLine.fs" />
@@ -114,7 +115,6 @@
     <Compile Include="Core\Conversion.fs" />
     <Compile Include="Core\Indexation.fs" />
     <Compile Include="Core\Package.fs" />
-    <Compile Include="Core\TestRunners.fs" />
     <Compile Include="Core\Bindings.fs" />
     <Compile Include="Core\Publishers.fsi" />
     <Compile Include="Core\Publishers.fs" />

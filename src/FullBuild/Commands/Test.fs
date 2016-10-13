@@ -23,4 +23,4 @@ let TestAssemblies (filters : string set) (excludes : string set) =
                                    |> Set.filter (fun x -> x.HasTests)
                                    |> Set.map (fun x -> x.BinFile)
 
-    (Core.TestRunners.TestWithTestRunner graph.TestRunner) assemblies excludes
+    (Plumbing.TestRunners.TestWithTestRunner graph.TestRunner) assemblies excludes
