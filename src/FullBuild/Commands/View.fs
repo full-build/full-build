@@ -289,7 +289,7 @@ let Open (cmd : CLI.Commands.OpenView) =
 let Graph (cmd : CLI.Commands.GraphView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let view = graph.Views |> Seq.find (fun x -> x.Name = cmd.Name)
-    let projects = view.Projects |> set
+    let projects = view.Projects
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml cmd.Name)
 

@@ -17,7 +17,6 @@ module ViewTests
 open System.IO
 open NUnit.Framework
 open FsUnit
-open Anthology
 open StringHelpers
 open Generators.Solution
 open TestHelpers
@@ -247,4 +246,3 @@ let CheckSelectReferencesAndReferencedBy () =
 
     let projects = view.Projects
     projects |> should equal goal
-
