@@ -45,5 +45,5 @@ let CheckCreateDependencies () =
                          (G, Set.empty) ] 
                          |> Map
 
-    let roots = NuGets.ComputePackagesRoots dependencies
+    let roots = Parsers.NuGet.ComputePackagesRoots dependencies
     roots |> should equal (Set [A; E; G])

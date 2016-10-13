@@ -127,7 +127,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
 
 
 let Install () =
-    Package.RestorePackages ()
+    Plumbing.Package.RestorePackages ()
     Conversion.GenerateProjectArtifacts()
 
 
@@ -281,7 +281,7 @@ let Index (indexInfo : CLI.Commands.IndexRepositories) =
     selectedRepos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Name)
     selectedRepos |> Indexation.IndexWorkspace
                   |> Indexation.Optimize
-                  |> Package.Simplify
+                  |> Plumbing.Package.Simplify
                   |> Configuration.SaveAnthology
 
 let Convert (convertInfo : CLI.Commands.ConvertRepositories) =

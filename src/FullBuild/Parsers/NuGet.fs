@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module NuGets
+module Parsers.NuGet
 
 open Anthology
 open IoHelpers
@@ -65,16 +65,3 @@ let ComputeTransitivePackageDependencies (packages : PackageId set) =
     let ids = allPackages |> Seq.map (fun x -> x.Key) |> Set
     ids
 
-
-let Add (url : RepositoryUrl) =
-    let antho = Configuration.LoadAnthology ()
-    let nugets = antho.NuGets @ [url] |> List.distinct
-    let newAntho = { antho
-                     with
-                        NuGets = nugets }
-    Configuration.SaveAnthology newAntho
-
-let List () =
-    let antho = Configuration.LoadAnthology()
-    for nuget in antho.NuGets do
-        printfn "%s" nuget.toLocalOrUrl
