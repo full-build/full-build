@@ -88,8 +88,6 @@
     <Compile Include="Graph.fs" />
     <Compile Include="MsBuildHelpers.fs" />
     <Compile Include="AnthologyGraph.fs" />
-    <Compile Include="Plumbing\FrameworkHandling.fs" />
-    <Compile Include="Plumbing\PlatformMatching.fs" />
     <Compile Include="Plumbing\PaketInterface.fs" />
     <Compile Include="Plumbing\VcsHg.fs" />
     <Compile Include="Plumbing\VcsGit.fs" />
@@ -102,6 +100,8 @@
     <Compile Include="Parsers\PackageRelationship.fs" />
     <Compile Include="Generators\Solution.fs" />
     <Compile Include="Generators\Dgml.fs" />
+    <Compile Include="Generators\FrameworkHandling.fs" />
+    <Compile Include="Generators\PlatformMatching.fs" />
     <Compile Include="Generators\Package.fs" />
     <Compile Include="Core\BuildArtifacts.fs" />
     <Compile Include="Core\Simplify.fs" />
