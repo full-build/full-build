@@ -16,7 +16,7 @@ module Core.Conversion
 open Collections
 
 
-let convertMsBuild (repos : Graph.Repository set) =
+let private convertMsBuild (repos : Graph.Repository set) =
     let antho = Configuration.LoadAnthology ()
     let projects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
     MsBuildConversion.GenerateProjects projects IoHelpers.XDocSaver

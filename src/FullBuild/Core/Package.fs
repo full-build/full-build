@@ -28,14 +28,6 @@ let private installPackages (nugets : RepositoryUrl list) =
     PaketInterface.PaketInstall ()
     Generators.Package.GeneratePackageImports()
 
-let RestorePackages () =
-    PaketInterface.PaketRestore ()
-    Generators.Package.GeneratePackageImports()
-
-let UpdatePackages () =
-    PaketInterface.PaketUpdate ()
-    Generators.Package.GeneratePackageImports()
-
 let private removeUnusedPackages (antho : Anthology) =
     let packages = PaketInterface.ParsePaketDependencies ()
     let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
@@ -57,7 +49,7 @@ let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
                                      |> Set
     Set.difference files fxDependencies
 
-let simplifyAnthologyWithPackages (antho) =
+let private simplifyAnthologyWithPackages (antho) =
     let promotedPackageAntho = SimplifyAnthologyWithoutPackage antho
 
     let packages = promotedPackageAntho.Projects |> Set.map (fun x -> x.PackageReferences)
@@ -69,6 +61,14 @@ let simplifyAnthologyWithPackages (antho) =
     let newAntho = SimplifyAnthologyWithPackages antho package2files package2packages
     removeUnusedPackages newAntho
     newAntho
+
+let RestorePackages () =
+    PaketInterface.PaketRestore ()
+    Generators.Package.GeneratePackageImports()
+
+let UpdatePackages () =
+    PaketInterface.PaketUpdate ()
+    Generators.Package.GeneratePackageImports()
 
 let Simplify (antho : Anthology) =
     installPackages antho.NuGets

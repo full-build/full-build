@@ -25,12 +25,12 @@ let private checkedExec =
     Exec.Exec checkErrorCode
 
 
-type PublishApp =
+type private PublishApp =
     { Name : string
       App : Application }
 
 
-let publishCopy (app : PublishApp) =
+let private publishCopy (app : PublishApp) =
     let wsDir = GetFolder Env.Folder.Workspace
     let antho = Configuration.LoadAnthology ()
     let projects = app.App.Projects
@@ -49,7 +49,7 @@ let publishCopy (app : PublishApp) =
         else
             printfn "[WARNING] Can't publish application %A without repository" app.Name
 
-let publishZip (app : PublishApp) =
+let private publishZip (app : PublishApp) =
     let tmpApp = { Name = ".tmp-" + app.Name
                    App = app.App }
     publishCopy tmpApp
@@ -61,7 +61,7 @@ let publishZip (app : PublishApp) =
 
     System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Optimal, false)
 
-let publishDocker (app : PublishApp) =
+let private publishDocker (app : PublishApp) =
     let tmpApp = { Name = ".tmp-docker"
                    App = app.App }
     publishCopy tmpApp
@@ -75,7 +75,7 @@ let publishDocker (app : PublishApp) =
     Exec.Exec checkErrorCode "docker" dockerArgs sourceFolder
     sourceFolder.Delete(true)
 
-let choosePublisher (pubType : PublisherType) appCopy appZip appDocker =
+let private choosePublisher (pubType : PublisherType) appCopy appZip appDocker =
     let publish = match pubType with
                   | PublisherType.Copy -> appCopy
                   | PublisherType.Zip -> appZip

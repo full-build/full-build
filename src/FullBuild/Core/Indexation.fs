@@ -33,7 +33,7 @@ let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir :
             |> Seq.filter projectCanBeProcessed
             |> Seq.map (parser repoDir repoRef)
 
-let parseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) =
+let private parseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) =
     repos |> Seq.map (fun x -> GetSubDirectory x.Name.toString wsDir)
           |> Seq.filter (fun x -> x.Exists)
           |> Seq.map (fun x -> parseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
@@ -42,13 +42,13 @@ let parseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository 
 
 
 
-
+// NOTE: should be private
 type ConflictType =
     | SameGuid of Project*Project
     | SameOutput of Project*Project
 
 
-let findConflictsForProject (project1 : Project) (otherProjects : Project list) =
+let private findConflictsForProject (project1 : Project) (otherProjects : Project list) =
     seq {
         for project2 in otherProjects do
             if project1 <> project2 then
@@ -58,6 +58,7 @@ let findConflictsForProject (project1 : Project) (otherProjects : Project list) 
                     yield SameOutput (project1, project2)
     }
 
+// NOTE: should be private
 let rec findConflicts (projects : Project list) =
     seq {
         match projects with
@@ -71,7 +72,7 @@ let rec findConflicts (projects : Project list) =
 
 
 
-let rec displayConflicts (conflicts : ConflictType list) =
+let rec private displayConflicts (conflicts : ConflictType list) =
     let displayConflict (p1 : Project) (p2 : Project) (msg : string) =
         printfn "Conflict detected between projects (%s) : " msg
         printfn " - %s/%s" p1.Repository.toString p1.RelativeProjectFile.toString
@@ -87,7 +88,7 @@ let rec displayConflicts (conflicts : ConflictType list) =
 
 
 
-let detectNewDependencies (projects : Parsers.MsBuild.ProjectDescriptor seq) =
+let private detectNewDependencies (projects : Parsers.MsBuild.ProjectDescriptor seq) =
     // add new packages (with correct version requirement)
     let foundPackages = projects |> Seq.map (fun x -> x.Packages)
                                  |> Seq.concat

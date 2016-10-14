@@ -20,14 +20,14 @@ open IoHelpers
 open Collections
 
 
-let checkErrorCode err =
+let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
 
 let private checkedExec =
     Exec.Exec checkErrorCode
 
 
-let parseContent (lines : string seq) =
+let private parseContent (lines : string seq) =
     seq {
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
@@ -36,7 +36,7 @@ let parseContent (lines : string seq) =
             | _ -> ()
     }
 
-let updateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
+let private updateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
     seq {
         for source in sources do
             let sourceUri = source.toLocalOrUrl
@@ -48,6 +48,28 @@ let updateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
             | "source" -> ()
             | _ -> yield line
     }
+
+let private generateDependenciesContent (packages : Package seq) =
+    seq {
+        for package in packages do
+            match package.Version with
+            | PackageVersion.PackageVersion x -> yield sprintf "nuget %s ~> %s" (package.Id.toString) x
+            | PackageVersion.Unspecified -> yield sprintf "nuget %s" (package.Id.toString)
+    }
+
+let private removeDependenciesContent (lines : string seq) (packages : PackageId set) =
+    seq {
+        for line in lines do
+            let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
+            match items.[0] with
+            | "nuget" -> if Set.contains (PackageId.from items.[1]) packages then ()
+                         else yield line
+            | _ -> yield line
+    }
+
+let private executePaketCommand cmd =
+    let confDir = Env.GetFolder Env.Folder.Config
+    checkedExec "paket.exe" cmd confDir
 
 let UpdateSources (sources : RepositoryUrl seq) =
     let confDir = Env.GetFolder Env.Folder.Config
@@ -67,14 +89,6 @@ let ParsePaketDependencies () =
     else
         Set.empty
 
-let generateDependenciesContent (packages : Package seq) =
-    seq {
-        for package in packages do
-            match package.Version with
-            | PackageVersion.PackageVersion x -> yield sprintf "nuget %s ~> %s" (package.Id.toString) x
-            | PackageVersion.Unspecified -> yield sprintf "nuget %s" (package.Id.toString)
-    }
-
 let AppendDependencies (packages : Package seq) =
     let confDir = Env.GetFolder Env.Folder.Config
     let paketDep = confDir |> GetFile "paket.dependencies"
@@ -83,26 +97,12 @@ let AppendDependencies (packages : Package seq) =
     let content = generateDependenciesContent packages
     File.AppendAllLines (paketDep.FullName, content)
 
-let removeDependenciesContent (lines : string seq) (packages : PackageId set) =
-    seq {
-        for line in lines do
-            let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
-            match items.[0] with
-            | "nuget" -> if Set.contains (PackageId.from items.[1]) packages then ()
-                         else yield line
-            | _ -> yield line
-    }
-
 let RemoveDependencies (packages : PackageId set) =
     let confDir = Env.GetFolder Env.Folder.Config
     let paketDep = confDir |> GetFile "paket.dependencies"
     let content = File.ReadAllLines (paketDep.FullName)
     let newContent = removeDependenciesContent content packages
     File.WriteAllLines (paketDep.FullName, newContent)
-
-let executePaketCommand cmd =
-    let confDir = Env.GetFolder Env.Folder.Config
-    checkedExec "paket.exe" cmd confDir
 
 
 

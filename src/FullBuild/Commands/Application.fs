@@ -18,11 +18,23 @@ open IoHelpers
 open Env
 open PatternMatching
 
-let asyncPublish (app : Graph.Application) =
+let private asyncPublish (app : Graph.Application) =
     async {
         DisplayHighlight app.Name
         Core.Publishers.PublishWithPublisher app
     }
+
+let private displayApp (app : Graph.Application) =
+    printf "%s [" app.Name
+    for project in app.Projects do
+        printf "%s " project.Output.Name
+    printfn "] => %s" (StringHelpers.toString app.Publisher)
+
+let private updateProjectBindings (project : Graph.Project) =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let prjFile = wsDir |> GetFile project.ProjectFile
+    let prjDir = prjFile.Directory
+    Core.Bindings.UpdateProjectBindingRedirects prjDir
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -41,12 +53,6 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let appFolder = Env.GetFolder Env.Folder.AppOutput
     appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter IoHelpers.ForceDelete
 
-let displayApp (app : Graph.Application) =
-    printf "%s [" app.Name
-    for project in app.Projects do
-        printf "%s " project.Output.Name
-    printfn "] => %s" (StringHelpers.toString app.Publisher)
-
 let List () =
     let graph = Configuration.LoadAnthology () |>Graph.from
     graph.Applications |> Seq.iter displayApp
@@ -62,14 +68,6 @@ let Drop (appName : string) =
     let app = graph.Applications |> Seq.find (fun x -> x.Name = appName)
     let newGraph = app.Delete()
     newGraph.Save()
-
-
-let updateProjectBindings (project : Graph.Project) =
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let prjFile = wsDir |> GetFile project.ProjectFile
-    let prjDir = prjFile.Directory
-    Core.Bindings.UpdateProjectBindingRedirects prjDir
-
 
 let BindProject (bindInfo : CLI.Commands.BindProject) =
     let graph = Configuration.LoadAnthology() |> Graph.from
