@@ -103,9 +103,9 @@
     <Compile Include="Generators\FrameworkHandling.fs" />
     <Compile Include="Generators\PlatformMatching.fs" />
     <Compile Include="Generators\Package.fs" />
+    <Compile Include="Generators\MsBuild.fs" />
     <Compile Include="Core\BuildArtifacts.fs" />
     <Compile Include="Core\Simplify.fs" />
-    <Compile Include="Core\MsBuildConversion.fs" />
     <Compile Include="Core\Conversion.fs" />
     <Compile Include="Core\Indexation.fs" />
     <Compile Include="Core\Package.fs" />
