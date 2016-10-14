@@ -38,7 +38,7 @@ deploy:
 
   - provider: NuGet
     api_key:
-      secure: 497rsDkO6DO9dnd9LoozwZeWYxLWzq8avJ0yAIka+wBOnrYhw54yUQknWJ7XQm7S
+      secure: Fa/KRLSPeo1w78xW6Yb6FJv3amW/BRcLKpy7DW7e0/mdsiug7GBA36twg2HOUCSS
     skip_symbols: true
     symbol_server:
     artifacts: apps/full-build.nupkg
