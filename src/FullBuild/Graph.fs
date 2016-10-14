@@ -173,6 +173,12 @@ and [<CustomEquality; CustomComparison>] Repository =
         let repoDir = wsDir |> IoHelpers.GetSubDirectory this.Name
         repoDir.Exists
 
+    member this.Delete () =
+        let repositoryId = this.Repository.Name
+        let newAntho = { this.Graph.Anthology
+                         with Repositories = this.Graph.Anthology.Repositories |> Set.filter (fun x -> x.Repository.Name = repositoryId) }
+        Graph(newAntho)
+
 // =====================================================================================================
 
 and [<CustomEquality; CustomComparison>] Project =
@@ -460,6 +466,8 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
 
     member this.Views = this.ViewMap.Values |> set
 
+    member this.NuGets = this.Anthology.NuGets |> List.map (fun x -> x.toString)
+
     member this.DefaultView =
         let viewId = Configuration.DefaultView ()
         match viewId with
@@ -490,6 +498,26 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
                     Anthology.Application.Projects = projectIds }
         let newAntho = { anthology 
                          with Applications = anthology.Applications |> Set.add app }
+        Graph(newAntho)
+
+    member this.CreateNuGet (url : string) =
+        let newAntho = { anthology
+                         with NuGets = anthology.NuGets @ [Anthology.RepositoryUrl.from url] |> List.distinct }
+        Graph(newAntho)
+
+    member this.CreateRepo name (url : string) builder (branch : string option) =
+        let repoBranch = match branch with
+                         | Some x -> Some (Anthology.BranchId.from x)
+                         | None -> None
+        let repo = { Anthology.Name = Anthology.RepositoryId.from name
+                     Anthology.Url = Anthology.RepositoryUrl.from url
+                     Anthology.Branch = repoBranch }
+        let repoBuilder = match builder with
+                           | BuilderType.MSBuild -> Anthology.BuilderType.MSBuild
+                           | BuilderType.Skip -> Anthology.BuilderType.Skip
+        let buildableRepo = { Anthology.Repository = repo; Anthology.Builder = repoBuilder }
+        let newAntho = { anthology
+                         with Repositories = anthology.Repositories |> Set.add buildableRepo }
         Graph(newAntho)
 
     member this.CreateView name filters parameters dependencies referencedBy modified builder =

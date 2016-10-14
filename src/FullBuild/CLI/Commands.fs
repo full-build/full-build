@@ -104,10 +104,10 @@ type Exec =
       All : bool }
 
 type AddRepository =
-    { Repo : RepositoryId
-      Url : RepositoryUrl
-      Branch : BranchId option
-      Builder : BuilderType }
+    { Name : string
+      Url : string
+      Branch : string option
+      Builder : Graph.BuilderType }
 
 type PullWorkspace =
     { Src : bool
