@@ -76,6 +76,8 @@ with
     member Branch : string
     member Uri : string
     member IsCloned: bool
+    member Delete: unit
+                -> Graph
 
 and [<Sealed>] Project = interface System.IComparable
 with
@@ -139,11 +141,21 @@ and [<Sealed>] Graph =
 
     member DefaultView : View option
     member Views : View set
+    member NuGets : string list
 
     member CreateApp: name : string
                    -> publisher : PublisherType
                    -> projects : Project set
                    -> Graph
+
+    member CreateNuGet: url : string
+                     -> Graph
+
+    member CreateRepo: name : string
+                    -> url : string
+                    -> builder : BuilderType
+                    -> branch : string option
+                    -> Graph
 
     member CreateView: name : string
                     -> filters : string set

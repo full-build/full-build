@@ -174,24 +174,23 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
         Core.BuildArtifacts.PullLatestReferenceBinaries ()
 
 let Exec (execInfo : CLI.Commands.Exec) =
-    let antho = Configuration.LoadAnthology()
+    let graph = Configuration.LoadAnthology() |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let repos = antho.Repositories |> Set.map (fun x -> x.Repository)
     let execRepos = match execInfo.All with
-                    | true -> repos |> Set.add antho.MasterRepository
-                    | _ -> repos
+                    | true -> graph.Repositories |> Set.add graph.MasterRepository
+                    | _ -> graph.Repositories
 
     for repo in execRepos do
-        let repoDir = wsDir |> GetSubDirectory repo.Name.toString
+        let repoDir = wsDir |> GetSubDirectory repo.Name
         if repoDir.Exists then
-            let vars = [ "FB_NAME", repo.Name.toString
+            let vars = [ "FB_NAME", repo.Name
                          "FB_PATH", repoDir.FullName
-                         "FB_URL", repo.Url.toLocalOrUrl
+                         "FB_URL", repo.Uri
                          "FB_WKS", wsDir.FullName ] |> Map.ofSeq
             let args = sprintf @"/c ""%s""" execInfo.Command
 
             try
-                DisplayHighlight repo.Name.toString
+                DisplayHighlight repo.Name
 
                 if Env.IsMono () then checkedExecWithVars "sh" ("-c " + args) repoDir vars
                 else checkedExecWithVars "cmd" args repoDir vars

@@ -356,14 +356,14 @@ let private commandOutdated (args : string list) =
     | [] -> Command.OutdatedPackages
     | _ -> Command.Error MainCommand.OutdatedPackage
 
-let rec private commandAddRepo (branch : BranchId option) (builder : BuilderType) (args : string list) =
+let rec private commandAddRepo (branch : string option) (builder : Graph.BuilderType) (args : string list) =
     match args with
     | TokenOption TokenOption.Branch
-      :: BranchId branch
+      :: Param branch
       :: tail -> tail |> commandAddRepo (Some branch) builder
     | Param name
-      :: [Param url] -> Command.AddRepository { Repo = RepositoryId.from name
-                                                Url = RepositoryUrl.from url
+      :: [Param url] -> Command.AddRepository { Name = name
+                                                Url = url
                                                 Branch = branch
                                                 Builder = builder }
     | _ -> Command.Error MainCommand.AddRepository
@@ -504,7 +504,7 @@ let Parse (args : string list) : Command =
     | Token Token.Outdated :: Token Token.Package :: cmdArgs -> cmdArgs |> commandOutdated
     | Token Token.List :: Token Token.Package :: cmdArgs -> cmdArgs |> commandListPackage
 
-    | Token Token.Add :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandAddRepo None BuilderType.MSBuild
+    | Token Token.Add :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandAddRepo None Graph.BuilderType.MSBuild
     | Token Token.Drop :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandDropRepo
     | Token Token.List :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandListRepo
 

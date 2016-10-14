@@ -43,28 +43,20 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
                   |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
 
 let Add (cmd : CLI.Commands.AddRepository) =
-    let antho = Configuration.LoadAnthology ()
-    let repo = { Anthology.Name = cmd.Repo; Anthology.Url = cmd.Url; Anthology.Branch = cmd.Branch }
-    let buildableRepo = { Anthology.Repository = repo; Anthology.Builder = cmd.Builder }
-    let repos = antho.Repositories |> Set.add buildableRepo
-                                   |> Seq.distinctBy (fun x -> x.Repository.Name)
-                                   |> Set
-    let newAntho = {antho
-                    with Repositories = repos}
-    Configuration.SaveAnthology newAntho
+    let graph = Configuration.LoadAnthology () |> Graph.from
+    let newGraph = graph.CreateRepo cmd.Name cmd.Url cmd.Builder cmd.Branch
+    newGraph.Save()
 
 let Drop (name : string) =
-    let repoName = name |> Anthology.RepositoryId.from
-    let antho = Configuration.LoadAnthology ()
-    let projectsInRepo = antho.Projects |> Set.filter (fun x -> x.Repository = repoName)
-    let projectOutputsInRepo = projectsInRepo |> Set.map (fun x -> x.ProjectId)
-
-    let refOutsideRepo = antho.Projects |> Set.filter (fun x -> x.Repository <> repoName && Set.intersect x.ProjectReferences projectOutputsInRepo <> Set.empty)
-    if refOutsideRepo <> Set.empty then
-        printfn "Repository %s is referenced from following projects:" name
-        refOutsideRepo |> Set.iter (fun x -> printfn " - %s/%s" x.Repository.toString x.RelativeProjectFile.toString)
+    let graph = Configuration.LoadAnthology () |> Graph.from
+    let repo = graph.Repositories |> Seq.find (fun x -> x.Name = name)
+    let referencingProjects = repo.Projects |> Set.map (fun x -> x.ReferencedBy)
+                                            |> Set.unionMany
+    let referencingRepos = referencingProjects |> Set.map (fun x -> x.Repository)
+                                               |> Set.remove repo
+    if referencingRepos = Set.empty then
+        let newGraph = repo.Delete() 
+        newGraph.Save()
     else
-        let newAntho = { antho
-                         with Projects = Set.difference antho.Projects projectsInRepo
-                              Repositories = antho.Repositories |> Set.filter (fun x -> x.Repository.Name <> repoName) }
-        Configuration.SaveAnthology newAntho
+        printfn "Repository %s is referenced from following projects:" name
+        referencingProjects |> Set.iter (fun x -> printfn " - %s/%s" x.Repository.Name x.ProjectFile)
