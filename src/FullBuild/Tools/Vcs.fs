@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Plumbing.Vcs
+module Tools.Vcs
 
 open Graph
 open System.IO
