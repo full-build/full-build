@@ -82,7 +82,7 @@
     <Compile Include="RepoTests.fs" />
     <Compile Include="DgmlTests.fs" />
     <Compile Include="ViewTests.fs" />
-    <Compile Include="NuGetTests.fs" />
+    <Compile Include="PackageRelationshipTests.fs" />
     <Compile Include="SimplifyTests.fs" />
     <Compile Include="IndexationTests.fs" />
     <Compile Include="Integration.fs" />
