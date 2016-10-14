@@ -452,6 +452,8 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
                                                       |> dict
         viewMap
 
+    member this.MinVersion = this.Anthology.MinVersion
+
     member this.MasterRepository = { Graph = this; Repository = this.Anthology.MasterRepository }
 
     member this.Repositories = this.RepositoryMap.Values |> set
