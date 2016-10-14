@@ -32,7 +32,6 @@ type private PublishApp =
 
 let private publishCopy (app : PublishApp) =
     let wsDir = GetFolder Env.Folder.Workspace
-    let antho = Configuration.LoadAnthology ()
     let projects = app.App.Projects
     for project in projects do
         let repoDir = wsDir |> GetSubDirectory (project.Repository.Name)
