@@ -18,7 +18,7 @@ open Collections
 open MsBuildHelpers
 open Graph
 
-let GenerateProjectNode (project : Project) =
+let private generateProjectNode (project : Project) =
     let isTest = project.HasTests
     let cat = isTest ? ( "TestProject", "Project")
 
@@ -48,19 +48,19 @@ let GenerateProjectNode (project : Project) =
         XAttribute(NsNone + "Output", output),
         XAttribute(NsNone + "OutputType", outputType))
 
-let GenerateNode (source : string) (label : string) (category : string) =
+let private generateNode (source : string) (label : string) (category : string) =
     XElement(NsDgml + "Node",
         XAttribute(NsNone + "Id", source),
         XAttribute(NsNone + "Label", label),
         XAttribute(NsNone + "Category", category))
 
-let GenerateLink (source : string) (target : string) (category : string) =
+let private generateLink (source : string) (target : string) (category : string) =
     XElement(NsDgml + "Link",
         XAttribute(NsNone + "Source", source),
         XAttribute(NsNone + "Target", target),
         XAttribute(NsNone + "Category", category))
 
-let GraphNodes (projects : Project set) (allProjects : Project set) (packages : Package set) (assemblies : Assembly set) (repos : Repository set) =
+let private graphNodes (projects : Project set) (allProjects : Project set) (packages : Package set) (assemblies : Assembly set) (repos : Repository set) =
     let importedProjects = allProjects - projects
 
     seq {
@@ -77,10 +77,10 @@ let GraphNodes (projects : Project set) (allProjects : Project set) (packages : 
                 XAttribute(NsNone + "Group", "Expanded"))
 
         for project in projects do
-            yield GenerateProjectNode project
+            yield generateProjectNode project
 
         for project in importedProjects do
-            yield GenerateNode (project.UniqueProjectId) (project.Output.Name) "ProjectImport"
+            yield generateNode (project.UniqueProjectId) (project.Output.Name) "ProjectImport"
 
         for repo in repos do
             yield XElement(NsDgml + "Node",
@@ -89,44 +89,44 @@ let GraphNodes (projects : Project set) (allProjects : Project set) (packages : 
                 XAttribute(NsNone + "Group", "Expanded"))
 
         for package in packages do
-            yield GenerateNode (package.Name) (package.Name) "Package"
+            yield generateNode (package.Name) (package.Name) "Package"
 
         for assembly in assemblies do
-            yield GenerateNode (assembly.Name) (assembly.Name) "Assembly"
+            yield generateNode (assembly.Name) (assembly.Name) "Assembly"
     }
 
-let GraphLinks (projects : Project set) (allProjects : Project set) =
+let private graphLinks (projects : Project set) (allProjects : Project set) =
     let importedProjects = allProjects - projects
 
     seq {
         for project in projects do
-            yield GenerateLink (project.Repository.Name) (project.UniqueProjectId) "Contains"
+            yield generateLink (project.Repository.Name) (project.UniqueProjectId) "Contains"
 
         for project in importedProjects do
-            yield GenerateLink (project.Repository.Name) (project.UniqueProjectId) "Contains"
+            yield generateLink (project.Repository.Name) (project.UniqueProjectId) "Contains"
 
         for project in projects do
             for reference in project.References do
-                yield GenerateLink (project.UniqueProjectId) (reference.UniqueProjectId) "ProjectRef"
+                yield generateLink (project.UniqueProjectId) (reference.UniqueProjectId) "ProjectRef"
 
         for project in projects do
             for package in project.PackageReferences do
-                yield GenerateLink (project.UniqueProjectId) (package.Name) "PackageRef"
+                yield generateLink (project.UniqueProjectId) (package.Name) "PackageRef"
 
         for project in projects do
             for assembly in project.AssemblyReferences do
-                yield GenerateLink (project.UniqueProjectId) (assembly.Name) "AssemblyRef"
+                yield generateLink (project.UniqueProjectId) (assembly.Name) "AssemblyRef"
 
         for project in projects do
             for package in project.PackageReferences do
-                yield GenerateLink "Packages" (package.Name) "Contains"
+                yield generateLink "Packages" (package.Name) "Contains"
 
         for project in projects do
             for assembly in project.AssemblyReferences do
-                yield GenerateLink "Assemblies" (assembly.Name) "Contains"
+                yield generateLink "Assemblies" (assembly.Name) "Contains"
     }
 
-let GraphCategories (repos : Repository set) =
+let private graphCategories (repos : Repository set) =
     let allCategories = [ ("Project", "Green")
                           ("TestProject", "Purple")
                           ("ProjectImport", "Navy")
@@ -156,7 +156,7 @@ let GraphCategories (repos : Repository set) =
                 XAttribute(NsNone + "OutgoingActionLabel", "Contains"))
     }
 
-let GraphProperties () =
+let private graphProperties () =
     let allProperties = [ ("FxVersion", "Target Framework Version", "System.String")
                           ("FxProfile", "Target Framework Profile", "System.String")
                           ("FxIdentifier", "Target Framework Identifier", "System.String")
@@ -174,7 +174,7 @@ let GraphProperties () =
 
     allProperties |> Seq.map generateProperty
 
-let GraphStyles () =
+let private graphStyles () =
     XElement(NsDgml + "Styles",
         XElement(NsDgml + "Style",
             XAttribute(NsNone + "TargetType", "Node"), XAttribute(NsNone + "GroupLabel", "Test Project"), XAttribute(NsNone + "ValueLabel", "True"),
@@ -195,11 +195,11 @@ let GraphContent (projects : Project set) (all : bool) =
                                |> Set.unionMany
     let assemblies = srcProjects |> Seq.map (fun x -> x.AssemblyReferences)
                                  |> Set.unionMany
-    let xNodes = XElement(NsDgml + "Nodes", GraphNodes srcProjects allProjects packages assemblies repos)
-    let xLinks = XElement(NsDgml+"Links", GraphLinks srcProjects allProjects)
-    let xCategories = XElement(NsDgml + "Categories", GraphCategories repos)
-    let xProperties = XElement(NsDgml + "Properties", GraphProperties ())
-    let xStyles = GraphStyles ()
+    let xNodes = XElement(NsDgml + "Nodes", graphNodes srcProjects allProjects packages assemblies repos)
+    let xLinks = XElement(NsDgml+"Links", graphLinks srcProjects allProjects)
+    let xCategories = XElement(NsDgml + "Categories", graphCategories repos)
+    let xProperties = XElement(NsDgml + "Properties", graphProperties ())
+    let xStyles = graphStyles ()
     let xGraphDir = XAttribute(NsNone + "GraphDirection", "TopToBottom")
     let xLayout = XAttribute(NsNone + "Layout", "Sugiyama")
     XDocument(

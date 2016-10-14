@@ -21,7 +21,7 @@ open Anthology
 
 
 
-type TokenOption =
+type private TokenOption =
     | Debug
     | All
     | Bin
@@ -38,7 +38,7 @@ type TokenOption =
     | Modified
     | Html
 
-let (|TokenOption|_|) (token : string) =
+let private (|TokenOption|_|) (token : string) =
     match token with
     | "--debug" -> Some TokenOption.Debug
     | "--all" -> Some TokenOption.All
@@ -58,7 +58,7 @@ let (|TokenOption|_|) (token : string) =
     | _ -> None
 
 
-type Token =
+type private Token =
     | Version
     | Workspace
     | Help
@@ -104,7 +104,7 @@ type Token =
     | Migrate
 
 
-let (|Token|_|) (token : string) =
+let private (|Token|_|) (token : string) =
     match token with
     | "version" -> Some Version
     | "workspace" -> Some Workspace
@@ -159,53 +159,53 @@ let (|Token|_|) (token : string) =
 
 
 
-let (|Param|_|) (prm : string) =
+let private (|Param|_|) (prm : string) =
     if prm.StartsWith("--") then None
     else Some prm
 
-let (|Params|_|) (prms : string list) =
+let private (|Params|_|) (prms : string list) =
     let hasNotParam = prms |> List.exists (fun x -> match x with
                                                     | Param _ -> false
                                                     | _ -> true)
     if hasNotParam then None
     else Some prms
 
-let (|BookmarkVersion|_|) version =
+let private (|BookmarkVersion|_|) version =
     match version with
     | Param _ -> Some (BookmarkVersion.from version)
     | _ -> None
 
-let (|ViewId|_|) view =
+let private (|ViewId|_|) view =
     match view with
     | Param _ -> Some view
     | _ -> None
 
-let (|RepositoryId|_|) name =
+let private (|RepositoryId|_|) name =
     match name with
     | Param _ -> Some (RepositoryId.from name)
     | _ -> None
 
-let (|ProjectId|_|) name =
+let private (|ProjectId|_|) name =
     match name with
     | Param _ -> Some (ProjectId.from name)
     | _ -> None
 
-let (|ApplicationId|_|) name =
+let private (|ApplicationId|_|) name =
     match name with
     | Param _ -> Some (ApplicationId.from name)
     | _ -> None
 
-let (|BranchId|_|) name =
+let private (|BranchId|_|) name =
     match name with
     | Param prm -> Some (BranchId.from prm)
     | _ -> None
 
-let (|PublisherType|_|) name =
+let private (|PublisherType|_|) name =
     match name with
     | Param _ -> Some (StringHelpers.fromString<Graph.PublisherType> name)
     | _ -> None
 
-let commandSetup (args : string list) =
+let private commandSetup (args : string list) =
     match args with
     | Param vcs
       :: Param masterRepository
@@ -216,7 +216,7 @@ let commandSetup (args : string list) =
                                                   Path = path }
     | _ -> Command.Error MainCommand.Setup
 
-let commandInit (args : string list) =
+let private commandInit (args : string list) =
     match args with
     | Param vcs
       :: Param masterRepository
@@ -226,14 +226,14 @@ let commandInit (args : string list) =
     | _ -> Command.Error MainCommand.Init
 
 
-let rec commandExec (all : bool) (args : string list) =
+let rec private commandExec (all : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.All
       :: tail -> tail |> commandExec true
     | [Param cmd] -> Command.Exec { Command = cmd; All = all }
     | _ -> Command.Error MainCommand.Exec
 
-let rec commandTest (excludes : string list) (args : string list) =
+let rec private commandTest (excludes : string list) (args : string list) =
     match args with
     | TokenOption TokenOption.Exclude
       :: Param category
@@ -243,19 +243,19 @@ let rec commandTest (excludes : string list) (args : string list) =
     | _ -> Command.Error MainCommand.Test
 
 
-let rec commandIndex (args : string list) =
+let rec private commandIndex (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Index
     | Params filters -> Command.IndexRepositories { Filters = set filters }
     | _ -> Command.Error MainCommand.Index
 
-let commandConvert (args : string list) =
+let private commandConvert (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Convert
     | Params filters -> Command.ConvertRepositories { Filters = set filters }
     | _ -> Command.Error MainCommand.Convert
 
-let rec commandClone (shallow : bool) (all : bool) (mt : bool) (args : string list) =
+let rec private commandClone (shallow : bool) (all : bool) (mt : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Shallow
       :: tail -> tail |> commandClone true all mt
@@ -269,14 +269,14 @@ let rec commandClone (shallow : bool) (all : bool) (mt : bool) (args : string li
 
 
 
-let rec commandGraph (all : bool) (args : string list) =
+let rec private commandGraph (all : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.View
       :: tail -> tail |> commandGraph true
     | [ViewId name] -> Command.GraphView { Name = name ; All = all }
     | _ -> Command.Error MainCommand.GraphView
 
-let rec commandPublish (mt : bool) view (args : string list) =
+let rec private commandPublish (mt : bool) view (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.PublishApp
     | TokenOption TokenOption.Multithread
@@ -288,7 +288,7 @@ let rec commandPublish (mt : bool) view (args : string list) =
     | _ -> Command.Error MainCommand.PublishApp
 
 
-let rec commandBuild (config : string) (clean : bool) (multithread : bool) (version : string option) (args : string list) =
+let rec private commandBuild (config : string) (clean : bool) (multithread : bool) (version : string option) (args : string list) =
     match args with
     | TokenOption TokenOption.Version
       :: Param ver
@@ -301,18 +301,18 @@ let rec commandBuild (config : string) (clean : bool) (multithread : bool) (vers
     | [ViewId name] -> Command.BuildView { Name = Some name ; Config = config; Clean = clean; Multithread = multithread; Version = version }
     | _ -> Command.Error MainCommand.BuildView
 
-let commandCheckout (args : string list) =
+let private commandCheckout (args : string list) =
     match args with
     | [version] -> Command.CheckoutWorkspace {Version = version}
     | _ -> Command.Error MainCommand.Checkout
 
-let commandBranch (args : string list) =
+let private commandBranch (args : string list) =
     match args with
     |  [version] -> Command.BranchWorkspace {Branch = Some version}
     | [] -> Command.BranchWorkspace {Branch = None}
     | _ -> Command.Error MainCommand.Branch
 
-let rec commandPush (branch : string option) (all : bool) (args : string list) =
+let rec private commandPush (branch : string option) (all : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Branch
       :: Param branch
@@ -322,7 +322,7 @@ let rec commandPush (branch : string option) (all : bool) (args : string list) =
     | [Param buildNumber] -> Command.PushWorkspace {Branch = branch; BuildNumber = buildNumber; Incremental = not all }
     | _ -> Command.Error MainCommand.Push
 
-let rec commandPull (src : bool) (bin : bool) (rebase : bool) (view : string option) (args : string list) =
+let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (view : string option) (args : string list) =
     match args with
     | TokenOption TokenOption.Src
       :: tail -> tail |> commandPull true false rebase view
@@ -336,27 +336,27 @@ let rec commandPull (src : bool) (bin : bool) (rebase : bool) (view : string opt
     | [] -> Command.PullWorkspace { Src = src ; Bin = bin; Rebase = rebase; View = view }
     | _ -> Command.Error MainCommand.Pull
 
-let commandClean (args : string list) =
+let private commandClean (args : string list) =
     match args with
     | [] -> Command.CleanWorkspace
     | _ -> Command.Error MainCommand.Clean
 
-let commandInstall (args : string list) =
+let private commandInstall (args : string list) =
     match args with
     | [] -> Command.InstallPackages
     | _ -> Command.Error MainCommand.InstallPackage
 
-let commandUpdate (args : string list) =
+let private commandUpdate (args : string list) =
     match args with
     | [] -> Command.UpdatePackages
     | _ -> Command.Error MainCommand.UpdatePackage
 
-let commandOutdated (args : string list) =
+let private commandOutdated (args : string list) =
     match args with
     | [] -> Command.OutdatedPackages
     | _ -> Command.Error MainCommand.OutdatedPackage
 
-let rec commandAddRepo (branch : BranchId option) (builder : BuilderType) (args : string list) =
+let rec private commandAddRepo (branch : BranchId option) (builder : BuilderType) (args : string list) =
     match args with
     | TokenOption TokenOption.Branch
       :: BranchId branch
@@ -368,27 +368,27 @@ let rec commandAddRepo (branch : BranchId option) (builder : BuilderType) (args 
                                                 Builder = builder }
     | _ -> Command.Error MainCommand.AddRepository
 
-let commandDropRepo (args : string list) =
+let private commandDropRepo (args : string list) =
     match args with
     | [repo] -> Command.DropRepository repo
     | _ -> Command.Error MainCommand.DropRepository
 
-let commandListRepo (args : string list) =
+let private commandListRepo (args : string list) =
     match args with
     | [] -> Command.ListRepositories
     | _ -> Command.Error MainCommand.ListRepository
 
-let commandAddNuGet (args : string list) =
+let private commandAddNuGet (args : string list) =
     match args with
     | [Param uri] -> Command.AddNuGet (RepositoryUrl.from uri)
     | _ -> Command.Error MainCommand.AddNuGet
 
-let commandListNuGet (args : string list) =
+let private commandListNuGet (args : string list) =
     match args with
     | [] -> Command.ListNuGets
     | _ -> Command.Error MainCommand.ListNuget
 
-let rec commandAddView (references : bool) (referencedBy : bool) (modified : bool) (args : string list) =
+let rec private commandAddView (references : bool) (referencedBy : bool) (modified : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Src
       :: tail -> tail |> commandAddView true referencedBy modified
@@ -400,22 +400,22 @@ let rec commandAddView (references : bool) (referencedBy : bool) (modified : boo
       :: Params filters -> Command.AddView { Name = name; Filters = filters; References = references; ReferencedBy = referencedBy; Modified = modified }
     | _ -> Command.Error MainCommand.AddView
 
-let commandDropView (args : string list) =
+let private commandDropView (args : string list) =
     match args with
     | [ViewId name] -> Command.DropView { Name = name }
     | _ -> Command.Error MainCommand.DropView
 
-let commandListView (args : string list) =
+let private commandListView (args : string list) =
     match args with
     | [] -> Command.ListViews
     | _ -> Command.Error MainCommand.ListView
 
-let commandDescribeView (args : string list) =
+let private commandDescribeView (args : string list) =
     match args with
     | [ViewId name] -> Command.DescribeView { Name = name }
     | _ -> Command.Error MainCommand.DescribeView
 
-let rec commandAlterView (forceDefault : bool option) (forceSrc : bool option) (forceParents : bool option) (args : string list) =
+let rec private commandAlterView (forceDefault : bool option) (forceSrc : bool option) (forceParents : bool option) (args : string list) =
     match args with
     | TokenOption TokenOption.Default
       :: tail -> tail |> commandAlterView (Some true) forceSrc forceParents
@@ -426,50 +426,50 @@ let rec commandAlterView (forceDefault : bool option) (forceSrc : bool option) (
     | [ViewId name] -> Command.AlterView { Name = name ; Default = forceDefault; Source = forceSrc; Parents = forceParents }
     | _ -> Command.Error MainCommand.AlterView
 
-let commandOpenView (args : string list) =
+let private commandOpenView (args : string list) =
     match args with
     | [ViewId name] -> Command.OpenView { Name = name }
     | _ -> Command.Error MainCommand.OpenView
 
-let commandAddApp (args : string list) =
+let private commandAddApp (args : string list) =
     match args with
     | Param name
       :: PublisherType pub
       :: Params projects -> Command.AddApplication { Name = name; Publisher = pub; Projects = set projects }
     | _ -> Command.Error MainCommand.AddApp
 
-let commandDropApp (args : string list) =
+let private commandDropApp (args : string list) =
     match args with
     | [ApplicationId name] -> Command.DropApplication name
     | _ -> Command.Error MainCommand.DropApp
 
-let commandListApp (args : string list) =
+let private commandListApp (args : string list) =
     match args with
     | [] -> Command.ListApplications
     | _ -> Command.Error MainCommand.ListApp
 
-let commandListPackage (args : string list) =
+let private commandListPackage (args : string list) =
     match args with
     | [] -> Command.ListPackages
     | _ -> Command.Error MainCommand.ListPackage
 
-let commandUpdateGuids (args : string list) =
+let private commandUpdateGuids (args : string list) =
     match args with
     | Params filters -> Command.UpdateGuids { Filters = set filters }
     | _ -> Command.Error MainCommand.UpgradeGuids
 
-let commandBind (args : string list) =
+let private commandBind (args : string list) =
     match args with
     | Params filters -> Command.BindProject { Filters = set filters }
     | _ -> Command.Error MainCommand.Bind
 
-let rec commandHistory (html : bool) (args : string list) =
+let rec private commandHistory (html : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Html :: tail -> tail |> commandHistory true
     | [] -> Command.History { Html = html }
     | _ -> Command.Error MainCommand.History
 
-let commandUpgrade (args : string list) =
+let private commandUpgrade (args : string list) =
     match args with
     | [] -> Command.Upgrade
     | [Param processId] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))

@@ -22,7 +22,7 @@ open MsBuildHelpers
 open Collections
 
 
-let generateBindingUnsafe (allAssemblies : string set) (file : FileInfo) =
+let private generateBindingUnsafe (allAssemblies : string set) (file : FileInfo) =
     // HACK
     let assId = Path.GetFileNameWithoutExtension(file.FullName).ToLowerInvariant()
     if not (allAssemblies |> Set.contains assId) then
@@ -46,17 +46,17 @@ let generateBindingUnsafe (allAssemblies : string set) (file : FileInfo) =
     else null
 
 
-let generateBinding (allAssemblies : string set) (file : FileInfo) =
+let private generateBinding (allAssemblies : string set) (file : FileInfo) =
     try
         generateBindingUnsafe allAssemblies file
     with
         :? System.BadImageFormatException -> null
 
-let getAssemblyConfig (file : FileInfo) =
+let private getAssemblyConfig (file : FileInfo) =
     file.FullName |> IoHelpers.AddExt IoHelpers.Extension.Config |> FileInfo
 
 
-let forceBindings (bindings : XElement) (appConfig : FileInfo) =
+let private forceBindings (bindings : XElement) (appConfig : FileInfo) =
     let config = if appConfig.Exists then XDocument.Load(appConfig.FullName)
                  else XDocument(XElement(NsNone + "configuration"))
 
@@ -74,18 +74,19 @@ let forceBindings (bindings : XElement) (appConfig : FileInfo) =
     // </assemblyBinding>
     config.Save(appConfig.FullName)
 
-let anthologyAssemblies () =
+let private anthologyAssemblies () =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let assemblies = graph.Projects |> Seq.map (fun x -> x.Output.Name)
                                     |> Set
     assemblies
 
-let generateBindings (allAssemblies : string set) (artifactDir : DirectoryInfo) =
+let private generateBindings (allAssemblies : string set) (artifactDir : DirectoryInfo) =
     let dependentAssemblies = artifactDir.GetFiles ("*.dll")
                               |> Seq.map (generateBinding allAssemblies)
                               |> Seq.filter (fun x -> x <> null)
     let bindings = XElement(NsRuntime + "assemblyBinding", dependentAssemblies)
     bindings
+
 
 let UpdateArtifactBindingRedirects (artifactDir : DirectoryInfo) =
     let assemblies = anthologyAssemblies()

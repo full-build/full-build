@@ -17,6 +17,12 @@ module Commands.Repo
 open Collections
 open Graph
 
+let private cloneRepoAndInit wsDir shallow (repo : Repository) =
+    async {
+        IoHelpers.DisplayHighlight repo.Name
+        Plumbing.Vcs.Clone wsDir repo shallow
+    }
+
 let List() =
     let graph = Configuration.LoadAnthology() |> Graph.from
 
@@ -25,12 +31,6 @@ let List() =
         printfn "%s : %s [%A]" repo.Name repo.Uri (StringHelpers.toString BuilderType.MSBuild)
 
     graph.Repositories |> Seq.iter printRepo
-
-let cloneRepoAndInit wsDir shallow (repo : Repository) =
-    async {
-        IoHelpers.DisplayHighlight repo.Name
-        Plumbing.Vcs.Clone wsDir repo shallow
-    }
 
 let Clone (cmd : CLI.Commands.CloneRepositories) =
     let wsDir = Env.GetFolder Env.Folder.Workspace

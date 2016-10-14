@@ -22,14 +22,14 @@ open FSharp.Data
 
 type GitRelease = JsonProvider<"ghreleasefeed.json">
 
-let getLatestReleaseUrl () =
+let private getLatestReleaseUrl () =
     let path = @"https://api.github.com/repos/full-build/full-build/releases/latest"
     let result = Http.RequestString(path,
                                     customizeHttpRequest = fun x -> x.UserAgent<-"fullbuild"; x)
     let releases = GitRelease.Parse(result)
     (releases.Assets.[0].BrowserDownloadUrl, releases.TagName)
 
-let downloadZip zipUrl =
+let private downloadZip zipUrl =
     let response = Http.Request(zipUrl,
                                 customizeHttpRequest = fun x -> x.UserAgent <- "fullbuild"; x)
     let zipFile = Path.GetTempFileName()
@@ -38,13 +38,13 @@ let downloadZip zipUrl =
         | _ -> printfn "ERROR"
     new FileInfo(zipFile)
 
-let backupFile (file:FileInfo) =
+let private backupFile (file:FileInfo) =
     System.IO.File.Move(file.FullName, file.FullName + "_bkp")
 
-let deleteBackupFiles (dir:DirectoryInfo) =
+let private deleteBackupFiles (dir:DirectoryInfo) =
     dir.GetFiles("*_bkp")|> Seq.iter (fun x -> File.Delete(x.FullName))
 
-let waitProcessToExit processId =
+let private waitProcessToExit processId =
     try
         use processInfo = Process.GetProcessById(processId)
         if processInfo <> null then
@@ -53,11 +53,7 @@ let waitProcessToExit processId =
         | :? System.ArgumentException -> ()
         | _ -> reraise()
 
-let FinalizeUpgrade processId =
-    waitProcessToExit processId
-    Env.getInstallationFolder () |> deleteBackupFiles
-
-let getSameFiles (firstDir:DirectoryInfo) (secondDir:DirectoryInfo) =
+let private getSameFiles (firstDir:DirectoryInfo) (secondDir:DirectoryInfo) =
     firstDir.GetFiles() |> Seq.where(fun x-> (secondDir |> IoHelpers.GetFile x.Name).Exists)
 
 let Upgrade () =
@@ -85,3 +81,7 @@ let Upgrade () =
     use currentProcess = Process.GetCurrentProcess()
     let processId = currentProcess.Id
     Exec.Spawn (installDir |> GetFile "fullbuild.exe").FullName (processId |> sprintf "upgrade %i")
+
+let FinalizeUpgrade processId =
+    waitProcessToExit processId
+    Env.getInstallationFolder () |> deleteBackupFiles

@@ -31,6 +31,28 @@ let private checkErrorCode err =
 let private checkedExecWithVars =
     Exec.ExecWithVars checkErrorCode
 
+let private textHeader (version : string) =
+    ()
+
+let private textFooter () =
+    ()
+
+let private htmlHeader (version : string) =
+    printfn "<html>"
+    printfn "<body>"
+    printfn "<h2>version %s</h2>" version
+
+let private htmlFooter () =
+    printfn "</body>"
+
+let private textBody (repo : string) (content : string) =
+    DisplayHighlight repo
+    printfn "%s" content
+
+let private htmlBody (repo : string) (content : string) =
+    printfn "<b>%s</b><br>" repo
+    let htmlContent = content.Replace(System.Environment.NewLine, "<br>")
+    printfn "%s<br><br>" htmlContent
 
 
 let Create (createInfo : CLI.Commands.SetupWorkspace) =
@@ -60,8 +82,6 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     finally
         Environment.CurrentDirectory <- currDir
 
-
-
 let Init (initInfo : CLI.Commands.InitWorkspace) =
     let wsDir = DirectoryInfo(initInfo.Path)
     wsDir.Create()
@@ -70,7 +90,6 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
     else
         let graph = Graph.init initInfo.MasterRepository initInfo.Type
         Plumbing.Vcs.Clone wsDir graph.MasterRepository true
-
 
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -125,11 +144,9 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
         DisplayHighlight repo.Name
         Plumbing.Vcs.Checkout wsDir repo branchInfo.Branch true
 
-
 let Install () =
     Core.Package.RestorePackages ()
     Core.Conversion.GenerateProjectArtifacts()
-
 
 let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -155,7 +172,6 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
 
     if pullInfo.Bin then
         Core.BuildArtifacts.PullLatestReferenceBinaries ()
-
 
 let Exec (execInfo : CLI.Commands.Exec) =
     let antho = Configuration.LoadAnthology()
@@ -222,31 +238,6 @@ let UpdateGuid (updInfo : CLI.Commands.UpdateGuids) =
             let guid = xdoc.Descendants(NsMsBuild + "ProjectGuid").Single()
             guid.Value <- Guid.NewGuid().ToString("B")
             xdoc.Save(prjFile.FullName)
-
-
-let textHeader (version : string) =
-    ()
-
-let textFooter () =
-    ()
-
-let htmlHeader (version : string) =
-    printfn "<html>"
-    printfn "<body>"
-    printfn "<h2>version %s</h2>" version
-
-let htmlFooter () =
-    printfn "</body>"
-
-let textBody (repo : string) (content : string) =
-    DisplayHighlight repo
-    printfn "%s" content
-
-let htmlBody (repo : string) (content : string) =
-    printfn "<b>%s</b><br>" repo
-    let htmlContent = content.Replace(System.Environment.NewLine, "<br>")
-    printfn "%s<br><br>" htmlContent
-
 
 let History (historyInfo : CLI.Commands.History) =
     let header = historyInfo.Html ? (htmlHeader, textHeader)

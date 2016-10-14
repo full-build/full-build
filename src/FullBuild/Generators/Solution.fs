@@ -21,7 +21,7 @@ open Graph
 open Collections
 
 
-let projectToProjectType (filename : string) =
+let private projectToProjectType (filename : string) =
     let file = FileInfo(filename)
     let ext2projType = Map [ (".csproj", "fae04ec0-301f-11d3-bf4b-00c04f79efbc")
                              (".fsproj", "f2a71f9b-5d33-465a-a702-920d77279786")
