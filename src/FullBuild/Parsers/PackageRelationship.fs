@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Parsers.NuGet
+module Parsers.PackageRelationship
 
 open Anthology
 open IoHelpers

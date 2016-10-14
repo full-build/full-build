@@ -41,7 +41,7 @@ let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
 
     let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))
     let xnuspec = XDocument.Load (nuspecFile.FullName)
-    let fxDependencies = Parsers.NuGet.GetFrameworkDependencies xnuspec
+    let fxDependencies = Parsers.PackageRelationship.GetFrameworkDependencies xnuspec
 
     let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
     let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
@@ -54,7 +54,7 @@ let private simplifyAnthologyWithPackages (antho) =
 
     let packages = promotedPackageAntho.Projects |> Set.map (fun x -> x.PackageReferences)
                                                  |> Set.unionMany
-    let package2packages = Parsers.NuGet.BuildPackageDependencies packages
+    let package2packages = Parsers.PackageRelationship.BuildPackageDependencies packages
     let allPackages = package2packages |> Seq.map (fun x -> x.Key)
     let package2files = allPackages |> Seq.map (fun x -> (x, gatherAllAssemblies x))
                                     |> Map

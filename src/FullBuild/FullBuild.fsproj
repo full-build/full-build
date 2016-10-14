@@ -99,7 +99,7 @@
     <Compile Include="CLI\Commands.fs" />
     <Compile Include="CLI\CommandLine.fs" />
     <Compile Include="Parsers\MsBuild.fs" />
-    <Compile Include="Parsers\NuGet.fs" />
+    <Compile Include="Parsers\PackageRelationship.fs" />
     <Compile Include="Generators\Solution.fs" />
     <Compile Include="Generators\Dgml.fs" />
     <Compile Include="Generators\Package.fs" />

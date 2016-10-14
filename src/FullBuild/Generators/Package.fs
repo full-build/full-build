@@ -163,7 +163,7 @@ let private generateTargetForPackageRef (package : PackageId) =
 
     let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))
     let xnuspec = XDocument.Load (nuspecFile.FullName)
-    let dependencies = Parsers.NuGet.GetPackageDependencies xnuspec
+    let dependencies = Parsers.PackageRelationship.GetPackageDependencies xnuspec
 
     let imports = generateDependenciesRefContent dependencies
     let choose = generateChooseRefContent libDir package
@@ -179,7 +179,7 @@ let private generateTargetForPackageCopy (package : PackageId) =
 
     let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))
     let xnuspec = XDocument.Load (nuspecFile.FullName)
-    let dependencies = Parsers.NuGet.GetPackageDependencies xnuspec
+    let dependencies = Parsers.PackageRelationship.GetPackageDependencies xnuspec
 
     let imports = generateDependenciesCopyContent dependencies
     let choose = generateChooseCopyContent libDir package
@@ -196,7 +196,7 @@ let private generateTargetsForPackage (package : PackageId) =
 
 let GeneratePackageImports () =
     PaketInterface.ParsePaketDependencies ()
-        |> Parsers.NuGet.BuildPackageDependencies
+        |> Parsers.PackageRelationship.BuildPackageDependencies
         |> Map.toList
         |> Seq.map fst
         |> Seq.iter generateTargetsForPackage
