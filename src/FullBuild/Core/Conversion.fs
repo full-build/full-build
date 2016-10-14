@@ -19,9 +19,9 @@ open Collections
 let private convertMsBuild (repos : Graph.Repository set) =
     let antho = Configuration.LoadAnthology ()
     let projects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
-    MsBuildConversion.GenerateProjects projects IoHelpers.XDocSaver
-    MsBuildConversion.ConvertProjects projects IoHelpers.XDocLoader IoHelpers.XDocSaver
-    MsBuildConversion.RemoveUselessStuff projects
+    Generators.MsBuild.GenerateProjects projects IoHelpers.XDocSaver
+    Generators.MsBuild.ConvertProjects projects IoHelpers.XDocLoader IoHelpers.XDocSaver
+    Generators.MsBuild.RemoveUselessStuff projects
 
 let Convert builder (repos : Graph.Repository set) =
     match builder with
@@ -38,4 +38,4 @@ let GenerateProjectArtifacts () =
         let (builder, brepos) = builder2repo
         let repos = brepos |> Seq.map (fun x -> x.Repository.Name) |> Set.ofSeq
         let projects = antho.Projects |> Set.filter (fun x -> repos |> Set.contains x.Repository)
-        MsBuildConversion.GenerateProjects projects IoHelpers.XDocSaver
+        Generators.MsBuild.GenerateProjects projects IoHelpers.XDocSaver
