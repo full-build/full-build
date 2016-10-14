@@ -291,3 +291,15 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
     let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
     publishSource.CopyTo(publishTarget.FullName, true) |> ignore
+
+let CheckMinVersion () =
+    try
+        let fbVersion = Env.FullBuildVersion ()
+        let graph = Configuration.LoadAnthology () |> Graph.from
+        let minVersion = System.Version.Parse graph.MinVersion
+
+        if fbVersion < minVersion then
+            failwithf "Minimum full-build version requirement: %s" graph.MinVersion
+    with
+        // we are probably not in a workspace
+        _ -> ()

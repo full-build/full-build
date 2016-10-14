@@ -126,6 +126,7 @@ with
                 -> unit
 
 and [<Sealed>] Graph =
+    member MinVersion: string
     member MasterRepository : Repository
     member Repositories : Repository set  
     member Assemblies : Assembly set  

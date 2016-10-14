@@ -66,8 +66,8 @@ let Publish (branch : string option) buildnum hash =
              reraise ()
 
 let PullReferenceBinaries version =
-    let antho = Configuration.LoadAnthology ()
-    let artifactDir = antho.Artifacts |> DirectoryInfo
+    let graph = Configuration.LoadAnthology () |> Graph.from
+    let artifactDir = graph.ArtifactsDir |> DirectoryInfo
 
     let versionDir = artifactDir |> GetSubDirectory version
     if versionDir.Exists then
@@ -79,8 +79,8 @@ let PullReferenceBinaries version =
         DisplayHighlight "[WARNING] No reference binaries found"
 
 let PullLatestReferenceBinaries () =
-    let antho = Configuration.LoadAnthology ()
-    let versionsFile = DirectoryInfo(antho.Artifacts) |> GetFile "versions"
+    let graph = Configuration.LoadAnthology () |> Graph.from
+    let versionsFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
     let version = File.ReadAllLines(versionsFile.FullName) |> Seq.last
     let hash = version.Split(':') |> Seq.toArray
     PullReferenceBinaries hash.[1]
