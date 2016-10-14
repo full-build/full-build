@@ -195,7 +195,7 @@ let private generateTargetsForPackage (package : PackageId) =
 
 
 let GeneratePackageImports () =
-    PaketInterface.ParsePaketDependencies ()
+    Tools.PaketInterface.ParsePaketDependencies ()
         |> Parsers.PackageRelationship.BuildPackageDependencies
         |> Map.toList
         |> Seq.map fst

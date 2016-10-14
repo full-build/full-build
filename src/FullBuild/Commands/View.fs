@@ -84,7 +84,7 @@ let Build (cmd : CLI.Commands.BuildView) =
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
-    Plumbing.Builders.BuildWithBuilder view.Builder slnFile cmd.Config cmd.Clean cmd.Multithread cmd.Version
+    Tools.Builders.BuildWithBuilder view.Builder slnFile cmd.Config cmd.Clean cmd.Multithread cmd.Version
 
 let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Configuration.LoadAnthology() |> Graph.from

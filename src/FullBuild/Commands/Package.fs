@@ -4,7 +4,7 @@ let Update () =
     Core.Package.UpdatePackages()
 
 let Outdated () =
-    PaketInterface.PaketOutdated ()
+    Tools.PaketInterface.PaketOutdated ()
 
 let List () =
-    PaketInterface.PaketInstalled ()
+    Tools.PaketInterface.PaketInstalled ()

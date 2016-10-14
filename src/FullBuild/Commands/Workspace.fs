@@ -64,7 +64,7 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     try
         Environment.CurrentDirectory <- wsDir.FullName
         let graph = Graph.create createInfo.MasterRepository createInfo.MasterArtifacts createInfo.Type TestRunnerType.NUnit
-        Plumbing.Vcs.Clone wsDir graph.MasterRepository true
+        Tools.Vcs.Clone wsDir graph.MasterRepository true
         graph.Save()
 
         let baseline = graph.CreateBaseline false
@@ -77,8 +77,8 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
         let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
         publishSource.CopyTo(publishTarget.FullName) |> ignore
 
-        Plumbing.Vcs.Ignore wsDir graph.MasterRepository
-        Plumbing.Vcs.Commit wsDir graph.MasterRepository "setup"
+        Tools.Vcs.Ignore wsDir graph.MasterRepository
+        Tools.Vcs.Commit wsDir graph.MasterRepository "setup"
     finally
         Environment.CurrentDirectory <- currDir
 
@@ -89,7 +89,7 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         printf "[WARNING] Workspace already exists - skipping"
     else
         let graph = Graph.init initInfo.MasterRepository initInfo.Type
-        Plumbing.Vcs.Clone wsDir graph.MasterRepository true
+        Tools.Vcs.Clone wsDir graph.MasterRepository true
 
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -100,10 +100,10 @@ let Push (pushInfo : CLI.Commands.PushWorkspace) =
 
     // commit
     let mainRepo = graph.MasterRepository
-    Try (fun () -> Plumbing.Vcs.Commit wsDir mainRepo "bookmark")
+    Try (fun () -> Tools.Vcs.Commit wsDir mainRepo "bookmark")
 
     // copy bin content
-    let hash = Plumbing.Vcs.Tip wsDir mainRepo
+    let hash = Tools.Vcs.Tip wsDir mainRepo
     Core.BuildArtifacts.Publish pushInfo.Branch pushInfo.BuildNumber hash
 
 let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
@@ -112,7 +112,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = graph.MasterRepository
-    Plumbing.Vcs.Checkout wsDir mainRepo (Some checkoutInfo.Version) false
+    Tools.Vcs.Checkout wsDir mainRepo (Some checkoutInfo.Version) false
 
     // checkout each repository now
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -121,7 +121,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     for repo in clonedRepos do
         DisplayHighlight repo.Name
         let repoVersion = baseline.Bookmarks |> Seq.find (fun x -> x.Repository.Name = repo.Name)
-        Plumbing.Vcs.Checkout wsDir repo (Some repoVersion.Version) false
+        Tools.Vcs.Checkout wsDir repo (Some repoVersion.Version) false
 
     // update binaries with observable baseline
     Core.BuildArtifacts.PullReferenceBinaries checkoutInfo.Version
@@ -133,7 +133,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = graph.MasterRepository
     try
-        Plumbing.Vcs.Checkout wsDir mainRepo branchInfo.Branch false
+        Tools.Vcs.Checkout wsDir mainRepo branchInfo.Branch false
     with
         _ -> printfn "WARNING: No branch on .full-build repository. Is this intended ?"
 
@@ -142,7 +142,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     let clonedRepos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     for repo in clonedRepos do
         DisplayHighlight repo.Name
-        Plumbing.Vcs.Checkout wsDir repo branchInfo.Branch true
+        Tools.Vcs.Checkout wsDir repo branchInfo.Branch true
 
 let Install () =
     Core.Package.RestorePackages ()
@@ -155,7 +155,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     if pullInfo.Src then
         let mainRepo = graph.MasterRepository
         DisplayHighlight mainRepo.Name
-        Plumbing.Vcs.Pull wsDir mainRepo pullInfo.Rebase
+        Tools.Vcs.Pull wsDir mainRepo pullInfo.Rebase
 
         let clonedRepos = match pullInfo.View with
                           | None -> graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
@@ -166,7 +166,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
 
         for repo in clonedRepos do
             DisplayHighlight repo.Name
-            Plumbing.Vcs.Pull wsDir repo pullInfo.Rebase
+            Tools.Vcs.Pull wsDir repo pullInfo.Rebase
 
         Install ()
 
@@ -206,23 +206,23 @@ let Clean () =
         // master repository will be cleaned again as final step
         let oldGraph = Configuration.LoadAnthology () |> Graph.from
         let wsDir = Env.GetFolder Env.Folder.Workspace
-        Plumbing.Vcs.Clean wsDir oldGraph.MasterRepository
+        Tools.Vcs.Clean wsDir oldGraph.MasterRepository
         let newAntho = Configuration.LoadAnthology() |> Graph.from
         oldGraph.Save()
 
         // remove repositories
         let reposToRemove = Set.difference oldGraph.Repositories newAntho.Repositories
         for repo in reposToRemove do
-            if repo.IsCloned then Plumbing.Vcs.Unclone wsDir repo
+            if repo.IsCloned then Tools.Vcs.Unclone wsDir repo
 
         // clean existing repositories
         for repo in newAntho.Repositories do
             if repo.IsCloned then
                 DisplayHighlight repo.Name
-                Plumbing.Vcs.Clean wsDir repo
+                Tools.Vcs.Clean wsDir repo
 
         DisplayHighlight newAntho.MasterRepository.Name
-        Plumbing.Vcs.Clean wsDir newAntho.MasterRepository
+        Tools.Vcs.Clean wsDir newAntho.MasterRepository
 
 let UpdateGuid (updInfo : CLI.Commands.UpdateGuids) =
     printfn "DANGER ! You will change all project guids for selected repository. Do you want to continue [Yes to confirm] ?"
@@ -250,17 +250,17 @@ let History (historyInfo : CLI.Commands.History) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     // header
-    let baselineTip = Plumbing.Vcs.Tip wsDir graph.MasterRepository
+    let baselineTip = Tools.Vcs.Tip wsDir graph.MasterRepository
     header baselineTip
 
     // body
-    let lastCommit = Plumbing.Vcs.LastCommit wsDir graph.MasterRepository "baseline"
-    let revision = Plumbing.Vcs.Log wsDir graph.MasterRepository lastCommit
+    let lastCommit = Tools.Vcs.LastCommit wsDir graph.MasterRepository "baseline"
+    let revision = Tools.Vcs.Log wsDir graph.MasterRepository lastCommit
     body graph.MasterRepository.Name revision
 
     for bookmark in baseline.Bookmarks do
         if bookmark.Repository.IsCloned then
-            let revision = Plumbing.Vcs.Log wsDir bookmark.Repository bookmark.Version
+            let revision = Tools.Vcs.Log wsDir bookmark.Repository bookmark.Version
             body bookmark.Repository.Name revision
 
     footer ()

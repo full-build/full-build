@@ -20,7 +20,7 @@ open Graph
 let private cloneRepoAndInit wsDir shallow (repo : Repository) =
     async {
         IoHelpers.DisplayHighlight repo.Name
-        Plumbing.Vcs.Clone wsDir repo shallow
+        Tools.Vcs.Clone wsDir repo shallow
     }
 
 let List() =
