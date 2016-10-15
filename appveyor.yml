@@ -44,8 +44,8 @@ deploy:
     auth_token:
       secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     artifact: apps/full-build.zip
-    draft: true
-    prerelease: false
+    draft: false
+    prerelease: true
     on:
       appveyor_repo_tag: false
   
