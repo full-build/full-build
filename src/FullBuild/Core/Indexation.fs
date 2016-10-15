@@ -88,7 +88,7 @@ let rec private displayConflicts (conflicts : ConflictType list) =
 
 
 
-let private detectNewDependencies (projects : Parsers.MsBuild.ProjectDescriptor seq) =
+let private detectNewDependencies (projects : Parsers.MSBuild.ProjectDescriptor seq) =
     // add new packages (with correct version requirement)
     let foundPackages = projects |> Seq.map (fun x -> x.Packages)
                                  |> Seq.concat
@@ -140,7 +140,7 @@ let IndexWorkspace (grepos : Graph.Repository set) =
     let antho = Configuration.LoadAnthology()
     let repos = antho.Repositories |> Set.filter (fun x -> grepos |> Set.exists (fun y -> y.Name = x.Repository.Name.toString))
                                    |> Set.map (fun x -> x.Repository)
-    let parsedProjects = parseWorkspaceProjects Parsers.MsBuild.ParseProject wsDir repos
+    let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos
 
     let packagesToAdd = detectNewDependencies parsedProjects
     Tools.PaketInterface.AppendDependencies packagesToAdd
