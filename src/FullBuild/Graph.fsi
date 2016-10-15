@@ -133,16 +133,23 @@ and [<Sealed>] Graph =
     member Applications : Application set
     member Projects : Project set
     member TestRunner : TestRunnerType
-
     member ArtifactsDir : string
-
     member Baseline : Baseline
-    member CreateBaseline: incremental : bool
-                        -> Baseline
-
     member DefaultView : View option
     member Views : View set
     member NuGets : string list
+
+    member CreateBaseline: incremental : bool
+                        -> Baseline
+
+    member CreateView: name : string
+                    -> filters : string set
+                    -> parameters: string set
+                    -> dependencies : bool
+                    -> referencedBy : bool
+                    -> modified : bool
+                    -> builder : BuilderType
+                    -> View
 
     member CreateApp: name : string
                    -> publisher : PublisherType
@@ -158,14 +165,6 @@ and [<Sealed>] Graph =
                     -> branch : string option
                     -> Graph
 
-    member CreateView: name : string
-                    -> filters : string set
-                    -> parameters: string set
-                    -> dependencies : bool
-                    -> referencedBy : bool
-                    -> modified : bool
-                    -> builder : BuilderType
-                    -> View
     member Save: unit
               -> unit
 
