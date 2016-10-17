@@ -41,26 +41,54 @@ let runFB (args : string) =
     finally
         System.Environment.CurrentDirectory <- currFolder
 
+#if !MONO
 [<Test>]
-let CheckSourceBuildIsSameAsBinaryBuild () = 
-    let expectedFiles = [ "libproject.dll"
-                          "libproject.pdb"
-                          "mainproject.exe"
-                          "mainproject.exe.config"
-                          "mainproject.pdb"
-                          "Mono.Cecil.dll"
-                          "Mono.Cecil.Mdb.dll"
-                          "Mono.Cecil.Pdb.dll"
-                          "Mono.Cecil.Rocks.dll" ] |> set
-
+let CheckSourceBuildIsSameAsBinaryBuildOnWindows () = 
+    let expectedFilesDotNet = [ "libproject.dll"
+                                "libproject.pdb"
+                                "mainproject.exe"
+                                "mainproject.exe.config"
+                                "mainproject.pdb"
+                                "Mono.Cecil.dll"
+                                "Mono.Cecil.Mdb.dll"
+                                "Mono.Cecil.Pdb.dll"
+                                "Mono.Cecil.Rocks.dll" ] |> set
+                            
     runFB "view testsrc tests/*"
     runFB "rebuild testsrc"    
 
     let outputDir = TestContext.CurrentContext.TestDirectory + "/../../../tests/MainProject/bin" |> DirectoryInfo
     let outputFileSrc = outputDir.EnumerateFiles () |> Seq.map (fun x -> x.Name) |> set
-    outputFileSrc |> should equal expectedFiles
+    outputFileSrc |> should equal expectedFilesDotNet
 
     runFB "view testbin tests/mainproject"
     runFB "rebuild testbin"
     let outputFileBin = outputDir.EnumerateFiles () |> Seq.map (fun x -> x.Name) |> set
-    outputFileBin |> should equal expectedFiles
+    outputFileBin |> should equal expectedFilesDotNet
+#endif
+
+#if MONO
+[<Test>]
+let CheckSourceBuildIsSameAsBinaryBuildOnMono () = 
+    let expectedFilesMono = [ "libproject.dll"
+                              "libproject.dll.mdb"
+                              "mainproject.exe"
+                              "mainproject.exe.config"
+                              "mainproject.exe.mdb"
+                              "Mono.Cecil.dll"
+                              "Mono.Cecil.Mdb.dll"
+                              "Mono.Cecil.Pdb.dll"
+                              "Mono.Cecil.Rocks.dll" ] |> set
+                            
+    runFB "view testsrc tests/*"
+    runFB "rebuild testsrc"    
+
+    let outputDir = TestContext.CurrentContext.TestDirectory + "/../../../tests/MainProject/bin" |> DirectoryInfo
+    let outputFileSrc = outputDir.EnumerateFiles () |> Seq.map (fun x -> x.Name) |> set
+    outputFileSrc |> should equal expectedFilesMono
+
+    runFB "view testbin tests/mainproject"
+    runFB "rebuild testbin"
+    let outputFileBin = outputDir.EnumerateFiles () |> Seq.map (fun x -> x.Name) |> set
+    outputFileBin |> should equal expectedFilesMono
+#endif
