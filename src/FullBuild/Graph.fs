@@ -18,6 +18,13 @@ open Collections
 
 #nowarn "0346" // GetHashCode missing
 
+
+let compareTo<'T, 'U> (this : 'T) (other : System.Object) (field : 'T -> 'U) =
+    match other with
+    | :? 'T as x -> System.Collections.Generic.Comparer<'U>.Default.Compare(field this, field x)
+    | _ -> failwith "Can't compare values with different types"
+
+
 [<RequireQualifiedAccess>] 
 type PackageVersion =
     | PackageVersion of string
@@ -61,10 +68,7 @@ type Package =
         System.Object.ReferenceEquals(this, other)
 
     interface System.IComparable with
-        member this.CompareTo(other) =
-            match other with
-            | :? Package as x -> System.Collections.Generic.Comparer<Anthology.PackageId>.Default.Compare(this.Package, x.Package)
-            | _ -> failwith "Can't compare values with different types"
+        member this.CompareTo(other) = compareTo this other (fun x -> x.Package)
 
     member this.Name = this.Package.toString
 
@@ -77,10 +81,7 @@ and [<CustomEquality; CustomComparison>] Assembly =
         System.Object.ReferenceEquals(this, other)
 
     interface System.IComparable with
-        member this.CompareTo(other) =
-            match other with
-            | :? Assembly as x -> System.Collections.Generic.Comparer<Anthology.AssemblyId>.Default.Compare(this.Assembly, x.Assembly)
-            | _ -> failwith "Can't compare values with different types"
+        member this.CompareTo(other) = compareTo this other (fun x -> x.Assembly)
 
     member this.Name = this.Assembly.toString
 
@@ -94,10 +95,7 @@ and [<CustomEquality; CustomComparison>] Application =
         System.Object.ReferenceEquals(this, other)
 
     interface System.IComparable with
-        member this.CompareTo(other) =
-            match other with
-            | :? Application as x -> System.Collections.Generic.Comparer<Anthology.ApplicationId>.Default.Compare(this.Application.Name, x.Application.Name)
-            | _ -> failwith "Can't compare values with different types"
+        member this.CompareTo(other) = compareTo this other (fun x -> x.Application.Name)
 
     member this.Name = this.Application.Name.toString
 
@@ -124,10 +122,7 @@ and [<CustomEquality; CustomComparison>] Repository =
         System.Object.ReferenceEquals(this, other)
 
     interface System.IComparable with
-        member this.CompareTo(other) =
-            match other with
-            | :? Repository as x -> System.Collections.Generic.Comparer<Anthology.RepositoryId>.Default.Compare(this.Repository.Name, x.Repository.Name)
-            | _ -> failwith "Can't compare values with different types"
+        member this.CompareTo(other) = compareTo this other (fun x -> x.Repository.Name)
 
     member this.Name : string = this.Repository.Name.toString
 
@@ -178,10 +173,7 @@ and [<CustomEquality; CustomComparison>] Project =
         System.Object.ReferenceEquals(this, other)
 
     interface System.IComparable with
-        member this.CompareTo(other) =
-            match other with
-            | :? Project as x -> System.Collections.Generic.Comparer<Anthology.ProjectId>.Default.Compare(this.Project.ProjectId, x.Project.ProjectId)
-            | _ -> failwith "Can't compare values with different types"
+        member this.CompareTo(other) = compareTo this other (fun x -> x.Project.ProjectId)
 
     member this.Repository =
         this.Graph.RepositoryMap.[this.Project.Repository]
@@ -278,10 +270,7 @@ with
         System.Object.ReferenceEquals(this, other)
 
     interface System.IComparable with
-        member this.CompareTo(other) =
-            match other with
-            | :? Bookmark as x -> System.Collections.Generic.Comparer<Anthology.RepositoryId>.Default.Compare(this.Bookmark.Repository, x.Bookmark.Repository)
-            | _ -> failwith "Can't compare values with different types"
+        member this.CompareTo(other) = compareTo this other (fun x -> x.Bookmark.Repository)
 
     member this.Repository =
         this.Graph.RepositoryMap.[this.Bookmark.Repository]
@@ -297,10 +286,7 @@ with
         System.Object.ReferenceEquals(this, other)
 
     interface System.IComparable with
-        member this.CompareTo(other) =
-            match other with
-            | :? Baseline as x -> System.Collections.Generic.Comparer<Anthology.Baseline>.Default.Compare(this.Baseline, x.Baseline)
-            | _ -> failwith "Can't compare values with different types"
+        member this.CompareTo(other) = compareTo this other (fun x -> x.Baseline)
 
     member this.IsIncremental = false
     
@@ -332,10 +318,7 @@ with
         System.Object.ReferenceEquals(this, other)
 
     interface System.IComparable with
-        member this.CompareTo(other) =
-            match other with
-            | :? View as x -> System.Collections.Generic.Comparer<Anthology.View>.Default.Compare(this.View, x.View)
-            | _ -> failwith "Can't compare values with different types"
+        member this.CompareTo(other) = compareTo this other (fun x -> x.View)
 
     member this.Name = this.View.Name
     member this.Filters = this.View.Filters
