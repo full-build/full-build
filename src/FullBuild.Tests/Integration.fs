@@ -54,13 +54,13 @@ let CheckSourceBuildIsSameAsBinaryBuild () =
                           "Mono.Cecil.Rocks.dll" ] |> set
 
     runFB "view testsrc tests/*"
-    runFB "rebuild --mt testsrc"    
+    runFB "rebuild testsrc"    
 
     let outputDir = TestContext.CurrentContext.TestDirectory + "/../../../tests/MainProject/bin" |> DirectoryInfo
     let outputFileSrc = outputDir.EnumerateFiles () |> Seq.map (fun x -> x.Name) |> set
     outputFileSrc |> should equal expectedFiles
 
     runFB "view testbin tests/mainproject"
-    runFB "rebuild --mt testbin"
+    runFB "rebuild testbin"
     let outputFileBin = outputDir.EnumerateFiles () |> Seq.map (fun x -> x.Name) |> set
     outputFileBin |> should equal expectedFiles
