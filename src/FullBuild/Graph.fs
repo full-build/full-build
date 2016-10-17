@@ -24,6 +24,9 @@ let compareTo<'T, 'U> (this : 'T) (other : System.Object) (fieldOf : 'T -> 'U) =
     | :? 'T as x -> System.Collections.Generic.Comparer<'U>.Default.Compare(fieldOf this, fieldOf x)
     | _ -> failwith "Can't compare values with different types"
 
+let refEquals (this : System.Object) (other : System.Object) =
+    System.Object.ReferenceEquals(this, other)
+
 
 [<RequireQualifiedAccess>] 
 type PackageVersion =
@@ -63,9 +66,8 @@ type TestRunnerType =
 type Package =
     { Graph : Graph
       Package : Anthology.PackageId }
-
-    override this.Equals(other : System.Object) =
-        System.Object.ReferenceEquals(this, other)
+with
+    override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
         member this.CompareTo(other) = compareTo this other (fun x -> x.Package)
@@ -77,8 +79,8 @@ type Package =
 and [<CustomEquality; CustomComparison>] Assembly = 
     { Graph : Graph
       Assembly : Anthology.AssemblyId }
-    override this.Equals(other : System.Object) =
-        System.Object.ReferenceEquals(this, other)
+with
+    override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
         member this.CompareTo(other) = compareTo this other (fun x -> x.Assembly)
@@ -90,9 +92,8 @@ and [<CustomEquality; CustomComparison>] Assembly =
 and [<CustomEquality; CustomComparison>] Application =
     { Graph : Graph
       Application : Anthology.Application } 
-
-    override this.Equals(other : System.Object) =
-        System.Object.ReferenceEquals(this, other)
+with
+    override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
         member this.CompareTo(other) = compareTo this other (fun x -> x.Application.Name)
@@ -117,9 +118,8 @@ and [<CustomEquality; CustomComparison>] Application =
 and [<CustomEquality; CustomComparison>] Repository =
     { Graph : Graph
       Repository : Anthology.Repository }
-
-    override this.Equals(other : System.Object) =
-        System.Object.ReferenceEquals(this, other)
+with
+    override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
         member this.CompareTo(other) = compareTo this other (fun x -> x.Repository.Name)
@@ -168,9 +168,8 @@ and [<CustomEquality; CustomComparison>] Repository =
 and [<CustomEquality; CustomComparison>] Project =
     { Graph : Graph
       Project : Anthology.Project }
-
-    override this.Equals(other : System.Object) =
-        System.Object.ReferenceEquals(this, other)
+with
+    override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
         member this.CompareTo(other) = compareTo this other (fun x -> x.Project.ProjectId)
@@ -266,8 +265,7 @@ and [<CustomEquality; CustomComparison>] Bookmark =
     { Graph : Graph
       Bookmark : Anthology.Bookmark }
 with
-    override this.Equals(other : System.Object) =
-        System.Object.ReferenceEquals(this, other)
+    override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
         member this.CompareTo(other) = compareTo this other (fun x -> x.Bookmark.Repository)
@@ -282,8 +280,7 @@ and [<CustomEquality; CustomComparison>] Baseline =
     { Graph : Graph 
       Baseline : Anthology.Baseline }
 with
-    override this.Equals(other : System.Object) =
-        System.Object.ReferenceEquals(this, other)
+    override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
         member this.CompareTo(other) = compareTo this other (fun x -> x.Baseline)
@@ -314,8 +311,7 @@ and [<CustomEquality; CustomComparison>] View =
     { Graph : Graph
       View : Anthology.View }
 with
-    override this.Equals(other : System.Object) =
-        System.Object.ReferenceEquals(this, other)
+    override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
         member this.CompareTo(other) = compareTo this other (fun x -> x.View)
