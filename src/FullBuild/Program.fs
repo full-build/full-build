@@ -80,7 +80,8 @@ let tryMain argv =
     | Command.Error errInfo -> CLI.CommandLine.PrintUsage errInfo
 
     stopWatch.Stop()
-    printfn "Completed in %d seconds." ((int)stopWatch.Elapsed.TotalSeconds)
+    let elapsed = stopWatch.Elapsed
+    printfn "Completed in %d seconds." ((int)elapsed.TotalSeconds)
 
     let retCode = match cmd with
                   | Command.Error _ -> 5

@@ -16,6 +16,7 @@ module Graph
 open Collections
 
 
+#nowarn "0346" // GetHashCode missing
 
 [<RequireQualifiedAccess>] 
 type PackageVersion =
@@ -54,13 +55,10 @@ type TestRunnerType =
 [<CustomEquality; CustomComparison>]
 type Package =
     { Graph : Graph
-      Package :Anthology.PackageId }
+      Package : Anthology.PackageId }
 
     override this.Equals(other : System.Object) =
         System.Object.ReferenceEquals(this, other)
-
-    override this.GetHashCode() : int =
-        this.Package.GetHashCode()
 
     interface System.IComparable with
         member this.CompareTo(other) =
@@ -78,9 +76,6 @@ and [<CustomEquality; CustomComparison>] Assembly =
     override this.Equals(other : System.Object) =
         System.Object.ReferenceEquals(this, other)
 
-    override this.GetHashCode() : int =
-        this.Assembly.GetHashCode()
-
     interface System.IComparable with
         member this.CompareTo(other) =
             match other with
@@ -97,9 +92,6 @@ and [<CustomEquality; CustomComparison>] Application =
 
     override this.Equals(other : System.Object) =
         System.Object.ReferenceEquals(this, other)
-
-    override this.GetHashCode() : int =
-        this.Application.GetHashCode()
 
     interface System.IComparable with
         member this.CompareTo(other) =
@@ -130,9 +122,6 @@ and [<CustomEquality; CustomComparison>] Repository =
 
     override this.Equals(other : System.Object) =
         System.Object.ReferenceEquals(this, other)
-
-    override this.GetHashCode() : int =
-        this.Repository.GetHashCode()
 
     interface System.IComparable with
         member this.CompareTo(other) =
@@ -187,9 +176,6 @@ and [<CustomEquality; CustomComparison>] Project =
 
     override this.Equals(other : System.Object) =
         System.Object.ReferenceEquals(this, other)
-
-    override this.GetHashCode() : int =
-        this.Project.GetHashCode()
 
     interface System.IComparable with
         member this.CompareTo(other) =
@@ -291,9 +277,6 @@ with
     override this.Equals(other : System.Object) =
         System.Object.ReferenceEquals(this, other)
 
-    override this.GetHashCode() : int =
-        this.Bookmark.GetHashCode()
-
     interface System.IComparable with
         member this.CompareTo(other) =
             match other with
@@ -312,9 +295,6 @@ and [<CustomEquality; CustomComparison>] Baseline =
 with
     override this.Equals(other : System.Object) =
         System.Object.ReferenceEquals(this, other)
-
-    override this.GetHashCode() : int =
-        this.Baseline.GetHashCode()
 
     interface System.IComparable with
         member this.CompareTo(other) =
@@ -350,9 +330,6 @@ and [<CustomEquality; CustomComparison>] View =
 with
     override this.Equals(other : System.Object) =
         System.Object.ReferenceEquals(this, other)
-
-    override this.GetHashCode() : int =
-        this.View.GetHashCode()
 
     interface System.IComparable with
         member this.CompareTo(other) =
