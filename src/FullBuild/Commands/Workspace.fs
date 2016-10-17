@@ -234,8 +234,9 @@ let UpdateGuid (updInfo : CLI.Commands.UpdateGuids) =
         for project in projects do
             let prjFile = wsDir |> GetFile project.ProjectFile
             let xdoc = XDocument.Load(prjFile.FullName)
-            let guid = xdoc.Descendants(NsMsBuild + "ProjectGuid").Single()
-            guid.Value <- Guid.NewGuid().ToString("B")
+            let xguid = xdoc.Descendants(NsMsBuild + "ProjectGuid").Single()
+            let newGuid = Guid.NewGuid()
+            xguid.Value <- newGuid.ToString("B")
             xdoc.Save(prjFile.FullName)
 
 let History (historyInfo : CLI.Commands.History) =

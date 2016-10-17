@@ -50,7 +50,8 @@ let GenerateSolutionContent (projects : Project set) =
             yield "\tEndProjectSection"
             yield "EndProject"
 
-        let repositories = projects |> Set.map (fun x -> (x.Repository, (GenerateGuidFromString (x.Repository.Name)).ToString("D")))
+        let repositories = projects |> Set.map (fun x -> let guid = GenerateGuidFromString (x.Repository.Name)
+                                                         (x.Repository, guid.ToString("D")))
                                     |> Map
         for repository in repositories do
             let repo = repository.Key.Name
