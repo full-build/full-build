@@ -19,9 +19,9 @@ open Collections
 #nowarn "0346" // GetHashCode missing
 
 
-let compareTo<'T, 'U> (this : 'T) (other : System.Object) (field : 'T -> 'U) =
+let compareTo<'T, 'U> (this : 'T) (other : System.Object) (fieldOf : 'T -> 'U) =
     match other with
-    | :? 'T as x -> System.Collections.Generic.Comparer<'U>.Default.Compare(field this, field x)
+    | :? 'T as x -> System.Collections.Generic.Comparer<'U>.Default.Compare(fieldOf this, fieldOf x)
     | _ -> failwith "Can't compare values with different types"
 
 
