@@ -14,28 +14,31 @@
 
 module Core.Conversion
 open Collections
+open Graph
 
 
-let private convertMsBuild (repos : Graph.Repository set) =
-    let antho = Configuration.LoadAnthology ()
-    let projects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
+let private convertMsBuild (repos : Repository set) =
+    let projects = repos |> Set.map (fun x -> x.Projects)
+                         |> Set.unionMany
     Generators.MSBuild.GenerateProjects projects IoHelpers.XDocSaver
     Generators.MSBuild.ConvertProjects projects IoHelpers.XDocLoader IoHelpers.XDocSaver
     Generators.MSBuild.RemoveUselessStuff projects
 
-let Convert builder (repos : Graph.Repository set) =
+let Convert builder (repos : Repository set) =
     match builder with
     | Graph.BuilderType.MSBuild -> convertMsBuild repos
     | Graph.BuilderType.Skip -> ()
 
 let GenerateProjectArtifacts () =
-    let antho = Configuration.LoadAnthology ()
-    let repos = antho.Repositories
+    let graph = Configuration.LoadAnthology () |> Graph.from
+    let repos = graph.Repositories
 
     let builder2repos = repos |> Seq.groupBy (fun x -> x.Builder)
 
-    for builder2repo in builder2repos do
-        let (builder, brepos) = builder2repo
-        let repos = brepos |> Seq.map (fun x -> x.Repository.Name) |> Set.ofSeq
-        let projects = antho.Projects |> Set.filter (fun x -> repos |> Set.contains x.Repository)
-        Generators.MSBuild.GenerateProjects projects IoHelpers.XDocSaver
+    for (builder, repos) in builder2repos do
+        let projects = repos |> Seq.map (fun x -> x.Projects)
+                             |> Set.unionMany
+
+        match builder with
+        | BuilderType.MSBuild -> Generators.MSBuild.GenerateProjects projects IoHelpers.XDocSaver
+        | BuilderType.Skip -> ()
