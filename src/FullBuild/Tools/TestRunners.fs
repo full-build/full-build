@@ -13,7 +13,6 @@
 //   limitations under the License.
 
 module Tools.TestRunners
-//open Anthology
 open Env
 open Collections
 open Graph
