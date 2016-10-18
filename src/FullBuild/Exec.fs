@@ -17,6 +17,10 @@ module Exec
 open System.Diagnostics
 open System.IO
 
+type ExecResult =
+    | Success
+    | Failure of int
+
 let defaultPSI (command : string) (args : string) (dir : DirectoryInfo) (redirectStdout : bool) =
     let psi = ProcessStartInfo (FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir.FullName, LoadUserProfile = true, RedirectStandardOutput = redirectStdout)
     psi
@@ -35,7 +39,12 @@ let ExecWithVars checkErrorCode (command : string) (args : string) (dir : Direct
 let Exec checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) =
     ExecWithVars checkErrorCode command args dir Map.empty
 
-let ExecWithVarsGetOutput checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
+let ExecWithVarsGetOutput (vars : Map<string, string>) (command : string) (args : string) (dir : DirectoryInfo) =
+    let toStatus exitCode =
+        match exitCode with
+        | 0 -> Success
+        | x -> Failure x
+
     let psi = defaultPSI command args dir true
 
     for var in vars do
@@ -44,11 +53,9 @@ let ExecWithVarsGetOutput checkErrorCode (command : string) (args : string) (dir
     use proc = Process.Start (psi)
     if proc = null then failwith "Failed to start process"
     proc.WaitForExit()
-    checkErrorCode proc.ExitCode
-    proc.StandardOutput.ReadToEnd()
+    proc.ExitCode |> toStatus, proc.StandardOutput.ReadToEnd()
 
-let ExecGetOutput checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) =
-    ExecWithVarsGetOutput checkErrorCode command args dir Map.empty
+let ExecGetOutput = ExecWithVarsGetOutput Map.empty
 
 let SpawnWithVerb (command : string) (verb : string) =
     let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Verb = verb)

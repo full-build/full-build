@@ -20,14 +20,12 @@ open Graph
 let private checkErrorCode err =
     if err <> 0 then failwithf "Process failed with error %d" err
 
+
 let private checkIgnore err =
     ()
 
 let private checkedExec =
     Exec.Exec checkErrorCode
-
-let private checkedExecGetOutput =
-    Exec.ExecGetOutput checkErrorCode
 
 let private checkedExecReadLine =
     Exec.ExecReadLine checkErrorCode
@@ -47,7 +45,7 @@ let GitPush (repoDir : DirectoryInfo) =
 let GitPull (repoDir : DirectoryInfo) (rebase : bool) =
     let dorebase = if rebase then "--rebase" else "--ff-only"
     let args = sprintf "pull %s" dorebase
-    checkedExecGetOutput "git" args  repoDir
+    Exec.ExecGetOutput "git" args repoDir
 
 let GitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=%H"
