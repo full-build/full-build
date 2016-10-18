@@ -4,4 +4,3 @@ nuget FSharp.Configuration
 nuget FSharp.Core
 nuget Mono.Cecil
 nuget FSharp.Data
-nuget NUnit
