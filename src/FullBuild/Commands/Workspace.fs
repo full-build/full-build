@@ -269,6 +269,8 @@ let Index (indexInfo : CLI.Commands.IndexRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) indexInfo.Filters
+    if selectedRepos = Set.empty then printfn "WARNING: empty repository selection"
+
     selectedRepos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Name)
     selectedRepos |> Core.Indexation.IndexWorkspace
                   |> Core.Indexation.Optimize
@@ -279,6 +281,8 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) convertInfo.Filters
+    if selectedRepos = Set.empty then printfn "WARNING: empty repository selection"
+
     selectedRepos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Name)
 
     let builder2repos = repos |> Seq.groupBy (fun x -> x.Builder)
