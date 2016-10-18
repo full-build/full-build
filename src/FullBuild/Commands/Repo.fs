@@ -37,6 +37,7 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let fakeView = graph.CreateView "clone" cmd.Filters Set.empty cmd.All false false Graph.BuilderType.MSBuild
     let selectedRepos = fakeView.Projects |> Set.map (fun x -> x.Repository)
+                                          |> Set.filter (fun x -> not x.IsCloned)
 
     let maxThrottle = cmd.Multithread ? (System.Environment.ProcessorCount*2, 1)
     selectedRepos |> Seq.map (cloneRepoAndInit wsDir cmd.Shallow)
