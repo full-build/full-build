@@ -93,7 +93,8 @@ let private generateProjectCopyTarget (project : Project) =
                 | OutputType.Exe -> "exe"
     let binFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
     let pdbFile = sprintf "%s/%s.pdb" MSBUILD_BIN_FOLDER output
-    let incFile = sprintf "%s;%s" binFile pdbFile
+    let mdbFile = sprintf "%s/%s.%s.mdb" MSBUILD_BIN_FOLDER output ext
+    let incFile = sprintf "%s;%s;%s" binFile pdbFile mdbFile
 
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
