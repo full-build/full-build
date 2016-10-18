@@ -329,9 +329,10 @@ with
     member this.Projects : Project set =
         let filters = this.View.Filters |> Set.map (fun x -> if x.IndexOfAny([|'/'; '\\' |]) = -1 then x + "/*" else x)
                                         |> Set.map (fun x -> x.Replace('\\', '/'))
-        let projects = PatternMatching.FilterMatch<Project> this.Graph.Projects 
-                                                            (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) 
-                                                            filters
+        let projects = PatternMatching.FilterMatch<Project> 
+                            this.Graph.Projects 
+                            (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) 
+                            filters
 
         let modProjects = if this.Modified then Baseline.ComputeBaselineDifferences this.Graph.Baseline (this.Graph.CreateBaseline false)
                           else Set.empty
@@ -341,7 +342,7 @@ with
         let refProjects = if this.ReferencedBy then Project.ComputeTransitiveReferencedBy viewProjects
                           else Set.empty
         let projects = viewProjects + depProjects + refProjects + modProjects
-        projects
+        projects |> Set.filter (fun x -> x.Repository.IsCloned)
 
     member this.Save (isDefault : bool option) = 
         let viewId = Anthology.ViewId this.View.Name
