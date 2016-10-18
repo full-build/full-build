@@ -20,24 +20,24 @@ open System.Linq
 open IoHelpers
 open MsBuildHelpers
 open Env
-open Anthology
 open Collections
+open Graph
 
 
-let private generatePackageCopy (packageRef : PackageId) =
-    let propName = PackagePropertyName packageRef
+let private generatePackageCopy (packageRef : Package) =
+    let propName = MsBuildPackagePropertyName packageRef
     let condition = sprintf "'$(%sCopy)' == ''" propName
-    let project = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/package-copy.targets" packageRef.toString
+    let project = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/package-copy.targets" packageRef.Name
     let import = XElement(NsMsBuild + "Import",
                        XAttribute(NsNone + "Project", project),
                        XAttribute(NsNone + "Condition", condition))
     import
 
 
-let private generateProjectCopy (projectRef : ProjectId) =
-    let propName = ProjectPropertyName projectRef
+let private generateProjectCopy (projectRef : Project) =
+    let propName = MsBuildProjectPropertyName projectRef
     let condition = sprintf "'$(%sCopy)' == ''" propName
-    let project = sprintf "$(FBWorkspaceDir)/.full-build/projects/%s-copy.targets" projectRef.toString
+    let project = sprintf "$(FBWorkspaceDir)/.full-build/projects/%s-copy.targets" projectRef.Output.Name
     let import = XElement(NsMsBuild + "Import",
                        XAttribute(NsNone + "Project", project),
                        XAttribute(NsNone + "Condition", condition))
@@ -45,17 +45,17 @@ let private generateProjectCopy (projectRef : ProjectId) =
 
 
 let private generateProjectTarget (project : Project) =
-    let projectProperty = ProjectPropertyName project.ProjectId
+    let projectProperty = MsBuildProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let cpyCondition = sprintf "'$(%sCopy)' == ''" projectProperty
-    let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.toString) project.RelativeProjectFile.toString
-    let output = (project.Output.toString)
+    let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.Name) project.ProjectFile
+    let output = (project.Output.Name)
     let ext = match project.OutputType with
               | OutputType.Dll -> "dll"
               | OutputType.Exe -> "exe"
     let binFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
-    let refFile = sprintf "%s/.full-build/projects/%s-copy.targets" MSBUILD_SOLUTION_DIR project.ProjectId.toString
+    let refFile = sprintf "%s/.full-build/projects/%s-copy.targets" MSBUILD_SOLUTION_DIR project.Output.Name
 
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -69,8 +69,8 @@ let private generateProjectTarget (project : Project) =
                 XElement(NsMsBuild + "ProjectReference",
                     XAttribute (NsNone + "Include", projectFile),
                     XAttribute (NsNone + "Condition", srcCondition),
-                    XElement (NsMsBuild + "Project", sprintf "{%s}" project.UniqueProjectId.toString),
-                    XElement (NsMsBuild + "Name", project.Output.toString)),
+                    XElement (NsMsBuild + "Project", sprintf "{%s}" project.UniqueProjectId),
+                    XElement (NsMsBuild + "Name", project.Output.Name)),
                 XElement (NsMsBuild + "Reference",
                     XAttribute (NsNone + "Include", binFile),
                     XAttribute (NsNone + "Condition", binCondition),
@@ -80,14 +80,14 @@ let private generateProjectTarget (project : Project) =
                     XAttribute(NsNone + "Condition", cpyCondition))))
 
 let private generateProjectCopyTarget (project : Project) =
-    let projectProperty = ProjectPropertyName project.ProjectId
+    let projectProperty = MsBuildProjectPropertyName project
     let projectCopyProperty = projectProperty + "Copy"
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let copyCondition = sprintf "'$(%s)' == ''" projectCopyProperty
-    let prjFiles = project.ProjectReferences |> Seq.map generateProjectCopy
+    let prjFiles = project.References |> Seq.map generateProjectCopy
     let pkgFiles = project.PackageReferences |> Seq.map generatePackageCopy
 
-    let output = (project.Output.toString)
+    let output = (project.Output.Name)
     let ext = match project.OutputType with
                 | OutputType.Dll -> "dll"
                 | OutputType.Exe -> "exe"
@@ -150,12 +150,12 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
     let filterPaket (xel : XElement) =
         xel.Descendants(NsMsBuild + "Paket").Any ()
 
-    let filterAssemblies (assFiles) (xel : XElement) =
+    let filterAssemblies (assFiles : Assembly set) (xel : XElement) =
         let inc = !> xel.Attribute(XNamespace.None + "Include") : string
         let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
-        let assRef = AssemblyId.from (System.Reflection.AssemblyName(assName))
-        let res = Set.contains assRef assFiles
-        not res
+        let assRef = Anthology.AssemblyId.from (System.Reflection.AssemblyName(assName))
+        let exists = assFiles |> Set.exists (fun x -> x.Name = assRef.toString)
+        not exists
 
     let hasNoChild (xel : XElement) =
         not <| xel.DescendantNodes().Any()
@@ -208,7 +208,7 @@ let private convertProject (xproj : XDocument) (project : Project) =
         xel.Value <- BIN_FOLDER
 
     let setDocumentation (xel : XElement) =
-        let fileName = sprintf "%s/%s.xml" BIN_FOLDER project.ProjectId.toString
+        let fileName = sprintf "%s/%s.xml" BIN_FOLDER project.Output.Name
         xel.Value <- fileName
 
     let filterAssemblyInfo (xel : XElement) =
@@ -225,8 +225,8 @@ let private convertProject (xproj : XDocument) (project : Project) =
 
     let patchAssemblyInfo (xel : XElement) =
         let fileName = !> xel.Attribute(XNamespace.None + "Include") : string
-        let repoDir = Env.GetFolder Folder.Workspace |> GetSubDirectory project.Repository.toString
-        let prjFile = repoDir |> GetFile project.RelativeProjectFile.toString
+        let repoDir = Env.GetFolder Folder.Workspace |> GetSubDirectory project.Repository.Name
+        let prjFile = repoDir |> GetFile project.ProjectFile
         let prjDir = Path.GetDirectoryName (prjFile.FullName) |> DirectoryInfo
         let infoFile = prjDir |> GetFile fileName
         let content = File.ReadAllLines (infoFile.FullName) |> List.ofSeq
@@ -243,19 +243,24 @@ let private convertProject (xproj : XDocument) (project : Project) =
     // set OutputPath
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
     cproj.Descendants(NsMsBuild + "DocumentationFile") |> Seq.iter setDocumentation
-    cproj.Descendants(NsMsBuild + "AssemblyName") |> Seq.iter (fun x -> x.Value <- project.Output.toString)
+    cproj.Descendants(NsMsBuild + "AssemblyName") |> Seq.iter (fun x -> x.Value <- project.Output.Name)
     cproj.Descendants(NsMsBuild + "AutoGenerateBindingRedirects") |> Seq.iter (fun x -> x.Value <- "false")
 
     // TODO: both 3 fields are optional - must discard everything and reset everything if not null or empty
-    if project.FxVersion.toString <> null then
-        cproj.Descendants(NsMsBuild + "TargetFrameworkVersion") |> Seq.iter (fun x -> x.Value <- project.FxVersion.toString)
-    if project.FxProfile.toString <> null then
-        cproj.Descendants(NsMsBuild + "TargetFrameworkProfile") |> Seq.iter (fun x -> x.Value <- project.FxProfile.toString)
-    if project.FxIdentifier.toString <> null then
-        cproj.Descendants(NsMsBuild + "TargetFrameworkIdentifier") |> Seq.iter (fun x -> x.Value <- project.FxIdentifier.toString)
+    match project.FxVersion with
+    | Some fxVersion -> cproj.Descendants(NsMsBuild + "TargetFrameworkVersion") |> Seq.iter (fun x -> x.Value <- fxVersion)
+    | None -> ()
+
+    match project.FxProfile with
+    | Some fxProfile -> cproj.Descendants(NsMsBuild + "TargetFrameworkProfile") |> Seq.iter (fun x -> x.Value <- fxProfile)
+    | None -> ()
+
+    match project.FxIdentifier with
+    | Some fxIdentifier -> cproj.Descendants(NsMsBuild + "TargetFrameworkIdentifier") |> Seq.iter (fun x -> x.Value <- fxIdentifier)
+    | None -> ()
 
     // import fb target
-    let wbRelative = ComputeHops (sprintf "%s/%s" project.Repository.toString project.RelativeProjectFile.toString)
+    let wbRelative = ComputeHops (sprintf "%s/%s" project.Repository.Name project.ProjectFile)
     let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     let importFB = XElement (NsMsBuild + "Import",
                        XAttribute (NsNone + "Project",
@@ -263,17 +268,15 @@ let private convertProject (xproj : XDocument) (project : Project) =
     firstItemGroup.AddBeforeSelf (importFB)
 
     // add project references
-    for projectReference in project.ProjectReferences do
-        let prjRef = projectReference.toString
-        let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER prjRef
+    for projectReference in project.References do
+        let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER projectReference.Output.Name
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
         cproj.Root.LastNode.AddAfterSelf(import)
 
     // add nuget references
     for packageReference in project.PackageReferences do
-        let pkgId = packageReference.toString
-        let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER pkgId
+        let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER packageReference.Name
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
         cproj.Root.LastNode.AddAfterSelf(import)
@@ -283,12 +286,12 @@ let private convertProjectContent (xproj : XDocument) (project : Project) =
     let convxproj = convertProject xproj project
     convxproj
 
-let ConvertProjects projects xdocLoader xdocSaver =
+let ConvertProjects (projects : Project seq) xdocLoader xdocSaver =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     for project in projects do
-        let repoDir = wsDir |> GetSubDirectory (project.Repository.toString)
-        if repoDir.Exists then
-            let projFile = repoDir |> GetFile project.RelativeProjectFile.toString
+        if project.Repository.IsCloned then
+            let repoDir = wsDir |> IoHelpers.GetSubDirectory project.Repository.Name
+            let projFile = repoDir |> GetFile project.ProjectFile
             let maybexproj = xdocLoader projFile
             match maybexproj with
             | Some xproj -> let convxproj = convertProjectContent xproj project
@@ -299,11 +302,11 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
     let prjDir = Env.GetFolder Env.Folder.Project
     for project in projects do
         let refProjectContent = generateProjectTarget project
-        let projectFile = prjDir |> GetFile (AddExt Targets (project.Output.toString))
+        let projectFile = prjDir |> GetFile (AddExt Targets (project.Output.Name))
         xdocSaver projectFile refProjectContent
 
         let refProjectCopyContent = generateProjectCopyTarget project
-        let projectCopyFile = prjDir |> GetFile (AddExt Targets (project.Output.toString + "-copy"))
+        let projectCopyFile = prjDir |> GetFile (AddExt Targets (project.Output.Name + "-copy"))
         xdocSaver projectCopyFile refProjectCopyContent
 
 let RemoveUselessStuff (projects : Project set) =
@@ -323,15 +326,17 @@ let RemoveUselessStuff (projects : Project set) =
 
     let repos = projects |> Set.map (fun x -> x.Repository)
     for repo in repos do
-        let repoDir = wsDir |> GetSubDirectory (repo.toString)
-        if repoDir.Exists then
+        if repo.IsCloned then
+            let repoDir = wsDir |> GetSubDirectory repo.Name
             seekAndDestroyFiles |> Seq.iter (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)
                                                       |> Seq.iter (fun x -> x.Delete()))
             seekAndDestroyDirs |> Seq.iter (fun x -> repoDir.EnumerateDirectories (x, SearchOption.AllDirectories)
                                                      |> Seq.iter (fun x -> x.Delete(true)))
 
     for project in projects do
-        let prjDir = wsDir |> GetSubDirectory (project.relativeProjectFolderFromWorkspace)
+        let repoDir = wsDir |> GetSubDirectory project.Repository.Name
+        let prjFile = repoDir |> GetFile project.ProjectFile
+        let prjDir = prjFile.Directory
         if prjDir.Exists then
             let binDir = prjDir |> GetSubDirectory BIN_FOLDER
             let objDir = prjDir |> GetSubDirectory OBJ_FOLDER
