@@ -4,8 +4,6 @@ environment:
   GITHUB_TOKEN:
     secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
 
-skip_tags: true
-
 version: 3.0.{build}
 
 shallow_clone: true
