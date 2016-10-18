@@ -26,7 +26,7 @@ deploy:
     release: 'full-build v$(appveyor_build_version)'
     description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
     auth_token:
-      secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
+      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     artifact: apps/full-build.zip
     draft: false
     prerelease: false
@@ -39,7 +39,7 @@ deploy:
     description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message) Pre-release'
     tag: '$(appveyor_repo_tag_name)'
     auth_token:
-      secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
+      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     artifact: apps/full-build.zip
     draft: false
     prerelease: true
@@ -48,7 +48,7 @@ deploy:
 
   - provider: NuGet
     api_key:
-      secure: 497rsDkO6DO9dnd9LoozwZeWYxLWzq8avJ0yAIka+wBOnrYhw54yUQknWJ7XQm7S
+      secure: Fa/KRLSPeo1w78xW6Yb6FJv3amW/BRcLKpy7DW7e0/mdsiug7GBA36twg2HOUCSS
     skip_symbols: true
     symbol_server:
     artifacts: apps/full-build.nupkg
@@ -59,10 +59,10 @@ deploy:
 notifications:
   - provider: GitHubPullRequest
     auth_token:
-      secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
+      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     template: '{{#passed}}:white_check_mark:{{/passed}}{{#failed}}:x:{{/failed}} [Build {{&projectName}} {{buildVersion}} {{status}}]({{buildUrl}}) (commit {{commitUrl}} by @{{&commitAuthorUsername}})'
 
   - provider: Slack
     incoming_webhook:
-      secure: w7TtD+2R6TPM1sPDSgXpkPWBzKsuOdQ1VA89MVRrQz1hyDYxmKe4MXK9UuebkoZ76yiqqqPdjPa8KsS2Flj0Whh/BXYPiw2pH+C56dhq8TM=
+      secure: gA2eVzMFIFRHZpWx6bDTbKCKGFOWEe3zRukzC4PTWklKnLTsIzm/TLqa/oGgPSFiSR7DsBLKpp1Tkd4eIEy2QlzqAwFx4IknxGh4igmbB7k=
     channel: '#builds'
