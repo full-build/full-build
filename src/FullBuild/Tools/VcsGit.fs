@@ -26,6 +26,9 @@ let private checkIgnore err =
 let private checkedExec =
     Exec.Exec checkErrorCode
 
+let private checkedExecGetOutput =
+    Exec.ExecGetOutput checkErrorCode
+
 let private checkedExecReadLine =
     Exec.ExecReadLine checkErrorCode
 
@@ -44,7 +47,7 @@ let GitPush (repoDir : DirectoryInfo) =
 let GitPull (repoDir : DirectoryInfo) (rebase : bool) =
     let dorebase = if rebase then "--rebase" else "--ff-only"
     let args = sprintf "pull %s" dorebase
-    checkedExec "git" args  repoDir
+    checkedExecGetOutput "git" args  repoDir
 
 let GitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=%H"

@@ -155,7 +155,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     if pullInfo.Src then
         let mainRepo = graph.MasterRepository
         DisplayHighlight mainRepo.Name
-        Tools.Vcs.Pull wsDir mainRepo pullInfo.Rebase
+        Tools.Vcs.Pull wsDir mainRepo pullInfo.Rebase |> printf "%s"
 
         let clonedRepos = match pullInfo.View with
                           | None -> graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
@@ -163,11 +163,18 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
                                              let repos = view.Projects |> Seq.map (fun x -> x.Repository)
                                                                        |> Seq.filter (fun x -> x.IsCloned)
                                              repos
-
-        for repo in clonedRepos do
-            DisplayHighlight repo.Name
-            Tools.Vcs.Pull wsDir repo pullInfo.Rebase
-
+        
+        clonedRepos 
+            |> Seq.map(fun repo -> async {
+                return repo.Name, Tools.Vcs.Pull wsDir repo pullInfo.Rebase
+            })
+            |> Async.Parallel
+            |> Async.RunSynchronously
+            |> Seq.iter(fun (repoName, output) -> 
+                        DisplayHighlight repoName
+                        output |> printf "%s")
+            |> ignore
+            
         Install ()
 
     if pullInfo.Bin then
