@@ -32,6 +32,7 @@ let Add (cmd : CLI.Commands.AddView) =
                                 Graph.BuilderType.MSBuild
 
     let projects = view.Projects
+    if projects = Set.empty then printfn "WARNING: empty project selection"
 
     // save view information first
     view.Save None
@@ -96,6 +97,10 @@ let Alter (cmd : CLI.Commands.AlterView) =
                                    (cmd.Parents = Some true) ? (true, view.ReferencedBy)
                                    view.Modified
                                    view.Builder
+
+    let projects = depView.Projects
+    if projects = Set.empty then printfn "WARNING: empty project selection"
+
     depView.Save cmd.Default
 
 let Open (cmd : CLI.Commands.OpenView) =
