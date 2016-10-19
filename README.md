@@ -20,7 +20,7 @@ Check out [full-build.io](http://full-build.io)
 
 Platform|Status
 --------|------
-.net 4.5|[![build status](https://ci.appveyor.com/api/projects/status/github/full-build/full-build?branch=master)](https://ci.appveyor.com/project/pchalamet/full-build/branch/master)
+.net 4.5|[![build status](https://ci.appveyor.com/api/projects/status/github/full-build/full-build?branch=master)](https://ci.appveyor.com/project/full-build/full-build/branch/master)
 
 # how to build
 * On windows
@@ -48,6 +48,9 @@ Note that before using Visual Studio or Xamarin Studio, you have to compile firs
 # contribution
 Contributions are welcomed. Ensure you have read CONTRIBUTING.md and LICENSE.txt before sending PR.
 
+Contributors:
+  * Pierre Chalamet
+  * Sergii Salata
 
 # licence
    Copyright 2014-2016 Pierre Chalamet
