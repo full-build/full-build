@@ -96,6 +96,8 @@
     <Compile Include="Tools\Vcs.fs" />
     <Compile Include="Tools\Builders.fs" />
     <Compile Include="Tools\TestRunners.fs" />
+    <Compile Include="Tools\Bindings.fs" />
+    <Compile Include="Tools\Publishers.fs" />
     <Compile Include="CLI\Commands.fs" />
     <Compile Include="CLI\CommandLine.fs" />
     <Compile Include="Parsers\MSBuild.fs" />
@@ -111,8 +113,6 @@
     <Compile Include="Core\Conversion.fs" />
     <Compile Include="Core\Indexation.fs" />
     <Compile Include="Core\Package.fs" />
-    <Compile Include="Core\Bindings.fs" />
-    <Compile Include="Core\Publishers.fs" />
     <Compile Include="Commands\View.fs" />
     <Compile Include="Commands\Repo.fs" />
     <Compile Include="Commands\Workspace.fs" />
