@@ -14,6 +14,7 @@
 
 module Graph
 open Collections
+open XmlHelpers
 
 
 #nowarn "0346" // GetHashCode missing
@@ -73,6 +74,36 @@ with
         member this.CompareTo(other) = compareTo this other (fun x -> x.Package)
 
     member this.Name = this.Package.toString
+
+    static member GetPackageDependencies (xnuspec : System.Xml.Linq.XDocument) =
+        xnuspec.Descendants()
+            |> Seq.filter (fun x -> x.Name.LocalName = "dependency" && (!> x.Attribute(NsNone + "exclude") : string) <> "Compile")
+            |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
+            |> Seq.map Anthology.PackageId.from
+            |> set
+
+    static member GetFrameworkDependencies (xnuspec : System.Xml.Linq.XDocument) =
+        xnuspec.Descendants()
+            |> Seq.filter (fun x -> x.Name.LocalName = "frameworkAssembly")
+            |> Seq.map (fun x -> !> x.Attribute(NsNone + "assemblyName") : string)
+            |> Seq.map Anthology.AssemblyId.from
+            |> set
+
+
+    member this.Dependencies : Package set =
+        let pkgsDir = Env.GetFolder Env.Folder.Package
+        let pkgDir = pkgsDir |> IoHelpers.GetSubDirectory (this.Package.toString)
+        let nuspecFile = pkgDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.NuSpec (this.Package.toString))
+        let xnuspec = System.Xml.Linq.XDocument.Load (nuspecFile.FullName)
+        Package.GetPackageDependencies xnuspec |> Set.map (fun x -> { Graph = this.Graph
+                                                                      Package = x })
+        
+    member this.FxAssemblies : Assembly set =
+        let pkgsDir = Env.GetFolder Env.Folder.Package
+        let pkgDir = pkgsDir |> IoHelpers.GetSubDirectory (this.Package.toString)
+        let nuspecFile = pkgDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.NuSpec (this.Package.toString))
+        let xnuspec = System.Xml.Linq.XDocument.Load (nuspecFile.FullName)
+        Package.GetFrameworkDependencies xnuspec |> Set.map (fun x -> { Graph = this.Graph; Assembly = x})
 
 // =====================================================================================================
 
@@ -285,7 +316,7 @@ with
     interface System.IComparable with
         member this.CompareTo(other) = compareTo this other (fun x -> x.Baseline)
 
-    member this.IsIncremental = false
+    member this.IsIncremental = this.Baseline.Incremental
     
     member this.Bookmarks = 
         this.Baseline.Bookmarks |> Set.map (fun x -> { Graph = this.Graph; Bookmark = x})
@@ -360,6 +391,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
     let mutable applicationMap : System.Collections.Generic.IDictionary<Anthology.ApplicationId, Application> = null
     let mutable projectMap : System.Collections.Generic.IDictionary<Anthology.ProjectId, Project> = null
     let mutable viewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> = null
+    let mutable packageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> = null
 
     member this.Anthology : Anthology.Anthology = anthology
 
@@ -408,7 +440,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
                                                       |> Seq.map (fun x -> x.Name |> Anthology.ViewId, { Graph = this; View = x })
                                                       |> dict
         viewMap
-
+            
     member this.MinVersion = this.Anthology.MinVersion
 
     member this.MasterRepository = { Graph = this; Repository = this.Anthology.MasterRepository }
@@ -438,6 +470,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
         { Graph = this; Baseline = baseline }
 
     member this.CreateBaseline (incremental : bool) =
+        // TODO: this should create a baseline - not return the previous one
         this.Baseline
 
     member this.TestRunner =

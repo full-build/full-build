@@ -18,8 +18,8 @@ open Anthology
 open IoHelpers
 open System.Linq
 open System.Xml.Linq
-open MsBuildHelpers
 open Collections
+open XmlHelpers
 
 
 let GetFrameworkDependencies (xnuspec : XDocument) =
@@ -59,9 +59,4 @@ let ComputePackagesRoots (package2packages : Map<PackageId, PackageId set>) =
                                  |> Seq.map (fun x -> x.Key)
                                  |> Set
     roots
-
-let ComputeTransitivePackageDependencies (packages : PackageId set) =
-    let allPackages = BuildPackageDependencies packages
-    let ids = allPackages |> Seq.map (fun x -> x.Key) |> Set
-    ids
 

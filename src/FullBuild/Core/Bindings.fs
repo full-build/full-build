@@ -18,7 +18,7 @@ open Env
 open System.IO
 open System.Linq
 open System.Xml.Linq
-open MsBuildHelpers
+open XmlHelpers
 open Collections
 
 

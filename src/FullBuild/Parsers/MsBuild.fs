@@ -20,7 +20,7 @@ open System.Linq
 open System.Xml.Linq
 open Anthology
 open StringHelpers
-open MsBuildHelpers
+open XmlHelpers
 open Env
 open Collections
 open System.Text.RegularExpressions

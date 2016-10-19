@@ -18,7 +18,8 @@ open System.Xml.Linq
 open System
 open System.Linq
 open IoHelpers
-open MsBuildHelpers
+open XmlHelpers
+open MSBuildHelpers
 open Env
 open Collections
 open Graph

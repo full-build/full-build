@@ -15,7 +15,7 @@
 module Generators.Dgml
 open System.Xml.Linq
 open Collections
-open MsBuildHelpers
+open XmlHelpers
 open Graph
 
 let private generateProjectNode (project : Project) =

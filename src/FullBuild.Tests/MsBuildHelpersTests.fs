@@ -16,7 +16,8 @@ module MsBuildHelpersTests
 
 open FsUnit
 open NUnit.Framework
-open MsBuildHelpers
+open XmlHelpers
+open MSBuildHelpers
 open System.Xml.Linq
 open Anthology
 open StringHelpers
