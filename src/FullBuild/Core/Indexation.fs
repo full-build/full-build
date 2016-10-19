@@ -17,7 +17,8 @@ open System.IO
 open IoHelpers
 open System.Linq
 open System.Xml.Linq
-open MsBuildHelpers
+open XmlHelpers
+open MSBuildHelpers
 open Anthology
 open Collections
 

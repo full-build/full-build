@@ -18,7 +18,7 @@ open IoHelpers
 open System.IO
 open System.Xml.Linq
 open System.Linq
-open MsBuildHelpers
+open XmlHelpers
 open Env
 open Collections
 open Simplify

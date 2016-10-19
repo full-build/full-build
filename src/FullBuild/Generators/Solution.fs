@@ -16,10 +16,10 @@ module Generators.Solution
 open System.IO
 open System.Xml.Linq
 open StringHelpers
-open MsBuildHelpers
+open XmlHelpers
 open Graph
 open Collections
-
+open MSBuildHelpers
 
 let private projectToProjectType (filename : string) =
     let file = FileInfo(filename)

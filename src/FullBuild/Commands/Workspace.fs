@@ -17,7 +17,7 @@ module Commands.Workspace
 open System.IO
 open IoHelpers
 open Env
-open MsBuildHelpers
+open XmlHelpers
 open System.Linq
 open System.Xml.Linq
 open Collections

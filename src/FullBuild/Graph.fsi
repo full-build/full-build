@@ -52,14 +52,14 @@ type TestRunnerType =
 type Package  = interface System.IComparable
 with
     member Name : string
+    member Dependencies: Package set
+    member FxAssemblies: Assembly set
 
-[<Sealed>] 
-type Assembly = interface System.IComparable
+and [<Sealed>] Assembly = interface System.IComparable
 with
     member Name : string
 
-[<Sealed>]
-type Application = interface System.IComparable
+and [<Sealed>] Application = interface System.IComparable
 with
     member Name : string
     member Publisher : PublisherType
@@ -138,6 +138,7 @@ and [<Sealed>] Graph =
     member DefaultView : View option
     member Views : View set
     member NuGets : string list
+    member Packages: Package set
 
     member CreateBaseline: incremental : bool
                         -> Baseline

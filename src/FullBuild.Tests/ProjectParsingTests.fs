@@ -23,7 +23,7 @@ open NUnit.Framework
 open FsUnit
 open Anthology
 open StringHelpers
-open MsBuildHelpers
+open XmlHelpers
 open TestHelpers
 
 let XDocumentLoader (loadPackagesConfig : bool) (fi : FileInfo) : XDocument option =

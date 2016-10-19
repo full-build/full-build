@@ -12,23 +12,8 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module MsBuildHelpers
+module MSBuildHelpers
 open Graph
-open System.Xml.Linq
-
-#nowarn "0077" // op_Explicit
-
-
-let NsMsBuild = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003")
-
-let NsDgml = XNamespace.Get("http://schemas.microsoft.com/vs/2009/dgml")
-
-let NsRuntime = XNamespace.Get("urn:schemas-microsoft-com:asm.v1")
-
-let NsNone = XNamespace.None
-
-let inline (!>) (x : ^a) : ^b = (((^a or ^b) : (static member op_Explicit : ^a -> ^b) x))
-
 
 let replaceInvalidChars (s : string) =
     s.Replace('-', '_').Replace('.', '_').Replace("{", "").Replace("}", "")
