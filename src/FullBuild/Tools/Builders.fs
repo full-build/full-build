@@ -66,7 +66,7 @@ let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multith
     let viewName = Path.GetFileNameWithoutExtension(viewFile.Name)
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let argTarget = sprintf "/t:%s /p:SolutionDir=%A /p:SolutionName=%A" target wsDir.FullName viewName
-    let argMt = if multithread then "/m"
+    let argMt = if multithread && not <| Env.IsMono () then "/m"
                 else ""
 
     let argConfig = sprintf "/p:Configuration=%s" config
