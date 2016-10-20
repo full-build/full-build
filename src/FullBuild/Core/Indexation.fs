@@ -93,7 +93,7 @@ let private detectNewDependencies (projects : Parsers.MSBuild.ProjectDescriptor 
     // add new packages (with correct version requirement)
     let foundPackages = projects |> Seq.map (fun x -> x.Packages)
                                  |> Seq.concat
-    let existingPackages = Tools.PaketInterface.ParsePaketDependencies ()
+    let existingPackages = Tools.Paket.ParsePaketDependencies ()
     let packagesToAdd = foundPackages |> Seq.filter (fun x -> Set.contains x.Id existingPackages |> not)
                                       |> Seq.distinctBy (fun x -> x.Id)
                                       |> Set
@@ -144,7 +144,7 @@ let IndexWorkspace (grepos : Graph.Repository set) =
     let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos
 
     let packagesToAdd = detectNewDependencies parsedProjects
-    Tools.PaketInterface.AppendDependencies packagesToAdd
+    Tools.Paket.AppendDependencies packagesToAdd
 
     let projects = parsedProjects |> Seq.map (fun x -> x.Project)
                                   |> Set
@@ -166,11 +166,11 @@ let Optimize (newAntho : Anthology) =
     Configuration.SaveAnthology simplifiedAntho
 
     // remove unused packages  - this will avoid downloading them for nothing
-    let allPackages = Tools.PaketInterface.ParsePaketDependencies ()
+    let allPackages = Tools.Paket.ParsePaketDependencies ()
     let usedPackages = simplifiedAntho.Projects |> Set.map (fun x -> x.PackageReferences)
                                                 |> Set.unionMany
     let unusedPackages = Set.difference allPackages usedPackages
-    Tools.PaketInterface.RemoveDependencies unusedPackages
+    Tools.Paket.RemoveDependencies unusedPackages
     /// END HACK
 
     simplifiedAntho

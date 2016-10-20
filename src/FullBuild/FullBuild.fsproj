@@ -88,7 +88,7 @@
     <Compile Include="XmlHelpers.fs" />
     <Compile Include="Graph.fsi" />
     <Compile Include="Graph.fs" />
-    <Compile Include="Tools\PaketInterface.fs" />
+    <Compile Include="Tools\Paket.fs" />
     <Compile Include="Tools\VcsHg.fs" />
     <Compile Include="Tools\VcsGit.fs" />
     <Compile Include="Tools\Vcs.fs" />
