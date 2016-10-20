@@ -267,13 +267,13 @@ with
     static member CollectProjects (collector : Project -> Project set) (projects : Project set) =
         Set.fold (fun s t -> collector t |> Project.CollectProjects collector |> Set.union s) projects projects
 
-    static member ComputeTransitiveReferences (seeds : Project set) : Project set =
+    static member TransitiveReferences (seeds : Project set) : Project set =
         Project.CollectProjects (fun x -> x.References) seeds
 
-    static member ComputeTransitiveReferencedBy (seeds : Project set) : Project set =
+    static member TransitiveReferencedBy (seeds : Project set) : Project set =
         Project.CollectProjects (fun x -> x.ReferencedBy) seeds
 
-    static member ComputeClosure (seeds : Project set) : Project set =
+    static member Closure (seeds : Project set) : Project set =
         let rec exploreNext (node : Project) (next : Project -> Project set) (path : Project list) (boundaries : Project set) =
             let nextNodes = next node
             Set.fold (fun s n -> s + explore n next path s) boundaries nextNodes
@@ -289,99 +289,6 @@ with
         let refByBoundaries = Set.fold (fun s t -> exploreNext t (fun x -> x.ReferencedBy) [t] s) refBoundaries seeds
         refByBoundaries
 
-
-// =====================================================================================================
-
-and [<CustomEquality; CustomComparison>] Bookmark =
-    { Graph : Graph
-      Bookmark : Anthology.Bookmark }
-with
-    override this.Equals(other : System.Object) = refEquals this other
-
-    interface System.IComparable with
-        member this.CompareTo(other) = compareTo this other (fun x -> x.Bookmark.Repository)
-
-    member this.Repository =
-        this.Graph.RepositoryMap.[this.Bookmark.Repository]
-    member this.Version = this.Bookmark.Version.toString
-
-// =====================================================================================================
-
-and [<CustomEquality; CustomComparison>] Baseline =
-    { Graph : Graph 
-      Baseline : Anthology.Baseline }
-with
-    override this.Equals(other : System.Object) = refEquals this other
-
-    interface System.IComparable with
-        member this.CompareTo(other) = compareTo this other (fun x -> x.Baseline)
-
-    member this.IsIncremental = this.Baseline.Incremental
-    
-    member this.Bookmarks = 
-        this.Baseline.Bookmarks |> Set.map (fun x -> { Graph = this.Graph; Bookmark = x})
-    
-    member this.ModifiedRepositories : Repository set = 
-        Set.empty
-
-    member this.Save () = 
-        Configuration.SaveBaseline this.Baseline
-
-    static member ComputeBaselineDifferences (oldBaseline : Baseline) (newBaseline : Baseline) =
-        let changes = Set.difference newBaseline.Bookmarks oldBaseline.Bookmarks
-        let projects = changes |> Set.map (fun x -> x.Repository.Projects)
-                               |> Set.unionMany
-        projects
-
-
-
-
-// =====================================================================================================
-
-and [<CustomEquality; CustomComparison>] View =
-    { Graph : Graph
-      View : Anthology.View }
-with
-    override this.Equals(other : System.Object) = refEquals this other
-
-    interface System.IComparable with
-        member this.CompareTo(other) = compareTo this other (fun x -> x.View)
-
-    member this.Name = this.View.Name
-    member this.Filters = this.View.Filters
-    member this.Parameters = this.View.Parameters
-    member this.References = this.View.SourceOnly
-    member this.ReferencedBy = this.View.Parents
-    member this.Modified = this.View.Modified
-    member this.Builder = match this.View.Builder with
-                          | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
-                          | Anthology.BuilderType.Skip -> BuilderType.Skip
-
-    member this.Projects : Project set =
-        let filters = this.View.Filters |> Set.map (fun x -> if x.IndexOfAny([|'/'; '\\' |]) = -1 then x + "/*" else x)
-                                        |> Set.map (fun x -> x.Replace('\\', '/'))
-        let projects = PatternMatching.FilterMatch<Project> 
-                            this.Graph.Projects 
-                            (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) 
-                            filters
-
-        let modProjects = if this.Modified then Baseline.ComputeBaselineDifferences this.Graph.Baseline (this.Graph.CreateBaseline false)
-                          else Set.empty
-        let viewProjects = Project.ComputeClosure (projects + modProjects)
-        let depProjects = if this.References then Project.ComputeTransitiveReferences viewProjects  
-                          else Set.empty
-        let refProjects = if this.ReferencedBy then Project.ComputeTransitiveReferencedBy viewProjects
-                          else Set.empty
-        let projects = viewProjects + depProjects + refProjects + modProjects
-        projects |> Set.filter (fun x -> x.Repository.IsCloned)
-
-    member this.Save (isDefault : bool option) = 
-        let viewId = Anthology.ViewId this.View.Name
-        Configuration.SaveView viewId this.View isDefault
-
-    member this.Delete () =
-        Configuration.DeleteView (Anthology.ViewId this.View.Name)
-
 // =====================================================================================================
 
 and [<Sealed>] Graph(anthology : Anthology.Anthology) =
@@ -390,7 +297,6 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
     let mutable repositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> = null
     let mutable applicationMap : System.Collections.Generic.IDictionary<Anthology.ApplicationId, Application> = null
     let mutable projectMap : System.Collections.Generic.IDictionary<Anthology.ProjectId, Project> = null
-    let mutable viewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> = null
     let mutable packageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> = null
 
     member this.Anthology : Anthology.Anthology = anthology
@@ -432,15 +338,6 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
                                              |> dict
         projectMap
 
-    member this.ViewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> = 
-        if viewMap |> isNull then
-            let vwDir = Env.GetFolder Env.Folder.View
-            viewMap <- vwDir.EnumerateFiles("*.view") |> Seq.map (fun x -> System.IO.Path.GetFileNameWithoutExtension(x.Name) |> Anthology.ViewId)
-                                                      |> Seq.map Configuration.LoadView
-                                                      |> Seq.map (fun x -> x.Name |> Anthology.ViewId, { Graph = this; View = x })
-                                                      |> dict
-        viewMap
-            
     member this.MinVersion = this.Anthology.MinVersion
 
     member this.MasterRepository = { Graph = this; Repository = this.Anthology.MasterRepository }
@@ -455,23 +352,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
 
     member this.Projects = this.ProjectMap.Values |> set
 
-    member this.Views = this.ViewMap.Values |> set
-
     member this.NuGets = this.Anthology.NuGets |> List.map (fun x -> x.toString)
-
-    member this.DefaultView =
-        let viewId = Configuration.DefaultView ()
-        match viewId with
-        | None -> None
-        | Some x -> Some this.ViewMap.[x]
-
-    member this.Baseline = 
-        let baseline = Configuration.LoadBaseline()
-        { Graph = this; Baseline = baseline }
-
-    member this.CreateBaseline (incremental : bool) =
-        // TODO: this should create a baseline - not return the previous one
-        this.Baseline
 
     member this.TestRunner =
         match this.Anthology.Tester with
@@ -511,20 +392,6 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
         let newAntho = { anthology
                          with Repositories = anthology.Repositories |> Set.add buildableRepo }
         Graph(newAntho)
-
-    member this.CreateView name filters parameters dependencies referencedBy modified builder =
-        let view = { Anthology.View.Name = name 
-                     Anthology.View.Filters = filters
-                     Anthology.View.Parameters = parameters
-                     Anthology.View.SourceOnly = dependencies
-                     Anthology.View.Parents = referencedBy
-                     Anthology.View.Modified = modified
-                     Anthology.View.Builder = match builder with
-                                              | BuilderType.MSBuild -> Anthology.BuilderType.MSBuild
-                                              | BuilderType.Skip -> Anthology.BuilderType.Skip }
-
-        { Graph = this
-          View = view }
 
     member this.Save () =
         Configuration.SaveAnthology this.Anthology

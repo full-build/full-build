@@ -21,7 +21,7 @@ open PatternMatching
 let private asyncPublish (app : Graph.Application) =
     async {
         DisplayHighlight app.Name
-        Tools.Publishers.PublishWithPublisher app
+        Core.Publishers.PublishWithPublisher app
     }
 
 let private displayApp (app : Graph.Application) =
@@ -34,13 +34,14 @@ let private updateProjectBindings (project : Graph.Project) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let prjFile = wsDir |> GetFile project.ProjectFile
     let prjDir = prjFile.Directory
-    Tools.Bindings.UpdateProjectBindingRedirects prjDir
+    Core.Bindings.UpdateProjectBindingRedirects prjDir
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
+    let viewRepository = ViewRepository.from graph
     let applications = match pubInfo.View with
                        | None -> graph.Applications
-                       | Some viewId -> let view = graph.Views |> Seq.find (fun x -> x.Name = viewId)
+                       | Some viewId -> let view = viewRepository.Views |> Seq.find (fun x -> x.Name = viewId)
                                         view.Projects |> Set.map (fun x -> x.Applications)
                                                       |> Set.unionMany
 

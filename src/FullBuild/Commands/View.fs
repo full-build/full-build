@@ -23,13 +23,14 @@ let Add (cmd : CLI.Commands.AddView) =
         failwith "Expecting at least one filter"
     
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let view = graph.CreateView cmd.Name
-                                (cmd.Filters |> Set.ofList)
-                                Set.empty
-                                cmd.References
-                                cmd.ReferencedBy
-                                cmd.Modified
-                                Graph.BuilderType.MSBuild
+    let viewRepository = ViewRepository.from graph
+    let view = viewRepository.CreateView cmd.Name
+                                         (cmd.Filters |> Set.ofList)
+                                         Set.empty
+                                         cmd.References
+                                         cmd.ReferencedBy
+                                         cmd.Modified
+                                         Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     if projects = Set.empty then printfn "WARNING: empty project selection"
@@ -51,15 +52,17 @@ let Add (cmd : CLI.Commands.AddView) =
 
 let Drop name =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let view = graph.Views |> Seq.tryFind (fun x -> x.Name = name)
+    let viewRepository = ViewRepository.from graph
+    let view = viewRepository.Views |> Seq.tryFind (fun x -> x.Name = name)
     match view with 
     | Some x -> x.Delete()
     | None -> ()
 
 let List () =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let views = graph.Views
-    let defaultView = graph.DefaultView
+    let viewRepository = ViewRepository.from graph
+    let views = viewRepository.Views
+    let defaultView = viewRepository.DefaultView
 
     let printViewInfo view =
         let defaultInfo = (defaultView = Some view) ? ("[default]", "")
@@ -69,7 +72,8 @@ let List () =
 
 let Describe name =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let view = graph.Views |> Seq.find (fun x -> x.Name = name)
+    let viewRepository = ViewRepository.from graph
+    let view = viewRepository.Views |> Seq.find (fun x -> x.Name = name)
     let builder = StringHelpers.toString view.Builder
     let builderInfo = view.Parameters |> Seq.fold (+) (sprintf "[%s] " builder)
     printfn "%s" builderInfo
@@ -77,26 +81,28 @@ let Describe name =
 
 let Build (cmd : CLI.Commands.BuildView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
+    let viewRepository = ViewRepository.from graph
     let view = match cmd.Name with
-               | Some x -> graph.Views |> Seq.find (fun y -> y.Name = x)
-               | None -> match graph.DefaultView with
+               | Some x -> viewRepository.Views |> Seq.find (fun y -> y.Name = x)
+               | None -> match viewRepository.DefaultView with
                          | None -> failwith "Can't determine view name"
                          | Some x -> x
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
-    Tools.Builders.BuildWithBuilder view.Builder slnFile cmd.Config cmd.Clean cmd.Multithread cmd.Version
+    Core.Builders.BuildWithBuilder view.Builder slnFile cmd.Config cmd.Clean cmd.Multithread cmd.Version
 
 let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let view = graph.Views |> Seq.find (fun x -> x.Name = cmd.Name)
-    let depView = graph.CreateView view.Name
-                                   view.Filters
-                                   view.Parameters
-                                   (cmd.Source = Some true) ? (true, view.References)
-                                   (cmd.Parents = Some true) ? (true, view.ReferencedBy)
-                                   view.Modified
-                                   view.Builder
+    let viewRepository = ViewRepository.from graph
+    let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
+    let depView = viewRepository.CreateView view.Name
+                                            view.Filters
+                                            view.Parameters
+                                            (cmd.Source = Some true) ? (true, view.References)
+                                            (cmd.Parents = Some true) ? (true, view.ReferencedBy)
+                                            view.Modified
+                                            view.Builder
 
     let projects = depView.Projects
     if projects = Set.empty then printfn "WARNING: empty project selection"
@@ -105,14 +111,16 @@ let Alter (cmd : CLI.Commands.AlterView) =
 
 let Open (cmd : CLI.Commands.OpenView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let view = graph.Views |> Seq.find (fun x -> x.Name = cmd.Name)
+    let viewRepository = ViewRepository.from graph
+    let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
     Exec.SpawnWithVerb slnFile.FullName "open"
 
 let Graph (cmd : CLI.Commands.GraphView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let view = graph.Views |> Seq.find (fun x -> x.Name = cmd.Name)
+    let viewRepository = ViewRepository.from graph
+    let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let projects = view.Projects
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml cmd.Name)

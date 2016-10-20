@@ -32,10 +32,11 @@ let CheckGenerateDgmlNoDependency () =
         let expectedDgml = XDocument.Load(testFile "single-node.dgml")
         let file = FileInfo(testFile "anthology-view.yaml")
         let graph = AnthologySerializer.Load file |> Graph.from
+        let viewRepository = ViewRepository.from graph
         let projects = graph.Projects
         let goal = projects |> selectProjects ["g"]
 
-        let view = graph.CreateView "test" (set ["*/g"]) Set.empty false false false Graph.BuilderType.MSBuild
+        let view = viewRepository.CreateView "test" (set ["*/g"]) Set.empty false false false Graph.BuilderType.MSBuild
         let res = Generators.Dgml.GraphContent view.Projects true
 
         res.ToString() |> should equal (expectedDgml.ToString())
@@ -50,10 +51,11 @@ let CheckGenerateDgmlWithDependencies () =
         let expectedDgml = XDocument.Load(testFile "single-node-dependencies.dgml")
         let file = FileInfo(testFile "anthology-view.yaml")
         let graph = AnthologySerializer.Load file |> Graph.from
+        let viewRepository = ViewRepository.from graph
         let projects = graph.Projects
         let goal = projects |> selectProjects ["g"]
 
-        let view = graph.CreateView "test" (set ["*/g"]) Set.empty true false false Graph.BuilderType.MSBuild
+        let view = viewRepository.CreateView "test" (set ["*/g"]) Set.empty true false false Graph.BuilderType.MSBuild
         let res = Generators.Dgml.GraphContent view.Projects true
         printfn "%s" (res.ToString())
         res.ToString() |> should equal (expectedDgml.ToString())

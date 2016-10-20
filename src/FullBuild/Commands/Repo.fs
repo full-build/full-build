@@ -35,7 +35,8 @@ let List() =
 let Clone (cmd : CLI.Commands.CloneRepositories) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let fakeView = graph.CreateView "clone" cmd.Filters Set.empty cmd.All false false Graph.BuilderType.MSBuild
+    let viewRepository = ViewRepository.from graph
+    let fakeView = viewRepository.CreateView "clone" cmd.Filters Set.empty cmd.All false false Graph.BuilderType.MSBuild
     let selectedRepos = fakeView.Projects |> Set.map (fun x -> x.Repository)
                                           |> Set.filter (fun x -> not x.IsCloned)
 
