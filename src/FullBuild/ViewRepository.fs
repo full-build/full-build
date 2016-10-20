@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module ViewRepository
+module Views
 
 open Graph
 open Collections
@@ -47,7 +47,7 @@ with
                             (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) 
                             filters
 
-        let baselineRepo = BaselineRepository.from this.Graph
+        let baselineRepo = Baselines.from this.Graph
         let newBaseline = baselineRepo.CreateBaseline false
         let modRepositories = if this.Modified then baselineRepo.Baseline - newBaseline
                               else Set.empty
@@ -69,7 +69,7 @@ with
         Configuration.DeleteView (Anthology.ViewId this.View.Name)
 
 
-and [<Sealed>] ViewRepository(graph : Graph) =
+and [<Sealed>] Factory(graph : Graph) =
     let mutable viewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> = null
 
     member this.ViewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> = 
@@ -104,4 +104,4 @@ and [<Sealed>] ViewRepository(graph : Graph) =
           View = view }
 
 let from graph =
-    ViewRepository(graph)
+    Factory(graph)

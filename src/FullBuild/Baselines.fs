@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module BaselineRepository
+module Baselines
 
 open Graph
 open Collections
@@ -61,7 +61,7 @@ with
 
 // =====================================================================================================
 
-and [<Sealed>] BaselineRepository(graph : Graph) =
+and [<Sealed>] Factory(graph : Graph) =
     member this.Baseline = 
         let baseline = Configuration.LoadBaseline()
         { Graph = graph; Baseline = baseline }
@@ -77,4 +77,4 @@ and [<Sealed>] BaselineRepository(graph : Graph) =
           
           
 let from graph =
-    BaselineRepository(graph)
+    Factory(graph)

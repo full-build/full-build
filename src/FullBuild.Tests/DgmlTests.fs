@@ -32,7 +32,7 @@ let CheckGenerateDgmlNoDependency () =
         let expectedDgml = XDocument.Load(testFile "single-node.dgml")
         let file = FileInfo(testFile "anthology-view.yaml")
         let graph = AnthologySerializer.Load file |> Graph.from
-        let viewRepository = ViewRepository.from graph
+        let viewRepository = Views.from graph
         let projects = graph.Projects
         let goal = projects |> selectProjects ["g"]
 
@@ -51,7 +51,7 @@ let CheckGenerateDgmlWithDependencies () =
         let expectedDgml = XDocument.Load(testFile "single-node-dependencies.dgml")
         let file = FileInfo(testFile "anthology-view.yaml")
         let graph = AnthologySerializer.Load file |> Graph.from
-        let viewRepository = ViewRepository.from graph
+        let viewRepository = Views.from graph
         let projects = graph.Projects
         let goal = projects |> selectProjects ["g"]
 

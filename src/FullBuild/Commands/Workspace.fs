@@ -67,7 +67,7 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
         Tools.Vcs.Clone wsDir graph.MasterRepository true
         graph.Save()
 
-        let baselineRepository = BaselineRepository.from graph
+        let baselineRepository = Baselines.from graph
         let baseline = baselineRepository.CreateBaseline false
         baseline.Save()
 
@@ -96,7 +96,7 @@ let Push (pushInfo : CLI.Commands.PushWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let allRepos = graph.Repositories
-    let baselineRepository = BaselineRepository.from graph
+    let baselineRepository = Baselines.from graph
     let newBaseline = baselineRepository.CreateBaseline pushInfo.Incremental
     newBaseline.Save()
 
@@ -118,7 +118,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
 
     // checkout each repository now
     let graph = Configuration.LoadAnthology () |> Graph.from
-    let baselineRepository = BaselineRepository.from graph
+    let baselineRepository = Baselines.from graph
     let baseline = baselineRepository.Baseline
     let clonedRepos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     for repo in clonedRepos do
@@ -164,7 +164,7 @@ let consoleProgressBar max =
 
 let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
-    let viewRepository = ViewRepository.from graph
+    let viewRepository = Views.from graph
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     if pullInfo.Src then
@@ -279,7 +279,7 @@ let History (historyInfo : CLI.Commands.History) =
     let footer = historyInfo.Html ? (htmlFooter, textFooter)
 
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let baselineRepository = BaselineRepository.from graph
+    let baselineRepository = Baselines.from graph
     let baseline = baselineRepository.Baseline
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
