@@ -35,13 +35,10 @@ let List() =
 let Clone (cmd : CLI.Commands.CloneRepositories) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let viewRepository = ViewRepository.from graph
-    let fakeView = viewRepository.CreateView "clone" cmd.Filters Set.empty cmd.All false false Graph.BuilderType.MSBuild
-    let selectedRepos = fakeView.Projects |> Set.map (fun x -> x.Repository)
-                                          |> Set.filter (fun x -> not x.IsCloned)
-
+    let selectedRepos = PatternMatching.FilterMatch graph.Repositories (fun x -> x.Name) cmd.Filters
     let maxThrottle = cmd.Multithread ? (System.Environment.ProcessorCount*2, 1)
-    selectedRepos |> Seq.map (cloneRepoAndInit wsDir cmd.Shallow)
+    selectedRepos |> Set.filter (fun x -> not x.IsCloned)
+                  |> Seq.map (cloneRepoAndInit wsDir cmd.Shallow)
                   |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
 
 let Add (cmd : CLI.Commands.AddRepository) =
