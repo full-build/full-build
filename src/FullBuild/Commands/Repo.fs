@@ -35,7 +35,7 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Configuration.LoadAnthology() |> Graph.from
     let selectedRepos = PatternMatching.FilterMatch graph.Repositories (fun x -> x.Name) cmd.Filters
-    let maxThrottle = cmd.Multithread ? (System.Environment.ProcessorCount*2, 1)
+    let maxThrottle = cmd.Multithread ? (System.Environment.ProcessorCount*4, 1)
     selectedRepos |> Set.filter (fun x -> not x.IsCloned)
                   |> Seq.map (cloneRepoAndInit wsDir cmd.Shallow)
                   |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore

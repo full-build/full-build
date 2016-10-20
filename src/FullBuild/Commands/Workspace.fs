@@ -162,22 +162,29 @@ let consoleProgressBar max =
             }
         loop 1)
 
+let private cloneRepo wsDir rebase (repo : Repository) =
+    async {
+        IoHelpers.DisplayHighlight repo.Name
+        Tools.Vcs.Pull wsDir repo rebase
+    }
+
+
 let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let viewRepository = Views.from graph
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     if pullInfo.Src then
-        let clonedRepos = match pullInfo.View with
-                          | None -> graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
-                          | Some viewName -> let view = viewRepository.Views |> Seq.find (fun x -> x.Name = viewName)
-                                             let repos = view.Projects |> Seq.map (fun x -> x.Repository)
-                                                                       |> Seq.filter (fun x -> x.IsCloned)
-                                             repos
+        let cloneRepos = match pullInfo.View with
+                         | None -> graph.Repositories
+                         | Some viewName -> let view = viewRepository.Views |> Seq.find (fun x -> x.Name = viewName)
+                                            let repos = view.Projects |> Set.map (fun x -> x.Repository)
+                                            repos
 
-        for repo in clonedRepos do                        
-            DisplayHighlight repo.Name
-            Tools.Vcs.Pull wsDir repo pullInfo.Rebase
+        let maxThrottle = pullInfo.Multithread ? (System.Environment.ProcessorCount*4, 1)
+        cloneRepos |> Seq.filter (fun x -> x.IsCloned)
+                   |> Seq.map (cloneRepo wsDir pullInfo.Rebase)
+                   |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
 
 //        let reposToPull = graph.MasterRepository :: (getClonedRepos () |> Seq.toList)
 //        let pb = reposToPull.Count() |> consoleProgressBar

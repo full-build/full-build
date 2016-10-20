@@ -113,6 +113,7 @@ type PullWorkspace =
     { Src : bool
       Bin : bool
       Rebase : bool
+      Multithread : bool
       View : string option }
 
 type PushWorkspace =
