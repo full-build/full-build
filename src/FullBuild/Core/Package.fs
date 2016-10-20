@@ -24,16 +24,16 @@ open Collections
 open Simplify
 
 let private installPackages (nugets : RepositoryUrl list) =
-    Tools.PaketInterface.UpdateSources nugets
-    Tools.PaketInterface.PaketInstall ()
+    Tools.Paket.UpdateSources nugets
+    Tools.Paket.PaketInstall ()
     Generators.Package.GeneratePackageImports()
 
 let private removeUnusedPackages (antho : Anthology) =
-    let packages = Tools.PaketInterface.ParsePaketDependencies ()
+    let packages = Tools.Paket.ParsePaketDependencies ()
     let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
                                       |> Set.unionMany
     let packagesToRemove = packages |> Set.filter (fun x -> (not << Set.contains x) usedPackages)
-    Tools.PaketInterface.RemoveDependencies packagesToRemove
+    Tools.Paket.RemoveDependencies packagesToRemove
 
 let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
     let pkgsDir = Env.GetFolder Env.Folder.Package
@@ -63,11 +63,11 @@ let private simplifyAnthologyWithPackages (antho) =
     newAntho
 
 let RestorePackages () =
-    Tools.PaketInterface.PaketRestore ()
+    Tools.Paket.PaketRestore ()
     Generators.Package.GeneratePackageImports()
 
 let UpdatePackages () =
-    Tools.PaketInterface.PaketUpdate ()
+    Tools.Paket.PaketUpdate ()
     Generators.Package.GeneratePackageImports()
 
 let Simplify (antho : Anthology) =
