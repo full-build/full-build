@@ -48,8 +48,8 @@ with
                             filters
 
         let baselineRepo = Baselines.from this.Graph
-        let newBaseline = baselineRepo.CreateBaseline false
-        let modRepositories = if this.Modified then baselineRepo.Baseline - newBaseline
+        let modRepositories = if this.Modified then let newBaseline = baselineRepo.CreateBaseline false
+                                                    baselineRepo.Baseline - newBaseline
                               else Set.empty
         let modProjects = modRepositories |> Set.map (fun x -> x.Projects)
                                           |> Set.unionMany
