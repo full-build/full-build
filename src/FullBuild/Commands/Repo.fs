@@ -27,8 +27,7 @@ let List() =
     let graph = Configuration.LoadAnthology() |> Graph.from
 
     let printRepo (repo : Repository) =
-        // HACK: use correct builder
-        printfn "%s : %s [%A]" repo.Name repo.Uri (StringHelpers.toString BuilderType.MSBuild)
+        printfn "%s : %s [%A]" repo.Name repo.Uri (StringHelpers.toString repo.Builder)
 
     graph.Repositories |> Seq.iter printRepo
 
