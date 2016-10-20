@@ -17,12 +17,16 @@ module Exec
 open System.Diagnostics
 open System.IO
 
-let defaultPSI (command : string) (args : string) (dir : DirectoryInfo) =
-    let psi = ProcessStartInfo (FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir.FullName, LoadUserProfile = true)
-    psi
+type ExecResult =
+    | Success
+    | Failure of int
 
+let defaultPSI (command : string) (args : string) (dir : DirectoryInfo) (redirectStdout : bool) =
+    let psi = ProcessStartInfo (FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir.FullName, LoadUserProfile = true, RedirectStandardOutput = redirectStdout, RedirectStandardError = redirectStdout)
+    psi
+    
 let ExecWithVars checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
-    let psi = defaultPSI command args dir
+    let psi = defaultPSI command args dir false
 
     for var in vars do
         psi.EnvironmentVariables.Add(var.Key, var.Value)
@@ -35,6 +39,30 @@ let ExecWithVars checkErrorCode (command : string) (args : string) (dir : Direct
 let Exec checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) =
     ExecWithVars checkErrorCode command args dir Map.empty
 
+let ExecWithVarsGetOutput (vars : Map<string, string>) (command : string) (args : string) (dir : DirectoryInfo) =
+    let toStatus exitCode =
+        match exitCode with
+        | 0 -> Success
+        | x -> Failure x
+    let getOutput (proc:Process) =
+        let join separator (items: string seq) = System.String.Join(separator, items)
+        seq {
+            let output = proc.StandardOutput.ReadToEnd()
+            if System.String.IsNullOrEmpty(output) |> not then yield output
+            let error = proc.StandardError.ReadToEnd()
+            if System.String.IsNullOrEmpty(error) |> not then yield error
+        } |> join System.Environment.NewLine
+    let psi = defaultPSI command args dir true
+
+    for var in vars do
+        psi.EnvironmentVariables.Add(var.Key, var.Value)
+
+    use proc = Process.Start(psi)    
+    proc.WaitForExit()
+    proc.ExitCode |> toStatus, getOutput proc
+
+let ExecGetOutput = ExecWithVarsGetOutput Map.empty
+
 let SpawnWithVerb (command : string) (verb : string) =
     let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Verb = verb)
     use proc = Process.Start (psi)
@@ -46,7 +74,7 @@ let Spawn (command : string) (args : string) =
     ()
 
 let ExecReadLine checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) =
-    let mutable psi = defaultPSI command args dir
+    let mutable psi = defaultPSI command args dir false
     psi.RedirectStandardOutput <- true
 
     use proc = Process.Start (psi)

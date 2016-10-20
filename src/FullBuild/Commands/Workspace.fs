@@ -148,25 +148,55 @@ let Install () =
     Core.Package.RestorePackages ()
     Core.Conversion.GenerateProjectArtifacts()
 
+let consoleProgressBar max = 
+    MailboxProcessor.Start(fun inbox -> 
+        new String(' ', max) |> printf "[%s]\r["
+        let rec loop n = async {
+                let! msg = inbox.Receive()
+                do printf "="
+                if n = max then return printfn "]"
+                return! n + 1 |> loop
+            }
+        loop 1)
+
 let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     if pullInfo.Src then
-        let mainRepo = graph.MasterRepository
-        DisplayHighlight mainRepo.Name
-        Tools.Vcs.Pull wsDir mainRepo pullInfo.Rebase
+        let getClonedRepos () = match pullInfo.View with
+                                | None -> graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
+                                | Some viewName -> let view = graph.Views |> Seq.find (fun x -> x.Name = viewName)
+                                                   let repos = view.Projects |> Seq.map (fun x -> x.Repository)
+                                                                             |> Seq.filter (fun x -> x.IsCloned)
+                                                   repos 
+                                
+        let reposToPull = graph.MasterRepository :: (getClonedRepos () |> Seq.toList)
+        let pb = reposToPull.Count() |> consoleProgressBar
+        let pullResults = reposToPull 
+                            |> Seq.map(fun repo -> async {
+                                let status, message = Tools.Vcs.Pull wsDir repo pullInfo.Rebase
+                                pb.Post()
+                                return repo.Name, status, message
+                            })
+                            |> Async.Parallel
+                            |> Async.RunSynchronously
+        
+        pullResults 
+            |> Seq.iter(fun (repoName, _, msg) -> 
+                DisplayHighlight repoName
+                msg |> printf "%s")
 
-        let clonedRepos = match pullInfo.View with
-                          | None -> graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
-                          | Some viewName -> let view = graph.Views |> Seq.find (fun x -> x.Name = viewName)
-                                             let repos = view.Projects |> Seq.map (fun x -> x.Repository)
-                                                                       |> Seq.filter (fun x -> x.IsCloned)
-                                             repos
-
-        for repo in clonedRepos do
-            DisplayHighlight repo.Name
-            Tools.Vcs.Pull wsDir repo pullInfo.Rebase
+        let ifNotEmpty f seq = 
+            if seq |> Seq.isEmpty then ()
+            else seq |> f
+        
+        pullResults 
+            |> Seq.choose(fun (repoName, status, msg) -> 
+                match status with
+                | Exec.Failure errorCode -> sprintf "Pull repo %s failed with error code %i" repoName errorCode |> Some
+                | Exec.Success -> None )
+            |> ifNotEmpty (fun errors -> String.Join(Environment.NewLine, errors) |> failwith)
 
         Install ()
 
