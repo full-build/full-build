@@ -25,7 +25,7 @@ let private checkIgnore err =
 
 let private checkedExec =
     Exec.Exec checkErrorCode
-
+    
 let private checkedExecMaybeIgnore ignoreError =
     let check = if ignoreError then checkIgnore else checkErrorCode
     Exec.Exec check
@@ -42,7 +42,7 @@ let HgPush (repoDir : DirectoryInfo) =
     checkedExec "hg" "push" repoDir
 
 let HgPull (repoDir : DirectoryInfo) (rebase : bool) =
-    checkedExec "hg" "pull -u" repoDir
+    Exec.ExecGetOutput "hg" "pull -u" repoDir
 
 let HgTip (repoDir : DirectoryInfo) =
     let args = @"id -i"
