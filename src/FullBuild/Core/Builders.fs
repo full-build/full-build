@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Tools.Builders
+module Core.Builders
 open System.IO
 open IoHelpers
 open Env

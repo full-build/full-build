@@ -53,10 +53,11 @@ let CheckSingleProjectSelection () =
     // 
     let file = FileInfo(testFile "anthology-view.yaml")
     let graph = AnthologySerializer.Load file |> Graph.from
+    let viewRepository = ViewRepository.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["g"]
 
-    let view = graph.CreateView "test" (set ["*/g"]) Set.empty false false false Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/g"]) Set.empty false false false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -76,10 +77,11 @@ let CheckClosureSelection () =
     // 
     let file = FileInfo(testFile "anthology-view.yaml")
     let graph = AnthologySerializer.Load file |> Graph.from
+    let viewRepository = ViewRepository.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "c"; "e"; "f"; "g"]
 
-    let view = graph.CreateView "test" (set ["*/a"; "*/g"]) Set.empty false false false Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/a"; "*/g"]) Set.empty false false false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -100,10 +102,11 @@ let checkSelectAllDependencies () =
     // 
     let file = FileInfo(testFile "anthology-view.yaml")
     let graph = AnthologySerializer.Load file |> Graph.from
+    let viewRepository = ViewRepository.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "e"; "f"; "g"]
 
-    let view = graph.CreateView "test" (set ["*/g"]) Set.empty true false false Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/g"]) Set.empty true false false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -123,10 +126,11 @@ let CheckAllReferencedBy () =
     // 
     let file = FileInfo(testFile "anthology-view.yaml")
     let graph = AnthologySerializer.Load file |> Graph.from
+    let viewRepository = ViewRepository.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["b"; "c"; "d"; "e"; "f"; "g"]
 
-    let view = graph.CreateView "test" (set ["*/b"]) Set.empty false true false Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/b"]) Set.empty false true false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -147,10 +151,11 @@ let CheckSelect2ProjectsWithoutParentButWithCommonChildrenSourceOnly () =
     // 
     let file = FileInfo(testFile "anthology-view.yaml")
     let graph = AnthologySerializer.Load file |> Graph.from
+    let viewRepository = ViewRepository.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "d"; "e"; "f"; "g"]
 
-    let view = graph.CreateView "test" (set ["*/d"; "*/g"]) Set.empty true false false Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/d"; "*/g"]) Set.empty true false false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -170,10 +175,11 @@ let CheckSelect2LeafProjectsSourceOnly () =
     // 
     let file = FileInfo(testFile "anthology-view.yaml")
     let graph = AnthologySerializer.Load file |> Graph.from
+    let viewRepository = ViewRepository.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"]
 
-    let view = graph.CreateView "test" (set ["*/a"; "*/b"]) Set.empty true false false Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/a"; "*/b"]) Set.empty true false false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -193,10 +199,11 @@ let CheckSelectProjectsWithHoleSourceOnly () =
     // 
     let file = FileInfo(testFile "anthology-view.yaml")
     let graph = AnthologySerializer.Load file |> Graph.from
+    let viewRepository = ViewRepository.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "e"; "f"; "g"]
 
-    let view = graph.CreateView "test" (set ["*/a"; "*/g"]) Set.empty true false false Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/a"; "*/g"]) Set.empty true false false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -216,10 +223,11 @@ let CheckSelectReferencedBy () =
     // 
     let file = FileInfo(testFile "anthology-view.yaml")
     let graph = AnthologySerializer.Load file |> Graph.from
+    let viewRepository = ViewRepository.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "c"; "e"; "f"; "g"]
 
-    let view = graph.CreateView "test" (set ["*/a"]) Set.empty false true false Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/a"]) Set.empty false true false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -239,10 +247,11 @@ let CheckSelectReferencesAndReferencedBy () =
     // 
     let file = FileInfo(testFile "anthology-view.yaml")
     let graph = AnthologySerializer.Load file |> Graph.from
+    let viewRepository = ViewRepository.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "e"; "f"; "g"]
 
-    let view = graph.CreateView "test" (set ["*/c"]) Set.empty true true false Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/c"]) Set.empty true true false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal

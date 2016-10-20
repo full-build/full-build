@@ -67,7 +67,8 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
         Tools.Vcs.Clone wsDir graph.MasterRepository true
         graph.Save()
 
-        let baseline = graph.CreateBaseline false
+        let baselineRepository = BaselineRepository.from graph
+        let baseline = baselineRepository.CreateBaseline false
         baseline.Save()
 
         // setup additional files for views to work correctly
@@ -95,7 +96,8 @@ let Push (pushInfo : CLI.Commands.PushWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let allRepos = graph.Repositories
-    let newBaseline = graph.CreateBaseline pushInfo.Incremental
+    let baselineRepository = BaselineRepository.from graph
+    let newBaseline = baselineRepository.CreateBaseline pushInfo.Incremental
     newBaseline.Save()
 
     // commit
@@ -116,7 +118,8 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
 
     // checkout each repository now
     let graph = Configuration.LoadAnthology () |> Graph.from
-    let baseline = graph.Baseline
+    let baselineRepository = BaselineRepository.from graph
+    let baseline = baselineRepository.Baseline
     let clonedRepos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     for repo in clonedRepos do
         DisplayHighlight repo.Name
@@ -161,16 +164,17 @@ let consoleProgressBar max =
 
 let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
+    let viewRepository = ViewRepository.from graph
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     if pullInfo.Src then
         let getClonedRepos () = match pullInfo.View with
                                 | None -> graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
-                                | Some viewName -> let view = graph.Views |> Seq.find (fun x -> x.Name = viewName)
+                                | Some viewName -> let view = viewRepository.Views |> Seq.find (fun x -> x.Name = viewName)
                                                    let repos = view.Projects |> Seq.map (fun x -> x.Repository)
                                                                              |> Seq.filter (fun x -> x.IsCloned)
-                                                   repos 
-                                
+                                                   repos
+
         let reposToPull = graph.MasterRepository :: (getClonedRepos () |> Seq.toList)
         let pb = reposToPull.Count() |> consoleProgressBar
         let pullResults = reposToPull 
@@ -181,7 +185,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
                             })
                             |> Async.Parallel
                             |> Async.RunSynchronously
-        
+
         pullResults 
             |> Seq.iter(fun (repoName, _, msg) -> 
                 DisplayHighlight repoName
@@ -275,7 +279,8 @@ let History (historyInfo : CLI.Commands.History) =
     let footer = historyInfo.Html ? (htmlFooter, textFooter)
 
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let baseline = graph.Baseline
+    let baselineRepository = BaselineRepository.from graph
+    let baseline = baselineRepository.Baseline
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
 

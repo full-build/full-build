@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Tools.TestRunners
+module Core.TestRunners
 open Env
 open Collections
 open Graph

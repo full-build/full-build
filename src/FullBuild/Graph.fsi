@@ -97,33 +97,13 @@ with
     member References: Project set
     member AssemblyReferences: Assembly set
     member PackageReferences: Package set
+    static member Closure: Project set
+                        -> Project set
+    static member TransitiveReferences: Project set
+                                     -> Project set
+    static member TransitiveReferencedBy: Project set
+                                       -> Project set
 
-and [<Sealed>] Bookmark = interface System.IComparable
-with
-    member Repository : Repository
-    member Version : string
-
-and [<Sealed>] Baseline = interface System.IComparable
-with
-    member IsIncremental: bool
-    member Bookmarks: Bookmark set
-    member Save: unit
-              -> unit
-
-and [<Sealed>] View = interface System.IComparable
-with
-    member Name: string
-    member Filters: string set
-    member Parameters: string set
-    member References: bool
-    member ReferencedBy: bool
-    member Modified : bool
-    member Builder: BuilderType
-    member Projects: Project set
-    member Save: isDefault : bool option
-              -> unit
-    member Delete: unit
-                -> unit
 
 and [<Sealed>] Graph =
     member MinVersion: string
@@ -134,23 +114,8 @@ and [<Sealed>] Graph =
     member Projects : Project set
     member TestRunner : TestRunnerType
     member ArtifactsDir : string
-    member Baseline : Baseline
-    member DefaultView : View option
-    member Views : View set
     member NuGets : string list
     member Packages: Package set
-
-    member CreateBaseline: incremental : bool
-                        -> Baseline
-
-    member CreateView: name : string
-                    -> filters : string set
-                    -> parameters: string set
-                    -> dependencies : bool
-                    -> referencedBy : bool
-                    -> modified : bool
-                    -> builder : BuilderType
-                    -> View
 
     member CreateApp: name : string
                    -> publisher : PublisherType
