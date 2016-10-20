@@ -164,24 +164,16 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     if pullInfo.Src then
-        let mainRepo = graph.MasterRepository
-        DisplayHighlight mainRepo.Name
-        match Tools.Vcs.Pull wsDir mainRepo pullInfo.Rebase with
-        | Exec.Failure errorCode, msg -> 
-            msg |> printf "%s"
-            errorCode |> sprintf "Pull failed with error code %i" |> failwith
-        | Exec.Success, msg -> 
-            msg |> printf "%s"
-        
-        
-        let clonedRepos = match pullInfo.View with
-                          | None -> graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
-                          | Some viewName -> let view = graph.Views |> Seq.find (fun x -> x.Name = viewName)
-                                             let repos = view.Projects |> Seq.map (fun x -> x.Repository)
-                                                                       |> Seq.filter (fun x -> x.IsCloned)
-                                             repos
-        let pb = clonedRepos.Count() |> consoleProgressBar
-        let pullResults = clonedRepos 
+        let getClonedRepos () = match pullInfo.View with
+                                | None -> graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
+                                | Some viewName -> let view = graph.Views |> Seq.find (fun x -> x.Name = viewName)
+                                                   let repos = view.Projects |> Seq.map (fun x -> x.Repository)
+                                                                             |> Seq.filter (fun x -> x.IsCloned)
+                                                   repos 
+                                
+        let reposToPull = graph.MasterRepository :: (getClonedRepos () |> Seq.toList)
+        let pb = reposToPull.Count() |> consoleProgressBar
+        let pullResults = reposToPull 
                             |> Seq.map(fun repo -> async {
                                 let status, message = Tools.Vcs.Pull wsDir repo pullInfo.Rebase
                                 pb.Post()
