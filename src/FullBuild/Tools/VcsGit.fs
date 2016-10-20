@@ -45,7 +45,7 @@ let GitPush (repoDir : DirectoryInfo) =
 let GitPull (repoDir : DirectoryInfo) (rebase : bool) =
     let dorebase = if rebase then "--rebase" else "--ff-only"
     let args = sprintf "pull %s" dorebase
-    Exec.ExecGetOutput "git" args repoDir
+    checkedExec "git" args repoDir
 
 let GitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=%H"
