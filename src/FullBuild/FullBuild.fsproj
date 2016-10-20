@@ -94,8 +94,8 @@
     <Compile Include="Tools\Vcs.fs" />
     <Compile Include="Baselines.fsi" />
     <Compile Include="Baselines.fs" />
-    <Compile Include="ViewRepository.fsi" />
-    <Compile Include="ViewRepository.fs" />
+    <Compile Include="Views.fsi" />
+    <Compile Include="Views.fs" />
     <Compile Include="MSBuildHelpers.fs" />
     <Compile Include="AnthologyGraph.fs" />
     <Compile Include="CLI\Commands.fs" />
