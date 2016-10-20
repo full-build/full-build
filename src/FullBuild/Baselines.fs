@@ -67,6 +67,10 @@ and [<Sealed>] Factory(graph : Graph) =
         { Graph = graph; Baseline = baseline }
 
     member this.CreateBaseline (incremental : bool) =
+        let notAllCloned = graph.Repositories |> Seq.exists (fun x -> x.IsCloned |> not)
+        if notAllCloned then
+            failwith "All repositories must be cloned to compute a baseline"
+
         let wsDir = Env.GetFolder Env.Folder.Workspace
         let bookmarks = graph.Repositories |> Set.map (fun x -> { Anthology.Bookmark.Repository = Anthology.RepositoryId.from x.Name
                                                                   Anthology.Bookmark.Version = Anthology.BookmarkVersion (Tools.Vcs.Tip wsDir x) })
