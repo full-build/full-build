@@ -19,16 +19,6 @@ open XmlHelpers
 
 #nowarn "0346" // GetHashCode missing
 
-
-let compareTo<'T, 'U> (this : 'T) (other : System.Object) (fieldOf : 'T -> 'U) =
-    match other with
-    | :? 'T as x -> System.Collections.Generic.Comparer<'U>.Default.Compare(fieldOf this, fieldOf x)
-    | _ -> failwith "Can't compare values with different types"
-
-let refEquals (this : System.Object) (other : System.Object) =
-    System.Object.ReferenceEquals(this, other)
-
-
 [<RequireQualifiedAccess>] 
 type PackageVersion =
     | PackageVersion of string
