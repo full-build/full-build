@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module ViewRepository
+module Views
 
 open Graph
 open Collections
@@ -32,7 +32,7 @@ with
     member Delete: unit
                 -> unit
 
-and [<Sealed>] ViewRepository =
+and [<Sealed>] Factory =
     member DefaultView : View option
     member Views : View set
     member CreateView: name : string
@@ -45,4 +45,4 @@ and [<Sealed>] ViewRepository =
                     -> View
 
 val from: graph : Graph
-       -> ViewRepository
+       -> Factory

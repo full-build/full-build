@@ -23,7 +23,7 @@ let Add (cmd : CLI.Commands.AddView) =
         failwith "Expecting at least one filter"
     
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let viewRepository = ViewRepository.from graph
+    let viewRepository = Views.from graph
     let view = viewRepository.CreateView cmd.Name
                                          (cmd.Filters |> Set.ofList)
                                          Set.empty
@@ -52,7 +52,7 @@ let Add (cmd : CLI.Commands.AddView) =
 
 let Drop name =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let viewRepository = ViewRepository.from graph
+    let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.tryFind (fun x -> x.Name = name)
     match view with 
     | Some x -> x.Delete()
@@ -60,7 +60,7 @@ let Drop name =
 
 let List () =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let viewRepository = ViewRepository.from graph
+    let viewRepository = Views.from graph
     let views = viewRepository.Views
     let defaultView = viewRepository.DefaultView
 
@@ -72,7 +72,7 @@ let List () =
 
 let Describe name =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let viewRepository = ViewRepository.from graph
+    let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = name)
     let builder = StringHelpers.toString view.Builder
     let builderInfo = view.Parameters |> Seq.fold (+) (sprintf "[%s] " builder)
@@ -81,7 +81,7 @@ let Describe name =
 
 let Build (cmd : CLI.Commands.BuildView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let viewRepository = ViewRepository.from graph
+    let viewRepository = Views.from graph
     let view = match cmd.Name with
                | Some x -> viewRepository.Views |> Seq.find (fun y -> y.Name = x)
                | None -> match viewRepository.DefaultView with
@@ -94,7 +94,7 @@ let Build (cmd : CLI.Commands.BuildView) =
 
 let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let viewRepository = ViewRepository.from graph
+    let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let depView = viewRepository.CreateView view.Name
                                             view.Filters
@@ -111,7 +111,7 @@ let Alter (cmd : CLI.Commands.AlterView) =
 
 let Open (cmd : CLI.Commands.OpenView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let viewRepository = ViewRepository.from graph
+    let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
@@ -119,7 +119,7 @@ let Open (cmd : CLI.Commands.OpenView) =
 
 let Graph (cmd : CLI.Commands.GraphView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let viewRepository = ViewRepository.from graph
+    let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let projects = view.Projects
     let wsDir = Env.GetFolder Env.Folder.Workspace

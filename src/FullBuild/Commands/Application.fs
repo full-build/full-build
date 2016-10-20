@@ -38,7 +38,7 @@ let private updateProjectBindings (project : Graph.Project) =
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
-    let viewRepository = ViewRepository.from graph
+    let viewRepository = Views.from graph
     let applications = match pubInfo.View with
                        | None -> graph.Applications
                        | Some viewId -> let view = viewRepository.Views |> Seq.find (fun x -> x.Name = viewId)

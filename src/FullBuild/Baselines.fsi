@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module BaselineRepository
+module Baselines
 
 open Collections
 open Graph
@@ -31,10 +31,10 @@ with
     member Save: unit
               -> unit
 
-and [<Sealed>] BaselineRepository =
+and [<Sealed>] Factory =
     member Baseline : Baseline
     member CreateBaseline: incremental : bool
                         -> Baseline
 
 val from: graph : Graph
-       -> BaselineRepository
+       -> Factory

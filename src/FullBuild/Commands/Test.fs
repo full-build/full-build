@@ -17,7 +17,7 @@ open Collections
 
 let TestAssemblies (filters : string set) (excludes : string set) =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let viewRepository = ViewRepository.from graph
+    let viewRepository = Views.from graph
     let selectedViews = PatternMatching.FilterMatch viewRepository.Views (fun x -> x.Name) filters
     let assemblies = selectedViews |> Set.map (fun x -> x.Projects)
                                    |> Set.unionMany

@@ -92,8 +92,8 @@
     <Compile Include="Tools\VcsHg.fs" />
     <Compile Include="Tools\VcsGit.fs" />
     <Compile Include="Tools\Vcs.fs" />
-    <Compile Include="BaselineRepository.fsi" />
-    <Compile Include="BaselineRepository.fs" />
+    <Compile Include="Baselines.fsi" />
+    <Compile Include="Baselines.fs" />
     <Compile Include="ViewRepository.fsi" />
     <Compile Include="ViewRepository.fs" />
     <Compile Include="MSBuildHelpers.fs" />
