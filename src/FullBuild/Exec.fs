@@ -17,71 +17,74 @@ module Exec
 open System.Diagnostics
 open System.IO
 
-type ExecResult =
-    | Success
-    | Failure of int
 
-let defaultPSI (command : string) (args : string) (dir : DirectoryInfo) (redirectStdout : bool) =
-    let psi = ProcessStartInfo (FileName = command, Arguments = args, UseShellExecute = false, WorkingDirectory = dir.FullName, LoadUserProfile = true, RedirectStandardOutput = redirectStdout, RedirectStandardError = redirectStdout)
+
+[<NoComparison; RequireQualifiedAccess>]
+type private MonitorCommand =
+    | Out of string list
+    | Err of string list
+    | End of int
+
+let private defaultPSI (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
+    let psi = ProcessStartInfo (FileName = command,
+                                Arguments = args,
+                                UseShellExecute = false, 
+                                WorkingDirectory = dir.FullName, 
+                                LoadUserProfile = true, 
+                                RedirectStandardOutput = true, 
+                                RedirectStandardError = true,
+                                StandardOutputEncoding = System.Text.Encoding.GetEncoding(850))
+    for var in vars do
+        psi.EnvironmentVariables.Add(var.Key, var.Value)
     psi
     
-let ExecWithVars checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
-    let psi = defaultPSI command args dir false
 
-    for var in vars do
-        psi.EnvironmentVariables.Add(var.Key, var.Value)
-
+let private supervisedExec onOut onErr onEnd (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
+    let psi = defaultPSI command args dir vars
     use proc = Process.Start (psi)
-    if proc = null then failwith "Failed to start process"
-    proc.WaitForExit()
-    checkErrorCode proc.ExitCode
+    if proc |> isNull then failwith "Failed to start process"
 
-let Exec checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) =
-    ExecWithVars checkErrorCode command args dir Map.empty
+    let rec read processLine (stm : System.IO.TextReader) buffer =
+        let line = stm.ReadLine()
+        if line |> isNull then buffer
+        else
+            processLine line
+            read processLine stm buffer@[line]
 
-let ExecWithVarsGetOutput (vars : Map<string, string>) (command : string) (args : string) (dir : DirectoryInfo) =
-    let toStatus exitCode =
-        match exitCode with
-        | 0 -> Success
-        | x -> Failure x
-    let getOutput (proc:Process) =
-        let join separator (items: string seq) = System.String.Join(separator, items)
-        seq {
-            let output = proc.StandardOutput.ReadToEnd()
-            if System.String.IsNullOrEmpty(output) |> not then yield output
-            let error = proc.StandardError.ReadToEnd()
-            if System.String.IsNullOrEmpty(error) |> not then yield error
-        } |> join System.Environment.NewLine
-    let psi = defaultPSI command args dir true
+    let asyncOut = async { return read onOut proc.StandardOutput List.empty |> MonitorCommand.Out }
+    let asyncErr = async { return read onErr proc.StandardError List.empty |> MonitorCommand.Err }
+    let asyncCode = async { proc.WaitForExit(); return proc.ExitCode |> MonitorCommand.End }
+    let res = [ asyncCode ; asyncOut ; asyncErr ] |> Async.Parallel |> Async.RunSynchronously 
+    match res.[0], res.[1], res.[2] with
+    | MonitorCommand.End code, MonitorCommand.Out out, MonitorCommand.Err err -> onEnd code out err
+    | _ -> failwith "Unexpected results"
 
-    for var in vars do
-        psi.EnvironmentVariables.Add(var.Key, var.Value)
 
-    use proc = Process.Start(psi)    
-    proc.WaitForExit()
-    proc.ExitCode |> toStatus, getOutput proc
 
-let ExecGetOutput = ExecWithVarsGetOutput Map.empty
+let ExecBuffered checkError =
+    supervisedExec ignore ignore checkError
 
-let SpawnWithVerb (command : string) (verb : string) =
-    let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Verb = verb)
-    use proc = Process.Start (psi)
-    ()
+let Exec checkError = 
+    supervisedExec (printfn "%s") (printfn "%s") checkError
+
+let ExecSingleLine checkError (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
+    let mutable res : string = null
+    let firstLine code out err =
+        checkError code out err        
+        match out with
+        | x :: _ -> res <- x
+        | [] -> failwith "No data found"
+
+    supervisedExec (printfn "%s") (printfn "%s") firstLine command args dir vars
+    res
+
 
 let Spawn (command : string) (args : string) =
     let psi = ProcessStartInfo (FileName = command, UseShellExecute = false, Arguments = args)
     use proc = Process.Start (psi)
     ()
 
-let ExecReadLine checkErrorCode (command : string) (args : string) (dir : DirectoryInfo) =
-    let mutable psi = defaultPSI command args dir false
-    psi.RedirectStandardOutput <- true
-
+let SpawnWithVerb (command : string) (verb : string) =
+    let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Verb = verb)
     use proc = Process.Start (psi)
-    if proc = null then failwith "Failed to start process"
-    proc.WaitForExit()
-    checkErrorCode proc.ExitCode
-
-    use stm = proc.StandardOutput
-    stm.ReadLine ()
-
+    ()

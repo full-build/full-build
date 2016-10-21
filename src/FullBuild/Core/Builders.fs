@@ -18,13 +18,11 @@ open IoHelpers
 open Env
 open Graph
 
-let checkErrorCode err =
-    if err <> 0 then failwithf "Process failed with error %d" err
+let private checkErrorCode code out err =
+    if code <> 0 then failwithf "Process failed with error %d" code
 
 let private checkedExec =
     Exec.Exec checkErrorCode
-
-
 
 
 
@@ -72,8 +70,8 @@ let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multith
     let argConfig = sprintf "/p:Configuration=%s" config
     let args = sprintf "/nologo %s %s %s %A" argTarget argMt argConfig viewFile.Name
 
-    if Env.IsMono () then checkedExec "xbuild" args wsDir
-    else checkedExec "msbuild" args wsDir
+    if Env.IsMono () then checkedExec "xbuild" args wsDir Map.empty
+    else checkedExec "msbuild" args wsDir Map.empty
 
 let chooseBuilder (builderType : BuilderType) msbuildBuilder skipBuilder =
     let builder = match builderType with

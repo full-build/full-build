@@ -20,20 +20,21 @@ open System
 open System.IO
 
 
-let private checkErrorCode err =
-    if err <> 0 then failwithf "Process failed with error %d" err
+let private checkErrorCode code out err =
+    if code <> 0 then failwithf "Process failed with error %d" code
 
-let private checkedExec = 
+let private checkedExec =
     Exec.Exec checkErrorCode
+
 
 [<Test>]
 let CheckExecOk () =
     if not <| Env.IsMono() then
         let currDir = IoHelpers.CurrentFolder ()
-        checkedExec "cmd" "/c dir >nul" currDir
+        checkedExec "cmd" "/c dir >nul" currDir Map.empty
 
 [<Test>]
 let CheckExecFailure () =
     let currDir = IoHelpers.CurrentFolder ()
-    (fun () -> checkedExec "gloubiboulga" "" currDir |> ignore) |> should throw typeof<System.ComponentModel.Win32Exception>
+    (fun () -> checkedExec "gloubiboulga" "" currDir Map.empty |> ignore) |> should throw typeof<System.ComponentModel.Win32Exception>
 

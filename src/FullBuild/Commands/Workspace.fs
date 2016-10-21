@@ -25,11 +25,11 @@ open System
 open Graph
 
 
-let private checkErrorCode err =
-    if err <> 0 then failwithf "Process failed with error %d" err
+let private checkErrorCode code out err =
+    if code <> 0 then failwithf "Process failed with error %d" code
 
 let private checkedExecWithVars =
-    Exec.ExecWithVars checkErrorCode
+    Exec.Exec checkErrorCode
 
 let private textHeader (version : string) =
     ()

@@ -17,10 +17,10 @@ module Tools.VcsHg
 open System.IO
 open Graph
 
-let private checkErrorCode err =
-    if err <> 0 then failwithf "Process failed with error %d" err
+let private checkErrorCode code out err =
+    if code <> 0 then failwithf "Process failed with error %d" code
 
-let private checkIgnore err =
+let private checkIgnore code out err =
     ()
 
 let private checkedExec =
@@ -31,32 +31,32 @@ let private checkedExecMaybeIgnore ignoreError =
     Exec.Exec check
 
 let private checkedExecReadLine =
-    Exec.ExecReadLine checkErrorCode
+    Exec.ExecSingleLine checkErrorCode
 
 let HgCommit (repoDir : DirectoryInfo) (comment : string) =
-    checkedExec "git" "add -S *" repoDir
+    checkedExec "git" "add -S *" repoDir Map.empty
     let args = sprintf "commit -A -m %A" comment
-    checkedExec "hg" args repoDir
+    checkedExec "hg" args repoDir Map.empty
 
 let HgPush (repoDir : DirectoryInfo) =
-    checkedExec "hg" "push" repoDir
+    checkedExec "hg" "push" repoDir Map.empty
 
 let HgPull (repoDir : DirectoryInfo) (rebase : bool) =
-    checkedExec "hg" "pull -u" repoDir
+    checkedExec "hg" "pull -u" repoDir Map.empty
 
 let HgTip (repoDir : DirectoryInfo) =
     let args = @"id -i"
-    let res = checkedExecReadLine "hg" args repoDir
+    let res = checkedExecReadLine "hg" args repoDir Map.empty
     res
 
 let HgClean (repoDir : DirectoryInfo) (repo : Repository) =
-    checkedExec "hg" "purge" repoDir
+    checkedExec "hg" "purge" repoDir Map.empty
 
 let HgIs (repo : Repository) =
     try
         let currDir = IoHelpers.CurrentFolder()
         let args = sprintf @"id -i -R %A" repo.Uri
-        checkedExecReadLine "hg" args currDir |> ignore
+        checkedExecReadLine "hg" args currDir Map.empty |> ignore
         true
     with
         _ -> false
@@ -65,7 +65,7 @@ let HgClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow
     let bronly = sprintf "-r %s" repo.Branch
     let args = sprintf @"clone %s %A %A" bronly url target.FullName
     let currDir = IoHelpers.CurrentFolder ()
-    checkedExec "hg" args currDir
+    checkedExec "hg" args currDir Map.empty
 
 let HgCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError : bool) =
     let rev = match version with
@@ -73,7 +73,7 @@ let HgCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError 
               | None -> "tip"
 
     let args = sprintf "update -r %A" rev
-    checkedExecMaybeIgnore ignoreError "hg" args repoDir
+    checkedExecMaybeIgnore ignoreError "hg" args repoDir Map.empty
 
 let HgHistory (repoDir : DirectoryInfo) (version : string) =
     null
