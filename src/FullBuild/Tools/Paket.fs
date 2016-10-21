@@ -20,8 +20,8 @@ open IoHelpers
 open Collections
 
 
-let private checkErrorCode err =
-    if err <> 0 then failwithf "Process failed with error %d" err
+let private checkErrorCode code out err =
+    if code <> 0 then failwithf "Process failed with error %d" code
 
 let private checkedExec =
     Exec.Exec checkErrorCode
@@ -69,7 +69,7 @@ let private removeDependenciesContent (lines : string seq) (packages : PackageId
 
 let private executePaketCommand cmd =
     let confDir = Env.GetFolder Env.Folder.Config
-    checkedExec "paket.exe" cmd confDir
+    checkedExec "paket.exe" cmd confDir Map.empty
 
 let UpdateSources (sources : RepositoryUrl seq) =
     let confDir = Env.GetFolder Env.Folder.Config

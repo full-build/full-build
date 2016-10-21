@@ -18,8 +18,8 @@ open Env
 open System.IO
 open Graph
 
-let private checkErrorCode err =
-    if err <> 0 then failwithf "Process failed with error %d" err
+let private checkErrorCode code out err =
+    if code < 0 then failwithf "Process failed with error %d" code
 
 let private checkedExec =
     Exec.Exec checkErrorCode
@@ -39,8 +39,8 @@ let private publishCopy (app : PublishApp) =
             let projFile = repoDir |> GetFile project.ProjectFile
             let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name projFile.FullName
 
-            if Env.IsMono () then checkedExec "xbuild" args wsDir
-            else checkedExec "msbuild" args wsDir
+            if Env.IsMono () then checkedExec "xbuild" args wsDir Map.empty
+            else checkedExec "msbuild" args wsDir Map.empty
 
             let appDir = GetFolder Env.Folder.AppOutput
             let artifactDir = appDir |> GetSubDirectory app.Name
@@ -71,7 +71,7 @@ let private publishDocker (app : PublishApp) =
     if targetFile.Exists then targetFile.Delete()
 
     let dockerArgs = sprintf "build -t %s ." app.Name
-    Exec.Exec checkErrorCode "docker" dockerArgs sourceFolder
+    Exec.Exec checkErrorCode "docker" dockerArgs sourceFolder Map.empty
     sourceFolder.Delete(true)
 
 let private choosePublisher (pubType : PublisherType) appCopy appZip appDocker =
