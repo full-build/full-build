@@ -18,9 +18,20 @@ open Collections
 open Graph
 
 let private cloneRepoAndInit wsDir shallow (repo : Repository) =
+    let rec printl lines =
+        match lines with
+        | line :: tail -> printfn "%s" line 
+                          printl tail
+        | [] -> ()
+
+    let onEnd code out err =
+        IoHelpers.DisplayHighlight repo.Name
+        printl out
+        printl err
+
     async {
         IoHelpers.DisplayHighlight repo.Name
-        Tools.Vcs.Clone wsDir repo shallow
+        Tools.Vcs.Clone wsDir repo shallow onEnd
     }
 
 let List() =

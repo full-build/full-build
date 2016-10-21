@@ -20,11 +20,17 @@ open Graph
 let private checkErrorCode code out err =
     if code <> 0 then failwithf "Process failed with error %d" code
 
+let private noBuffering code out err =
+    ()
+
 let private checkIgnore code out err =
     ()
 
-let private checkedExec =
-    Exec.Exec checkErrorCode
+let private checkedExec onEnd =
+    let ycheck code out err =
+        onEnd code out err
+        checkErrorCode code out err
+    Exec.Exec ycheck
     
 let private checkedExecMaybeIgnore ignoreError =
     let check = if ignoreError then checkIgnore else checkErrorCode
@@ -34,15 +40,15 @@ let private checkedExecReadLine =
     Exec.ExecSingleLine checkErrorCode
 
 let HgCommit (repoDir : DirectoryInfo) (comment : string) =
-    checkedExec "git" "add -S *" repoDir Map.empty
+    checkedExec noBuffering "git" "add -S *" repoDir Map.empty
     let args = sprintf "commit -A -m %A" comment
-    checkedExec "hg" args repoDir Map.empty
+    checkedExec noBuffering "hg" args repoDir Map.empty
 
 let HgPush (repoDir : DirectoryInfo) =
-    checkedExec "hg" "push" repoDir Map.empty
+    checkedExec noBuffering "hg" "push" repoDir Map.empty
 
-let HgPull (repoDir : DirectoryInfo) (rebase : bool) =
-    checkedExec "hg" "pull -u" repoDir Map.empty
+let HgPull (repoDir : DirectoryInfo) (rebase : bool) onEnd =
+    checkedExec onEnd "hg" "pull -u" repoDir Map.empty
 
 let HgTip (repoDir : DirectoryInfo) =
     let args = @"id -i"
@@ -50,7 +56,7 @@ let HgTip (repoDir : DirectoryInfo) =
     res
 
 let HgClean (repoDir : DirectoryInfo) (repo : Repository) =
-    checkedExec "hg" "purge" repoDir Map.empty
+    checkedExec noBuffering "hg" "purge" repoDir Map.empty
 
 let HgIs (repo : Repository) =
     try
@@ -61,11 +67,11 @@ let HgIs (repo : Repository) =
     with
         _ -> false
 
-let HgClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
+let HgClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) onEnd =
     let bronly = sprintf "-r %s" repo.Branch
     let args = sprintf @"clone %s %A %A" bronly url target.FullName
     let currDir = IoHelpers.CurrentFolder ()
-    checkedExec "hg" args currDir Map.empty
+    checkedExec onEnd "hg" args currDir Map.empty
 
 let HgCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError : bool) =
     let rev = match version with

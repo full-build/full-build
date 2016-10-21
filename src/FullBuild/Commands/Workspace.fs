@@ -31,6 +31,9 @@ let private checkErrorCode code out err =
 let private checkedExecWithVars =
     Exec.Exec checkErrorCode
 
+let private noBuffering code out err =
+    ()
+
 let private textHeader (version : string) =
     ()
 
@@ -64,7 +67,7 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     try
         Environment.CurrentDirectory <- wsDir.FullName
         let graph = Graph.create createInfo.MasterRepository createInfo.MasterArtifacts createInfo.Type TestRunnerType.NUnit
-        Tools.Vcs.Clone wsDir graph.MasterRepository true
+        Tools.Vcs.Clone wsDir graph.MasterRepository true noBuffering
         graph.Save()
 
         let baselineRepository = Baselines.from graph
@@ -90,7 +93,7 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         printf "[WARNING] Workspace already exists - skipping"
     else
         let graph = Graph.init initInfo.MasterRepository initInfo.Type
-        Tools.Vcs.Clone wsDir graph.MasterRepository true
+        Tools.Vcs.Clone wsDir graph.MasterRepository true noBuffering
 
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -163,9 +166,18 @@ let consoleProgressBar max =
         loop 1)
 
 let private cloneRepo wsDir rebase (repo : Repository) =
+    let rec printl lines =
+        match lines with
+        | line :: tail -> printfn "%s" line 
+                          printl tail
+        | [] -> ()
+
     async {
-        IoHelpers.DisplayHighlight repo.Name
-        Tools.Vcs.Pull wsDir repo rebase
+        let onEnd code out err = 
+            IoHelpers.DisplayHighlight repo.Name
+            printl out
+            printl err
+        Tools.Vcs.Pull wsDir repo rebase onEnd
     }
 
 
@@ -185,33 +197,6 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
         cloneRepos |> Seq.filter (fun x -> x.IsCloned)
                    |> Seq.map (cloneRepo wsDir pullInfo.Rebase)
                    |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
-
-//        let reposToPull = graph.MasterRepository :: (getClonedRepos () |> Seq.toList)
-//        let pb = reposToPull.Count() |> consoleProgressBar
-//        let pullResults = reposToPull 
-//                            |> Seq.map(fun repo -> async {
-//                                let status, message = Tools.Vcs.Pull wsDir repo pullInfo.Rebase
-//                                pb.Post()
-//                                return repo.Name, status, message
-//                            })
-//                            |> Async.Parallel
-//                            |> Async.RunSynchronously
-//
-//        pullResults 
-//            |> Seq.iter(fun (repoName, _, msg) -> 
-//                DisplayHighlight repoName
-//                msg |> printf "%s")
-//
-//        let ifNotEmpty f seq = 
-//            if seq |> Seq.isEmpty then ()
-//            else seq |> f
-//        
-//        pullResults 
-//            |> Seq.choose(fun (repoName, status, msg) -> 
-//                match status with
-//                | Exec.Failure errorCode -> sprintf "Pull repo %s failed with error code %i" repoName errorCode |> Some
-//                | Exec.Success -> None )
-//            |> ifNotEmpty (fun errors -> String.Join(Environment.NewLine, errors) |> failwith)
 
         Install ()
 

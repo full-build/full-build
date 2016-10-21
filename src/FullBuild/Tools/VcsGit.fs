@@ -20,11 +20,17 @@ open Graph
 let private checkErrorCode code out err =
     if code <> 0 then failwithf "Process failed with error %d" code
 
+let private noBuffering code out err =
+    ()
+
 let private checkIgnore code out err =
     ()
 
-let private checkedExec =
-    Exec.Exec checkErrorCode
+let private checkedExec onEnd =
+    let ycheck code out err =
+        onEnd code out err
+        checkErrorCode code out err
+    Exec.Exec ycheck
     
 let private checkedExecMaybeIgnore ignoreError =
     let check = if ignoreError then checkIgnore else checkErrorCode
@@ -34,17 +40,17 @@ let private checkedExecReadLine =
     Exec.ExecSingleLine checkErrorCode
 
 let GitCommit (repoDir : DirectoryInfo) (comment : string) =
-    checkedExec "git" "add --all" repoDir Map.empty
+    checkedExec noBuffering "git" "add --all" repoDir Map.empty
     let args = sprintf "commit -m %A" comment
-    checkedExec "git" args repoDir Map.empty
+    checkedExec noBuffering "git" args repoDir Map.empty
 
 let GitPush (repoDir : DirectoryInfo) =
-    checkedExec "git" "push --quiet" repoDir Map.empty
+    checkedExec noBuffering "git" "push --quiet" repoDir Map.empty
 
-let GitPull (repoDir : DirectoryInfo) (rebase : bool) =
+let GitPull (repoDir : DirectoryInfo) (rebase : bool) onEnd =
     let dorebase = if rebase then "--rebase" else "--ff-only"
     let args = sprintf "pull %s" dorebase
-    checkedExec "git" args repoDir Map.empty
+    checkedExec onEnd "git" args repoDir Map.empty
 
 let GitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=%H"
@@ -52,9 +58,9 @@ let GitTip (repoDir : DirectoryInfo) =
     res
 
 let GitClean (repoDir : DirectoryInfo) (repo : Repository) =
-    checkedExec "git" "reset --hard" repoDir Map.empty
-    checkedExec "git" "clean -fxd" repoDir Map.empty
-    checkedExec "git" (sprintf "checkout %s" repo.Branch) repoDir Map.empty
+    checkedExec noBuffering "git" "reset --hard" repoDir Map.empty
+    checkedExec noBuffering "git" "clean -fxd" repoDir Map.empty
+    checkedExec noBuffering "git" (sprintf "checkout %s" repo.Branch) repoDir Map.empty
 
 let GitIs (repo : Repository) =
     try
@@ -65,7 +71,7 @@ let GitIs (repo : Repository) =
     with
         _ -> false
 
-let GitClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
+let GitClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) onEnd =
     let bronly = sprintf "--branch %s --no-single-branch" repo.Branch
     let depth = if shallow then "--depth=3"
                 else ""
@@ -73,10 +79,10 @@ let GitClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallo
     let args = sprintf @"clone %s --quiet %s %s %A" url bronly depth target.FullName
 
     let currDir = IoHelpers.CurrentFolder ()
-    checkedExec "git" args currDir Map.empty
+    checkedExec onEnd "git" args currDir Map.empty
 
-let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
-    GitClone repo target url shallow
+let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) onEnd =
+    GitClone repo target url shallow onEnd
 
     let installDir = Env.GetFolder Env.Folder.Installation
     let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
