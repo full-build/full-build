@@ -25,22 +25,24 @@ type private MonitorCommand =
     | Err of string list
     | End of int
 
-let private defaultPSI (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
+let private defaultPSI (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) redirect =
     let psi = ProcessStartInfo (FileName = command,
                                 Arguments = args,
                                 UseShellExecute = false, 
                                 WorkingDirectory = dir.FullName, 
-                                LoadUserProfile = true, 
-                                RedirectStandardOutput = true, 
-                                RedirectStandardError = true,
-                                StandardOutputEncoding = System.Text.Encoding.GetEncoding(850))
+                                LoadUserProfile = true)
     for var in vars do
         psi.EnvironmentVariables.Add(var.Key, var.Value)
+
+    if redirect then
+        psi.RedirectStandardOutput <- true
+        psi.RedirectStandardError <- true
+
     psi
     
 
-let private supervisedExec onOut onErr onEnd (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
-    let psi = defaultPSI command args dir vars
+let private supervisedExec onOut onErr onEnd redirect (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
+    let psi = defaultPSI command args dir vars redirect
     use proc = Process.Start (psi)
     if proc |> isNull then failwith "Failed to start process"
 
@@ -51,8 +53,10 @@ let private supervisedExec onOut onErr onEnd (command : string) (args : string) 
             processLine line
             read processLine stm buffer@[line]
 
-    let asyncOut = async { return read onOut proc.StandardOutput List.empty |> MonitorCommand.Out }
-    let asyncErr = async { return read onErr proc.StandardError List.empty |> MonitorCommand.Err }
+    let asyncOut = if redirect then async { return read onOut proc.StandardOutput List.empty |> MonitorCommand.Out }
+                               else async { return List.empty |> MonitorCommand.Out }
+    let asyncErr = if redirect then async { return read onErr proc.StandardError List.empty |> MonitorCommand.Err }
+                               else async { return List.empty |> MonitorCommand.Err }
     let asyncCode = async { proc.WaitForExit(); return proc.ExitCode |> MonitorCommand.End }
     let res = [ asyncCode ; asyncOut ; asyncErr ] |> Async.Parallel |> Async.RunSynchronously 
     match res.[0], res.[1], res.[2] with
@@ -62,10 +66,10 @@ let private supervisedExec onOut onErr onEnd (command : string) (args : string) 
 
 
 let ExecBuffered checkError =
-    supervisedExec ignore ignore checkError
+    supervisedExec ignore ignore checkError true
 
 let Exec checkError = 
-    supervisedExec (printfn "%s") (printfn "%s") checkError
+    supervisedExec (printfn "%s") (printfn "%s") checkError false
 
 let ExecSingleLine checkError (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
     let mutable res : string = null
@@ -75,7 +79,7 @@ let ExecSingleLine checkError (command : string) (args : string) (dir : Director
         | x :: _ -> res <- x
         | [] -> failwith "No data found"
 
-    supervisedExec (printfn "%s") (printfn "%s") firstLine command args dir vars
+    supervisedExec (printfn "%s") (printfn "%s") firstLine true command args dir vars
     res
 
 
