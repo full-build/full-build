@@ -17,6 +17,7 @@ pushd cs-do
 %FULLBUILD% describe view all || goto :ko
 %FULLBUILD% graph all || goto :ko
 %FULLBUILD% build all || goto :ko
+%FULLBUILD% history || goto :ko
 %FULLBUILD% drop view csc || goto :ko
 %FULLBUILD% outdated package || goto :ko
 %FULLBUILD% update package || goto :ko
