@@ -36,7 +36,9 @@ init:
   - ps: $posAfterVchar = $branch.LastIndexOf("v") + 1
   - ps: $versionLength = $branch.Length - $posAfterVchar
   - ps: $version = $branch.substring($posAfterVchar, $versionLength)
-  - ps: Update-AppveyorBuild -Version "$version.$env:APPVEYOR_BUILD_NUMBER"
+  - ps: $newVersion = "$version.$env:APPVEYOR_BUILD_NUMBER"
+  - ps: Write-Host "Building version $newVersion"
+  - ps: Update-AppveyorBuild -Version "$newVersion"
 
 shallow_clone: true
 
