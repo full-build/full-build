@@ -13,6 +13,7 @@
 //   limitations under the License.
 
 module PatternMatching
+open Collections
 
 let private (|MatchZeroOrMore|_|) c =
     match c with
@@ -38,3 +39,13 @@ let rec private matchRec (content : char list) (pattern : char list) =
 
 let Match (content : string) (pattern : string) =
     matchRec (content.ToLowerInvariant() |> Seq.toList) (pattern.ToLowerInvariant() |> Seq.toList)
+
+
+let FilterMatch<'T when 'T : comparison> (items : 'T set) (strOf : 'T -> string) (filters : string set) : 'T set =
+    let mapItems = items |> Set.map (fun x -> (x, (strOf x).ToLowerInvariant()))
+    let matchItems filter = mapItems |> Set.filter (fun x -> Match (snd x) filter)
+                                     |> Set.map fst
+    let matches = filters |> Set.map (fun x -> x.ToLowerInvariant()) 
+                          |> Set.map matchItems
+                          |> Set.unionMany
+    matches

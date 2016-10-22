@@ -1,4 +1,18 @@
-﻿module SimplifyTests
+﻿//   Copyright 2014-2016 Pierre Chalamet
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+
+module SimplifyTests
 
 open FsUnit
 open NUnit.Framework
@@ -27,7 +41,7 @@ let CheckSimplifyAssemblies () =
     lognetunittests.ProjectReferences |> should not' (contain cassandraSharpPrjRef)
     lognetunittests.ProjectReferences |> should not' (contain cassandraSharpItfPrjRef)
 
-    let simplifedProjects = Simplify.TransformSingleAssemblyToProjectOrPackage package2Files anthology.Projects
+    let simplifedProjects = Core.Simplify.TransformSingleAssemblyToProjectOrPackage package2Files anthology.Projects
     let simplifiedlognetunittests = simplifedProjects |> Seq.find (fun x -> x.UniqueProjectId = lognetunittestsRef)
 
     simplifiedlognetunittests.AssemblyReferences |> should not' (contain cassandraSharpAssName)
@@ -68,7 +82,7 @@ let CheckSimplifyAnthology () =
                                  (PackageId.from "cassandra-sharp-core", Set [PackageId.from "Rx-Main"])
                                  (PackageId.from "cassandra-sharp-interfaces", Set.empty) ]
 
-    let newAnthology = Simplify.SimplifyAnthologyWithPackages anthology package2files package2packages
+    let newAnthology = Core.Simplify.SimplifyAnthologyWithPackages anthology package2files package2packages
     let file = FileInfo (Path.GetRandomFileName())
     //printfn "Temporary file is %A" file.FullName
 
@@ -106,8 +120,8 @@ let CheckConflictsWithSameGuid () =
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }
 
-    let conflictsSameGuid = Indexation.findConflicts [p1; p2] |> List.ofSeq
-    conflictsSameGuid |> should equal [Indexation.SameGuid (p1, p2)]
+    let conflictsSameGuid = Core.Indexation.findConflicts [p1; p2] |> List.ofSeq
+    conflictsSameGuid |> should equal [Core.Indexation.SameGuid (p1, p2)]
 
 [<Test>]
 let CheckConflictsWithSameOutput () =
@@ -139,8 +153,8 @@ let CheckConflictsWithSameOutput () =
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }
 
-    let conflictsSameGuid = Indexation.findConflicts [p1; p2] |> List.ofSeq
-    conflictsSameGuid |> should equal [Indexation.SameOutput (p1, p2)]
+    let conflictsSameGuid = Core.Indexation.findConflicts [p1; p2] |> List.ofSeq
+    conflictsSameGuid |> should equal [Core.Indexation.SameOutput (p1, p2)]
 
 [<Test>]
 let CheckNoConflictsSameProjectName () =
@@ -172,5 +186,5 @@ let CheckNoConflictsSameProjectName () =
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }
 
-    let conflictsSameGuid = Indexation.findConflicts [p1; p2] |> List.ofSeq
+    let conflictsSameGuid = Core.Indexation.findConflicts [p1; p2] |> List.ofSeq
     conflictsSameGuid |> should equal []

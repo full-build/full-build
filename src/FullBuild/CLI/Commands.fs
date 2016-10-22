@@ -12,88 +12,91 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Commands
+module CLI.Commands
 open Anthology
 open Collections
 
 
 type SetupWorkspace =
-    { MasterRepository : RepositoryUrl
+    { MasterRepository : string
       MasterArtifacts : string
-      Type : VcsType
+      Type : Graph.VcsType
       Path : string }
 
 type InitWorkspace =
-    { MasterRepository : RepositoryUrl
-      Type : VcsType
+    { MasterRepository : string
+      Type : Graph.VcsType
       Path : string }
 
 type CheckoutWorkspace =
     { Version : string }
 
 type CloneRepositories =
-    { Filters : RepositoryId set
+    { Filters : string set
       Shallow : bool
       All : bool
       Multithread : bool }
 
+type UpdateGuids =
+    { Filters : string set }
+
 type IndexRepositories =
-    { Filters : RepositoryId set }
+    { Filters : string set }
 
 type ConvertRepositories =
-    { Filters : RepositoryId set }
+    { Filters : string set }
 
 type TestAssemblies =
-    { Filters : string list
-      Excludes : string list }
+    { Filters : string set
+      Excludes : string set }
 
 type NuGetUrl =
     { Url : string }
 
 type AddView =
-    { Name : ViewId
+    { Name : string
       Filters : string list
-      SourceOnly : bool
-      Parents : bool
+      References : bool
+      ReferencedBy : bool
       Modified : bool }
 
 type ViewName =
-    { Name : ViewId }
+    { Name : string }
 
 type PublishApplications =
-    { View: ViewId option
+    { View: string option
       Filters : string list
       Multithread : bool }
 
 type CheckoutVersion =
-    { Version : BookmarkVersion }
+    { Version : string }
 
 type BranchWorkspace =
-    { Branch : BookmarkVersion option }
+    { Branch : string option }
 
 type AddApplication =
-    { Name : ApplicationId
-      Publisher : PublisherType
-      Projects : ProjectId list }
+    { Name : string
+      Publisher : Graph.PublisherType
+      Projects : string set }
 
 type BuildView =
-    { Name : ViewId option
+    { Name : string option
       Config : string
       Clean : bool
       Multithread : bool
       Version : string option }
 
 type AlterView =
-    { Name : ViewId
+    { Name : string
       Default : bool option
       Source : bool option
       Parents : bool option }
 
 type OpenView =
-    { Name : ViewId }
+    { Name : string }
 
 type GraphView =
-    { Name : ViewId
+    { Name : string
       All : bool }
 
 type Exec =
@@ -101,16 +104,17 @@ type Exec =
       All : bool }
 
 type AddRepository =
-    { Repo : RepositoryId
-      Url : RepositoryUrl
-      Branch : BranchId option
-      Builder : BuilderType }
+    { Name : string
+      Url : string
+      Branch : string option
+      Builder : Graph.BuilderType }
 
 type PullWorkspace =
     { Src : bool
       Bin : bool
       Rebase : bool
-      View : ViewId option }
+      Multithread : bool
+      View : string option }
 
 type PushWorkspace =
     { BuildNumber : string
@@ -118,7 +122,7 @@ type PushWorkspace =
       Incremental : bool }
 
 type BindProject =
-    { Filters : string list }
+    { Filters : string set }
 
 type History =
     { Html : bool }
@@ -189,7 +193,7 @@ type Command =
     | PullWorkspace of PullWorkspace
     | Exec of Exec
     | CleanWorkspace
-    | UpdateGuids of RepositoryId
+    | UpdateGuids of UpdateGuids
     | TestAssemblies of TestAssemblies
     | History of History
 
@@ -197,7 +201,7 @@ type Command =
     | ListRepositories
     | AddRepository of AddRepository
     | CloneRepositories of CloneRepositories
-    | DropRepository of RepositoryId
+    | DropRepository of string
 
     // view
     | ListViews
