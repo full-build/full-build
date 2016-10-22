@@ -27,7 +27,7 @@ environment:
 
 #version: $(APPVEYOR_REPO_TAG_NAME).{build}
 init:
-  -ps: . .\Set-Version.ps1
+  - ps: . .\Set-Version.ps1
 
 shallow_clone: true
 
