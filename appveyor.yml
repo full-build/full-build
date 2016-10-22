@@ -1,12 +1,33 @@
+#
+# configuration to suite git flow process
+#
+# all
+# ---
+#  - version is from tag name
+#  - publish happens iif tag applied
+#
+# master
+# ------
+#  - push stable-release to GitHub
+#  - push package to NuGet
+#
+# release/*
+# ---------
+#  - push beta-release to GitHub
+#
+# develop
+# -------
+#  - push alpha-release to GitHub
+
 os: Visual Studio 2015
 
 environment:
   GITHUB_TOKEN:
     secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
 
-skip_tags: true
-
-version: 2.6.{build}
+#version: $(APPVEYOR_REPO_TAG_NAME).{build}
+init:
+  -ps: . .\Set-Version.ps1
 
 shallow_clone: true
 
@@ -14,7 +35,7 @@ build_script:
   - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION%
   
 test_script:
-  - ps: . .\pushtestresult.ps1
+  - ps: . .\Push-TestResult.ps1
 
 artifacts:
   - path: apps/full-build.zip
@@ -26,16 +47,43 @@ artifacts:
 deploy:
   - provider: GitHub
     release: 'full-build v$(appveyor_build_version)'
-    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
+    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message) stable'
+    tag: 'stable'
+    auth_token:
+      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
+    artifact: apps/full-build.zip
+    draft: true
+    prerelease: false
+    on:
+      branch: master
+      appveyor_repo_tag: true
+  
+  - provider: GitHub
+    release: 'full-build v$(appveyor_build_version)'
+    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message) beta'
+    tag: 'beta'
     auth_token:
       secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     artifact: apps/full-build.zip
     draft: false
-    prerelease: false
+    prerelease: true
     on:
-      branch: master
-      appveyor_repo_tag: false
+      branch: release/*
+      appveyor_repo_tag: true  
 
+ - provider: GitHub
+    release: 'full-build v$(appveyor_build_version)'
+    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message) alpha'
+    tag: 'alpha'
+    auth_token:
+      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
+    artifact: apps/full-build.zip
+    draft: false
+    prerelease: true
+    on:
+      branch: develop
+      appveyor_repo_tag: true  
+      
   - provider: NuGet
     api_key:
       secure: Fa/KRLSPeo1w78xW6Yb6FJv3amW/BRcLKpy7DW7e0/mdsiug7GBA36twg2HOUCSS
@@ -44,7 +92,8 @@ deploy:
     artifacts: apps/full-build.nupkg
     on:
       branch: master
-
+      appveyor_repo_tag: true  
+      
 notifications:
   - provider: GitHubPullRequest
     auth_token:
