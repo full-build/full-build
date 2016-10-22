@@ -37,7 +37,7 @@ let private checkedExecMaybeIgnore ignoreError =
     Exec.Exec check
 
 let private checkedExecReadLine =
-    Exec.ExecSingleLine checkErrorCode
+    Exec.ExecGetOutput checkErrorCode
 
 let HgCommit (repoDir : DirectoryInfo) (comment : string) =
     checkedExec noBuffering "git" "add -S *" repoDir Map.empty
@@ -82,10 +82,10 @@ let HgCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError 
     checkedExecMaybeIgnore ignoreError "hg" args repoDir Map.empty
 
 let HgHistory (repoDir : DirectoryInfo) (version : string) =
-    null
+    []
 
 let HgLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
-    ""
+    []
 
 let HgIgnore (repoDir : DirectoryInfo) =
     // FIXME

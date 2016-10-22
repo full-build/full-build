@@ -254,17 +254,21 @@ let History (historyInfo : CLI.Commands.History) =
         
     // body
     let lastCommit = Tools.Vcs.LastCommit wsDir graph.MasterRepository "baseline"
-    let revision = Tools.Vcs.Log wsDir graph.MasterRepository lastCommit
+    let revision = Tools.Vcs.Log wsDir graph.MasterRepository lastCommit.[0]
 
     let revisions = seq {
         // master repo
-        yield graph.MasterRepository, revision
+        match revision with
+        | [] -> ()
+        | _ -> yield graph.MasterRepository, revision
 
         // other repositories then
         for bookmark in baseline.Bookmarks do
             if bookmark.Repository.IsCloned then
                 let revision = Tools.Vcs.Log wsDir bookmark.Repository bookmark.Version
-                yield bookmark.Repository, revision
+                match revision with
+                | [] -> ()
+                | _ -> yield bookmark.Repository, revision
     }
 
     let histType = if historyInfo.Html then Generators.History.HistoryType.Html

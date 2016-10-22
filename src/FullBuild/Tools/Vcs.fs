@@ -40,7 +40,7 @@ let Clone (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) onEnd =
     (chooseVcs wsDir repo.Vcs repo gitCloneFunc hgCloneFunc) repo.Uri shallow onEnd
 
 let Tip (wsDir : DirectoryInfo) (repo : Repository) =
-    chooseVcs wsDir repo.Vcs repo GitTip HgTip
+    (chooseVcs wsDir repo.Vcs repo GitTip HgTip).[0]
 
 // version : None ==> master
 let Checkout (wsDir : DirectoryInfo) (repo : Repository) (version : string option) (ignore : bool) =

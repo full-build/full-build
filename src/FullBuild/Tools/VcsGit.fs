@@ -37,7 +37,7 @@ let private checkedExecMaybeIgnore ignoreError =
     Exec.Exec check
 
 let private checkedExecReadLine =
-    Exec.ExecSingleLine checkErrorCode
+    Exec.ExecGetOutput checkErrorCode
 
 let GitCommit (repoDir : DirectoryInfo) (comment : string) =
     checkedExec noBuffering "git" "add --all" repoDir Map.empty
@@ -105,7 +105,7 @@ let GitHistory (repoDir : DirectoryInfo) (version : string) =
         let res = checkedExecReadLine "git" args repoDir Map.empty
         res
     with
-        exn -> sprintf "Failed to get history for repository %A from version %A (%s)" repoDir.Name version (exn.ToString())
+        exn -> [sprintf "Failed to get history for repository %A from version %A (%s)" repoDir.Name version (exn.ToString())]
 
 let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
     let args = sprintf @"log -1 --format=%%H %s" relativeFile
