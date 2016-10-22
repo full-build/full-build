@@ -27,7 +27,17 @@ environment:
 
 #version: $(APPVEYOR_REPO_TAG_NAME).{build}
 init:
-  - ps: . .\Set-Version.ps1
+  - ps: $branch = $env:APPVEYOR_REPO_BRANCH
+  - ps: if($branch -eq 'master') $version = $env:APPVEYOR_REPO_TAG_NAME
+  - ps: elseif ($branch -eq 'develop') $version = 'v999.999'
+  - ps: else $version = $branch
+  - ps: $posAfterVchar = $branch.LastIndexOf("v") + 1
+  - ps: $versionLength = $branch.Length - $posAfterVchar
+  - ps: $version = $branch.substring($posAfterVchar, $versionLength)
+  - ps: $newVersion = "$version.$env:APPVEYOR_BUILD_NUMBER"
+  - ps: Write-Host "Update appveyor build version to: $newVersion"
+  - ps: $env:APPVEYOR_BUILD_VERSION = "$newVersion"
+  - ps: Update-AppveyorBuild -Version "$newVersion"
 
 shallow_clone: true
 
