@@ -25,7 +25,7 @@ environment:
   GITHUB_TOKEN:
     secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
 
-version: v2.6.{build}
+version: 2.6.{build}
 
 init:
   - ps: $branch = $env:APPVEYOR_REPO_BRANCH
