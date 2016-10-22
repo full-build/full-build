@@ -28,24 +28,21 @@ let private htmlHeader (version : string) =
 let private htmlFooter () =
     printfn "</body>"
 
-let private textBody (repo : string) (content : string) =
+let private textBody (repo : string) (content : string list) =
     IoHelpers.DisplayHighlight repo
-    printfn "%s" content
+    content |> Seq.iter (printfn "%s")
 
-let private htmlBody (repo : string) (content : string) =
+let private htmlBody (repo : string) (content : string list) =
     printfn "<b>%s</b><br>" repo
-    let htmlContent = content.Replace(System.Environment.NewLine, "<br>")
-    printfn "%s<br><br>" htmlContent
-
-
-
+    content |> Seq.iter (printfn "%s<br>")
+    printfn "<br>"
 
 type HistoryType =
     | Html
     | Text
 
 
-let Save (histType : HistoryType) (version : string) (revisions : (Graph.Repository*string) seq) =
+let Save (histType : HistoryType) (version : string) (revisions : (Graph.Repository*string list) seq) =
     let header, body, footer = match histType with
                                | HistoryType.Html -> htmlHeader, htmlBody, htmlFooter
                                | HistoryType.Text -> textHeader, textBody, textFooter

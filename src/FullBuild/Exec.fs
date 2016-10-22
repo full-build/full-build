@@ -71,15 +71,13 @@ let ExecBuffered checkError =
 let Exec checkError = 
     supervisedExec (printfn "%s") (printfn "%s") checkError false
 
-let ExecSingleLine checkError (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
-    let mutable res : string = null
+let ExecGetOutput checkError (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
+    let mutable res : string list = List.empty
     let firstLine code out err =
-        checkError code out err        
-        match out with
-        | x :: _ -> res <- x
-        | [] -> failwith "No data found"
+        checkError code out err
+        res <- out @ err
 
-    supervisedExec (printfn "%s") (printfn "%s") firstLine true command args dir vars
+    supervisedExec ignore ignore firstLine true command args dir vars
     res
 
 
