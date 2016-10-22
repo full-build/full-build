@@ -108,6 +108,7 @@
     <Compile Include="Generators\PlatformMatching.fs" />
     <Compile Include="Generators\Package.fs" />
     <Compile Include="Generators\MSBuild.fs" />
+    <Compile Include="Generators\History.fs" />
     <Compile Include="Core\Builders.fs" />
     <Compile Include="Core\TestRunners.fs" />
     <Compile Include="Core\Bindings.fs" />
