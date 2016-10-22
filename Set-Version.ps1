@@ -4,15 +4,19 @@ if($branch -eq 'master') {
 } 
 # develop (alpha)
 elseif ($branch -eq 'develop') {
-    $version = '999.999.999'
+    $version = 'v999.999'
 }
 # release 
 else {
-    $posAfterVchar = $branch.LastIndexOf("v") + 1
-    $versionLength = $branch.Length - $posAfterVchar
-    $version = $branch.substring($posAfterVchar, $versionLength)
+    $version = $branch
 }
 
+# keep only version after v
+$posAfterVchar = $branch.LastIndexOf("v") + 1
+$versionLength = $branch.Length - $posAfterVchar
+$version = $branch.substring($posAfterVchar, $versionLength)
+
+# set version in appveyor
 $newVersion = "$version.$env:APPVEYOR_BUILD_NUMBER"
 Write-Host "Update appveyor build version to: $newVersion"
 
