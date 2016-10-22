@@ -33,8 +33,8 @@ init:
   - ps: If ($branch -eq "develop") { $version = "v999.0" }
   - ps: If ($branch -like "release/*") { $version = $branch }
   - ps: If ($branch -like "feature/*") { $version = "v999.1" }
-  - ps: if($version) { $posAfterVchar = $branch.LastIndexOf("v") + 1 }
-  - ps: if($version) { $versionLength = $branch.Length - $posAfterVchar }
+  - ps: if($version) { $posAfterVchar = $version.LastIndexOf("v") + 1 }
+  - ps: if($version) { $versionLength = $version.Length - $posAfterVchar }
   - ps: if($version) { $version = $version.substring($posAfterVchar, $versionLength) }
   - ps: if($version) { $newVersion = "$version.$env:APPVEYOR_BUILD_NUMBER" }
   - ps: if($version) { Update-AppveyorBuild -Version "$newVersion" }
