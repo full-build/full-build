@@ -1,15 +1,7 @@
 $branch = $env:APPVEYOR_REPO_BRANCH
-if($branch -eq 'master') {
-    $version = $env:APPVEYOR_REPO_TAG_NAME
-} 
-# develop (alpha)
-elseif ($branch -eq 'develop') {
-    $version = 'v999.999'
-}
-# release 
-else {
-    $version = $branch
-}
+if($branch -eq 'master') $version = $env:APPVEYOR_REPO_TAG_NAME
+elseif ($branch -eq 'develop') $version = 'v999.999'
+else $version = $branch
 
 # keep only version after v
 $posAfterVchar = $branch.LastIndexOf("v") + 1
