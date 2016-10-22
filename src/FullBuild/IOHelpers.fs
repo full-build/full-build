@@ -22,10 +22,6 @@ open System.Xml.Linq
 let private checkErrorCode code out err =
     if code > 7 then failwithf "Process failed with error %d" code
 
-let private checkedExec =
-    Exec.Exec  checkErrorCode
-
-
 type Extension =
     | View
     | Solution
@@ -110,7 +106,7 @@ let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) (readOnly : boo
                   else "/A-:R"
 
     let args = sprintf "%s /MIR /MT /NP /NFL /NDL /NJH /NJS %A %A" setRead source.FullName target.FullName
-    checkedExec "robocopy.exe" args currDir Map.empty
+    Exec.Exec checkErrorCode "robocopy.exe" args currDir Map.empty
 
 let GetExtension (file : FileInfo) =
     file.Extension.Replace(".", "")

@@ -21,9 +21,6 @@ open Graph
 let private checkErrorCode code out err =
     if code < 0 then failwithf "Process failed with error %d" code
 
-let private checkedExec =
-    Exec.Exec checkErrorCode
-
 
 type private PublishApp =
     { Name : string
@@ -39,8 +36,8 @@ let private publishCopy (app : PublishApp) =
             let projFile = repoDir |> GetFile project.ProjectFile
             let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name projFile.FullName
 
-            if Env.IsMono () then checkedExec "xbuild" args wsDir Map.empty
-            else checkedExec "msbuild" args wsDir Map.empty
+            if Env.IsMono () then Exec.Exec checkErrorCode "xbuild" args wsDir Map.empty
+            else Exec.Exec checkErrorCode "msbuild" args wsDir Map.empty
 
             let appDir = GetFolder Env.Folder.AppOutput
             let artifactDir = appDir |> GetSubDirectory app.Name

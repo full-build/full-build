@@ -28,35 +28,8 @@ open Graph
 let private checkErrorCode code out err =
     if code <> 0 then failwithf "Process failed with error %d" code
 
-let private checkedExecWithVars =
-    Exec.Exec checkErrorCode
-
 let private noBuffering code out err =
     ()
-
-let private textHeader (version : string) =
-    ()
-
-let private textFooter () =
-    ()
-
-let private htmlHeader (version : string) =
-    printfn "<html>"
-    printfn "<body>"
-    printfn "<h2>version %s</h2>" version
-
-let private htmlFooter () =
-    printfn "</body>"
-
-let private textBody (repo : string) (content : string) =
-    DisplayHighlight repo
-    printfn "%s" content
-
-let private htmlBody (repo : string) (content : string) =
-    printfn "<b>%s</b><br>" repo
-    let htmlContent = content.Replace(System.Environment.NewLine, "<br>")
-    printfn "%s<br><br>" htmlContent
-
 
 let Create (createInfo : CLI.Commands.SetupWorkspace) =
     let wsDir = DirectoryInfo(createInfo.Path)
@@ -222,8 +195,8 @@ let Exec (execInfo : CLI.Commands.Exec) =
             try
                 DisplayHighlight repo.Name
 
-                if Env.IsMono () then checkedExecWithVars "sh" ("-c " + args) repoDir vars
-                else checkedExecWithVars "cmd" args repoDir vars
+                if Env.IsMono () then Exec.Exec checkErrorCode "sh" ("-c " + args) repoDir vars
+                else Exec.Exec checkErrorCode "cmd" args repoDir vars
             with e -> printfn "*** %s" e.Message
 
 let Clean () =
@@ -270,9 +243,9 @@ let UpdateGuid (updInfo : CLI.Commands.UpdateGuids) =
             xdoc.Save(prjFile.FullName)
 
 let History (historyInfo : CLI.Commands.History) =
-    let header = historyInfo.Html ? (htmlHeader, textHeader)
-    let body = historyInfo.Html ? (htmlBody, textBody)
-    let footer = historyInfo.Html ? (htmlFooter, textFooter)
+    let header = historyInfo.Html ? (History.htmlHeader, History.textHeader)
+    let body = historyInfo.Html ? (History.htmlBody, History.textBody)
+    let footer = historyInfo.Html ? (History.htmlFooter, History.textFooter)
 
     let graph = Configuration.LoadAnthology() |> Graph.from
     let baselineRepository = Baselines.from graph
