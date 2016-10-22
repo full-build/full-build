@@ -29,8 +29,8 @@ environment:
 init:
   - ps: $branch = $env:APPVEYOR_REPO_BRANCH
   - ps: if ($branch -eq 'master') { $version = $env:APPVEYOR_REPO_TAG_NAME }
-  - ps: else if ($branch -eq 'develop') { $version = 'v999.999' }
-  - ps: else { $version = $branch }
+  - ps: if ($branch -eq 'develop') { $version = 'v999.999' }
+  - ps: if (!$version) { $version = $branch }
   - ps: $posAfterVchar = $branch.LastIndexOf("v") + 1
   - ps: $versionLength = $branch.Length - $posAfterVchar
   - ps: $version = $branch.substring($posAfterVchar, $versionLength)
