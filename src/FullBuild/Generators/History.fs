@@ -12,29 +12,46 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module History
+module Generators.History
 
-let textHeader (version : string) =
+let private textHeader (version : string) =
     ()
 
-let textFooter () =
+let private textFooter () =
     ()
 
-let htmlHeader (version : string) =
+let private htmlHeader (version : string) =
     printfn "<html>"
     printfn "<body>"
     printfn "<h2>version %s</h2>" version
 
-let htmlFooter () =
+let private htmlFooter () =
     printfn "</body>"
 
-let textBody (repo : string) (content : string) =
+let private textBody (repo : string) (content : string) =
     IoHelpers.DisplayHighlight repo
     printfn "%s" content
 
-let htmlBody (repo : string) (content : string) =
+let private htmlBody (repo : string) (content : string) =
     printfn "<b>%s</b><br>" repo
     let htmlContent = content.Replace(System.Environment.NewLine, "<br>")
     printfn "%s<br><br>" htmlContent
 
 
+
+
+type HistoryType =
+    | Html
+    | Text
+
+
+let Save (histType : HistoryType) (version : string) (revisions : (Graph.Repository*string) seq) =
+    let header, body, footer = match histType with
+                               | HistoryType.Html -> htmlHeader, htmlBody, htmlFooter
+                               | HistoryType.Text -> textHeader, textBody, textFooter
+
+    header version
+    revisions |> Seq.iter (fun x -> let repo = x |> fst
+                                    let revision = x |> snd
+                                    body repo.Name revision)
+    footer ()

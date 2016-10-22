@@ -243,10 +243,6 @@ let UpdateGuid (updInfo : CLI.Commands.UpdateGuids) =
             xdoc.Save(prjFile.FullName)
 
 let History (historyInfo : CLI.Commands.History) =
-    let header = historyInfo.Html ? (History.htmlHeader, History.textHeader)
-    let body = historyInfo.Html ? (History.htmlBody, History.textBody)
-    let footer = historyInfo.Html ? (History.htmlFooter, History.textFooter)
-
     let graph = Configuration.LoadAnthology() |> Graph.from
     let baselineRepository = Baselines.from graph
     let baseline = baselineRepository.Baseline
@@ -254,20 +250,27 @@ let History (historyInfo : CLI.Commands.History) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     // header
-    let baselineTip = Tools.Vcs.Tip wsDir graph.MasterRepository
-    header baselineTip
-
+    let version = Tools.Vcs.Tip wsDir graph.MasterRepository
+        
     // body
     let lastCommit = Tools.Vcs.LastCommit wsDir graph.MasterRepository "baseline"
     let revision = Tools.Vcs.Log wsDir graph.MasterRepository lastCommit
-    body graph.MasterRepository.Name revision
 
-    for bookmark in baseline.Bookmarks do
-        if bookmark.Repository.IsCloned then
-            let revision = Tools.Vcs.Log wsDir bookmark.Repository bookmark.Version
-            body bookmark.Repository.Name revision
+    let revisions = seq {
+        // master repo
+        yield graph.MasterRepository, revision
 
-    footer ()
+        // other repositories then
+        for bookmark in baseline.Bookmarks do
+            if bookmark.Repository.IsCloned then
+                let revision = Tools.Vcs.Log wsDir bookmark.Repository bookmark.Version
+                yield bookmark.Repository, revision
+    }
+
+    let histType = if historyInfo.Html then Generators.History.HistoryType.Html
+                                       else Generators.History.HistoryType.Text
+
+    Generators.History.Save histType version revisions
 
 let Index (indexInfo : CLI.Commands.IndexRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from
