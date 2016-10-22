@@ -1,16 +1,10 @@
 $branch = $env:APPVEYOR_REPO_BRANCH
-if($branch -eq 'master') $version = $env:APPVEYOR_REPO_TAG_NAME
-elseif ($branch -eq 'develop') $version = 'v999.999'
-else $version = $branch
-
-# keep only version after v
+If ($branch -eq "master" -And $env:APPVEYOR_REPO_TAG_NAME) { $version = $env:APPVEYOR_REPO_TAG_NAME }
+If ($branch -eq "develop") { $version = "v999.0" }
+If ($branch -like "release/*") { $version = $branch }
+If ($branch -like "feature/*") { $version = "v0.0" }
 $posAfterVchar = $branch.LastIndexOf("v") + 1
 $versionLength = $branch.Length - $posAfterVchar
-$version = $branch.substring($posAfterVchar, $versionLength)
-
-# set version in appveyor
+$version = $version.substring($posAfterVchar, $versionLength)
 $newVersion = "$version.$env:APPVEYOR_BUILD_NUMBER"
-Write-Host "Update appveyor build version to: $newVersion"
-
-$env:APPVEYOR_BUILD_VERSION = "$newVersion"
-Update-AppveyorBuild -Version "$newVersion"
+Write-Host "Building version $newVersion"
