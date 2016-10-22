@@ -71,7 +71,7 @@ deploy:
       branch: release/*
       appveyor_repo_tag: true  
 
- - provider: GitHub
+  - provider: GitHub
     release: 'full-build v$(appveyor_build_version)'
     description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message) alpha'
     tag: 'alpha'
