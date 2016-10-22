@@ -35,7 +35,7 @@ init:
   - ps: If ($branch -like "feature/*") { $version = "v0.0" }
   - ps: $posAfterVchar = $branch.LastIndexOf("v") + 1
   - ps: $versionLength = $branch.Length - $posAfterVchar
-  - ps: $version = $branch.substring($posAfterVchar, $versionLength)
+  - ps: $version = $version.substring($posAfterVchar, $versionLength)
   - ps: $newVersion = "$version.$env:APPVEYOR_BUILD_NUMBER"
   - ps: Write-Host "Building version $newVersion"
   - ps: Update-AppveyorBuild -Version "$newVersion"
