@@ -32,7 +32,7 @@ init:
   - ps: If ($branch -eq "master" -And $env:APPVEYOR_REPO_TAG_NAME) { $version = $env:APPVEYOR_REPO_TAG_NAME }
   - ps: If ($branch -eq "develop") { $version = "v999.0" }
   - ps: If ($branch -like "release/*") { $version = $branch }
-  - ps: If ($branch -like "feature/*") { $version = "v0.0" }
+  - ps: If ($branch -like "feature/*") { $version = "v999.1" }
   - ps: if($version) { $posAfterVchar = $branch.LastIndexOf("v") + 1 }
   - ps: if($version) { $versionLength = $branch.Length - $posAfterVchar }
   - ps: if($version) { $version = $version.substring($posAfterVchar, $versionLength) }
