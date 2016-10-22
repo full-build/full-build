@@ -28,20 +28,20 @@ environment:
 version: v2.6.{build}
 
 init:
-  - ps: |
-  $branch = $env:APPVEYOR_REPO_BRANCH
-  If ($branch -eq "master" -And $env:APPVEYOR_REPO_TAG_NAME) { $version = "$env:APPVEYOR_REPO_TAG_NAME" }
-  ElseIf ($branch -eq "develop") { $version = "v999.0" }
-  ElseIf ($branch -like "release/*") { $version = $branch }
-  ElseIf ($branch -like "feature/*") { $version = "v999.1" }
-  If ($version) {
-    $posAfterVchar = $branch.LastIndexOf("v") + 1
-    $versionLength = $branch.Length - $posAfterVchar
-    $version = $version.substring($posAfterVchar, $versionLength)
-    $newVersion = "$version.$env:APPVEYOR_BUILD_NUMBER"
-    Write-Host "Building version $newVersion"
-    Update-AppveyorBuild -Version "$newVersion"
-  }
+  - ps: >-
+    $branch = $env:APPVEYOR_REPO_BRANCH
+    If ($branch -eq "master" -And $env:APPVEYOR_REPO_TAG_NAME) { $version = "$env:APPVEYOR_REPO_TAG_NAME" }
+    ElseIf ($branch -eq "develop") { $version = "v999.0" }
+    ElseIf ($branch -like "release/*") { $version = $branch }
+    ElseIf ($branch -like "feature/*") { $version = "v999.1" }
+    If ($version) {
+        $posAfterVchar = $branch.LastIndexOf("v") + 1
+        $versionLength = $branch.Length - $posAfterVchar
+        $version = $version.substring($posAfterVchar, $versionLength)
+        $newVersion = "$version.$env:APPVEYOR_BUILD_NUMBER"
+        Write-Host "Building version $newVersion"
+        Update-AppveyorBuild -Version "$newVersion"
+    }
 
 shallow_clone: true
 
