@@ -6,7 +6,7 @@
 
 # Development workflow
   * Master is protected (no direct push)
-  * Work and PR must be based from develop (full-build use git flow)
+  * Work and PR must be based from 'develop' branch (full-build use git flow)
   * Commit references issue number (eg: 'blah blah #42')
   * Patch is developed in branch or cloned repository and requires appveyor + ff merge
   * Merge will be squashed
