@@ -37,7 +37,8 @@ type private TokenOption =
     | View
     | Modified
     | Html
-    | Rc
+    | Alpha
+    | Beta
 
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -56,7 +57,8 @@ let private (|TokenOption|_|) (token : string) =
     | "--view" -> Some TokenOption.View
     | "--modified" -> Some TokenOption.Modified
     | "--html" -> Some TokenOption.Html
-    | "--rc" -> Some TokenOption.Rc
+    | "--alpha" -> Some TokenOption.Alpha
+    | "--beta" -> Some TokenOption.Beta
     | _ -> None
 
 
@@ -475,8 +477,9 @@ let rec private commandHistory (html : bool) (args : string list) =
 
 let rec private commandUpgrade (verStatus : string) (args : string list) =
     match args with
-    | TokenOption TokenOption.Rc :: tail -> tail |> commandUpgrade "rc"
-    | [] -> Command.Upgrade verStatus
+    | [] -> Command.Upgrade "stable"
+    | [TokenOption TokenOption.Alpha] -> Command.Upgrade "alpha"
+    | [TokenOption TokenOption.Beta] -> Command.Upgrade "beta"
     | [Param processId] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))
     | _ -> Command.Error MainCommand.Upgrade
 
@@ -581,7 +584,7 @@ let UsageContent() =
         MainCommand.Bind, "bind <projectId-wildcard>+ : update bindings"
         MainCommand.Clean, "clean : DANGER! reset and clean workspace (interactive command)"
         MainCommand.History, "history [--html] : display history since last baseline"
-        MainCommand.Upgrade, "upgrade : upgrade full-build to latest available version"
+        MainCommand.Upgrade, "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
         MainCommand.Unknown, ""
         MainCommand.UpdatePackage, "update package : update packages"
         MainCommand.OutdatedPackage, "outdated package : display outdated packages"
