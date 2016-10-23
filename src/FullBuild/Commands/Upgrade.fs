@@ -27,7 +27,7 @@ let private getLatestReleaseUrl (verStatus : string) =
     let result = Http.RequestString(path,
                                     customizeHttpRequest = fun x -> x.UserAgent<-"fullbuild"; x)
     let releases = GitRelease.Parse(result)
-    (releases.Assets.[0].BrowserDownloadUrl, releases.TagName)
+    (releases.Assets.[0].BrowserDownloadUrl, releases.Name)
 
 let private downloadZip zipUrl =
     let response = Http.Request(zipUrl,
@@ -56,9 +56,9 @@ let private waitProcessToExit processId =
 let private getSameFiles (firstDir:DirectoryInfo) (secondDir:DirectoryInfo) =
     firstDir.GetFiles() |> Seq.where(fun x-> (secondDir |> IoHelpers.GetFile x.Name).Exists)
 
-let Upgrade (verStatus : string) =
-    let (zipUrl, tag) = getLatestReleaseUrl verStatus
-    printfn "Upgrading to version %s (%s)" tag verStatus
+let Upgrade (tag : string) =
+    let (zipUrl, ver) = getLatestReleaseUrl tag
+    printfn "Upgrading to version %s (%s)" ver tag
 
     let installDir = Env.getInstallationFolder ()
     deleteBackupFiles installDir
