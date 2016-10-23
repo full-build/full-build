@@ -1,10 +1,10 @@
 v3.0
-  * Graph api use internally to get rid of code complexity
-  * solution gen based on graph 
-  * dgml gen based on graph
-  * builder based on graph
-  * caching implementation in graph leading to vastly improved performance
-  * workspace commands are using graph api
+  * Graph api use internally to simplify implementation
+  * Solution gen based on graph 
+  * Dgml gen based on graph
+  * Builder based on graph
+  * Caching implementation in graph leading to vastly improved performance
+  * Workspace commands are using graph api
   * Repo commands are using graph api
   * Test commands are using graph api
   * App commands are using graph api
@@ -13,6 +13,7 @@ v3.0
   * Partial build over modified repositories using graph api
   * Split Plumbing modules into Plumbing & Anthology
   * Env, Configuration & Anthology modules usage limited
-  * Parallel pull of repositories
-  * pull --continue
+  * Parallel pull of repositories (pull --mt)
+  * Can upgrade with alpha & beta environment
   * Package management is using graph api
+  * Build process cleanup
