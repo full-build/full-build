@@ -1,0 +1,18 @@
+v3.0
+  * Graph api use internally to get rid of code complexity
+  * solution gen based on graph 
+  * dgml gen based on graph
+  * builder based on graph
+  * caching implementation in graph leading to vastly improved performance
+  * workspace commands are using graph api
+  * Repo commands are using graph api
+  * Test commands are using graph api
+  * App commands are using graph api
+  * Package commands are using graph api
+  * NuGet commands are using graph api
+  * Partial build over modified repositories using graph api
+  * Split Plumbing modules into Plumbing & Anthology
+  * Env, Configuration & Anthology modules usage limited
+  * Parallel pull of repositories
+  * pull --continue
+  * Package management is using graph api
