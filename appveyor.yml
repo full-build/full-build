@@ -33,13 +33,10 @@ init:
   - ps: if ($version) { $env:BUILD_VERSION_STATUS = "-rc" }
   - ps: if ($version) { Set-AppveyorBuildVariable -Name BUILD_VERSION_STATUS -Value $env:BUILD_VERSION_STATUS }
   - ps: Write-Host "Building version $env:APPVEYOR_BUILD_VERSION $env:BUILD_VERSION_STATUS"
-  - cmd: echo init version %APPVEYOR_BUILD_VERSION% with status %BUILD_VERSION_STATUS%
 
 shallow_clone: true
 
 build_script:
-  - ps: Write-Host "building version $env:APPVEYOR_BUILD_VERSION with status $env:BUILD_VERSION_STATUS"
-  - cmd: echo building version %APPVEYOR_BUILD_VERSION% with status %BUILD_VERSION_STATUS%
   - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION% %BUILD_VERSION_STATUS%
   
 test_script:
