@@ -7,7 +7,7 @@ rem both build ensure compatibility on version update
 setlocal
 
 call :bootstrapbuild || goto :ko
-call :build %1 || goto :ko
+call :build %1 %2 || goto :ko
 call :test || goto :ko
 goto :ok
 
