@@ -2,16 +2,17 @@
 # master
 # ------
 #  - push release to GitHub as stable
-#  - push package to NuGet
+#  - package is stable and pushed to NuGet
 #
 # release/*
 # ---------
-#  - push only to GitHub as draft/pre-release
-#  - package artifact in appveyor can be pushed to NuGet (-rc)
+#  - push to GitHub as draft/pre-release (beta)
+#  - package is beta and pushed to NuGet
 #
-# all other branches
-# ------------------
-#  - nothing but artifacts in appveyor
+# develop
+# -------
+#  - push to GitHub as draft/pre-release (alpha)
+#  - package is alpha
 #
 
 os: Visual Studio 2015
@@ -65,9 +66,23 @@ deploy:
       appveyor_repo_tag: false
 
   - provider: GitHub
-    release: 'full-build v$(appveyor_build_version) rc'
+    release: 'full-build v$(appveyor_build_version) beta'
     description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
-    tag: 'rc'
+    tag: 'beta'
+    auth_token:
+      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
+    artifact: apps/full-build.zip
+    draft: false
+    prerelease: true
+    force_update: true
+    on:
+      branch: /release\/.*/
+      appveyor_repo_tag: false
+      
+  - provider: GitHub
+    release: 'full-build v$(appveyor_build_version) alpha'
+    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
+    tag: 'alpha'
     auth_token:
       secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     artifact: apps/full-build.zip
@@ -75,9 +90,9 @@ deploy:
     prerelease: true
     force_update: true
     on:
-      branch: /release\/.*/
+      branch: develop
       appveyor_repo_tag: false
-      
+
   - provider: NuGet
     api_key:
       secure: Fa/KRLSPeo1w78xW6Yb6FJv3amW/BRcLKpy7DW7e0/mdsiug7GBA36twg2HOUCSS
@@ -86,6 +101,16 @@ deploy:
     artifacts: apps/full-build.nupkg
     on:
       branch: master
+      appveyor_repo_tag: false  
+
+  - provider: NuGet
+    api_key:
+      secure: Fa/KRLSPeo1w78xW6Yb6FJv3amW/BRcLKpy7DW7e0/mdsiug7GBA36twg2HOUCSS
+    skip_symbols: true
+    symbol_server:
+    artifacts: apps/full-build.nupkg
+    on:
+      branch: /release\/.*/
       appveyor_repo_tag: false  
       
 notifications:
