@@ -32,6 +32,7 @@ init:
   - ps: if ($version) { $env:APPVEYOR_BUILD_VERSION = $newVersion }
   - ps: if ($version) { $env:BUILD_VERSION_STATUS = "-rc" }
   - ps: if ($version) { Set-AppveyorBuildVariable -Name BUILD_VERSION_STATUS -Value $env:BUILD_VERSION_STATUS }
+  - ps: if ($version) { appveyor SetVariable -Name BUILD_VERSION_STATUS -Value $env:BUILD_VERSION_STATUS }
   - ps: Write-Host "Building version $env:APPVEYOR_BUILD_VERSION $env:BUILD_VERSION_STATUS"
 
 shallow_clone: true
