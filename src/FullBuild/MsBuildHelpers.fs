@@ -12,29 +12,31 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module MsBuildHelpers
-open Anthology
-open System.Xml.Linq
-
-let NsMsBuild = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003")
-
-let NsDgml = XNamespace.Get("http://schemas.microsoft.com/vs/2009/dgml")
-
-let NsRuntime = XNamespace.Get("urn:schemas-microsoft-com:asm.v1")
-
-let NsNone = XNamespace.None
-
-let inline (!>) (x : ^a) : ^b = (((^a or ^b) : (static member op_Explicit : ^a -> ^b) x))
-
+module MSBuildHelpers
+open Graph
 
 let replaceInvalidChars (s : string) =
     s.Replace('-', '_').Replace('.', '_').Replace("{", "").Replace("}", "")
 
-let ProjectPropertyName (projectId : ProjectId) =
-    let prjGuid = projectId.toString |> replaceInvalidChars
-    let prjProp = sprintf "FullBuild_%s" prjGuid
+
+let ProjectPropertyName (projectId : Anthology.ProjectId) =
+    let prjId = projectId.toString |> replaceInvalidChars
+    let prjProp = sprintf "FullBuild_%s" prjId
     prjProp
 
-let PackagePropertyName (packageId : PackageId) =
-    let pkgProp = sprintf "FullBuild_%s_Pkg" packageId.toString |> replaceInvalidChars
+let PackagePropertyName (packageId : Anthology.PackageId) =
+    let pkgId = packageId.toString |> replaceInvalidChars
+    let pkgProp = sprintf "FullBuild_%s_Pkg" pkgId
+    pkgProp
+
+
+
+let MsBuildProjectPropertyName (project : Project) =
+    let prjId = project.ProjectId |> replaceInvalidChars
+    let prjProp = sprintf "FullBuild_%s" prjId
+    prjProp
+
+let MsBuildPackagePropertyName (package : Package) =
+    let pkgId = package.Name |> replaceInvalidChars
+    let pkgProp = sprintf "FullBuild_%s_Pkg" pkgId
     pkgProp

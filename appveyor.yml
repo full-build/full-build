@@ -1,18 +1,18 @@
 #
-# configuration to suite git flow process
-#
 # master
 # ------
-#  - push stable-release to GitHub
+#  - push release to GitHub as stable
 #  - push package to NuGet
 #
 # release/*
 # ---------
-#  - push beta-release to GitHub as draft
+#  - push only to GitHub as draft/pre-release
+#  - package artifact in appveyor can be pushed to NuGet (-rc)
 #
-# develop
-# -------
-#  - push alpha-release to GitHub as draft
+# all other branches
+# ------------------
+#  - nothing but artifacts in appveyor
+#
 
 os: Visual Studio 2015
 
@@ -20,22 +20,24 @@ environment:
   GITHUB_TOKEN:
     secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
 
-version: 2.6.{build}
+version: 3.0.{build}
 
 init:
   - ps: If ($env:APPVEYOR_REPO_BRANCH -like "release/*") { $version = $env:APPVEYOR_REPO_BRANCH }
-  - ps: if($version) { $posAfterVchar = $version.LastIndexOf("v") + 1 }
-  - ps: if($version) { $versionLength = $version.Length - $posAfterVchar }
-  - ps: if($version) { $version = $version.substring($posAfterVchar, $versionLength) }
-  - ps: if($version) { $newVersion = "$version.$env:APPVEYOR_BUILD_NUMBER" }
-  - ps: if($version) { Update-AppveyorBuild -Version "$newVersion" }
-  - ps: if($version) { $env:APPVEYOR_BUILD_VERSION = $newVersion }
-  - ps: Write-Host "Building version $env:APPVEYOR_BUILD_VERSION"
+  - ps: if ($version) { $posAfterVchar = $version.LastIndexOf("v") + 1 }
+  - ps: if ($version) { $versionLength = $version.Length - $posAfterVchar }
+  - ps: if ($version) { $version = $version.substring($posAfterVchar, $versionLength) }
+  - ps: if ($version) { $newVersion = "$version.$env:APPVEYOR_BUILD_NUMBER" }
+  - ps: if ($version) { Update-AppveyorBuild -Version "$newVersion" }
+  - ps: if ($version) { $env:APPVEYOR_BUILD_VERSION = $newVersion }
+  - ps: if ($version) { $env:BUILD_VERSION_STATUS = "-rc" }
+  - ps: if ($version) { Set-AppveyorBuildVariable -Name "BUILD_VERSION_STATUS" -Value "$env:BUILD_VERSION_STATUS" }
+  - ps: Write-Host "Building version $env:APPVEYOR_BUILD_VERSION $env:BUILD_VERSION_STATUS"
 
 shallow_clone: true
 
 build_script:
-  - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION%
+  - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION% %BUILD_VERSION_STATUS%
   
 test_script:
   - ps: . .\Push-TestResult.ps1
@@ -49,40 +51,32 @@ artifacts:
 
 deploy:
   - provider: GitHub
-    release: 'full-build v$(appveyor_build_version)'
-    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message) stable'
+    release: 'full-build v$(appveyor_build_version) stable'
+    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
+    tag: 'stable'
     auth_token:
       secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     artifact: apps/full-build.zip
     draft: false
     prerelease: false
+    force_update: true
     on:
       branch: master
       appveyor_repo_tag: false
-  
-  - provider: GitHub
-    release: 'full-build v$(appveyor_build_version)'
-    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message) beta'
-    auth_token:
-      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
-    artifact: apps/full-build.zip
-    draft: true
-    prerelease: true
-    on:
-      branch: release/*
-      appveyor_repo_tag: false  
 
   - provider: GitHub
-    release: 'full-build v$(appveyor_build_version)'
-    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message) beta'
+    release: 'full-build v$(appveyor_build_version) rc'
+    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
+    tag: 'rc'
     auth_token:
       secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     artifact: apps/full-build.zip
     draft: true
     prerelease: true
+    force_update: true
     on:
-      branch: develop
-      appveyor_repo_tag: false  
+      branch: release/*
+      appveyor_repo_tag: false
       
   - provider: NuGet
     api_key:

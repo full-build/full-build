@@ -12,6 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+
 module Graph
 
 open Collections
@@ -43,53 +44,104 @@ type VcsType =
     | Git
     | Hg
 
+[<RequireQualifiedAccess>]
+type TestRunnerType =
+    | NUnit
+
 [<Sealed>]
 type Package  = interface System.IComparable
 with
     member Name : string
+    member Dependencies: Package set
+    member FxAssemblies: Assembly set
 
-[<Sealed>] 
-type Assembly = interface System.IComparable
+and [<Sealed>] Assembly = interface System.IComparable
 with
     member Name : string
 
-[<Sealed>]
-type Application = interface System.IComparable
+and [<Sealed>] Application = interface System.IComparable
 with
     member Name : string
     member Publisher : PublisherType
-    member Projects : Project set
+    member Projects: Project set
+    member Delete: unit
+                -> Graph
 
 and [<Sealed>] Repository = interface System.IComparable
 with
     member Name : string
     member Builder : BuilderType
-    member Projects : Project set
+    member Projects: Project set
     member Vcs : VcsType
     member Branch : string
     member Uri : string
+    member IsCloned: bool
+    member Delete: unit
+                -> Graph
 
 and [<Sealed>] Project = interface System.IComparable
 with
-    member RelativeProjectFile : string
+    member BinFile : string
+    member ProjectFile : string
     member UniqueProjectId : string
     member Output : Assembly
     member ProjectId : string
     member OutputType : OutputType
-    member FxVersion : string
-    member FxProfile : string
-    member FxIdentifier : string
+    member FxVersion : string option
+    member FxProfile : string option
+    member FxIdentifier : string option
     member HasTests : bool
-    member Repository : Repository
-    member Applications : Application set
-    member ReferencedBy : Project set
-    member References : Project set
-    member AssemblyReferences : Assembly set
-    member PackageReferences : Package set
+    member Repository:  Repository
+    member Applications: Application set
+    member ReferencedBy: Project set
+    member References: Project set
+    member AssemblyReferences: Assembly set
+    member PackageReferences: Package set
+    static member Closure: Project set
+                        -> Project set
+    static member TransitiveReferences: Project set
+                                     -> Project set
+    static member TransitiveReferencedBy: Project set
+                                       -> Project set
 
-type [<Sealed>] Graph =
+
+and [<Sealed>] Graph =
+    member MinVersion: string
+    member MasterRepository : Repository
+    member Repositories : Repository set  
+    member Assemblies : Assembly set  
+    member Applications : Application set
     member Projects : Project set
-    member Applications : Application set    
-    member Repositories : Repository set   
+    member TestRunner : TestRunnerType
+    member ArtifactsDir : string
+    member NuGets : string list
+    member Packages: Package set
+
+    member CreateApp: name : string
+                   -> publisher : PublisherType
+                   -> projects : Project set
+                   -> Graph
+
+    member CreateNuGet: url : string
+                     -> Graph
+
+    member CreateRepo: name : string
+                    -> url : string
+                    -> builder : BuilderType
+                    -> branch : string option
+                    -> Graph
+
+    member Save: unit
+              -> unit
 
 val from : Anthology.Anthology -> Graph 
+
+val create: uri : string
+         -> artifacts : string
+         -> vcs : VcsType
+         -> runner : TestRunnerType
+         -> Graph
+
+val init: uri : string
+       -> vcs : VcsType
+       -> Graph
