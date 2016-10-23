@@ -54,7 +54,6 @@ deploy:
   - provider: GitHub
     release: 'full-build v$(appveyor_build_version) stable'
     description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
-    tag: 'stable'
     auth_token:
       secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     artifact: apps/full-build.zip
@@ -68,7 +67,6 @@ deploy:
   - provider: GitHub
     release: 'full-build v$(appveyor_build_version) beta'
     description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
-    tag: 'beta'
     auth_token:
       secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     artifact: apps/full-build.zip
@@ -82,7 +80,6 @@ deploy:
   - provider: GitHub
     release: 'full-build v$(appveyor_build_version) alpha'
     description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
-    tag: 'alpha'
     auth_token:
       secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     artifact: apps/full-build.zip
