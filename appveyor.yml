@@ -37,6 +37,7 @@ init:
 shallow_clone: true
 
 build_script:
+  - ps: building version $env:APPVEYOR_BUILD_VERSION with status $env:BUILD_VERSION_STATUS
   - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION% %BUILD_VERSION_STATUS%
   
 test_script:
