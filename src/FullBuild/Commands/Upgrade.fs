@@ -22,8 +22,8 @@ open FSharp.Data
 
 type GitRelease = JsonProvider<"ghreleasefeed.json">
 
-let private getLatestReleaseUrl () =
-    let path = @"https://api.github.com/repos/full-build/full-build/releases/latest"
+let private getLatestReleaseUrl (verStatus : string) =
+    let path = sprintf @"https://api.github.com/repos/full-build/full-build/releases/tags/%s" verStatus
     let result = Http.RequestString(path,
                                     customizeHttpRequest = fun x -> x.UserAgent<-"fullbuild"; x)
     let releases = GitRelease.Parse(result)
@@ -56,9 +56,9 @@ let private waitProcessToExit processId =
 let private getSameFiles (firstDir:DirectoryInfo) (secondDir:DirectoryInfo) =
     firstDir.GetFiles() |> Seq.where(fun x-> (secondDir |> IoHelpers.GetFile x.Name).Exists)
 
-let Upgrade () =
-    let (zipUrl, tag) = getLatestReleaseUrl ()
-    printfn "Upgrading to version %s" tag
+let Upgrade (verStatus : string) =
+    let (zipUrl, tag) = getLatestReleaseUrl verStatus
+    printfn "Upgrading to version %s (%s)" tag verStatus
 
     let installDir = Env.getInstallationFolder ()
     deleteBackupFiles installDir

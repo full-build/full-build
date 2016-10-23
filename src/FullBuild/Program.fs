@@ -73,7 +73,7 @@ let tryMain argv =
     | Command.BindProject bindInfo -> Commands.Application.BindProject bindInfo
 
     // misc
-    | Command.Upgrade -> Commands.Upgrade.Upgrade ()
+    | Command.Upgrade verStatus -> Commands.Upgrade.Upgrade verStatus
     | Command.FinalizeUpgrade processId -> Commands.Upgrade.FinalizeUpgrade processId
     | Command.Version -> CLI.CommandLine.PrintVersion ()
     | Command.Usage -> CLI.CommandLine.PrintUsage MainCommand.Unknown

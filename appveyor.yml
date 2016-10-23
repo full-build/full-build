@@ -1,18 +1,18 @@
 #
-# configuration to suite git flow process
-#
 # master
 # ------
-#  - push stable-release to GitHub
+#  - push release to GitHub as stable
 #  - push package to NuGet
 #
 # release/*
 # ---------
-#  - push beta-release to GitHub as draft
+#  - push only to GitHub as draft/pre-release
+#  - package artifact in appveyor can be pushed to NuGet (-rc)
 #
-# develop
-# -------
-#  - push alpha-release to GitHub as draft
+# all other branches
+# ------------------
+#  - nothing but artifacts in appveyor
+#
 
 os: Visual Studio 2015
 
@@ -30,7 +30,7 @@ init:
   - ps: if ($version) { $newVersion = "$version.$env:APPVEYOR_BUILD_NUMBER" }
   - ps: if ($version) { Update-AppveyorBuild -Version "$newVersion" }
   - ps: if ($version) { $env:APPVEYOR_BUILD_VERSION = $newVersion }
-  - ps: if ($version) { $env:BUILD_VERSION_STATUS = "-beta" }
+  - ps: if ($version) { $env:BUILD_VERSION_STATUS = "-rc" }
   - ps: if ($version) { Set-AppveyorBuildVariable -Name "BUILD_VERSION_STATUS" -Value "$env:BUILD_VERSION_STATUS" }
   - ps: Write-Host "Building version $env:APPVEYOR_BUILD_VERSION $env:BUILD_VERSION_STATUS"
 
@@ -53,38 +53,30 @@ deploy:
   - provider: GitHub
     release: 'full-build v$(appveyor_build_version) stable'
     description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
+    tag: 'stable'
     auth_token:
       secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     artifact: apps/full-build.zip
     draft: false
     prerelease: false
+    force_update: true
     on:
       branch: master
       appveyor_repo_tag: false
-  
-  - provider: GitHub
-    release: 'full-build v$(appveyor_build_version) beta'
-    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
-    auth_token:
-      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
-    artifact: apps/full-build.zip
-    draft: true
-    prerelease: true
-    on:
-      branch: release/*
-      appveyor_repo_tag: false  
 
   - provider: GitHub
-    release: 'full-build v$(appveyor_build_version) alpha'
+    release: 'full-build v$(appveyor_build_version) rc'
     description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
+    tag: 'rc'
     auth_token:
       secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
     artifact: apps/full-build.zip
     draft: true
     prerelease: true
+    force_update: true
     on:
-      branch: develop
-      appveyor_repo_tag: false  
+      branch: release/*
+      appveyor_repo_tag: false
       
   - provider: NuGet
     api_key:
@@ -94,16 +86,6 @@ deploy:
     artifacts: apps/full-build.nupkg
     on:
       branch: master
-      appveyor_repo_tag: false  
-
-  - provider: NuGet
-    api_key:
-      secure: Fa/KRLSPeo1w78xW6Yb6FJv3amW/BRcLKpy7DW7e0/mdsiug7GBA36twg2HOUCSS
-    skip_symbols: true
-    symbol_server:
-    artifacts: apps/full-build.nupkg
-    on:
-      branch: release/*
       appveyor_repo_tag: false  
       
 notifications:

@@ -179,7 +179,7 @@ type Command =
 
     | Version
     | Usage
-    | Upgrade
+    | Upgrade of string
     | FinalizeUpgrade of int
 
     // workspace

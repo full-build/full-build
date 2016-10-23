@@ -37,6 +37,7 @@ type private TokenOption =
     | View
     | Modified
     | Html
+    | Rc
 
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -55,6 +56,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--view" -> Some TokenOption.View
     | "--modified" -> Some TokenOption.Modified
     | "--html" -> Some TokenOption.Html
+    | "--rc" -> Some TokenOption.Rc
     | _ -> None
 
 
@@ -471,9 +473,10 @@ let rec private commandHistory (html : bool) (args : string list) =
     | [] -> Command.History { Html = html }
     | _ -> Command.Error MainCommand.History
 
-let private commandUpgrade (args : string list) =
+let rec private commandUpgrade (verStatus : string) (args : string list) =
     match args with
-    | [] -> Command.Upgrade
+    | TokenOption TokenOption.Rc :: tail -> tail |> commandUpgrade "rc"
+    | [] -> Command.Upgrade verStatus
     | [Param processId] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))
     | _ -> Command.Error MainCommand.Upgrade
 
@@ -481,7 +484,7 @@ let Parse (args : string list) : Command =
     match args with
     | [Token Token.Version] -> Command.Version
     | [Token Token.Help] -> Command.Usage
-    | Token Token.Upgrade :: cmdArgs -> cmdArgs |> commandUpgrade
+    | Token Token.Upgrade :: cmdArgs -> cmdArgs |> commandUpgrade "stable"
     | Token Token.Setup :: cmdArgs -> cmdArgs |> commandSetup
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
