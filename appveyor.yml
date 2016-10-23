@@ -23,6 +23,8 @@ environment:
 
 version: 3.0.{build}
 
+skip_tags: true
+
 init:
   - ps: If ($env:APPVEYOR_REPO_BRANCH -like "release/*") { $version = $env:APPVEYOR_REPO_BRANCH }
   - ps: if ($version) { $posAfterVchar = $version.LastIndexOf("v") + 1 }
