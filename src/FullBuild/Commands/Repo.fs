@@ -17,9 +17,15 @@ module Commands.Repo
 open Collections
 open Graph
 
+let consoleLock = System.Object()
+
+let printClone ((repo, execResult) : (Repository * Exec.ExecResult)) =
+    lock consoleLock (fun () -> IoHelpers.DisplayHighlight repo.Name
+                                execResult |> Exec.PrintOutput)
+
 let private cloneRepoAndInit wsDir shallow (repo : Repository) =
     async {
-        return repo, Tools.Vcs.Clone wsDir repo shallow
+        return (repo, Tools.Vcs.Clone wsDir repo shallow) |> printClone
     }
 
 let List() =
@@ -39,8 +45,7 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
         selectedRepos |> Set.filter (fun x -> not x.IsCloned)
                   |> Seq.map (cloneRepoAndInit wsDir cmd.Shallow)
                   |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously 
-    cloneResults |> Seq.iter(fun (repo, execResult) -> IoHelpers.DisplayHighlight repo.Name; execResult |> Exec.PrintOutput |> ignore)
-    cloneResults |> Seq.map(snd) |> Exec.CheckMulitpleResponseCode
+    cloneResults |> Exec.CheckMulitpleResponseCode
 
 let Add (cmd : CLI.Commands.AddRepository) =
     let graph = Configuration.LoadAnthology () |> Graph.from

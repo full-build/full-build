@@ -132,8 +132,14 @@ let consoleProgressBar max =
             }
         loop 1)
 
+let consoleLock = System.Object()
+
+let printPull ((repo, execResult) : (Repository * Exec.ExecResult)) =
+    lock consoleLock (fun () -> IoHelpers.DisplayHighlight repo.Name
+                                execResult |> Exec.PrintOutput)
+
 let private cloneRepo wsDir rebase (repo : Repository) = async {
-    return repo, Tools.Vcs.Pull wsDir repo rebase 
+    return (repo, Tools.Vcs.Pull wsDir repo rebase) |> printPull
 }
 
 let Pull (pullInfo : CLI.Commands.PullWorkspace) =
@@ -145,11 +151,10 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
 
     if pullInfo.Src then
-        DisplayHighlight graph.MasterRepository.Name
         graph.MasterRepository 
             |> cloneRepo wsDir pullInfo.Rebase 
             |> Async.RunSynchronously
-            |> snd |> Exec.PrintOutput |> Exec.CheckResponseCode
+            |> Exec.CheckResponseCode
 
         let selectedRepos = match pullInfo.View with
                              | None -> graph.Repositories
@@ -157,13 +162,13 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
                                                 let repos = view.Projects |> Set.map (fun x -> x.Repository)
                                                 repos
         let maxThrottle = pullInfo.Multithread ? (System.Environment.ProcessorCount*4, 1)
+
         let pullResults = selectedRepos 
                             |> Seq.filter (fun x -> x.IsCloned)
                             |> Seq.map (cloneRepo wsDir pullInfo.Rebase)
                             |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously 
         
-        pullResults |> Seq.iter(fun (repo, execResult) -> IoHelpers.DisplayHighlight repo.Name; execResult |> Exec.PrintOutput |> ignore)
-        pullResults |> Seq.map(snd) |> Exec.CheckMulitpleResponseCode
+        pullResults |> Exec.CheckMulitpleResponseCode
 
         Install ()
 
