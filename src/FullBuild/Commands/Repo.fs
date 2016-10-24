@@ -20,14 +20,16 @@ open Graph
 let private cloneRepoAndInit wsDir shallow (repo : Repository) =
     let rec printl lines =
         match lines with
-        | line :: tail -> printfn "%s" line 
+        | line :: tail -> printfn "%s" line
                           printl tail
         | [] -> ()
 
+    let consoleLock = System.Object()
+
     let onEnd code out err =
-        IoHelpers.DisplayHighlight repo.Name
-        printl out
-        printl err
+        lock consoleLock (fun () -> IoHelpers.DisplayHighlight repo.Name
+                                    printl out
+                                    printl err)
 
     async {
         IoHelpers.DisplayHighlight repo.Name
@@ -64,7 +66,7 @@ let Drop (name : string) =
     let referencingRepos = referencingProjects |> Set.map (fun x -> x.Repository)
                                                |> Set.remove repo
     if referencingRepos = Set.empty then
-        let newGraph = repo.Delete() 
+        let newGraph = repo.Delete()
         newGraph.Save()
     else
         printfn "Repository %s is referenced from following projects:" name

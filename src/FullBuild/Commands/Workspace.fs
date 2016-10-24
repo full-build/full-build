@@ -127,8 +127,8 @@ let Install () =
     Core.Package.RestorePackages ()
     Core.Conversion.GenerateProjectArtifacts()
 
-let consoleProgressBar max = 
-    MailboxProcessor.Start(fun inbox -> 
+let consoleProgressBar max =
+    MailboxProcessor.Start(fun inbox ->
         new String(' ', max) |> printf "[%s]\r["
         let rec loop n = async {
                 let! msg = inbox.Receive()
@@ -141,15 +141,16 @@ let consoleProgressBar max =
 let private cloneRepo wsDir rebase (repo : Repository) =
     let rec printl lines =
         match lines with
-        | line :: tail -> printfn "%s" line 
+        | line :: tail -> printfn "%s" line
                           printl tail
         | [] -> ()
 
+    let consoleLock = System.Object()
     async {
-        let onEnd code out err = 
-            IoHelpers.DisplayHighlight repo.Name
-            printl out
-            printl err
+        let onEnd code out err =
+            lock consoleLock (fun () -> IoHelpers.DisplayHighlight repo.Name
+                                        printl out
+                                        printl err)
         Tools.Vcs.Pull wsDir repo rebase onEnd
     }
 
@@ -251,7 +252,7 @@ let History (historyInfo : CLI.Commands.History) =
 
     // header
     let version = Tools.Vcs.Tip wsDir graph.MasterRepository
-        
+
     // body
     let lastCommit = Tools.Vcs.LastCommit wsDir graph.MasterRepository "baseline"
     let revision = Tools.Vcs.Log wsDir graph.MasterRepository lastCommit.[0]
