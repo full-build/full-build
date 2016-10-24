@@ -76,7 +76,7 @@ let Push (pushInfo : CLI.Commands.PushWorkspace) =
 
     // copy bin content
     let hash = Tools.Vcs.Tip wsDir mainRepo
-    Core.BuildArtifacts.Publish pushInfo.Branch pushInfo.BuildNumber hash
+    Core.BuildArtifacts.Publish graph pushInfo.Branch pushInfo.BuildNumber hash
 
 let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     // checkout repositories
@@ -97,7 +97,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
         Tools.Vcs.Checkout wsDir repo (Some repoVersion.Version) false
 
     // update binaries with observable baseline
-    Core.BuildArtifacts.PullReferenceBinaries checkoutInfo.Version
+    Core.BuildArtifacts.PullReferenceBinaries graph checkoutInfo.Version
 
 let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     // checkout repositories
@@ -141,6 +141,9 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let viewRepository = Views.from graph
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
+    // refresh graph just in case something has changed
+    let graph = Configuration.LoadAnthology () |> Graph.from
+
     if pullInfo.Src then
         DisplayHighlight graph.MasterRepository.Name
         graph.MasterRepository 
@@ -165,7 +168,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
         Install ()
 
     if pullInfo.Bin then
-        Core.BuildArtifacts.PullLatestReferenceBinaries ()
+        Core.BuildArtifacts.PullLatestReferenceBinaries graph
 
 let Exec (execInfo : CLI.Commands.Exec) =
     let graph = Configuration.LoadAnthology() |> Graph.from
