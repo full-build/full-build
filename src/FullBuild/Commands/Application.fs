@@ -30,12 +30,6 @@ let private displayApp (app : Graph.Application) =
         printf "%s " project.Output.Name
     printfn "] => %s" (StringHelpers.toString app.Publisher)
 
-let private updateProjectBindings (project : Graph.Project) =
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let prjFile = wsDir |> GetFile project.ProjectFile
-    let prjDir = prjFile.Directory
-    Core.Bindings.UpdateProjectBindingRedirects prjDir
-
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let viewRepository = Views.from graph
@@ -80,4 +74,5 @@ let BindProject (bindInfo : CLI.Commands.BindProject) =
                                                |> Set.unionMany
 
     let projects = PatternMatching.FilterMatch availableProjects (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) bindInfo.Filters
-    projects |> Set.iter updateProjectBindings
+    projects |> Set.iter Core.Bindings.UpdateProjectBindingRedirects
+        
