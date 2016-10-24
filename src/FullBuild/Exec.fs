@@ -92,8 +92,8 @@ let CheckResponseCode execResult =
     | Some error -> failwith error
     | None -> ()
 
-let CheckMulitpleResponseCode execResults =
-    let errors = execResults |> Seq.choose(fun execResult -> execResult |> resultToError)
+let CheckMultipleResponseCode execResults =
+    let errors = execResults |> Seq.choose (fun execResult -> execResult |> resultToError)
     if errors |> Seq.isEmpty |> not then
         errors |> String.concat System.Environment.NewLine |> failwith
 

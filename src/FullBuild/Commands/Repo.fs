@@ -45,7 +45,7 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
         selectedRepos |> Set.filter (fun x -> not x.IsCloned)
                   |> Seq.map (cloneRepoAndInit wsDir cmd.Shallow)
                   |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously 
-    cloneResults |> Exec.CheckMulitpleResponseCode
+    cloneResults |> Exec.CheckMultipleResponseCode
 
 let Add (cmd : CLI.Commands.AddRepository) =
     let graph = Configuration.LoadAnthology () |> Graph.from
