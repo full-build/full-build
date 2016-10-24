@@ -23,11 +23,13 @@ open FSharp.Data
 type GitRelease = JsonProvider<"ghreleasefeed.json">
 
 let private getLatestReleaseUrl (verStatus : string) =
-    let path = sprintf @"https://api.github.com/repos/full-build/full-build/releases/tags/%s" verStatus
+    let tag = sprintf "-%s" verStatus
+    let path = @"https://api.github.com/repos/full-build/full-build/releases" 
     let result = Http.RequestString(path,
                                     customizeHttpRequest = fun x -> x.UserAgent<-"fullbuild"; x)
     let releases = GitRelease.Parse(result)
-    (releases.Assets.[0].BrowserDownloadUrl, releases.Name)
+    let mostRecentRelease = releases |> Seq.find (fun x -> x.TagName.EndsWith(tag))
+    (mostRecentRelease.Assets.[0].BrowserDownloadUrl, mostRecentRelease.Name)
 
 let private downloadZip zipUrl =
     let response = Http.Request(zipUrl,
