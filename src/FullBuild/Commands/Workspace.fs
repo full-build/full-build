@@ -168,7 +168,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
                             |> Seq.map (cloneRepo wsDir pullInfo.Rebase)
                             |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously 
         
-        pullResults |> Exec.CheckMulitpleResponseCode
+        pullResults |> Exec.CheckMultipleResponseCode
 
         Install ()
 
