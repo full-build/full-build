@@ -28,8 +28,8 @@ type private MonitorCommand =
 let private defaultPSI (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) redirect =
     let psi = ProcessStartInfo (FileName = command,
                                 Arguments = args,
-                                UseShellExecute = false, 
-                                WorkingDirectory = dir.FullName, 
+                                UseShellExecute = false,
+                                WorkingDirectory = dir.FullName,
                                 LoadUserProfile = true)
     for var in vars do
         psi.EnvironmentVariables.Add(var.Key, var.Value)
@@ -39,7 +39,7 @@ let private defaultPSI (command : string) (args : string) (dir : DirectoryInfo) 
         psi.RedirectStandardError <- true
 
     psi
-    
+
 
 let private supervisedExec onOut onErr onEnd redirect (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
     let psi = defaultPSI command args dir vars redirect
@@ -58,7 +58,7 @@ let private supervisedExec onOut onErr onEnd redirect (command : string) (args :
     let asyncErr = if redirect then async { return read onErr proc.StandardError List.empty |> MonitorCommand.Err }
                                else async { return List.empty |> MonitorCommand.Err }
     let asyncCode = async { proc.WaitForExit(); return proc.ExitCode |> MonitorCommand.End }
-    let res = [ asyncCode ; asyncOut ; asyncErr ] |> Async.Parallel |> Async.RunSynchronously 
+    let res = [ asyncCode ; asyncOut ; asyncErr ] |> Async.Parallel |> Async.RunSynchronously
     match res.[0], res.[1], res.[2] with
     | MonitorCommand.End code, MonitorCommand.Out out, MonitorCommand.Err err -> onEnd code out err
     | _ -> failwith "Unexpected results"
@@ -68,7 +68,7 @@ let private supervisedExec onOut onErr onEnd redirect (command : string) (args :
 let ExecBuffered checkError =
     supervisedExec ignore ignore checkError true
 
-let Exec checkError = 
+let Exec checkError =
     supervisedExec (printfn "%s") (printfn "%s") checkError false
 
 let ExecGetOutput checkError (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
