@@ -16,62 +16,55 @@ module Tools.VcsHg
 
 open System.IO
 open Graph
+open Exec
 
-let private checkErrorCode code out err =
-    if code <> 0 then failwithf "Process failed with error %d" code
+let private checkErrorCode execResult =
+    if execResult.ResultCode <> 0 then failwithf "Process failed with error %d" execResult.ResultCode
 
-let private noBuffering code out err =
-    ()
-
-let private checkIgnore code out err =
-    ()
-
-let private checkedExec onEnd =
-    let ycheck code out err =
-        onEnd code out err
-        checkErrorCode code out err
-    Exec.Exec ycheck
+let private checkedExec command args dir vars =
+    Exec command args dir vars |> checkErrorCode
     
-let private checkedExecMaybeIgnore ignoreError =
-    let check = if ignoreError then checkIgnore else checkErrorCode
-    Exec.Exec check
+let private checkedExecMaybeIgnore command args dir vars ignoreError =
+    let check = if ignoreError then ignore else checkErrorCode
+    Exec command args dir vars |> check
 
-let private checkedExecReadLine =
-    Exec.ExecGetOutput checkErrorCode
+let private checkedExecReadLine command args dir vars =
+    let res = Exec command args dir vars
+    res
 
 let HgCommit (repoDir : DirectoryInfo) (comment : string) =
-    checkedExec noBuffering "git" "add -S *" repoDir Map.empty
+    checkedExec "git" "add -S *" repoDir Map.empty
     let args = sprintf "commit -A -m %A" comment
-    checkedExec noBuffering "hg" args repoDir Map.empty
+    checkedExec "hg" args repoDir Map.empty
 
 let HgPush (repoDir : DirectoryInfo) =
-    checkedExec noBuffering "hg" "push" repoDir Map.empty
+    checkedExec "hg" "push" repoDir Map.empty
 
-let HgPull (repoDir : DirectoryInfo) (rebase : bool) onEnd =
-    checkedExec onEnd "hg" "pull -u" repoDir Map.empty
+let HgPull (repoDir : DirectoryInfo) (rebase : bool) =
+    ExecGetOutput "hg" "pull -u" repoDir Map.empty
 
 let HgTip (repoDir : DirectoryInfo) =
     let args = @"id -i"
     let res = checkedExecReadLine "hg" args repoDir Map.empty
-    res
+    res.Out @ res.Error
 
 let HgClean (repoDir : DirectoryInfo) (repo : Repository) =
-    checkedExec noBuffering "hg" "purge" repoDir Map.empty
+    checkedExec "hg" "purge" repoDir Map.empty
 
 let HgIs (repo : Repository) =
     try
         let currDir = IoHelpers.CurrentFolder()
         let args = sprintf @"id -i -R %A" repo.Uri
-        checkedExecReadLine "hg" args currDir Map.empty |> ignore
+        checkedExec "hg" args currDir Map.empty 
         true
     with
         _ -> false
 
-let HgClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) onEnd =
+let HgClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
     let bronly = sprintf "-r %s" repo.Branch
     let args = sprintf @"clone %s %A %A" bronly url target.FullName
     let currDir = IoHelpers.CurrentFolder ()
-    checkedExec onEnd "hg" args currDir Map.empty
+    ExecGetOutput "hg" args currDir Map.empty
 
 let HgCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError : bool) =
     let rev = match version with
@@ -79,7 +72,7 @@ let HgCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError 
               | None -> "tip"
 
     let args = sprintf "update -r %A" rev
-    checkedExecMaybeIgnore ignoreError "hg" args repoDir Map.empty
+    checkedExecMaybeIgnore "hg" args repoDir Map.empty ignoreError
 
 let HgHistory (repoDir : DirectoryInfo) (version : string) =
     []

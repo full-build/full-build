@@ -19,10 +19,6 @@ open System.IO
 open IoHelpers
 open Collections
 
-
-let private checkErrorCode code out err =
-    if code <> 0 then failwithf "Process failed with error %d" code
-
 let private parseContent (lines : string seq) =
     seq {
         for line in lines do
@@ -65,7 +61,7 @@ let private removeDependenciesContent (lines : string seq) (packages : PackageId
 
 let private executePaketCommand cmd =
     let confDir = Env.GetFolder Env.Folder.Config
-    Exec.Exec checkErrorCode "paket.exe" cmd confDir Map.empty
+    Exec.Exec "paket.exe" cmd confDir Map.empty |> Exec.CheckResponseCode
 
 let UpdateSources (sources : RepositoryUrl seq) =
     let confDir = Env.GetFolder Env.Folder.Config

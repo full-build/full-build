@@ -25,12 +25,6 @@ open System
 open Graph
 
 
-let private checkErrorCode code out err =
-    if code <> 0 then failwithf "Process failed with error %d" code
-
-let private noBuffering code out err =
-    ()
-
 let Create (createInfo : CLI.Commands.SetupWorkspace) =
     let wsDir = DirectoryInfo(createInfo.Path)
     wsDir.Create()
@@ -40,7 +34,7 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     try
         Environment.CurrentDirectory <- wsDir.FullName
         let graph = Graph.create createInfo.MasterRepository createInfo.MasterArtifacts createInfo.Type TestRunnerType.NUnit
-        Tools.Vcs.Clone wsDir graph.MasterRepository true noBuffering
+        Tools.Vcs.Clone wsDir graph.MasterRepository true |> Exec.PrintOutput |> Exec.CheckResponseCode
         graph.Save()
 
         let baselineRepository = Baselines.from graph
@@ -66,7 +60,7 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         printf "[WARNING] Workspace already exists - skipping"
     else
         let graph = Graph.init initInfo.MasterRepository initInfo.Type
-        Tools.Vcs.Clone wsDir graph.MasterRepository true noBuffering
+        Tools.Vcs.Clone wsDir graph.MasterRepository true |> Exec.PrintOutput |> Exec.CheckResponseCode
 
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -138,21 +132,9 @@ let consoleProgressBar max =
             }
         loop 1)
 
-let private cloneRepo wsDir rebase (repo : Repository) =
-    let rec printl lines =
-        match lines with
-        | line :: tail -> printfn "%s" line 
-                          printl tail
-        | [] -> ()
-
-    async {
-        let onEnd code out err = 
-            IoHelpers.DisplayHighlight repo.Name
-            printl out
-            printl err
-        Tools.Vcs.Pull wsDir repo rebase onEnd
-    }
-
+let private cloneRepo wsDir rebase (repo : Repository) = async {
+    return repo, Tools.Vcs.Pull wsDir repo rebase 
+}
 
 let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -160,16 +142,25 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     if pullInfo.Src then
-        let cloneRepos = match pullInfo.View with
-                         | None -> graph.Repositories
-                         | Some viewName -> let view = viewRepository.Views |> Seq.find (fun x -> x.Name = viewName)
-                                            let repos = view.Projects |> Set.map (fun x -> x.Repository)
-                                            repos
+        DisplayHighlight graph.MasterRepository.Name
+        graph.MasterRepository 
+            |> cloneRepo wsDir pullInfo.Rebase 
+            |> Async.RunSynchronously
+            |> snd |> Exec.PrintOutput |> Exec.CheckResponseCode
 
+        let selectedRepos = match pullInfo.View with
+                             | None -> graph.Repositories
+                             | Some viewName -> let view = viewRepository.Views |> Seq.find (fun x -> x.Name = viewName)
+                                                let repos = view.Projects |> Set.map (fun x -> x.Repository)
+                                                repos
         let maxThrottle = pullInfo.Multithread ? (System.Environment.ProcessorCount*4, 1)
-        cloneRepos |> Seq.filter (fun x -> x.IsCloned)
-                   |> Seq.map (cloneRepo wsDir pullInfo.Rebase)
-                   |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
+        let pullResults = selectedRepos 
+                            |> Seq.filter (fun x -> x.IsCloned)
+                            |> Seq.map (cloneRepo wsDir pullInfo.Rebase)
+                            |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously 
+        
+        pullResults |> Seq.iter(fun (repo, execResult) -> IoHelpers.DisplayHighlight repo.Name; execResult |> Exec.PrintOutput |> ignore)
+        pullResults |> Seq.map(snd) |> Exec.CheckMulitpleResponseCode
 
         Install ()
 
@@ -195,8 +186,8 @@ let Exec (execInfo : CLI.Commands.Exec) =
             try
                 DisplayHighlight repo.Name
 
-                if Env.IsMono () then Exec.Exec checkErrorCode "sh" ("-c " + args) repoDir vars
-                else Exec.Exec checkErrorCode "cmd" args repoDir vars
+                if Env.IsMono () then Exec.Exec "sh" ("-c " + args) repoDir vars |> Exec.CheckResponseCode
+                else Exec.Exec "cmd" args repoDir vars |> Exec.CheckResponseCode
             with e -> printfn "*** %s" e.Message
 
 let Clean () =

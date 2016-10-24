@@ -33,11 +33,11 @@ let Unclone (wsDir : DirectoryInfo) (repo : Repository) =
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name
     if repoDir.Exists then repoDir.Delete(true)
 
-let Clone (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) onEnd =
+let Clone (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) =
     let gitCloneFunc = if repo.Vcs = VcsType.Gerrit then GerritClone repo
                                                     else GitClone repo
     let hgCloneFunc = HgClone repo
-    (chooseVcs wsDir repo.Vcs repo gitCloneFunc hgCloneFunc) repo.Uri shallow onEnd
+    (chooseVcs wsDir repo.Vcs repo gitCloneFunc hgCloneFunc) repo.Uri shallow
 
 let Tip (wsDir : DirectoryInfo) (repo : Repository) =
     (chooseVcs wsDir repo.Vcs repo GitTip HgTip).[0]
@@ -49,8 +49,8 @@ let Checkout (wsDir : DirectoryInfo) (repo : Repository) (version : string optio
 let Ignore (wsDir : DirectoryInfo) (repo : Repository) =
     chooseVcs wsDir repo.Vcs repo  GitIgnore HgIgnore
 
-let Pull (wsDir : DirectoryInfo) (repo : Repository) (rebase : bool) onEnd =
-    (chooseVcs wsDir repo.Vcs repo GitPull HgPull) rebase onEnd
+let Pull (wsDir : DirectoryInfo) (repo : Repository) (rebase : bool) =
+    (chooseVcs wsDir repo.Vcs repo GitPull HgPull) rebase
 
 let Commit (wsDir : DirectoryInfo) (repo : Repository) (comment : string) =
     (chooseVcs wsDir repo.Vcs repo GitCommit HgCommit) comment

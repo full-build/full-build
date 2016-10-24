@@ -18,10 +18,6 @@ open IoHelpers
 open Env
 open Graph
 
-let private checkErrorCode code out err =
-    if code <> 0 then failwithf "Process failed with error %d" code
-
-
 let generateVersionFs version =
     [|
         "namespace FullBuildVersion"
@@ -66,8 +62,8 @@ let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multith
     let argConfig = sprintf "/p:Configuration=%s" config
     let args = sprintf "/nologo %s %s %s %A" argTarget argMt argConfig viewFile.Name
 
-    if Env.IsMono () then Exec.Exec checkErrorCode "xbuild" args wsDir Map.empty
-    else Exec.Exec checkErrorCode "msbuild" args wsDir Map.empty
+    if Env.IsMono () then Exec.Exec "xbuild" args wsDir Map.empty |> Exec.CheckResponseCode
+    else Exec.Exec "msbuild" args wsDir Map.empty |> Exec.CheckResponseCode
 
 let chooseBuilder (builderType : BuilderType) msbuildBuilder skipBuilder =
     let builder = match builderType with
