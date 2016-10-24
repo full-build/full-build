@@ -16,28 +16,29 @@ module Tools.VcsGit
 
 open System.IO
 open Graph
+open Exec
 
-let private checkErrorCode code out err =
-    if code <> 0 then failwithf "Process failed with error %d" code
+let private checkErrorCode execResult =
+    if execResult.ResultCode <> 0 then failwithf "Process failed with error %d" execResult.ResultCode
 
 let private noBuffering code out err =
     ()
 
-let private checkIgnore code out err =
-    ()
-
 let private checkedExec onEnd =
-    let ycheck code out err =
-        onEnd code out err
-        checkErrorCode code out err
-    Exec.Exec ycheck
+    let ycheck execResult =
+        onEnd execResult.ResultCode execResult.Out execResult.Error
+        execResult |> checkErrorCode 
+    fun x y z s -> Exec x y z s  |> ycheck
     
 let private checkedExecMaybeIgnore ignoreError =
-    let check = if ignoreError then checkIgnore else checkErrorCode
-    Exec.Exec check
+    let check = if ignoreError then ignore else checkErrorCode
+    fun x y z s -> Exec x y z s  |> check
 
 let private checkedExecReadLine =
-    Exec.ExecGetOutput checkErrorCode
+    fun x y z s -> 
+        let res = ExecGetOutput x y z s  
+        res |> checkErrorCode
+        res.Out @ res.Error
 
 let GitCommit (repoDir : DirectoryInfo) (comment : string) =
     checkedExec noBuffering "git" "add --all" repoDir Map.empty
@@ -47,15 +48,14 @@ let GitCommit (repoDir : DirectoryInfo) (comment : string) =
 let GitPush (repoDir : DirectoryInfo) =
     checkedExec noBuffering "git" "push --quiet" repoDir Map.empty
 
-let GitPull (repoDir : DirectoryInfo) (rebase : bool) onEnd =
+let GitPull (repoDir : DirectoryInfo) (rebase : bool) =
     let dorebase = if rebase then "--rebase" else "--ff-only"
     let args = sprintf "pull %s" dorebase
-    checkedExec onEnd "git" args repoDir Map.empty
+    ExecGetOutput "git" args repoDir Map.empty
 
 let GitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=%H"
-    let res = checkedExecReadLine "git" args repoDir Map.empty
-    res
+    checkedExecReadLine "git" args repoDir Map.empty
 
 let GitClean (repoDir : DirectoryInfo) (repo : Repository) =
     checkedExec noBuffering "git" "reset --hard" repoDir Map.empty
@@ -71,7 +71,7 @@ let GitIs (repo : Repository) =
     with
         _ -> false
 
-let GitClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) onEnd =
+let GitClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
     let bronly = sprintf "--branch %s --no-single-branch" repo.Branch
     let depth = if shallow then "--depth=3"
                 else ""
@@ -79,10 +79,10 @@ let GitClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallo
     let args = sprintf @"clone %s --quiet %s %s %A" url bronly depth target.FullName
 
     let currDir = IoHelpers.CurrentFolder ()
-    checkedExec onEnd "git" args currDir Map.empty
+    ExecGetOutput "git" args currDir Map.empty
 
-let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) onEnd =
-    GitClone repo target url shallow onEnd
+let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
+    let res = GitClone repo target url shallow
 
     let installDir = Env.GetFolder Env.Folder.Installation
     let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
@@ -90,6 +90,7 @@ let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (sha
                         |> IoHelpers.GetSubDirectory "hooks"
                         |> IoHelpers.GetFile "commit-msg"
     commitMsgFile.CopyTo (target.FullName) |> ignore
+    res
 
 let GitCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError : bool) =
     let rev = match version with
@@ -102,15 +103,13 @@ let GitCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError
 let GitHistory (repoDir : DirectoryInfo) (version : string) =
     let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version
     try
-        let res = checkedExecReadLine "git" args repoDir Map.empty
-        res
+        checkedExecReadLine "git" args repoDir Map.empty
     with
         exn -> [sprintf "Failed to get history for repository %A from version %A (%s)" repoDir.Name version (exn.ToString())]
 
 let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
     let args = sprintf @"log -1 --format=%%H %s" relativeFile
-    let res = checkedExecReadLine "git" args repoDir Map.empty
-    res
+    checkedExecReadLine "git" args repoDir Map.empty
 
 let GitIgnore (repoDir : DirectoryInfo) =
     let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"

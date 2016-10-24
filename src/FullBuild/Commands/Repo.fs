@@ -18,20 +18,8 @@ open Collections
 open Graph
 
 let private cloneRepoAndInit wsDir shallow (repo : Repository) =
-    let rec printl lines =
-        match lines with
-        | line :: tail -> printfn "%s" line 
-                          printl tail
-        | [] -> ()
-
-    let onEnd code out err =
-        IoHelpers.DisplayHighlight repo.Name
-        printl out
-        printl err
-
     async {
-        IoHelpers.DisplayHighlight repo.Name
-        Tools.Vcs.Clone wsDir repo shallow onEnd
+        return repo, Tools.Vcs.Clone wsDir repo shallow
     }
 
 let List() =
@@ -47,9 +35,12 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let selectedRepos = PatternMatching.FilterMatch graph.Repositories (fun x -> x.Name) cmd.Filters
     let maxThrottle = cmd.Multithread ? (System.Environment.ProcessorCount*4, 1)
-    selectedRepos |> Set.filter (fun x -> not x.IsCloned)
+    let cloneResults =
+        selectedRepos |> Set.filter (fun x -> not x.IsCloned)
                   |> Seq.map (cloneRepoAndInit wsDir cmd.Shallow)
-                  |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
+                  |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously 
+    cloneResults |> Seq.iter(fun (repo, execResult) -> IoHelpers.DisplayHighlight repo.Name; execResult |> Exec.PrintOutput |> ignore)
+    cloneResults |> Seq.map(snd) |> Exec.CheckMulitpleResponseCode
 
 let Add (cmd : CLI.Commands.AddRepository) =
     let graph = Configuration.LoadAnthology () |> Graph.from

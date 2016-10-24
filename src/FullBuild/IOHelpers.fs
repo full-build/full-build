@@ -19,8 +19,8 @@ open System.Xml.Linq
 
 
 // http://ss64.com/nt/robocopy-exit.html
-let private checkErrorCode code out err =
-    if code > 7 then failwithf "Process failed with error %d" code
+let private checkErrorCode (execResult:Exec.ExecResult) =
+    if execResult.ResultCode > 7 then failwithf "Process failed with error %d" execResult.ResultCode
 
 type Extension =
     | View
@@ -106,7 +106,7 @@ let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) (readOnly : boo
                   else "/A-:R"
 
     let args = sprintf "%s /MIR /MT /NP /NFL /NDL /NJH /NJS %A %A" setRead source.FullName target.FullName
-    Exec.Exec checkErrorCode "robocopy.exe" args currDir Map.empty
+    Exec.Exec "robocopy.exe" args currDir Map.empty |> checkErrorCode
 
 let GetExtension (file : FileInfo) =
     file.Extension.Replace(".", "")
@@ -119,7 +119,6 @@ let GetFilewithoutRootDirectory (file : string) =
     let idx = file.IndexOf('/')
     file.Substring(idx+1)
 
-
 let consoleLock = System.Object()
 let DisplayHighlight s =
     let display () =
@@ -129,7 +128,6 @@ let DisplayHighlight s =
         Console.ForegroundColor <- oldColor
 
     lock consoleLock display
-
 
 let Try action =
     try

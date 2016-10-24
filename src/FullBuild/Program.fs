@@ -17,7 +17,7 @@ open CLI.Commands
 
 let tryMain argv =
     Env.CheckLicense ()
-    Commands.Workspace.CheckMinVersion ()
+    //Commands.Workspace.CheckMinVersion ()
 
     let cmd = CLI.CommandLine.Parse (argv |> Seq.toList)
 
