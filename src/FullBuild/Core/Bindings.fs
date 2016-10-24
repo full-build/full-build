@@ -102,7 +102,12 @@ let UpdateArtifactBindingRedirects (artifactDir : DirectoryInfo) =
         |> Seq.filter (fun x -> x.Exists)
         |> Seq.iter (forceBindings bindings)
 
-let UpdateProjectBindingRedirects (projectDir : DirectoryInfo) =
+let UpdateProjectBindingRedirects (project : Graph.Project) =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let repoDir = wsDir |> IoHelpers.GetSubDirectory project.Repository.Name
+    let prjFile = repoDir |> GetFile project.ProjectFile
+    let projectDir = prjFile.Directory
+
     let assemblies = anthologyAssemblies()
     let artifactDir = projectDir |> GetSubDirectory "bin"
     let bindings = generateBindings assemblies artifactDir

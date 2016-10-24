@@ -19,9 +19,18 @@ let TestAssemblies (filters : string set) (excludes : string set) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
     let selectedViews = PatternMatching.FilterMatch viewRepository.Views (fun x -> x.Name) filters
-    let assemblies = selectedViews |> Set.map (fun x -> x.Projects)
+
+    // first set binding redirects on output only
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let projects = selectedViews |> Set.map (fun x -> x.Projects)
                                    |> Set.unionMany
                                    |> Set.filter (fun x -> x.HasTests)
-                                   |> Set.map (fun x -> x.BinFile)
+    let artifactDirs = projects |> Set.map (fun x -> sprintf "%s/%s" x.Repository.Name x.ProjectFile)
+                                |> Seq.map (fun x -> wsDir |> IoHelpers.GetFile x)
+                                |> Seq.map (fun x -> x.Directory)
+                                |> Seq.map (fun x -> x |> IoHelpers.GetSubDirectory "bin")
+    artifactDirs |> Seq.iter Core.Bindings.UpdateArtifactBindingRedirects
 
+    // then test assemblies
+    let assemblies = projects |> Set.map (fun x -> x.BinFile)
     (Core.TestRunners.TestWithTestRunner graph.TestRunner) assemblies excludes
