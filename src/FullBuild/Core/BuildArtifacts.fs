@@ -15,9 +15,10 @@
 module Core.BuildArtifacts
 open System.IO
 open IoHelpers
+open Graph
 
 
-let Publish (branch : string option) buildnum hash =
+let Publish (graph : Graph) (branch : string option) buildnum hash =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let mainRepo = graph.MasterRepository
     let wsDir = Env.GetFolder Env.Folder.Workspace
@@ -65,8 +66,7 @@ let Publish (branch : string option) buildnum hash =
 
              reraise ()
 
-let PullReferenceBinaries version =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+let PullReferenceBinaries (graph : Graph) version =
     let artifactDir = graph.ArtifactsDir |> DirectoryInfo
 
     let versionDir = artifactDir |> GetSubDirectory version
@@ -78,9 +78,8 @@ let PullReferenceBinaries version =
     else
         DisplayHighlight "[WARNING] No reference binaries found"
 
-let PullLatestReferenceBinaries () =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+let PullLatestReferenceBinaries (graph : Graph) =
     let versionsFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
     let version = File.ReadAllLines(versionsFile.FullName) |> Seq.last
     let hash = version.Split(':') |> Seq.toArray
-    PullReferenceBinaries hash.[1]
+    PullReferenceBinaries graph hash.[1]
