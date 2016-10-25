@@ -54,7 +54,10 @@ let Save (histType : HistoryType) (version : string) (revisions : (Graph.Reposit
     let lines = match histType with
                 | HistoryType.Text -> writeText version revisions 
                 | HistoryType.Html -> writeHtml version revisions
-    let historyFile = wsDir |> IoHelpers.GetFile "history"
+    let ext = match histType with
+              | HistoryType.Text -> ".txt" 
+              | HistoryType.Html -> ".html"
+    let historyFile = wsDir |> IoHelpers.GetFile ("history" + ext)
     System.IO.File.WriteAllLines(historyFile.FullName, lines)
 
     // print out changes
