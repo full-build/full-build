@@ -29,7 +29,7 @@ with
     override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
-        member this.CompareTo(other) = compareTo this other (fun x -> x.Bookmark.Repository)
+        member this.CompareTo(other) = compareTo this other (fun x -> x.Bookmark)
 
     member this.Repository =
         this.Graph.Repositories |> Seq.find (fun x -> x.Name = this.Bookmark.Repository.toString)
