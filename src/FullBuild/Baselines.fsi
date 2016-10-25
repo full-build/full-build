@@ -27,7 +27,7 @@ with
     member IsIncremental: bool
     member Bookmarks: Bookmark set
     static member (-): Baseline*Baseline
-                    -> Repository set
+                    -> Bookmark set
     member Save: unit
               -> unit
 
