@@ -52,8 +52,8 @@ with
     member this.Bookmarks =
         this.Baseline.Bookmarks |> Set.map (fun x -> { Graph = this.Graph; Bookmark = x })
 
-    static member (-) (a:Baseline, b : Baseline) =
-        let changes = Set.difference a.Bookmarks b.Bookmarks
+    static member (-) (ref : Baseline, target : Baseline) =
+        let changes = Set.difference ref.Bookmarks target.Bookmarks
         changes
 
     member this.Save () =

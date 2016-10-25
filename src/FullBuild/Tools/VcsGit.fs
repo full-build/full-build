@@ -105,7 +105,7 @@ let GitHistory (repoDir : DirectoryInfo) (version : string) =
     try
         checkedExecReadLine "git" args repoDir Map.empty
     with
-        exn -> [sprintf "Failed to get history for repository %A from version %A (%s)" repoDir.Name version (exn.ToString())]
+        _ -> [sprintf "Failed to get history from version %A - please pull !" version]
 
 let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
     let args = sprintf @"log -1 --format=%%H %s" relativeFile

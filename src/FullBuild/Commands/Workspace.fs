@@ -245,6 +245,10 @@ let History (historyInfo : CLI.Commands.History) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let baselineRepository = Baselines.from graph
     let baseline = baselineRepository.Baseline
+
+    // newBaseline contains only cloned repositories
+    // this means deltaBookmarks can contain non cloned repositories
+    // before computing history, ensure repositories are correctly cloned
     let newBaseline = baselineRepository.CreateBaseline false
     let deltaBookmarks = baseline - newBaseline
 
