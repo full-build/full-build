@@ -14,41 +14,52 @@
 
 module Generators.History
 
-let private textHeader (version : string) =
-    ()
 
-let private textFooter () =
-    ()
-
-let private htmlHeader (version : string) =
-    printfn "<html>"
-    printfn "<body>"
-    printfn "<h2>version %s</h2>" version
-
-let private htmlFooter () =
-    printfn "</body>"
-
-let private textBody (repo : string) (content : string list) =
-    IoHelpers.DisplayHighlight repo
+let private textBody (repo : Graph.Repository) (content : string list) =
+    IoHelpers.DisplayHighlight repo.Name
     content |> Seq.iter (printfn "%s")
 
-let private htmlBody (repo : string) (content : string list) =
-    printfn "<b>%s</b><br>" repo
-    content |> Seq.iter (printfn "%s<br>")
-    printfn "<br>"
 
 type HistoryType =
     | Html
     | Text
 
 
-let Save (histType : HistoryType) (version : string) (revisions : (Graph.Repository*string list) seq) =
-    let header, body, footer = match histType with
-                               | HistoryType.Html -> htmlHeader, htmlBody, htmlFooter
-                               | HistoryType.Text -> textHeader, textBody, textFooter
+let writeText (version : string) (revisions : (Graph.Repository * string list) seq) =
+    seq {
+        yield sprintf "version %s" version
+        for (repo, rev) in revisions do
+            yield sprintf "==> %s" repo.Name
+            for change in rev do
+                yield sprintf "%s" change
+    }
 
-    header version
-    revisions |> Seq.iter (fun x -> let repo = x |> fst
-                                    let revision = x |> snd
-                                    body repo.Name revision)
-    footer ()
+
+let writeHtml (version : string) (revisions : (Graph.Repository * string list) seq) =
+    seq {
+        yield "<html>"
+        yield "<body>"
+        yield sprintf "<h2>version %s</h2>" version
+        for (repo, rev) in revisions do
+            yield sprintf "<b>%s</b><br>" repo.Name
+            for change in rev do
+                yield sprintf "%s<br>" change
+            yield "<br>"
+        yield "</body>"
+    }
+
+
+let Save (histType : HistoryType) (version : string) (revisions : (Graph.Repository*string list) seq) =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let lines = match histType with
+                | HistoryType.Text -> writeText version revisions 
+                | HistoryType.Html -> writeHtml version revisions
+    let historyFile = wsDir |> IoHelpers.GetFile "history"
+    System.IO.File.WriteAllLines(historyFile.FullName, lines)
+
+    // print out changes
+    printfn "version %s" version
+    for (repo, rev) in revisions do
+        IoHelpers.DisplayHighlight repo.Name
+        for change in rev do
+            printfn "%s" change
