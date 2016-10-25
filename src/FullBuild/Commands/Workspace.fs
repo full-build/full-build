@@ -121,8 +121,8 @@ let Install () =
     Core.Package.RestorePackages ()
     Core.Conversion.GenerateProjectArtifacts()
 
-let consoleProgressBar max = 
-    MailboxProcessor.Start(fun inbox -> 
+let consoleProgressBar max =
+    MailboxProcessor.Start(fun inbox ->
         new String(' ', max) |> printf "[%s]\r["
         let rec loop n = async {
                 let! msg = inbox.Receive()
@@ -151,8 +151,8 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
 
     if pullInfo.Src then
-        graph.MasterRepository 
-            |> cloneRepo wsDir pullInfo.Rebase 
+        graph.MasterRepository
+            |> cloneRepo wsDir pullInfo.Rebase
             |> Async.RunSynchronously
             |> Exec.CheckResponseCode
 
@@ -163,11 +163,11 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
                                                 repos
         let maxThrottle = pullInfo.Multithread ? (System.Environment.ProcessorCount*4, 1)
 
-        let pullResults = selectedRepos 
+        let pullResults = selectedRepos
                             |> Seq.filter (fun x -> x.IsCloned)
                             |> Seq.map (cloneRepo wsDir pullInfo.Rebase)
-                            |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously 
-        
+                            |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
+
         pullResults |> Exec.CheckMultipleResponseCode
 
         Install ()
@@ -245,12 +245,14 @@ let History (historyInfo : CLI.Commands.History) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let baselineRepository = Baselines.from graph
     let baseline = baselineRepository.Baseline
+    let newBaseline = baselineRepository.CreateBaseline false
+    let deltaBookmarks = newBaseline - baseline
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     // header
     let version = Tools.Vcs.Tip wsDir graph.MasterRepository
-        
+
     // body
     let lastCommit = Tools.Vcs.LastCommit wsDir graph.MasterRepository "baseline"
     let revision = Tools.Vcs.Log wsDir graph.MasterRepository lastCommit.[0]
@@ -262,7 +264,7 @@ let History (historyInfo : CLI.Commands.History) =
         | _ -> yield graph.MasterRepository, revision
 
         // other repositories then
-        for bookmark in baseline.Bookmarks do
+        for bookmark in deltaBookmarks do
             if bookmark.Repository.IsCloned then
                 let revision = Tools.Vcs.Log wsDir bookmark.Repository bookmark.Version
                 match revision with

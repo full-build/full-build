@@ -42,28 +42,28 @@ with
     member this.Projects : Project set =
         let filters = this.View.Filters |> Set.map (fun x -> if x.IndexOfAny([|'/'; '\\' |]) = -1 then x + "/*" else x)
                                         |> Set.map (fun x -> x.Replace('\\', '/'))
-        let projects = PatternMatching.FilterMatch<Project> 
-                            this.Graph.Projects 
-                            (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) 
+        let projects = PatternMatching.FilterMatch<Project>
+                            this.Graph.Projects
+                            (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name)
                             filters
 
         let baselineRepo = Baselines.from this.Graph
-        let modRepositories = if this.Modified then 
+        let modRepositories = if this.Modified then
                                     let newBaseline = baselineRepo.CreateBaseline false
                                     newBaseline - baselineRepo.Baseline
                               else Set.empty
 
-        let modProjects = modRepositories |> Set.map (fun x -> x.Projects)
+        let modProjects = modRepositories |> Set.map (fun x -> x.Repository.Projects)
                                           |> Set.unionMany
         let viewProjects = Project.Closure (projects + modProjects)
-        let depProjects = if this.References then Project.TransitiveReferences viewProjects  
+        let depProjects = if this.References then Project.TransitiveReferences viewProjects
                           else Set.empty
         let refProjects = if this.ReferencedBy then Project.TransitiveReferencedBy viewProjects
                           else Set.empty
         let projects = viewProjects + depProjects + refProjects + modProjects
         projects |> Set.filter (fun x -> x.Repository.IsCloned)
 
-    member this.Save (isDefault : bool option) = 
+    member this.Save (isDefault : bool option) =
         let viewId = Anthology.ViewId this.View.Name
         Configuration.SaveView viewId this.View isDefault
 
@@ -74,7 +74,7 @@ with
 and [<Sealed>] Factory(graph : Graph) =
     let mutable viewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> = null
 
-    member this.ViewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> = 
+    member this.ViewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> =
         if viewMap |> isNull then
             let vwDir = Env.GetFolder Env.Folder.View
             viewMap <- vwDir.EnumerateFiles("*.view") |> Seq.map (fun x -> System.IO.Path.GetFileNameWithoutExtension(x.Name) |> Anthology.ViewId)
@@ -82,7 +82,7 @@ and [<Sealed>] Factory(graph : Graph) =
                                                       |> Seq.map (fun x -> x.Name |> Anthology.ViewId, { Graph = graph; View = x })
                                                       |> dict
         viewMap
-            
+
     member this.Views = this.ViewMap.Values |> set
 
     member this.DefaultView =
@@ -92,7 +92,7 @@ and [<Sealed>] Factory(graph : Graph) =
         | Some x -> Some this.ViewMap.[x]
 
     member this.CreateView name filters parameters dependencies referencedBy modified builder =
-        let view = { Anthology.View.Name = name 
+        let view = { Anthology.View.Name = name
                      Anthology.View.Filters = filters
                      Anthology.View.Parameters = parameters
                      Anthology.View.SourceOnly = dependencies

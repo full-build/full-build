@@ -39,7 +39,7 @@ with
 // =====================================================================================================
 
 and [<CustomEquality; CustomComparison>] Baseline =
-    { Graph : Graph 
+    { Graph : Graph
       Baseline : Anthology.Baseline }
 with
     override this.Equals(other : System.Object) = refEquals this other
@@ -48,21 +48,21 @@ with
         member this.CompareTo(other) = compareTo this other (fun x -> x.Baseline)
 
     member this.IsIncremental = this.Baseline.Incremental
-    
-    member this.Bookmarks = 
+
+    member this.Bookmarks =
         this.Baseline.Bookmarks |> Set.map (fun x -> { Graph = this.Graph; Bookmark = x })
-    
+
     static member (-) (a:Baseline, b : Baseline) =
         let changes = Set.difference a.Bookmarks b.Bookmarks
-        changes |> Set.map (fun x -> x.Repository)
+        changes
 
-    member this.Save () = 
+    member this.Save () =
         Configuration.SaveBaseline this.Baseline
 
 // =====================================================================================================
 
 and [<Sealed>] Factory(graph : Graph) =
-    member this.Baseline = 
+    member this.Baseline =
         let baseline = Configuration.LoadBaseline()
         { Graph = graph; Baseline = baseline }
 
@@ -74,11 +74,11 @@ and [<Sealed>] Factory(graph : Graph) =
         let wsDir = Env.GetFolder Env.Folder.Workspace
         let bookmarks = graph.Repositories |> Set.map (fun x -> { Anthology.Bookmark.Repository = Anthology.RepositoryId.from x.Name
                                                                   Anthology.Bookmark.Version = Anthology.BookmarkVersion (Tools.Vcs.Tip wsDir x) })
-        let baseline = { Anthology.Baseline.Incremental = incremental 
+        let baseline = { Anthology.Baseline.Incremental = incremental
                          Anthology.Baseline.Bookmarks = bookmarks }
         { Graph = graph
           Baseline = baseline }
-          
-          
+
+
 let from graph =
     Factory(graph)
