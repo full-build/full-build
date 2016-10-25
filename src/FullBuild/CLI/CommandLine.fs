@@ -93,7 +93,6 @@ type private Token =
 
     | Add
     | Drop
-    | Pending
     | List
     | Describe
 
@@ -141,7 +140,6 @@ let private (|Token|_|) (token : string) =
 
     | "add" -> Some Add
     | "drop" -> Some Drop
-    | "pending" -> Some Pending
     | "list" -> Some List
     | "describe" -> Some Describe
 
@@ -520,7 +518,6 @@ let Parse (args : string list) : Command =
     | Token Token.List :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandListNuGet
 
     | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false
-    | Token Token.Pending :: Token Token.View :: cmdArgs -> cmdArgs |> commandAddView true true true
     | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
     | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
     | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
@@ -597,7 +594,6 @@ let UsageContent() =
         MainCommand.AddNuGet, "add nuget <nuget-uri> : add nuget uri"
         MainCommand.ListNuget, "list nuget : list NuGet feeds"
         MainCommand.Unknown, ""
-        MainCommand.DropView, "pending view <viewId> : create view with modified and depending repos"
         MainCommand.DropView, "drop view <viewId> : drop view"
         MainCommand.ListView, "list view : list views"
         MainCommand.DescribeView, "describe view <name> : describe view"
