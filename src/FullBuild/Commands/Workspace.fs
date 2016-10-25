@@ -246,7 +246,7 @@ let History (historyInfo : CLI.Commands.History) =
     let baselineRepository = Baselines.from graph
     let baseline = baselineRepository.Baseline
     let newBaseline = baselineRepository.CreateBaseline false
-    let deltaBookmarks = newBaseline - baseline
+    let deltaBookmarks = baseline - newBaseline
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
