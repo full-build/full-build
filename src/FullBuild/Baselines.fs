@@ -68,8 +68,16 @@ and [<Sealed>] Factory(graph : Graph) =
 
     member this.CreateBaseline (incremental : bool) =
         let wsDir = Env.GetFolder Env.Folder.Workspace
-        let bookmarks = graph.Repositories |> Set.map (fun x -> { Anthology.Bookmark.Repository = Anthology.RepositoryId.from x.Name
-                                                                  Anthology.Bookmark.Version = Anthology.BookmarkVersion (Tools.Vcs.Tip wsDir x) })
+
+        // get current repositories status
+        let newBookmarks = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
+                                              |> Set.map (fun x -> { Anthology.Bookmark.Repository = Anthology.RepositoryId.from x.Name
+                                                                     Anthology.Bookmark.Version = Anthology.BookmarkVersion (Tools.Vcs.Tip wsDir x) })
+
+        let oldBookmarks = this.Baseline.Bookmarks |> Set.filter (fun x -> incremental && (x.Repository.IsCloned |> not))
+                                                   |> Set.map (fun x -> x.Bookmark)
+        let bookmarks = oldBookmarks + newBookmarks
+
         let baseline = { Anthology.Baseline.Incremental = incremental
                          Anthology.Baseline.Bookmarks = bookmarks }
         { Graph = graph
