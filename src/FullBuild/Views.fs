@@ -48,12 +48,15 @@ with
                             filters
 
         let baselineRepo = Baselines.from this.Graph
-        let modRepositories = if this.Modified then
-                                    let newBaseline = baselineRepo.CreateBaseline false
-                                    newBaseline - baselineRepo.Baseline
-                              else Set.empty
+        let modBookmarks = if this.Modified then
+                               // newBaseline contains all repositories bookmarks - even non cloned ones (because true)
+                               // this will add new repositories if necessary and discard unchanged repositories
+                               // in fine, we only have new repositories and modified repositories
+                               let newBaseline = baselineRepo.CreateBaseline true
+                               newBaseline - baselineRepo.Baseline
+                           else Set.empty
 
-        let modProjects = modRepositories |> Set.map (fun x -> x.Repository.Projects)
+        let modProjects = modBookmarks |> Set.map (fun x -> x.Repository.Projects)
                                           |> Set.unionMany
         let viewProjects = Project.Closure (projects + modProjects)
         let depProjects = if this.References then Project.TransitiveReferences viewProjects
