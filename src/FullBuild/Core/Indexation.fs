@@ -18,7 +18,6 @@ open IoHelpers
 open System.Linq
 open System.Xml.Linq
 open XmlHelpers
-open MSBuildHelpers
 open Anthology
 open Collections
 
@@ -39,8 +38,6 @@ let private parseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Rep
           |> Seq.filter (fun x -> x.Exists)
           |> Seq.map (fun x -> parseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
           |> Seq.concat
-
-
 
 
 // NOTE: should be private

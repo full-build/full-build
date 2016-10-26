@@ -15,11 +15,6 @@
 module Generators.History
 
 
-let private textBody (repo : Graph.Repository) (content : string list) =
-    IoHelpers.DisplayHighlight repo.Name
-    content |> Seq.iter (printfn "%s")
-
-
 type HistoryType =
     | Html
     | Text
@@ -30,8 +25,7 @@ let writeText (version : string) (revisions : (Graph.Repository * string list) s
         yield sprintf "version %s" version
         for (repo, rev) in revisions do
             yield sprintf "==> %s" repo.Name
-            for change in rev do
-                yield sprintf "%s" change
+            yield! rev |> Seq.map (sprintf "%s")
     }
 
 
@@ -42,8 +36,7 @@ let writeHtml (version : string) (revisions : (Graph.Repository * string list) s
         yield sprintf "<h2>version %s</h2>" version
         for (repo, rev) in revisions do
             yield sprintf "<b>%s</b><br>" repo.Name
-            for change in rev do
-                yield sprintf "%s<br>" change
+            yield! rev |> Seq.map (sprintf "%s<br>")
             yield "<br>"
         yield "</body>"
     }
@@ -51,18 +44,14 @@ let writeHtml (version : string) (revisions : (Graph.Repository * string list) s
 
 let Save (histType : HistoryType) (version : string) (revisions : (Graph.Repository*string list) seq) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let lines = match histType with
-                | HistoryType.Text -> writeText version revisions 
-                | HistoryType.Html -> writeHtml version revisions
-    let ext = match histType with
-              | HistoryType.Text -> ".txt" 
-              | HistoryType.Html -> ".html"
-    let historyFile = wsDir |> IoHelpers.GetFile ("history" + ext)
+    let lines, ext = match histType with
+                     | HistoryType.Text -> writeText version revisions, IoHelpers.Extension.Text
+                     | HistoryType.Html -> writeHtml version revisions, IoHelpers.Extension.Html
+    let historyFile = wsDir |> IoHelpers.GetFile ("history" |> IoHelpers.AddExt ext)
     System.IO.File.WriteAllLines(historyFile.FullName, lines)
 
     // print out changes
     printfn "version %s" version
     for (repo, rev) in revisions do
         IoHelpers.DisplayHighlight repo.Name
-        for change in rev do
-            printfn "%s" change
+        rev |> Seq.iter (printfn "%s")
