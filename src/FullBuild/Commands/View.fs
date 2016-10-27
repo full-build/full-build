@@ -26,7 +26,6 @@ let Add (cmd : CLI.Commands.AddView) =
     let viewRepository = Views.from graph
     let view = viewRepository.CreateView cmd.Name
                                          (cmd.Filters |> Set.ofList)
-                                         Set.empty
                                          cmd.References
                                          cmd.ReferencedBy
                                          cmd.Modified
@@ -75,8 +74,6 @@ let Describe name =
     let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = name)
     let builder = StringHelpers.toString view.Builder
-    let builderInfo = view.Parameters |> Seq.fold (+) (sprintf "[%s] " builder)
-    printfn "%s" builderInfo
     view.Filters |> Seq.iter (fun x -> printfn "%s" x)
 
 let Build (cmd : CLI.Commands.BuildView) =
@@ -98,7 +95,6 @@ let Alter (cmd : CLI.Commands.AlterView) =
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let depView = viewRepository.CreateView view.Name
                                             view.Filters
-                                            view.Parameters
                                             (cmd.Source = Some true) ? (true, view.References)
                                             (cmd.Parents = Some true) ? (true, view.ReferencedBy)
                                             view.Modified

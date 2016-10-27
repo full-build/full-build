@@ -226,7 +226,6 @@ type View =
     { Name : string
       Filters : string set
       Builder : BuilderType
-      Parameters : string set
       SourceOnly : bool
       Parents : bool
       Modified : bool }

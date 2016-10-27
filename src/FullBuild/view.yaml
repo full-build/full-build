@@ -4,8 +4,6 @@
         - filter: toto/*
         - filter: titi/*
     builder: msbuild
-    parameters: 
-        - parameter: --mt
     references: true
     referencedBy: true
     modified: true

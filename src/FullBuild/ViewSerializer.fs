@@ -32,11 +32,6 @@ let SerializeView (view : View) =
         filterItem.filter <- filter
         config.view.filters.Add filterItem
 
-    config.view.parameters.Clear()
-    for parameter in view.Parameters do
-        let paramItem = ViewConfig.view_Type.parameters_Item_Type()
-        paramItem.parameter <- parameter
-        config.view.parameters.Add paramItem
     config.view.references <- view.SourceOnly
     config.view.referencedBy <- view.Parents
     config.view.modified <- view.Modified
@@ -51,9 +46,6 @@ let DeserializeView content =
       Filters = config.view.filters
                 |> Seq.map (fun x -> x.filter)
                 |> Set.ofSeq
-      Parameters = config.view.parameters
-                   |> Seq.map (fun x -> x.parameter)
-                   |> Set.ofSeq
       Builder = BuilderType.from config.view.builder
       SourceOnly = config.view.references
       Parents = config.view.referencedBy

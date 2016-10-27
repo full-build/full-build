@@ -23,7 +23,6 @@ let CheckSaveLoadBaseline () =
     let view1 = { Name = "toto"
                   Filters = ["cassandra-sharp/*"] |> Set
                   Builder = BuilderType.MSBuild
-                  Parameters = ["--mt"; "--debug" ] |> Set 
                   SourceOnly = true 
                   Parents = false 
                   Modified = false }
