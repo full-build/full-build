@@ -60,7 +60,7 @@ with
         let viewProjects = Project.Closure (projects + modProjects)
         let depProjects = if this.References then Project.TransitiveReferences viewProjects
                           else Set.empty
-        let refProjects = if this.ReferencedBy || this.Modified then Project.TransitiveReferencedBy viewProjects
+        let refProjects = if this.ReferencedBy then Project.TransitiveReferencedBy viewProjects
                           else Set.empty
         let projects = viewProjects + depProjects + refProjects
         let repositoriesNotCloned = projects |> Set.map (fun x -> x.Repository) 
