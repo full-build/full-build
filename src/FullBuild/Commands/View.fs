@@ -115,6 +115,17 @@ let Open (cmd : CLI.Commands.OpenView) =
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
     Exec.SpawnWithVerb slnFile.FullName "open"
 
+let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
+    let view = System.IO.FileInfo(cmd.FilePath) |> ViewSerializer.Load
+    {   CLI.Commands.AddView.Name = view.Name
+        CLI.Commands.AddView.Filters = view.Filters |> Set.toList
+        CLI.Commands.AddView.ReferencedBy = view.Parents
+        CLI.Commands.AddView.References = view.SourceOnly
+        CLI.Commands.AddView.Modified = view.Modified }
+                  |> Add
+    {   CLI.Commands.OpenView.Name = view.Name } 
+                  |> Open
+
 let Graph (cmd : CLI.Commands.GraphView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
