@@ -59,7 +59,7 @@ with
         let modProjects = modBookmarks |> Set.map (fun x -> x.Repository.Projects)
                                           |> Set.unionMany
         let viewProjects = Project.Closure (projects + modProjects)
-        let depProjects = if this.References then Project.TransitiveReferences viewProjects
+        let depProjects = if this.References || this.Modified then Project.TransitiveReferences viewProjects
                           else Set.empty
         let refProjects = if this.ReferencedBy then Project.TransitiveReferencedBy viewProjects
                           else Set.empty
