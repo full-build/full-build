@@ -55,7 +55,7 @@ let tryMain argv =
     | Command.BuildView viewInfo -> Commands.View.Build viewInfo
     | Command.AlterView viewInfo -> Commands.View.Alter viewInfo
     | Command.OpenView viewInfo -> Commands.View.Open viewInfo
-    | Command.FullBuildView viewInfo -> ViewCommands.OpenFullBuildView viewInfo
+    | Command.FullBuildView viewInfo -> Commands.View.OpenFullBuildView viewInfo
 
     // nuget
     | Command.AddNuGet url -> Commands.NuGet.Add url.toString
