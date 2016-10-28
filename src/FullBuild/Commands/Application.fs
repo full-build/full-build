@@ -74,5 +74,7 @@ let BindProject (bindInfo : CLI.Commands.BindProject) =
                                                |> Set.unionMany
 
     let projects = PatternMatching.FilterMatch availableProjects (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) bindInfo.Filters
-    projects |> Set.iter Core.Bindings.UpdateProjectBindingRedirects
+    projects |> Set.iter(fun project -> 
+                            printfn "Binding %s/%s" project.Repository.Name project.ProjectId
+                            project |> Core.Bindings.UpdateProjectBindingRedirects)
         
