@@ -27,6 +27,7 @@ type private TokenOption =
     | Down
     | All
     | Bin
+    | Src
     | Exclude
     | Multithread
     | Shallow
@@ -47,6 +48,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--up" -> Some TokenOption.Up
     | "--down" -> Some TokenOption.Down
     | "--bin" -> Some TokenOption.Bin
+    | "--src" -> Some TokenOption.Src
     | "--all" -> Some TokenOption.All
     | "--exclude" -> Some TokenOption.Exclude
     | "--mt" -> Some TokenOption.Multithread
@@ -326,20 +328,20 @@ let rec private commandPush (branch : string option) (all : bool) (args : string
     | [Param buildNumber] -> Command.PushWorkspace {Branch = branch; BuildNumber = buildNumber; Incremental = not all }
     | _ -> Command.Error MainCommand.Push
 
-let rec private commandPull (downReferences : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
+let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Down
+    | TokenOption TokenOption.Src
       :: tail -> tail |> commandPull true false rebase multithread view
     | TokenOption TokenOption.Bin
       :: tail -> tail |> commandPull false true rebase multithread view
     | TokenOption TokenOption.Rebase
-      :: tail -> tail |> commandPull downReferences bin true multithread view
+      :: tail -> tail |> commandPull src bin true multithread view
     | TokenOption TokenOption.Multithread
-      :: tail -> tail |> commandPull downReferences bin rebase true view
+      :: tail -> tail |> commandPull src bin rebase true view
     | TokenOption TokenOption.View
       :: ViewId name
       :: tail -> tail |> commandPull true true rebase multithread (Some name)
-    | [] -> Command.PullWorkspace { DownReferences = downReferences ; Bin = bin; Rebase = rebase; Multithread = multithread; View = view }
+    | [] -> Command.PullWorkspace { Sources = src ; Bin = bin; Rebase = rebase; Multithread = multithread; View = view }
     | _ -> Command.Error MainCommand.Pull
 
 let private commandClean (args : string list) =
@@ -579,7 +581,7 @@ let UsageContent() =
         MainCommand.Exec, "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         MainCommand.Index, "index <repoId-wildcard>+ : index repositories"
         MainCommand.Convert, "convert <repoId-wildcard> : convert projects in repositories"
-        MainCommand.Pull, "pull [--down|--bin] [--mt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
+        MainCommand.Pull, "pull [--src|--bin] [--mt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
         MainCommand.Push, "push [--branch <branch>] [--all] <buildNumber> : push a baseline from current repositories version and display version"
         MainCommand.PublishApp, "publish [--mt] [--view <viewId>] <appId-wildcard> : publish application"
         MainCommand.Bind, "bind <projectId-wildcard>+ : update bindings"

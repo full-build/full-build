@@ -55,7 +55,7 @@ let Add (cmd : CLI.Commands.AddRepository) =
 let Drop (name : string) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let repo = graph.Repositories |> Seq.find (fun x -> x.Name = name)
-    let referencingProjects = repo.Projects |> Set.map (fun x -> x.IncomingReferences)
+    let referencingProjects = repo.Projects |> Set.map (fun x -> x.ReferencedBy)
                                             |> Set.unionMany
     let referencingRepos = referencingProjects |> Set.map (fun x -> x.Repository)
                                                |> Set.remove repo
