@@ -110,7 +110,7 @@ type AddRepository =
       Builder : Graph.BuilderType }
 
 type PullWorkspace =
-    { DownReferences : bool
+    { Sources : bool
       Bin : bool
       Rebase : bool
       Multithread : bool

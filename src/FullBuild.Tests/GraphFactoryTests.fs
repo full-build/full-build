@@ -52,11 +52,11 @@ let ConvertToGraph () =
 
     let projects = graph.Projects
     let cassandrasharpProject = projects |> Seq.find (fun x -> x.ProjectId = "cassandrasharp")
-    let cassandrasharpReferencies = cassandrasharpProject.OutgoingReferences |> Seq.map (fun x -> x.ProjectId) |> set
+    let cassandrasharpReferencies = cassandrasharpProject.References |> Seq.map (fun x -> x.ProjectId) |> set
     let expectedDependencies = [ "cassandrasharp.interfaces"] |> set
     cassandrasharpReferencies |> should equal expectedDependencies
 
-    let cassandrasharpReferencedBy = cassandrasharpProject.IncomingReferences |> Seq.map (fun x -> x.ProjectId) |> set
+    let cassandrasharpReferencedBy = cassandrasharpProject.ReferencedBy |> Seq.map (fun x -> x.ProjectId) |> set
     let expectedReferencedBy = [ "cqlplus"
                                  "cassandrasharpunittests" 
                                  "samples"
