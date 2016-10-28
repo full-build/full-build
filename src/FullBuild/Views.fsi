@@ -21,8 +21,8 @@ type [<Sealed>] View = interface System.IComparable
 with
     member Name: string
     member Filters: string set
-    member References: bool
-    member ReferencedBy: bool
+    member UpReferences: bool
+    member DownReferences: bool
     member Modified : bool
     member Builder: BuilderType
     member Projects: Project set
@@ -36,8 +36,8 @@ and [<Sealed>] Factory =
     member Views : View set
     member CreateView: name : string
                     -> filters : string set
-                    -> dependencies : bool
-                    -> referencedBy : bool
+                    -> downReferences : bool
+                    -> upReferences : bool
                     -> modified : bool
                     -> builder : BuilderType
                     -> View

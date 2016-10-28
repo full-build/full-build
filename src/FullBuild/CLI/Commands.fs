@@ -56,8 +56,8 @@ type NuGetUrl =
 type AddView =
     { Name : string
       Filters : string list
-      References : bool
-      ReferencedBy : bool
+      UpReferences : bool
+      DownReferences : bool
       Modified : bool }
 
 type ViewName =
@@ -89,8 +89,8 @@ type BuildView =
 type AlterView =
     { Name : string
       Default : bool option
-      Source : bool option
-      Parents : bool option }
+      UpReferences : bool option
+      DownReferences : bool option }
 
 type OpenView =
     { Name : string }
@@ -110,7 +110,7 @@ type AddRepository =
       Builder : Graph.BuilderType }
 
 type PullWorkspace =
-    { Src : bool
+    { DownReferences : bool
       Bin : bool
       Rebase : bool
       Multithread : bool

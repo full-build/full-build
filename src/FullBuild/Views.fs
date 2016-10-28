@@ -31,8 +31,8 @@ with
 
     member this.Name = this.View.Name
     member this.Filters = this.View.Filters
-    member this.References = this.View.SourceOnly
-    member this.ReferencedBy = this.View.Parents
+    member this.UpReferences = this.View.UpReferences
+    member this.DownReferences = this.View.DownReferences
     member this.Modified = this.View.Modified
     member this.Builder = match this.View.Builder with
                           | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
@@ -61,9 +61,9 @@ with
         let modProjects = modBookmarks |> Set.map (fun x -> x.Repository.Projects)
                                        |> Set.unionMany
         let viewProjects = Project.Closure (projects + modProjects)
-        let depProjects = if this.References then Project.TransitiveReferences viewProjects
+        let depProjects = if this.UpReferences then Project.TransitiveIncomingReferences viewProjects
                           else Set.empty
-        let refProjects = if this.ReferencedBy then Project.TransitiveReferencedBy viewProjects
+        let refProjects = if this.DownReferences || this.Modified  then Project.TransitiveOutgoingReferences viewProjects
                           else Set.empty
         let projects = viewProjects + depProjects + refProjects
         let repositoriesNotCloned = projects |> Set.map (fun x -> x.Repository) 
@@ -102,11 +102,11 @@ and [<Sealed>] Factory(graph : Graph) =
         | None -> None
         | Some x -> Some this.ViewMap.[x]
 
-    member this.CreateView name filters dependencies referencedBy modified builder =
+    member this.CreateView name filters downReferences upReferences modified builder =
         let view = { Anthology.View.Name = name
                      Anthology.View.Filters = filters
-                     Anthology.View.SourceOnly = dependencies
-                     Anthology.View.Parents = referencedBy
+                     Anthology.View.DownReferences = downReferences
+                     Anthology.View.UpReferences = upReferences
                      Anthology.View.Modified = modified
                      Anthology.View.Builder = match builder with
                                               | BuilderType.MSBuild -> Anthology.BuilderType.MSBuild

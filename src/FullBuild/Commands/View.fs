@@ -26,8 +26,8 @@ let Add (cmd : CLI.Commands.AddView) =
     let viewRepository = Views.from graph
     let view = viewRepository.CreateView cmd.Name
                                          (cmd.Filters |> Set.ofList)
-                                         cmd.References
-                                         cmd.ReferencedBy
+                                         cmd.DownReferences
+                                         cmd.UpReferences
                                          cmd.Modified
                                          Graph.BuilderType.MSBuild
 
@@ -95,8 +95,8 @@ let Alter (cmd : CLI.Commands.AlterView) =
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let depView = viewRepository.CreateView view.Name
                                             view.Filters
-                                            (cmd.Source = Some true) ? (true, view.References)
-                                            (cmd.Parents = Some true) ? (true, view.ReferencedBy)
+                                            (cmd.DownReferences = Some true) ? (true, view.DownReferences)
+                                            (cmd.UpReferences = Some true) ? (true, view.UpReferences)
                                             view.Modified
                                             view.Builder
 

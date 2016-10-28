@@ -150,7 +150,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     // refresh graph just in case something has changed
     let graph = Configuration.LoadAnthology () |> Graph.from
 
-    if pullInfo.Src then
+    if pullInfo.DownReferences then
         graph.MasterRepository
             |> cloneRepo wsDir pullInfo.Rebase
             |> Async.RunSynchronously

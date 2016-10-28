@@ -23,9 +23,10 @@ open Anthology
 
 type private TokenOption =
     | Debug
+    | Up
+    | Down
     | All
     | Bin
-    | Src
     | Exclude
     | Multithread
     | Shallow
@@ -43,9 +44,10 @@ type private TokenOption =
 let private (|TokenOption|_|) (token : string) =
     match token with
     | "--debug" -> Some TokenOption.Debug
-    | "--all" -> Some TokenOption.All
+    | "--up" -> Some TokenOption.Up
+    | "--down" -> Some TokenOption.Down
     | "--bin" -> Some TokenOption.Bin
-    | "--src" -> Some TokenOption.Src
+    | "--all" -> Some TokenOption.All
     | "--exclude" -> Some TokenOption.Exclude
     | "--mt" -> Some TokenOption.Multithread
     | "--shallow" -> Some TokenOption.Shallow
@@ -324,20 +326,20 @@ let rec private commandPush (branch : string option) (all : bool) (args : string
     | [Param buildNumber] -> Command.PushWorkspace {Branch = branch; BuildNumber = buildNumber; Incremental = not all }
     | _ -> Command.Error MainCommand.Push
 
-let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
+let rec private commandPull (downReferences : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Src
+    | TokenOption TokenOption.Down
       :: tail -> tail |> commandPull true false rebase multithread view
     | TokenOption TokenOption.Bin
       :: tail -> tail |> commandPull false true rebase multithread view
     | TokenOption TokenOption.Rebase
-      :: tail -> tail |> commandPull src bin true multithread view
+      :: tail -> tail |> commandPull downReferences bin true multithread view
     | TokenOption TokenOption.Multithread
-      :: tail -> tail |> commandPull src bin rebase true view
+      :: tail -> tail |> commandPull downReferences bin rebase true view
     | TokenOption TokenOption.View
       :: ViewId name
       :: tail -> tail |> commandPull true true rebase multithread (Some name)
-    | [] -> Command.PullWorkspace { Src = src ; Bin = bin; Rebase = rebase; Multithread = multithread; View = view }
+    | [] -> Command.PullWorkspace { DownReferences = downReferences ; Bin = bin; Rebase = rebase; Multithread = multithread; View = view }
     | _ -> Command.Error MainCommand.Pull
 
 let private commandClean (args : string list) =
@@ -392,16 +394,16 @@ let private commandListNuGet (args : string list) =
     | [] -> Command.ListNuGets
     | _ -> Command.Error MainCommand.ListNuget
 
-let rec private commandAddView (references : bool) (referencedBy : bool) (modified : bool) (args : string list) =
+let rec private commandAddView (upReferences : bool) (downReferences : bool) (modified : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Src
-      :: tail -> tail |> commandAddView true referencedBy modified
-    | TokenOption TokenOption.All
-      :: tail -> tail |> commandAddView references true modified
+    | TokenOption TokenOption.Up
+      :: tail -> tail |> commandAddView true downReferences modified
+    | TokenOption TokenOption.Down
+      :: tail -> tail |> commandAddView upReferences true modified
     | TokenOption TokenOption.Modified
-      :: tail -> tail |> commandAddView references referencedBy true
+      :: tail -> tail |> commandAddView upReferences downReferences true
     | ViewId name
-      :: Params filters -> Command.AddView { Name = name; Filters = filters; References = references; ReferencedBy = referencedBy; Modified = modified }
+      :: Params filters -> Command.AddView { Name = name; Filters = filters; UpReferences = upReferences; DownReferences = downReferences; Modified = modified }
     | _ -> Command.Error MainCommand.AddView
 
 let private commandDropView (args : string list) =
@@ -419,15 +421,17 @@ let private commandDescribeView (args : string list) =
     | [ViewId name] -> Command.DescribeView { Name = name }
     | _ -> Command.Error MainCommand.DescribeView
 
-let rec private commandAlterView (forceDefault : bool option) (forceSrc : bool option) (forceParents : bool option) (args : string list) =
+let rec private commandAlterView (forceDefault : bool option) (forceUpReferences : bool option) (forceDownReferences : bool option) (args : string list) =
     match args with
     | TokenOption TokenOption.Default
-      :: tail -> tail |> commandAlterView (Some true) forceSrc forceParents
-    | TokenOption TokenOption.Src
-      :: tail -> tail |> commandAlterView forceDefault (Some true) forceParents
+      :: tail -> tail |> commandAlterView (Some true) forceUpReferences forceDownReferences
+    | TokenOption TokenOption.Up
+      :: tail -> tail |> commandAlterView forceDefault (Some true) forceDownReferences
+    | TokenOption TokenOption.Down
+      :: tail -> tail |> commandAlterView forceDefault forceUpReferences (Some true)
     | TokenOption TokenOption.Bin
-      :: tail -> tail |> commandAlterView forceDefault (Some false) forceParents
-    | [ViewId name] -> Command.AlterView { Name = name ; Default = forceDefault; Source = forceSrc; Parents = forceParents }
+      :: tail -> tail |> commandAlterView forceDefault (Some false) (Some false)
+    | [ViewId name] -> Command.AlterView { Name = name ; Default = forceDefault; UpReferences = forceUpReferences; DownReferences = forceDownReferences }
     | _ -> Command.Error MainCommand.AlterView
 
 let private commandOpenView (args : string list) =
@@ -566,7 +570,7 @@ let UsageContent() =
         MainCommand.Checkout, "checkout <version> : checkout workspace to version"
         MainCommand.Branch, "branch [<branch>] : checkout workspace to branch"
         MainCommand.InstallPackage, "install : install packages"
-        MainCommand.AddView, "view [--src] [--all] [--modified] <viewId> <viewId-wildcard>+ : add repositories to view"
+        MainCommand.AddView, "view [--down] [--up] [--modified] <viewId> <viewId-wildcard>+ : add repositories to view"
         MainCommand.OpenView, "open <viewId> : open view with your favorite ide"
         MainCommand.BuildView, "build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
         MainCommand.RebuildView, "rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"
@@ -575,7 +579,7 @@ let UsageContent() =
         MainCommand.Exec, "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         MainCommand.Index, "index <repoId-wildcard>+ : index repositories"
         MainCommand.Convert, "convert <repoId-wildcard> : convert projects in repositories"
-        MainCommand.Pull, "pull [--src|--bin] [--mt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
+        MainCommand.Pull, "pull [--down|--bin] [--mt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
         MainCommand.Push, "push [--branch <branch>] [--all] <buildNumber> : push a baseline from current repositories version and display version"
         MainCommand.PublishApp, "publish [--mt] [--view <viewId>] <appId-wildcard> : publish application"
         MainCommand.Bind, "bind <projectId-wildcard>+ : update bindings"
@@ -597,7 +601,7 @@ let UsageContent() =
         MainCommand.DropView, "drop view <viewId> : drop view"
         MainCommand.ListView, "list view : list views"
         MainCommand.DescribeView, "describe view <name> : describe view"
-        MainCommand.AlterView, "alter view [--default] [--src|--bin] [--all] <viewId> : alter view"
+        MainCommand.AlterView, "alter view [--default] [--up|--bin] [--down|--bin] <viewId> : alter view"
         MainCommand.Unknown, ""
         MainCommand.AddApp, "add app <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         MainCommand.DropApp, "drop app <appId> : drop application"
