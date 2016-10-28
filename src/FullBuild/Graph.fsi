@@ -93,15 +93,15 @@ with
     member HasTests : bool
     member Repository:  Repository
     member Applications: Application set
-    member ReferencedBy: Project set
-    member References: Project set
+    member IncomingReferences: Project set
+    member OutgoingReferences: Project set
     member AssemblyReferences: Assembly set
     member PackageReferences: Package set
     static member Closure: Project set
                         -> Project set
-    static member TransitiveReferences: Project set
+    static member TransitiveIncomingReferences: Project set
                                      -> Project set
-    static member TransitiveReferencedBy: Project set
+    static member TransitiveOutgoingReferences: Project set
                                        -> Project set
 
 

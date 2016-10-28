@@ -85,7 +85,7 @@ let private generateProjectCopyTarget (project : Project) =
     let projectCopyProperty = projectProperty + "Copy"
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let copyCondition = sprintf "'$(%s)' == ''" projectCopyProperty
-    let prjFiles = project.References |> Seq.map generateProjectCopy
+    let prjFiles = project.OutgoingReferences |> Seq.map generateProjectCopy
     let pkgFiles = project.PackageReferences |> Seq.map generatePackageCopy
 
     let output = (project.Output.Name)
@@ -269,7 +269,7 @@ let private convertProject (xproj : XDocument) (project : Project) =
     firstItemGroup.AddBeforeSelf (importFB)
 
     // add project references
-    for projectReference in project.References do
+    for projectReference in project.OutgoingReferences do
         let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER projectReference.Output.Name
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))

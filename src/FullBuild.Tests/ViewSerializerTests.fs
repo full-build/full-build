@@ -23,8 +23,8 @@ let CheckSaveLoadBaseline () =
     let view1 = { Name = "toto"
                   Filters = ["cassandra-sharp/*"] |> Set
                   Builder = BuilderType.MSBuild
-                  SourceOnly = true 
-                  Parents = false 
+                  UpReferences = false 
+                  DownReferences = true 
                   Modified = false }
 
     let res = ViewSerializer.SerializeView view1

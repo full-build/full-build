@@ -203,11 +203,11 @@ with
         this.Graph.Anthology.Applications |> Set.filter (fun x -> x.Projects |> Set.contains projectId)
                                           |> Set.map (fun x -> this.Graph.ApplicationMap.[x.Name])
 
-    member this.References =
+    member this.OutgoingReferences =
         let referenceIds = this.Project.ProjectReferences
         referenceIds |> Set.map (fun x -> this.Graph.ProjectMap.[x])
 
-    member this.ReferencedBy =
+    member this.IncomingReferences =
         let projectId = this.Project.ProjectId
         this.Graph.Anthology.Projects |> Set.filter (fun x -> x.ProjectReferences |> Set.contains projectId)
                                       |> Set.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
@@ -257,11 +257,11 @@ with
     static member CollectProjects (collector : Project -> Project set) (projects : Project set) =
         Set.fold (fun s t -> collector t |> Project.CollectProjects collector |> Set.union s) projects projects
 
-    static member TransitiveReferences (seeds : Project set) : Project set =
-        Project.CollectProjects (fun x -> x.References) seeds
+    static member TransitiveIncomingReferences (seeds : Project set) : Project set =
+        Project.CollectProjects (fun x -> x.IncomingReferences) seeds
 
-    static member TransitiveReferencedBy (seeds : Project set) : Project set =
-        Project.CollectProjects (fun x -> x.ReferencedBy) seeds
+    static member TransitiveOutgoingReferences (seeds : Project set) : Project set =
+        Project.CollectProjects (fun x -> x.OutgoingReferences) seeds
 
     static member Closure (seeds : Project set) : Project set =
         let rec exploreNext (node : Project) (next : Project -> Project set) (path : Project list) (boundaries : Project set) =
@@ -275,8 +275,8 @@ with
             else
                 exploreNext node next currPath boundaries
 
-        let refBoundaries = Set.fold (fun s t -> exploreNext t (fun x -> x.References) [t] s) seeds seeds
-        let refByBoundaries = Set.fold (fun s t -> exploreNext t (fun x -> x.ReferencedBy) [t] s) refBoundaries seeds
+        let refBoundaries = Set.fold (fun s t -> exploreNext t (fun x -> x.OutgoingReferences) [t] s) seeds seeds
+        let refByBoundaries = Set.fold (fun s t -> exploreNext t (fun x -> x.IncomingReferences) [t] s) refBoundaries seeds
         refByBoundaries
 
 // =====================================================================================================

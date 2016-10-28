@@ -106,7 +106,7 @@ let private graphLinks (projects : Project set) (allProjects : Project set) =
             yield generateLink (project.Repository.Name) (project.UniqueProjectId) "Contains"
 
         for project in projects do
-            for reference in project.References do
+            for reference in project.OutgoingReferences do
                 yield generateLink (project.UniqueProjectId) (reference.UniqueProjectId) "ProjectRef"
 
         for project in projects do
@@ -189,7 +189,7 @@ let private graphStyles () =
 let GraphContent (projects : Project set) (all : bool) =
     let srcProjects = if all then projects
                       else projects |> Set.filter (fun x -> not x.HasTests)
-    let allProjects = srcProjects |> Set.map (fun x -> x.References) |> Set.unionMany
+    let allProjects = srcProjects |> Set.map (fun x -> x.OutgoingReferences) |> Set.unionMany
     let repos = allProjects |> Set.map (fun x -> x.Repository)
     let packages = srcProjects |> Set.map (fun x -> x.PackageReferences)
                                |> Set.unionMany

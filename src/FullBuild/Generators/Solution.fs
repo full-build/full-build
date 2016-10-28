@@ -43,7 +43,7 @@ let GenerateSolutionContent (projects : Project set) =
                   (project.UniqueProjectId)
 
             yield "\tProjectSection(ProjectDependencies) = postProject"
-            for reference in project.References do
+            for reference in project.OutgoingReferences do
                 if projects |> Set.contains reference then
                     let dependencyName = sprintf "{%s}" reference.UniqueProjectId
                     yield sprintf "\t\t%s = %s" dependencyName dependencyName

@@ -32,8 +32,8 @@ let SerializeView (view : View) =
         filterItem.filter <- filter
         config.view.filters.Add filterItem
 
-    config.view.references <- view.SourceOnly
-    config.view.referencedBy <- view.Parents
+    config.view.upward <- view.UpReferences
+    config.view.downward <- view.DownReferences
     config.view.modified <- view.Modified
 
     config.ToString()
@@ -47,8 +47,8 @@ let DeserializeView content =
                 |> Seq.map (fun x -> x.filter)
                 |> Set.ofSeq
       Builder = BuilderType.from config.view.builder
-      SourceOnly = config.view.references
-      Parents = config.view.referencedBy
+      UpReferences = config.view.upward
+      DownReferences = config.view.downward
       Modified = config.view.modified }
 
 
