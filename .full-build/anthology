@@ -23,7 +23,7 @@ anthology:
         - project: fullbuild
     - name: full-build.zip
       type: zip
-      projects: 
+      projects:
         - project: fullbuild
   projects:
     - guid: faaf3b40-ea78-4eaf-9859-863ff16f6058
@@ -42,7 +42,6 @@ anthology:
         - assembly: system.xml
         - assembly: system.xml.linq
       packages:
-        - package: FSharp.Core
         - package: fsunit
       projects:
         - project: fullbuild

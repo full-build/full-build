@@ -20,12 +20,6 @@ open Collections
 open System.Reflection
 open StringHelpers
 
-
-type ViewId = ViewId of string
-with
-    member this.toString = (fun (ViewId x) -> x)this
-    static member from s = ViewId s
-
 [<RequireQualifiedAccess>]
 type OutputType =
     | Exe
@@ -34,6 +28,12 @@ with
      member this.toString = toString this
      static member from s = fromString<OutputType> s
 
+
+
+type ViewId = ViewId of string
+with
+    member this.toString = (fun (ViewId x) -> x)this
+    static member from s = ViewId s
 
 
 type AssemblyId = private AssemblyId of string
@@ -223,9 +223,9 @@ type Baseline =
       Bookmarks : Bookmark set }
 
 type View =
-    { Filters : string set
+    { Name : string
+      Filters : string set
       Builder : BuilderType
-      Parameters : string set
-      SourceOnly : bool
-      Parents : bool
+      UpReferences : bool
+      DownReferences : bool
       Modified : bool }

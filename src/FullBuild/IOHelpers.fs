@@ -19,12 +19,8 @@ open System.Xml.Linq
 
 
 // http://ss64.com/nt/robocopy-exit.html
-let private checkErrorCode err =
-    if err > 7 then failwithf "Process failed with error %d" err
-
-let private checkedExec =
-    Exec.Exec checkErrorCode
-
+let private checkErrorCode (execResult:Exec.ExecResult) =
+    if execResult.ResultCode > 7 then failwithf "Process failed with error %d" execResult.ResultCode
 
 type Extension =
     | View
@@ -40,6 +36,8 @@ type Extension =
     | Dll
     | Zip
     | Config
+    | Text
+    | Html
 
 let AddExt (ext : Extension) (fileName : string) : string =
     let sext = match ext with
@@ -56,6 +54,8 @@ let AddExt (ext : Extension) (fileName : string) : string =
                | Dll -> "dll"
                | Zip -> "zip"
                | Config -> "config"
+               | Text -> "txt"
+               | Html -> "html"
     sprintf "%s.%s" fileName sext
 
 let ToUnix (f : string) : string =
@@ -110,7 +110,7 @@ let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) (readOnly : boo
                   else "/A-:R"
 
     let args = sprintf "%s /MIR /MT /NP /NFL /NDL /NJH /NJS %A %A" setRead source.FullName target.FullName
-    checkedExec "robocopy.exe" args currDir
+    Exec.Exec "robocopy.exe" args currDir Map.empty |> checkErrorCode
 
 let GetExtension (file : FileInfo) =
     file.Extension.Replace(".", "")
@@ -123,7 +123,6 @@ let GetFilewithoutRootDirectory (file : string) =
     let idx = file.IndexOf('/')
     file.Substring(idx+1)
 
-
 let consoleLock = System.Object()
 let DisplayHighlight s =
     let display () =
@@ -133,7 +132,6 @@ let DisplayHighlight s =
         Console.ForegroundColor <- oldColor
 
     lock consoleLock display
-
 
 let Try action =
     try
