@@ -99,9 +99,9 @@ with
     member PackageReferences: Package set
     static member Closure: Project set
                         -> Project set
-    static member TransitiveIncomingReferences: Project set
+    static member TransitiveReferences: Project set
                                      -> Project set
-    static member TransitiveOutgoingReferences: Project set
+    static member TransitiveReferencedBy: Project set
                                        -> Project set
 
 
