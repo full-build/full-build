@@ -1,10 +1,9 @@
 ﻿view:
+    name: viewname
     filters:
         - filter: toto/*
         - filter: titi/*
     builder: msbuild
-    parameters: 
-        - parameter: --mt
-    sourceonly: true
-    parents: true
+    upward: true
+    downward: true
     modified: true

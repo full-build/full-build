@@ -25,20 +25,15 @@ type private ViewConfig = FSharp.Configuration.YamlConfig<"View.yaml">
 let SerializeView (view : View) =
     let config = new ViewConfig()
     config.view.builder <- view.Builder.toString
-
+    config.view.name <- view.Name
     config.view.filters.Clear()
     for filter in view.Filters do
         let filterItem = ViewConfig.view_Type.filters_Item_Type()
         filterItem.filter <- filter
         config.view.filters.Add filterItem
 
-    config.view.parameters.Clear()
-    for parameter in view.Parameters do
-        let paramItem = ViewConfig.view_Type.parameters_Item_Type()
-        paramItem.parameter <- parameter
-        config.view.parameters.Add paramItem
-    config.view.sourceonly <- view.SourceOnly
-    config.view.parents <- view.Parents
+    config.view.upward <- view.UpReferences
+    config.view.downward <- view.DownReferences
     config.view.modified <- view.Modified
 
     config.ToString()
@@ -47,15 +42,13 @@ let SerializeView (view : View) =
 let DeserializeView content =
     let config = new ViewConfig()
     config.LoadText content
-    { Filters = config.view.filters
+    { Name = config.view.name
+      Filters = config.view.filters
                 |> Seq.map (fun x -> x.filter)
                 |> Set.ofSeq
-      Parameters = config.view.parameters
-                   |> Seq.map (fun x -> x.parameter)
-                   |> Set.ofSeq
       Builder = BuilderType.from config.view.builder
-      SourceOnly = config.view.sourceonly
-      Parents = config.view.parents
+      UpReferences = config.view.upward
+      DownReferences = config.view.downward
       Modified = config.view.modified }
 
 
@@ -65,5 +58,13 @@ let Save (filename : FileInfo) (view : View) =
 
 let Load (filename : FileInfo) : View =
     let content = File.ReadAllText (filename.FullName)
+//    { Name = "toto"
+//      Filters = Set.empty
+//      Parameters = Set.empty
+//      Builder = Anthology.BuilderType.MSBuild
+//      SourceOnly = true
+//      Parents = true
+//      Modified = true }
+
     DeserializeView content
 
