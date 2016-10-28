@@ -61,9 +61,9 @@ with
         let modProjects = modBookmarks |> Set.map (fun x -> x.Repository.Projects)
                                        |> Set.unionMany
         let viewProjects = Project.Closure (projects + modProjects)
-        let depProjects = if this.UpReferences then Project.TransitiveIncomingReferences viewProjects
+        let depProjects = if this.UpReferences || this.Modified then Project.TransitiveReferencedBy viewProjects
                           else Set.empty
-        let refProjects = if this.DownReferences || this.Modified  then Project.TransitiveOutgoingReferences viewProjects
+        let refProjects = if this.DownReferences then Project.TransitiveReferences viewProjects
                           else Set.empty
         let projects = viewProjects + depProjects + refProjects
         let repositoriesNotCloned = projects |> Set.map (fun x -> x.Repository) 

@@ -257,11 +257,11 @@ with
     static member CollectProjects (collector : Project -> Project set) (projects : Project set) =
         Set.fold (fun s t -> collector t |> Project.CollectProjects collector |> Set.union s) projects projects
 
-    static member TransitiveIncomingReferences (seeds : Project set) : Project set =
-        Project.CollectProjects (fun x -> x.ReferencedBy) seeds
-
-    static member TransitiveOutgoingReferences (seeds : Project set) : Project set =
+    static member TransitiveReferences (seeds : Project set) : Project set =
         Project.CollectProjects (fun x -> x.References) seeds
+
+    static member TransitiveReferencedBy (seeds : Project set) : Project set =
+        Project.CollectProjects (fun x -> x.ReferencedBy) seeds
 
     static member Closure (seeds : Project set) : Project set =
         let rec exploreNext (node : Project) (next : Project -> Project set) (path : Project list) (boundaries : Project set) =
