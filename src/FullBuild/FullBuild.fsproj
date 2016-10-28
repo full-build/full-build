@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -21,15 +22,16 @@
     <Tailcalls>false</Tailcalls>
     <OutputPath>bin</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>5</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>publish providers.generic.zip</StartArguments>
+    <StartArguments>history</StartArguments>
     <StartWorkingDirectory>c:\src\avp</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
-    <NoWarn>0077</NoWarn>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,7 +39,7 @@
     <Tailcalls>true</Tailcalls>
     <OutputPath>bin</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>5</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
@@ -71,6 +73,10 @@
       <Link>LICENSE.txt</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\..\CHANGES.txt">
+      <Link>CHANGES.txt</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="Collections.fs" />
     <Compile Include="StringHelpers.fs" />
     <Compile Include="PatternMatching.fs" />
@@ -82,43 +88,49 @@
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="BaselineSerializer.fs" />
     <Compile Include="ViewSerializer.fs" />
+    <Compile Include="Configuration.fs" />
+    <Compile Include="XmlHelpers.fs" />
     <Compile Include="Graph.fsi" />
     <Compile Include="Graph.fs" />
-    <Compile Include="GraphHelpers.fsi" />
-    <Compile Include="GraphHelpers.fs" />
-    <Compile Include="MsBuildHelpers.fs" />
-    <Compile Include="PaketInterface.fs" />
-    <Compile Include="ProjectParsing.fs" />
-    <Compile Include="Vcs/Vcs.fsi" />
-    <Compile Include="Vcs/VcsHg.fs" />
-    <Compile Include="Vcs/VcsGit.fs" />
-    <Compile Include="Vcs/Vcs.fs" />
-    <Compile Include="CLI\Commands.fs" />
-    <Compile Include="CLI\CommandLine.fsi" />
-    <Compile Include="CLI\CommandLine.fs" />
-    <Compile Include="Configuration.fs" />
+    <Compile Include="Tools\Paket.fs" />
+    <Compile Include="Tools\VcsHg.fs" />
+    <Compile Include="Tools\VcsGit.fs" />
+    <Compile Include="Tools\Vcs.fs" />
+    <Compile Include="Baselines.fsi" />
+    <Compile Include="Baselines.fs" />
+    <Compile Include="Views.fsi" />
+    <Compile Include="Views.fs" />
+    <Compile Include="MSBuildHelpers.fs" />
     <Compile Include="AnthologyGraph.fs" />
-    <Compile Include="Repo.fs" />
-    <Compile Include="Solution.fs" />
-    <Compile Include="Dgml.fs" />
-    <Compile Include="Builders.fs" />
-    <Compile Include="Bindings.fs" />
-    <Compile Include="Publishers.fs" />
-    <Compile Include="TestRunners.fs" />
-    <Compile Include="View.fs" />
-    <Compile Include="NuGets.fs" />
-    <Compile Include="Simplify.fs" />
-    <Compile Include="FrameworkHandling.fs" />
-    <Compile Include="PlatformMatching.fs" />
-    <Compile Include="Package.fs" />
-    <Compile Include="MsBuildConversion.fs" />
-    <Compile Include="Conversion.fs" />
-    <Compile Include="Test.fs" />
-    <Compile Include="Indexation.fs" />
-    <Compile Include="BuildArtifacts.fs" />
-    <Compile Include="Workspace.fs" />
-    <Compile Include="Application.fs" />
-    <Compile Include="Upgrade.fs" />
+    <Compile Include="CLI\Commands.fs" />
+    <Compile Include="CLI\CommandLine.fs" />
+    <Compile Include="Parsers\MSBuild.fs" />
+    <Compile Include="Parsers\PackageRelationship.fs" />
+    <Compile Include="Generators\Solution.fs" />
+    <Compile Include="Generators\Dgml.fs" />
+    <Compile Include="Generators\FrameworkHandling.fs" />
+    <Compile Include="Generators\PlatformMatching.fs" />
+    <Compile Include="Generators\Package.fs" />
+    <Compile Include="Generators\MSBuild.fs" />
+    <Compile Include="Generators\History.fsi" />
+    <Compile Include="Generators\History.fs" />
+    <Compile Include="Core\Builders.fs" />
+    <Compile Include="Core\TestRunners.fs" />
+    <Compile Include="Core\Bindings.fs" />
+    <Compile Include="Core\Publishers.fs" />
+    <Compile Include="Core\BuildArtifacts.fs" />
+    <Compile Include="Core\Simplify.fs" />
+    <Compile Include="Core\Conversion.fs" />
+    <Compile Include="Core\Indexation.fs" />
+    <Compile Include="Core\Package.fs" />
+    <Compile Include="Commands\View.fs" />
+    <Compile Include="Commands\Repo.fs" />
+    <Compile Include="Commands\Workspace.fs" />
+    <Compile Include="Commands\Test.fs" />
+    <Compile Include="Commands\Application.fs" />
+    <Compile Include="Commands\Upgrade.fs" />
+    <Compile Include="Commands\NuGet.fs" />
+    <Compile Include="Commands\Package.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="ghreleasefeed.json" />
