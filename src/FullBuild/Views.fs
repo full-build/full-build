@@ -41,8 +41,11 @@ with
     member this.Projects : Project set =
         let filters = this.View.Filters |> Set.map (fun x -> if x.IndexOfAny([|'/'; '\\' |]) = -1 then x + "/*" else x)
                                         |> Set.map (fun x -> x.Replace('\\', '/'))
+        let allClonedProjects = this.Graph.Repositories |> Set.filter (fun x -> x.IsCloned)
+                                                        |> Set.map (fun x -> x.Projects)
+                                                        |> Set.unionMany
         let projects = PatternMatching.FilterMatch<Project>
-                            this.Graph.Projects
+                            allClonedProjects
                             (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name)
                             filters
 
