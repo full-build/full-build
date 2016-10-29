@@ -40,8 +40,8 @@ and [<Sealed>] Factory =
                     -> downReferences : bool
                     -> upReferences : bool
                     -> modified : bool
-                    -> builder : BuilderType
                     -> app : string option
+                    -> builder : BuilderType
                     -> View
 
 val from: graph : Graph

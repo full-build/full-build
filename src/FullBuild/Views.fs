@@ -110,16 +110,16 @@ and [<Sealed>] Factory(graph : Graph) =
         | None -> None
         | Some x -> Some this.ViewMap.[x]
 
-    member this.CreateView name filters downReferences upReferences modified builder appFilter =
+    member this.CreateView name filters downReferences upReferences modified appFilter builder =
         let view = { Anthology.View.Name = name
                      Anthology.View.Filters = filters
                      Anthology.View.DownReferences = downReferences
                      Anthology.View.UpReferences = upReferences
                      Anthology.View.Modified = modified
+                     Anthology.View.AppFilter = appFilter 
                      Anthology.View.Builder = match builder with
                                               | BuilderType.MSBuild -> Anthology.BuilderType.MSBuild
-                                              | BuilderType.Skip -> Anthology.BuilderType.Skip 
-                     Anthology.View.AppFilter = appFilter }
+                                              | BuilderType.Skip -> Anthology.BuilderType.Skip }
 
         { Graph = graph
           View = view }
