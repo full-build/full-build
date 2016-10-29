@@ -119,8 +119,8 @@ let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
     let view = System.IO.FileInfo(cmd.FilePath) |> ViewSerializer.Load
     {   CLI.Commands.AddView.Name = view.Name
         CLI.Commands.AddView.Filters = view.Filters |> Set.toList
-        CLI.Commands.AddView.ReferencedBy = view.Parents
-        CLI.Commands.AddView.References = view.SourceOnly
+        CLI.Commands.AddView.DownReferences = view.DownReferences
+        CLI.Commands.AddView.UpReferences = view.UpReferences
         CLI.Commands.AddView.Modified = view.Modified }
                   |> Add
     {   CLI.Commands.OpenView.Name = view.Name } 
