@@ -34,6 +34,7 @@ with
     member this.UpReferences = this.View.UpReferences
     member this.DownReferences = this.View.DownReferences
     member this.Modified = this.View.Modified
+    member this.AppFilter = this.View.AppFilter
     member this.Builder = match this.View.Builder with
                           | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
                           | Anthology.BuilderType.Skip -> BuilderType.Skip
@@ -49,18 +50,25 @@ with
                             (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name)
                             filters
 
-        let baselineRepo = Baselines.from this.Graph
         let modBookmarks = if this.Modified then
                                // newBaseline contains all repositories bookmarks - even non cloned ones (because true)
                                // this will add new repositories if necessary and discard unchanged repositories
                                // in fine, we only have new repositories and modified repositories
+                               let baselineRepo = Baselines.from this.Graph
                                let newBaseline = baselineRepo.CreateBaseline true
                                newBaseline - baselineRepo.Baseline
                            else Set.empty
 
         let modProjects = modBookmarks |> Set.map (fun x -> x.Repository.Projects)
                                        |> Set.unionMany
-        let viewProjects = Project.Closure (projects + modProjects)
+
+        let appProjects = match this.AppFilter with
+                          | Some appFilter -> let apps = PatternMatching.FilterMatch this.Graph.Applications (fun x -> x.Name) (Set.singleton appFilter)
+                                              apps |> Set.map (fun x -> x.Projects)
+                                                   |> Set.unionMany
+                          | None -> Set.empty
+        
+        let viewProjects = Project.Closure (projects + modProjects + appProjects)
         let depProjects = if this.UpReferences then Project.TransitiveReferencedBy viewProjects
                           else Set.empty
         let refProjects = if this.DownReferences then Project.TransitiveReferences viewProjects
@@ -102,7 +110,7 @@ and [<Sealed>] Factory(graph : Graph) =
         | None -> None
         | Some x -> Some this.ViewMap.[x]
 
-    member this.CreateView name filters downReferences upReferences modified builder =
+    member this.CreateView name filters downReferences upReferences modified builder appFilter =
         let view = { Anthology.View.Name = name
                      Anthology.View.Filters = filters
                      Anthology.View.DownReferences = downReferences
@@ -110,7 +118,8 @@ and [<Sealed>] Factory(graph : Graph) =
                      Anthology.View.Modified = modified
                      Anthology.View.Builder = match builder with
                                               | BuilderType.MSBuild -> Anthology.BuilderType.MSBuild
-                                              | BuilderType.Skip -> Anthology.BuilderType.Skip }
+                                              | BuilderType.Skip -> Anthology.BuilderType.Skip 
+                     Anthology.View.AppFilter = appFilter }
 
         { Graph = graph
           View = view }

@@ -49,7 +49,8 @@ let DeserializeView content =
       Builder = BuilderType.from config.view.builder
       UpReferences = config.view.upward
       DownReferences = config.view.downward
-      Modified = config.view.modified }
+      Modified = config.view.modified 
+      AppFilter = (config.view.name |> isNull) ? (None, Some config.view.name) }
 
 
 let Save (filename : FileInfo) (view : View) =

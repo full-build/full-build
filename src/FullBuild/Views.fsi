@@ -24,6 +24,7 @@ with
     member UpReferences: bool
     member DownReferences: bool
     member Modified : bool
+    member AppFilter : string option
     member Builder: BuilderType
     member Projects: Project set
     member Save: isDefault : bool option
@@ -40,6 +41,7 @@ and [<Sealed>] Factory =
                     -> upReferences : bool
                     -> modified : bool
                     -> builder : BuilderType
+                    -> app : string option
                     -> View
 
 val from: graph : Graph

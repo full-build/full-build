@@ -30,6 +30,7 @@ let Add (cmd : CLI.Commands.AddView) =
                                          cmd.UpReferences
                                          cmd.Modified
                                          Graph.BuilderType.MSBuild
+                                         cmd.AppFilter
 
     let projects = view.Projects
     if projects = Set.empty then printfn "WARNING: empty project selection"
@@ -99,6 +100,7 @@ let Alter (cmd : CLI.Commands.AlterView) =
                                             (cmd.UpReferences = Some true) ? (true, view.UpReferences)
                                             view.Modified
                                             view.Builder
+                                            view.AppFilter
 
     let projects = depView.Projects
     if projects = Set.empty then printfn "WARNING: empty project selection"

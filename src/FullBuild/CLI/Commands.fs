@@ -58,7 +58,8 @@ type AddView =
       Filters : string list
       UpReferences : bool
       DownReferences : bool
-      Modified : bool }
+      Modified : bool 
+      AppFilter : string option }
 
 type ViewName =
     { Name : string }

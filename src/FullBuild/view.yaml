@@ -7,3 +7,4 @@
     upward: true
     downward: true
     modified: true
+    appfilter : blah*
