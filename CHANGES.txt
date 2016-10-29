@@ -1,3 +1,6 @@
+v3.1
+  * Create view from application (issue #112)
+
 v3.0
   * Graph api use internally to simplify implementation
   * Solution gen based on graph 
