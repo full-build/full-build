@@ -39,24 +39,26 @@ type Extension =
     | Text
     | Html
 
+let GetExtentionString ext =
+    match ext with
+    | View -> "fbv"
+    | Solution -> "sln"
+    | Targets -> "targets"
+    | CsProj -> "csproj"
+    | FsProj -> "fsproj"
+    | VbProj -> "vbproj"
+    | NuSpec -> "nuspec"
+    | Dgml -> "dgml"
+    | App -> "app"
+    | Exe -> "exe"
+    | Dll -> "dll"
+    | Zip -> "zip"
+    | Config -> "config"
+    | Text -> "txt"
+    | Html -> "html"
+
 let AddExt (ext : Extension) (fileName : string) : string =
-    let sext = match ext with
-               | View -> "view"
-               | Solution -> "sln"
-               | Targets -> "targets"
-               | CsProj -> "csproj"
-               | FsProj -> "fsproj"
-               | VbProj -> "vbproj"
-               | NuSpec -> "nuspec"
-               | Dgml -> "dgml"
-               | App -> "app"
-               | Exe -> "exe"
-               | Dll -> "dll"
-               | Zip -> "zip"
-               | Config -> "config"
-               | Text -> "txt"
-               | Html -> "html"
-    sprintf "%s.%s" fileName sext
+    ext |> GetExtentionString |> sprintf "%s.%s" fileName
 
 let ToUnix (f : string) : string =
     if f = null then f
