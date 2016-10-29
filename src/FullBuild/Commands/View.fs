@@ -29,6 +29,7 @@ let Add (cmd : CLI.Commands.AddView) =
                                          cmd.DownReferences
                                          cmd.UpReferences
                                          cmd.Modified
+                                         cmd.AppFilter
                                          Graph.BuilderType.MSBuild
 
     let projects = view.Projects
@@ -98,6 +99,7 @@ let Alter (cmd : CLI.Commands.AlterView) =
                                             (cmd.DownReferences = Some true) ? (true, view.DownReferences)
                                             (cmd.UpReferences = Some true) ? (true, view.UpReferences)
                                             view.Modified
+                                            view.AppFilter
                                             view.Builder
 
     let projects = depView.Projects

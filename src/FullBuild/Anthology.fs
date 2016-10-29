@@ -228,4 +228,5 @@ type View =
       Builder : BuilderType
       UpReferences : bool
       DownReferences : bool
-      Modified : bool }
+      Modified : bool 
+      AppFilter : string option }
