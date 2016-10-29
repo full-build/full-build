@@ -35,6 +35,9 @@ let SerializeView (view : View) =
     config.view.upward <- view.UpReferences
     config.view.downward <- view.DownReferences
     config.view.modified <- view.Modified
+    config.view.appfilter <- match view.AppFilter with
+                             | None -> null
+                             | Some appFilter -> appFilter
 
     config.ToString()
 
@@ -49,7 +52,8 @@ let DeserializeView content =
       Builder = BuilderType.from config.view.builder
       UpReferences = config.view.upward
       DownReferences = config.view.downward
-      Modified = config.view.modified }
+      Modified = config.view.modified 
+      AppFilter = (config.view.appfilter |> isNull) ? (None, Some config.view.appfilter) }
 
 
 let Save (filename : FileInfo) (view : View) =

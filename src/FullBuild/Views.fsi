@@ -24,6 +24,7 @@ with
     member UpReferences: bool
     member DownReferences: bool
     member Modified : bool
+    member AppFilter : string option
     member Builder: BuilderType
     member Projects: Project set
     member Save: isDefault : bool option
@@ -39,6 +40,7 @@ and [<Sealed>] Factory =
                     -> downReferences : bool
                     -> upReferences : bool
                     -> modified : bool
+                    -> app : string option
                     -> builder : BuilderType
                     -> View
 
