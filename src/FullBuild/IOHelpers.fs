@@ -39,7 +39,7 @@ type Extension =
     | Text
     | Html
 
-let GetExtentionString ext =
+let GetExtensionString ext =
     match ext with
     | View -> "fbv"
     | Solution -> "sln"
@@ -58,7 +58,7 @@ let GetExtentionString ext =
     | Html -> "html"
 
 let AddExt (ext : Extension) (fileName : string) : string =
-    ext |> GetExtentionString |> sprintf "%s.%s" fileName
+    ext |> GetExtensionString |> sprintf "%s.%s" fileName
 
 let ToUnix (f : string) : string =
     if f = null then f
