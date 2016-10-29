@@ -580,7 +580,7 @@ let UsageContent() =
         MainCommand.Checkout, "checkout <version> : checkout workspace to version"
         MainCommand.Branch, "branch [<branch>] : checkout workspace to branch"
         MainCommand.InstallPackage, "install : install packages"
-        MainCommand.AddView, "view [--down] [--up] [--modified] <viewId> <viewId-wildcard>+ : add repositories to view"
+        MainCommand.AddView, "view [--down] [--up] [--modified] [--app <app-wildcard>] <viewId> <viewId-wildcard>+ : add repositories to view"
         MainCommand.OpenView, "open <viewId> : open view with your favorite ide"
         MainCommand.BuildView, "build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
         MainCommand.RebuildView, "rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"
