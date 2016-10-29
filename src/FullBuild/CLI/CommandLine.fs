@@ -112,7 +112,7 @@ type private Token =
     | Migrate
 
 let (|FullBuildView|_|) (viewFile : string) =
-    if viewFile.EndsWith(IoHelpers.Extension.View |> IoHelpers.GetExtentionString |> sprintf ".%s") && System.IO.File.Exists(viewFile) then
+    if viewFile.EndsWith(IoHelpers.Extension.View |> IoHelpers.GetExtensionString |> sprintf ".%s") && System.IO.File.Exists(viewFile) then
         Some viewFile
     else 
         None
