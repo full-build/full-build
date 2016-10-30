@@ -1,5 +1,6 @@
 v3.1
   * Create view from application (issue #112)
+  * Upgrade to latest Paket profile mapping
 
 v3.0
   * Graph api use internally to simplify implementation
