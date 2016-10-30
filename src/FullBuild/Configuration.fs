@@ -21,23 +21,23 @@ type WorkspaceConfiguration =
     { Repositories : Repository list }
 
 let LoadAnthology() : Anthology = 
-    let anthoFn = GetAnthologyFileName ()
+    let anthoFn = GetAnthologyFile ()
     AnthologySerializer.Load anthoFn
 
 let SaveAnthology  = 
-    let anthoFn = GetAnthologyFileName ()
+    let anthoFn = GetAnthologyFile ()
     AnthologySerializer.Save anthoFn
 
 let LoadBaseline() : Baseline =
-    let baselineFile = GetBaselineFileName ()
+    let baselineFile = GetBaselineFile ()
     BaselineSerializer.Load baselineFile
 
 let SaveBaseline =
-    let baselineFile = GetBaselineFileName ()
+    let baselineFile = GetBaselineFile ()
     BaselineSerializer.Save baselineFile
 
 let LoadView (viewId :ViewId) : View =
-    let viewFile = GetViewFileName viewId.toString 
+    let viewFile = GetViewFile viewId.toString 
     if not viewFile.Exists then failwithf "View %A does not exist" viewId.toString
     ViewSerializer.Load viewFile
 
@@ -75,7 +75,7 @@ let private setDefaultView (viewId : ViewId) =
     System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
 
 let SaveView (viewId : ViewId) view (isDefault : bool option) =
-    let viewFile = GetViewFileName viewId.toString 
+    let viewFile = GetViewFile viewId.toString 
     ViewSerializer.Save viewFile view
     match isDefault with
     | None -> ()
@@ -83,5 +83,5 @@ let SaveView (viewId : ViewId) view (isDefault : bool option) =
     | Some true -> setDefaultView viewId
 
 let ViewExists (viewId : ViewId) =
-    let viewFile = GetViewFileName viewId.toString 
+    let viewFile = GetViewFile viewId.toString 
     viewFile.Exists

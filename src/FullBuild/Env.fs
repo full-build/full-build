@@ -87,14 +87,20 @@ let rec GetFolder folder =
     | Folder.Bin -> GetFolder Folder.Config |> CreateSubDirectory BIN_FOLDER
     | Folder.Installation -> getInstallationFolder()
 
-let GetAnthologyFileName() =
+let GetAnthologyFile() =
     GetFolder Folder.Config |> GetFile ANTHOLOGY_FILENAME
 
-let GetBaselineFileName() =
+let GetBaselineFile() =
     GetFolder Folder.Config  |> GetFile BASELINE_FILENAME
 
-let GetViewFileName viewName =
+let GetViewFile viewName =
     GetFolder Folder.Current |> GetFile (AddExt Extension.View viewName)
+
+let GetSolutionFile viewName =
+    GetFolder Folder.Workspace |> GetFile (AddExt Extension.Solution viewName)
+
+let GetSolutionDefinesFile viewName =
+    GetFolder Folder.View |> GetFile (AddExt Extension.Targets viewName)
 
 let IsMono () =
     let monoRuntime = System.Type.GetType ("Mono.Runtime")

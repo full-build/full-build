@@ -18,6 +18,18 @@ open IoHelpers
 open Collections
 open Graph
 
+let private GenerateSlnAndTargets (view:Views.View) = 
+    let projects = view.Projects
+    if projects = Set.empty then printfn "WARNING: empty project selection"
+    // generate solution defines
+    let slnDefines = Env.GetSolutionDefinesFile view.Name
+    let slnDefinesContent = Generators.Solution.GenerateSolutionDefines projects
+    SaveFileIfNecessary slnDefines (slnDefinesContent.ToString())
+    // generate solution file
+    let slnFile = Env.GetSolutionFile view.Name
+    let slnContent = Generators.Solution.GenerateSolutionContent projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
+    SaveFileIfNecessary slnFile slnContent
+
 let Add (cmd : CLI.Commands.AddView) =
     if cmd.Filters.Length = 0 && not cmd.Modified then
         failwith "Expecting at least one filter"
@@ -31,24 +43,9 @@ let Add (cmd : CLI.Commands.AddView) =
                                          cmd.Modified
                                          cmd.AppFilter
                                          Graph.BuilderType.MSBuild
-
-    let projects = view.Projects
-    if projects = Set.empty then printfn "WARNING: empty project selection"
-
     // save view information first
     view.Save None
-
-    // generate solution defines
-    let slnDefines = Generators.Solution.GenerateSolutionDefines projects
-    let viewDir = GetFolder Env.Folder.View
-    let slnDefineFile = viewDir |> GetFile (AddExt Targets view.Name)
-    SaveFileIfNecessary slnDefineFile (slnDefines.ToString())
-
-    // generate solution file
-    let wsDir = GetFolder Env.Folder.Workspace
-    let slnFile = wsDir |> GetFile (AddExt Solution view.Name)
-    let slnContent = Generators.Solution.GenerateSolutionContent projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
-    SaveFileIfNecessary slnFile slnContent
+    view |> GenerateSlnAndTargets
 
 let Drop name =
     let graph = Configuration.LoadAnthology() |> Graph.from
@@ -97,20 +94,15 @@ let Open (cmd : CLI.Commands.OpenView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
     let view = cmd.Name |> viewRepository.OpenView
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
+    let slnFile = Env.GetSolutionFile view.Name 
+    let slnDefinesFile = Env.GetSolutionDefinesFile view.Name 
+    if slnFile.Exists |> not || slnDefinesFile.Exists |> not then
+        view |> GenerateSlnAndTargets
     Exec.SpawnWithVerb slnFile.FullName "open"
 
 let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
     let view = System.IO.FileInfo(cmd.FilePath) |> ViewSerializer.Load
-    {   CLI.Commands.AddView.Name = view.Name
-        CLI.Commands.AddView.Filters = view.Filters |> Set.toList
-        CLI.Commands.AddView.DownReferences = view.DownReferences
-        CLI.Commands.AddView.UpReferences = view.UpReferences
-        CLI.Commands.AddView.Modified = view.Modified }
-                  |> Add
-    {   CLI.Commands.OpenView.Name = view.Name } 
-                  |> Open
+    { CLI.Commands.OpenView.Name = view.Name }  |> Open
 
 let Graph (cmd : CLI.Commands.GraphView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
