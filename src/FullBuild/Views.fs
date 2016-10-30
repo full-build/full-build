@@ -95,12 +95,6 @@ and [<Sealed>] Factory(graph : Graph) =
         let view = viewId |> Anthology.ViewId |> Configuration.LoadView
         { Graph = graph; View = view }
 
-    member this.TryOpenView viewId = 
-        if viewId |> Anthology.ViewId |> Configuration.ViewExists then
-            Some (this.OpenView viewId)
-        else
-            None
-
     member this.DefaultView =
         Configuration.DefaultView () |> Option.map(fun (Anthology.ViewId viewId) -> this.OpenView viewId)
 

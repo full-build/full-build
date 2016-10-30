@@ -36,8 +36,6 @@ and [<Sealed>] Factory =
     member DefaultView : View option
     member OpenView: viewId: string
                     -> View 
-    member TryOpenView: viewId: string
-                    -> View option
     member CreateView: name : string
                     -> filters : string set
                     -> downReferences : bool
