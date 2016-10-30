@@ -4,6 +4,6 @@
         - filter: toto/*
         - filter: titi/*
     builder: msbuild
-    upward: true
-    downward: true
+    references: true
+    referencedBy: true
     modified: true
