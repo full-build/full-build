@@ -32,8 +32,8 @@ let SerializeView (view : View) =
         filterItem.filter <- filter
         config.view.filters.Add filterItem
 
-    config.view.upward <- view.UpReferences
-    config.view.downward <- view.DownReferences
+    config.view.referencedBy <- view.UpReferences
+    config.view.references <- view.DownReferences
     config.view.modified <- view.Modified
     config.view.appfilter <- match view.AppFilter with
                              | None -> null
@@ -50,8 +50,8 @@ let DeserializeView content =
                 |> Seq.map (fun x -> x.filter)
                 |> Set.ofSeq
       Builder = BuilderType.from config.view.builder
-      UpReferences = config.view.upward
-      DownReferences = config.view.downward
+      UpReferences = config.view.referencedBy
+      DownReferences = config.view.references
       Modified = config.view.modified 
       AppFilter = (config.view.appfilter |> isNull) ? (None, Some config.view.appfilter) }
 
