@@ -47,7 +47,7 @@ type ConvertRepositories =
     { Filters : string set }
 
 type TestAssemblies =
-    { Filters : string set
+    { Views : string set
       Excludes : string set }
 
 type NuGetUrl =
@@ -208,7 +208,6 @@ type Command =
     | DropRepository of string
 
     // view
-    | ListViews
     | AddView of AddView
     | DropView of ViewName
     | DescribeView of ViewName

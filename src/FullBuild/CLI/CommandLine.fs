@@ -251,7 +251,7 @@ let rec private commandTest (excludes : string list) (args : string list) =
       :: Param category
       :: tail -> tail |> commandTest (category :: excludes)
     | [] -> Command.Error MainCommand.Test
-    | Params filters -> Command.TestAssemblies { Filters = set filters; Excludes = set excludes }
+    | viewNames -> Command.TestAssemblies { Views = set viewNames; Excludes = set excludes }
     | _ -> Command.Error MainCommand.Test
 
 
@@ -426,11 +426,6 @@ let private commandDropView (args : string list) =
     | [ViewId name] -> Command.DropView { Name = name }
     | _ -> Command.Error MainCommand.DropView
 
-let private commandListView (args : string list) =
-    match args with
-    | [] -> Command.ListViews
-    | _ -> Command.Error MainCommand.ListView
-
 let private commandDescribeView (args : string list) =
     match args with
     | [ViewId name] -> Command.DescribeView { Name = name }
@@ -538,7 +533,6 @@ let Parse (args : string list) : Command =
 
     | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false None
     | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
-    | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
     | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
     | Token Token.Alter :: Token Token.View :: cmdArgs -> cmdArgs |> commandAlterView None None None
     | Token Token.Open :: cmdArgs -> cmdArgs |> commandOpenView
@@ -590,7 +584,7 @@ let UsageContent() =
         MainCommand.OpenView, "open <viewId> : open view with your favorite ide"
         MainCommand.BuildView, "build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
         MainCommand.RebuildView, "rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"
-        MainCommand.Test, "test [--exclude <category>]* <viewId-wildcard>+ : test assemblies (match repository/project)"
+        MainCommand.Test, "test [--exclude <category>]* <viewId>+ : test assemblies (match repository/project)"
         MainCommand.GraphView, "graph [--all] <viewId> : graph view content (project, packages, assemblies)"
         MainCommand.Exec, "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         MainCommand.Index, "index <repoId-wildcard>+ : index repositories"
@@ -615,7 +609,6 @@ let UsageContent() =
         MainCommand.ListNuget, "list nuget : list NuGet feeds"
         MainCommand.Unknown, ""
         MainCommand.DropView, "drop view <viewId> : drop view"
-        MainCommand.ListView, "list view : list views"
         MainCommand.DescribeView, "describe view <name> : describe view"
         MainCommand.AlterView, "alter view [--default] [--up|--bin] [--down|--bin] <viewId> : alter view"
         MainCommand.Unknown, ""

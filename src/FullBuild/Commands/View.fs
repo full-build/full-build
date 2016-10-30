@@ -53,27 +53,13 @@ let Add (cmd : CLI.Commands.AddView) =
 let Drop name =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    let view = viewRepository.Views |> Seq.tryFind (fun x -> x.Name = name)
-    match view with 
-    | Some x -> x.Delete()
-    | None -> ()
-
-let List () =
-    let graph = Configuration.LoadAnthology() |> Graph.from
-    let viewRepository = Views.from graph
-    let views = viewRepository.Views
-    let defaultView = viewRepository.DefaultView
-
-    let printViewInfo view =
-        let defaultInfo = (defaultView = Some view) ? ("[default]", "")
-        printfn "%s %s" view.Name defaultInfo
-
-    views |> Seq.iter printViewInfo
+    name |> viewRepository.OpenView 
+         |> (fun x -> x.Delete())
 
 let Describe name =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    let view = viewRepository.Views |> Seq.find (fun x -> x.Name = name)
+    let view = name |> viewRepository.OpenView
     let builder = StringHelpers.toString view.Builder
     view.Filters |> Seq.iter (fun x -> printfn "%s" x)
 
@@ -81,7 +67,7 @@ let Build (cmd : CLI.Commands.BuildView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
     let view = match cmd.Name with
-               | Some x -> viewRepository.Views |> Seq.find (fun y -> y.Name = x)
+               | Some x -> x |> viewRepository.OpenView
                | None -> match viewRepository.DefaultView with
                          | None -> failwith "Can't determine view name"
                          | Some x -> x
@@ -93,7 +79,7 @@ let Build (cmd : CLI.Commands.BuildView) =
 let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
+    let view = cmd.Name |> viewRepository.OpenView
     let depView = viewRepository.CreateView view.Name
                                             view.Filters
                                             (cmd.DownReferences = Some true) ? (true, view.DownReferences)
@@ -110,7 +96,7 @@ let Alter (cmd : CLI.Commands.AlterView) =
 let Open (cmd : CLI.Commands.OpenView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
+    let view = cmd.Name |> viewRepository.OpenView
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
     Exec.SpawnWithVerb slnFile.FullName "open"
@@ -129,7 +115,7 @@ let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
 let Graph (cmd : CLI.Commands.GraphView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
+    let view = cmd.Name |> viewRepository.OpenView
     let projects = view.Projects
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml cmd.Name)

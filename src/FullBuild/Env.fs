@@ -64,6 +64,7 @@ let getInstallationFolder () =
 
 [<RequireQualifiedAccess>]
 type Folder =
+       | Current
        | Workspace
        | AppOutput
        | Config
@@ -76,6 +77,7 @@ type Folder =
 
 let rec GetFolder folder =
     match folder with
+    | Folder.Current -> CurrentFolder()
     | Folder.Workspace -> CurrentFolder() |> workspaceFolderSearch
     | Folder.AppOutput -> GetFolder Folder.Workspace |> CreateSubDirectory MSBUILD_APP_OUTPUT
     | Folder.Config -> GetFolder Folder.Workspace |> CreateSubDirectory MASTER_REPO
@@ -92,7 +94,7 @@ let GetBaselineFileName() =
     GetFolder Folder.Config  |> GetFile BASELINE_FILENAME
 
 let GetViewFileName viewName =
-    GetFolder Folder.View |> GetFile (AddExt Extension.View viewName)
+    GetFolder Folder.Current |> GetFile (AddExt Extension.View viewName)
 
 let IsMono () =
     let monoRuntime = System.Type.GetType ("Mono.Runtime")

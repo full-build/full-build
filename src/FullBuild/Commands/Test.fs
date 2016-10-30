@@ -15,16 +15,16 @@
 module Commands.Test
 open Collections
 
-let TestAssemblies (filters : string set) (excludes : string set) =
+let TestAssemblies (cmd : CLI.Commands.TestAssemblies) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    let selectedViews = PatternMatching.FilterMatch viewRepository.Views (fun x -> x.Name) filters
+    let selectedView = cmd.Views |> Seq.map(viewRepository.OpenView) 
 
     // first set binding redirects on output only
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let projects = selectedViews |> Set.map (fun x -> x.Projects)
-                                   |> Set.unionMany
-                                   |> Set.filter (fun x -> x.HasTests)
+    let projects = selectedView |> Seq.map(fun x -> x.Projects)
+                                |> Set.unionMany
+                                |> Set.filter (fun x -> x.HasTests)
     let artifactDirs = projects |> Set.map (fun x -> sprintf "%s/%s" x.Repository.Name x.ProjectFile)
                                 |> Seq.map (fun x -> wsDir |> IoHelpers.GetFile x)
                                 |> Seq.map (fun x -> x.Directory)
@@ -33,4 +33,5 @@ let TestAssemblies (filters : string set) (excludes : string set) =
 
     // then test assemblies
     let assemblies = projects |> Set.map (fun x -> x.BinFile)
-    (Core.TestRunners.TestWithTestRunner graph.TestRunner) assemblies excludes
+    (Core.TestRunners.TestWithTestRunner graph.TestRunner) assemblies cmd.Excludes
+    
