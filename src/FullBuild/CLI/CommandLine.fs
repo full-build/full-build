@@ -574,7 +574,7 @@ let UsageContent() =
     let content = [
         MainCommand.Usage, "help : display this help"
         MainCommand.Version, "version : display full-build version"
-        MainCommand.Setup, "setup <git|gerrit|hg> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
+        MainCommand.Setup, "setup <git|gerrit> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         MainCommand.Init, "init <master-repository> <local-path> : initialize a new workspace in given path"
         MainCommand.CloneRepository, "clone [--mt] [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
         MainCommand.Checkout, "checkout <version> : checkout workspace to version"

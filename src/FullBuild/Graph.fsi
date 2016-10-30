@@ -40,9 +40,8 @@ type BuilderType =
 
 [<RequireQualifiedAccess>]
 type VcsType =
-    | Gerrit
     | Git
-    | Hg
+    | Gerrit
 
 [<RequireQualifiedAccess>]
 type TestRunnerType =
