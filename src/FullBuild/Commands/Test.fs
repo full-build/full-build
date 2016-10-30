@@ -18,11 +18,11 @@ open Collections
 let TestAssemblies (cmd : CLI.Commands.TestAssemblies) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    let selectedView = cmd.Views |> Seq.map(viewRepository.OpenView) 
+    let selectedView = cmd.Views |> Seq.map (viewRepository.OpenView) 
 
     // first set binding redirects on output only
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let projects = selectedView |> Seq.map(fun x -> x.Projects)
+    let projects = selectedView |> Seq.map (fun x -> x.Projects)
                                 |> Set.unionMany
                                 |> Set.filter (fun x -> x.HasTests)
     let artifactDirs = projects |> Set.map (fun x -> sprintf "%s/%s" x.Repository.Name x.ProjectFile)
