@@ -91,24 +91,12 @@ with
 
 
 and [<Sealed>] Factory(graph : Graph) =
-    let mutable viewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> = null
-
-    member this.ViewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> =
-        if viewMap |> isNull then
-            let vwDir = Env.GetFolder Env.Folder.View
-            viewMap <- vwDir.EnumerateFiles("*.view") |> Seq.map (fun x -> System.IO.Path.GetFileNameWithoutExtension(x.Name) |> Anthology.ViewId)
-                                                      |> Seq.map Configuration.LoadView
-                                                      |> Seq.map (fun x -> x.Name |> Anthology.ViewId, { Graph = graph; View = x })
-                                                      |> dict
-        viewMap
-
-    member this.Views = this.ViewMap.Values |> set
+    member this.GetView viewId = 
+        let view = viewId |> Anthology.ViewId |> Configuration.LoadView
+        { Graph = graph; View = view }
 
     member this.DefaultView =
-        let viewId = Configuration.DefaultView ()
-        match viewId with
-        | None -> None
-        | Some x -> Some this.ViewMap.[x]
+        Configuration.DefaultView () |> Option.map(fun (Anthology.ViewId viewId) -> this.GetView viewId)
 
     member this.CreateView name filters downReferences upReferences modified appFilter builder =
         let view = { Anthology.View.Name = name

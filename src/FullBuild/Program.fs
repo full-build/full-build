@@ -38,7 +38,7 @@ let tryMain argv =
     | Command.History histInfo -> Commands.Workspace.History histInfo
     | Command.InstallPackages -> Commands.Workspace.Install ()
 
-    | Command.TestAssemblies testInfo -> Commands.Test.TestAssemblies testInfo.Filters testInfo.Excludes
+    | Command.TestAssemblies testInfo -> Commands.Test.TestAssemblies testInfo
 
     // repository
     | Command.AddRepository addInfo -> Commands.Repo.Add addInfo
@@ -49,12 +49,12 @@ let tryMain argv =
     // view
     | Command.AddView viewInfo -> Commands.View.Add viewInfo
     | Command.DropView viewInfo -> Commands.View.Drop viewInfo.Name
-    | Command.ListViews -> Commands.View.List ()
     | Command.DescribeView viewInfo -> Commands.View.Describe viewInfo.Name
     | Command.GraphView viewInfo -> Commands.View.Graph viewInfo
     | Command.BuildView viewInfo -> Commands.View.Build viewInfo
     | Command.AlterView viewInfo -> Commands.View.Alter viewInfo
     | Command.OpenView viewInfo -> Commands.View.Open viewInfo
+    | Command.FullBuildView viewInfo -> Commands.View.OpenFullBuildView viewInfo
 
     // nuget
     | Command.AddNuGet url -> Commands.NuGet.Add url.toString

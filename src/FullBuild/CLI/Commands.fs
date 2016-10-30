@@ -47,7 +47,7 @@ type ConvertRepositories =
     { Filters : string set }
 
 type TestAssemblies =
-    { Filters : string set
+    { Views : string set
       Excludes : string set }
 
 type NuGetUrl =
@@ -95,6 +95,9 @@ type AlterView =
 
 type OpenView =
     { Name : string }
+
+type FullBuildView =
+    { FilePath : string }
 
 type GraphView =
     { Name : string
@@ -205,7 +208,6 @@ type Command =
     | DropRepository of string
 
     // view
-    | ListViews
     | AddView of AddView
     | DropView of ViewName
     | DescribeView of ViewName
@@ -213,6 +215,7 @@ type Command =
     | BuildView of BuildView
     | AlterView of AlterView
     | OpenView of OpenView
+    | FullBuildView of FullBuildView
 
     // nuget
     | AddNuGet of RepositoryUrl
