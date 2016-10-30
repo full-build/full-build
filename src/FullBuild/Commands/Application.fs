@@ -35,7 +35,7 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let viewRepository = Views.from graph
     let applications = match pubInfo.View with
                        | None -> graph.Applications
-                       | Some viewId -> let view = viewId |> viewRepository.OpenView
+                       | Some viewId -> let view = viewId |> viewRepository.GetView
                                         view.Projects |> Set.map (fun x -> x.Applications)
                                                       |> Set.unionMany
 

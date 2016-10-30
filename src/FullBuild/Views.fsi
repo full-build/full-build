@@ -34,7 +34,7 @@ with
 
 and [<Sealed>] Factory =
     member DefaultView : View option
-    member OpenView: viewId: string
+    member GetView: viewId: string
                     -> View 
     member CreateView: name : string
                     -> filters : string set

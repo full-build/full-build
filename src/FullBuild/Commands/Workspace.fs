@@ -158,7 +158,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
 
         let selectedRepos = match pullInfo.View with
                              | None -> graph.Repositories
-                             | Some viewName -> let view = viewName |> viewRepository.OpenView
+                             | Some viewName -> let view = viewName |> viewRepository.GetView
                                                 let repos = view.Projects |> Set.map (fun x -> x.Repository)
                                                 repos
         let maxThrottle = pullInfo.Multithread ? (System.Environment.ProcessorCount*4, 1)

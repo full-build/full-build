@@ -50,13 +50,13 @@ let Add (cmd : CLI.Commands.AddView) =
 let Drop name =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    name |> viewRepository.OpenView 
+    name |> viewRepository.GetView 
          |> (fun x -> x.Delete())
 
 let Describe name =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    let view = name |> viewRepository.OpenView
+    let view = name |> viewRepository.GetView
     let builder = StringHelpers.toString view.Builder
     view.Filters |> Seq.iter (fun x -> printfn "%s" x)
 
@@ -64,7 +64,7 @@ let Build (cmd : CLI.Commands.BuildView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
     let view = match cmd.Name with
-               | Some x -> x |> viewRepository.OpenView
+               | Some x -> x |> viewRepository.GetView
                | None -> match viewRepository.DefaultView with
                          | None -> failwith "Can't determine view name"
                          | Some x -> x
@@ -76,7 +76,7 @@ let Build (cmd : CLI.Commands.BuildView) =
 let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    let view = cmd.Name |> viewRepository.OpenView
+    let view = cmd.Name |> viewRepository.GetView
     let depView = viewRepository.CreateView view.Name
                                             view.Filters
                                             (cmd.DownReferences = Some true) ? (true, view.DownReferences)
@@ -93,7 +93,7 @@ let Alter (cmd : CLI.Commands.AlterView) =
 let Open (cmd : CLI.Commands.OpenView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    let view = cmd.Name |> viewRepository.OpenView
+    let view = cmd.Name |> viewRepository.GetView
     let slnFile = Env.GetSolutionFile view.Name 
     let slnDefinesFile = Env.GetSolutionDefinesFile view.Name 
     if slnFile.Exists |> not || slnDefinesFile.Exists |> not then
@@ -107,7 +107,7 @@ let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
 let Graph (cmd : CLI.Commands.GraphView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    let view = cmd.Name |> viewRepository.OpenView
+    let view = cmd.Name |> viewRepository.GetView
     let projects = view.Projects
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml cmd.Name)

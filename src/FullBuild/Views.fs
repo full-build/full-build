@@ -91,12 +91,12 @@ with
 
 
 and [<Sealed>] Factory(graph : Graph) =
-    member this.OpenView viewId = 
+    member this.GetView viewId = 
         let view = viewId |> Anthology.ViewId |> Configuration.LoadView
         { Graph = graph; View = view }
 
     member this.DefaultView =
-        Configuration.DefaultView () |> Option.map(fun (Anthology.ViewId viewId) -> this.OpenView viewId)
+        Configuration.DefaultView () |> Option.map(fun (Anthology.ViewId viewId) -> this.GetView viewId)
 
     member this.CreateView name filters downReferences upReferences modified appFilter builder =
         let view = { Anthology.View.Name = name

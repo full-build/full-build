@@ -18,7 +18,7 @@ open Collections
 let TestAssemblies (cmd : CLI.Commands.TestAssemblies) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
-    let selectedView = cmd.Views |> Seq.map (viewRepository.OpenView) 
+    let selectedView = cmd.Views |> Seq.map (viewRepository.GetView) 
 
     // first set binding redirects on output only
     let wsDir = Env.GetFolder Env.Folder.Workspace
