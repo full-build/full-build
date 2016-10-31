@@ -41,7 +41,7 @@ type Extension =
 
 let GetExtensionString ext =
     match ext with
-    | View -> "fbv"
+    | View -> "fbsln"
     | Solution -> "sln"
     | Targets -> "targets"
     | CsProj -> "csproj"

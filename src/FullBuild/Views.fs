@@ -84,7 +84,16 @@ with
 
     member this.Save (isDefault : bool option) =
         let viewId = Anthology.ViewId this.View.Name
-        Configuration.SaveView viewId this.View isDefault
+        let viewFile = Env.GetViewFile this.View.Name
+        ViewSerializer.Save viewFile this.View
+        match isDefault with
+        | None -> ()
+        | Some false -> if Configuration.DefaultView () = Some viewId then Configuration.DeleteDefaultView()
+        | Some true -> Configuration.SetDefaultView viewId
+    
+    member this.SaveStatic () =
+        let staticViewFile = Env.GetStaticViewFile this.View.Name
+        ViewSerializer.Save staticViewFile this.View
 
     member this.Delete () =
         Configuration.DeleteView (Anthology.ViewId this.View.Name)

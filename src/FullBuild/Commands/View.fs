@@ -37,16 +37,15 @@ let Add (cmd : CLI.Commands.AddView) =
 
     // save view information first
     view.Save None
+    if cmd.Static then view.SaveStatic()
 
     // generate solution defines
-    let slnDefines = Generators.Solution.GenerateSolutionDefines projects
-    let viewDir = GetFolder Env.Folder.View
-    let slnDefineFile = viewDir |> GetFile (AddExt Targets view.Name)
-    SaveFileIfNecessary slnDefineFile (slnDefines.ToString())
+    let slnDefineFile = Env.GetSolutionDefinesFile view.Name
+    let slnDefinesContent = Generators.Solution.GenerateSolutionDefines projects
+    SaveFileIfNecessary slnDefineFile (slnDefinesContent.ToString())
 
     // generate solution file
-    let wsDir = GetFolder Env.Folder.Workspace
-    let slnFile = wsDir |> GetFile (AddExt Solution view.Name)
+    let slnFile = Env.GetSolutionFile view.Name
     let slnContent = Generators.Solution.GenerateSolutionContent projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
     SaveFileIfNecessary slnFile slnContent
 
@@ -121,7 +120,9 @@ let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
         CLI.Commands.AddView.Filters = view.Filters |> Set.toList
         CLI.Commands.AddView.DownReferences = view.DownReferences
         CLI.Commands.AddView.UpReferences = view.UpReferences
-        CLI.Commands.AddView.Modified = view.Modified }
+        CLI.Commands.AddView.Modified = view.Modified
+        CLI.Commands.AddView.AppFilter = view.AppFilter
+        CLI.Commands.AddView.Static = false }
                   |> Add
     {   CLI.Commands.OpenView.Name = view.Name } 
                   |> Open
