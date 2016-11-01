@@ -16,16 +16,14 @@ module Tools.Vcs
 
 open Graph
 open System.IO
-open VcsHg
 open VcsGit
 
 
-let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gitFun hgFun =
+let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gitFun =
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name
     let f = match vcsType with
             | VcsType.Git -> gitFun
             | VcsType.Gerrit -> gitFun
-            | VcsType.Hg -> hgFun
     f repoDir
 
 
@@ -36,33 +34,32 @@ let Unclone (wsDir : DirectoryInfo) (repo : Repository) =
 let Clone (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) =
     let gitCloneFunc = if repo.Vcs = VcsType.Gerrit then GerritClone repo
                                                     else GitClone repo
-    let hgCloneFunc = HgClone repo
-    (chooseVcs wsDir repo.Vcs repo gitCloneFunc hgCloneFunc) repo.Uri shallow
+    (chooseVcs wsDir repo.Vcs repo gitCloneFunc) repo.Uri shallow
 
 let Tip (wsDir : DirectoryInfo) (repo : Repository) =
-    (chooseVcs wsDir repo.Vcs repo GitTip HgTip).[0]
+    (chooseVcs wsDir repo.Vcs repo GitTip).[0]
 
 // version : None ==> master
 let Checkout (wsDir : DirectoryInfo) (repo : Repository) (version : string option) (ignore : bool) =
-    (chooseVcs wsDir repo.Vcs repo GitCheckout HgCheckout) version ignore
+    (chooseVcs wsDir repo.Vcs repo GitCheckout) version ignore
 
 let Ignore (wsDir : DirectoryInfo) (repo : Repository) =
-    chooseVcs wsDir repo.Vcs repo  GitIgnore HgIgnore
+    chooseVcs wsDir repo.Vcs repo  GitIgnore
 
 let Pull (wsDir : DirectoryInfo) (repo : Repository) (rebase : bool) =
-    (chooseVcs wsDir repo.Vcs repo GitPull HgPull) rebase
+    (chooseVcs wsDir repo.Vcs repo GitPull) rebase
 
 let Commit (wsDir : DirectoryInfo) (repo : Repository) (comment : string) =
-    (chooseVcs wsDir repo.Vcs repo GitCommit HgCommit) comment
+    (chooseVcs wsDir repo.Vcs repo GitCommit) comment
 
 let Push (wsDir : DirectoryInfo) (repo : Repository) =
-    (chooseVcs wsDir repo.Vcs repo GitPush HgPush)
+    (chooseVcs wsDir repo.Vcs repo GitPush)
 
 let Clean (wsDir : DirectoryInfo) (repo : Repository) =
-    (chooseVcs wsDir repo.Vcs repo GitClean HgClean) repo
+    (chooseVcs wsDir repo.Vcs repo GitClean) repo
 
 let Log (wsDir : DirectoryInfo) (repo : Repository) (version : string) =
-    (chooseVcs wsDir repo.Vcs repo GitHistory HgHistory) version
+    (chooseVcs wsDir repo.Vcs repo GitHistory) version
 
 let LastCommit (wsDir : DirectoryInfo) (repo : Repository) (relativeFile : string) =
-    (chooseVcs wsDir repo.Vcs repo GitLastCommit HgLastCommit) relativeFile
+    (chooseVcs wsDir repo.Vcs repo GitLastCommit) relativeFile
