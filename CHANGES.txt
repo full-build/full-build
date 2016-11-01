@@ -1,5 +1,6 @@
 v3.1
   * Create view from application (issue #112)
+  * Support for PackageReference (issue #119)
   * Remove Mercurial support (issue #125)
 
 v3.0

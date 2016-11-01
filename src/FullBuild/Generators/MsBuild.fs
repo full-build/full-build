@@ -168,6 +168,9 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
 
     let seekAndDestroy =
         [
+            // package reference
+            "PackageReference", always
+
             // paket
             "None", filterPaketReference
             "Import", filterPaketTarget
