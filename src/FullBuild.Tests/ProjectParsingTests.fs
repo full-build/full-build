@@ -56,8 +56,10 @@ let CheckBasicParsingCSharp () =
                                  { Id=PackageId.from "Newtonsoft.Json"; Version=PackageVersion.PackageVersion "7.0.1" }
                                  { Id=PackageId.from "NLog"; Version=PackageVersion.PackageVersion "4.0.1" }
                                  { Id=PackageId.from "NUnit"; Version=PackageVersion.PackageVersion "2.6.3" }
-                                 { Id=PackageId.from "xunit"; Version=PackageVersion.PackageVersion "1.9.1" } ]
-    
+                                 { Id=PackageId.from "xunit"; Version=PackageVersion.PackageVersion "1.9.1" } 
+                                 { Id=PackageId.from "Microsoft.NETCore.App"; Version=PackageVersion.PackageVersion "1.0.0" } 
+                                 { Id=PackageId.from "Microsoft.NET.SDK"; Version=PackageVersion.PackageVersion "2.0.0" } ]
+
     let file = FileInfo (testFile "./CSharpProjectSample1.csproj")
     let prjDescriptor = Parsers.MSBuild.parseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") file
     prjDescriptor.Project.UniqueProjectId |> should equal (ProjectUniqueId.from (ParseGuid "3AF55CC8-9998-4039-BC31-54ECBFC91396"))
