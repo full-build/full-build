@@ -71,6 +71,12 @@ let private parseNuGetPackage (pkgRef : XElement) : Package =
     { Id = PackageId.from pkgId
       Version = PackageVersion.PackageVersion pkgVer }
 
+let private parsePackageReferencePackage (pkgRef : XElement) : Package =
+    let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "Include")
+    let pkgVer = !> pkgRef.Attribute(XNamespace.None + "Version") : string
+    { Id = PackageId.from pkgId
+      Version = PackageVersion.PackageVersion pkgVer }
+
 let private parseFullBuildPackage (fileName : string) : Package =
     let fi = FileInfo (fileName)
     let fo = fi.Directory.Name
@@ -107,6 +113,12 @@ let private getFullBuildPackages (prjDoc : XDocument)  =
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER) || x.StartsWith(MSBUILD_PACKAGE_FOLDER2))
                  |> Seq.map parseFullBuildPackage
+                 |> Set
+    fbPkgs
+
+let private getPackageReferencePackages (prjDoc : XDocument)  =
+    let fbPkgs = prjDoc.Descendants(NsMsBuild + "PackageReference")
+                 |> Seq.map parsePackageReferencePackage
                  |> Set
     fbPkgs
 
@@ -148,9 +160,9 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                         | Some xnuget -> getNuGetPackages xnuget
                         | _ -> Set.empty
     let fbPackages = getFullBuildPackages xprj
+    let pkgRefPackages = getPackageReferencePackages xprj
     let paketPackages = getPaketPackages xprj
-    let packages = nugetPackages |> Set.union fbPackages
-                                 |> Set.union paketPackages
+    let packages = nugetPackages + fbPackages + pkgRefPackages + paketPackages
     let pkgRefs = packages |> Set.map (fun x -> x.Id)
     let hasTests = assemblyRef.toString.EndsWith(".tests")
 

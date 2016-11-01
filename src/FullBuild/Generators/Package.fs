@@ -70,10 +70,11 @@ let private generateChooseRefContent (libDir : DirectoryInfo) =
             let dirs = if foundDirs.Length = 0 then [""]
                        else foundDirs
             let path2platforms = Paket.PlatformMatching.getSupportedTargetProfiles dirs
+            let allTargets = path2platforms |> Seq.map (fun x -> x.Value) |> List.ofSeq
 
             for path2pf in path2platforms do
                 let pathLib = libDir |> IoHelpers.GetSubDirectory path2pf.Key
-                let condition = Paket.PlatformMatching.getCondition None (List.ofSeq path2pf.Value)
+                let condition = Paket.PlatformMatching.getCondition None allTargets (List.ofSeq path2pf.Value)
                 let whenCondition = if condition = "$(TargetFrameworkIdentifier) == 'true'" then "True"
                                     else condition
                 yield generateItemGroup pathLib whenCondition
@@ -92,10 +93,11 @@ let private generateChooseCopyContent (libDir : DirectoryInfo) =
             let dirs = if foundDirs.Length = 0 then [""]
                        else foundDirs
             let path2platforms = Paket.PlatformMatching.getSupportedTargetProfiles dirs
+            let allTargets = path2platforms |> Seq.map (fun x -> x.Value) |> List.ofSeq
 
             for path2pf in path2platforms do
                 let pathLib = libDir |> IoHelpers.GetSubDirectory path2pf.Key
-                let condition = Paket.PlatformMatching.getCondition None (List.ofSeq path2pf.Value)
+                let condition = Paket.PlatformMatching.getCondition None allTargets (List.ofSeq path2pf.Value)
                 let whenCondition = if condition = "$(TargetFrameworkIdentifier) == 'true'" then "True"
                                     else condition
                 yield generateItemGroupCopy pathLib whenCondition
