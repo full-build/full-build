@@ -336,13 +336,3 @@ let RemoveUselessStuff (projects : Project set) =
     for repo in repos do
         let repoDir = wsDir |> GetSubDirectory repo.Name
         seekAndDestroy repoDir
-
-    for project in projects do
-        let repoDir = wsDir |> GetSubDirectory project.Repository.Name
-        let prjFile = repoDir |> GetFile project.ProjectFile
-        let prjDir = prjFile.Directory
-        if prjDir.Exists then
-            let binDir = prjDir |> GetSubDirectory BIN_FOLDER
-            let objDir = prjDir |> GetSubDirectory OBJ_FOLDER
-            binDir |> IoHelpers.ForceDelete
-            objDir |> IoHelpers.ForceDelete
