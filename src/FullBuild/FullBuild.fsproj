@@ -102,6 +102,7 @@
     <Compile Include="Views.fs" />
     <Compile Include="MSBuildHelpers.fs" />
     <Compile Include="AnthologyGraph.fs" />
+    <Compile Include="OsHelpers.fs" />
     <Compile Include="CLI\Commands.fs" />
     <Compile Include="CLI\CommandLine.fs" />
     <Compile Include="Parsers\MSBuild.fs" />
@@ -146,6 +147,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="anthology.yaml" />
+    <Content Include="favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
