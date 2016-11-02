@@ -50,7 +50,7 @@ let Publish (graph : Graph) (branch : string option) buildnum hash =
             printfn "[WARNING] Build output already exists - skipping"
 
         let latestVersionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
-        
+
         File.AppendAllLines(latestVersionFile.FullName, [buildTag])
         printfn "[version] %s" hash
         for app in appDir |> EnumarateFiles do
@@ -65,6 +65,15 @@ let Publish (graph : Graph) (branch : string option) buildnum hash =
              if tmpVersionDir.Exists then tmpVersionDir.Delete(true)
 
              reraise ()
+
+let FetchVersionsForArtifact (graph : Graph) (app : Application) =
+    let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
+    let lines = System.IO.File.ReadAllLines (versionFile.FullName)
+
+    let toVersion (line : string) =
+        line.Split(':').[0]
+
+    lines |> Seq.map toVersion
 
 let PullReferenceBinaries (graph : Graph) version =
     let artifactDir = graph.ArtifactsDir |> DirectoryInfo
