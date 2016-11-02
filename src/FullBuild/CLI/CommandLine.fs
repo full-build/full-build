@@ -43,6 +43,7 @@ type private TokenOption =
     | Beta
     | App
     | Static
+    | NoMultithread
 
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -67,6 +68,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--beta" -> Some TokenOption.Beta
     | "--app" -> Some TokenOption.App
     | "--static" -> Some TokenOption.Static
+    | "--nomt" -> Some TokenOption.NoMultithread
     | _ -> None
 
 type private Token =
@@ -276,7 +278,10 @@ let rec private commandClone (shallow : bool) (all : bool) (mt : bool) (args : s
     | TokenOption TokenOption.All
       :: tail -> tail |> commandClone shallow true mt
     | TokenOption TokenOption.Multithread
-      :: tail -> tail |> commandClone shallow all true
+      :: tail -> printfn "WARNING: clone --mt is deprecated"
+                 tail |> commandClone shallow all true
+    | TokenOption TokenOption.NoMultithread
+      :: tail -> tail |> commandClone shallow all false
     | [] -> Command.Error MainCommand.CloneRepository
     | Params filters -> Command.CloneRepositories { Filters = set filters; Shallow = shallow; All = all; Multithread = mt }
     | _ -> Command.Error MainCommand.CloneRepository
@@ -294,7 +299,10 @@ let rec private commandPublish (mt : bool) view (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.PublishApp
     | TokenOption TokenOption.Multithread
-      :: tail -> tail |> commandPublish true view
+      :: tail -> printfn "WARNING: publish --mt is deprecated"
+                 tail |> commandPublish true view
+    | TokenOption TokenOption.NoMultithread
+      :: tail -> tail |> commandPublish false view
     | TokenOption TokenOption.View
       :: ViewId name
       :: tail -> tail |> commandPublish mt (Some name)
@@ -345,7 +353,10 @@ let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (multithre
     | TokenOption TokenOption.Rebase
       :: tail -> tail |> commandPull src bin true multithread view
     | TokenOption TokenOption.Multithread
-      :: tail -> tail |> commandPull src bin rebase true view
+      :: tail -> printfn "WARNING: option pull --mt is deprecated"
+                 tail |> commandPull src bin rebase true view
+    | TokenOption TokenOption.NoMultithread
+      :: tail -> tail |> commandPull src bin rebase false view
     | TokenOption TokenOption.View
       :: ViewId name
       :: tail -> tail |> commandPull true true rebase multithread (Some name)
@@ -517,15 +528,15 @@ let Parse (args : string list) : Command =
     | Token Token.Test :: cmdArgs -> cmdArgs |> commandTest []
     | Token Token.Index :: cmdArgs -> cmdArgs |> commandIndex
     | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert
-    | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false false
+    | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false true
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
-    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish false None
+    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish true None
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
     | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush None false
-    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false false None
+    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false true None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
     | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory false
@@ -588,7 +599,7 @@ let UsageContent() =
         MainCommand.Version, "version : display full-build version"
         MainCommand.Setup, "setup <git|gerrit> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         MainCommand.Init, "init <master-repository> <local-path> : initialize a new workspace in given path"
-        MainCommand.CloneRepository, "clone [--mt] [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
+        MainCommand.CloneRepository, "clone [--nomt] [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
         MainCommand.Checkout, "checkout <version> : checkout workspace to version"
         MainCommand.Branch, "branch [<branch>] : checkout workspace to branch"
         MainCommand.InstallPackage, "install : install packages"
@@ -601,9 +612,9 @@ let UsageContent() =
         MainCommand.Exec, "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         MainCommand.Index, "index <repoId-wildcard>+ : index repositories"
         MainCommand.Convert, "convert <repoId-wildcard> : convert projects in repositories"
-        MainCommand.Pull, "pull [--src|--bin] [--mt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
+        MainCommand.Pull, "pull [--src|--bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
         MainCommand.Push, "push [--branch <branch>] [--all] <buildNumber> : push a baseline from current repositories version and display version"
-        MainCommand.PublishApp, "publish [--mt] [--view <viewId>] <appId-wildcard> : publish application"
+        MainCommand.PublishApp, "publish [--nomt] [--view <viewId>] <appId-wildcard> : publish application"
         MainCommand.Bind, "bind <projectId-wildcard>+ : update bindings"
         MainCommand.Clean, "clean : DANGER! reset and clean workspace (interactive command)"
         MainCommand.History, "history [--html] : display history since last baseline"
