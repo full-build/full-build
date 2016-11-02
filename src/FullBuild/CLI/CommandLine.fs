@@ -412,7 +412,7 @@ let rec private commandAddView (upReferences : bool) (downReferences : bool) (mo
                                              Filters = filters
                                              UpReferences = upReferences
                                              DownReferences = downReferences
-                                             Modified = modified 
+                                             Modified = modified
                                              AppFilter = app}
     | _ -> Command.Error MainCommand.AddView
 
@@ -461,9 +461,10 @@ let private commandDropApp (args : string list) =
     | [ApplicationId name] -> Command.DropApplication name
     | _ -> Command.Error MainCommand.DropApp
 
-let private commandListApp (args : string list) =
+let rec private commandListApp (version : string option) (args : string list) =
     match args with
-    | [] -> Command.ListApplications
+    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandListApp (Some version)
+    | [] -> Command.ListApplications { Version = version }
     | _ -> Command.Error MainCommand.ListApp
 
 let private commandListPackage (args : string list) =
@@ -540,7 +541,7 @@ let Parse (args : string list) : Command =
 
     | Token Token.Add :: Token Token.App :: cmdArgs -> cmdArgs |> commandAddApp
     | Token Token.Drop :: Token Token.App :: cmdArgs -> cmdArgs |> commandDropApp
-    | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp
+    | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp None
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
     | _ -> Command.Error MainCommand.Unknown
