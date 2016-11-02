@@ -42,6 +42,7 @@ type private TokenOption =
     | Alpha
     | Beta
     | App
+    | Static
     | NoMultithread
 
 let private (|TokenOption|_|) (token : string) =
@@ -66,6 +67,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--alpha" -> Some TokenOption.Alpha
     | "--beta" -> Some TokenOption.Beta
     | "--app" -> Some TokenOption.App
+    | "--static" -> Some TokenOption.Static
     | "--nomt" -> Some TokenOption.NoMultithread
     | _ -> None
 
@@ -113,6 +115,11 @@ type private Token =
     | UpdateGuids
     | Migrate
 
+let (|FullBuildView|_|) (viewFile : string) =
+    if viewFile.EndsWith(IoHelpers.Extension.View |> IoHelpers.GetExtensionString |> sprintf ".%s") && System.IO.File.Exists(viewFile) then
+        Some viewFile
+    else 
+        None
 
 let private (|Token|_|) (token : string) =
     match token with
@@ -408,23 +415,26 @@ let private commandListNuGet (args : string list) =
     | [] -> Command.ListNuGets
     | _ -> Command.Error MainCommand.ListNuget
 
-let rec private commandAddView (upReferences : bool) (downReferences : bool) (modified : bool) (app : string option) (args : string list) =
+let rec private commandAddView (upReferences : bool) (downReferences : bool) (modified : bool) (app : string option) (staticView : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Up
-      :: tail -> tail |> commandAddView true downReferences modified app
+      :: tail -> tail |> commandAddView true downReferences modified app staticView
     | TokenOption TokenOption.Down
-      :: tail -> tail |> commandAddView upReferences true modified app
+      :: tail -> tail |> commandAddView upReferences true modified app staticView
     | TokenOption TokenOption.Modified
-      :: tail -> tail |> commandAddView upReferences downReferences true app
+      :: tail -> tail |> commandAddView upReferences downReferences true app staticView
     | TokenOption TokenOption.App
-      :: appFilter :: tail -> tail |> commandAddView upReferences downReferences true (Some appFilter)
+      :: appFilter :: tail -> tail |> commandAddView upReferences downReferences true (Some appFilter) staticView
+    | TokenOption TokenOption.Static
+      :: tail -> tail |> commandAddView upReferences downReferences true app true
     | ViewId name
       :: Params filters -> Command.AddView { Name = name
                                              Filters = filters
                                              UpReferences = upReferences
                                              DownReferences = downReferences
                                              Modified = modified
-                                             AppFilter = app}
+                                             AppFilter = app
+                                             Static = staticView}
     | _ -> Command.Error MainCommand.AddView
 
 let private commandDropView (args : string list) =
@@ -543,7 +553,7 @@ let Parse (args : string list) : Command =
     | Token Token.Add :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandAddNuGet
     | Token Token.List :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandListNuGet
 
-    | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false None
+    | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false None false
     | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
     | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
     | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
@@ -555,6 +565,7 @@ let Parse (args : string list) : Command =
     | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp None
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
+    | FullBuildView viewFile :: [] -> Command.FullBuildView { FilePath = viewFile }
     | _ -> Command.Error MainCommand.Unknown
 
 
@@ -592,7 +603,7 @@ let UsageContent() =
         MainCommand.Checkout, "checkout <version> : checkout workspace to version"
         MainCommand.Branch, "branch [<branch>] : checkout workspace to branch"
         MainCommand.InstallPackage, "install : install packages"
-        MainCommand.AddView, "view [--down] [--up] [--modified] [--app <app-wildcard>] <viewId> <viewId-wildcard>+ : add repositories to view"
+        MainCommand.AddView, "view [--down] [--up] [--modified] [--app <app-wildcard>] [--static] <viewId> <viewId-wildcard>+ : add repositories to view"
         MainCommand.OpenView, "open <viewId> : open view with your favorite ide"
         MainCommand.BuildView, "build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
         MainCommand.RebuildView, "rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"

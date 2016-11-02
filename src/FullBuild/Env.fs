@@ -64,6 +64,7 @@ let getInstallationFolder () =
 
 [<RequireQualifiedAccess>]
 type Folder =
+       | Current
        | Workspace
        | AppOutput
        | Config
@@ -76,6 +77,7 @@ type Folder =
 
 let rec GetFolder folder =
     match folder with
+    | Folder.Current -> CurrentFolder() 
     | Folder.Workspace -> CurrentFolder() |> workspaceFolderSearch
     | Folder.AppOutput -> GetFolder Folder.Workspace |> CreateSubDirectory MSBUILD_APP_OUTPUT
     | Folder.Config -> GetFolder Folder.Workspace |> CreateSubDirectory MASTER_REPO
@@ -85,14 +87,23 @@ let rec GetFolder folder =
     | Folder.Bin -> GetFolder Folder.Config |> CreateSubDirectory BIN_FOLDER
     | Folder.Installation -> getInstallationFolder()
 
-let GetAnthologyFileName() =
+let GetAnthologyFile() =
     GetFolder Folder.Config |> GetFile ANTHOLOGY_FILENAME
 
-let GetBaselineFileName() =
+let GetBaselineFile() =
     GetFolder Folder.Config  |> GetFile BASELINE_FILENAME
 
-let GetViewFileName viewName =
+let GetViewFile viewName =
     GetFolder Folder.View |> GetFile (AddExt Extension.View viewName)
+
+let GetStaticViewFile viewName =
+    GetFolder Folder.Current |> GetFile (AddExt Extension.View viewName)
+
+let GetSolutionFile viewName =
+    GetFolder Folder.Workspace |> GetFile (AddExt Extension.Solution viewName)
+
+let GetSolutionDefinesFile viewName =
+    GetFolder Folder.View |> GetFile (AddExt Extension.Targets viewName)
 
 let IsMono () =
     let monoRuntime = System.Type.GetType ("Mono.Runtime")

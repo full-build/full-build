@@ -28,7 +28,9 @@ with
     member Builder: BuilderType
     member Projects: Project set
     member Save: isDefault : bool option
-              -> unit
+                          -> unit
+    member SaveStatic: unit
+                    -> unit
     member Delete: unit
                 -> unit
 

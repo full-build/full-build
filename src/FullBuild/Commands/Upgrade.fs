@@ -87,3 +87,4 @@ let Upgrade (tag : string) =
 let FinalizeUpgrade processId =
     waitProcessToExit processId
     Env.getInstallationFolder () |> deleteBackupFiles
+    Env.getInstallationFolder () |> OsHelpers.RegisterSystemExtension
