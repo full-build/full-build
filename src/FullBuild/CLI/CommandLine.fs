@@ -616,7 +616,7 @@ let UsageContent() =
         MainCommand.Unknown, ""
         MainCommand.AddApp, "add app <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         MainCommand.DropApp, "drop app <appId> : drop application"
-        MainCommand.ListApp, "list app : list applications"
+        MainCommand.ListApp, "list app [--version <versionId>]: list applications"
         MainCommand.Unknown, ""
         MainCommand.UpgradeGuids, "update-guids : DANGER! change guids of all projects in given repository (interactive command)" ]
 
