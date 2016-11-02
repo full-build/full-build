@@ -122,6 +122,16 @@ deploy:
       branch: /release\/.*/
       appveyor_repo_tag: false  
       
+  - provider: NuGet
+    api_key:
+      secure: Fa/KRLSPeo1w78xW6Yb6FJv3amW/BRcLKpy7DW7e0/mdsiug7GBA36twg2HOUCSS
+    skip_symbols: true
+    symbol_server:
+    artifacts: apps/full-build.nupkg
+    on:
+      branch: develop
+      appveyor_repo_tag: false
+
 notifications:
   - provider: GitHubPullRequest
     auth_token:
