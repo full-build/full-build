@@ -84,7 +84,16 @@ with
 
     member this.Save (isDefault : bool option) =
         let viewId = Anthology.ViewId this.View.Name
-        Configuration.SaveView viewId this.View isDefault
+        let viewFile = Env.GetViewFile this.View.Name
+        ViewSerializer.Save viewFile this.View
+        match isDefault with
+        | None -> ()
+        | Some false -> if Configuration.DefaultView () = Some viewId then Configuration.DeleteDefaultView()
+        | Some true -> Configuration.SetDefaultView viewId
+    
+    member this.SaveStatic () =
+        let staticViewFile = Env.GetStaticViewFile this.View.Name
+        ViewSerializer.Save staticViewFile this.View
 
     member this.Delete () =
         Configuration.DeleteView (Anthology.ViewId this.View.Name)
@@ -96,7 +105,7 @@ and [<Sealed>] Factory(graph : Graph) =
     member this.ViewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> =
         if viewMap |> isNull then
             let vwDir = Env.GetFolder Env.Folder.View
-            viewMap <- vwDir.EnumerateFiles("*.view") |> Seq.map (fun x -> System.IO.Path.GetFileNameWithoutExtension(x.Name) |> Anthology.ViewId)
+            viewMap <- vwDir.EnumerateFiles(IoHelpers.Extension.View |> IoHelpers.GetExtensionString |> sprintf "*.%s") |> Seq.map (fun x -> System.IO.Path.GetFileNameWithoutExtension(x.Name) |> Anthology.ViewId)
                                                       |> Seq.map Configuration.LoadView
                                                       |> Seq.map (fun x -> x.Name |> Anthology.ViewId, { Graph = graph; View = x })
                                                       |> dict
