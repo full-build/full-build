@@ -315,19 +315,19 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
 
 
 let rec seekAndDestroy (dir : DirectoryInfo) =
-    for file in dir.GetFiles() do        
-        let delFile = file.Extension.Equals(".sln", StringComparison.CurrentCultureIgnoreCase)
-                      || file.Name.Equals("packages.config", StringComparison.CurrentCultureIgnoreCase)
-                      || file.Name.Equals("paket.dependencies", StringComparison.CurrentCultureIgnoreCase)
-                      || file.Name.Equals("paket.references", StringComparison.CurrentCultureIgnoreCase)
-        if delFile then file.Delete()
-
     for subdir in dir.GetDirectories() do
         let delDir = subdir.Name.Equals("packages", StringComparison.CurrentCultureIgnoreCase)
                      || subdir.Name.Equals(".paket", StringComparison.CurrentCultureIgnoreCase)
                      || subdir.Name.Equals(".nuget", StringComparison.CurrentCultureIgnoreCase)
         if delDir then subdir.Delete(true)
         else seekAndDestroy subdir
+
+    for file in dir.GetFiles() do        
+        let delFile = file.Extension.Equals(".sln", StringComparison.CurrentCultureIgnoreCase)
+                      || file.Name.Equals("packages.config", StringComparison.CurrentCultureIgnoreCase)
+                      || file.Name.Equals("paket.dependencies", StringComparison.CurrentCultureIgnoreCase)
+                      || file.Name.Equals("paket.references", StringComparison.CurrentCultureIgnoreCase)
+        if delFile then file.Delete()
 
 
 let RemoveUselessStuff (projects : Project set) =
