@@ -5,6 +5,7 @@ v3.1
   * List applications with version (issue #129)
   * Static views support (issue #131)
   * --mt is default for clone, pull & publish (issue #128)
+  * Fix conversion performance (issue #133)
 
 v3.0
   * Graph api use internally to simplify implementation
