@@ -3,6 +3,7 @@ v3.1
   * Support for PackageReference (issue #119)
   * Remove Mercurial support (issue #125)
   * List applications with version (issue #129)
+  * --mt is default for clone, pull & publish (issue #128)
 
 v3.0
   * Graph api use internally to simplify implementation
