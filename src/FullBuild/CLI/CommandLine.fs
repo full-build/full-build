@@ -421,7 +421,7 @@ let rec private commandAddView (upReferences : bool) (downReferences : bool) (mo
                                              Filters = filters
                                              UpReferences = upReferences
                                              DownReferences = downReferences
-                                             Modified = modified 
+                                             Modified = modified
                                              AppFilter = app
                                              Static = staticView}
     | _ -> Command.Error MainCommand.AddView
@@ -471,9 +471,10 @@ let private commandDropApp (args : string list) =
     | [ApplicationId name] -> Command.DropApplication name
     | _ -> Command.Error MainCommand.DropApp
 
-let private commandListApp (args : string list) =
+let rec private commandListApp (version : string option) (args : string list) =
     match args with
-    | [] -> Command.ListApplications
+    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandListApp (Some version)
+    | [] -> Command.ListApplications { Version = version }
     | _ -> Command.Error MainCommand.ListApp
 
 let private commandListPackage (args : string list) =
@@ -550,7 +551,7 @@ let Parse (args : string list) : Command =
 
     | Token Token.Add :: Token Token.App :: cmdArgs -> cmdArgs |> commandAddApp
     | Token Token.Drop :: Token Token.App :: cmdArgs -> cmdArgs |> commandDropApp
-    | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp
+    | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp None
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
     | FullBuildView viewFile :: [] -> Command.FullBuildView { FilePath = viewFile }
@@ -585,7 +586,7 @@ let UsageContent() =
     let content = [
         MainCommand.Usage, "help : display this help"
         MainCommand.Version, "version : display full-build version"
-        MainCommand.Setup, "setup <git|gerrit|hg> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
+        MainCommand.Setup, "setup <git|gerrit> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         MainCommand.Init, "init <master-repository> <local-path> : initialize a new workspace in given path"
         MainCommand.CloneRepository, "clone [--mt] [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
         MainCommand.Checkout, "checkout <version> : checkout workspace to version"
@@ -626,7 +627,7 @@ let UsageContent() =
         MainCommand.Unknown, ""
         MainCommand.AddApp, "add app <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         MainCommand.DropApp, "drop app <appId> : drop application"
-        MainCommand.ListApp, "list app : list applications"
+        MainCommand.ListApp, "list app [--version <versionId>]: list applications"
         MainCommand.Unknown, ""
         MainCommand.UpgradeGuids, "update-guids : DANGER! change guids of all projects in given repository (interactive command)" ]
 

@@ -93,7 +93,6 @@
     <Compile Include="Graph.fsi" />
     <Compile Include="Graph.fs" />
     <Compile Include="Tools\Paket.fs" />
-    <Compile Include="Tools\VcsHg.fs" />
     <Compile Include="Tools\VcsGit.fs" />
     <Compile Include="Tools\Vcs.fs" />
     <Compile Include="Baselines.fsi" />

@@ -42,9 +42,8 @@ type BuilderType =
 
 [<RequireQualifiedAccess>]
 type VcsType =
-    | Gerrit
     | Git
-    | Hg
+    | Gerrit
 
 [<RequireQualifiedAccess>]
 type TestRunnerType =
@@ -158,13 +157,11 @@ with
     member this.Vcs = match this.Graph.Anthology.Vcs with
                       | Anthology.VcsType.Gerrit -> VcsType.Gerrit
                       | Anthology.VcsType.Git -> VcsType.Git
-                      | Anthology.VcsType.Hg -> VcsType.Hg
 
     member this.Branch = match this.Repository.Branch with
                          | Some x -> x.toString
                          | None -> match this.Vcs with
                                    | VcsType.Gerrit | VcsType.Git -> "master"
-                                   | VcsType.Hg -> "default"
 
     member this.Uri = this.Repository.Url.toString
 
@@ -401,7 +398,6 @@ let create (uri : string) (artifacts : string) vcs runner =
     let anthoVcs = match vcs with
                    | VcsType.Gerrit -> Anthology.VcsType.Gerrit
                    | VcsType.Git -> Anthology.VcsType.Git
-                   | VcsType.Hg -> Anthology.VcsType.Hg
 
     let anthoRunner = match runner with
                       | TestRunnerType.NUnit -> Anthology.TestRunnerType.NUnit

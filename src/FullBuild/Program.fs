@@ -67,7 +67,7 @@ let tryMain argv =
     | Command.ListPackages -> Commands.Package.List ()
 
     // applications
-    | Command.ListApplications -> Commands.Application.List ()
+    | Command.ListApplications appInfo -> Commands.Application.List appInfo
     | Command.AddApplication appInfo -> Commands.Application.Add appInfo
     | Command.DropApplication name -> Commands.Application.Drop name.toString
     | Command.PublishApplications pubInfo -> Commands.Application.Publish pubInfo
@@ -82,7 +82,7 @@ let tryMain argv =
 
     stopWatch.Stop()
     let elapsed = stopWatch.Elapsed
-    printfn "Completed in %d seconds." ((int)elapsed.TotalSeconds)
+//    printfn "Completed in %d seconds." ((int)elapsed.TotalSeconds)
 
     let retCode = match cmd with
                   | Command.Error _ -> 5

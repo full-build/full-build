@@ -25,10 +25,14 @@ let private asyncPublish (app : Graph.Application) =
     }
 
 let private displayApp (app : Graph.Application) =
-    printf "%s [" app.Name
-    for project in app.Projects do
-        printf "%s " project.Output.Name
-    printfn "] => %s" (StringHelpers.toString app.Publisher)
+    printfn "%s" app.Name
+
+let private filterApp (graph : Graph.Graph) (version : string) (app : Graph.Application) =
+    async {
+        let hasVersion = Core.BuildArtifacts.FetchVersionsForArtifact graph app |> Seq.contains version
+        return if hasVersion then Seq.singleton app
+               else Seq.empty
+    }
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -39,7 +43,7 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
                                         view.Projects |> Set.map (fun x -> x.Applications)
                                                       |> Set.unionMany
 
-    let apps = PatternMatching.FilterMatch applications (fun x -> x.Name) (set pubInfo.Filters)                
+    let apps = PatternMatching.FilterMatch applications (fun x -> x.Name) (set pubInfo.Filters)
     let runApps = apps |> Seq.map asyncPublish
 
     let maxThrottle = if pubInfo.Multithread then (System.Environment.ProcessorCount*2) else 1
@@ -48,9 +52,15 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let appFolder = Env.GetFolder Env.Folder.AppOutput
     appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter IoHelpers.ForceDelete
 
-let List () =
-    let graph = Configuration.LoadAnthology () |>Graph.from
-    graph.Applications |> Seq.iter displayApp
+let List (appInfo : CLI.Commands.ListApplications) =
+    let graph = Configuration.LoadAnthology () |> Graph.from
+    let apps = match appInfo.Version with
+               | None -> graph.Applications |> Set.toSeq
+               | Some version -> let maxThrottle = System.Environment.ProcessorCount*4
+                                 graph.Applications |> Seq.map (filterApp graph version)
+                                                    |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
+                                                    |> Seq.concat
+    apps |> Seq.iter displayApp
 
 let Add (addInfo : CLI.Commands.AddApplication) =
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -74,7 +84,6 @@ let BindProject (bindInfo : CLI.Commands.BindProject) =
                                                |> Set.unionMany
 
     let projects = PatternMatching.FilterMatch availableProjects (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) bindInfo.Filters
-    projects |> Set.iter(fun project -> 
+    projects |> Set.iter(fun project ->
                             printfn "Binding %s/%s" project.Repository.Name project.ProjectId
                             project |> Core.Bindings.UpdateProjectBindingRedirects)
-        

@@ -123,7 +123,7 @@ type PullWorkspace =
 
 type PushWorkspace =
     { BuildNumber : string
-      Branch : string option 
+      Branch : string option
       Incremental : bool }
 
 type BindProject =
@@ -131,6 +131,9 @@ type BindProject =
 
 type History =
     { Html : bool }
+
+type ListApplications =
+    { Version : string option }
 
 
 [<RequireQualifiedAccess>]
@@ -230,7 +233,7 @@ type Command =
     | OutdatedPackages
 
     // applications
-    | ListApplications
+    | ListApplications of ListApplications
     | AddApplication of AddApplication
     | DropApplication of ApplicationId
     | PublishApplications of PublishApplications
