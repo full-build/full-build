@@ -1,0 +1,9 @@
+view:
+  name: fullbuild
+  filters:
+    - filter: '*/*'
+  builder: msbuild
+  references: false
+  referencedBy: false
+  modified: true
+  appfilter: null

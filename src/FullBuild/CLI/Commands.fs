@@ -58,8 +58,9 @@ type AddView =
       Filters : string list
       UpReferences : bool
       DownReferences : bool
-      Modified : bool
-      AppFilter : string option }
+      Modified : bool 
+      AppFilter : string option
+      Static : bool }
 
 type ViewName =
     { Name : string }
@@ -95,6 +96,9 @@ type AlterView =
 
 type OpenView =
     { Name : string }
+
+type FullBuildView =
+    { FilePath : string }
 
 type GraphView =
     { Name : string
@@ -216,6 +220,7 @@ type Command =
     | BuildView of BuildView
     | AlterView of AlterView
     | OpenView of OpenView
+    | FullBuildView of FullBuildView
 
     // nuget
     | AddNuGet of RepositoryUrl
