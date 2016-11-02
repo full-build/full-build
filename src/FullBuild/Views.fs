@@ -40,7 +40,7 @@ with
                           | Anthology.BuilderType.Skip -> BuilderType.Skip
 
     member this.Projects : Project set =
-        let filters = this.View.Filters |> Set.map (fun x -> if x.IndexOfAny([|'/'; '\\' |]) = -1 then x + "/*" else x)
+        let filters = this.View.Filters |> Set.map (fun x -> if x.IndexOfAny([|'/'; '\\'; '*' |]) = -1 then x + "/*" else x)
                                         |> Set.map (fun x -> x.Replace('\\', '/'))
         let allClonedProjects = this.Graph.Repositories |> Set.filter (fun x -> x.IsCloned)
                                                         |> Set.map (fun x -> x.Projects)
@@ -67,15 +67,15 @@ with
                                               apps |> Set.map (fun x -> x.Projects)
                                                    |> Set.unionMany
                           | None -> Set.empty
-        
+
         let viewProjects = Project.Closure (projects + modProjects + appProjects)
         let depProjects = if this.UpReferences then Project.TransitiveReferencedBy viewProjects
                           else Set.empty
         let refProjects = if this.DownReferences then Project.TransitiveReferences viewProjects
                           else Set.empty
         let projects = viewProjects + depProjects + refProjects
-        let repositoriesNotCloned = projects |> Set.map (fun x -> x.Repository) 
-                                             |> Set.filter (fun x -> x.IsCloned |> not)                        
+        let repositoriesNotCloned = projects |> Set.map (fun x -> x.Repository)
+                                             |> Set.filter (fun x -> x.IsCloned |> not)
         if repositoriesNotCloned <> Set.empty then
             printfn "ERROR: some repositories must be cloned to create the view"
             repositoriesNotCloned |> Set.iter (fun x -> printfn "  %s" x.Name)
@@ -116,7 +116,7 @@ and [<Sealed>] Factory(graph : Graph) =
                      Anthology.View.DownReferences = downReferences
                      Anthology.View.UpReferences = upReferences
                      Anthology.View.Modified = modified
-                     Anthology.View.AppFilter = appFilter 
+                     Anthology.View.AppFilter = appFilter
                      Anthology.View.Builder = match builder with
                                               | BuilderType.MSBuild -> Anthology.BuilderType.MSBuild
                                               | BuilderType.Skip -> Anthology.BuilderType.Skip }
