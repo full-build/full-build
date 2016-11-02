@@ -28,7 +28,7 @@ skip_tags: true
 init:
   - ps: |
       If ($env:APPVEYOR_REPO_BRANCH -like "develop") {
-          $version = "$version.$env:APPVEYOR_BUILD_VERSION"
+          $version = "$env:APPVEYOR_BUILD_VERSION"
           $verStatus = "-alpha"
       }
       If ($env:APPVEYOR_REPO_BRANCH -like "release/*") {
