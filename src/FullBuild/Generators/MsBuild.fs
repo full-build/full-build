@@ -313,29 +313,29 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
         let projectCopyFile = prjDir |> GetFile (AddExt Targets (project.Output.Name + "-copy"))
         xdocSaver projectCopyFile refProjectCopyContent
 
+
+let rec seekAndDestroy (dir : DirectoryInfo) =
+    for file in dir.GetFiles() do        
+        let delFile = file.Extension.Equals(".sln", StringComparison.CurrentCultureIgnoreCase)
+                      || file.Name.Equals("packages.config", StringComparison.CurrentCultureIgnoreCase)
+                      || file.Name.Equals("paket.dependencies", StringComparison.CurrentCultureIgnoreCase)
+                      || file.Name.Equals("paket.references", StringComparison.CurrentCultureIgnoreCase)
+        if delFile then file.Delete()
+
+    for subdir in dir.GetDirectories() do
+        let delDir = subdir.Name.Equals("packages", StringComparison.CurrentCultureIgnoreCase)
+                     || subdir.Name.Equals(".paket", StringComparison.CurrentCultureIgnoreCase)
+                     || subdir.Name.Equals(".nuget", StringComparison.CurrentCultureIgnoreCase)
+        if delDir then subdir.Delete(true)
+        else seekAndDestroy subdir
+
+
 let RemoveUselessStuff (projects : Project set) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let seekAndDestroyFiles = [
-                                "*.sln"
-                                "packages.config"
-                                "paket.dependencies"
-                                "paket.lock"
-                                "paket.references"
-                              ]
-    let seekAndDestroyDirs = [
-                                "packages"
-                                ".paket"
-                                ".nuget"
-                             ]
-
     let repos = projects |> Set.map (fun x -> x.Repository)
     for repo in repos do
-        if repo.IsCloned then
-            let repoDir = wsDir |> GetSubDirectory repo.Name
-            seekAndDestroyFiles |> Seq.iter (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories)
-                                                      |> Seq.iter (fun x -> x.Delete()))
-            seekAndDestroyDirs |> Seq.iter (fun x -> repoDir.EnumerateDirectories (x, SearchOption.AllDirectories)
-                                                     |> Seq.iter (fun x -> x.Delete(true)))
+        let repoDir = wsDir |> GetSubDirectory repo.Name
+        seekAndDestroy repoDir
 
     for project in projects do
         let repoDir = wsDir |> GetSubDirectory project.Repository.Name

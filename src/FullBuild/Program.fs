@@ -81,7 +81,7 @@ let tryMain argv =
 
     stopWatch.Stop()
     let elapsed = stopWatch.Elapsed
-//    printfn "Completed in %d seconds." ((int)elapsed.TotalSeconds)
+    printfn "Completed in %d seconds." ((int)elapsed.TotalSeconds)
 
     let retCode = match cmd with
                   | Command.Error _ -> 5
