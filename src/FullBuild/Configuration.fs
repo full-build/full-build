@@ -74,6 +74,8 @@ let SetDefaultView (viewId : ViewId) =
     let defaultFile = vwFolder |> IoHelpers.GetFile "default"
     System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
 
-let ViewExists viewName =
-    let viewFile = GetViewFile viewName 
-    viewFile.Exists
+let ViewExistsAndNotCorrupted viewName =
+    [|viewName |> Env.GetSolutionFile; 
+      viewName |> Env.GetSolutionDefinesFile; 
+      viewName |> Env.GetViewFile|]
+        |> Array.forall(fun x->x.Exists)
