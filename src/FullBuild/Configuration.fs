@@ -69,7 +69,7 @@ let DeleteView (viewId : ViewId) =
     if DefaultView() = Some viewId && defaultFile.Exists then
         defaultFile.Delete()
 
-let SetDefaultView (viewId : ViewId) =
+let private setDefaultView (viewId : ViewId) =
     let vwFolder = Env.GetFolder Env.Folder.View
     let defaultFile = vwFolder |> IoHelpers.GetFile "default"
     System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
@@ -79,3 +79,14 @@ let ViewExistsAndNotCorrupted viewName =
       viewName |> Env.GetSolutionDefinesFile; 
       viewName |> Env.GetViewFile|]
         |> Array.forall(fun x->x.Exists)
+let SaveView (viewId : ViewId) view (isDefault : bool option) =
+    let viewFile = GetViewFile viewId.toString
+    ViewSerializer.Save viewFile view
+    match isDefault with
+    | None -> ()
+    | Some false -> if DefaultView () = Some viewId then DeleteDefaultView()
+    | Some true -> setDefaultView viewId
+
+let ViewExists viewName =
+    let viewFile = GetViewFile viewName 
+    viewFile.Exists
