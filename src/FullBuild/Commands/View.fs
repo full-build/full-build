@@ -116,7 +116,7 @@ let Open (cmd : CLI.Commands.OpenView) =
 
 let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
     let view = System.IO.FileInfo(cmd.FilePath) |> ViewSerializer.Load
-    if view.Name |> Configuration.ViewExists |> not then
+    if view.Name |> Configuration.ViewExistsAndNotCorrupted |> not then
         {   CLI.Commands.AddView.Name = view.Name
             CLI.Commands.AddView.Filters = view.Filters |> Set.toList
             CLI.Commands.AddView.DownReferences = view.DownReferences

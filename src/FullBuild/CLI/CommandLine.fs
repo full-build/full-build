@@ -424,9 +424,9 @@ let rec private commandAddView (upReferences : bool) (downReferences : bool) (mo
     | TokenOption TokenOption.Modified
       :: tail -> tail |> commandAddView upReferences downReferences true app staticView
     | TokenOption TokenOption.App
-      :: appFilter :: tail -> tail |> commandAddView upReferences downReferences true (Some appFilter) staticView
+      :: appFilter :: tail -> tail |> commandAddView upReferences downReferences modified (Some appFilter) staticView
     | TokenOption TokenOption.Static
-      :: tail -> tail |> commandAddView upReferences downReferences true app true
+      :: tail -> tail |> commandAddView upReferences downReferences modified app true
     | ViewId name
       :: Params filters -> Command.AddView { Name = name
                                              Filters = filters
