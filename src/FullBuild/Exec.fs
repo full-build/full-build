@@ -84,7 +84,7 @@ let PrintOutput execResult =
     execResult
 
 let private resultToError execResult = 
-    if execResult.ResultCode < 0 then Some (execResult.ResultCode |> sprintf "Process failed with error %d")
+    if execResult.ResultCode <> 0 then Some (execResult.ResultCode |> sprintf "Process failed with error %d")
     else None
 
 let CheckResponseCode execResult =
