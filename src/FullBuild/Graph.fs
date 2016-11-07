@@ -345,7 +345,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
         match this.Anthology.Tester with
         | Anthology.TestRunnerType.NUnit -> TestRunnerType.NUnit
 
-    member this.ArtifactsDir = this.Anthology.Artifacts
+    member this.ArtifactsDir = this.Anthology.Binaries
 
     member this.CreateApp name publisher (projects : Project set) =
         let pub = match publisher with
@@ -403,7 +403,7 @@ let create (uri : string) (artifacts : string) vcs runner =
                       | TestRunnerType.NUnit -> Anthology.TestRunnerType.NUnit
 
     let antho = { Anthology.Anthology.MinVersion = Env.FullBuildVersion().ToString()
-                  Anthology.Anthology.Artifacts = artifacts
+                  Anthology.Anthology.Binaries = artifacts
                   Anthology.Anthology.NuGets = []
                   Anthology.Anthology.MasterRepository = repo
                   Anthology.Anthology.Repositories = Set.empty

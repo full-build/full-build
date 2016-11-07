@@ -22,10 +22,17 @@ open System.IO
 open TestHelpers
 
 
+let loadAnthology artifactsFile projectsFile =
+    let artifactsFile = FileInfo(testFile artifactsFile)
+    let projectsFile = FileInfo(testFile projectsFile)
+    let artifacts = ArtifactsSerializer.Load artifactsFile
+    let projects = ProjectsSerializer.Load projectsFile
+    let anthology = AnthologySerializer.Deserialize artifacts projects
+    anthology
+
 [<Test>]
 let CheckSimplifyAssemblies () =
-    let file = FileInfo(testFile "anthology-indexed.yaml")
-    let anthology = AnthologySerializer.Load file
+    let anthology = loadAnthology "indexed-artifacts.yaml" "indexed-projects.yaml"
 
     let package2Files = Map.empty
 
@@ -51,11 +58,8 @@ let CheckSimplifyAssemblies () =
 
 [<Test>]
 let CheckSimplifyAnthology () =
-    let fileIndexed = FileInfo(testFile "anthology-indexed.yaml")
-    let anthology = AnthologySerializer.Load fileIndexed
-
-    let fileSimplified = FileInfo(testFile "anthology-simplified.yaml")
-    let expectedAnthology = AnthologySerializer.Load fileSimplified
+    let anthology = loadAnthology "indexed-artifacts.yaml" "indexed-projects.yaml"
+    let expectedAnthology = loadAnthology "simplified-artifacts.yaml" "simplified-projects.yaml"
 
     let package2files = Map [ (PackageId.from "log4net", Set [AssemblyId.from "log4net"])
                               (PackageId.from "Moq", Set [AssemblyId.from "moq"; AssemblyId.from "Moq.Silverlight" ])
@@ -83,11 +87,6 @@ let CheckSimplifyAnthology () =
                                  (PackageId.from "cassandra-sharp-interfaces", Set.empty) ]
 
     let newAnthology = Core.Simplify.SimplifyAnthologyWithPackages anthology package2files package2packages
-    let file = FileInfo (Path.GetRandomFileName())
-    //printfn "Temporary file is %A" file.FullName
-
-    AnthologySerializer.Save file newAnthology
-
     newAnthology |> should equal expectedAnthology
 
 [<Test>]

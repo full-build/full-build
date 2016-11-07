@@ -27,9 +27,11 @@ open TestHelpers
 
 [<Test>]
 let ConvertToGraph () =
-    let fileSimplified = FileInfo(testFile "anthology-graph.yaml")
-    let anthology = AnthologySerializer.Load fileSimplified
-
+    let artifactsFile = FileInfo(testFile "graph-artifacts.yaml")
+    let projectsFile = FileInfo(testFile "graph-projects.yaml")
+    let artifacts = ArtifactsSerializer.Load artifactsFile
+    let projects = ProjectsSerializer.Load projectsFile
+    let anthology = AnthologySerializer.Deserialize artifacts projects
     let graph = Graph.from anthology
 
     let apps = graph.Applications |> Seq.map (fun x -> x.Name) |> set

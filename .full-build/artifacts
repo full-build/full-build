@@ -1,0 +1,27 @@
+artifacts:
+  minversion: 0.0.0
+  binaries: C:\Binaries
+  nugets:
+    - nuget: https://www.nuget.org/api/v2/
+  test: nunit
+  vcs: git
+  mainrepository:
+    uri: http://www.google.com/
+  repositories:
+    - repo: src
+      branch: master
+      build: msbuild
+      uri: https://github.com/pchalamet/full-build
+    - repo: tests
+      branch: master
+      build: msbuild
+      uri: https://github.com/pchalamet/full-build
+  apps:
+    - name: full-build
+      type: copy
+      projects:
+        - project: fullbuild
+    - name: full-build.zip
+      type: zip
+      projects:
+        - project: fullbuild

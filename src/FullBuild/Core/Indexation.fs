@@ -130,9 +130,7 @@ let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
     Set.union remainingProjects newProjects
 
 
-// this function has 2 side effects:
-// * update paket.dependencies (both sources and packages)
-// * anthology
+// WARNING: paket.dependencies modified
 let IndexWorkspace (grepos : Graph.Repository set) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let antho = Configuration.LoadAnthology()
@@ -157,10 +155,9 @@ let IndexWorkspace (grepos : Graph.Repository set) =
 
 let Optimize (newAntho : Anthology) =
     /// BEGIN HACK : here we optimize anthology and dependencies in order to speed up package retrieval after conversion
-    ///              warning: big side effect (anthology and paket.dependencies are modified)
+    ///              warning: big side effect (paket.dependencies is modified)
     // automaticaly migrate packages to project - this will avoid retrieving them
     let simplifiedAntho = Simplify.SimplifyAnthologyWithoutPackage newAntho
-    Configuration.SaveAnthology simplifiedAntho
 
     // remove unused packages  - this will avoid downloading them for nothing
     let allPackages = Tools.Paket.ParsePaketDependencies ()

@@ -290,7 +290,7 @@ let Index (indexInfo : CLI.Commands.IndexRepositories) =
     selectedRepos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Name)
     selectedRepos |> Core.Indexation.IndexWorkspace
                   |> Core.Indexation.Optimize
-                  |> Core.Package.Simplify
+                  |> Core.Package.Simplify 
                   |> Configuration.SaveAnthology
 
 let Convert (convertInfo : CLI.Commands.ConvertRepositories) =

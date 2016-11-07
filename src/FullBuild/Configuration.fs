@@ -14,19 +14,32 @@
 
 module Configuration
 
-open Anthology
 open Env
+open Anthology
+open ArtifactsSerializer
+open ProjectsSerializer
 
 type WorkspaceConfiguration = 
     { Repositories : Repository list }
 
 let LoadAnthology() : Anthology = 
-    let anthoFn = GetAnthologyFile ()
-    AnthologySerializer.Load anthoFn
+    let artifactsFile = GetArtifactsFile ()
+    let artifacts = ArtifactsSerializer.Load artifactsFile
 
-let SaveAnthology  = 
-    let anthoFn = GetAnthologyFile ()
-    AnthologySerializer.Save anthoFn
+    let projectsFile = GetProjectsFile ()
+    let projects = ProjectsSerializer.Load projectsFile
+
+    let antho = AnthologySerializer.Deserialize artifacts projects
+    antho
+
+let SaveAnthology (antho : Anthology) = 
+    let (artifacts, projects) = AnthologySerializer.Serialize antho
+
+    let artifactsFile = GetArtifactsFile ()
+    ArtifactsSerializer.Save artifactsFile artifacts
+
+    let projectsFile = GetProjectsFile ()
+    ProjectsSerializer.Save projectsFile projects
 
 let LoadBaseline() : Baseline =
     let baselineFile = GetBaselineFile ()

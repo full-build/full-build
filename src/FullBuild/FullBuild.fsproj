@@ -85,6 +85,8 @@
     <Compile Include="IoHelpers.fs" />
     <Compile Include="Env.fs" />
     <Compile Include="Anthology.fs" />
+    <Compile Include="ArtifactsSerializer.fs" />
+    <Compile Include="ProjectsSerializer.fs" />
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="BaselineSerializer.fs" />
     <Compile Include="ViewSerializer.fs" />
@@ -133,6 +135,7 @@
     <Compile Include="Commands\Package.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
+    <None Include="projects.yaml" />
     <None Include="ghreleasefeed.json" />
     <None Include="baseline.yaml" />
     <None Include="view.yaml" />
@@ -145,10 +148,10 @@
     <Content Include="commit-msg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="anthology.yaml" />
     <Content Include="favicon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="artifacts.yaml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,0 +1,18 @@
+artifacts:
+  minversion: 0.0.0.0
+  binaries: C:\Binaries
+  nugets:
+    - nuget: https://www.nuget.org/api/v2/
+  repositories:
+    - repo: .full-build
+      type: git
+      uri: https://github.com/pchalamet/view-fb
+    - repo: src
+      type: git
+      uri: https://github.com/pchalamet/view
+  apps:
+    - name: ed-app.zip
+      type: zip
+      projects:
+        - project: e
+        - project: d

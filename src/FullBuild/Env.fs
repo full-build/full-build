@@ -23,7 +23,8 @@ let private PROJECT_FOLDER = "projects"
 let private PACKAGE_FOLDER = "packages"
 let BIN_FOLDER = "bin"
 let OBJ_FOLDER = "obj"
-let ANTHOLOGY_FILENAME = "anthology"
+let ARTIFACTS_FILENAME = "artifacts"
+let PROJECTS_FILENAME = "projects"
 let BASELINE_FILENAME = "baseline"
 let FULLBUILD_TARGETS = "full-build.targets"
 let MASTER_REPO = ".full-build"
@@ -87,8 +88,11 @@ let rec GetFolder folder =
     | Folder.Bin -> GetFolder Folder.Config |> CreateSubDirectory BIN_FOLDER
     | Folder.Installation -> getInstallationFolder()
 
-let GetAnthologyFile() =
-    GetFolder Folder.Config |> GetFile ANTHOLOGY_FILENAME
+let GetArtifactsFile() =
+    GetFolder Folder.Config |> GetFile ARTIFACTS_FILENAME
+
+let GetProjectsFile() =
+    GetFolder Folder.Bin |> GetFile PROJECTS_FILENAME
 
 let GetBaselineFile() =
     GetFolder Folder.Config  |> GetFile BASELINE_FILENAME

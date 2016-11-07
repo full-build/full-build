@@ -1,27 +1,4 @@
-anthology:
-  minversion: 0.0.0.0
-  artifacts: C:\Binaries
-  nugets:
-    - nuget: https://www.nuget.org/api/v2/
-  mainrepository:
-    uri: https://github.com/pchalamet/cassandra-sharp-full-build
-  repositories:
-    - repo: cassandra-sharp
-      type: git
-      uri: https://github.com/pchalamet/cassandra-sharp
-    - repo: cassandra-sharp-contrib
-      type: git
-      uri: https://github.com/pchalamet/cassandra-sharp-contrib
-  apps:
-    - name: cqlplus
-      type: zip
-      projects: 
-        - project: cqlplus
-    - name: cassandrasharp-log4net
-      type: zip
-      projects: 
-        - project: cassandrasharp.contrib.log4net
-  projects:
+﻿projects:
     - guid: 984a4b04-c71a-4550-9193-817cfacba30a
       file: cassandra-sharp/Apache.Cassandra/Apache.Cassandra-net45.csproj
       out: apache.cassandra.dll
@@ -54,9 +31,17 @@ anthology:
         - assembly: system
         - assembly: system.configuration
         - assembly: system.numerics
+        - assembly: system.reactive.core
+        - assembly: system.reactive.interfaces
+        - assembly: system.reactive.linq
+        - assembly: system.reactive.platformservices
         - assembly: system.xml
       packages:
+        - package: Rx-Core
+        - package: Rx-Interfaces
+        - package: Rx-Linq
         - package: Rx-Main
+        - package: Rx-PlatformServices
       projects:
         - project: cassandrasharp.interfaces
     - guid: 22d4356f-bc92-4399-a92c-c1f9ef6ecc73
@@ -65,15 +50,25 @@ anthology:
       fx: 
         version: v4.5
       assemblies:
+        - assembly: moq
+        - assembly: nunit.framework
         - assembly: system
         - assembly: system.configuration
         - assembly: system.core
         - assembly: system.numerics
+        - assembly: system.reactive.core
+        - assembly: system.reactive.interfaces
+        - assembly: system.reactive.linq
+        - assembly: system.reactive.platformservices
         - assembly: system.xml
       packages:
         - package: Moq
         - package: Nunit
+        - package: Rx-Core
+        - package: Rx-Interfaces
+        - package: Rx-Linq
         - package: Rx-Main
+        - package: Rx-PlatformServices
       projects:
         - project: apache.cassandra
         - project: cassandrasharp
@@ -121,24 +116,47 @@ anthology:
       fx: 
         version: v4.5
       assemblies:
+        - assembly: cassandrasharp.interfaces
+        - assembly: log4net
         - assembly: system
+        - assembly: system.reactive.core
+        - assembly: system.reactive.interfaces
+        - assembly: system.reactive.linq
+        - assembly: system.reactive.platformservices
       packages:
+        - package: Rx-Core
+        - package: Rx-Interfaces
+        - package: Rx-Linq
         - package: Rx-Main
+        - package: Rx-PlatformServices
+        - package: cassandra-sharp-interfaces
         - package: log4net
-      projects:
-        - project: cassandrasharp.interfaces
+      projects: []
     - guid: 9e8648a4-d25a-4cfa-aaee-20d9d63ff571
       file: cassandra-sharp-contrib/CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj
       out: cassandrasharp.contrib.log4netunittests.dll
       fx: 
         version: v4.5
       assemblies:
+        - assembly: cassandrasharp
+        - assembly: cassandrasharp.interfaces
+        - assembly: log4net
+        - assembly: nunit.framework
         - assembly: system
         - assembly: system.core
+        - assembly: system.reactive.core
+        - assembly: system.reactive.interfaces
+        - assembly: system.reactive.linq
+        - assembly: system.reactive.platformservices
       packages:
         - package: Nunit
+        - package: Rx-Core
+        - package: Rx-Interfaces
+        - package: Rx-Linq
         - package: Rx-Main
+        - package: Rx-PlatformServices
+        - package: cassandra-sharp
+        - package: cassandra-sharp-core
+        - package: cassandra-sharp-interfaces
         - package: log4net
-      projects:
-        - project: cassandrasharp
-        - project: cassandrasharp.interfaces
+      projects: []
