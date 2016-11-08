@@ -297,12 +297,12 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) convertInfo.Filters
     if selectedRepos = Set.empty then printfn "WARNING: empty repository selection"
 
-    selectedRepos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Name)
-
-    let builder2repos = repos |> Seq.groupBy (fun x -> x.Builder)
+    let builder2repos = selectedRepos |> Seq.groupBy (fun x -> x.Builder)
     for builder2repo in builder2repos do
         let (builder, repos) = builder2repo
-        Core.Conversion.Convert builder (set repos)
+        for repo in repos do
+            IoHelpers.DisplayHighlight repo.Name
+            Core.Conversion.Convert builder (Set.singleton repo)
 
     // setup additional files for views to work correctly
     let confDir = Env.GetFolder Env.Folder.Config
