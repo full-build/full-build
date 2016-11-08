@@ -127,11 +127,13 @@ let GetFilewithoutRootDirectory (file : string) =
 
 let consoleLock = System.Object()
 let DisplayHighlight s =
-    let display () =
+    let display () =        
         let oldColor = Console.ForegroundColor
-        Console.ForegroundColor <- ConsoleColor.Cyan
-        Console.WriteLine("{0}", [|s|])
-        Console.ForegroundColor <- oldColor
+        try
+            Console.ForegroundColor <- ConsoleColor.Cyan
+            printfn "%s" s
+        finally
+            Console.ForegroundColor <- oldColor
 
     lock consoleLock display
 
