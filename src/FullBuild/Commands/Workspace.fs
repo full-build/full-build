@@ -289,7 +289,8 @@ let Index (indexInfo : CLI.Commands.IndexRepositories) =
 
     selectedRepos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Name)
     selectedRepos |> Core.Indexation.IndexWorkspace
-                  |> Core.Indexation.Optimize
+                  |> Core.Simplify.SimplifyAnthologyWithoutPackage
+                  |> Core.Package.RemoveUnusedPackages
                   |> Core.Package.Simplify 
                   |> Configuration.SaveAnthology
 

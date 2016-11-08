@@ -152,19 +152,3 @@ let IndexWorkspace (grepos : Graph.Repository set) =
     let newAntho = { antho
                      with Projects = allProjects |> Set.ofList }
     newAntho
-
-let Optimize (newAntho : Anthology) =
-    /// BEGIN HACK : here we optimize anthology and dependencies in order to speed up package retrieval after conversion
-    ///              warning: big side effect (paket.dependencies is modified)
-    // automaticaly migrate packages to project - this will avoid retrieving them
-    let simplifiedAntho = Simplify.SimplifyAnthologyWithoutPackage newAntho
-
-    // remove unused packages  - this will avoid downloading them for nothing
-    let allPackages = Tools.Paket.ParsePaketDependencies ()
-    let usedPackages = simplifiedAntho.Projects |> Set.map (fun x -> x.PackageReferences)
-                                                |> Set.unionMany
-    let unusedPackages = Set.difference allPackages usedPackages
-    Tools.Paket.RemoveDependencies unusedPackages
-    /// END HACK
-
-    simplifiedAntho

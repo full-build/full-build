@@ -17,8 +17,6 @@ open Anthology
 open IoHelpers
 open System.IO
 open System.Xml.Linq
-open System.Linq
-open XmlHelpers
 open Env
 open Collections
 open Simplify
@@ -49,19 +47,6 @@ let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
                                      |> Set
     Set.difference files fxDependencies
 
-let private simplifyAnthologyWithPackages (antho) =
-    let promotedPackageAntho = SimplifyAnthologyWithoutPackage antho
-
-    let packages = promotedPackageAntho.Projects |> Set.map (fun x -> x.PackageReferences)
-                                                 |> Set.unionMany
-    let package2packages = Parsers.PackageRelationship.BuildPackageDependencies packages
-    let allPackages = package2packages |> Seq.map (fun x -> x.Key)
-    let package2files = allPackages |> Seq.map (fun x -> (x, gatherAllAssemblies x))
-                                    |> Map
-    let newAntho = SimplifyAnthologyWithPackages antho package2files package2packages
-    removeUnusedPackages newAntho
-    newAntho
-
 let RestorePackages () =
     Tools.Paket.PaketRestore ()
     Generators.Package.GeneratePackageImports()
@@ -71,7 +56,27 @@ let UpdatePackages () =
     Generators.Package.GeneratePackageImports()
 
 let Simplify (antho : Anthology) =
-    installPackages antho.NuGets
-
-    let newAntho = simplifyAnthologyWithPackages antho
+    let packages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
+                                  |> Set.unionMany
+    let package2packages = Parsers.PackageRelationship.BuildPackageDependencies packages
+    let allPackages = package2packages |> Seq.map (fun x -> x.Key)
+    let package2files = allPackages |> Seq.map (fun x -> (x, gatherAllAssemblies x))
+                                    |> Map
+    let newAntho = SimplifyAnthologyWithPackages antho package2files package2packages
+    removeUnusedPackages newAntho
     newAntho
+
+
+let RemoveUnusedPackages (antho : Anthology) =
+    /// here we optimize anthology and dependencies in order to speed up package retrieval after conversion
+    /// warning: big side effect (paket.dependencies is modified)
+    // automaticaly migrate packages to project - this will avoid retrieving them
+    // remove unused packages  - this will avoid downloading them for nothing
+    let allPackages = Tools.Paket.ParsePaketDependencies ()
+    let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
+                                      |> Set.unionMany
+    let unusedPackages = allPackages - usedPackages
+    if unusedPackages <> Set.empty then
+        Tools.Paket.RemoveDependencies unusedPackages
+        installPackages antho.NuGets
+    antho
