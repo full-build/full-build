@@ -33,9 +33,15 @@ let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir :
             |> Seq.filter projectCanBeProcessed
             |> Seq.map (parser repoDir repoRef)
 
+let private printParseStatus (repoDir : DirectoryInfo) =
+    let repo = RepositoryId.from(repoDir.Name)
+    IoHelpers.DisplayHighlight repo.toString
+    repoDir
+
 let private parseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) =
     repos |> Seq.map (fun x -> GetSubDirectory x.Name.toString wsDir)
           |> Seq.filter (fun x -> x.Exists)
+          |> Seq.map printParseStatus
           |> Seq.map (fun x -> parseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
           |> Seq.concat
 
@@ -138,9 +144,6 @@ let IndexWorkspace (grepos : Graph.Repository set) =
                                    |> Set.map (fun x -> x.Repository)
     let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos
 
-    let packagesToAdd = detectNewDependencies parsedProjects
-    Tools.Paket.AppendDependencies packagesToAdd
-
     let projects = parsedProjects |> Seq.map (fun x -> x.Project)
                                   |> Set
     let allProjects = MergeProjects projects antho.Projects |> Set.toList
@@ -149,6 +152,28 @@ let IndexWorkspace (grepos : Graph.Repository set) =
         displayConflicts conflicts
         failwith "Conflict(s) detected"
 
-    let newAntho = { antho
-                     with Projects = allProjects |> Set.ofList }
+    let anthoWithIndexedProjects = { antho
+                                     with Projects = allProjects |> Set.ofList }
+
+    let newAntho = Core.Simplify.SimplifyAnthologyWithoutPackage anthoWithIndexedProjects
+
+    /// here we optimize anthology and dependencies in order to speed up package retrieval after conversion
+    /// warning: big side effect (paket.dependencies is modified)
+    // automaticaly migrate packages to project - this will avoid retrieving them
+    // remove unused packages  - this will avoid downloading them for nothing
+    let packagesToAdd = detectNewDependencies parsedProjects
+    if packagesToAdd <> Set.empty then
+        Tools.Paket.AppendDependencies packagesToAdd
+
+    let allPackages = Tools.Paket.ParsePaketDependencies ()
+    let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
+                                      |> Set.unionMany
+    let unusedPackages = allPackages - usedPackages
+    if unusedPackages <> Set.empty then
+        Tools.Paket.RemoveDependencies unusedPackages
+
+    // if changes then install packages
+    if packagesToAdd <> Set.empty || unusedPackages <> Set.empty then
+        Core.Package.InstallPackages newAntho.NuGets
+
     newAntho

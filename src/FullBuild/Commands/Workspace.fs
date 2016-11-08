@@ -287,10 +287,7 @@ let Index (indexInfo : CLI.Commands.IndexRepositories) =
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) indexInfo.Filters
     if selectedRepos = Set.empty then printfn "WARNING: empty repository selection"
 
-    selectedRepos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Name)
     selectedRepos |> Core.Indexation.IndexWorkspace
-                  |> Core.Simplify.SimplifyAnthologyWithoutPackage
-                  |> Core.Package.RemoveUnusedPackages
                   |> Core.Package.Simplify 
                   |> Configuration.SaveAnthology
 

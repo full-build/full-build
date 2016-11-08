@@ -123,8 +123,8 @@
     <Compile Include="Core\BuildArtifacts.fs" />
     <Compile Include="Core\Simplify.fs" />
     <Compile Include="Core\Conversion.fs" />
-    <Compile Include="Core\Indexation.fs" />
     <Compile Include="Core\Package.fs" />
+    <Compile Include="Core\Indexation.fs" />
     <Compile Include="Commands\View.fs" />
     <Compile Include="Commands\Repo.fs" />
     <Compile Include="Commands\Workspace.fs" />

@@ -21,7 +21,7 @@ open Env
 open Collections
 open Simplify
 
-let private installPackages (nugets : RepositoryUrl list) =
+let InstallPackages (nugets : RepositoryUrl list) =
     Tools.Paket.UpdateSources nugets
     Tools.Paket.PaketInstall ()
     Generators.Package.GeneratePackageImports()
@@ -65,18 +65,3 @@ let Simplify (antho : Anthology) =
     let newAntho = SimplifyAnthologyWithPackages antho package2files package2packages
     removeUnusedPackages newAntho
     newAntho
-
-
-let RemoveUnusedPackages (antho : Anthology) =
-    /// here we optimize anthology and dependencies in order to speed up package retrieval after conversion
-    /// warning: big side effect (paket.dependencies is modified)
-    // automaticaly migrate packages to project - this will avoid retrieving them
-    // remove unused packages  - this will avoid downloading them for nothing
-    let allPackages = Tools.Paket.ParsePaketDependencies ()
-    let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
-                                      |> Set.unionMany
-    let unusedPackages = allPackages - usedPackages
-    if unusedPackages <> Set.empty then
-        Tools.Paket.RemoveDependencies unusedPackages
-        installPackages antho.NuGets
-    antho
