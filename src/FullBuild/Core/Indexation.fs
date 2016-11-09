@@ -162,15 +162,13 @@ let IndexWorkspace (grepos : Graph.Repository set) =
     // automaticaly migrate packages to project - this will avoid retrieving them
     // remove unused packages  - this will avoid downloading them for nothing
     let packagesToAdd = detectNewDependencies parsedProjects
-    if packagesToAdd <> Set.empty then
-        Tools.Paket.AppendDependencies packagesToAdd
+    Tools.Paket.AppendDependencies packagesToAdd
 
     let allPackages = Tools.Paket.ParsePaketDependencies ()
     let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
                                       |> Set.unionMany
     let unusedPackages = allPackages - usedPackages
-    if unusedPackages <> Set.empty then
-        Tools.Paket.RemoveDependencies unusedPackages
+    Tools.Paket.RemoveDependencies unusedPackages
 
     // if changes then install packages
     if packagesToAdd <> Set.empty || unusedPackages <> Set.empty then

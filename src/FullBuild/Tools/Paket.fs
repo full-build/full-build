@@ -81,22 +81,20 @@ let ParsePaketDependencies () =
     else
         Set.empty
 
-let AppendDependencies (packages : Package seq) =
-    let confDir = Env.GetFolder Env.Folder.Config
-    let paketDep = confDir |> GetFile "paket.dependencies"
-
-
-    let content = generateDependenciesContent packages
-    File.AppendAllLines (paketDep.FullName, content)
+let AppendDependencies (packages : Package set) =
+    if packages <> Set.empty then
+        let confDir = Env.GetFolder Env.Folder.Config
+        let paketDep = confDir |> GetFile "paket.dependencies"
+        let content = generateDependenciesContent packages
+        File.AppendAllLines (paketDep.FullName, content)
 
 let RemoveDependencies (packages : PackageId set) =
-    let confDir = Env.GetFolder Env.Folder.Config
-    let paketDep = confDir |> GetFile "paket.dependencies"
-    let content = File.ReadAllLines (paketDep.FullName)
-    let newContent = removeDependenciesContent content packages
-    File.WriteAllLines (paketDep.FullName, newContent)
-
-
+    if packages <> Set.empty then
+        let confDir = Env.GetFolder Env.Folder.Config
+        let paketDep = confDir |> GetFile "paket.dependencies"
+        let content = File.ReadAllLines (paketDep.FullName)
+        let newContent = removeDependenciesContent content packages
+        File.WriteAllLines (paketDep.FullName, newContent)
 
 
 let PaketInstall () =
