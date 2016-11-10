@@ -125,6 +125,7 @@
     <Compile Include="Core\Conversion.fs" />
     <Compile Include="Core\Package.fs" />
     <Compile Include="Core\Indexation.fs" />
+    <Compile Include="Migration\AnthologyLoader2.fs" />
     <Compile Include="Commands\View.fs" />
     <Compile Include="Commands\Repo.fs" />
     <Compile Include="Commands\Workspace.fs" />
@@ -133,8 +134,10 @@
     <Compile Include="Commands\Upgrade.fs" />
     <Compile Include="Commands\NuGet.fs" />
     <Compile Include="Commands\Package.fs" />
+    <Compile Include="Commands\Migrate.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
+    <None Include="anthology2.yaml" />
     <None Include="projects.yaml" />
     <None Include="ghreleasefeed.json" />
     <None Include="baseline.yaml" />

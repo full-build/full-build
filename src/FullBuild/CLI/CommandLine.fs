@@ -517,6 +517,11 @@ let rec private commandUpgrade (verStatus : string) (args : string list) =
     | [Param processId] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))
     | _ -> Command.Error MainCommand.Upgrade
 
+let private commandMigrate (args : string list) =
+    match args with
+    | [] -> Command.Migrate
+    | _ -> Command.Error MainCommand.Migrate
+
 let Parse (args : string list) : Command =
     match args with
     | [Token Token.Version] -> Command.Version
@@ -565,6 +570,7 @@ let Parse (args : string list) : Command =
     | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp None
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
+    | Token Token.Migrate :: cmdArgs -> cmdArgs |> commandMigrate
     | FullBuildView viewFile :: [] -> Command.FullBuildView { FilePath = viewFile }
     | _ -> Command.Error MainCommand.Unknown
 

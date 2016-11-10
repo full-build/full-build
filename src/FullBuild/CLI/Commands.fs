@@ -178,6 +178,7 @@ type MainCommand =
     | DropApp
     | PublishApp
     | Bind
+    | Migrate
     | Unknown
 
 
@@ -189,6 +190,7 @@ type Command =
     | Usage
     | Upgrade of string
     | FinalizeUpgrade of int
+    | Migrate
 
     // workspace
     | SetupWorkspace of SetupWorkspace

@@ -76,6 +76,7 @@ let tryMain argv =
     // misc
     | Command.Upgrade verStatus -> Commands.Upgrade.Upgrade verStatus
     | Command.FinalizeUpgrade processId -> Commands.Upgrade.FinalizeUpgrade processId
+    | Command.Migrate -> Commands.Migrate.Migrate ()
     | Command.Version -> CLI.CommandLine.PrintVersion ()
     | Command.Usage -> CLI.CommandLine.PrintUsage MainCommand.Unknown
     | Command.Error errInfo -> CLI.CommandLine.PrintUsage errInfo
