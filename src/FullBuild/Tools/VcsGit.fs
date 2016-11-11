@@ -27,16 +27,16 @@ let private noBuffering code out err =
 let private checkedExec onEnd =
     let ycheck execResult =
         onEnd execResult.ResultCode execResult.Out execResult.Error
-        execResult |> checkErrorCode 
+        execResult |> checkErrorCode
     fun x y z s -> Exec x y z s  |> ycheck
-    
+
 let private checkedExecMaybeIgnore ignoreError =
     let check = if ignoreError then ignore else checkErrorCode
     fun x y z s -> Exec x y z s  |> check
 
 let private checkedExecReadLine =
-    fun x y z s -> 
-        let res = ExecGetOutput x y z s  
+    fun x y z s ->
+        let res = ExecGetOutput x y z s
         res |> checkErrorCode
         res.Out @ res.Error
 
@@ -58,9 +58,10 @@ let GitTip (repoDir : DirectoryInfo) =
     checkedExecReadLine "git" args repoDir Map.empty
 
 let GitClean (repoDir : DirectoryInfo) (repo : Repository) =
-    checkedExec noBuffering "git" "reset --hard" repoDir Map.empty
-    checkedExec noBuffering "git" "clean -fxd" repoDir Map.empty
     checkedExec noBuffering "git" (sprintf "checkout %s" repo.Branch) repoDir Map.empty
+    let resetArgs = sprintf "reset --hard origin/%s" repo.Branch
+    checkedExec noBuffering "git" resetArgs repoDir Map.empty
+    checkedExec noBuffering "git" "clean -fxd" repoDir Map.empty
 
 let GitIs (repo : Repository) =
     try
