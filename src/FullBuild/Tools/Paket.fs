@@ -63,7 +63,7 @@ let private executePaketCommand cmd =
     let confDir = Env.GetFolder Env.Folder.Config
     Exec.Exec "paket.exe" cmd confDir Map.empty |> Exec.CheckResponseCode
 
-let UpdateSources (sources : RepositoryUrl seq) =
+let UpdateSources (sources : RepositoryUrl list) =
     let confDir = Env.GetFolder Env.Folder.Config
     let paketDep = confDir |> GetFile "paket.dependencies"
     let oldContent = if paketDep.Exists then File.ReadAllLines (paketDep.FullName) |> Array.toSeq

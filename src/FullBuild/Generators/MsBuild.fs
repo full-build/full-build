@@ -203,7 +203,7 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
             "PropertyGroup", hasNoChild
         ]
 
-    seekAndDestroy |> Seq.iter (fun (x, y) -> cproj.Descendants(NsMsBuild + x).Where(y).Remove())
+    seekAndDestroy |> List.iter (fun (x, y) -> cproj.Descendants(NsMsBuild + x).Where(y).Remove())
     cproj
 
 

@@ -85,7 +85,7 @@ let Deserialize (content) =
         | [] -> Set.empty
         | x :: tail -> let appName = ApplicationId.from x.name
                        let publishType = PublisherType.from x.``type``
-                       let projects = x.projects |> Seq.map (fun x -> ProjectId.from x.project) |> Set
+                       let projects = x.projects |> Seq.map (fun x -> ProjectId.from x.project) |> Set.ofSeq
                        let app = { Name = appName ; Publisher = publishType; Projects = projects }
                        convertToApplications tail |> Set.add app
 

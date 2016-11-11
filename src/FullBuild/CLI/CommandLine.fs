@@ -653,12 +653,12 @@ let UsageContent() =
 
 
 let PrintUsage (what : MainCommand) =
-    let lines = UsageContent () |> Seq.filter (fun (cmd, _) -> cmd = what || what = MainCommand.Unknown)
-                                |> Seq.map (fun (_, desc) -> desc)
+    let lines = UsageContent () |> List.filter (fun (cmd, _) -> cmd = what || what = MainCommand.Unknown)
+                                |> List.map (fun (_, desc) -> desc)
 
     printfn "Usage:"
     for line in lines do
         printfn "  %s" line
 
 let PrintVersion () =
-    VersionContent() |> Seq.iter (fun x -> printfn "%s" x)
+    VersionContent() |> List.iter (fun x -> printfn "%s" x)

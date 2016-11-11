@@ -69,14 +69,14 @@ with
             |> Seq.filter (fun x -> x.Name.LocalName = "dependency" && (!> x.Attribute(NsNone + "exclude") : string) <> "Compile")
             |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
             |> Seq.map Anthology.PackageId.from
-            |> set
+            |> Set.ofSeq
 
     static member GetFrameworkDependencies (xnuspec : System.Xml.Linq.XDocument) =
         xnuspec.Descendants()
             |> Seq.filter (fun x -> x.Name.LocalName = "frameworkAssembly")
             |> Seq.map (fun x -> !> x.Attribute(NsNone + "assemblyName") : string)
             |> Seq.map Anthology.AssemblyId.from
-            |> set
+            |> Set.ofSeq
 
 
     member this.Dependencies : Package set =

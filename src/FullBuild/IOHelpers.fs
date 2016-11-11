@@ -149,6 +149,7 @@ let FindKnownProjects (repoDir : DirectoryInfo) =
      AddExt VbProj "*"
      AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories))
                         |> Seq.concat
+                        |> List.ofSeq
 
 let EnumarateFiles (dir : DirectoryInfo) =
     dir.EnumerateFiles()

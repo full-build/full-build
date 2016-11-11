@@ -30,8 +30,8 @@ let private projectCanBeProcessed (fileName : FileInfo) =
 
 let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) =
     repoDir |> IoHelpers.FindKnownProjects
-            |> Seq.filter projectCanBeProcessed
-            |> Seq.map (parser repoDir repoRef)
+            |> List.filter projectCanBeProcessed
+            |> List.map (parser repoDir repoRef)
 
 let private printParseStatus (repoDir : DirectoryInfo) =
     let repo = RepositoryId.from(repoDir.Name)
@@ -44,7 +44,7 @@ let private parseWorkspaceProjects parser (wsDir : DirectoryInfo) (repos : Repos
           |> Seq.map printParseStatus
           |> Seq.map (fun x -> parseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
           |> Seq.concat
-          |> Seq.toList
+          |> List.ofSeq
 
 
 // NOTE: should be private
@@ -95,13 +95,11 @@ let rec private displayConflicts (conflicts : ConflictType list) =
 
 let private detectNewDependencies (projects : Parsers.MSBuild.ProjectDescriptor seq) =
     // add new packages (with correct version requirement)
-    let foundPackages = projects |> Seq.map (fun x -> x.Packages)
-                                 |> Seq.concat
     let existingPackages = Tools.Paket.ParsePaketDependencies ()
-    let packagesToAdd = foundPackages |> Seq.filter (fun x -> Set.contains x.Id existingPackages |> not)
-                                      |> Seq.distinctBy (fun x -> x.Id)
-                                      |> Set
-    packagesToAdd
+    projects |> Seq.collect (fun x -> x.Packages)
+             |> Seq.filter (fun x -> Set.contains x.Id existingPackages |> not)
+             |> Seq.distinctBy (fun x -> x.Id)
+             |> Set.ofSeq
 
 
 
@@ -145,7 +143,7 @@ let IndexWorkspace (grepos : Graph.Repository set) =
                                    |> Set.map (fun x -> x.Repository)
     let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos
 
-    let projects = parsedProjects |> Seq.map (fun x -> x.Project)
+    let projects = parsedProjects |> List.map (fun x -> x.Project)
                                   |> Set
     let allProjects = MergeProjects projects antho.Projects |> Set.toList
     let conflicts = findConflicts allProjects |> List.ofSeq

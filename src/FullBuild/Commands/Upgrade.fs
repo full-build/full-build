@@ -56,7 +56,7 @@ let private waitProcessToExit processId =
         | _ -> reraise()
 
 let private getSameFiles (firstDir:DirectoryInfo) (secondDir:DirectoryInfo) =
-    firstDir.GetFiles() |> Seq.where(fun x-> (secondDir |> IoHelpers.GetFile x.Name).Exists)
+    firstDir.GetFiles() |> Array.where(fun x-> (secondDir |> IoHelpers.GetFile x.Name).Exists)
 
 let Upgrade (tag : string) =
     let (zipUrl, ver) = getLatestReleaseUrl tag

@@ -44,7 +44,7 @@ let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
     let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
     let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
     let files = Seq.append dlls exes |> Seq.map AssemblyId.from
-                                     |> Set
+                                     |> Set.ofSeq
     Set.difference files fxDependencies
 
 let RestorePackages () =
@@ -59,9 +59,8 @@ let Simplify (antho : Anthology) =
     let packages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
                                   |> Set.unionMany
     let package2packages = Parsers.PackageRelationship.BuildPackageDependencies packages
-    let allPackages = package2packages |> Seq.map (fun x -> x.Key)
-    let package2files = allPackages |> Seq.map (fun x -> (x, gatherAllAssemblies x))
-                                    |> Map
+    let package2files = package2packages |> Seq.map (fun kvp -> (kvp.Key, gatherAllAssemblies kvp.Key))
+                                         |> Map
     let newAntho = SimplifyAnthologyWithPackages antho package2files package2packages
     removeUnusedPackages newAntho
     newAntho

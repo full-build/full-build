@@ -74,6 +74,7 @@ let FetchVersionsForArtifact (graph : Graph) (app : Application) =
         line.Split(':').[0]
 
     lines |> Seq.map toVersion
+          |> List.ofSeq
 
 let PullReferenceBinaries (graph : Graph) version =
     let artifactDir = graph.ArtifactsDir |> DirectoryInfo
