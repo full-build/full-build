@@ -38,12 +38,13 @@ let private printParseStatus (repoDir : DirectoryInfo) =
     IoHelpers.DisplayHighlight repo.toString
     repoDir
 
-let private parseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) =
+let private parseWorkspaceProjects parser (wsDir : DirectoryInfo) (repos : Repository seq) =
     repos |> Seq.map (fun x -> GetSubDirectory x.Name.toString wsDir)
           |> Seq.filter (fun x -> x.Exists)
           |> Seq.map printParseStatus
           |> Seq.map (fun x -> parseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
           |> Seq.concat
+          |> Seq.toList
 
 
 // NOTE: should be private
@@ -175,3 +176,26 @@ let IndexWorkspace (grepos : Graph.Repository set) =
         Core.Package.InstallPackages newAntho.NuGets
 
     newAntho
+
+let SaveAnthologyProjects (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
+    let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
+    let untouchedProjects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
+
+    if untouchedPreviousProjects <> untouchedProjects then
+        printfn "Missing repositories for indexation"
+        let prevGroups = untouchedPreviousProjects |> Seq.groupBy (fun x -> x.Repository)
+                                                   |> Seq.map (fun (repo, prjs) -> repo, prjs |> set)
+                                                   |> dict
+        let currGroups = untouchedProjects |> Seq.groupBy (fun x -> x.Repository)
+                                           |> Seq.map (fun (repo, prjs) -> repo, prjs |> set)
+                                           |> dict
+
+        for kvp in prevGroups do
+            let prevProjects = kvp.Value
+            let currProjects = currGroups.[kvp.Key]
+            if prevProjects <> currProjects then
+                printfn "%s" kvp.Key.toString
+
+        failwithf "Missing repositories for indexation"
+
+    antho

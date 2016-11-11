@@ -282,13 +282,15 @@ let History (historyInfo : CLI.Commands.History) =
     Generators.History.Save histType version revisions
 
 let Index (indexInfo : CLI.Commands.IndexRepositories) =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let antho = Configuration.LoadAnthology()
+    let graph = antho |> Graph.from
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) indexInfo.Filters
     if selectedRepos = Set.empty then printfn "WARNING: empty repository selection"
 
     selectedRepos |> Core.Indexation.IndexWorkspace
                   |> Core.Package.Simplify 
+                  |> Core.Indexation.SaveAnthologyProjects antho selectedRepos
                   |> Configuration.SaveAnthology
 
 let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
