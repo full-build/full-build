@@ -290,7 +290,7 @@ let Index (indexInfo : CLI.Commands.IndexRepositories) =
 
     selectedRepos |> Core.Indexation.IndexWorkspace
                   |> Core.Package.Simplify 
-                  |> Core.Indexation.SaveAnthologyProjects antho selectedRepos
+                  |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
                   |> Configuration.SaveAnthology
 
 let Convert (convertInfo : CLI.Commands.ConvertRepositories) =

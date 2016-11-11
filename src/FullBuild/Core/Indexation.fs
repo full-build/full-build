@@ -175,7 +175,7 @@ let IndexWorkspace (grepos : Graph.Repository set) =
 
     newAntho
 
-let SaveAnthologyProjects (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
+let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
     let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
     let untouchedProjects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
 
@@ -195,5 +195,21 @@ let SaveAnthologyProjects (previousAntho : Anthology) (repos : Graph.Repository 
                 printfn "%s" kvp.Key.toString
 
         failwithf "Missing repositories for indexation"
+
+    let modifiedPreviousProjects = previousAntho.Projects |> Seq.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
+                                                          |> Seq.groupBy (fun x -> x.Repository)
+                                                          |> Seq.map (fun (r, p) -> r, p |> Set.ofSeq)
+                                                          |> dict
+
+    let modifiedProjects = antho.Projects |> Seq.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
+                                          |> Seq.groupBy (fun x -> x.Repository)
+                                          |> Seq.map (fun (r, p) -> r, p |> Set.ofSeq)
+                                          |> dict
+
+    for kvp in modifiedProjects do
+        let repo = kvp.Key
+        let projects = { ProjectsSerializer.Projects = kvp.Value }
+//        if modifiedPreviousProjects.[repo] <> projects.Projects then
+        Configuration.SaveProjectsRepository repo projects
 
     antho

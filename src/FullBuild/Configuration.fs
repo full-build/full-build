@@ -41,6 +41,16 @@ let SaveAnthology (antho : Anthology) =
     let projectsFile = GetProjectsFile ()
     ProjectsSerializer.Save projectsFile projects
 
+let SaveProjectsRepository (repo : RepositoryId) (projects : Projects) =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
+    let fbRepoDir = repoDir |> IoHelpers.GetSubDirectory ".full-build"
+    fbRepoDir.Create()
+    let projectsFile = fbRepoDir |> IoHelpers.GetFile "projects"
+
+    ProjectsSerializer.Save projectsFile projects
+    
+
 let LoadBaseline() : Baseline =
     let baselineFile = GetBaselineFile ()
     BaselineSerializer.Load baselineFile
