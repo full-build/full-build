@@ -34,6 +34,7 @@ type PublisherType =
     | Copy
     | Zip
     | Docker
+    | Nuget
 
 [<RequireQualifiedAccess>]
 type BuilderType =
@@ -125,6 +126,7 @@ with
                             | Anthology.PublisherType.Copy -> PublisherType.Copy
                             | Anthology.PublisherType.Zip -> PublisherType.Zip
                             | Anthology.PublisherType.Docker -> PublisherType.Docker
+                            | Anthology.PublisherType.Nuget -> PublisherType.Nuget
 
     member this.Projects =
         this.Application.Projects |> Set.map (fun x -> this.Graph.ProjectMap.[x])
@@ -355,6 +357,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
                   | PublisherType.Zip -> Anthology.PublisherType.Zip
                   | PublisherType.Copy -> Anthology.PublisherType.Copy
                   | PublisherType.Docker -> Anthology.PublisherType.Docker
+                  | PublisherType.Nuget -> Anthology.PublisherType.Nuget
         let projectIds = projects |> Set.map (fun x -> Anthology.ProjectId.from x.Output.Name)
         let app = { Anthology.Application.Name = Anthology.ApplicationId.from name
                     Anthology.Application.Publisher = pub

@@ -192,6 +192,7 @@ type PublisherType =
     | Copy
     | Zip
     | Docker
+    | Nuget
 with
      member this.toString = toString this
      static member from s = fromString<PublisherType> s
