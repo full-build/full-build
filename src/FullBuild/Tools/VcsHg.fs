@@ -23,7 +23,7 @@ let private checkErrorCode execResult =
 
 let private checkedExec command args dir vars =
     Exec command args dir vars |> checkErrorCode
-    
+
 let private checkedExecMaybeIgnore command args dir vars ignoreError =
     let check = if ignoreError then ignore else checkErrorCode
     Exec command args dir vars |> check
@@ -55,7 +55,7 @@ let HgIs (repo : Repository) =
     try
         let currDir = IoHelpers.CurrentFolder()
         let args = sprintf @"id -i -R %A" repo.Uri
-        checkedExec "hg" args currDir Map.empty 
+        checkedExec "hg" args currDir Map.empty
         true
     with
         _ -> false
@@ -83,3 +83,6 @@ let HgLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
 let HgIgnore (repoDir : DirectoryInfo) =
     // FIXME
     ()
+
+let HgLogs (repoDir : DirectoryInfo) =
+    []
