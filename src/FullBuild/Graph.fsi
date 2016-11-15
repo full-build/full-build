@@ -32,7 +32,7 @@ type PublisherType =
     | Copy
     | Zip
     | Docker
-    | Nuget
+    | NuGet
 
 [<RequireQualifiedAccess>]
 type BuilderType =
