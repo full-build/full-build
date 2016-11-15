@@ -87,7 +87,7 @@ let private publishNuget (app : PublishApp) =
         let version =  defaultArg (Builders.getCurrentBuildVersion()) "1.0.0"
         let nugetArgs = sprintf "pack %s -version %s" nuspecFile.Name version
         Exec.Exec "nuget" nugetArgs sourceFolder Map.empty |> Exec.CheckResponseCode
-        for file in sourceFolder.EnumerateFiles("*.nupkg") do file.CopyTo(Path.Combine(appDir.FullName, file.Name)) |> ignore
+        for file in sourceFolder.EnumerateFiles("*.nupkg") do file.CopyTo(Path.Combine(appDir.FullName, app.Name, file.Name)) |> ignore
         sourceFolder.Delete(true)
     | None -> failwith (sprintf "No nuspec found for the application %s" app.Name)
 
