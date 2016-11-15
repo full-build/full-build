@@ -112,6 +112,10 @@ let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
     let args = sprintf @"log -1 --format=%%H %s" relativeFile
     checkedExecReadLine "git" args repoDir Map.empty
 
+let GitLogs (repoDir : DirectoryInfo) =
+    let args = sprintf @"log --format=%%H"
+    checkedExecReadLine "git" args repoDir Map.empty
+
 let GitIgnore (repoDir : DirectoryInfo) =
     let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"
 

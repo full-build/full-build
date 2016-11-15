@@ -87,8 +87,34 @@ let PullReferenceBinaries (graph : Graph) version =
     else
         DisplayHighlight "[WARNING] No reference binaries found"
 
-let PullLatestReferenceBinaries (graph : Graph) =
+
+
+
+let findMostRecentVersion (graph : Graph) (repoVersions : string list) =
+    // get built versions in a list => first is the most recent
     let versionsFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
-    let version = File.ReadAllLines(versionsFile.FullName) |> Seq.last
-    let hash = version.Split(':') |> Seq.toArray
-    PullReferenceBinaries graph hash.[1]
+    let builtVersions = File.ReadAllLines(versionsFile.FullName) |> Seq.map (fun x -> x.Split(':')) |> List.ofSeq
+    let fbVersions = builtVersions |> List.map (fun x -> x.[1])
+                                   |> List.rev
+
+    let hashIsCompiled hash =
+        repoVersions |> List.contains hash
+
+    let rec findHash versions =
+        match versions with
+        | version :: tail -> if hashIsCompiled version then Some version
+                             else findHash tail
+        | [] -> None
+
+    let latestBuiltVersion = findHash fbVersions
+    match latestBuiltVersion with
+    | Some x -> x
+    | _ -> let versionsInMaster = builtVersions |> List.filter (fun x -> x.[2] = graph.MasterRepository.Branch)
+           if versionsInMaster |> List.length = 0 then failwith "Can't find compatible version"
+           let latestVersion = versionsInMaster.[0].[1]
+           printfn "WARNING: can't find compatible version - using latest build from %A" graph.MasterRepository.Branch
+           latestVersion
+
+let PullLatestCompatibleBinaries (graph : Graph) (repoVersions : string list) =
+    let mostRecentVersion = findMostRecentVersion graph repoVersions
+    PullReferenceBinaries graph mostRecentVersion
