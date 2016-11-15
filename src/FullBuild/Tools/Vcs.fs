@@ -29,7 +29,7 @@ let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gi
     f repoDir
 
 
-let Unclone (wsDir : DirectoryInfo) (repo : Repository) = 
+let Unclone (wsDir : DirectoryInfo) (repo : Repository) =
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name
     if repoDir.Exists then repoDir.Delete(true)
 
@@ -66,3 +66,6 @@ let Log (wsDir : DirectoryInfo) (repo : Repository) (version : string) =
 
 let LastCommit (wsDir : DirectoryInfo) (repo : Repository) (relativeFile : string) =
     (chooseVcs wsDir repo.Vcs repo GitLastCommit HgLastCommit) relativeFile
+
+let Logs (wsDir : DirectoryInfo) (repo : Repository) =
+    (chooseVcs wsDir repo.Vcs repo GitLogs HgLogs)

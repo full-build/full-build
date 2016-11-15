@@ -27,16 +27,16 @@ let private noBuffering code out err =
 let private checkedExec onEnd =
     let ycheck execResult =
         onEnd execResult.ResultCode execResult.Out execResult.Error
-        execResult |> checkErrorCode 
+        execResult |> checkErrorCode
     fun x y z s -> Exec x y z s  |> ycheck
-    
+
 let private checkedExecMaybeIgnore ignoreError =
     let check = if ignoreError then ignore else checkErrorCode
     fun x y z s -> Exec x y z s  |> check
 
 let private checkedExecReadLine =
-    fun x y z s -> 
-        let res = ExecGetOutput x y z s  
+    fun x y z s ->
+        let res = ExecGetOutput x y z s
         res |> checkErrorCode
         res.Out @ res.Error
 
@@ -109,6 +109,10 @@ let GitHistory (repoDir : DirectoryInfo) (version : string) =
 
 let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
     let args = sprintf @"log -1 --format=%%H %s" relativeFile
+    checkedExecReadLine "git" args repoDir Map.empty
+
+let GitLogs (repoDir : DirectoryInfo) =
+    let args = sprintf @"log --format=%%H"
     checkedExecReadLine "git" args repoDir Map.empty
 
 let GitIgnore (repoDir : DirectoryInfo) =

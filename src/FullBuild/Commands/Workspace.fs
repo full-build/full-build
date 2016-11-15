@@ -173,7 +173,8 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
         Install ()
 
     if pullInfo.Bin then
-        Core.BuildArtifacts.PullLatestReferenceBinaries graph
+        let versions = Tools.Vcs.Logs wsDir graph.MasterRepository
+        Core.BuildArtifacts.PullLatestCompatibleBinaries graph versions
 
 let Exec (execInfo : CLI.Commands.Exec) =
     let graph = Configuration.LoadAnthology() |> Graph.from
