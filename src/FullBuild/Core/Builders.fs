@@ -40,7 +40,7 @@ let writeVersionMsbuild version =
     File.WriteAllLines(csFile.FullName, generateVersionCs version)
 
     let versionFile = Env.GetVersionFileName()
-    File.WriteAllLines(versionFile.FullName, [|sprintf "%A" version|])
+    File.WriteAllText(versionFile.FullName, (sprintf "%s" version))
 
 let getCurrentBuildVersion () =
     let versionFile = Env.GetVersionFileName()

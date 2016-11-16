@@ -77,8 +77,10 @@ let private publishNuget (app : PublishApp) =
     publishCopy tmpApp
 
     let appDir = GetFolder Env.Folder.AppOutput
-    let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name)
-    
+    let sourceFolder = appDir |> GetSubDirectory tmpApp.Name
+    let targetFolder = appDir |> GetSubDirectory app.Name
+    if targetFolder.Exists then targetFolder.Delete(true)
+
     let nuspec = sourceFolder.EnumerateFiles("*.nuspec") 
                     |> Seq.tryHead 
 
@@ -87,7 +89,9 @@ let private publishNuget (app : PublishApp) =
         let version =  defaultArg (Builders.getCurrentBuildVersion()) "1.0.0"
         let nugetArgs = sprintf "pack %s -version %s" nuspecFile.Name version
         Exec.Exec "nuget" nugetArgs sourceFolder Map.empty |> Exec.CheckResponseCode
-        for file in sourceFolder.EnumerateFiles("*.nupkg") do file.CopyTo(Path.Combine(appDir.FullName, app.Name, file.Name)) |> ignore
+        targetFolder.Create()
+        for file in sourceFolder.EnumerateFiles("*.nupkg") do 
+            file.CopyTo(Path.Combine(targetFolder.FullName, file.Name)) |> ignore
         sourceFolder.Delete(true)
     | None -> failwith (sprintf "No nuspec found for the application %s" app.Name)
 
