@@ -91,7 +91,7 @@ let private publishNuget (app : PublishApp) =
         Exec.Exec "nuget" nugetArgs sourceFolder Map.empty |> Exec.CheckResponseCode
         targetFolder.Create()
         for file in sourceFolder.EnumerateFiles("*.nupkg") do 
-            file.CopyTo(Path.Combine(targetFolder.FullName, file.Name)) |> ignore
+            file.MoveTo(Path.Combine(targetFolder.FullName, file.Name)) |> ignore
         sourceFolder.Delete(true)
     | None -> failwith (sprintf "No nuspec found for the application %s" app.Name)
 
