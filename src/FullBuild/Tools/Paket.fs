@@ -23,9 +23,10 @@ let private parseContent (lines : string seq) =
     seq {
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
-            match items.[0] with
-            | "nuget" -> yield (PackageId.from items.[1])
-            | _ -> ()
+            if 0 < items.Length then
+                match items.[0] with
+                | "nuget" -> yield (PackageId.from items.[1])
+                | _ -> ()
     }
 
 let private updateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
