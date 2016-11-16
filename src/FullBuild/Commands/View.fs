@@ -112,7 +112,7 @@ let Open (cmd : CLI.Commands.OpenView) =
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
-    Exec.SpawnWithVerb slnFile.FullName "open"
+    Exec.Spawn slnFile.FullName "" "open"
 
 let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
     let view = System.IO.FileInfo(cmd.FilePath) |> ViewSerializer.Load
