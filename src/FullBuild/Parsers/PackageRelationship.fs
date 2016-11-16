@@ -30,10 +30,14 @@ let GetFrameworkDependencies (xnuspec : XDocument) =
         |> set
 
 let GetPackageDependencies (xnuspec : XDocument) =
+    let pkgsDir = Env.GetFolder Env.Folder.Package
+
     xnuspec.Descendants()
         |> Seq.filter (fun x -> x.Name.LocalName = "dependency" && (!> x.Attribute(NsNone + "exclude") : string) <> "Compile")
         |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
         |> Seq.map PackageId.from
+        |> Seq.filter (fun x -> let path = pkgsDir |> IoHelpers.GetSubDirectory (x.toString)
+                                path.Exists)
         |> set
 
 let rec BuildPackageDependencies (packages : PackageId seq) =
