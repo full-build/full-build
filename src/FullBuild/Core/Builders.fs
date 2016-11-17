@@ -32,21 +32,29 @@ let generateVersionCs version =
         sprintf "[assembly: AssemblyVersion(%A)]" version
     |]
 
-let versionMsbuild version =
-    let binDir = Env.GetFolder Folder.Bin
-    let fsFile = binDir |> GetFile "BuildVersionAssemblyInfo.fs"
+let writeVersionMsbuild version =
+    let fsFile = Env.GetFsGlobalAssemblyInfoFileName()
     File.WriteAllLines(fsFile.FullName, generateVersionFs version)
 
-    let csFile = binDir |> GetFile "BuildVersionAssemblyInfo.cs"
+    let csFile = Env.GetCsGlobalAssemblyInfoFileName()
     File.WriteAllLines(csFile.FullName, generateVersionCs version)
 
+    let versionFile = Env.GetVersionFileName()
+    File.WriteAllText(versionFile.FullName, (sprintf "%s" version))
+
+let getCurrentBuildVersion () =
+    let versionFile = Env.GetVersionFileName()
+    if versionFile.Exists then 
+        versionFile.FullName |> File.ReadAllText |> Some
+    else 
+        None
 
 let buildSkip (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
     ()
 
 let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
     match version with
-    | Some givenVersion -> versionMsbuild givenVersion
+    | Some givenVersion -> writeVersionMsbuild givenVersion
     | _ -> ()
 
     let target = if clean then "Rebuild"
