@@ -25,6 +25,9 @@ let BIN_FOLDER = "bin"
 let OBJ_FOLDER = "obj"
 let ANTHOLOGY_FILENAME = "anthology"
 let BASELINE_FILENAME = "baseline"
+let VERSION_FILENAME = "version"
+let FS_GLOBAL_ASSEMBLYINFO_FILENAME = "BuildVersionAssemblyInfo.fs"
+let CS_GLOBAL_ASSEMBLYINFO_FILENAME = "BuildVersionAssemblyInfo.cs"
 let FULLBUILD_TARGETS = "full-build.targets"
 let MASTER_REPO = ".full-build"
 let MSBUILD_SOLUTION_DIR = "$(FBWorkspaceDir)"
@@ -86,6 +89,15 @@ let rec GetFolder folder =
     | Folder.Package -> GetFolder Folder.Config |> CreateSubDirectory PACKAGE_FOLDER
     | Folder.Bin -> GetFolder Folder.Config |> CreateSubDirectory BIN_FOLDER
     | Folder.Installation -> getInstallationFolder()
+
+let GetVersionFileName() =
+    GetFolder Folder.Bin |> GetFile VERSION_FILENAME
+
+let GetFsGlobalAssemblyInfoFileName() =
+    GetFolder Folder.Bin |> GetFile FS_GLOBAL_ASSEMBLYINFO_FILENAME
+
+let GetCsGlobalAssemblyInfoFileName() =
+    GetFolder Folder.Bin |> GetFile CS_GLOBAL_ASSEMBLYINFO_FILENAME
 
 let GetAnthologyFile() =
     GetFolder Folder.Config |> GetFile ANTHOLOGY_FILENAME
