@@ -57,7 +57,7 @@ let CheckSingleProjectSelection () =
     let projects = graph.Projects
     let goal = projects |> selectProjects ["g"]
 
-    let view = viewRepository.CreateView "test" (set ["*/g"]) false false false None Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/g"]) false false false None false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -81,7 +81,7 @@ let CheckClosureSelection () =
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "c"; "e"; "f"; "g"]
 
-    let view = viewRepository.CreateView "test" (set ["*/a"; "*/g"]) false false false None Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/a"; "*/g"]) false false false None false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -106,7 +106,7 @@ let checkSelectAllDependencies () =
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "e"; "f"; "g"]
 
-    let view = viewRepository.CreateView "test" (set ["*/g"]) true false false None Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/g"]) true false false None false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -130,7 +130,7 @@ let CheckAllReferencedBy () =
     let projects = graph.Projects
     let goal = projects |> selectProjects ["b"; "c"; "d"; "e"; "f"; "g"]
 
-    let view = viewRepository.CreateView "test" (set ["*/b"]) false true false None Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/b"]) false true false None false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -155,7 +155,7 @@ let CheckSelect2ProjectsWithoutParentButWithCommonChildrenSourceOnly () =
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "d"; "e"; "f"; "g"]
 
-    let view = viewRepository.CreateView "test" (set ["*/d"; "*/g"]) true false false None Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/d"; "*/g"]) true false false None false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -179,7 +179,7 @@ let CheckSelect2LeafProjectsSourceOnly () =
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"]
 
-    let view = viewRepository.CreateView "test" (set ["*/a"; "*/b"]) true false false None Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/a"; "*/b"]) true false false None false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -203,7 +203,7 @@ let CheckSelectProjectsWithHoleSourceOnly () =
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "e"; "f"; "g"]
 
-    let view = viewRepository.CreateView "test" (set ["*/a"; "*/g"]) true false false None Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/a"; "*/g"]) true false false None false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -227,7 +227,7 @@ let CheckSelectReferencedBy () =
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "c"; "e"; "f"; "g"]
 
-    let view = viewRepository.CreateView "test" (set ["*/a"]) false true false None Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/a"]) false true false None false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -251,7 +251,7 @@ let CheckSelectReferencesAndReferencedBy () =
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "e"; "f"; "g"]
 
-    let view = viewRepository.CreateView "test" (set ["*/c"]) true true false None Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" (set ["*/c"]) true true false None false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal
@@ -274,7 +274,7 @@ let CheckSelectFromAppDown () =
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "d"; "e"]
 
-    let view = viewRepository.CreateView "test" Set.empty true false false (Some "ed-app*") Graph.BuilderType.MSBuild
+    let view = viewRepository.CreateView "test" Set.empty true false false (Some "ed-app*") false Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     projects |> should equal goal

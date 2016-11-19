@@ -45,6 +45,7 @@ type private TokenOption =
     | Static
     | NoMultithread
     | Project
+    | Test
 
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -71,6 +72,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--static" -> Some TokenOption.Static
     | "--nomt" -> Some TokenOption.NoMultithread
     | "--project" -> Some TokenOption.Project
+    | "--test" -> Some TokenOption.Test
     | _ -> None
 
 type private Token =
@@ -423,18 +425,20 @@ let private commandListNuGet (args : string list) =
     | [] -> Command.ListNuGets
     | _ -> Command.Error MainCommand.ListNuget
 
-let rec private commandAddView (upReferences : bool) (downReferences : bool) (modified : bool) (app : string option) (staticView : bool) (args : string list) =
+let rec private commandAddView (upReferences : bool) (downReferences : bool) (modified : bool) (app : string option) (staticView : bool) (test: bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Up
-      :: tail -> tail |> commandAddView true downReferences modified app staticView
+      :: tail -> tail |> commandAddView true downReferences modified app staticView test
     | TokenOption TokenOption.Down
-      :: tail -> tail |> commandAddView upReferences true modified app staticView
+      :: tail -> tail |> commandAddView upReferences true modified app staticView test
     | TokenOption TokenOption.Modified
-      :: tail -> tail |> commandAddView upReferences downReferences true app staticView
+      :: tail -> tail |> commandAddView upReferences downReferences true app staticView test
     | TokenOption TokenOption.App
-      :: appFilter :: tail -> tail |> commandAddView upReferences downReferences modified (Some appFilter) staticView
+      :: appFilter :: tail -> tail |> commandAddView upReferences downReferences modified (Some appFilter) staticView test
     | TokenOption TokenOption.Static
-      :: tail -> tail |> commandAddView upReferences downReferences modified app true
+      :: tail -> tail |> commandAddView upReferences downReferences modified app true test
+    | TokenOption TokenOption.Test
+      :: tail -> tail |> commandAddView upReferences downReferences modified app staticView test
     | ViewId name
       :: Params filters -> Command.AddView { Name = name
                                              Filters = filters
@@ -442,7 +446,8 @@ let rec private commandAddView (upReferences : bool) (downReferences : bool) (mo
                                              DownReferences = downReferences
                                              Modified = modified
                                              AppFilter = app
-                                             Static = staticView}
+                                             Static = staticView
+                                             Tests = test }
     | _ -> Command.Error MainCommand.AddView
 
 let private commandDropView (args : string list) =
@@ -567,7 +572,7 @@ let Parse (args : string list) : Command =
     | Token Token.Add :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandAddNuGet
     | Token Token.List :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandListNuGet
 
-    | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false None false
+    | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false None false false
     | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
     | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
     | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
@@ -619,7 +624,7 @@ let UsageContent() =
         MainCommand.Checkout, "checkout <version> : checkout workspace to version"
         MainCommand.Branch, "branch [<branch>] : checkout workspace to branch"
         MainCommand.InstallPackage, "install : install packages"
-        MainCommand.AddView, "view [--down] [--up] [--modified] [--app <app-wildcard>] [--static] <viewId> <viewId-wildcard>+ : add repositories to view"
+        MainCommand.AddView, "view [--down] [--up] [--modified] [--app <app-wildcard>] [--static] [--test] <viewId> <viewId-wildcard>+ : add repositories to view"
         MainCommand.OpenView, "open <viewId> : open view with your favorite ide"
         MainCommand.BuildView, "build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
         MainCommand.RebuildView, "rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"

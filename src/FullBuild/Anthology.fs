@@ -228,4 +228,5 @@ type View =
       UpReferences : bool
       DownReferences : bool
       Modified : bool 
-      AppFilter : string option }
+      AppFilter : string option 
+      Tests : bool }
