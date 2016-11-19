@@ -16,7 +16,7 @@ module Commands.Unused
 open Graph
 
 
-let listUnusedProjects (graph : Graph) =
+let private queryUnusedProjects (graph : Graph) =
     let rootProjects = graph.Applications |> Set.map (fun x -> x.Projects)
                                           |> Set.unionMany
 
@@ -36,8 +36,8 @@ let listUnusedProjects (graph : Graph) =
     else
         printfn "No unused projects found"
 
-let List (unusedInfo : CLI.Commands.ListUnused) =
+let QueryUnused (queryInfo : CLI.Commands.QueryUnused) =
     let antho = Configuration.LoadAnthology()
     let graph = antho |> Graph.from
 
-    if unusedInfo.Project then listUnusedProjects graph
+    if queryInfo.Project then queryUnusedProjects graph
