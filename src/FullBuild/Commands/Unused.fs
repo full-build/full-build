@@ -21,7 +21,10 @@ let listUnusedProjects (graph : Graph) =
                                           |> Set.unionMany
 
     let allUsedProjects = Project.TransitiveReferences rootProjects
-    let unusedProjects = graph.Projects - allUsedProjects |> Set.filter (fun x -> x.HasTests |> not)
+    let projectsUnitTests = allUsedProjects |> Set.map (fun x -> x.ReferencedBy |> Set.filter (fun y -> y.HasTests))
+                                            |> Set.unionMany
+                                            |> Project.TransitiveReferences
+    let unusedProjects = graph.Projects - (allUsedProjects + projectsUnitTests)
 
     if 0 < unusedProjects.Count then 
         IoHelpers.DisplayHighlight "Unused projects"
