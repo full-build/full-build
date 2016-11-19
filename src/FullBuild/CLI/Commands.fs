@@ -135,6 +135,9 @@ type History =
 type ListApplications =
     { Version : string option }
 
+type ListUnused =
+    { Project : bool }
+
 
 [<RequireQualifiedAccess>]
 type MainCommand =
@@ -177,6 +180,7 @@ type MainCommand =
     | AddApp
     | DropApp
     | PublishApp
+    | ListUnused
     | Bind
     | Unknown
 
@@ -238,3 +242,8 @@ type Command =
     | DropApplication of ApplicationId
     | PublishApplications of PublishApplications
     | BindProject of BindProject
+
+    // projects
+    | ListUnused of ListUnused
+
+

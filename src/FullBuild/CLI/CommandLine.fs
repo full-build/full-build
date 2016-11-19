@@ -44,6 +44,7 @@ type private TokenOption =
     | App
     | Static
     | NoMultithread
+    | Project
 
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -69,6 +70,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--app" -> Some TokenOption.App
     | "--static" -> Some TokenOption.Static
     | "--nomt" -> Some TokenOption.NoMultithread
+    | "--project" -> Some TokenOption.Project
     | _ -> None
 
 type private Token =
@@ -110,6 +112,8 @@ type private Token =
     | Package
     | NuGet
     | App
+
+    | Unused
 
     | Clean
     | UpdateGuids
@@ -162,6 +166,8 @@ let private (|Token|_|) (token : string) =
     | "package" -> Some Package
     | "nuget" -> Some NuGet
     | "app" -> Some App
+
+    | "unused" -> Some Unused
 
     | "update-guids" -> Some UpdateGuids
     | "migrate" -> Some Migrate
@@ -517,6 +523,12 @@ let rec private commandUpgrade (verStatus : string) (args : string list) =
     | [Param processId] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))
     | _ -> Command.Error MainCommand.Upgrade
 
+let rec private commandListUnused (project : bool) (args : string list) =
+    match args with
+    | TokenOption TokenOption.Project :: tail -> tail |> commandListUnused true
+    | [] -> Command.ListUnused { Project = project }
+    | _ -> Command.Error MainCommand.ListUnused
+
 let Parse (args : string list) : Command =
     match args with
     | [Token Token.Version] -> Command.Version
@@ -563,6 +575,8 @@ let Parse (args : string list) : Command =
     | Token Token.Add :: Token Token.App :: cmdArgs -> cmdArgs |> commandAddApp
     | Token Token.Drop :: Token Token.App :: cmdArgs -> cmdArgs |> commandDropApp
     | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp None
+
+    | Token Token.List :: Token Token.Unused :: cmdArgs -> cmdArgs |> commandListUnused false
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
     | FullBuildView viewFile :: [] -> Command.FullBuildView { FilePath = viewFile }
@@ -638,7 +652,9 @@ let UsageContent() =
         MainCommand.Unknown, ""
         MainCommand.AddApp, "add app <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         MainCommand.DropApp, "drop app <appId> : drop application"
-        MainCommand.ListApp, "list app [--version <versionId>]: list applications"
+        MainCommand.ListApp, "list app [--version <versionId>] : list applications"
+        MainCommand.Unknown, ""
+        MainCommand.ListUnused, "list unused [--project] : list unused items"
         MainCommand.Unknown, ""
         MainCommand.UpgradeGuids, "update-guids : DANGER! change guids of all projects in given repository (interactive command)" ]
 
