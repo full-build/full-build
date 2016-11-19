@@ -135,7 +135,7 @@ type History =
 type ListApplications =
     { Version : string option }
 
-type ListUnused =
+type QueryUnused =
     { Project : bool }
 
 
@@ -244,6 +244,6 @@ type Command =
     | BindProject of BindProject
 
     // projects
-    | ListUnused of ListUnused
+    | QueryUnused of QueryUnused
 
 
