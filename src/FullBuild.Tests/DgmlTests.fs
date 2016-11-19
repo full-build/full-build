@@ -36,7 +36,7 @@ let CheckGenerateDgmlNoDependency () =
         let projects = graph.Projects
         let goal = projects |> selectProjects ["g"]
 
-        let view = viewRepository.CreateView "test" (set ["*/g"]) false false false None Graph.BuilderType.MSBuild
+        let view = viewRepository.CreateView "test" (set ["*/g"]) false false false None false Graph.BuilderType.MSBuild
         let res = Generators.Dgml.GraphContent view.Projects true
 
         res.ToString() |> should equal (expectedDgml.ToString())
@@ -55,7 +55,7 @@ let CheckGenerateDgmlWithDependencies () =
         let projects = graph.Projects
         let goal = projects |> selectProjects ["g"]
 
-        let view = viewRepository.CreateView "test" (set ["*/g"]) true false false None Graph.BuilderType.MSBuild
+        let view = viewRepository.CreateView "test" (set ["*/g"]) true false false None false Graph.BuilderType.MSBuild
         let res = Generators.Dgml.GraphContent view.Projects true
         printfn "%s" (res.ToString())
         res.ToString() |> should equal (expectedDgml.ToString())

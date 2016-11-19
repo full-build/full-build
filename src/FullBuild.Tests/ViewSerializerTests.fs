@@ -26,7 +26,8 @@ let CheckSaveLoadView () =
                   UpReferences = false 
                   DownReferences = true 
                   Modified = false 
-                  AppFilter = Some "tagada*" }
+                  AppFilter = Some "tagada*" 
+                  Tests = false }
 
     let res = ViewSerializer.SerializeView view1
     printfn "%s" res

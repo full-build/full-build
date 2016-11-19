@@ -60,7 +60,8 @@ type AddView =
       DownReferences : bool
       Modified : bool 
       AppFilter : string option
-      Static : bool }
+      Static : bool 
+      Tests : bool }
 
 type ViewName =
     { Name : string }

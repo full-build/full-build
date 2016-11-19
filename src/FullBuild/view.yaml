@@ -8,3 +8,4 @@
     referencedBy: true
     modified: true
     appfilter : blah*
+    tests: false

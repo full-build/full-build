@@ -19,7 +19,7 @@ open Collections
 open Graph
 
 let Add (cmd : CLI.Commands.AddView) =
-    if cmd.Filters.Length = 0 && not cmd.Modified then
+    if cmd.Filters.Length = 0 && not cmd.Modified && cmd.AppFilter.IsNone then
         failwith "Expecting at least one filter"
     
     let graph = Configuration.LoadAnthology() |> Graph.from
@@ -30,6 +30,7 @@ let Add (cmd : CLI.Commands.AddView) =
                                          cmd.UpReferences
                                          cmd.Modified
                                          cmd.AppFilter
+                                         cmd.Tests
                                          Graph.BuilderType.MSBuild
 
     let projects = view.Projects
@@ -99,6 +100,7 @@ let Alter (cmd : CLI.Commands.AlterView) =
                                             (cmd.UpReferences = Some true) ? (true, view.UpReferences)
                                             view.Modified
                                             view.AppFilter
+                                            view.Tests
                                             view.Builder
 
     let projects = depView.Projects
@@ -123,7 +125,8 @@ let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
             CLI.Commands.AddView.UpReferences = view.UpReferences
             CLI.Commands.AddView.Modified = view.Modified
             CLI.Commands.AddView.AppFilter = view.AppFilter
-            CLI.Commands.AddView.Static = false } |> Add
+            CLI.Commands.AddView.Static = false 
+            CLI.Commands.AddView.Tests = false } |> Add
     {   CLI.Commands.OpenView.Name = view.Name }  
         |> Open
 
