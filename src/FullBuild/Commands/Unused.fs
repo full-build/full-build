@@ -24,8 +24,12 @@ let listUnusedProjects (graph : Graph) =
     let unusedProjects = graph.Projects - allUsedProjects |> Set.filter (fun x -> x.HasTests |> not)
 
     if 0 < unusedProjects.Count then 
-        for project in unusedProjects do
-            printfn "%s/%s" project.Repository.Name project.Output.Name
+        IoHelpers.DisplayHighlight "Unused projects"
+        let groupedProjects = unusedProjects |> Seq.groupBy (fun x -> x.Repository)
+        for repo, projects in groupedProjects do
+            printfn "%s" repo.Name
+            for project in projects do            
+                printfn "    %s" project.Output.Name
     else
         printfn "No unused projects found"
 
