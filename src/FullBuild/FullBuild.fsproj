@@ -131,6 +131,7 @@
     <Compile Include="Commands\Upgrade.fs" />
     <Compile Include="Commands\NuGet.fs" />
     <Compile Include="Commands\Package.fs" />
+    <Compile Include="Commands\Unused.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="ghreleasefeed.json" />

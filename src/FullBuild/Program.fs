@@ -73,6 +73,9 @@ let tryMain argv =
     | Command.PublishApplications pubInfo -> Commands.Application.Publish pubInfo
     | Command.BindProject bindInfo -> Commands.Application.BindProject bindInfo
 
+    // unused
+    | Command.ListUnused unusedInfo -> Commands.Unused.List unusedInfo
+
     // misc
     | Command.Upgrade verStatus -> Commands.Upgrade.Upgrade verStatus
     | Command.FinalizeUpgrade processId -> Commands.Upgrade.FinalizeUpgrade processId

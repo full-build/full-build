@@ -1,0 +1,36 @@
+﻿//   Copyright 2014-2016 Pierre Chalamet
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+
+module Commands.Unused
+open Graph
+
+
+let listUnusedProjects (graph : Graph) =
+    let rootProjects = graph.Applications |> Set.map (fun x -> x.Projects)
+                                          |> Set.unionMany
+
+    let allUsedProjects = Project.TransitiveReferences rootProjects
+    let unusedProjects = graph.Projects - allUsedProjects |> Set.filter (fun x -> x.HasTests |> not)
+
+    if 0 < unusedProjects.Count then 
+        for project in unusedProjects do
+            printfn "%s/%s" project.Repository.Name project.Output.Name
+    else
+        printfn "No unused projects found"
+
+let List (unusedInfo : CLI.Commands.ListUnused) =
+    let antho = Configuration.LoadAnthology()
+    let graph = antho |> Graph.from
+
+    if unusedInfo.Project then listUnusedProjects graph
