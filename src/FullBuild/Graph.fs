@@ -195,7 +195,8 @@ with
     member this.Delete () =
         let repositoryId = this.Repository.Name
         let newAntho = { this.Graph.Anthology
-                         with Repositories = this.Graph.Anthology.Repositories |> Set.filter (fun x -> x.Repository.Name = repositoryId) }
+                         with Repositories = this.Graph.Anthology.Repositories |> Set.filter (fun x -> x.Repository.Name <> repositoryId) 
+                              Projects = this.Graph.Anthology.Projects |> Set.filter (fun x -> x.Repository <> repositoryId) }
         Graph(newAntho)
 
 // =====================================================================================================
