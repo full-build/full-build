@@ -44,7 +44,8 @@ type private TokenOption =
     | App
     | Static
     | NoMultithread
-    | Project
+    | UnusedProjects
+    | Packages
     | Test
 
 let private (|TokenOption|_|) (token : string) =
@@ -71,7 +72,8 @@ let private (|TokenOption|_|) (token : string) =
     | "--app" -> Some TokenOption.App
     | "--static" -> Some TokenOption.Static
     | "--nomt" -> Some TokenOption.NoMultithread
-    | "--project" -> Some TokenOption.Project
+    | "--unused-projects" -> Some TokenOption.UnusedProjects
+    | "--packages" -> Some TokenOption.Packages
     | "--test" -> Some TokenOption.Test
     | _ -> None
 
@@ -530,11 +532,17 @@ let rec private commandUpgrade (verStatus : string) (args : string list) =
     | [Param processId] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))
     | _ -> Command.Error MainCommand.Upgrade
 
-let rec private commandQueryUnused (project : bool) (args : string list) =
+let rec private commandQuery (project : bool) (nuget : bool) (view : string option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Project :: tail -> tail |> commandQueryUnused true
-    | [] -> Command.QueryUnused { Project = project }
-    | _ -> Command.Error MainCommand.ListUnused
+    | TokenOption TokenOption.UnusedProjects :: tail -> tail |> commandQuery true nuget view
+    | TokenOption TokenOption.Packages :: tail -> tail |> commandQuery project true view
+    | TokenOption TokenOption.View 
+      :: ViewId viewName :: tail -> tail |> commandQuery project true (Some viewName)
+    | [] -> Command.Query { UnusedProjects = project 
+                            UsedPackages = nuget 
+                            View = view }
+    | _ -> Command.Error MainCommand.QueryUnused
+
 
 let Parse (args : string list) : Command =
     match args with
@@ -583,7 +591,7 @@ let Parse (args : string list) : Command =
     | Token Token.Drop :: Token Token.App :: cmdArgs -> cmdArgs |> commandDropApp
     | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp None
 
-    | Token Token.Query :: Token Token.Unused :: cmdArgs -> cmdArgs |> commandQueryUnused false
+    | Token Token.Query :: cmdArgs -> cmdArgs |> commandQuery false false None
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
     | FullBuildView viewFile :: [] -> Command.FullBuildView { FilePath = viewFile }
@@ -661,7 +669,7 @@ let UsageContent() =
         MainCommand.DropApp, "drop app <appId> : drop application"
         MainCommand.ListApp, "list app [--version <versionId>] : list applications"
         MainCommand.Unknown, ""
-        MainCommand.ListUnused, "query unused [--project] : list unused items"
+        MainCommand.Query, "query [--unused-projects] [--packages] [--view <viewId>] : query items"
         MainCommand.Unknown, ""
         MainCommand.UpgradeGuids, "update-guids : DANGER! change guids of all projects in given repository (interactive command)" ]
 

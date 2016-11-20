@@ -12,8 +12,9 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Commands.Unused
+module Commands.Query
 open Graph
+open Collections
 
 
 let private queryUnusedProjects (graph : Graph) =
@@ -36,8 +37,38 @@ let private queryUnusedProjects (graph : Graph) =
     else
         printfn "No unused projects found"
 
-let QueryUnused (queryInfo : CLI.Commands.QueryUnused) =
+
+let private queryPackages (projects : Project set) =
+    let unittestsprojects = projects |> Set.filter (fun x -> x.HasTests)
+    let otherprojects = projects - unittestsprojects
+
+    let packages = otherprojects |> Set.map (fun x -> x.PackageReferences)
+                                 |> Set.unionMany
+
+    let packagesunittests = (unittestsprojects |> Set.map (fun x -> x.PackageReferences)
+                                              |> Set.unionMany) - packages
+
+    if 0 < packages.Count || 0 < packagesunittests.Count then
+        IoHelpers.DisplayHighlight "Used packages"
+        for package in packages do
+            printfn "%s" package.Name
+
+        IoHelpers.DisplayHighlight "Used packages in unit tests"
+        for package in packagesunittests do
+            printfn "%s" package.Name
+    else
+        printfn "No packages found"
+
+let Query (queryInfo : CLI.Commands.Query) =
     let antho = Configuration.LoadAnthology()
     let graph = antho |> Graph.from
 
-    if queryInfo.Project then queryUnusedProjects graph
+    if queryInfo.UnusedProjects then queryUnusedProjects graph
+
+    if queryInfo.UsedPackages then 
+        match queryInfo.View with
+        | Some viewName -> let views = Views.from graph
+                           let view = views.Views |> Seq.find (fun x -> x.Name = viewName)
+                           queryPackages view.Projects
+        | _ -> queryPackages graph.Projects
+
