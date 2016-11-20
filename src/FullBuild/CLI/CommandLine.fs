@@ -302,7 +302,7 @@ let rec private commandClone (shallow : bool) (all : bool) (mt : bool) (args : s
 
 let rec private commandGraph (all : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.View
+    | TokenOption TokenOption.All
       :: tail -> tail |> commandGraph true
     | [ViewId name] -> Command.GraphView { Name = name ; All = all }
     | _ -> Command.Error MainCommand.GraphView
