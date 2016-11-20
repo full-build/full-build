@@ -27,6 +27,7 @@ type private TokenOption =
     | Down
     | All
     | Bin
+    | LatestBin
     | Src
     | Exclude
     | Multithread
@@ -54,6 +55,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--up" -> Some TokenOption.Up
     | "--down" -> Some TokenOption.Down
     | "--bin" -> Some TokenOption.Bin
+    | "--latest-bin" -> Some TokenOption.LatestBin
     | "--src" -> Some TokenOption.Src
     | "--all" -> Some TokenOption.All
     | "--exclude" -> Some TokenOption.Exclude
@@ -356,23 +358,25 @@ let rec private commandPush (branch : string option) (all : bool) (args : string
     | [Param buildNumber] -> Command.PushWorkspace {Branch = branch; BuildNumber = buildNumber; Incremental = not all }
     | _ -> Command.Error MainCommand.Push
 
-let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
+let rec private commandPull (src : bool) (bin : bool) (latestBin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
     match args with
     | TokenOption TokenOption.Src
-      :: tail -> tail |> commandPull true false rebase multithread view
+      :: tail -> tail |> commandPull true false false rebase multithread view
     | TokenOption TokenOption.Bin
-      :: tail -> tail |> commandPull false true rebase multithread view
+      :: tail -> tail |> commandPull false true false rebase multithread view
+    | TokenOption TokenOption.LatestBin
+      :: tail -> tail |> commandPull false false true rebase multithread view
     | TokenOption TokenOption.Rebase
-      :: tail -> tail |> commandPull src bin true multithread view
+      :: tail -> tail |> commandPull src bin latestBin true multithread view
     | TokenOption TokenOption.Multithread
       :: tail -> printfn "WARNING: option pull --mt is deprecated"
-                 tail |> commandPull src bin rebase true view
+                 tail |> commandPull src bin latestBin rebase true view
     | TokenOption TokenOption.NoMultithread
-      :: tail -> tail |> commandPull src bin rebase false view
+      :: tail -> tail |> commandPull src bin latestBin rebase false view
     | TokenOption TokenOption.View
       :: ViewId name
-      :: tail -> tail |> commandPull true true rebase multithread (Some name)
-    | [] -> Command.PullWorkspace { Sources = src ; Bin = bin; Rebase = rebase; Multithread = multithread; View = view }
+      :: tail -> tail |> commandPull true true false rebase multithread (Some name)
+    | [] -> Command.PullWorkspace { Sources = src ; Bin = bin; LatestBin = latestBin; Rebase = rebase; Multithread = multithread; View = view }
     | _ -> Command.Error MainCommand.Pull
 
 let private commandClean (args : string list) =
@@ -563,7 +567,7 @@ let Parse (args : string list) : Command =
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
     | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush None false
-    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false true None
+    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false false true None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
     | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory false
@@ -641,7 +645,7 @@ let UsageContent() =
         MainCommand.Exec, "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         MainCommand.Index, "index <repoId-wildcard>+ : index repositories"
         MainCommand.Convert, "convert <repoId-wildcard> : convert projects in repositories"
-        MainCommand.Pull, "pull [--src|--bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
+        MainCommand.Pull, "pull [--src|--bin|--latest-bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
         MainCommand.Push, "push [--branch <branch>] [--all] <buildNumber> : push a baseline from current repositories version and display version"
         MainCommand.PublishApp, "publish [--nomt] [--view <viewId>] <appId-wildcard> : publish application"
         MainCommand.Bind, "bind <projectId-wildcard>+ : update bindings"

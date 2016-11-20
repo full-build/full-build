@@ -118,6 +118,7 @@ type AddRepository =
 type PullWorkspace =
     { Sources : bool
       Bin : bool
+      LatestBin : bool
       Rebase : bool
       Multithread : bool
       View : string option }

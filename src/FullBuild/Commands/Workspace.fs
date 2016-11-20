@@ -172,7 +172,10 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
 
         Install ()
 
-    if pullInfo.Bin then
+    if pullInfo.LatestBin then
+        let versions = Tools.Vcs.Logs wsDir graph.MasterRepository
+        Core.BuildArtifacts.PullLatestBinaries graph versions
+    elif pullInfo.Bin then
         let versions = Tools.Vcs.Logs wsDir graph.MasterRepository
         Core.BuildArtifacts.PullLatestCompatibleBinaries graph versions
 
