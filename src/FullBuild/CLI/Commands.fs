@@ -136,9 +136,10 @@ type History =
 type ListApplications =
     { Version : string option }
 
-type QueryUnused =
-    { Project : bool }
-
+type Query =
+    { View : string  option
+      UnusedProjects : bool
+      UsedPackages : bool }
 
 [<RequireQualifiedAccess>]
 type MainCommand =
@@ -181,7 +182,8 @@ type MainCommand =
     | AddApp
     | DropApp
     | PublishApp
-    | ListUnused
+    | QueryUnused
+    | Query
     | Bind
     | Unknown
 
@@ -244,7 +246,7 @@ type Command =
     | PublishApplications of PublishApplications
     | BindProject of BindProject
 
-    // projects
-    | QueryUnused of QueryUnused
+    // query
+    | Query of Query
 
 

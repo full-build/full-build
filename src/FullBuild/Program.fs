@@ -74,7 +74,8 @@ let tryMain argv =
     | Command.BindProject bindInfo -> Commands.Application.BindProject bindInfo
 
     // unused
-    | Command.QueryUnused queryInfo -> Commands.Unused.QueryUnused queryInfo
+//    | Command.QueryUnused queryInfo -> Commands.Query.QueryUnused queryInfo
+    | Command.Query queryInfo -> Commands.Query.Query queryInfo
 
     // misc
     | Command.Upgrade verStatus -> Commands.Upgrade.Upgrade verStatus
