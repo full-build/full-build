@@ -182,7 +182,6 @@ type MainCommand =
     | AddApp
     | DropApp
     | PublishApp
-    | QueryUnused
     | Query
     | Bind
     | Unknown

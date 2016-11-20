@@ -538,10 +538,10 @@ let rec private commandQuery (project : bool) (nuget : bool) (view : string opti
     | TokenOption TokenOption.Packages :: tail -> tail |> commandQuery project true view
     | TokenOption TokenOption.View 
       :: ViewId viewName :: tail -> tail |> commandQuery project true (Some viewName)
-    | [] -> Command.Query { UnusedProjects = project 
-                            UsedPackages = nuget 
-                            View = view }
-    | _ -> Command.Error MainCommand.QueryUnused
+    | [] when project || nuget -> Command.Query { UnusedProjects = project 
+                                                  UsedPackages = nuget 
+                                                  View = view }
+    | _ -> Command.Error MainCommand.Query
 
 
 let Parse (args : string list) : Command =
@@ -669,7 +669,7 @@ let UsageContent() =
         MainCommand.DropApp, "drop app <appId> : drop application"
         MainCommand.ListApp, "list app [--version <versionId>] : list applications"
         MainCommand.Unknown, ""
-        MainCommand.Query, "query [--unused-projects] [--packages] [--view <viewId>] : query items"
+        MainCommand.Query, "query <--unused-projects|--packages> [--view <viewId>] : query items"
         MainCommand.Unknown, ""
         MainCommand.UpgradeGuids, "update-guids : DANGER! change guids of all projects in given repository (interactive command)" ]
 
