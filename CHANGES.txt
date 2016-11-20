@@ -6,6 +6,10 @@ v3.1
   * Static views support (issue #131)
   * --mt is default for clone, pull & publish (issue #128)
   * Fix conversion performance (issue #133)
+  * Fix view creation performance (issue #144)
+  * Support for NuGet application (issue #143)
+  * Fix pulling binaries must use current baseline (#86)
+  * Anthology queries
 
 v3.0
   * Graph api use internally to simplify implementation
