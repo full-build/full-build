@@ -10,6 +10,7 @@ v3.1
   * Support for NuGet application (issue #143)
   * Fix pulling binaries must use current baseline (#86)
   * Anthology queries
+  * Fix broken baseline when repository is dropped (issue #139)
 
 v3.0
   * Graph api use internally to simplify implementation
