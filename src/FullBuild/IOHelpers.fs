@@ -130,7 +130,7 @@ let DisplayHighlight s =
     let display () =
         let oldColor = Console.ForegroundColor
         Console.ForegroundColor <- ConsoleColor.Cyan
-        Console.WriteLine("==> {0}", [|s|])
+        Console.WriteLine("{0}", [|s|])
         Console.ForegroundColor <- oldColor
 
     lock consoleLock display
