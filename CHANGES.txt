@@ -11,6 +11,7 @@ v3.1
   * Fix pulling binaries must use current baseline (#86)
   * Anthology queries
   * Fix broken baseline when repository is dropped (issue #139)
+  * Fix drop repo (issue #145)
 
 v3.0
   * Graph api use internally to simplify implementation
