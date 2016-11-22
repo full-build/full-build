@@ -96,7 +96,7 @@ let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (sha
 let GitCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError : bool) =
     let rev = match version with
               | Some x -> x
-              | None -> "HEAD"
+              | None -> "master"
 
     let args = sprintf "checkout %A" rev
     checkedExecMaybeIgnore ignoreError "git" args repoDir Map.empty
