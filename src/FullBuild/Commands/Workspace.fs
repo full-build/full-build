@@ -106,7 +106,11 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = graph.MasterRepository
     try
-        Tools.Vcs.Checkout wsDir mainRepo branchInfo.Branch false
+        let br = match branchInfo.Branch with
+                 | Some x -> Some x
+                 | None -> Some mainRepo.Branch
+
+        Tools.Vcs.Checkout wsDir mainRepo br false
     with
         _ -> printfn "WARNING: No branch on .full-build repository. Is this intended ?"
 
@@ -114,8 +118,12 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let clonedRepos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     for repo in clonedRepos do
+        let br = match branchInfo.Branch with
+                 | Some x -> Some x
+                 | None -> Some repo.Branch
+
         DisplayHighlight repo.Name
-        Tools.Vcs.Checkout wsDir repo branchInfo.Branch true
+        Tools.Vcs.Checkout wsDir repo br true
 
 let Install () =
     Core.Package.RestorePackages ()
@@ -305,7 +313,7 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
 
     selectedRepos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Name)
 
-    let builder2repos = repos |> Seq.groupBy (fun x -> x.Builder)
+    let builder2repos = selectedRepos |> Seq.groupBy (fun x -> x.Builder)
     for builder2repo in builder2repos do
         let (builder, repos) = builder2repo
         Core.Conversion.Convert builder (set repos)
