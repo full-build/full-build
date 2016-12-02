@@ -68,14 +68,18 @@ let private getAssemblies(xdoc : XDocument) : AssemblyId set =
 let private parseNuGetPackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "id")
     let pkgVer = !> pkgRef.Attribute(XNamespace.None + "version") : string
+    let ver = if pkgVer |> isNull then PackageVersion.Unspecified
+              else PackageVersion.PackageVersion pkgVer
     { Id = PackageId.from pkgId
-      Version = PackageVersion.PackageVersion pkgVer }
+      Version = ver }
 
 let private parsePackageReferencePackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "Include")
-    let pkgVer = !> pkgRef.Attribute(XNamespace.None + "Version") : string
+    let pkgVer = !> pkgRef.Descendants(XmlHelpers.NsMsBuild + "Version").SingleOrDefault() : string
+    let ver = if pkgVer |> isNull then PackageVersion.Unspecified
+              else PackageVersion.PackageVersion pkgVer
     { Id = PackageId.from pkgId
-      Version = PackageVersion.PackageVersion pkgVer }
+      Version = ver }
 
 let private parseFullBuildPackage (fileName : string) : Package =
     let fi = FileInfo (fileName)
