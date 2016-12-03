@@ -19,7 +19,7 @@ open Collections
 open Graph
 
 let Add (cmd : CLI.Commands.AddView) =
-    if cmd.Filters.Length = 0 && not cmd.Modified then
+    if cmd.Filters.Length = 0 && not cmd.Modified && cmd.AppFilter.IsNone then
         failwith "Expecting at least one filter"
     
     let graph = Configuration.LoadAnthology() |> Graph.from
@@ -29,6 +29,8 @@ let Add (cmd : CLI.Commands.AddView) =
                                          cmd.DownReferences
                                          cmd.UpReferences
                                          cmd.Modified
+                                         cmd.AppFilter
+                                         cmd.Tests
                                          Graph.BuilderType.MSBuild
 
     let projects = view.Projects
@@ -36,16 +38,15 @@ let Add (cmd : CLI.Commands.AddView) =
 
     // save view information first
     view.Save None
+    if cmd.Static then view.SaveStatic()
 
     // generate solution defines
-    let slnDefines = Generators.Solution.GenerateSolutionDefines projects
-    let viewDir = GetFolder Env.Folder.View
-    let slnDefineFile = viewDir |> GetFile (AddExt Targets view.Name)
-    SaveFileIfNecessary slnDefineFile (slnDefines.ToString())
+    let slnDefineFile = Env.GetSolutionDefinesFile view.Name
+    let slnDefinesContent = Generators.Solution.GenerateSolutionDefines projects
+    SaveFileIfNecessary slnDefineFile (slnDefinesContent.ToString())
 
     // generate solution file
-    let wsDir = GetFolder Env.Folder.Workspace
-    let slnFile = wsDir |> GetFile (AddExt Solution view.Name)
+    let slnFile = Env.GetSolutionFile view.Name
     let slnContent = Generators.Solution.GenerateSolutionContent projects |> Seq.fold (fun s t -> sprintf "%s%s\n" s t) ""
     SaveFileIfNecessary slnFile slnContent
 
@@ -98,6 +99,8 @@ let Alter (cmd : CLI.Commands.AlterView) =
                                             (cmd.DownReferences = Some true) ? (true, view.DownReferences)
                                             (cmd.UpReferences = Some true) ? (true, view.UpReferences)
                                             view.Modified
+                                            view.AppFilter
+                                            view.Tests
                                             view.Builder
 
     let projects = depView.Projects
@@ -111,7 +114,21 @@ let Open (cmd : CLI.Commands.OpenView) =
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
-    Exec.SpawnWithVerb slnFile.FullName "open"
+    Exec.Spawn slnFile.FullName "" "open"
+
+let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
+    let view = System.IO.FileInfo(cmd.FilePath) |> ViewSerializer.Load
+    if view.Name |> Configuration.ViewExistsAndNotCorrupted |> not then
+        {   CLI.Commands.AddView.Name = view.Name
+            CLI.Commands.AddView.Filters = view.Filters |> Set.toList
+            CLI.Commands.AddView.DownReferences = view.DownReferences
+            CLI.Commands.AddView.UpReferences = view.UpReferences
+            CLI.Commands.AddView.Modified = view.Modified
+            CLI.Commands.AddView.AppFilter = view.AppFilter
+            CLI.Commands.AddView.Static = false 
+            CLI.Commands.AddView.Tests = false } |> Add
+    {   CLI.Commands.OpenView.Name = view.Name }  
+        |> Open
 
 let Graph (cmd : CLI.Commands.GraphView) =
     let graph = Configuration.LoadAnthology() |> Graph.from

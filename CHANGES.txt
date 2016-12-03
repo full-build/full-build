@@ -1,3 +1,20 @@
+v3.1
+  * Create view from application (issue #112)
+  * Support for PackageReference (issue #119)
+  * Remove Mercurial support (issue #125)
+  * List applications with version (issue #129)
+  * Static views support (issue #131)
+  * --mt is default for clone, pull & publish (issue #128)
+  * Fix conversion performance (issue #133)
+  * Fix view creation performance (issue #144)
+  * Support for NuGet application (issue #143)
+  * Fix pulling binaries must use current baseline (#86)
+  * Anthology queries
+  * Fix broken baseline when repository is dropped (issue #139)
+  * Fix drop repo (issue #145)
+  * Support for pull --latest-bin (issue #86)
+  * Support for NuGet application (issue #143)
+
 v3.0
   * Graph api use internally to simplify implementation
   * Solution gen based on graph 

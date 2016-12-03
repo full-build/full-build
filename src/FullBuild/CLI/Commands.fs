@@ -58,7 +58,10 @@ type AddView =
       Filters : string list
       UpReferences : bool
       DownReferences : bool
-      Modified : bool }
+      Modified : bool 
+      AppFilter : string option
+      Static : bool 
+      Tests : bool }
 
 type ViewName =
     { Name : string }
@@ -95,6 +98,9 @@ type AlterView =
 type OpenView =
     { Name : string }
 
+type FullBuildView =
+    { FilePath : string }
+
 type GraphView =
     { Name : string
       All : bool }
@@ -112,13 +118,14 @@ type AddRepository =
 type PullWorkspace =
     { Sources : bool
       Bin : bool
+      LatestBin : bool
       Rebase : bool
       Multithread : bool
       View : string option }
 
 type PushWorkspace =
     { BuildNumber : string
-      Branch : string option 
+      Branch : string option
       Incremental : bool }
 
 type BindProject =
@@ -127,6 +134,13 @@ type BindProject =
 type History =
     { Html : bool }
 
+type ListApplications =
+    { Version : string option }
+
+type Query =
+    { View : string  option
+      UnusedProjects : bool
+      UsedPackages : bool }
 
 [<RequireQualifiedAccess>]
 type MainCommand =
@@ -169,6 +183,7 @@ type MainCommand =
     | AddApp
     | DropApp
     | PublishApp
+    | Query
     | Bind
     | Unknown
 
@@ -212,6 +227,7 @@ type Command =
     | BuildView of BuildView
     | AlterView of AlterView
     | OpenView of OpenView
+    | FullBuildView of FullBuildView
 
     // nuget
     | AddNuGet of RepositoryUrl
@@ -224,8 +240,13 @@ type Command =
     | OutdatedPackages
 
     // applications
-    | ListApplications
+    | ListApplications of ListApplications
     | AddApplication of AddApplication
     | DropApplication of ApplicationId
     | PublishApplications of PublishApplications
     | BindProject of BindProject
+
+    // query
+    | Query of Query
+
+

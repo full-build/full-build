@@ -66,6 +66,15 @@ let Publish (graph : Graph) (branch : string option) buildnum hash =
 
              reraise ()
 
+let FetchVersionsForArtifact (graph : Graph) (app : Application) =
+    let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
+    let lines = System.IO.File.ReadAllLines (versionFile.FullName)
+
+    let toVersion (line : string) =
+        line.Split(':').[0]
+
+    lines |> Seq.map toVersion
+
 let PullReferenceBinaries (graph : Graph) version =
     let artifactDir = graph.ArtifactsDir |> DirectoryInfo
 
@@ -80,13 +89,24 @@ let PullReferenceBinaries (graph : Graph) version =
 
 
 
+let findLatestVersion (graph : Graph) (repoVersions : string list) =
+    // get built versions in a list => first is the most recent
+    let versionsFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
+    let builtVersions = File.ReadAllLines(versionsFile.FullName) |> Seq.map (fun x -> x.Split(':')) 
+                                                                 |> List.ofSeq
+                                                                 |> List.rev
+    let versionsInMaster = builtVersions |> List.filter (fun x -> x.[2] = graph.MasterRepository.Branch)
+    if versionsInMaster |> List.length = 0 then failwith "Can't find compatible version"
+    let latestVersion = versionsInMaster.[0].[1]
+    latestVersion
 
 let findMostRecentVersion (graph : Graph) (repoVersions : string list) =
     // get built versions in a list => first is the most recent
     let versionsFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
-    let builtVersions = File.ReadAllLines(versionsFile.FullName) |> Seq.map (fun x -> x.Split(':')) |> List.ofSeq
+    let builtVersions = File.ReadAllLines(versionsFile.FullName) |> Seq.map (fun x -> x.Split(':')) 
+                                                                 |> List.ofSeq
+                                                                 |> List.rev
     let fbVersions = builtVersions |> List.map (fun x -> x.[1])
-                                   |> List.rev
 
     let hashIsCompiled hash =
         repoVersions |> List.contains hash
@@ -105,6 +125,10 @@ let findMostRecentVersion (graph : Graph) (repoVersions : string list) =
            let latestVersion = versionsInMaster.[0].[1]
            printfn "WARNING: can't find compatible version - using latest build from %A" graph.MasterRepository.Branch
            latestVersion
+
+let PullLatestBinaries (graph : Graph) (repoVersions : string list) =
+    let mostRecentVersion = findLatestVersion graph repoVersions
+    PullReferenceBinaries graph mostRecentVersion
 
 let PullLatestCompatibleBinaries (graph : Graph) (repoVersions : string list) =
     let mostRecentVersion = findMostRecentVersion graph repoVersions

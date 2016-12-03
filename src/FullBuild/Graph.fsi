@@ -41,9 +41,8 @@ type BuilderType =
 
 [<RequireQualifiedAccess>]
 type VcsType =
-    | Gerrit
     | Git
-    | Hg
+    | Gerrit
 
 [<RequireQualifiedAccess>]
 type TestRunnerType =
@@ -77,6 +76,10 @@ with
     member Branch : string
     member Uri : string
     member IsCloned: bool
+    member References: Repository set
+    member ReferencedBy: Repository set
+    static member Closure: Repository set
+                        -> Repository set
     member Delete: unit
                 -> Graph
 

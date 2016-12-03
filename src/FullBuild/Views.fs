@@ -34,12 +34,14 @@ with
     member this.UpReferences = this.View.UpReferences
     member this.DownReferences = this.View.DownReferences
     member this.Modified = this.View.Modified
+    member this.AppFilter = this.View.AppFilter
+    member this.Tests = this.View.Tests
     member this.Builder = match this.View.Builder with
                           | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
                           | Anthology.BuilderType.Skip -> BuilderType.Skip
 
     member this.Projects : Project set =
-        let filters = this.View.Filters |> Set.map (fun x -> if x.IndexOfAny([|'/'; '\\' |]) = -1 then x + "/*" else x)
+        let filters = this.View.Filters |> Set.map (fun x -> if x.IndexOfAny([|'/'; '\\'; '*' |]) = -1 then x + "/*" else x)
                                         |> Set.map (fun x -> x.Replace('\\', '/'))
         let allClonedProjects = this.Graph.Repositories |> Set.filter (fun x -> x.IsCloned)
                                                         |> Set.map (fun x -> x.Projects)
@@ -49,34 +51,51 @@ with
                             (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name)
                             filters
 
-        let baselineRepo = Baselines.from this.Graph
         let modBookmarks = if this.Modified then
                                // newBaseline contains all repositories bookmarks - even non cloned ones (because true)
                                // this will add new repositories if necessary and discard unchanged repositories
                                // in fine, we only have new repositories and modified repositories
+                               let baselineRepo = Baselines.from this.Graph
                                let newBaseline = baselineRepo.CreateBaseline true
                                newBaseline - baselineRepo.Baseline
                            else Set.empty
 
         let modProjects = modBookmarks |> Set.map (fun x -> x.Repository.Projects)
                                        |> Set.unionMany
-        let viewProjects = Project.Closure (projects + modProjects)
+
+        let appProjects = match this.AppFilter with
+                          | Some appFilter -> let apps = PatternMatching.FilterMatch this.Graph.Applications (fun x -> x.Name) (Set.singleton appFilter)
+                                              apps |> Set.map (fun x -> x.Projects)
+                                                             |> Set.unionMany
+                          | None -> Set.empty
+
+        let viewProjects = Project.Closure (projects + modProjects + appProjects)
         let depProjects = if this.UpReferences then Project.TransitiveReferencedBy viewProjects
                           else Set.empty
         let refProjects = if this.DownReferences then Project.TransitiveReferences viewProjects
                           else Set.empty
         let projects = viewProjects + depProjects + refProjects
-        let repositoriesNotCloned = projects |> Set.map (fun x -> x.Repository) 
-                                             |> Set.filter (fun x -> x.IsCloned |> not)                        
+        let unittests = if this.Tests then 
+                            projects |> Set.map (fun x -> x.ReferencedBy |> Set.filter (fun y -> y.HasTests))
+                                     |> Set.unionMany
+                        else Set.empty
+        let viewProjects = projects + unittests
+
+        let repositoriesNotCloned = viewProjects |> Set.map (fun x -> x.Repository)
+                                                 |> Set.filter (fun x -> x.IsCloned |> not)
         if repositoriesNotCloned <> Set.empty then
             printfn "ERROR: some repositories must be cloned to create the view"
             repositoriesNotCloned |> Set.iter (fun x -> printfn "  %s" x.Name)
             failwithf "Missing repositories"
-        projects
+        viewProjects
 
     member this.Save (isDefault : bool option) =
         let viewId = Anthology.ViewId this.View.Name
         Configuration.SaveView viewId this.View isDefault
+    
+    member this.SaveStatic () =
+        let staticViewFile = Env.GetStaticViewFile this.View.Name
+        ViewSerializer.Save staticViewFile this.View
 
     member this.Delete () =
         Configuration.DeleteView (Anthology.ViewId this.View.Name)
@@ -88,7 +107,7 @@ and [<Sealed>] Factory(graph : Graph) =
     member this.ViewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> =
         if viewMap |> isNull then
             let vwDir = Env.GetFolder Env.Folder.View
-            viewMap <- vwDir.EnumerateFiles("*.view") |> Seq.map (fun x -> System.IO.Path.GetFileNameWithoutExtension(x.Name) |> Anthology.ViewId)
+            viewMap <- vwDir.EnumerateFiles(IoHelpers.Extension.View |> IoHelpers.GetExtensionString |> sprintf "*.%s") |> Seq.map (fun x -> System.IO.Path.GetFileNameWithoutExtension(x.Name) |> Anthology.ViewId)
                                                       |> Seq.map Configuration.LoadView
                                                       |> Seq.map (fun x -> x.Name |> Anthology.ViewId, { Graph = graph; View = x })
                                                       |> dict
@@ -102,12 +121,14 @@ and [<Sealed>] Factory(graph : Graph) =
         | None -> None
         | Some x -> Some this.ViewMap.[x]
 
-    member this.CreateView name filters downReferences upReferences modified builder =
+    member this.CreateView name filters downReferences upReferences modified appFilter tests builder =
         let view = { Anthology.View.Name = name
                      Anthology.View.Filters = filters
                      Anthology.View.DownReferences = downReferences
                      Anthology.View.UpReferences = upReferences
                      Anthology.View.Modified = modified
+                     Anthology.View.AppFilter = appFilter
+                     Anthology.View.Tests = tests
                      Anthology.View.Builder = match builder with
                                               | BuilderType.MSBuild -> Anthology.BuilderType.MSBuild
                                               | BuilderType.Skip -> Anthology.BuilderType.Skip }
