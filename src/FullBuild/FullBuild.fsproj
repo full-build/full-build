@@ -26,8 +26,10 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>history</StartArguments>
-    <StartWorkingDirectory>c:\src\avp</StartWorkingDirectory>
+    <StartArguments>
+    </StartArguments>
+    <StartWorkingDirectory>
+    </StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>
@@ -90,10 +92,10 @@
     <Compile Include="ViewSerializer.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="XmlHelpers.fs" />
+    <Compile Include="Algorithm.fs" />
     <Compile Include="Graph.fsi" />
     <Compile Include="Graph.fs" />
     <Compile Include="Tools\Paket.fs" />
-    <Compile Include="Tools\VcsHg.fs" />
     <Compile Include="Tools\VcsGit.fs" />
     <Compile Include="Tools\Vcs.fs" />
     <Compile Include="Baselines.fsi" />
@@ -102,6 +104,7 @@
     <Compile Include="Views.fs" />
     <Compile Include="MSBuildHelpers.fs" />
     <Compile Include="AnthologyGraph.fs" />
+    <Compile Include="OsHelpers.fs" />
     <Compile Include="CLI\Commands.fs" />
     <Compile Include="CLI\CommandLine.fs" />
     <Compile Include="Parsers\MSBuild.fs" />
@@ -131,6 +134,7 @@
     <Compile Include="Commands\Upgrade.fs" />
     <Compile Include="Commands\NuGet.fs" />
     <Compile Include="Commands\Package.fs" />
+    <Compile Include="Commands\Query.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="ghreleasefeed.json" />
@@ -146,6 +150,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="anthology.yaml" />
+    <Content Include="favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

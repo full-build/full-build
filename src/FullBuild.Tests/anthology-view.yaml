@@ -10,7 +10,12 @@ anthology:
     - repo: src
       type: git
       uri: https://github.com/pchalamet/view
-  apps: []
+  apps:
+    - name: ed-app.zip
+      type: zip
+      projects:
+        - project: e
+        - project: d
   projects:
     - guid: 4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6
       file: src/a.csproj

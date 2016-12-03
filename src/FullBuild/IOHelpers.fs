@@ -39,24 +39,26 @@ type Extension =
     | Text
     | Html
 
+let GetExtensionString ext =
+    match ext with
+    | View -> "fbsln"
+    | Solution -> "sln"
+    | Targets -> "targets"
+    | CsProj -> "csproj"
+    | FsProj -> "fsproj"
+    | VbProj -> "vbproj"
+    | NuSpec -> "nuspec"
+    | Dgml -> "dgml"
+    | App -> "app"
+    | Exe -> "exe"
+    | Dll -> "dll"
+    | Zip -> "zip"
+    | Config -> "config"
+    | Text -> "txt"
+    | Html -> "html"
+
 let AddExt (ext : Extension) (fileName : string) : string =
-    let sext = match ext with
-               | View -> "view"
-               | Solution -> "sln"
-               | Targets -> "targets"
-               | CsProj -> "csproj"
-               | FsProj -> "fsproj"
-               | VbProj -> "vbproj"
-               | NuSpec -> "nuspec"
-               | Dgml -> "dgml"
-               | App -> "app"
-               | Exe -> "exe"
-               | Dll -> "dll"
-               | Zip -> "zip"
-               | Config -> "config"
-               | Text -> "txt"
-               | Html -> "html"
-    sprintf "%s.%s" fileName sext
+    ext |> GetExtensionString |> sprintf "%s.%s" fileName
 
 let ToUnix (f : string) : string =
     if f = null then f
@@ -128,7 +130,7 @@ let DisplayHighlight s =
     let display () =
         let oldColor = Console.ForegroundColor
         Console.ForegroundColor <- ConsoleColor.Cyan
-        Console.WriteLine("==> {0}", [|s|])
+        Console.WriteLine("{0}", [|s|])
         Console.ForegroundColor <- oldColor
 
     lock consoleLock display

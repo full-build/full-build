@@ -74,8 +74,12 @@ and [<Sealed>] Factory(graph : Graph) =
                                               |> Set.map (fun x -> { Anthology.Bookmark.Repository = Anthology.RepositoryId.from x.Name
                                                                      Anthology.Bookmark.Version = Anthology.BookmarkVersion (Tools.Vcs.Tip wsDir x) })
 
-        let oldBookmarks = this.Baseline.Bookmarks |> Set.filter (fun x -> incremental && (x.Repository.IsCloned |> not))
-                                                   |> Set.map (fun x -> x.Bookmark)
+        let repo2bookmark = this.Baseline.Bookmarks |> Seq.map (fun x -> x.Bookmark.Repository, x.Bookmark)
+                                                    |> dict
+
+        let oldBookmarks = graph.Repositories |> Set.filter (fun x -> incremental && x.IsCloned |> not)
+                                              |> Set.map (fun x -> repo2bookmark.[Anthology.RepositoryId.from x.Name])
+
         let bookmarks = oldBookmarks + newBookmarks
 
         let baseline = { Anthology.Baseline.Incremental = incremental

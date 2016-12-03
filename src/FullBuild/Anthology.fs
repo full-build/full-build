@@ -65,7 +65,6 @@ type Package =
 type VcsType =
     | Gerrit
     | Git
-    | Hg
 with
      member this.toString = toString this
      static member from s = fromString<VcsType> s
@@ -229,4 +228,6 @@ type View =
       Builder : BuilderType
       UpReferences : bool
       DownReferences : bool
-      Modified : bool }
+      Modified : bool 
+      AppFilter : string option 
+      Tests : bool }

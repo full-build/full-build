@@ -28,3 +28,8 @@ let compareTo<'T, 'U> (this : 'T) (other : System.Object) (fieldOf : 'T -> 'U) =
 
 let refEquals (this : System.Object) (other : System.Object) =
     System.Object.ReferenceEquals(this, other)
+
+let memoize (f: 'a -> 'b) : 'a -> 'b =
+    let cache = System.Collections.Concurrent.ConcurrentDictionary<'a, 'b>()
+    fun (x: 'a) ->
+        cache.GetOrAdd(x, f)

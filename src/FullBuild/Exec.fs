@@ -97,12 +97,7 @@ let CheckMultipleResponseCode execResults =
     if errors |> Seq.isEmpty |> not then
         errors |> String.concat System.Environment.NewLine |> failwith
 
-let Spawn (command : string) (args : string) =
-    let psi = ProcessStartInfo (FileName = command, UseShellExecute = false, Arguments = args)
-    use proc = Process.Start (psi)
-    ()
-
-let SpawnWithVerb (command : string) (verb : string) =
-    let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Verb = verb)
+let Spawn (command : string) (args : string) (verb : string) =
+    let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Arguments = args, Verb = verb)
     use proc = Process.Start (psi)
     ()
