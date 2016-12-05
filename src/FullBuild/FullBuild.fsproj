@@ -114,6 +114,7 @@
     <Compile Include="Generators\MSBuild.fs" />
     <Compile Include="Generators\History.fsi" />
     <Compile Include="Generators\History.fs" />
+    <Compile Include="Generators\Packagers.fs" />
     <Compile Include="Core\Builders.fs" />
     <Compile Include="Core\TestRunners.fs" />
     <Compile Include="Core\Bindings.fs" />
@@ -146,6 +147,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="anthology.yaml" />
+    <None Include="Examples\Library.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

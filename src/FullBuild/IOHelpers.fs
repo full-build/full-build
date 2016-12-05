@@ -149,6 +149,9 @@ let FindKnownProjects (repoDir : DirectoryInfo) =
 let EnumarateFiles (dir : DirectoryInfo) =
     dir.EnumerateFiles()
 
+let EnumarateChildren (dir : DirectoryInfo) =
+    dir.EnumerateFileSystemInfos()
+
 let SaveFileIfNecessary (file : FileInfo) (content : string) =
     let overwrite = (file.Exists |> not) || File.ReadAllText(file.FullName) <> content
     if overwrite then
