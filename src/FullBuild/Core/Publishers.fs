@@ -86,7 +86,8 @@ let private publishNuget (app : PublishApp) =
 
     match nuspec with
     | Some nuspecFile ->
-        let version =  defaultArg (Builders.getCurrentBuildVersion()) "1.0.0"
+        Generators.Packagers.UpdateDependencies nuspecFile
+        let version = defaultArg (Builders.getCurrentBuildVersion()) "1.0.0"
         let nugetArgs = sprintf "pack %s -version %s" nuspecFile.Name version
         Exec.Exec "nuget" nugetArgs sourceFolder Map.empty |> Exec.CheckResponseCode
         targetFolder.Create()
