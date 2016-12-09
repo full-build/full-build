@@ -90,3 +90,12 @@ let SaveView (viewId : ViewId) view (isDefault : bool option) =
 let ViewExists viewName =
     let viewFile = GetViewFile viewName 
     viewFile.Exists
+
+let LoadBranch () : string =
+    let file = Env.GetBranchFile ()
+    let branch = System.IO.File.ReadAllText(file.FullName)
+    branch
+
+let SaveBranch (branch : string) : unit =
+    let file = Env.GetBranchFile ()
+    System.IO.File.WriteAllText(file.FullName, branch)

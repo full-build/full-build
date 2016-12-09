@@ -22,71 +22,77 @@ open Collections
 
 // =====================================================================================================
 
-type [<CustomEquality; CustomComparison>] Bookmark =
-    { Graph : Graph
-      Bookmark : Anthology.Bookmark }
+[<Sealed>]
+type Bookmark(graph : Graph, repository : Repository, hash : string) = class end
 with
     override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
-        member this.CompareTo(other) = compareTo this other (fun x -> x.Bookmark)
+        member this.CompareTo(other) = compareTo this other (fun x -> sprintf "%s %s" x.Repository.Name x.Version)
 
     member this.Repository =
-        this.Graph.Repositories |> Seq.find (fun x -> x.Name = this.Bookmark.Repository.toString)
+        repository
 
-    member this.Version = this.Bookmark.Version.toString
+    member this.Version = hash
 
 // =====================================================================================================
 
-and [<CustomEquality; CustomComparison>] Baseline =
-    { Graph : Graph
-      Baseline : Anthology.Baseline }
+[<Sealed>]
+type Baseline(graph : Graph, label : string) = class end
 with
+    let incremental : bool = false
+
+    let mutable bookmarks : Bookmark set option = None
+    let collectBookmarks (tag : string) : Bookmark set =
+        let repos = graph.MasterRepository |> Set.singleton
+                                           |> Set.union graph.Repositories
+
+        let wsDir = Env.GetFolder Env.Folder.Workspace
+        let res = repos |> Set.map (fun x -> let hash = Tools.Vcs.TagToHash wsDir x tag
+                                             Bookmark(graph, x, hash))
+        bookmarks <- Some res
+        res
+
+
     override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
-        member this.CompareTo(other) = compareTo this other (fun x -> x.Baseline)
+        member this.CompareTo(other) = compareTo this other (fun x -> sprintf "%A %A" x.IsIncremental x.BuildNumber)
 
-    member this.IsIncremental = this.Baseline.Incremental
+    member this.IsIncremental = incremental
 
-    member this.Bookmarks =
-        this.Baseline.Bookmarks |> Set.map (fun x -> { Graph = this.Graph; Bookmark = x })
+    member this.BuildNumber = label
 
-    static member (-) (ref : Baseline, target : Baseline) =
+    member this.Bookmarks : Bookmark set = 
+        bookmarks |> orDefault (collectBookmarks label)
+
+    static member (-) (ref : Baseline, target : Baseline) : Bookmark set =
         let changes = Set.difference ref.Bookmarks target.Bookmarks
         changes
 
-    member this.Save () =
-        Configuration.SaveBaseline this.Baseline
+    member this.Save () : unit =
+        let wsDir = Env.GetFolder Env.Folder.Workspace
+        let comment = this.IsIncremental ? ("incremental", "fullbuild")
+        this.Bookmarks |> Set.iter (fun x -> Tools.Vcs.Tag wsDir x.Repository x.Version this.BuildNumber comment)
 
 // =====================================================================================================
 
-and [<Sealed>] Factory(graph : Graph) =
-    member this.Baseline =
-        let baseline = Configuration.LoadBaseline()
-        { Graph = graph; Baseline = baseline }
+[<Sealed>] 
+type Factory(graph : Graph) = class end
+with
+    let wsDir = Env.GetFolder Env.Folder.Workspace
 
-    member this.CreateBaseline (incremental : bool) =
-        let wsDir = Env.GetFolder Env.Folder.Workspace
+    member this.Baseline : Baseline =
+        let branch = Configuration.LoadBranch()
+        let tagFilter = sprintf "fullbuild-%s-*" branch
+        let tag = Tools.Vcs.FindLatestMatchingTag wsDir graph.MasterRepository tagFilter |> orDefault "HEAD"
+        Baseline(graph, tag)
 
-        // get current repositories status
-        let newBookmarks = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
-                                              |> Set.map (fun x -> { Anthology.Bookmark.Repository = Anthology.RepositoryId.from x.Name
-                                                                     Anthology.Bookmark.Version = Anthology.BookmarkVersion (Tools.Vcs.Tip wsDir x) })
+    member this.CreateBaseline (incremental : bool) (buildNumber : string) : Baseline =
+        let tag = Tools.Vcs.Head wsDir graph.MasterRepository
+        Baseline(graph, tag)
 
-        let repo2bookmark = this.Baseline.Bookmarks |> Seq.map (fun x -> x.Bookmark.Repository, x.Bookmark)
-                                                    |> dict
-
-        let oldBookmarks = graph.Repositories |> Set.filter (fun x -> incremental && x.IsCloned |> not)
-                                              |> Set.map (fun x -> repo2bookmark.[Anthology.RepositoryId.from x.Name])
-
-        let bookmarks = oldBookmarks + newBookmarks
-
-        let baseline = { Anthology.Baseline.Incremental = incremental
-                         Anthology.Baseline.Bookmarks = bookmarks }
-        { Graph = graph
-          Baseline = baseline }
-
+// =====================================================================================================
 
 let from graph =
     Factory(graph)

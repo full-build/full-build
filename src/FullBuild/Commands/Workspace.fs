@@ -37,9 +37,7 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
         Tools.Vcs.Clone wsDir graph.MasterRepository true |> Exec.PrintOutput |> Exec.CheckResponseCode
         graph.Save()
 
-        let baselineRepository = Baselines.from graph
-        let baseline = baselineRepository.CreateBaseline false
-        baseline.Save()
+        Tools.Vcs.Ignore wsDir graph.MasterRepository
 
         // setup additional files for views to work correctly
         let installDir = Env.GetFolder Env.Folder.Installation
@@ -47,9 +45,6 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
         let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
         let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
         publishSource.CopyTo(publishTarget.FullName) |> ignore
-
-        Tools.Vcs.Ignore wsDir graph.MasterRepository
-        Tools.Vcs.Commit wsDir graph.MasterRepository "setup"
     finally
         Environment.CurrentDirectory <- currDir
 
@@ -65,18 +60,16 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let allRepos = graph.Repositories
-    let baselineRepository = Baselines.from graph
-    let newBaseline = baselineRepository.CreateBaseline pushInfo.Incremental
-    newBaseline.Save()
-
-    // commit
-    let mainRepo = graph.MasterRepository
-    Try (fun () -> Tools.Vcs.Commit wsDir mainRepo "bookmark")
 
     // copy bin content
+    let mainRepo = graph.MasterRepository
     let hash = Tools.Vcs.Tip wsDir mainRepo
     Core.BuildArtifacts.Publish graph pushInfo.Branch pushInfo.BuildNumber hash
+
+    // then publish baseline
+    let baselineRepository = Baselines.from graph
+    let newBaseline = baselineRepository.CreateBaseline pushInfo.Incremental pushInfo.BuildNumber
+    newBaseline.Save()
 
 let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     // checkout repositories
@@ -84,17 +77,14 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = graph.MasterRepository
-    Tools.Vcs.Checkout wsDir mainRepo (Some checkoutInfo.Version) false
+    Tools.Vcs.Checkout wsDir mainRepo checkoutInfo.Version
 
     // checkout each repository now
     let graph = Configuration.LoadAnthology () |> Graph.from
-    let baselineRepository = Baselines.from graph
-    let baseline = baselineRepository.Baseline
     let clonedRepos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     for repo in clonedRepos do
         DisplayHighlight repo.Name
-        let repoVersion = baseline.Bookmarks |> Seq.find (fun x -> x.Repository.Name = repo.Name)
-        Tools.Vcs.Checkout wsDir repo (Some repoVersion.Version) false
+        Tools.Vcs.Checkout wsDir repo checkoutInfo.Version
 
     // update binaries with observable baseline
     Core.BuildArtifacts.PullReferenceBinaries graph checkoutInfo.Version
@@ -105,25 +95,22 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = graph.MasterRepository
-    try
-        let br = match branchInfo.Branch with
-                 | Some x -> Some x
-                 | None -> Some mainRepo.Branch
-
-        Tools.Vcs.Checkout wsDir mainRepo br false
-    with
-        _ -> printfn "WARNING: No branch on .full-build repository. Is this intended ?"
+    let br = match branchInfo.Branch with
+                | Some x -> x
+                | None -> mainRepo.Branch
+    Tools.Vcs.Checkout wsDir mainRepo br
+    Configuration.SaveBranch br
 
     // checkout each repository now
     let graph = Configuration.LoadAnthology () |> Graph.from
     let clonedRepos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     for repo in clonedRepos do
         let br = match branchInfo.Branch with
-                 | Some x -> Some x
-                 | None -> Some repo.Branch
+                 | Some x -> x
+                 | None -> repo.Branch
 
         DisplayHighlight repo.Name
-        Tools.Vcs.Checkout wsDir repo br true
+        Tools.Vcs.Checkout wsDir repo br
 
 let Install () =
     Core.Package.RestorePackages ()
@@ -261,7 +248,7 @@ let History (historyInfo : CLI.Commands.History) =
     // newBaseline contains only cloned repositories
     // this means deltaBookmarks can contain non cloned repositories
     // before computing history, ensure repositories are correctly cloned
-    let newBaseline = baselineRepository.CreateBaseline false
+    let newBaseline = baselineRepository.CreateBaseline false "temp"
     let deltaBookmarks = baseline - newBaseline
 
     let wsDir = Env.GetFolder Env.Folder.Workspace

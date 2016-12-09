@@ -42,9 +42,6 @@ let Publish (graph : Graph) (branch : string option) buildnum hash =
             let appTargetDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_APPS_FOLDER
             IoHelpers.CopyFolder appDir appTargetDir true
 
-            // publish
-            Try (fun () -> Tools.Vcs.Push wsDir mainRepo)
-
             tmpVersionDir.MoveTo(versionDir.FullName)
         else
             printfn "[WARNING] Build output already exists - skipping"
