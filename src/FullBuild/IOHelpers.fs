@@ -146,10 +146,7 @@ let FindKnownProjects (repoDir : DirectoryInfo) =
      AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories))
                         |> Seq.concat
 
-let EnumarateFiles (dir : DirectoryInfo) =
-    dir.EnumerateFiles()
-
-let EnumarateChildren (dir : DirectoryInfo) =
+let EnumerateChildren (dir : DirectoryInfo) =
     dir.EnumerateFileSystemInfos()
 
 let SaveFileIfNecessary (file : FileInfo) (content : string) =
