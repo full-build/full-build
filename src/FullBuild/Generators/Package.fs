@@ -38,7 +38,7 @@ let private generateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo 
 
 let private generateItemGroupCopyContent (pkgDir : DirectoryInfo) (fxLibs : DirectoryInfo) =
     let relativePath = ComputeRelativeDirPath pkgDir fxLibs
-    let files = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/**/*.*" relativePath
+    let files = sprintf "$(SolutionDir)/.full-build/packages/%s/**/*.*" relativePath
     let copyFiles = XElement(NsMsBuild + "FBCopyFiles",
                         XAttribute(NsNone + "Include", files))
     copyFiles

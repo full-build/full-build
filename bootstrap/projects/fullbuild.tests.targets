@@ -1,13 +1,13 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
+  <Import Project="$(SolutionDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <ItemGroup>
-    <ProjectReference Include="$(FBWorkspaceDir)/src/FullBuild.Tests/FullBuild.Tests.fsproj" Condition="'$(FullBuild_fullbuild_tests)' != ''">
+    <ProjectReference Include="$(SolutionDir)/src/FullBuild.Tests/FullBuild.Tests.fsproj" Condition="'$(FullBuild_fullbuild_tests)' != ''">
       <Project>{faaf3b40-ea78-4eaf-9859-863ff16f6058}</Project>
       <Name>fullbuild.tests</Name>
     </ProjectReference>
-    <Reference Include="$(FBWorkspaceDir)/.full-build/bin/fullbuild.tests.dll" Condition="'$(FullBuild_fullbuild_tests)' == ''">
+    <Reference Include="$(SolutionDir)/.full-build/bin/fullbuild.tests.dll" Condition="'$(FullBuild_fullbuild_tests)' == ''">
       <Private>true</Private>
     </Reference>
   </ItemGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/projects/fullbuild.tests-copy.targets" Condition="'$(FullBuild_fullbuild_testsCopy)' == ''" />
+  <Import Project="$(SolutionDir)/.full-build/projects/fullbuild.tests-copy.targets" Condition="'$(FullBuild_fullbuild_testsCopy)' == ''" />
 </Project>

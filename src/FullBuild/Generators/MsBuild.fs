@@ -28,7 +28,7 @@ open Graph
 let private generatePackageCopy (packageRef : Package) =
     let propName = MsBuildPackagePropertyName packageRef
     let condition = sprintf "'$(%sCopy)' == ''" propName
-    let project = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/package-copy.targets" packageRef.Name
+    let project = sprintf "$(SolutionDir)/.full-build/packages/%s/package-copy.targets" packageRef.Name
     let import = XElement(NsMsBuild + "Import",
                        XAttribute(NsNone + "Project", project),
                        XAttribute(NsNone + "Condition", condition))
@@ -38,7 +38,7 @@ let private generatePackageCopy (packageRef : Package) =
 let private generateProjectCopy (projectRef : Project) =
     let propName = MsBuildProjectPropertyName projectRef
     let condition = sprintf "'$(%sCopy)' == ''" propName
-    let project = sprintf "$(FBWorkspaceDir)/.full-build/projects/%s-copy.targets" projectRef.Output.Name
+    let project = sprintf "$(SolutionDir)/.full-build/projects/%s-copy.targets" projectRef.Output.Name
     let import = XElement(NsMsBuild + "Import",
                        XAttribute(NsNone + "Project", project),
                        XAttribute(NsNone + "Condition", condition))
@@ -64,7 +64,7 @@ let private generateProjectTarget (project : Project) =
     XDocument (
         XElement(NsMsBuild + "Project",
             XElement (NsMsBuild + "Import",
-                XAttribute (NsNone + "Project", "$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets"),
+                XAttribute (NsNone + "Project", "$(SolutionDir)/.full-build/views/$(SolutionName).targets"),
                 XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
             XElement (NsMsBuild + "ItemGroup",
                 XElement(NsMsBuild + "ProjectReference",
@@ -264,11 +264,10 @@ let private convertProject (xproj : XDocument) (project : Project) =
     | None -> ()
 
     // import fb target
-    let wbRelative = ComputeHops (sprintf "%s/%s" project.Repository.Name project.ProjectFile)
     let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     let importFB = XElement (NsMsBuild + "Import",
                        XAttribute (NsNone + "Project",
-                                   sprintf "%s.full-build/full-build.targets" wbRelative))
+                                   "$(SolutionDir)/.full-build/full-build.targets"))
     firstItemGroup.AddBeforeSelf (importFB)
 
     // add project references

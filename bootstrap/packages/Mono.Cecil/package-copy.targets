@@ -6,27 +6,27 @@
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v3.0')">
       <ItemGroup>
-        <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/packages/Mono.Cecil/lib/net20/**/*.*" />
+        <FBCopyFiles Include="$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net20/**/*.*" />
       </ItemGroup>
     </When>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v3.5'">
       <ItemGroup>
-        <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/packages/Mono.Cecil/lib/net35/**/*.*" />
+        <FBCopyFiles Include="$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net35/**/*.*" />
       </ItemGroup>
     </When>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0')">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v4.0'">
       <ItemGroup>
-        <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/packages/Mono.Cecil/lib/net40/**/*.*" />
+        <FBCopyFiles Include="$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net40/**/*.*" />
       </ItemGroup>
     </When>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
       <ItemGroup>
-        <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/packages/Mono.Cecil/lib/net45/**/*.*" />
+        <FBCopyFiles Include="$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/net45/**/*.*" />
       </ItemGroup>
     </When>
     <When Condition="$(TargetFrameworkIdentifier) == 'Silverlight' And $(TargetFrameworkVersion) == 'v5.0'">
       <ItemGroup>
-        <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/packages/Mono.Cecil/lib/sl5/**/*.*" />
+        <FBCopyFiles Include="$(SolutionDir)/.full-build/packages/Mono.Cecil/lib/sl5/**/*.*" />
       </ItemGroup>
     </When>
   </Choose>
