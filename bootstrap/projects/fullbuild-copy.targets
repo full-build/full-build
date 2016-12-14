@@ -3,9 +3,9 @@
     <FullBuild_fullbuildCopy>Y</FullBuild_fullbuildCopy>
   </PropertyGroup>
   <ItemGroup>
-    <FBCopyFiles Include="$(SolutionDir)/.full-build/bin/fullbuild.exe;$(SolutionDir)/.full-build/bin/fullbuild.pdb;$(SolutionDir)/.full-build/bin/fullbuild.exe.mdb" />
+    <FBCopyFiles Include="$(SolutionDir)\.full-build\bin\fullbuild.exe;$(SolutionDir)\.full-build\bin\fullbuild.pdb;$(SolutionDir)\.full-build\bin\fullbuild.exe.mdb" />
   </ItemGroup>
-  <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Configuration/package-copy.targets" Condition="'$(FullBuild_FSharp_Configuration_PkgCopy)' == ''" />
-  <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Core/package-copy.targets" Condition="'$(FullBuild_FSharp_Core_PkgCopy)' == ''" />
-  <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Data/package-copy.targets" Condition="'$(FullBuild_FSharp_Data_PkgCopy)' == ''" />
+  <Import Project="$(SolutionDir)\.full-build\packages\FSharp.Configuration\package-copy.targets" Condition="'$(FullBuild_FSharp_Configuration_PkgCopy)' == ''" />
+  <Import Project="$(SolutionDir)\.full-build\packages\FSharp.Core\package-copy.targets" Condition="'$(FullBuild_FSharp_Core_PkgCopy)' == ''" />
+  <Import Project="$(SolutionDir)\.full-build\packages\FSharp.Data\package-copy.targets" Condition="'$(FullBuild_FSharp_Data_PkgCopy)' == ''" />
 </Project>

@@ -29,7 +29,7 @@ let private generateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo 
         for file in files do
             let assemblyName = Path.GetFileNameWithoutExtension (file.FullName)
             let relativePath = ComputeRelativeFilePath pkgDir file
-            let hintPath = sprintf "%s%s" MSBUILD_PACKAGE_FOLDER relativePath |> ToUnix
+            let hintPath = sprintf "%s%s" MSBUILD_PACKAGE_FOLDER relativePath |> ToWindows
             yield XElement(NsMsBuild + "Reference",
                     XAttribute(NsNone + "Include", assemblyName),
                     XElement(NsMsBuild + "HintPath", hintPath),
@@ -38,7 +38,7 @@ let private generateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo 
 
 let private generateItemGroupCopyContent (pkgDir : DirectoryInfo) (fxLibs : DirectoryInfo) =
     let relativePath = ComputeRelativeDirPath pkgDir fxLibs
-    let files = sprintf "$(SolutionDir)/.full-build/packages/%s/**/*.*" relativePath
+    let files = sprintf @"$(SolutionDir)\.full-build\packages\%s\**\*.*" relativePath
     let copyFiles = XElement(NsMsBuild + "FBCopyFiles",
                         XAttribute(NsNone + "Include", files))
     copyFiles

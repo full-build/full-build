@@ -58,7 +58,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="$(SolutionDir)/.full-build/full-build.targets" />
+  <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
   <ItemGroup>
     <Compile Include="TestHelpers.fs" />
     <Compile Include="CollectionsTests.fs" />
@@ -144,5 +144,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <Import Project="$(SolutionDir)/.full-build/projects/fullbuild.targets" />
-  <Import Project="$(SolutionDir)/.full-build/packages/FsUnit/package.targets" />
+  <Import Project="$(SolutionDir)/.full-build/packages/FsUnit\package.targets" />
+  <Import Project="$(SolutionDir)\.full-build\projects\fullbuild.targets" />
+  <Import Project="$(SolutionDir)\.full-build\packages\FsUnit\package.targets" />
 </Project>
