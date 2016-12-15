@@ -52,6 +52,7 @@ let private getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.map IoHelpers.ToWindows
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER) || x.StartsWith(MSBUILD_PROJECT_FOLDER2))
+                 |> Seq.map IoHelpers.ToPlatformPath
                  |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectId.from)
                  |> Set
 
@@ -119,6 +120,7 @@ let private getFullBuildPackages (prjDoc : XDocument)  =
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.map IoHelpers.ToWindows
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER) || x.StartsWith(MSBUILD_PACKAGE_FOLDER2))
+                 |> Seq.map IoHelpers.ToPlatformPath
                  |> Seq.map parseFullBuildPackage
                  |> Set
     fbPkgs

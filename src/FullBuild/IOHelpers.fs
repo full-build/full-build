@@ -60,6 +60,12 @@ let GetExtensionString ext =
 let AddExt (ext : Extension) (fileName : string) : string =
     ext |> GetExtensionString |> sprintf "%s.%s" fileName
 
+let ToPlatformPath (f : string) : string =
+    let sep = sprintf "%c" System.IO.Path.DirectorySeparatorChar
+    if f |> isNull then f
+    else f.Replace(@"\", sep)
+ 
+
 let ToWindows (f : string) : string =
     if f |> isNull then f
     else f.Replace(@"/", @"\")
