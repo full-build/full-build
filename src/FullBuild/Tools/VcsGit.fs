@@ -58,9 +58,10 @@ let GitTip (repoDir : DirectoryInfo) =
     checkedExecReadLine "git" args repoDir Map.empty
 
 let GitClean (repoDir : DirectoryInfo) (repo : Repository) =
-    checkedExec noBuffering "git" "reset --hard" repoDir Map.empty
-    checkedExec noBuffering "git" "clean -fxd" repoDir Map.empty
     checkedExec noBuffering "git" (sprintf "checkout %s" repo.Branch) repoDir Map.empty
+    let resetArgs = sprintf "reset --hard origin/%s" repo.Branch
+    checkedExec noBuffering "git" resetArgs repoDir Map.empty
+    checkedExec noBuffering "git" "clean -fxd" repoDir Map.empty
 
 let GitIs (repo : Repository) =
     try
@@ -95,7 +96,7 @@ let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (sha
 let GitCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError : bool) =
     let rev = match version with
               | Some x -> x
-              | None -> "HEAD"
+              | None -> "master"
 
     let args = sprintf "checkout %A" rev
     checkedExecMaybeIgnore ignoreError "git" args repoDir Map.empty

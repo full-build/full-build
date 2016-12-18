@@ -19,13 +19,15 @@ open NUnit.Framework
 open Anthology
 
 [<Test>]
-let CheckSaveLoadBaseline () =
+let CheckSaveLoadView () =
     let view1 = { Name = "toto"
                   Filters = ["cassandra-sharp/*"] |> Set
                   Builder = BuilderType.MSBuild
                   UpReferences = false 
                   DownReferences = true 
-                  Modified = false }
+                  Modified = false 
+                  AppFilter = Some "tagada*" 
+                  Tests = false }
 
     let res = ViewSerializer.SerializeView view1
     printfn "%s" res
