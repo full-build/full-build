@@ -84,7 +84,7 @@ let PrintOutput execResult =
     execResult
 
 let private resultToError execResult = 
-    if execResult.ResultCode < 0 then Some (execResult.ResultCode |> sprintf "Process failed with error %d")
+    if execResult.ResultCode <> 0 then Some (execResult.ResultCode |> sprintf "Process failed with error %d")
     else None
 
 let CheckResponseCode execResult =
@@ -97,12 +97,7 @@ let CheckMultipleResponseCode execResults =
     if errors |> Seq.isEmpty |> not then
         errors |> String.concat System.Environment.NewLine |> failwith
 
-let Spawn (command : string) (args : string) =
-    let psi = ProcessStartInfo (FileName = command, UseShellExecute = false, Arguments = args)
-    use proc = Process.Start (psi)
-    ()
-
-let SpawnWithVerb (command : string) (verb : string) =
-    let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Verb = verb)
+let Spawn (command : string) (args : string) (verb : string) =
+    let psi = ProcessStartInfo (FileName = command, UseShellExecute = true, Arguments = args, Verb = verb)
     use proc = Process.Start (psi)
     ()
