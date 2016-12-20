@@ -57,7 +57,7 @@ let CheckGenerateDgmlWithDependencies () =
 
         let view = viewRepository.CreateView "test" (set ["*/g"]) true false false None false Graph.BuilderType.MSBuild
         let res = Generators.Dgml.GraphContent view.Projects true
-        printfn "%s" (res.ToString())
+
         res.ToString() |> should equal (expectedDgml.ToString())
     finally
         System.Environment.CurrentDirectory <- currFolder
