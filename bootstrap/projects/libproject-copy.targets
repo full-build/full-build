@@ -3,7 +3,7 @@
     <FullBuild_libprojectCopy>Y</FullBuild_libprojectCopy>
   </PropertyGroup>
   <ItemGroup>
-    <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/bin/libproject.dll;$(FBWorkspaceDir)/.full-build/bin/libproject.pdb;$(FBWorkspaceDir)/.full-build/bin/libproject.dll.mdb" />
+    <FBCopyFiles Include="$(SolutionDir)\.full-build\bin\libproject.dll;$(SolutionDir)\.full-build\bin\libproject.pdb;$(SolutionDir)\.full-build\bin\libproject.dll.mdb" />
   </ItemGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/Mono.Cecil/package-copy.targets" Condition="'$(FullBuild_Mono_Cecil_PkgCopy)' == ''" />
+  <Import Project="$(SolutionDir)\.full-build\packages\Mono.Cecil\package-copy.targets" Condition="'$(FullBuild_Mono_Cecil_PkgCopy)' == ''" />
 </Project>
