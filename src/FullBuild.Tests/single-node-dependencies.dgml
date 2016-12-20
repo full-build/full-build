@@ -1,26 +1,26 @@
 ﻿<DirectedGraph Layout="Sugiyama" GraphDirection="TopToBottom" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
   <Nodes>
-    <Node Id="4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6" Label="a" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6" IsTest="true" Output="Graph+Assembly" OutputType="Graph+OutputType" />
-    <Node Id="386c73d8-95dc-4684-ba6c-20f4cd63e42a" Label="b" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="386c73d8-95dc-4684-ba6c-20f4cd63e42a" IsTest="true" Output="Graph+Assembly" OutputType="Graph+OutputType" />
-    <Node Id="2904bc7b-8b30-41f1-8160-02b5281704b4" Label="c" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="2904bc7b-8b30-41f1-8160-02b5281704b4" IsTest="true" Output="Graph+Assembly" OutputType="Graph+OutputType" />
-    <Node Id="d7b81c18-45df-44dc-853d-8cab07e1ad97" Label="e" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="d7b81c18-45df-44dc-853d-8cab07e1ad97" IsTest="true" Output="Graph+Assembly" OutputType="Graph+OutputType" />
-    <Node Id="78c2e0d4-b410-4702-af93-71db7db228d0" Label="f" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="78c2e0d4-b410-4702-af93-71db7db228d0" IsTest="true" Output="Graph+Assembly" OutputType="Graph+OutputType" />
-    <Node Id="eb5c2f2b-d117-47b0-8067-305b4bae9aa2" Label="g" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="eb5c2f2b-d117-47b0-8067-305b4bae9aa2" IsTest="true" Output="Graph+Assembly" OutputType="Graph+OutputType" />
+    <Node Id="4C116D6D-22FF-4B9C-80FD-DE0E6D0A96B6" Label="a" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="4C116D6D-22FF-4B9C-80FD-DE0E6D0A96B6" IsTest="true" Output="Graph+Assembly" OutputType="Graph+OutputType" />
+    <Node Id="386C73D8-95DC-4684-BA6C-20F4CD63E42A" Label="b" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="386C73D8-95DC-4684-BA6C-20F4CD63E42A" IsTest="true" Output="Graph+Assembly" OutputType="Graph+OutputType" />
+    <Node Id="2904BC7B-8B30-41F1-8160-02B5281704B4" Label="c" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="2904BC7B-8B30-41F1-8160-02B5281704B4" IsTest="true" Output="Graph+Assembly" OutputType="Graph+OutputType" />
+    <Node Id="D7B81C18-45DF-44DC-853D-8CAB07E1AD97" Label="e" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="D7B81C18-45DF-44DC-853D-8CAB07E1AD97" IsTest="true" Output="Graph+Assembly" OutputType="Graph+OutputType" />
+    <Node Id="78C2E0D4-B410-4702-AF93-71DB7DB228D0" Label="f" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="78C2E0D4-B410-4702-AF93-71DB7DB228D0" IsTest="true" Output="Graph+Assembly" OutputType="Graph+OutputType" />
+    <Node Id="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" Label="g" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" IsTest="true" Output="Graph+Assembly" OutputType="Graph+OutputType" />
     <Node Id="src" Label="src" Group="Expanded" />
   </Nodes>
   <Links>
-    <Link Source="src" Target="4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6" Category="Contains" />
-    <Link Source="src" Target="386c73d8-95dc-4684-ba6c-20f4cd63e42a" Category="Contains" />
-    <Link Source="src" Target="2904bc7b-8b30-41f1-8160-02b5281704b4" Category="Contains" />
-    <Link Source="src" Target="d7b81c18-45df-44dc-853d-8cab07e1ad97" Category="Contains" />
-    <Link Source="src" Target="78c2e0d4-b410-4702-af93-71db7db228d0" Category="Contains" />
-    <Link Source="src" Target="eb5c2f2b-d117-47b0-8067-305b4bae9aa2" Category="Contains" />
-    <Link Source="2904bc7b-8b30-41f1-8160-02b5281704b4" Target="4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6" Category="ProjectRef" />
-    <Link Source="2904bc7b-8b30-41f1-8160-02b5281704b4" Target="386c73d8-95dc-4684-ba6c-20f4cd63e42a" Category="ProjectRef" />
-    <Link Source="d7b81c18-45df-44dc-853d-8cab07e1ad97" Target="2904bc7b-8b30-41f1-8160-02b5281704b4" Category="ProjectRef" />
-    <Link Source="78c2e0d4-b410-4702-af93-71db7db228d0" Target="2904bc7b-8b30-41f1-8160-02b5281704b4" Category="ProjectRef" />
-    <Link Source="eb5c2f2b-d117-47b0-8067-305b4bae9aa2" Target="d7b81c18-45df-44dc-853d-8cab07e1ad97" Category="ProjectRef" />
-    <Link Source="eb5c2f2b-d117-47b0-8067-305b4bae9aa2" Target="78c2e0d4-b410-4702-af93-71db7db228d0" Category="ProjectRef" />
+    <Link Source="src" Target="4C116D6D-22FF-4B9C-80FD-DE0E6D0A96B6" Category="Contains" />
+    <Link Source="src" Target="386C73D8-95DC-4684-BA6C-20F4CD63E42A" Category="Contains" />
+    <Link Source="src" Target="2904BC7B-8B30-41F1-8160-02B5281704B4" Category="Contains" />
+    <Link Source="src" Target="D7B81C18-45DF-44DC-853D-8CAB07E1AD97" Category="Contains" />
+    <Link Source="src" Target="78C2E0D4-B410-4702-AF93-71DB7DB228D0" Category="Contains" />
+    <Link Source="src" Target="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" Category="Contains" />
+    <Link Source="2904BC7B-8B30-41F1-8160-02B5281704B4" Target="4C116D6D-22FF-4B9C-80FD-DE0E6D0A96B6" Category="ProjectRef" />
+    <Link Source="2904BC7B-8B30-41F1-8160-02B5281704B4" Target="386C73D8-95DC-4684-BA6C-20F4CD63E42A" Category="ProjectRef" />
+    <Link Source="D7B81C18-45DF-44DC-853D-8CAB07E1AD97" Target="2904BC7B-8B30-41F1-8160-02B5281704B4" Category="ProjectRef" />
+    <Link Source="78C2E0D4-B410-4702-AF93-71DB7DB228D0" Target="2904BC7B-8B30-41F1-8160-02B5281704B4" Category="ProjectRef" />
+    <Link Source="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" Target="D7B81C18-45DF-44DC-853D-8CAB07E1AD97" Category="ProjectRef" />
+    <Link Source="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" Target="78C2E0D4-B410-4702-AF93-71DB7DB228D0" Category="ProjectRef" />
   </Links>
   <Categories>
     <Category Id="Project" Background="Green" />
