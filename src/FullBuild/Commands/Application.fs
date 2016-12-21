@@ -57,7 +57,8 @@ let List (appInfo : CLI.Commands.ListApplications) =
     let apps = match appInfo.Version with
                | None -> graph.Applications |> Set.toSeq
                | Some version -> let maxThrottle = System.Environment.ProcessorCount*4
-                                 graph.Applications |> Seq.map (filterApp graph version)
+                                 graph.Applications |> Seq.filter (fun (x : Graph.Application) -> x.Publisher = Graph.PublisherType.Zip)
+                                                    |> Seq.map (filterApp graph version)
                                                     |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
                                                     |> Seq.concat
     apps |> Seq.iter displayApp
