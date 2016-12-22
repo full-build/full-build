@@ -51,7 +51,7 @@ let GenerateSolutionContent (projects : Project set) =
             yield "EndProject"
 
         let repositories = projects |> Set.map (fun x -> let guid = GenerateGuidFromString (x.Repository.Name)
-                                                         (x.Repository, guid.ToString("D")))
+                                                         (x.Repository, guid |> StringHelpers.toVSGuid))
                                     |> Map
         for repository in repositories do
             let repo = repository.Key.Name

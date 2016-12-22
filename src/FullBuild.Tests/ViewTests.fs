@@ -33,6 +33,7 @@ let CheckGenerateSolution () =
 
     let expectedFile = testFile "anthology-solution.txt"
     let expectedLines = System.IO.File.ReadAllLines expectedFile
+
     content |> should equal expectedLines
 
 

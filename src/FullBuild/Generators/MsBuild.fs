@@ -28,7 +28,7 @@ open Graph
 let private generatePackageCopy (packageRef : Package) =
     let propName = MsBuildPackagePropertyName packageRef
     let condition = sprintf "'$(%sCopy)' == ''" propName
-    let project = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/package-copy.targets" packageRef.Name
+    let project = sprintf @"$(SolutionDir)\.full-build\packages\%s\package-copy.targets" packageRef.Name
     let import = XElement(NsMsBuild + "Import",
                        XAttribute(NsNone + "Project", project),
                        XAttribute(NsNone + "Condition", condition))
@@ -38,7 +38,7 @@ let private generatePackageCopy (packageRef : Package) =
 let private generateProjectCopy (projectRef : Project) =
     let propName = MsBuildProjectPropertyName projectRef
     let condition = sprintf "'$(%sCopy)' == ''" propName
-    let project = sprintf "$(FBWorkspaceDir)/.full-build/projects/%s-copy.targets" projectRef.Output.Name
+    let project = sprintf @"$(SolutionDir)\.full-build\projects\%s-copy.targets" projectRef.Output.Name
     let import = XElement(NsMsBuild + "Import",
                        XAttribute(NsNone + "Project", project),
                        XAttribute(NsNone + "Condition", condition))
@@ -50,13 +50,13 @@ let private generateProjectTarget (project : Project) =
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let cpyCondition = sprintf "'$(%sCopy)' == ''" projectProperty
-    let projectFile = sprintf "%s/%s/%s" MSBUILD_SOLUTION_DIR (project.Repository.Name) project.ProjectFile
+    let projectFile = sprintf @"%s\%s\%s" MSBUILD_SOLUTION_DIR (project.Repository.Name) project.ProjectFile
     let output = (project.Output.Name)
     let ext = match project.OutputType with
               | OutputType.Dll -> "dll"
               | OutputType.Exe -> "exe"
-    let binFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
-    let refFile = sprintf "%s/.full-build/projects/%s-copy.targets" MSBUILD_SOLUTION_DIR project.Output.Name
+    let binFile = sprintf @"%s\%s.%s" MSBUILD_BIN_FOLDER output ext
+    let refFile = sprintf @"%s\.full-build\projects\%s-copy.targets" MSBUILD_SOLUTION_DIR project.Output.Name
 
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -64,7 +64,7 @@ let private generateProjectTarget (project : Project) =
     XDocument (
         XElement(NsMsBuild + "Project",
             XElement (NsMsBuild + "Import",
-                XAttribute (NsNone + "Project", "$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets"),
+                XAttribute (NsNone + "Project", @"$(SolutionDir)\.full-build\views\$(SolutionName).targets"),
                 XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
             XElement (NsMsBuild + "ItemGroup",
                 XElement(NsMsBuild + "ProjectReference",
@@ -92,9 +92,9 @@ let private generateProjectCopyTarget (project : Project) =
     let ext = match project.OutputType with
                 | OutputType.Dll -> "dll"
                 | OutputType.Exe -> "exe"
-    let binFile = sprintf "%s/%s.%s" MSBUILD_BIN_FOLDER output ext
-    let pdbFile = sprintf "%s/%s.pdb" MSBUILD_BIN_FOLDER output
-    let mdbFile = sprintf "%s/%s.%s.mdb" MSBUILD_BIN_FOLDER output ext
+    let binFile = sprintf @"%s\%s.%s" MSBUILD_BIN_FOLDER output ext
+    let pdbFile = sprintf @"%s\%s.pdb" MSBUILD_BIN_FOLDER output
+    let mdbFile = sprintf @"%s\%s.%s.mdb" MSBUILD_BIN_FOLDER output ext
     let incFile = sprintf "%s;%s;%s" binFile pdbFile mdbFile
 
     // This is the import targets that will be Import'ed inside a proj file.
@@ -125,11 +125,11 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
             || attr.StartsWith(MSBUILD_PACKAGE_FOLDER2, StringComparison.CurrentCultureIgnoreCase)
 
     let filterFullBuildTargets (xel : XElement) =
-        let attr = !> (xel.Attribute (NsNone + "Project")) : string
-        attr.EndsWith(".full-build/full-build.targets", StringComparison.CurrentCultureIgnoreCase)
+        let attr = (!> (xel.Attribute (NsNone + "Project")) : string) |> ToWindows
+        attr.EndsWith(@".full-build\full-build.targets", StringComparison.CurrentCultureIgnoreCase)
 
     let filterNuget (xel : XElement) =
-        let attr = !> (xel.Attribute (NsNone + "Project")) : string
+        let attr = (!> (xel.Attribute (NsNone + "Project")) : string) |> ToWindows
         attr.StartsWith("$(SolutionDir)\.nuget\NuGet.targets", StringComparison.CurrentCultureIgnoreCase)
 
     let filterNugetTarget (xel : XElement) =
@@ -145,7 +145,7 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
         attr.StartsWith("paket.references", StringComparison.CurrentCultureIgnoreCase)
 
     let filterPaketTarget (xel : XElement) =
-        let attr = !> (xel.Attribute (NsNone + "Project")) : string
+        let attr = (!> (xel.Attribute (NsNone + "Project")) : string) |> ToWindows
         attr.StartsWith("$(SolutionDir)\.paket\paket.targets", StringComparison.CurrentCultureIgnoreCase)
 
     let filterPaket (xel : XElement) =
@@ -264,11 +264,10 @@ let private convertProject (xproj : XDocument) (project : Project) =
     | None -> ()
 
     // import fb target
-    let wbRelative = ComputeHops (sprintf "%s/%s" project.Repository.Name project.ProjectFile)
     let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
     let importFB = XElement (NsMsBuild + "Import",
                        XAttribute (NsNone + "Project",
-                                   sprintf "%s.full-build/full-build.targets" wbRelative))
+                                   @"$(SolutionDir)\.full-build\full-build.targets"))
     firstItemGroup.AddBeforeSelf (importFB)
 
     // add project references
@@ -280,7 +279,7 @@ let private convertProject (xproj : XDocument) (project : Project) =
 
     // add nuget references
     for packageReference in project.PackageReferences do
-        let importFile = sprintf "%s%s/package.targets" MSBUILD_PACKAGE_FOLDER packageReference.Name
+        let importFile = sprintf @"%s%s\package.targets" MSBUILD_PACKAGE_FOLDER packageReference.Name
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
         cproj.Root.LastNode.AddAfterSelf(import)
