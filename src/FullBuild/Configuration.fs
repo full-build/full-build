@@ -28,14 +28,6 @@ let SaveAnthology  =
     let anthoFn = GetAnthologyFile ()
     AnthologySerializer.Save anthoFn
 
-let LoadBaseline() : Baseline =
-    let baselineFile = GetBaselineFile ()
-    BaselineSerializer.Load baselineFile
-
-let SaveBaseline =
-    let baselineFile = GetBaselineFile ()
-    BaselineSerializer.Save baselineFile
-
 let LoadView (viewId :ViewId) : View =
     let viewFile = GetViewFile viewId.toString 
     if not viewFile.Exists then failwithf "View %A does not exist" viewId.toString
