@@ -25,6 +25,18 @@ open System
 open Graph
 
 
+let printPull ((repo, execResult) : (Repository * Exec.ExecResult)) =
+    lock consoleLock (fun () -> IoHelpers.DisplayHighlight repo.Name
+                                execResult |> Exec.PrintOutput)
+
+let private checkoutRepo wsDir (checkoutInfo : CLI.Commands.CheckoutVersion) (repo : Repository) = async {
+    return (repo, Tools.Vcs.Checkout wsDir repo checkoutInfo.Version) |> printPull
+}
+
+
+
+
+
 let Create (createInfo : CLI.Commands.SetupWorkspace) =
     let wsDir = DirectoryInfo(createInfo.Path)
     wsDir.Create()
@@ -48,27 +60,16 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     finally
         Environment.CurrentDirectory <- currDir
 
-let Init (initInfo : CLI.Commands.InitWorkspace) =
-    let wsDir = DirectoryInfo(initInfo.Path)
-    wsDir.Create()
-    if IsWorkspaceFolder wsDir then
-        printf "[WARNING] Workspace already exists - skipping"
-    else
-        let graph = Graph.init initInfo.MasterRepository initInfo.Type
-        Tools.Vcs.Clone wsDir graph.MasterRepository true |> Exec.PrintOutput |> Exec.CheckResponseCode
-
+        
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
-    let wsDir = Env.GetFolder Env.Folder.Workspace
 
     // copy bin content
-    let mainRepo = graph.MasterRepository
-    let hash = Tools.Vcs.Tip wsDir mainRepo
-    Core.BuildArtifacts.Publish graph pushInfo.Branch pushInfo.BuildNumber hash
-
-    // then publish baseline
     let baselineRepository = Baselines.from graph
     let newBaseline = baselineRepository.CreateBaseline pushInfo.Incremental pushInfo.BuildNumber
+    Core.BuildArtifacts.Publish graph newBaseline.Info
+
+    // then publish baseline
     newBaseline.Save()
 
 let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
@@ -77,44 +78,45 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = graph.MasterRepository
-    Tools.Vcs.Checkout wsDir mainRepo checkoutInfo.Version
+    Tools.Vcs.Checkout wsDir mainRepo checkoutInfo.Version |> Exec.CheckResponseCode
 
     // checkout each repository now
     let graph = Configuration.LoadAnthology () |> Graph.from
-    let clonedRepos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
-    for repo in clonedRepos do
-        DisplayHighlight repo.Name
-        Tools.Vcs.Checkout wsDir repo checkoutInfo.Version
+    let repos = graph.Repositories
+    let maxThrottle = System.Environment.ProcessorCount*4
+    let branchResults = repos |> Seq.filter (fun x -> x.IsCloned)
+                              |> Seq.map (checkoutRepo wsDir checkoutInfo)
+                              |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
+
+    branchResults |> Exec.CheckMultipleResponseCode
 
     // update binaries with observable baseline
     Core.BuildArtifacts.PullReferenceBinaries graph checkoutInfo.Version
 
+
 let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
-    // checkout repositories
-    DisplayHighlight ".full-build"
-    let graph = Configuration.LoadAnthology () |> Graph.from
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let mainRepo = graph.MasterRepository
-    let br = match branchInfo.Branch with
-                | Some x -> x
-                | None -> mainRepo.Branch
-    Tools.Vcs.Checkout wsDir mainRepo br
-    Configuration.SaveBranch br
+    match branchInfo.Branch with
+    | Some x -> Configuration.SaveBranch x
+    | None -> let name = Configuration.LoadBranch()
+              printfn "%s" name
 
-    // checkout each repository now
-    let graph = Configuration.LoadAnthology () |> Graph.from
-    let clonedRepos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
-    for repo in clonedRepos do
-        let br = match branchInfo.Branch with
-                 | Some x -> x
-                 | None -> repo.Branch
 
-        DisplayHighlight repo.Name
-        Tools.Vcs.Checkout wsDir repo br
+let Init (initInfo : CLI.Commands.InitWorkspace) =
+    let wsDir = DirectoryInfo(initInfo.Path)
+    wsDir.Create()
+    if IsWorkspaceFolder wsDir then
+        printf "[WARNING] Workspace already exists - skipping"
+    else
+        let graph = Graph.init initInfo.MasterRepository initInfo.Type
+        Tools.Vcs.Clone wsDir graph.MasterRepository true |> Exec.PrintOutput |> Exec.CheckResponseCode
+        let branchInfo = { CLI.Commands.BranchWorkspace.Branch = Some graph.MasterRepository.Branch }
+        Branch branchInfo
+
 
 let Install () =
     Core.Package.RestorePackages ()
     Core.Conversion.GenerateProjectArtifacts()
+
 
 let consoleProgressBar max =
     MailboxProcessor.Start(fun inbox ->
@@ -128,10 +130,6 @@ let consoleProgressBar max =
         loop 1)
 
 let consoleLock = System.Object()
-
-let printPull ((repo, execResult) : (Repository * Exec.ExecResult)) =
-    lock consoleLock (fun () -> IoHelpers.DisplayHighlight repo.Name
-                                execResult |> Exec.PrintOutput)
 
 let private cloneRepo wsDir rebase (repo : Repository) = async {
     return (repo, Tools.Vcs.Pull wsDir repo rebase) |> printPull
@@ -167,12 +165,11 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
 
         Install ()
 
-    if pullInfo.LatestBin then
-        let versions = Tools.Vcs.Logs wsDir graph.MasterRepository
-        Core.BuildArtifacts.PullLatestBinaries graph versions
-    elif pullInfo.Bin then
-        let versions = Tools.Vcs.Logs wsDir graph.MasterRepository
-        Core.BuildArtifacts.PullLatestCompatibleBinaries graph versions
+    if pullInfo.Bin then
+        let baselineRepository = Baselines.from graph
+        let baseline = baselineRepository.Baseline
+        let tag = Tag.Format baseline.Info
+        Core.BuildArtifacts.PullReferenceBinaries graph tag
 
 let Exec (execInfo : CLI.Commands.Exec) =
     let graph = Configuration.LoadAnthology() |> Graph.from
@@ -212,8 +209,8 @@ let Clean () =
 
         // remove repositories
         let reposToRemove = Set.difference oldGraph.Repositories newAntho.Repositories
-        for repo in reposToRemove do
-            if repo.IsCloned then Tools.Vcs.Unclone wsDir repo
+        reposToRemove |> Seq.filter (fun x -> x.IsCloned)
+                      |> Seq.iter (Tools.Vcs.Unclone wsDir)
 
         // clean existing repositories
         for repo in newAntho.Repositories do

@@ -26,10 +26,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>
-    </StartArguments>
-    <StartWorkingDirectory>
-    </StartWorkingDirectory>
+    <StartArguments>push --all 1.2.3</StartArguments>
+    <StartWorkingDirectory>c:\src\avp</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>
@@ -97,6 +95,7 @@
     <Compile Include="Tools\Paket.fs" />
     <Compile Include="Tools\VcsGit.fs" />
     <Compile Include="Tools\Vcs.fs" />
+    <Compile Include="Tools\Tag.fs" />
     <Compile Include="Baselines.fsi" />
     <Compile Include="Baselines.fs" />
     <Compile Include="Views.fsi" />

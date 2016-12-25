@@ -95,7 +95,7 @@ let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (sha
 
 let GitCheckout (repoDir : DirectoryInfo) (version : string) =
     let args = sprintf "checkout %A" version
-    checkedExec noBuffering "git" args repoDir Map.empty
+    ExecGetOutput "git" args repoDir Map.empty
 
 let GitHistory (repoDir : DirectoryInfo) (version : string) =
     let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version
@@ -134,8 +134,8 @@ let GitTagToHash (repoDir : DirectoryInfo) (tag : string) : string =
 let GitHead (repoDir : DirectoryInfo) () =
     "HEAD"
 
-let GitTag (repoDir : DirectoryInfo) (version : string) (tag : string) (comment : string) =
-    let argsTag = sprintf @"tag -a %s -m %A %s" tag comment version
+let GitTag (repoDir : DirectoryInfo) (tag : string) =
+    let argsTag = sprintf @"tag -a %s" tag
     checkedExec noBuffering "git" argsTag repoDir Map.empty
 
     let argsPush = sprintf @"push %s" tag

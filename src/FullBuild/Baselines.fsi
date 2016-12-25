@@ -24,8 +24,7 @@ with
 
 and [<Sealed>] Baseline = interface System.IComparable
 with
-    member IsIncremental: bool
-    member BuildNumber: string
+    member Info: Tag.TagInfo
     member Bookmarks: Bookmark set
 
     static member (-): Baseline*Baseline

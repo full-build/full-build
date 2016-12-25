@@ -348,35 +348,20 @@ let private commandBranch (args : string list) =
     | [] -> Command.BranchWorkspace {Branch = None}
     | _ -> Command.Error MainCommand.Branch
 
-let rec private commandPush (branch : string option) (all : bool) (args : string list) =
+let rec private commandPush (all : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Branch
-      :: Param branch
-      :: tail -> tail |> commandPush (Some branch) all
-    | TokenOption TokenOption.All
-      :: tail -> tail |> commandPush branch true
-    | [Param buildNumber] -> Command.PushWorkspace {Branch = branch; BuildNumber = buildNumber; Incremental = not all }
+    | TokenOption TokenOption.All :: tail -> tail |> commandPush true
+    | [Param buildNumber] -> Command.PushWorkspace {BuildNumber = buildNumber; Incremental = not all }
     | _ -> Command.Error MainCommand.Push
 
-let rec private commandPull (src : bool) (bin : bool) (latestBin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
+let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Src
-      :: tail -> tail |> commandPull true false false rebase multithread view
-    | TokenOption TokenOption.Bin
-      :: tail -> tail |> commandPull false true false rebase multithread view
-    | TokenOption TokenOption.LatestBin
-      :: tail -> tail |> commandPull false false true rebase multithread view
-    | TokenOption TokenOption.Rebase
-      :: tail -> tail |> commandPull src bin latestBin true multithread view
-    | TokenOption TokenOption.Multithread
-      :: tail -> printfn "WARNING: option pull --mt is deprecated"
-                 tail |> commandPull src bin latestBin rebase true view
-    | TokenOption TokenOption.NoMultithread
-      :: tail -> tail |> commandPull src bin latestBin rebase false view
-    | TokenOption TokenOption.View
-      :: ViewId name
-      :: tail -> tail |> commandPull true true false rebase multithread (Some name)
-    | [] -> Command.PullWorkspace { Sources = src ; Bin = bin; LatestBin = latestBin; Rebase = rebase; Multithread = multithread; View = view }
+    | TokenOption TokenOption.Src :: tail -> tail |> commandPull true false rebase multithread view
+    | TokenOption TokenOption.Bin :: tail -> tail |> commandPull false true rebase multithread view
+    | TokenOption TokenOption.Rebase :: tail -> tail |> commandPull src bin true multithread view
+    | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandPull src bin rebase false view
+    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPull true true rebase multithread (Some name)
+    | [] -> Command.PullWorkspace { Sources = src ; Bin = bin; Rebase = rebase; Multithread = multithread; View = view }
     | _ -> Command.Error MainCommand.Pull
 
 let private commandClean (args : string list) =
@@ -566,8 +551,8 @@ let Parse (args : string list) : Command =
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
-    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush None false
-    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false false true None
+    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush false
+    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false true None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
     | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory false
@@ -634,7 +619,7 @@ let UsageContent() =
         MainCommand.Init, "init <master-repository> <local-path> : initialize a new workspace in given path"
         MainCommand.CloneRepository, "clone [--nomt] [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
         MainCommand.Checkout, "checkout <version> : checkout workspace to version"
-        MainCommand.Branch, "branch [<branch>] : checkout workspace to branch"
+        MainCommand.Branch, "branch [<branch>] : switch to branch"
         MainCommand.InstallPackage, "install : install packages"
         MainCommand.AddView, "view [--down] [--up] [--modified] [--app <app-wildcard>] [--static] [--test] <viewId> <viewId-wildcard>+ : add repositories to view"
         MainCommand.OpenView, "open <viewId> : open view with your favorite ide"
@@ -646,7 +631,7 @@ let UsageContent() =
         MainCommand.Index, "index <repoId-wildcard>+ : index repositories"
         MainCommand.Convert, "convert <repoId-wildcard> : convert projects in repositories"
         MainCommand.Pull, "pull [--src|--bin|--latest-bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
-        MainCommand.Push, "push [--branch <branch>] [--all] <buildNumber> : push a baseline from current repositories version and display version"
+        MainCommand.Push, "push [--all] <buildNumber> : push a baseline from current repositories version and display version"
         MainCommand.PublishApp, "publish [--nomt] [--view <viewId>] <appId-wildcard> : publish application"
         MainCommand.Bind, "bind <projectId-wildcard>+ : update bindings"
         MainCommand.Clean, "clean : DANGER! reset and clean workspace (interactive command)"

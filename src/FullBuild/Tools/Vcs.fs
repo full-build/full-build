@@ -70,5 +70,5 @@ let TagToHash (wsDir : DirectoryInfo) (repo : Repository) (tag : string) : strin
 let Head (wsDir : DirectoryInfo) (repo : Repository) : string =
     (chooseVcs wsDir repo.Vcs repo GitHead) ()
    
-let Tag (wsDir : DirectoryInfo) (repo : Repository) (version : string) (tag : string) (comment : string) : unit =
-    (chooseVcs wsDir repo.Vcs repo GitTag) version tag comment
+let Tag (wsDir : DirectoryInfo) (repo : Repository) (tag : string): unit =
+    (chooseVcs wsDir repo.Vcs repo GitTag) tag

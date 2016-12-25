@@ -103,9 +103,6 @@ let GetCsGlobalAssemblyInfoFileName() =
 let GetAnthologyFile() =
     GetFolder Folder.Config |> GetFile ANTHOLOGY_FILENAME
 
-let GetBaselineFile() =
-    GetFolder Folder.Config  |> GetFile BASELINE_FILENAME
-
 let GetViewFile viewName =
     GetFolder Folder.View |> GetFile (AddExt Extension.View viewName)
 
@@ -119,7 +116,7 @@ let GetSolutionDefinesFile viewName =
     GetFolder Folder.View |> GetFile (AddExt Extension.Targets viewName)
 
 let GetBranchFile () =
-    GetFolder Folder.Config |> GetFile BRANCH_FILENAME
+    GetFolder Folder.View |> GetFile BRANCH_FILENAME
 
 let IsMono () =
     let monoRuntime = System.Type.GetType ("Mono.Runtime")
