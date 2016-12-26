@@ -2,6 +2,7 @@ v3.2
   * Better support for NuGet
   * Fix outstanding issues with Xamarin Studio and Visual Studio on macOS
   * Get rid of $(FBWorkspaceDir) as NCrunch does not work anyway
+  * Tag for baseline (issue #114)
 
 v3.1
   * Create view from application (issue #112)
