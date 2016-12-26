@@ -142,8 +142,7 @@ let DisplayHighlight (s : string) =
         let oldColor = Console.ForegroundColor
         try
             Console.ForegroundColor <- ConsoleColor.Cyan
-            Console.WriteLine("{0}", [|s|])
-            printfn "%s" s
+            Console.WriteLine("{0}", s)
         finally
             Console.ForegroundColor <- oldColor
 
