@@ -30,9 +30,9 @@ let private checkedExec onEnd =
         execResult |> checkErrorCode
     fun x y z s -> Exec x y z s  |> ycheck
 
-let private checkedExecMaybeIgnore ignoreError =
-    let check = if ignoreError then ignore else checkErrorCode
-    fun x y z s -> Exec x y z s  |> check
+//let private checkedExecMaybeIgnore ignoreError =
+//    let check = if ignoreError then ignore else checkErrorCode
+//    fun x y z s -> Exec x y z s  |> check
 
 let private checkedExecReadLine =
     fun x y z s ->
@@ -40,13 +40,13 @@ let private checkedExecReadLine =
         res |> checkErrorCode
         res.Out @ res.Error
 
-let GitCommit (repoDir : DirectoryInfo) (comment : string) =
-    checkedExec noBuffering "git" "add --all" repoDir Map.empty
-    let args = sprintf "commit -m %A" comment
-    checkedExec noBuffering "git" args repoDir Map.empty
+//let GitCommit (repoDir : DirectoryInfo) (comment : string) =
+//    checkedExec noBuffering "git" "add --all" repoDir Map.empty
+//    let args = sprintf "commit -m %A" comment
+//    checkedExec noBuffering "git" args repoDir Map.empty
 
-let GitPush (repoDir : DirectoryInfo) =
-    checkedExec noBuffering "git" "push --quiet" repoDir Map.empty
+//let GitPushTag (repoDir : DirectoryInfo) =
+//    checkedExec noBuffering "git" "push --quiet" repoDir Map.empty
 
 let GitPull (repoDir : DirectoryInfo) (rebase : bool) =
     let dorebase = if rebase then "--rebase" else "--ff-only"
@@ -93,13 +93,9 @@ let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (sha
     commitMsgFile.CopyTo (target.FullName) |> ignore
     res
 
-let GitCheckout (repoDir : DirectoryInfo) (version : string option) (ignoreError : bool) =
-    let rev = match version with
-              | Some x -> x
-              | None -> "master"
-
-    let args = sprintf "checkout %A" rev
-    checkedExecMaybeIgnore ignoreError "git" args repoDir Map.empty
+let GitCheckout (repoDir : DirectoryInfo) (version : string) =
+    let args = sprintf "checkout %A" version
+    ExecGetOutput "git" args repoDir Map.empty
 
 let GitHistory (repoDir : DirectoryInfo) (version : string) =
     let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version
@@ -122,3 +118,26 @@ let GitIgnore (repoDir : DirectoryInfo) =
     let installDir = Env.GetFolder Env.Folder.Installation
     let srcGitIgnore = installDir |> IoHelpers.GetFile "gitignore"
     srcGitIgnore.CopyTo(dstGitIgnore.FullName) |> ignore
+
+let GitFindLatestMatchingTag (repoDir : DirectoryInfo) (filter : string) : string option =
+    let args = sprintf "describe --match %A" filter
+    let res = ExecGetOutput "git" args repoDir Map.empty
+    if res.Out.Length = 1 then Some res.Out.[0]
+    else None
+
+let GitTagToHash (repoDir : DirectoryInfo) (tag : string) : string =
+    let args = sprintf @"rev-list --format=""%%H %%s"" -n 1 %s" tag
+    let res = checkedExecReadLine "git" args repoDir Map.empty
+    let items = res.[0].Split(' ')
+    items.[0]
+
+let GitHead (repoDir : DirectoryInfo) () =
+    "HEAD"
+
+let GitTag (repoDir : DirectoryInfo) (tag : string) =
+    let comment = "fullbuild"
+    let argsTag = sprintf @"tag -a %s -m %A" tag comment
+    checkedExec noBuffering "git" argsTag repoDir Map.empty
+
+    let argsPush = sprintf @"push %s" tag
+    checkedExec noBuffering "git" argsPush repoDir Map.empty

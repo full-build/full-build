@@ -95,11 +95,12 @@ let tryMain argv =
 
 [<EntryPoint>]
 let main argv =
+    let debug, args = CLI.CommandLine.IsDebug argv
     try
-        tryMain argv
+        tryMain args
     with
-        x -> printfn "---------------------------------------------------"
-             printfn "Unexpected error:"
-             printfn "%A" x
-             printfn "---------------------------------------------------"
+        x -> if debug |> not then printfn "Error: %s" x.Message
+             else printfn "---------------------------------------------------"
+                  printfn "%A" x
+                  printfn "---------------------------------------------------"
              5

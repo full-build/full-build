@@ -18,7 +18,6 @@ open Graph
 open System.IO
 open VcsGit
 
-
 let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gitFun =
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name
     let f = match vcsType with
@@ -40,8 +39,8 @@ let Tip (wsDir : DirectoryInfo) (repo : Repository) =
     (chooseVcs wsDir repo.Vcs repo GitTip).[0]
 
 // version : None ==> master
-let Checkout (wsDir : DirectoryInfo) (repo : Repository) (version : string option) (ignore : bool) =
-    (chooseVcs wsDir repo.Vcs repo GitCheckout) version ignore
+let Checkout (wsDir : DirectoryInfo) (repo : Repository) (version : string) =
+    (chooseVcs wsDir repo.Vcs repo GitCheckout) version
 
 let Ignore (wsDir : DirectoryInfo) (repo : Repository) =
     chooseVcs wsDir repo.Vcs repo  GitIgnore
@@ -49,20 +48,27 @@ let Ignore (wsDir : DirectoryInfo) (repo : Repository) =
 let Pull (wsDir : DirectoryInfo) (repo : Repository) (rebase : bool) =
     (chooseVcs wsDir repo.Vcs repo GitPull) rebase
 
-let Commit (wsDir : DirectoryInfo) (repo : Repository) (comment : string) =
-    (chooseVcs wsDir repo.Vcs repo GitCommit) comment
-
-let Push (wsDir : DirectoryInfo) (repo : Repository) =
-    (chooseVcs wsDir repo.Vcs repo GitPush)
-
 let Clean (wsDir : DirectoryInfo) (repo : Repository) =
     (chooseVcs wsDir repo.Vcs repo GitClean) repo
 
+// only used in Baselines
 let Log (wsDir : DirectoryInfo) (repo : Repository) (version : string) =
     (chooseVcs wsDir repo.Vcs repo GitHistory) version
+
+let Logs (wsDir : DirectoryInfo) (repo : Repository) =
+    (chooseVcs wsDir repo.Vcs repo GitLogs)
 
 let LastCommit (wsDir : DirectoryInfo) (repo : Repository) (relativeFile : string) =
     (chooseVcs wsDir repo.Vcs repo GitLastCommit) relativeFile
 
-let Logs (wsDir : DirectoryInfo) (repo : Repository) =
-    (chooseVcs wsDir repo.Vcs repo GitLogs)
+let FindLatestMatchingTag (wsDir : DirectoryInfo) (repo : Repository) (filter : string) : string option =
+    (chooseVcs wsDir repo.Vcs repo GitFindLatestMatchingTag) filter
+
+let TagToHash (wsDir : DirectoryInfo) (repo : Repository) (tag : string) : string =
+    (chooseVcs wsDir repo.Vcs repo GitTagToHash) tag
+
+let Head (wsDir : DirectoryInfo) (repo : Repository) : string =
+    (chooseVcs wsDir repo.Vcs repo GitHead) ()
+   
+let Tag (wsDir : DirectoryInfo) (repo : Repository) (tag : string): unit =
+    (chooseVcs wsDir repo.Vcs repo GitTag) tag

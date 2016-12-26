@@ -118,14 +118,12 @@ type AddRepository =
 type PullWorkspace =
     { Sources : bool
       Bin : bool
-      LatestBin : bool
       Rebase : bool
       Multithread : bool
       View : string option }
 
 type PushWorkspace =
     { BuildNumber : string
-      Branch : string option
       Incremental : bool }
 
 type BindProject =
