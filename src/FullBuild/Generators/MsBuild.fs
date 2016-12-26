@@ -313,25 +313,48 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
         xdocSaver projectCopyFile refProjectCopyContent
 
 
-let rec seekAndDestroy (dir : DirectoryInfo) =
+let isFileIncluded (excludes : string set) (file : string) (rootDir : string) =
+    let relativeFile = file.Replace(rootDir, "") |> IoHelpers.ToUnix |> Set.singleton
+    let res = PatternMatching.FilterMatch relativeFile id excludes
+    res = Set.empty
+
+
+let rec removeUselessFiles (excludes : string set) (dir : DirectoryInfo) (rootDir : string) =
     for subdir in dir.GetDirectories() do
         let delDir = subdir.Name.Equals("packages", StringComparison.CurrentCultureIgnoreCase)
                      || subdir.Name.Equals(".paket", StringComparison.CurrentCultureIgnoreCase)
                      || subdir.Name.Equals(".nuget", StringComparison.CurrentCultureIgnoreCase)
-        if delDir then subdir.Delete(true)
-        else seekAndDestroy subdir
+        if delDir then 
+            let canDelete = isFileIncluded excludes subdir.FullName rootDir
+            if canDelete then subdir.Delete(true)
+        else removeUselessFiles excludes subdir rootDir
 
     for file in dir.GetFiles() do        
         let delFile = file.Extension.Equals(".sln", StringComparison.CurrentCultureIgnoreCase)
                       || file.Name.Equals("packages.config", StringComparison.CurrentCultureIgnoreCase)
                       || file.Name.Equals("paket.dependencies", StringComparison.CurrentCultureIgnoreCase)
                       || file.Name.Equals("paket.references", StringComparison.CurrentCultureIgnoreCase)
-        if delFile then file.Delete()
+        if delFile then
+            let canDelete = isFileIncluded excludes file.FullName rootDir
+            if canDelete then file.Delete()
 
+let private loadFbIgnore (repoDir : DirectoryInfo) : string set =
+    let excludeFile = repoDir |> GetFile ".fbignore"
+    let excludes = if excludeFile.Exists then System.IO.File.ReadAllLines(excludeFile.FullName)
+                                              |> Seq.map (fun x -> let idx = x.IndexOf('#')
+                                                                   let s = if idx <> -1  then x.Substring(0, idx)
+                                                                                         else x
+                                                                   s.Trim())
+                                              |> Seq.filter (fun x -> String.IsNullOrWhiteSpace(x) |> not)
+                                              |> Seq.map (fun x -> "*" + x)
+                                              |> Set
+                    else Set.empty
+    excludes
 
 let RemoveUselessStuff (projects : Project set) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repos = projects |> Set.map (fun x -> x.Repository)
     for repo in repos do
         let repoDir = wsDir |> GetSubDirectory repo.Name
-        seekAndDestroy repoDir
+        let excludes = loadFbIgnore repoDir
+        removeUselessFiles excludes repoDir repoDir.FullName
