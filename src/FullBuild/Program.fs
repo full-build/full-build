@@ -96,7 +96,7 @@ let tryMain argv =
 
 [<EntryPoint>]
 let main argv =
-    let debug, args = CLI.CommandLine.IsDebug argv
+    let debug, args = CLI.CommandLine.IsDebug (argv |> List.ofArray)
     try
         tryMain args
     with
