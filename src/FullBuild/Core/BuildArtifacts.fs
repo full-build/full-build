@@ -53,7 +53,7 @@ let Publish (graph : Graph) (branch : string option) buildnum hash =
 
         File.AppendAllLines(latestVersionFile.FullName, [buildTag])
         printfn "[version] %s" hash
-        for app in appDir |> EnumarateFiles do
+        for app in appDir |> EnumerateChildren do
             printfn "[appversion] %s" app.Name
             let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
             File.AppendAllLines(versionFile.FullName, [buildTag])
