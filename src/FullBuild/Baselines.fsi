@@ -24,16 +24,18 @@ with
 
 and [<Sealed>] Baseline = interface System.IComparable
 with
-    member IsIncremental: bool
-    member Bookmarks: Bookmark set
+    member Info: Tag.TagInfo
+
     static member (-): Baseline*Baseline
                     -> Bookmark set
     member Save: unit
               -> unit
 
+
 and [<Sealed>] Factory =
     member Baseline : Baseline
     member CreateBaseline: incremental : bool
+                        -> buildNumber : string
                         -> Baseline
 
 val from: graph : Graph
