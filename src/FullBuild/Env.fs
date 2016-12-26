@@ -26,6 +26,7 @@ let OBJ_FOLDER = "obj"
 let ANTHOLOGY_FILENAME = "anthology"
 let BASELINE_FILENAME = "baseline"
 let VERSION_FILENAME = "version"
+let BRANCH_FILENAME = "branch"
 let FS_GLOBAL_ASSEMBLYINFO_FILENAME = "BuildVersionAssemblyInfo.fs"
 let CS_GLOBAL_ASSEMBLYINFO_FILENAME = "BuildVersionAssemblyInfo.cs"
 let FULLBUILD_TARGETS = "full-build.targets"
@@ -102,9 +103,6 @@ let GetCsGlobalAssemblyInfoFileName() =
 let GetAnthologyFile() =
     GetFolder Folder.Config |> GetFile ANTHOLOGY_FILENAME
 
-let GetBaselineFile() =
-    GetFolder Folder.Config  |> GetFile BASELINE_FILENAME
-
 let GetViewFile viewName =
     GetFolder Folder.View |> GetFile (AddExt Extension.View viewName)
 
@@ -116,6 +114,9 @@ let GetSolutionFile viewName =
 
 let GetSolutionDefinesFile viewName =
     GetFolder Folder.View |> GetFile (AddExt Extension.Targets viewName)
+
+let GetBranchFile () =
+    GetFolder Folder.View |> GetFile BRANCH_FILENAME
 
 let IsMono () =
     let monoRuntime = System.Type.GetType ("Mono.Runtime")

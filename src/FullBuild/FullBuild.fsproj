@@ -26,8 +26,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>convert qa</StartArguments>
-    <StartWorkingDirectory>c:\src\avp</StartWorkingDirectory>
+    <StartArguments></StartArguments>
+    <StartWorkingDirectory></StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>
@@ -86,7 +86,6 @@
     <Compile Include="Env.fs" />
     <Compile Include="Anthology.fs" />
     <Compile Include="AnthologySerializer.fs" />
-    <Compile Include="BaselineSerializer.fs" />
     <Compile Include="ViewSerializer.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="XmlHelpers.fs" />
@@ -96,6 +95,7 @@
     <Compile Include="Tools\Paket.fs" />
     <Compile Include="Tools\VcsGit.fs" />
     <Compile Include="Tools\Vcs.fs" />
+    <Compile Include="Tools\Tag.fs" />
     <Compile Include="Baselines.fsi" />
     <Compile Include="Baselines.fs" />
     <Compile Include="Views.fsi" />
