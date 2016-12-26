@@ -173,6 +173,9 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
         let tag = Tag.Format baseline.Info
         Core.BuildArtifacts.PullReferenceBinaries graph tag
 
+    // consolidate anthology
+    Core.Indexation.ConsolidateAnthology()
+
 
 let Exec (execInfo : CLI.Commands.Exec) =
     let graph = Configuration.LoadAnthology() |> Graph.from
