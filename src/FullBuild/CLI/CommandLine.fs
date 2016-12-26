@@ -587,9 +587,9 @@ let Parse (args : string list) : Command =
     | _ -> Command.Error MainCommand.Unknown
 
 
-let IsDebug (args : string seq) : (bool * string seq) =
-    if (args <> Seq.empty && args |> Seq.head = "--debug") then
-        let newArgs = args |> Seq.skip(1)
+let IsDebug (args : string list) : (bool * string list) =
+    if (args <> List.empty && args |> List.head = "--debug") then
+        let newArgs = args.Tail
         (true, newArgs)
     else
         (false, args)
