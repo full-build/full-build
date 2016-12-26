@@ -46,7 +46,7 @@ let Publish (graph : Graph) (tagInfo : Tag.TagInfo) =
 
         File.AppendAllLines(latestVersionFile.FullName, [tag])
         printfn "[version] %s" tag
-        for app in appDir |> EnumarateFiles do
+        for app in appDir |> EnumerateChildren do
             printfn "[appversion] %s" app.Name
             let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
             File.AppendAllLines(versionFile.FullName, [tag])

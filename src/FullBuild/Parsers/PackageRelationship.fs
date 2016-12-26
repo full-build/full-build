@@ -20,7 +20,7 @@ open System.Linq
 open System.Xml.Linq
 open Collections
 open XmlHelpers
-
+open Env
 
 let GetFrameworkDependencies (xnuspec : XDocument) =
     xnuspec.Descendants()
@@ -64,3 +64,9 @@ let ComputePackagesRoots (package2packages : Map<PackageId, PackageId set>) =
                                  |> Set
     roots
 
+let GetDependencyNuspec packageName = 
+    Env.GetFolder Folder.Package
+    |> GetSubDirectory packageName
+    |> GetFile(sprintf "%s.nuspec" packageName)
+    |> fun x -> x.FullName
+      
