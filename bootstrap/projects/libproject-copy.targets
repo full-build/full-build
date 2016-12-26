@@ -1,9 +1,0 @@
-<Project Condition="'$(FullBuild_libprojectCopy)' == ''" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <FullBuild_libprojectCopy>Y</FullBuild_libprojectCopy>
-  </PropertyGroup>
-  <ItemGroup>
-    <FBCopyFiles Include="$(SolutionDir)\.full-build\bin\libproject.dll;$(SolutionDir)\.full-build\bin\libproject.pdb;$(SolutionDir)\.full-build\bin\libproject.dll.mdb" />
-  </ItemGroup>
-  <Import Project="$(SolutionDir)\.full-build\packages\Mono.Cecil\package-copy.targets" Condition="'$(FullBuild_Mono_Cecil_PkgCopy)' == ''" />
-</Project>
