@@ -587,6 +587,14 @@ let Parse (args : string list) : Command =
     | _ -> Command.Error MainCommand.Unknown
 
 
+let IsDebug (args : string seq) : (bool * string seq) =
+    if (args <> Seq.empty && args |> Seq.head = "--debug") then
+        let newArgs = args |> Seq.skip(1)
+        (true, newArgs)
+    else
+        (false, args)
+
+
 let VersionContent() =
     let version = Env.FullBuildVersion()
     let fbVersion = sprintf "full-build %s" (version.ToString())

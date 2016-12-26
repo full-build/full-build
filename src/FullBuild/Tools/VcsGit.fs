@@ -121,8 +121,8 @@ let GitIgnore (repoDir : DirectoryInfo) =
 
 let GitFindLatestMatchingTag (repoDir : DirectoryInfo) (filter : string) : string option =
     let args = sprintf "describe --match %A" filter
-    let res = checkedExecReadLine "git" args repoDir Map.empty
-    if res.Length = 1 then Some res.[0]
+    let res = ExecGetOutput "git" args repoDir Map.empty
+    if res.Out.Length = 1 then Some res.Out.[0]
     else None
 
 let GitTagToHash (repoDir : DirectoryInfo) (tag : string) : string =
@@ -135,7 +135,8 @@ let GitHead (repoDir : DirectoryInfo) () =
     "HEAD"
 
 let GitTag (repoDir : DirectoryInfo) (tag : string) =
-    let argsTag = sprintf @"tag -a %s" tag
+    let comment = "fullbuild"
+    let argsTag = sprintf @"tag -a %s -m %A" tag comment
     checkedExec noBuffering "git" argsTag repoDir Map.empty
 
     let argsPush = sprintf @"push %s" tag

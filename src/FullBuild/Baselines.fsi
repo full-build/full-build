@@ -25,7 +25,6 @@ with
 and [<Sealed>] Baseline = interface System.IComparable
 with
     member Info: Tag.TagInfo
-    member Bookmarks: Bookmark set
 
     static member (-): Baseline*Baseline
                     -> Bookmark set

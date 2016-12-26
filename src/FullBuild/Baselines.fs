@@ -38,21 +38,22 @@ with
 // =====================================================================================================
 
 [<Sealed>]
-type Baseline(graph : Graph, tagInfo : Tag.TagInfo) = class end
+type Baseline(graph : Graph, tagInfo : Tag.TagInfo, isHead : bool) = class end
 with
     let mutable bookmarks : Bookmark set option = None
     let collectBookmarks () =
-        match bookmarks with
-        | None -> let tag = Tag.Format tagInfo
-                  let repos = graph.MasterRepository |> Set.singleton
-                                                     |> Set.union graph.Repositories
+        if bookmarks = None then
+            let repos = graph.MasterRepository |> Set.singleton
+                                               |> Set.union graph.Repositories
 
-                  let wsDir = Env.GetFolder Env.Folder.Workspace
-                  let res = repos |> Set.map (fun x -> let hash = Tools.Vcs.TagToHash wsDir x tag
-                                                       Bookmark(graph, x, hash))
-                  bookmarks <- Some res
-                  res
-        | Some x -> x
+            let wsDir = Env.GetFolder Env.Folder.Workspace
+            let res = repos |> Set.map (fun x -> let tag = if isHead then Tools.Vcs.Head wsDir x
+                                                            else Tag.Format tagInfo
+                                                 let hash = Tools.Vcs.TagToHash wsDir x tag
+                                                 Bookmark(graph, x, hash))
+            bookmarks <- Some res
+
+        bookmarks.Value
 
     override this.Equals(other : System.Object) = refEquals this other
 
@@ -72,7 +73,9 @@ with
         let branch = Configuration.LoadBranch()
         let wsDir = Env.GetFolder Env.Folder.Workspace
         let tag = Tag.Format tagInfo
-        this.Bookmarks |> Set.iter (fun x -> Tools.Vcs.Tag wsDir x.Repository tag)
+
+        Tools.Vcs.Tag wsDir graph.MasterRepository tag
+        graph.Repositories |> Set.iter (fun x -> Tools.Vcs.Tag wsDir x tag)
 
 // =====================================================================================================
 
@@ -85,15 +88,16 @@ with
         let branch = Configuration.LoadBranch()
         let tagFilter = sprintf "fullbuild-%s-*" branch
         let latestTag = Tools.Vcs.FindLatestMatchingTag wsDir graph.MasterRepository tagFilter
-        let tagInfo = match latestTag with
-                      | Some tag -> Tag.Parse tag
-                      | _ -> failwith "Failure to find latest tag"
-        Baseline(graph, tagInfo)
+        if latestTag = None then failwith "Failure to find latest tag"
+        let tag = latestTag.Value
+        let tagInfo = Tag.Parse tag
+        Baseline(graph, tagInfo, false)
 
     member this.CreateBaseline (incremental : bool) (buildNumber : string) : Baseline =
+        let graph = Configuration.LoadAnthology() |> Graph.from
         let branch = Configuration.LoadBranch()
         let tagInfo = { Tag.TagInfo.Branch = branch; Tag.TagInfo.BuildNumber = buildNumber; Tag.TagInfo.Incremental = incremental }
-        Baseline(graph, tagInfo)
+        Baseline(graph, tagInfo, true)
 
 // =====================================================================================================
 
