@@ -27,6 +27,7 @@ type private TokenOption =
     | Down
     | All
     | Bin
+    | LatestBin
     | Src
     | Exclude
     | Multithread
@@ -44,6 +45,9 @@ type private TokenOption =
     | App
     | Static
     | NoMultithread
+    | UnusedProjects
+    | Packages
+    | Test
 
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -51,6 +55,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--up" -> Some TokenOption.Up
     | "--down" -> Some TokenOption.Down
     | "--bin" -> Some TokenOption.Bin
+    | "--latest-bin" -> Some TokenOption.LatestBin
     | "--src" -> Some TokenOption.Src
     | "--all" -> Some TokenOption.All
     | "--exclude" -> Some TokenOption.Exclude
@@ -69,6 +74,9 @@ let private (|TokenOption|_|) (token : string) =
     | "--app" -> Some TokenOption.App
     | "--static" -> Some TokenOption.Static
     | "--nomt" -> Some TokenOption.NoMultithread
+    | "--unused-projects" -> Some TokenOption.UnusedProjects
+    | "--packages" -> Some TokenOption.Packages
+    | "--test" -> Some TokenOption.Test
     | _ -> None
 
 type private Token =
@@ -110,6 +118,9 @@ type private Token =
     | Package
     | NuGet
     | App
+
+    | Query
+    | Unused
 
     | Clean
     | UpdateGuids
@@ -162,6 +173,9 @@ let private (|Token|_|) (token : string) =
     | "package" -> Some Package
     | "nuget" -> Some NuGet
     | "app" -> Some App
+
+    | "query" -> Some Query
+    | "unused" -> Some Unused
 
     | "update-guids" -> Some UpdateGuids
     | "migrate" -> Some Migrate
@@ -290,7 +304,7 @@ let rec private commandClone (shallow : bool) (all : bool) (mt : bool) (args : s
 
 let rec private commandGraph (all : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.View
+    | TokenOption TokenOption.All
       :: tail -> tail |> commandGraph true
     | [ViewId name] -> Command.GraphView { Name = name ; All = all }
     | _ -> Command.Error MainCommand.GraphView
@@ -334,32 +348,19 @@ let private commandBranch (args : string list) =
     | [] -> Command.BranchWorkspace {Branch = None}
     | _ -> Command.Error MainCommand.Branch
 
-let rec private commandPush (branch : string option) (all : bool) (args : string list) =
+let rec private commandPush (all : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Branch
-      :: Param branch
-      :: tail -> tail |> commandPush (Some branch) all
-    | TokenOption TokenOption.All
-      :: tail -> tail |> commandPush branch true
-    | [Param buildNumber] -> Command.PushWorkspace {Branch = branch; BuildNumber = buildNumber; Incremental = not all }
+    | TokenOption TokenOption.All :: tail -> tail |> commandPush true
+    | [Param buildNumber] -> Command.PushWorkspace {BuildNumber = buildNumber; Incremental = not all }
     | _ -> Command.Error MainCommand.Push
 
 let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Src
-      :: tail -> tail |> commandPull true false rebase multithread view
-    | TokenOption TokenOption.Bin
-      :: tail -> tail |> commandPull false true rebase multithread view
-    | TokenOption TokenOption.Rebase
-      :: tail -> tail |> commandPull src bin true multithread view
-    | TokenOption TokenOption.Multithread
-      :: tail -> printfn "WARNING: option pull --mt is deprecated"
-                 tail |> commandPull src bin rebase true view
-    | TokenOption TokenOption.NoMultithread
-      :: tail -> tail |> commandPull src bin rebase false view
-    | TokenOption TokenOption.View
-      :: ViewId name
-      :: tail -> tail |> commandPull true true rebase multithread (Some name)
+    | TokenOption TokenOption.Src :: tail -> tail |> commandPull true false rebase multithread view
+    | TokenOption TokenOption.Bin :: tail -> tail |> commandPull false true rebase multithread view
+    | TokenOption TokenOption.Rebase :: tail -> tail |> commandPull src bin true multithread view
+    | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandPull src bin rebase false view
+    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPull true true rebase multithread (Some name)
     | [] -> Command.PullWorkspace { Sources = src ; Bin = bin; Rebase = rebase; Multithread = multithread; View = view }
     | _ -> Command.Error MainCommand.Pull
 
@@ -415,18 +416,20 @@ let private commandListNuGet (args : string list) =
     | [] -> Command.ListNuGets
     | _ -> Command.Error MainCommand.ListNuget
 
-let rec private commandAddView (upReferences : bool) (downReferences : bool) (modified : bool) (app : string option) (staticView : bool) (args : string list) =
+let rec private commandAddView (upReferences : bool) (downReferences : bool) (modified : bool) (app : string option) (staticView : bool) (test: bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Up
-      :: tail -> tail |> commandAddView true downReferences modified app staticView
+      :: tail -> tail |> commandAddView true downReferences modified app staticView test
     | TokenOption TokenOption.Down
-      :: tail -> tail |> commandAddView upReferences true modified app staticView
+      :: tail -> tail |> commandAddView upReferences true modified app staticView test
     | TokenOption TokenOption.Modified
-      :: tail -> tail |> commandAddView upReferences downReferences true app staticView
+      :: tail -> tail |> commandAddView upReferences downReferences true app staticView test
     | TokenOption TokenOption.App
-      :: appFilter :: tail -> tail |> commandAddView upReferences downReferences modified (Some appFilter) staticView
+      :: appFilter :: tail -> tail |> commandAddView upReferences downReferences modified (Some appFilter) staticView test
     | TokenOption TokenOption.Static
-      :: tail -> tail |> commandAddView upReferences downReferences modified app true
+      :: tail -> tail |> commandAddView upReferences downReferences modified app true test
+    | TokenOption TokenOption.Test
+      :: tail -> tail |> commandAddView upReferences downReferences modified app staticView test
     | ViewId name
       :: Params filters -> Command.AddView { Name = name
                                              Filters = filters
@@ -434,7 +437,8 @@ let rec private commandAddView (upReferences : bool) (downReferences : bool) (mo
                                              DownReferences = downReferences
                                              Modified = modified
                                              AppFilter = app
-                                             Static = staticView}
+                                             Static = staticView
+                                             Tests = test }
     | _ -> Command.Error MainCommand.AddView
 
 let private commandDropView (args : string list) =
@@ -517,6 +521,18 @@ let rec private commandUpgrade (verStatus : string) (args : string list) =
     | [Param processId] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))
     | _ -> Command.Error MainCommand.Upgrade
 
+let rec private commandQuery (project : bool) (nuget : bool) (view : string option) (args : string list) =
+    match args with
+    | TokenOption TokenOption.UnusedProjects :: tail -> tail |> commandQuery true nuget view
+    | TokenOption TokenOption.Packages :: tail -> tail |> commandQuery project true view
+    | TokenOption TokenOption.View 
+      :: ViewId viewName :: tail -> tail |> commandQuery project true (Some viewName)
+    | [] when project || nuget -> Command.Query { UnusedProjects = project 
+                                                  UsedPackages = nuget 
+                                                  View = view }
+    | _ -> Command.Error MainCommand.Query
+
+
 let private commandMigrate (args : string list) =
     match args with
     | [] -> Command.Migrate
@@ -540,7 +556,7 @@ let Parse (args : string list) : Command =
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
-    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush None false
+    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush false
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false true None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
@@ -558,7 +574,7 @@ let Parse (args : string list) : Command =
     | Token Token.Add :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandAddNuGet
     | Token Token.List :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandListNuGet
 
-    | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false None false
+    | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false None false false
     | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
     | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
     | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
@@ -569,10 +585,20 @@ let Parse (args : string list) : Command =
     | Token Token.Drop :: Token Token.App :: cmdArgs -> cmdArgs |> commandDropApp
     | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp None
 
+    | Token Token.Query :: cmdArgs -> cmdArgs |> commandQuery false false None
+
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
     | Token Token.Migrate :: cmdArgs -> cmdArgs |> commandMigrate
     | FullBuildView viewFile :: [] -> Command.FullBuildView { FilePath = viewFile }
     | _ -> Command.Error MainCommand.Unknown
+
+
+let IsDebug (args : string seq) : (bool * string seq) =
+    if (args <> Seq.empty && args |> Seq.head = "--debug") then
+        let newArgs = args |> Seq.skip(1)
+        (true, newArgs)
+    else
+        (false, args)
 
 
 let VersionContent() =
@@ -607,9 +633,9 @@ let UsageContent() =
         MainCommand.Init, "init <master-repository> <local-path> : initialize a new workspace in given path"
         MainCommand.CloneRepository, "clone [--nomt] [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
         MainCommand.Checkout, "checkout <version> : checkout workspace to version"
-        MainCommand.Branch, "branch [<branch>] : checkout workspace to branch"
+        MainCommand.Branch, "branch [<branch>] : switch to branch"
         MainCommand.InstallPackage, "install : install packages"
-        MainCommand.AddView, "view [--down] [--up] [--modified] [--app <app-wildcard>] [--static] <viewId> <viewId-wildcard>+ : add repositories to view"
+        MainCommand.AddView, "view [--down] [--up] [--modified] [--app <app-wildcard>] [--static] [--test] <viewId> <viewId-wildcard>+ : add repositories to view"
         MainCommand.OpenView, "open <viewId> : open view with your favorite ide"
         MainCommand.BuildView, "build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
         MainCommand.RebuildView, "rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"
@@ -618,8 +644,8 @@ let UsageContent() =
         MainCommand.Exec, "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         MainCommand.Index, "index <repoId-wildcard>+ : index repositories"
         MainCommand.Convert, "convert <repoId-wildcard> : convert projects in repositories"
-        MainCommand.Pull, "pull [--src|--bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
-        MainCommand.Push, "push [--branch <branch>] [--all] <buildNumber> : push a baseline from current repositories version and display version"
+        MainCommand.Pull, "pull [--src|--bin|--latest-bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
+        MainCommand.Push, "push [--all] <buildNumber> : push a baseline from current repositories version and display version"
         MainCommand.PublishApp, "publish [--nomt] [--view <viewId>] <appId-wildcard> : publish application"
         MainCommand.Bind, "bind <projectId-wildcard>+ : update bindings"
         MainCommand.Clean, "clean : DANGER! reset and clean workspace (interactive command)"
@@ -645,6 +671,8 @@ let UsageContent() =
         MainCommand.AddApp, "add app <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         MainCommand.DropApp, "drop app <appId> : drop application"
         MainCommand.ListApp, "list app [--version <versionId>]: list applications"
+        MainCommand.Unknown, ""
+        MainCommand.Query, "query <--unused-projects|--packages> [--view <viewId>] : query items"
         MainCommand.Unknown, ""
         MainCommand.UpgradeGuids, "update-guids : DANGER! change guids of all projects in given repository (interactive command)" ]
 

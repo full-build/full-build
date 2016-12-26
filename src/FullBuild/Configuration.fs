@@ -51,14 +51,6 @@ let SaveProjectsRepository (repo : RepositoryId) (projects : Projects) =
     ProjectsSerializer.Save projectsFile projects
     
 
-let LoadBaseline() : Baseline =
-    let baselineFile = GetBaselineFile ()
-    BaselineSerializer.Load baselineFile
-
-let SaveBaseline =
-    let baselineFile = GetBaselineFile ()
-    BaselineSerializer.Save baselineFile
-
 let LoadView (viewId :ViewId) : View =
     let viewFile = GetViewFile viewId.toString 
     if not viewFile.Exists then failwithf "View %A does not exist" viewId.toString
@@ -113,3 +105,12 @@ let SaveView (viewId : ViewId) view (isDefault : bool option) =
 let ViewExists viewName =
     let viewFile = GetViewFile viewName 
     viewFile.Exists
+
+let LoadBranch () : string =
+    let file = Env.GetBranchFile ()
+    let branch = System.IO.File.ReadAllText(file.FullName)
+    branch
+
+let SaveBranch (branch : string) : unit =
+    let file = Env.GetBranchFile ()
+    System.IO.File.WriteAllText(file.FullName, branch)

@@ -20,6 +20,16 @@ type set<'T when 'T : comparison> = Set<'T>
 
 let (?) (q: bool) (yes: 'a, no: 'a) = if q then yes else no
 
+let unwrap<'T> (value : 'T option) =
+    match value with
+    | Some x -> x
+    | _ -> failwith "Expecting value"
+
+let orDefault<'T> (defValue : 'T) (value : 'T option) =
+    match value with
+    | Some x -> x
+    | None -> defValue
+
 
 let compareTo<'T, 'U> (this : 'T) (other : System.Object) (fieldOf : 'T -> 'U) =
     match other with

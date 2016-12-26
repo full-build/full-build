@@ -1,3 +1,11 @@
+v3.2
+  * Better support for NuGet
+  * Fix outstanding issues with Xamarin Studio and Visual Studio on macOS
+  * Get rid of $(FBWorkspaceDir) as NCrunch does not work anyway
+  * Tag for baseline (issue #114)
+  * Support for .fbignore to avoid deleting files on conversion (issue #147)
+  * --debug option to display full callstack on crash
+
 v3.1
   * Create view from application (issue #112)
   * Support for PackageReference (issue #119)
@@ -6,6 +14,14 @@ v3.1
   * Static views support (issue #131)
   * --mt is default for clone, pull & publish (issue #128)
   * Fix conversion performance (issue #133)
+  * Fix view creation performance (issue #144)
+  * Support for NuGet application (issue #143)
+  * Fix pulling binaries must use current baseline (#86)
+  * Anthology queries
+  * Fix broken baseline when repository is dropped (issue #139)
+  * Fix drop repo (issue #145)
+  * Support for pull --latest-bin (issue #86)
+  * Support for NuGet application (issue #143)
 
 v3.0
   * Graph api use internally to simplify implementation

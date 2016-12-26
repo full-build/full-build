@@ -60,7 +60,8 @@ type AddView =
       DownReferences : bool
       Modified : bool 
       AppFilter : string option
-      Static : bool }
+      Static : bool 
+      Tests : bool }
 
 type ViewName =
     { Name : string }
@@ -123,7 +124,6 @@ type PullWorkspace =
 
 type PushWorkspace =
     { BuildNumber : string
-      Branch : string option
       Incremental : bool }
 
 type BindProject =
@@ -135,6 +135,10 @@ type History =
 type ListApplications =
     { Version : string option }
 
+type Query =
+    { View : string  option
+      UnusedProjects : bool
+      UsedPackages : bool }
 
 [<RequireQualifiedAccess>]
 type MainCommand =
@@ -177,6 +181,7 @@ type MainCommand =
     | AddApp
     | DropApp
     | PublishApp
+    | Query
     | Bind
     | Migrate
     | Unknown
@@ -240,3 +245,8 @@ type Command =
     | DropApplication of ApplicationId
     | PublishApplications of PublishApplications
     | BindProject of BindProject
+
+    // query
+    | Query of Query
+
+

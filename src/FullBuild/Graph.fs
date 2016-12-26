@@ -34,6 +34,7 @@ type PublisherType =
     | Copy
     | Zip
     | Docker
+    | NuGet
 
 [<RequireQualifiedAccess>]
 type BuilderType =
@@ -65,11 +66,16 @@ with
     member this.Name = this.Package.toString
 
     static member GetPackageDependencies (xnuspec : System.Xml.Linq.XDocument) =
-        xnuspec.Descendants()
-            |> Seq.filter (fun x -> x.Name.LocalName = "dependency" && (!> x.Attribute(NsNone + "exclude") : string) <> "Compile")
-            |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
-            |> Seq.map Anthology.PackageId.from
-            |> Set.ofSeq
+        let pkgsDir = Env.GetFolder Env.Folder.Package
+        let dependencies = xnuspec.Descendants()
+                           |> Seq.filter (fun x -> x.Name.LocalName = "dependency" && (!> x.Attribute(NsNone + "exclude") : string) <> "Compile")
+                           |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
+                           |> Seq.map Anthology.PackageId.from
+                           |> Set.ofSeq
+                           |> Seq.filter (fun x -> let path = pkgsDir |> IoHelpers.GetSubDirectory (x.toString)
+                                                   path.Exists)
+                           |> set
+        dependencies
 
     static member GetFrameworkDependencies (xnuspec : System.Xml.Linq.XDocument) =
         xnuspec.Descendants()
@@ -124,6 +130,7 @@ with
                             | Anthology.PublisherType.Copy -> PublisherType.Copy
                             | Anthology.PublisherType.Zip -> PublisherType.Zip
                             | Anthology.PublisherType.Docker -> PublisherType.Docker
+                            | Anthology.PublisherType.NuGet -> PublisherType.NuGet
 
     member this.Projects =
         this.Application.Projects |> Set.map (fun x -> this.Graph.ProjectMap.[x])
@@ -175,10 +182,24 @@ with
         let repoDir = wsDir |> IoHelpers.GetSubDirectory this.Name
         repoDir.Exists
 
+    member this.References = 
+        this.Projects |> Set.map (fun x -> x.References |> Set.map (fun y -> y.Repository))
+                      |> Set.unionMany
+                      |> Set.remove this
+
+    member this.ReferencedBy = 
+        this.Projects |> Set.map (fun x -> x.ReferencedBy |> Set.map (fun y -> y.Repository))
+                      |> Set.unionMany
+                      |> Set.remove this
+
+    static member Closure (seeds : Repository set) =
+        Algorithm.Closure seeds (fun x -> x.References) (fun x -> x.ReferencedBy)
+
     member this.Delete () =
         let repositoryId = this.Repository.Name
         let newAntho = { this.Graph.Anthology
-                         with Repositories = this.Graph.Anthology.Repositories |> Set.filter (fun x -> x.Repository.Name = repositoryId) }
+                         with Repositories = this.Graph.Anthology.Repositories |> Set.filter (fun x -> x.Repository.Name <> repositoryId) 
+                              Projects = this.Graph.Anthology.Projects |> Set.filter (fun x -> x.Repository <> repositoryId) }
         Graph(newAntho)
 
 // =====================================================================================================
@@ -200,11 +221,11 @@ with
         this.Graph.Anthology.Applications |> Set.filter (fun x -> x.Projects |> Set.contains projectId)
                                           |> Set.map (fun x -> this.Graph.ApplicationMap.[x.Name])
 
-    member this.References =
+    member this.References : Project set =
         let referenceIds = this.Project.ProjectReferences
         referenceIds |> Set.map (fun x -> this.Graph.ProjectMap.[x])
 
-    member this.ReferencedBy =
+    member this.ReferencedBy : Project set =
         let projectId = this.Project.ProjectId
         this.Graph.Anthology.Projects |> Set.filter (fun x -> x.ProjectReferences |> Set.contains projectId)
                                       |> Set.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
@@ -261,20 +282,12 @@ with
         Project.CollectProjects (fun x -> x.ReferencedBy) seeds
 
     static member Closure (seeds : Project set) : Project set =
-        let rec exploreNext (node : Project) (next : Project -> Project set) (path : Project list) (boundaries : Project set) =
-            let nextNodes = next node
-            Set.fold (fun s n -> s + explore n next path s) boundaries nextNodes
+        let repositories = seeds |> Set.map (fun x -> x.Repository)
+                                 |> Repository.Closure
+        let getRefs (x : Project) = x.References |> Set.filter (fun x -> repositories |> Set.contains x.Repository)
+        let getRefBy (x : Project) = x.ReferencedBy |> Set.filter (fun x -> repositories |> Set.contains x.Repository)
 
-        and explore (node : Project) (next : Project -> Project set) (path : Project list) (boundaries : Project set) =
-            let currPath = node :: path
-            if boundaries |> Set.contains node then
-                currPath |> set
-            else
-                exploreNext node next currPath boundaries
-
-        let refBoundaries = Set.fold (fun s t -> exploreNext t (fun x -> x.References) [t] s) seeds seeds
-        let refByBoundaries = Set.fold (fun s t -> exploreNext t (fun x -> x.ReferencedBy) [t] s) refBoundaries seeds
-        refByBoundaries
+        Algorithm.Closure seeds getRefs getRefBy
 
 // =====================================================================================================
 
@@ -352,6 +365,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
                   | PublisherType.Zip -> Anthology.PublisherType.Zip
                   | PublisherType.Copy -> Anthology.PublisherType.Copy
                   | PublisherType.Docker -> Anthology.PublisherType.Docker
+                  | PublisherType.NuGet -> Anthology.PublisherType.NuGet
         let projectIds = projects |> Set.map (fun x -> Anthology.ProjectId.from x.Output.Name)
         let app = { Anthology.Application.Name = Anthology.ApplicationId.from name
                     Anthology.Application.Publisher = pub

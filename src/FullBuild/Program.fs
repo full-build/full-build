@@ -73,6 +73,10 @@ let tryMain argv =
     | Command.PublishApplications pubInfo -> Commands.Application.Publish pubInfo
     | Command.BindProject bindInfo -> Commands.Application.BindProject bindInfo
 
+    // unused
+//    | Command.QueryUnused queryInfo -> Commands.Query.QueryUnused queryInfo
+    | Command.Query queryInfo -> Commands.Query.Query queryInfo
+
     // misc
     | Command.Upgrade verStatus -> Commands.Upgrade.Upgrade verStatus
     | Command.FinalizeUpgrade processId -> Commands.Upgrade.FinalizeUpgrade processId
@@ -83,7 +87,7 @@ let tryMain argv =
 
     stopWatch.Stop()
     let elapsed = stopWatch.Elapsed
-    printfn "Completed in %d seconds." ((int)elapsed.TotalSeconds)
+    //printfn "Completed in %d seconds." ((int)elapsed.TotalSeconds)
 
     let retCode = match cmd with
                   | Command.Error _ -> 5
@@ -92,11 +96,12 @@ let tryMain argv =
 
 [<EntryPoint>]
 let main argv =
+    let debug, args = CLI.CommandLine.IsDebug argv
     try
-        tryMain argv
+        tryMain args
     with
-        x -> printfn "---------------------------------------------------"
-             printfn "Unexpected error:"
-             printfn "%A" x
-             printfn "---------------------------------------------------"
+        x -> if debug |> not then printfn "Error: %s" x.Message
+             else printfn "---------------------------------------------------"
+                  printfn "%A" x
+                  printfn "---------------------------------------------------"
              5

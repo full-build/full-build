@@ -82,9 +82,11 @@ let Upgrade (tag : string) =
 
     use currentProcess = Process.GetCurrentProcess()
     let processId = currentProcess.Id
-    Exec.Spawn (installDir |> GetFile "fullbuild.exe").FullName (processId |> sprintf "upgrade %i")
+    Exec.Spawn (installDir |> GetFile "fullbuild.exe").FullName (processId |> sprintf "upgrade %i") "runas"
 
 let FinalizeUpgrade processId =
     waitProcessToExit processId
     Env.getInstallationFolder () |> deleteBackupFiles
     Env.getInstallationFolder () |> OsHelpers.RegisterSystemExtension
+    let version = Env.FullBuildVersion() 
+    printf "Updated to version %s" (version.ToString())

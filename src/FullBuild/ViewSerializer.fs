@@ -35,6 +35,7 @@ let SerializeView (view : View) =
     config.view.referencedBy <- view.UpReferences
     config.view.references <- view.DownReferences
     config.view.modified <- view.Modified
+    config.view.tests <- view.Tests
     config.view.appfilter <- match view.AppFilter with
                              | None -> null
                              | Some appFilter -> appFilter
@@ -53,6 +54,7 @@ let DeserializeView content =
       UpReferences = config.view.referencedBy
       DownReferences = config.view.references
       Modified = config.view.modified 
+      Tests = config.view.tests
       AppFilter = (config.view.appfilter |> isNull) ? (None, Some config.view.appfilter) }
 
 

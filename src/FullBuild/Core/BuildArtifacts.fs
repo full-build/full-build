@@ -16,18 +16,14 @@ module Core.BuildArtifacts
 open System.IO
 open IoHelpers
 open Graph
+open Collections
 
 
-let Publish (graph : Graph) (branch : string option) buildnum hash =
-    let graph = Configuration.LoadAnthology () |> Graph.from
-    let mainRepo = graph.MasterRepository
-    let wsDir = Env.GetFolder Env.Folder.Workspace
+let Publish (graph : Graph) (tagInfo : Tag.TagInfo) =
+    let tag = Tag.Format tagInfo
     let appDir = Env.GetFolder Env.Folder.AppOutput
-    let versionDir = DirectoryInfo(graph.ArtifactsDir) |> GetSubDirectory hash
+    let versionDir = DirectoryInfo(graph.ArtifactsDir) |> GetSubDirectory tag
     let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
-    let buildTag = match branch with
-                      | None -> sprintf "%s:%s:default" buildnum hash
-                      | Some br -> sprintf "%s:%s:%s" buildnum hash br
 
     try
         let doPublish = not versionDir.Exists
@@ -42,21 +38,18 @@ let Publish (graph : Graph) (branch : string option) buildnum hash =
             let appTargetDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_APPS_FOLDER
             IoHelpers.CopyFolder appDir appTargetDir true
 
-            // publish
-            Try (fun () -> Tools.Vcs.Push wsDir mainRepo)
-
             tmpVersionDir.MoveTo(versionDir.FullName)
         else
             printfn "[WARNING] Build output already exists - skipping"
 
         let latestVersionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
 
-        File.AppendAllLines(latestVersionFile.FullName, [buildTag])
-        printfn "[version] %s" hash
-        for app in appDir |> EnumarateFiles do
+        File.AppendAllLines(latestVersionFile.FullName, [tag])
+        printfn "[version] %s" tag
+        for app in appDir |> EnumerateChildren do
             printfn "[appversion] %s" app.Name
             let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
-            File.AppendAllLines(versionFile.FullName, [buildTag])
+            File.AppendAllLines(versionFile.FullName, [tag])
     with
         _ -> versionDir.Refresh ()
              if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
@@ -87,9 +80,3 @@ let PullReferenceBinaries (graph : Graph) version =
         IoHelpers.CopyFolder sourceBinDir targetBinDir false
     else
         DisplayHighlight "[WARNING] No reference binaries found"
-
-let PullLatestReferenceBinaries (graph : Graph) =
-    let versionsFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
-    let version = File.ReadAllLines(versionsFile.FullName) |> Seq.last
-    let hash = version.Split(':') |> Seq.toArray
-    PullReferenceBinaries graph hash.[1]

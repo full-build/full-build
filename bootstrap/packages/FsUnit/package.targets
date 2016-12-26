@@ -1,19 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Condition="'$(FullBuild_fsunit_Pkg)' == ''" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Condition="'$(FullBuild_FsUnit_Pkg)' == ''" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <FullBuild_fsunit_Pkg>Y</FullBuild_fsunit_Pkg>
+    <FullBuild_FsUnit_Pkg>Y</FullBuild_FsUnit_Pkg>
   </PropertyGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Core/package.targets" Condition="'$(FullBuild_FSharp_Core_Pkg)' == ''" />
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/NUnit/package.targets" Condition="'$(FullBuild_NUnit_Pkg)' == ''" />
+  <Import Project="$(SolutionDir)\.full-build\packages\FSharp.Core/package.targets" Condition="'$(FullBuild_FSharp_Core_Pkg)' == ''" />
+  <Import Project="$(SolutionDir)\.full-build\packages\NUnit/package.targets" Condition="'$(FullBuild_NUnit_Pkg)' == ''" />
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1')">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3')">
       <ItemGroup>
         <Reference Include="FsUnit.NUnit">
-          <HintPath>$(FBWorkspaceDir)/.full-build/packages/fsunit/lib/net45/FsUnit.NUnit.dll</HintPath>
+          <HintPath>$(SolutionDir)\.full-build\packages\FsUnit\lib\net45\FsUnit.NUnit.dll</HintPath>
           <Private>true</Private>
         </Reference>
         <Reference Include="NHamcrest">
-          <HintPath>$(FBWorkspaceDir)/.full-build/packages/fsunit/lib/net45/NHamcrest.dll</HintPath>
+          <HintPath>$(SolutionDir)\.full-build\packages\FsUnit\lib\net45\NHamcrest.dll</HintPath>
           <Private>true</Private>
         </Reference>
       </ItemGroup>

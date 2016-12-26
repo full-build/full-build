@@ -23,9 +23,10 @@ let private parseContent (lines : string seq) =
     seq {
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
-            match items.[0] with
-            | "nuget" -> yield (PackageId.from items.[1])
-            | _ -> ()
+            if 0 < items.Length then
+                match items.[0] with
+                | "nuget" -> yield (PackageId.from items.[1])
+                | _ -> ()
     }
 
 let private updateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
@@ -36,9 +37,11 @@ let private updateSourceContent (lines : string seq) (sources : RepositoryUrl se
 
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
-            match items.[0] with
-            | "source" -> ()
-            | _ -> yield line
+            if 0 < items.Length then
+                match items.[0] with
+                | "source" -> ()
+                | _ -> yield line
+            else yield line
     }
 
 let private generateDependenciesContent (packages : Package seq) =
@@ -53,10 +56,13 @@ let private removeDependenciesContent (lines : string seq) (packages : PackageId
     seq {
         for line in lines do
             let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
-            match items.[0] with
-            | "nuget" -> if Set.contains (PackageId.from items.[1]) packages then ()
-                         else yield line
-            | _ -> yield line
+            if 0 < items.Length then
+                match items.[0] with
+                | "nuget" -> if Set.contains (PackageId.from items.[1]) packages then ()
+                             else yield line
+                | _ -> yield line
+            else
+                yield line
     }
 
 let private executePaketCommand cmd =

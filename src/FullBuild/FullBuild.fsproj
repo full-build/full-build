@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -26,8 +26,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>index distributors.hotelbeds</StartArguments>
-    <StartWorkingDirectory>c:\src\avp</StartWorkingDirectory>
+    <StartArguments></StartArguments>
+    <StartWorkingDirectory></StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>
@@ -67,7 +67,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="../../.full-build/full-build.targets" />
+  <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
   <ItemGroup>
     <Content Include="..\..\LICENSE.txt">
       <Link>LICENSE.txt</Link>
@@ -88,15 +88,16 @@
     <Compile Include="ArtifactsSerializer.fs" />
     <Compile Include="ProjectsSerializer.fs" />
     <Compile Include="AnthologySerializer.fs" />
-    <Compile Include="BaselineSerializer.fs" />
     <Compile Include="ViewSerializer.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="XmlHelpers.fs" />
+    <Compile Include="Algorithm.fs" />
     <Compile Include="Graph.fsi" />
     <Compile Include="Graph.fs" />
     <Compile Include="Tools\Paket.fs" />
     <Compile Include="Tools\VcsGit.fs" />
     <Compile Include="Tools\Vcs.fs" />
+    <Compile Include="Tools\Tag.fs" />
     <Compile Include="Baselines.fsi" />
     <Compile Include="Baselines.fs" />
     <Compile Include="Views.fsi" />
@@ -116,6 +117,7 @@
     <Compile Include="Generators\MSBuild.fs" />
     <Compile Include="Generators\History.fsi" />
     <Compile Include="Generators\History.fs" />
+    <Compile Include="Generators\Packagers.fs" />
     <Compile Include="Core\Builders.fs" />
     <Compile Include="Core\TestRunners.fs" />
     <Compile Include="Core\Bindings.fs" />
@@ -134,6 +136,7 @@
     <Compile Include="Commands\Upgrade.fs" />
     <Compile Include="Commands\NuGet.fs" />
     <Compile Include="Commands\Package.fs" />
+    <Compile Include="Commands\Query.fs" />
     <Compile Include="Commands\Migrate.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
@@ -151,6 +154,7 @@
     <Content Include="commit-msg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Examples\Library.nuspec" />
     <Content Include="favicon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -166,7 +170,10 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Configuration/package.targets" />
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Core/package.targets" />
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/FSharp.Data/package.targets" />
+  <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Configuration\package.targets" />
+  <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Core\package.targets" />
+  <Import Project="$(SolutionDir)/.full-build/packages/FSharp.Data\package.targets" />
+  <Import Project="$(SolutionDir)\.full-build\packages\FSharp.Configuration\package.targets" />
+  <Import Project="$(SolutionDir)\.full-build\packages\FSharp.Core\package.targets" />
+  <Import Project="$(SolutionDir)\.full-build\packages\FSharp.Data\package.targets" />
 </Project>

@@ -60,9 +60,19 @@ let GetExtensionString ext =
 let AddExt (ext : Extension) (fileName : string) : string =
     ext |> GetExtensionString |> sprintf "%s.%s" fileName
 
+let ToPlatformPath (f : string) : string =
+    let sep = sprintf "%c" System.IO.Path.DirectorySeparatorChar
+    if f |> isNull then f
+    else f.Replace(@"\", sep) 
+
+let ToWindows (f : string) : string =
+    if f |> isNull then f
+    else f.Replace(@"/", @"\")
+
 let ToUnix (f : string) : string =
-    if f = null then f
-    else f.Replace(@"\", "/")
+    if f |> isNull then f
+    else f.Replace(@"\", @"/")
+
 
 let GetSubDirectory (subDir : string) (dir : DirectoryInfo) : DirectoryInfo =
     let newPath = Path.Combine(dir.FullName, subDir)
@@ -78,7 +88,7 @@ let GetFile (fileName : string) (dir : DirectoryInfo) : FileInfo =
     FileInfo (fullFileName)
 
 let rec private computeRelativePathInc (topDir : DirectoryInfo) (childDir : DirectoryInfo) (path : string) =
-    if topDir.FullName = childDir.FullName then path |> ToUnix
+    if topDir.FullName = childDir.FullName then path |> ToWindows
     else
         let newPath = Path.Combine(childDir.Name, path)
         computeRelativePathInc topDir childDir.Parent newPath
@@ -118,19 +128,21 @@ let GetExtension (file : FileInfo) =
     file.Extension.Replace(".", "")
 
 let GetRootDirectory (file : string) =
-    let idx = file.IndexOf('/')
+    let idx = (file |> ToWindows).IndexOf('\\')
     file.Substring(0, idx)
 
 let GetFilewithoutRootDirectory (file : string) =
-    let idx = file.IndexOf('/')
+    let idx = (file |> ToWindows).IndexOf('\\')
     file.Substring(idx+1)
 
 let consoleLock = System.Object()
-let DisplayHighlight s =
+
+let DisplayHighlight (s : string) =
     let display () =        
         let oldColor = Console.ForegroundColor
         try
             Console.ForegroundColor <- ConsoleColor.Cyan
+            Console.WriteLine("{0}", [|s|])
             printfn "%s" s
         finally
             Console.ForegroundColor <- oldColor
@@ -151,8 +163,8 @@ let FindKnownProjects (repoDir : DirectoryInfo) =
                         |> Seq.concat
                         |> List.ofSeq
 
-let EnumarateFiles (dir : DirectoryInfo) =
-    dir.EnumerateFiles()
+let EnumerateChildren (dir : DirectoryInfo) =
+    dir.EnumerateFileSystemInfos()
 
 let SaveFileIfNecessary (file : FileInfo) (content : string) =
     let overwrite = (file.Exists |> not) || File.ReadAllText(file.FullName) <> content

@@ -19,7 +19,7 @@ open Collections
 open Graph
 
 let Add (cmd : CLI.Commands.AddView) =
-    if cmd.Filters.Length = 0 && not cmd.Modified then
+    if cmd.Filters.Length = 0 && not cmd.Modified && cmd.AppFilter.IsNone then
         failwith "Expecting at least one filter"
     
     let graph = Configuration.LoadAnthology() |> Graph.from
@@ -30,10 +30,11 @@ let Add (cmd : CLI.Commands.AddView) =
                                          cmd.UpReferences
                                          cmd.Modified
                                          cmd.AppFilter
+                                         cmd.Tests
                                          Graph.BuilderType.MSBuild
 
     let projects = view.Projects
-    if projects = Set.empty then printfn "WARNING: empty project selection"
+    if projects = Set.empty then failwith "Empty project selection"
 
     // save view information first
     view.Save None
@@ -99,10 +100,11 @@ let Alter (cmd : CLI.Commands.AlterView) =
                                             (cmd.UpReferences = Some true) ? (true, view.UpReferences)
                                             view.Modified
                                             view.AppFilter
+                                            view.Tests
                                             view.Builder
 
     let projects = depView.Projects
-    if projects = Set.empty then printfn "WARNING: empty project selection"
+    if projects = Set.empty then failwith "Empty project selection"
 
     depView.Save cmd.Default
 
@@ -112,7 +114,7 @@ let Open (cmd : CLI.Commands.OpenView) =
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
-    Exec.SpawnWithVerb slnFile.FullName "open"
+    Exec.Spawn slnFile.FullName "" "open"
 
 let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
     let view = System.IO.FileInfo(cmd.FilePath) |> ViewSerializer.Load
@@ -123,7 +125,8 @@ let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
             CLI.Commands.AddView.UpReferences = view.UpReferences
             CLI.Commands.AddView.Modified = view.Modified
             CLI.Commands.AddView.AppFilter = view.AppFilter
-            CLI.Commands.AddView.Static = false } |> Add
+            CLI.Commands.AddView.Static = false 
+            CLI.Commands.AddView.Tests = false } |> Add
     {   CLI.Commands.OpenView.Name = view.Name }  
         |> Open
 

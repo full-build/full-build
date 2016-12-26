@@ -131,7 +131,7 @@ with
 
 type ProjectUniqueId = private ProjectUniqueId of Guid
 with
-    member this.toString = (fun (ProjectUniqueId x) -> x.ToString("D")) this
+    member this.toString = (fun (ProjectUniqueId x) -> x |> StringHelpers.toVSGuid) this
     static member from (guid : Guid) = ProjectUniqueId guid
 
 type ProjectId = private ProjectId of string
@@ -142,7 +142,7 @@ with
 
 type ProjectType = private ProjectType of Guid
 with
-    member this.toString = (fun (ProjectType x) -> x.ToString("D")) this
+    member this.toString = (fun (ProjectType x) -> x |> StringHelpers.toVSGuid) this
     static member from (guid : Guid) = ProjectType guid
 
 type FxInfo = private FxInfo of string option
@@ -191,6 +191,7 @@ type PublisherType =
     | Copy
     | Zip
     | Docker
+    | NuGet
 with
      member this.toString = toString this
      static member from s = fromString<PublisherType> s
@@ -231,4 +232,5 @@ type View =
       UpReferences : bool
       DownReferences : bool
       Modified : bool 
-      AppFilter : string option }
+      AppFilter : string option 
+      Tests : bool }

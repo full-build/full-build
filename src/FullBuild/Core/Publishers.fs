@@ -71,17 +71,39 @@ let private publishDocker (app : PublishApp) =
     Exec.Exec "docker" dockerArgs sourceFolder Map.empty |> checkErrorCode
     sourceFolder.Delete(true)
 
-let private choosePublisher (pubType : PublisherType) appCopy appZip appDocker =
-    let publish = match pubType with
-                  | PublisherType.Copy -> appCopy
-                  | PublisherType.Zip -> appZip
-                  | PublisherType.Docker -> appDocker
-    publish
+let private publishNuget (app : PublishApp) =
+    let tmpApp = { Name = ".tmp-nuget-" + app.Name
+                   App = app.App }
+    publishCopy tmpApp
 
+    let appDir = GetFolder Env.Folder.AppOutput
+    let sourceFolder = appDir |> GetSubDirectory tmpApp.Name
+    let targetFolder = appDir |> GetSubDirectory app.Name
+    if targetFolder.Exists then targetFolder.Delete(true)
+
+    let nuspec = sourceFolder.EnumerateFiles("*.nuspec") 
+                    |> Seq.tryHead 
+
+    match nuspec with
+    | Some nuspecFile ->
+        Generators.Packagers.UpdateDependencies nuspecFile
+        let version = defaultArg (Builders.getCurrentBuildVersion()) "1.0.0"
+        let nugetArgs = sprintf "pack %s -version %s" nuspecFile.Name version
+        Exec.Exec "nuget" nugetArgs sourceFolder Map.empty |> Exec.CheckResponseCode
+        targetFolder.Create()
+        for file in sourceFolder.EnumerateFiles("*.nupkg") do 
+            file.MoveTo(Path.Combine(targetFolder.FullName, file.Name)) |> ignore
+        sourceFolder.Delete(true)
+    | None -> failwith (sprintf "No nuspec found for the application %s" app.Name)
 
 let PublishWithPublisher (app : Application) =
-    let pubApp = { Name = app.Name
-                   App = app }
-    (choosePublisher app.Publisher publishCopy publishZip publishDocker) pubApp
+    let publisher = 
+        match app.Publisher with
+        | PublisherType.Copy -> publishCopy
+        | PublisherType.Zip -> publishZip
+        | PublisherType.Docker -> publishDocker
+        | PublisherType.NuGet -> publishNuget
+    { Name = app.Name; App = app }
+        |> publisher
 
 

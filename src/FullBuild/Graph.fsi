@@ -32,6 +32,7 @@ type PublisherType =
     | Copy
     | Zip
     | Docker
+    | NuGet
 
 [<RequireQualifiedAccess>]
 type BuilderType =
@@ -75,6 +76,10 @@ with
     member Branch : string
     member Uri : string
     member IsCloned: bool
+    member References: Repository set
+    member ReferencedBy: Repository set
+    static member Closure: Repository set
+                        -> Repository set
     member Delete: unit
                 -> Graph
 

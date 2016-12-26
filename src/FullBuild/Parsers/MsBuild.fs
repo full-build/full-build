@@ -43,13 +43,16 @@ let private getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     // VS project references
     let prjRefs = xdoc.Descendants(NsMsBuild + "ProjectReference")
                   |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
+                  |> Seq.map IoHelpers.ToWindows
                   |> Seq.map (fun x -> getProjectOutput prjDir x |> ProjectId.from)
                   |> Set.ofSeq
 
     // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
+                 |> Seq.map IoHelpers.ToWindows
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER) || x.StartsWith(MSBUILD_PROJECT_FOLDER2))
+                 |> Seq.map IoHelpers.ToPlatformPath
                  |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectId.from)
                  |> Set.ofSeq
 
@@ -68,14 +71,18 @@ let private getAssemblies(xdoc : XDocument) : AssemblyId set =
 let private parseNuGetPackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "id")
     let pkgVer = !> pkgRef.Attribute(XNamespace.None + "version") : string
+    let ver = if pkgVer |> isNull then PackageVersion.Unspecified
+              else PackageVersion.PackageVersion pkgVer
     { Id = PackageId.from pkgId
-      Version = PackageVersion.PackageVersion pkgVer }
+      Version = ver }
 
 let private parsePackageReferencePackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "Include")
-    let pkgVer = !> pkgRef.Attribute(XNamespace.None + "Version") : string
+    let pkgVer = !> pkgRef.Descendants(XmlHelpers.NsMsBuild + "Version").SingleOrDefault() : string
+    let ver = if pkgVer |> isNull then PackageVersion.Unspecified
+              else PackageVersion.PackageVersion pkgVer
     { Id = PackageId.from pkgId
-      Version = PackageVersion.PackageVersion pkgVer }
+      Version = ver }
 
 let private parseFullBuildPackage (fileName : string) : Package =
     let fi = FileInfo (fileName)
@@ -111,7 +118,9 @@ let private getPackageFromPaketReference (xel : XElement) =
 let private getFullBuildPackages (prjDoc : XDocument)  =
     let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
+                 |> Seq.map IoHelpers.ToWindows
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER) || x.StartsWith(MSBUILD_PACKAGE_FOLDER2))
+                 |> Seq.map IoHelpers.ToPlatformPath
                  |> Seq.map parseFullBuildPackage
                  |> Set.ofSeq
     fbPkgs

@@ -20,7 +20,7 @@ open System.Linq
 open System.Xml.Linq
 open Collections
 open XmlHelpers
-
+open Env
 
 let GetFrameworkDependencies (xnuspec : XDocument) =
     xnuspec.Descendants()
@@ -30,11 +30,15 @@ let GetFrameworkDependencies (xnuspec : XDocument) =
         |> Set.ofSeq
 
 let GetPackageDependencies (xnuspec : XDocument) =
+    let pkgsDir = Env.GetFolder Env.Folder.Package
+
     xnuspec.Descendants()
         |> Seq.filter (fun x -> x.Name.LocalName = "dependency" && (!> x.Attribute(NsNone + "exclude") : string) <> "Compile")
         |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
         |> Seq.map PackageId.from
-        |> Set.ofSeq
+        |> Seq.filter (fun x -> let path = pkgsDir |> IoHelpers.GetSubDirectory (x.toString)
+                                path.Exists)
+        |> set
 
 let rec BuildPackageDependencies (packages : PackageId seq) =
     let pkgsDir = Env.GetFolder Env.Folder.Package
@@ -60,3 +64,9 @@ let ComputePackagesRoots (package2packages : Map<PackageId, PackageId set>) =
                                  |> Set.ofSeq
     roots
 
+let GetDependencyNuspec packageName = 
+    Env.GetFolder Folder.Package
+    |> GetSubDirectory packageName
+    |> GetFile(sprintf "%s.nuspec" packageName)
+    |> fun x -> x.FullName
+      

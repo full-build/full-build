@@ -35,6 +35,7 @@ with
     member this.DownReferences = this.View.DownReferences
     member this.Modified = this.View.Modified
     member this.AppFilter = this.View.AppFilter
+    member this.Tests = this.View.Tests
     member this.Builder = match this.View.Builder with
                           | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
                           | Anthology.BuilderType.Skip -> BuilderType.Skip
@@ -55,7 +56,7 @@ with
                                // this will add new repositories if necessary and discard unchanged repositories
                                // in fine, we only have new repositories and modified repositories
                                let baselineRepo = Baselines.from this.Graph
-                               let newBaseline = baselineRepo.CreateBaseline true
+                               let newBaseline = baselineRepo.CreateBaseline true "temp"
                                newBaseline - baselineRepo.Baseline
                            else Set.empty
 
@@ -65,7 +66,7 @@ with
         let appProjects = match this.AppFilter with
                           | Some appFilter -> let apps = PatternMatching.FilterMatch this.Graph.Applications (fun x -> x.Name) (Set.singleton appFilter)
                                               apps |> Set.map (fun x -> x.Projects)
-                                                   |> Set.unionMany
+                                                             |> Set.unionMany
                           | None -> Set.empty
 
         let viewProjects = Project.Closure (projects + modProjects + appProjects)
@@ -74,13 +75,19 @@ with
         let refProjects = if this.DownReferences then Project.TransitiveReferences viewProjects
                           else Set.empty
         let projects = viewProjects + depProjects + refProjects
-        let repositoriesNotCloned = projects |> Set.map (fun x -> x.Repository)
-                                             |> Set.filter (fun x -> x.IsCloned |> not)
+        let unittests = if this.Tests then 
+                            projects |> Set.map (fun x -> x.ReferencedBy |> Set.filter (fun y -> y.HasTests))
+                                     |> Set.unionMany
+                        else Set.empty
+        let viewProjects = projects + unittests
+
+        let repositoriesNotCloned = viewProjects |> Set.map (fun x -> x.Repository)
+                                                 |> Set.filter (fun x -> x.IsCloned |> not)
         if repositoriesNotCloned <> Set.empty then
             printfn "ERROR: some repositories must be cloned to create the view"
             repositoriesNotCloned |> Set.iter (fun x -> printfn "  %s" x.Name)
             failwithf "Missing repositories"
-        projects
+        viewProjects
 
     member this.Save (isDefault : bool option) =
         let viewId = Anthology.ViewId this.View.Name
@@ -114,13 +121,14 @@ and [<Sealed>] Factory(graph : Graph) =
         | None -> None
         | Some x -> Some this.ViewMap.[x]
 
-    member this.CreateView name filters downReferences upReferences modified appFilter builder =
+    member this.CreateView name filters downReferences upReferences modified appFilter tests builder =
         let view = { Anthology.View.Name = name
                      Anthology.View.Filters = filters
                      Anthology.View.DownReferences = downReferences
                      Anthology.View.UpReferences = upReferences
                      Anthology.View.Modified = modified
                      Anthology.View.AppFilter = appFilter
+                     Anthology.View.Tests = tests
                      Anthology.View.Builder = match builder with
                                               | BuilderType.MSBuild -> Anthology.BuilderType.MSBuild
                                               | BuilderType.Skip -> Anthology.BuilderType.Skip }
