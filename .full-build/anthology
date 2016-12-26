@@ -42,7 +42,7 @@ anthology:
         - assembly: system.xml
         - assembly: system.xml.linq
       packages:
-        - package: fsunit
+        - package: FsUnit
       projects:
         - project: fullbuild
     - guid: 5fde3939-c144-4287-bc57-a96ec2d1a9da

@@ -1,57 +1,57 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "Apache.Cassandra-net45", "cassandra-sharp/Apache.Cassandra/Apache.Cassandra-net45.csproj", "{984a4b04-c71a-4550-9193-817cfacba30a}"
+Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "Apache.Cassandra-net45", "cassandra-sharp/Apache.Cassandra/Apache.Cassandra-net45.csproj", "{984A4B04-C71A-4550-9193-817CFACBA30A}"
 	ProjectSection(ProjectDependencies) = postProject
-		{499eb63c-d74c-47e8-ae48-a2fc94538e9d} = {499eb63c-d74c-47e8-ae48-a2fc94538e9d}
+		{499EB63C-D74C-47E8-AE48-A2FC94538E9D} = {499EB63C-D74C-47E8-AE48-A2FC94538E9D}
 	EndProjectSection
 EndProject
-Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "CassandraSharp-net45", "cassandra-sharp/CassandraSharp/CassandraSharp-net45.csproj", "{c1d252b7-d766-4c28-9c46-0696f896846c}"
+Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "CassandraSharp-net45", "cassandra-sharp/CassandraSharp/CassandraSharp-net45.csproj", "{C1D252B7-D766-4C28-9C46-0696F896846C}"
 	ProjectSection(ProjectDependencies) = postProject
-		{6f6eb447-9569-406a-a23b-c09b6dbdbe10} = {6f6eb447-9569-406a-a23b-c09b6dbdbe10}
+		{6F6EB447-9569-406A-A23B-C09B6DBDBE10} = {6F6EB447-9569-406A-A23B-C09B6DBDBE10}
 	EndProjectSection
 EndProject
-Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "CassandraSharp.Contrib.log4net-net45", "cassandra-sharp-contrib/CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj", "{925833ed-8653-4e90-9c37-b5b6cb693cf4}"
+Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "CassandraSharp.Contrib.log4net-net45", "cassandra-sharp-contrib/CassandraSharp.Contrib.log4net/CassandraSharp.Contrib.log4net-net45.csproj", "{925833ED-8653-4E90-9C37-B5B6CB693CF4}"
 	ProjectSection(ProjectDependencies) = postProject
-		{6f6eb447-9569-406a-a23b-c09b6dbdbe10} = {6f6eb447-9569-406a-a23b-c09b6dbdbe10}
+		{6F6EB447-9569-406A-A23B-C09B6DBDBE10} = {6F6EB447-9569-406A-A23B-C09B6DBDBE10}
 	EndProjectSection
 EndProject
-Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "CassandraSharp.Contrib.log4netUnitTests-net45", "cassandra-sharp-contrib/CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj", "{9e8648a4-d25a-4cfa-aaee-20d9d63ff571}"
+Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "CassandraSharp.Contrib.log4netUnitTests-net45", "cassandra-sharp-contrib/CassandraSharp.Contrib.log4netUnitTests/CassandraSharp.Contrib.log4netUnitTests-net45.csproj", "{9E8648A4-D25A-4CFA-AAEE-20D9D63FF571}"
 	ProjectSection(ProjectDependencies) = postProject
-		{c1d252b7-d766-4c28-9c46-0696f896846c} = {c1d252b7-d766-4c28-9c46-0696f896846c}
-		{6f6eb447-9569-406a-a23b-c09b6dbdbe10} = {6f6eb447-9569-406a-a23b-c09b6dbdbe10}
+		{C1D252B7-D766-4C28-9C46-0696F896846C} = {C1D252B7-D766-4C28-9C46-0696F896846C}
+		{6F6EB447-9569-406A-A23B-C09B6DBDBE10} = {6F6EB447-9569-406A-A23B-C09B6DBDBE10}
 	EndProjectSection
 EndProject
-Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "CassandraSharp.Interfaces-net45", "cassandra-sharp/CassandraSharp.Interfaces/CassandraSharp.Interfaces-net45.csproj", "{6f6eb447-9569-406a-a23b-c09b6dbdbe10}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "CassandraSharpUnitTests-net45", "cassandra-sharp/CassandraSharpUnitTests/CassandraSharpUnitTests-net45.csproj", "{22d4356f-bc92-4399-a92c-c1f9ef6ecc73}"
-	ProjectSection(ProjectDependencies) = postProject
-		{984a4b04-c71a-4550-9193-817cfacba30a} = {984a4b04-c71a-4550-9193-817cfacba30a}
-		{c1d252b7-d766-4c28-9c46-0696f896846c} = {c1d252b7-d766-4c28-9c46-0696f896846c}
-		{6f6eb447-9569-406a-a23b-c09b6dbdbe10} = {6f6eb447-9569-406a-a23b-c09b6dbdbe10}
-		{499eb63c-d74c-47e8-ae48-a2fc94538e9d} = {499eb63c-d74c-47e8-ae48-a2fc94538e9d}
-	EndProjectSection
-EndProject
-Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "cqlplus-net45", "cassandra-sharp/cqlplus/cqlplus-net45.csproj", "{0a06398e-69be-487b-a011-4c0be6619b59}"
-	ProjectSection(ProjectDependencies) = postProject
-		{c1d252b7-d766-4c28-9c46-0696f896846c} = {c1d252b7-d766-4c28-9c46-0696f896846c}
-		{6f6eb447-9569-406a-a23b-c09b6dbdbe10} = {6f6eb447-9569-406a-a23b-c09b6dbdbe10}
-	EndProjectSection
-EndProject
-Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "Samples-net45", "cassandra-sharp/Samples/Samples-net45.csproj", "{8b2359b2-4a73-4a49-8e1e-646014a768a4}"
-	ProjectSection(ProjectDependencies) = postProject
-		{c1d252b7-d766-4c28-9c46-0696f896846c} = {c1d252b7-d766-4c28-9c46-0696f896846c}
-		{6f6eb447-9569-406a-a23b-c09b6dbdbe10} = {6f6eb447-9569-406a-a23b-c09b6dbdbe10}
-	EndProjectSection
-EndProject
-Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "Thrift-net45", "cassandra-sharp/Thrift/Thrift-net45.csproj", "{499eb63c-d74c-47e8-ae48-a2fc94538e9d}"
+Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "CassandraSharp.Interfaces-net45", "cassandra-sharp/CassandraSharp.Interfaces/CassandraSharp.Interfaces-net45.csproj", "{6F6EB447-9569-406A-A23B-C09B6DBDBE10}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cassandra-sharp", "cassandra-sharp", "{3e45f0b5-93f9-6d1d-fe99-e1eb3c3f8b50}"
+Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "CassandraSharpUnitTests-net45", "cassandra-sharp/CassandraSharpUnitTests/CassandraSharpUnitTests-net45.csproj", "{22D4356F-BC92-4399-A92C-C1F9EF6ECC73}"
+	ProjectSection(ProjectDependencies) = postProject
+		{984A4B04-C71A-4550-9193-817CFACBA30A} = {984A4B04-C71A-4550-9193-817CFACBA30A}
+		{C1D252B7-D766-4C28-9C46-0696F896846C} = {C1D252B7-D766-4C28-9C46-0696F896846C}
+		{6F6EB447-9569-406A-A23B-C09B6DBDBE10} = {6F6EB447-9569-406A-A23B-C09B6DBDBE10}
+		{499EB63C-D74C-47E8-AE48-A2FC94538E9D} = {499EB63C-D74C-47E8-AE48-A2FC94538E9D}
+	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cassandra-sharp-contrib", "cassandra-sharp-contrib", "{930836cc-992f-e356-ccc9-96f1adb7ff88}"
+Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "cqlplus-net45", "cassandra-sharp/cqlplus/cqlplus-net45.csproj", "{0A06398E-69BE-487B-A011-4C0BE6619B59}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C1D252B7-D766-4C28-9C46-0696F896846C} = {C1D252B7-D766-4C28-9C46-0696F896846C}
+		{6F6EB447-9569-406A-A23B-C09B6DBDBE10} = {6F6EB447-9569-406A-A23B-C09B6DBDBE10}
+	EndProjectSection
+EndProject
+Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "Samples-net45", "cassandra-sharp/Samples/Samples-net45.csproj", "{8B2359B2-4A73-4A49-8E1E-646014A768A4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C1D252B7-D766-4C28-9C46-0696F896846C} = {C1D252B7-D766-4C28-9C46-0696F896846C}
+		{6F6EB447-9569-406A-A23B-C09B6DBDBE10} = {6F6EB447-9569-406A-A23B-C09B6DBDBE10}
+	EndProjectSection
+EndProject
+Project("{fae04ec0-301f-11d3-bf4b-00c04f79efbc}") = "Thrift-net45", "cassandra-sharp/Thrift/Thrift-net45.csproj", "{499EB63C-D74C-47E8-AE48-A2FC94538E9D}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cassandra-sharp", "cassandra-sharp", "{3E45F0B5-93F9-6D1D-FE99-E1EB3C3F8B50}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cassandra-sharp-contrib", "cassandra-sharp-contrib", "{930836CC-992F-E356-CCC9-96F1ADB7FF88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,52 +59,52 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{984a4b04-c71a-4550-9193-817cfacba30a}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{984a4b04-c71a-4550-9193-817cfacba30a}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{984a4b04-c71a-4550-9193-817cfacba30a}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{984a4b04-c71a-4550-9193-817cfacba30a}.Release|Any CPU.Build.0 = Release|Any CPU
-		{c1d252b7-d766-4c28-9c46-0696f896846c}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{c1d252b7-d766-4c28-9c46-0696f896846c}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{c1d252b7-d766-4c28-9c46-0696f896846c}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{c1d252b7-d766-4c28-9c46-0696f896846c}.Release|Any CPU.Build.0 = Release|Any CPU
-		{925833ed-8653-4e90-9c37-b5b6cb693cf4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{925833ed-8653-4e90-9c37-b5b6cb693cf4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{925833ed-8653-4e90-9c37-b5b6cb693cf4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{925833ed-8653-4e90-9c37-b5b6cb693cf4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9e8648a4-d25a-4cfa-aaee-20d9d63ff571}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9e8648a4-d25a-4cfa-aaee-20d9d63ff571}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9e8648a4-d25a-4cfa-aaee-20d9d63ff571}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9e8648a4-d25a-4cfa-aaee-20d9d63ff571}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6f6eb447-9569-406a-a23b-c09b6dbdbe10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6f6eb447-9569-406a-a23b-c09b6dbdbe10}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6f6eb447-9569-406a-a23b-c09b6dbdbe10}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6f6eb447-9569-406a-a23b-c09b6dbdbe10}.Release|Any CPU.Build.0 = Release|Any CPU
-		{22d4356f-bc92-4399-a92c-c1f9ef6ecc73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{22d4356f-bc92-4399-a92c-c1f9ef6ecc73}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{22d4356f-bc92-4399-a92c-c1f9ef6ecc73}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{22d4356f-bc92-4399-a92c-c1f9ef6ecc73}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0a06398e-69be-487b-a011-4c0be6619b59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0a06398e-69be-487b-a011-4c0be6619b59}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0a06398e-69be-487b-a011-4c0be6619b59}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0a06398e-69be-487b-a011-4c0be6619b59}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8b2359b2-4a73-4a49-8e1e-646014a768a4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8b2359b2-4a73-4a49-8e1e-646014a768a4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8b2359b2-4a73-4a49-8e1e-646014a768a4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8b2359b2-4a73-4a49-8e1e-646014a768a4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{499eb63c-d74c-47e8-ae48-a2fc94538e9d}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{499eb63c-d74c-47e8-ae48-a2fc94538e9d}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{499eb63c-d74c-47e8-ae48-a2fc94538e9d}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{499eb63c-d74c-47e8-ae48-a2fc94538e9d}.Release|Any CPU.Build.0 = Release|Any CPU
+		{984A4B04-C71A-4550-9193-817CFACBA30A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{984A4B04-C71A-4550-9193-817CFACBA30A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{984A4B04-C71A-4550-9193-817CFACBA30A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{984A4B04-C71A-4550-9193-817CFACBA30A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1D252B7-D766-4C28-9C46-0696F896846C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1D252B7-D766-4C28-9C46-0696F896846C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1D252B7-D766-4C28-9C46-0696F896846C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1D252B7-D766-4C28-9C46-0696F896846C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{925833ED-8653-4E90-9C37-B5B6CB693CF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{925833ED-8653-4E90-9C37-B5B6CB693CF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{925833ED-8653-4E90-9C37-B5B6CB693CF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{925833ED-8653-4E90-9C37-B5B6CB693CF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E8648A4-D25A-4CFA-AAEE-20D9D63FF571}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E8648A4-D25A-4CFA-AAEE-20D9D63FF571}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E8648A4-D25A-4CFA-AAEE-20D9D63FF571}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E8648A4-D25A-4CFA-AAEE-20D9D63FF571}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F6EB447-9569-406A-A23B-C09B6DBDBE10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F6EB447-9569-406A-A23B-C09B6DBDBE10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F6EB447-9569-406A-A23B-C09B6DBDBE10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F6EB447-9569-406A-A23B-C09B6DBDBE10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22D4356F-BC92-4399-A92C-C1F9EF6ECC73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22D4356F-BC92-4399-A92C-C1F9EF6ECC73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22D4356F-BC92-4399-A92C-C1F9EF6ECC73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22D4356F-BC92-4399-A92C-C1F9EF6ECC73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A06398E-69BE-487B-A011-4C0BE6619B59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A06398E-69BE-487B-A011-4C0BE6619B59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A06398E-69BE-487B-A011-4C0BE6619B59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A06398E-69BE-487B-A011-4C0BE6619B59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B2359B2-4A73-4A49-8E1E-646014A768A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B2359B2-4A73-4A49-8E1E-646014A768A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B2359B2-4A73-4A49-8E1E-646014A768A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B2359B2-4A73-4A49-8E1E-646014A768A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{499EB63C-D74C-47E8-AE48-A2FC94538E9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{499EB63C-D74C-47E8-AE48-A2FC94538E9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{499EB63C-D74C-47E8-AE48-A2FC94538E9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{499EB63C-D74C-47E8-AE48-A2FC94538E9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{984a4b04-c71a-4550-9193-817cfacba30a} = {3e45f0b5-93f9-6d1d-fe99-e1eb3c3f8b50}
-		{c1d252b7-d766-4c28-9c46-0696f896846c} = {3e45f0b5-93f9-6d1d-fe99-e1eb3c3f8b50}
-		{925833ed-8653-4e90-9c37-b5b6cb693cf4} = {930836cc-992f-e356-ccc9-96f1adb7ff88}
-		{9e8648a4-d25a-4cfa-aaee-20d9d63ff571} = {930836cc-992f-e356-ccc9-96f1adb7ff88}
-		{6f6eb447-9569-406a-a23b-c09b6dbdbe10} = {3e45f0b5-93f9-6d1d-fe99-e1eb3c3f8b50}
-		{22d4356f-bc92-4399-a92c-c1f9ef6ecc73} = {3e45f0b5-93f9-6d1d-fe99-e1eb3c3f8b50}
-		{0a06398e-69be-487b-a011-4c0be6619b59} = {3e45f0b5-93f9-6d1d-fe99-e1eb3c3f8b50}
-		{8b2359b2-4a73-4a49-8e1e-646014a768a4} = {3e45f0b5-93f9-6d1d-fe99-e1eb3c3f8b50}
-		{499eb63c-d74c-47e8-ae48-a2fc94538e9d} = {3e45f0b5-93f9-6d1d-fe99-e1eb3c3f8b50}
+		{984A4B04-C71A-4550-9193-817CFACBA30A} = {3E45F0B5-93F9-6D1D-FE99-E1EB3C3F8B50}
+		{C1D252B7-D766-4C28-9C46-0696F896846C} = {3E45F0B5-93F9-6D1D-FE99-E1EB3C3F8B50}
+		{925833ED-8653-4E90-9C37-B5B6CB693CF4} = {930836CC-992F-E356-CCC9-96F1ADB7FF88}
+		{9E8648A4-D25A-4CFA-AAEE-20D9D63FF571} = {930836CC-992F-E356-CCC9-96F1ADB7FF88}
+		{6F6EB447-9569-406A-A23B-C09B6DBDBE10} = {3E45F0B5-93F9-6D1D-FE99-E1EB3C3F8B50}
+		{22D4356F-BC92-4399-A92C-C1F9EF6ECC73} = {3E45F0B5-93F9-6D1D-FE99-E1EB3C3F8B50}
+		{0A06398E-69BE-487B-A011-4C0BE6619B59} = {3E45F0B5-93F9-6D1D-FE99-E1EB3C3F8B50}
+		{8B2359B2-4A73-4A49-8E1E-646014A768A4} = {3E45F0B5-93F9-6D1D-FE99-E1EB3C3F8B50}
+		{499EB63C-D74C-47E8-AE48-A2FC94538E9D} = {3E45F0B5-93F9-6D1D-FE99-E1EB3C3F8B50}
 	EndGlobalSection
 EndGlobal

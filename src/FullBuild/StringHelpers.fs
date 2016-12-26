@@ -44,3 +44,6 @@ let GenerateGuidFromString (input : string) =
 let containsIgnoreCase (x : string) (y : string) =
     x.IndexOf(y, System.StringComparison.CurrentCultureIgnoreCase) <> -1
 
+let toVSGuid (guid : System.Guid) =
+    guid.ToString("D").ToUpperInvariant()
+ 

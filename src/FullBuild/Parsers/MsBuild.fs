@@ -43,13 +43,16 @@ let private getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     // VS project references
     let prjRefs = xdoc.Descendants(NsMsBuild + "ProjectReference")
                   |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
+                  |> Seq.map IoHelpers.ToWindows
                   |> Seq.map (fun x -> getProjectOutput prjDir x |> ProjectId.from)
                   |> Set
 
     // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
+                 |> Seq.map IoHelpers.ToWindows
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER) || x.StartsWith(MSBUILD_PROJECT_FOLDER2))
+                 |> Seq.map IoHelpers.ToPlatformPath
                  |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectId.from)
                  |> Set
 
@@ -115,7 +118,9 @@ let private getPackageFromPaketReference (xel : XElement) =
 let private getFullBuildPackages (prjDoc : XDocument)  =
     let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
+                 |> Seq.map IoHelpers.ToWindows
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER) || x.StartsWith(MSBUILD_PACKAGE_FOLDER2))
+                 |> Seq.map IoHelpers.ToPlatformPath
                  |> Seq.map parseFullBuildPackage
                  |> Set
     fbPkgs
