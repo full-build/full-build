@@ -1,0 +1,9 @@
+<Project Condition="'$(FullBuild_mainprojectCopy)' == ''" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FullBuild_mainprojectCopy>Y</FullBuild_mainprojectCopy>
+  </PropertyGroup>
+  <ItemGroup>
+    <FBCopyFiles Include="$(SolutionDir)\.full-build\bin\mainproject.exe;$(SolutionDir)\.full-build\bin\mainproject.pdb;$(SolutionDir)\.full-build\bin\mainproject.exe.mdb" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)\.full-build\projects\libproject-copy.targets" Condition="'$(FullBuild_libprojectCopy)' == ''" />
+</Project>
