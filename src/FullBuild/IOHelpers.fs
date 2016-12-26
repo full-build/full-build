@@ -63,12 +63,16 @@ let AddExt (ext : Extension) (fileName : string) : string =
 let ToPlatformPath (f : string) : string =
     let sep = sprintf "%c" System.IO.Path.DirectorySeparatorChar
     if f |> isNull then f
-    else f.Replace(@"\", sep)
- 
+    else f.Replace(@"\", sep) 
 
 let ToWindows (f : string) : string =
     if f |> isNull then f
     else f.Replace(@"/", @"\")
+
+let ToUnix (f : string) : string =
+    if f |> isNull then f
+    else f.Replace(@"\", @"/")
+
 
 let GetSubDirectory (subDir : string) (dir : DirectoryInfo) : DirectoryInfo =
     let newPath = Path.Combine(dir.FullName, subDir)

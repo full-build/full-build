@@ -3,6 +3,7 @@ v3.2
   * Fix outstanding issues with Xamarin Studio and Visual Studio on macOS
   * Get rid of $(FBWorkspaceDir) as NCrunch does not work anyway
   * Tag for baseline (issue #114)
+  * Support for .fbignore to avoid deleting files on conversion (issue #147)
 
 v3.1
   * Create view from application (issue #112)
