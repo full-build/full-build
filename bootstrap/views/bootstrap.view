@@ -1,0 +1,6 @@
+view:
+  filters:
+    - filter: '*'
+  builder: msbuild
+  parameters: []
+  sourceonly: false
