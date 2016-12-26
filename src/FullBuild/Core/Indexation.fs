@@ -175,6 +175,24 @@ let IndexWorkspace (grepos : Graph.Repository set) =
 
     newAntho
 
+
+let ConsolidateAnthology () = 
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let antho = Configuration.LoadAnthology ()
+
+    // update anthology
+    let mutable consAntho = antho
+    for repo in antho.Repositories do
+        let repoDir = wsDir |> GetSubDirectory repo.Repository.Name.toString
+        if repoDir.Exists then
+            let repoProjects = Configuration.LoadProjectsRepository repo.Repository.Name
+            let newProjects = consAntho.Projects |> Set.filter (fun x -> x.Repository <> repo.Repository.Name)
+                                                 |> Set.union repoProjects.Projects
+            consAntho <- { consAntho
+                           with Projects = newProjects }
+    Configuration.SaveAnthology consAntho                                                                                
+
+
 let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
     let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
     let untouchedProjects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
@@ -196,11 +214,6 @@ let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph
 
         failwithf "Missing repositories for indexation"
 
-    let modifiedPreviousProjects = previousAntho.Projects |> Seq.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
-                                                          |> Seq.groupBy (fun x -> x.Repository)
-                                                          |> Seq.map (fun (r, p) -> r, p |> Set.ofSeq)
-                                                          |> dict
-
     let modifiedProjects = antho.Projects |> Seq.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
                                           |> Seq.groupBy (fun x -> x.Repository)
                                           |> Seq.map (fun (r, p) -> r, p |> Set.ofSeq)
@@ -209,7 +222,6 @@ let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph
     for kvp in modifiedProjects do
         let repo = kvp.Key
         let projects = { ProjectsSerializer.Projects = kvp.Value }
-//        if modifiedPreviousProjects.[repo] <> projects.Projects then
         Configuration.SaveProjectsRepository repo projects
 
     antho

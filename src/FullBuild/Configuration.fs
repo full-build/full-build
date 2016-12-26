@@ -16,7 +16,6 @@ module Configuration
 
 open Env
 open Anthology
-open ArtifactsSerializer
 open ProjectsSerializer
 
 type WorkspaceConfiguration = 
@@ -47,9 +46,15 @@ let SaveProjectsRepository (repo : RepositoryId) (projects : Projects) =
     let fbRepoDir = repoDir |> IoHelpers.GetSubDirectory ".full-build"
     fbRepoDir.Create()
     let projectsFile = fbRepoDir |> IoHelpers.GetFile "projects"
+    ProjectsSerializer.Save projectsFile projects    
 
-    ProjectsSerializer.Save projectsFile projects
-    
+let LoadProjectsRepository (repo : RepositoryId) : Projects =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
+    let fbRepoDir = repoDir |> IoHelpers.GetSubDirectory ".full-build"
+    if fbRepoDir.Exists |> not then failwithf "Can't load projects in reposiory %s" repo.toString
+    let projectsFile = fbRepoDir |> IoHelpers.GetFile "projects"
+    ProjectsSerializer.Load projectsFile
 
 let LoadView (viewId :ViewId) : View =
     let viewFile = GetViewFile viewId.toString 
@@ -90,10 +95,10 @@ let private setDefaultView (viewId : ViewId) =
     System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
 
 let ViewExistsAndNotCorrupted viewName =
-    [|viewName |> Env.GetSolutionFile; 
-      viewName |> Env.GetSolutionDefinesFile; 
-      viewName |> Env.GetViewFile|]
-        |> Array.forall(fun x->x.Exists)
+    [| viewName |> Env.GetSolutionFile
+       viewName |> Env.GetSolutionDefinesFile
+       viewName |> Env.GetViewFile |] |> Array.forall(fun x -> x.Exists)
+
 let SaveView (viewId : ViewId) view (isDefault : bool option) =
     let viewFile = GetViewFile viewId.toString
     ViewSerializer.Save viewFile view

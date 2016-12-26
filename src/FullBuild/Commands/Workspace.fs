@@ -62,7 +62,10 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
 
 
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    // consolidate all repositories in global anthology
+    Core.Indexation.ConsolidateAnthology ()
+
+    let graph = Configuration.LoadAnthology() |> Graph.from
 
     // copy bin content
     let baselineRepository = Baselines.from graph
@@ -162,7 +165,6 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
                             |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
 
         pullResults |> Exec.CheckMultipleResponseCode
-
         Install ()
 
     if pullInfo.Bin then
@@ -170,6 +172,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
         let baseline = baselineRepository.Baseline
         let tag = Tag.Format baseline.Info
         Core.BuildArtifacts.PullReferenceBinaries graph tag
+
 
 let Exec (execInfo : CLI.Commands.Exec) =
     let graph = Configuration.LoadAnthology() |> Graph.from
