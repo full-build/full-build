@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -87,11 +87,10 @@ with
     member this.Baseline : Baseline =
         let branch = Configuration.LoadBranch()
         let tagFilter = sprintf "fullbuild-%s-*" branch
-        let latestTag = Tools.Vcs.FindLatestMatchingTag wsDir graph.MasterRepository tagFilter
-        if latestTag = None then failwith "Failure to find latest tag"
-        let tag = latestTag.Value
-        let tagInfo = Tag.Parse tag
-        Baseline(graph, tagInfo, false)
+        match Tools.Vcs.FindLatestMatchingTag wsDir graph.MasterRepository tagFilter with
+        | Some tag -> let tagInfo = Tag.Parse tag
+                      Baseline(graph, tagInfo, false)
+        | _ -> failwith "Failure to find latest tag"
 
     member this.CreateBaseline (incremental : bool) (buildNumber : string) : Baseline =
         let graph = Configuration.LoadAnthology() |> Graph.from
