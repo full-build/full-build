@@ -20,7 +20,7 @@ open System
 open Collections
 open StringHelpers
 
-type private AnthologyConfig = FSharp.Configuration.YamlConfig<"anthology.yaml">
+type private AnthologyConfig = FSharp.Configuration.YamlConfig<"Examples/anthology.yaml">
 
 
 let Serialize (antho : Anthology) =

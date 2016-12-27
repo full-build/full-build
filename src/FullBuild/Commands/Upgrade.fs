@@ -20,7 +20,7 @@ open System.Diagnostics
 open System.IO.Compression
 open FSharp.Data
 
-type GitRelease = JsonProvider<"ghreleasefeed.json">
+type GitRelease = JsonProvider<"Examples/ghreleasefeed.json">
 
 let private getLatestReleaseUrl (verStatus : string) =
     let tag = sprintf "-%s" verStatus
