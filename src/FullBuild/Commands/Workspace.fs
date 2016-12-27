@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -36,6 +36,13 @@ let private checkoutRepo wsDir (checkoutInfo : CLI.Commands.CheckoutVersion) (re
 
 
 
+let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
+    match branchInfo.Branch with
+    | Some x -> Configuration.SaveBranch x
+    | None -> let name = Configuration.LoadBranch()
+              printfn "%s" name
+
+
 
 let Create (createInfo : CLI.Commands.SetupWorkspace) =
     let wsDir = DirectoryInfo(createInfo.Path)
@@ -57,6 +64,9 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
         let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
         let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
         publishSource.CopyTo(publishTarget.FullName) |> ignore
+
+        let branchInfo = { CLI.Commands.BranchWorkspace.Branch = Some graph.MasterRepository.Branch }
+        Branch branchInfo
     finally
         Environment.CurrentDirectory <- currDir
 
@@ -95,13 +105,6 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
 
     // update binaries with observable baseline
     Core.BuildArtifacts.PullReferenceBinaries graph checkoutInfo.Version
-
-
-let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
-    match branchInfo.Branch with
-    | Some x -> Configuration.SaveBranch x
-    | None -> let name = Configuration.LoadBranch()
-              printfn "%s" name
 
 
 let Init (initInfo : CLI.Commands.InitWorkspace) =

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -26,8 +26,10 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments></StartArguments>
-    <StartWorkingDirectory></StartWorkingDirectory>
+    <StartArguments>
+    </StartArguments>
+    <StartWorkingDirectory>
+    </StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>
@@ -77,6 +79,19 @@
       <Link>CHANGES.txt</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="full-build.targets">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="gitignore">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="commit-msg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="App.config" />
     <Compile Include="Collections.fs" />
     <Compile Include="StringHelpers.fs" />
     <Compile Include="PatternMatching.fs" />
@@ -139,25 +154,11 @@
     <Compile Include="Commands\Query.fs" />
     <Compile Include="Commands\Migrate.fs" />
     <Compile Include="Program.fs" />
-    <None Include="App.config" />
-    <None Include="anthology2.yaml" />
-    <None Include="projects.yaml" />
-    <None Include="ghreleasefeed.json" />
-    <None Include="baseline.yaml" />
-    <None Include="view.yaml" />
-    <Content Include="full-build.targets">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="gitignore">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="commit-msg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <None Include="Examples\Library.nuspec" />
-    <Content Include="favicon.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <None Include="Examples\ghreleasefeed.json" />
+    <None Include="Examples\view.yaml" />
+    <None Include="Examples\anthology.yaml" />
+    <None Include="Examples\anthology2.yaml" />
     <None Include="artifacts.yaml" />
   </ItemGroup>
   <ItemGroup>

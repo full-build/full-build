@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ open CLI.Commands
 
 let tryMain argv =
     Env.CheckLicense ()
-    //Commands.Workspace.CheckMinVersion ()
+    Commands.Workspace.CheckMinVersion ()
 
     let cmd = CLI.CommandLine.Parse (argv |> Seq.toList)
 

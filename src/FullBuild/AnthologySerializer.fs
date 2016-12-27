@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@ module AnthologySerializer
 open Anthology
 open ArtifactsSerializer
 open ProjectsSerializer
+
+type private AnthologyConfig = FSharp.Configuration.YamlConfig<"Examples/anthology.yaml">
+
 
 let Serialize (antho : Anthology) =
     let artifacts = { MinVersion = antho.MinVersion

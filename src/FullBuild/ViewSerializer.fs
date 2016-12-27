@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ open System.IO
 open Collections
 
 
-type private ViewConfig = FSharp.Configuration.YamlConfig<"View.yaml">
+type private ViewConfig = FSharp.Configuration.YamlConfig<"Examples/View.yaml">
 
 
 let SerializeView (view : View) =

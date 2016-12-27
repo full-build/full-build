@@ -20,7 +20,7 @@ open System
 open Collections
 open StringHelpers
 
-type private AnthologyConfig = FSharp.Configuration.YamlConfig<"anthology2.yaml">
+type private AnthologyConfig = FSharp.Configuration.YamlConfig<"Examples/anthology2.yaml">
 
 let Deserialize (content) =
     let rec convertToNuGets (items : AnthologyConfig.anthology_Type.nugets_Item_Type list) =

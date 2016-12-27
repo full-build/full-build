@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ let CheckLicense () =
 
     let licContent = File.ReadAllText (licFile.FullName)
     let guid = StringHelpers.GenerateGuidFromString licContent
-    let licGuid = StringHelpers.ParseGuid "21a734e7-1308-06de-3905-7708ed4c4dbc"
+    let licGuid = StringHelpers.ParseGuid "adb309ac-9a43-00de-cd67-6d479bc4752a"
     if guid <> licGuid then failwithf "Please ensure original LICENSE.txt is available."
 
 let FullBuildVersion () =
