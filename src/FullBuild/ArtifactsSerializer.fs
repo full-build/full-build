@@ -31,7 +31,7 @@ type Artifacts =
       Tester : TestRunnerType }
 
 
-type private ArtifactsConfig = FSharp.Configuration.YamlConfig<"artifacts.yaml">
+type private ArtifactsConfig = FSharp.Configuration.YamlConfig<"Examples/artifacts.yaml">
 
 
 let Serialize (artifacts : Artifacts) =

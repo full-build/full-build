@@ -159,7 +159,7 @@
     <None Include="Examples\view.yaml" />
     <None Include="Examples\anthology.yaml" />
     <None Include="Examples\anthology2.yaml" />
-    <None Include="artifacts.yaml" />
+    <None Include="Examples\artifacts.yaml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
