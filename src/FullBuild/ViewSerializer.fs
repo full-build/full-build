@@ -19,7 +19,7 @@ open System.IO
 open Collections
 
 
-type private ViewConfig = FSharp.Configuration.YamlConfig<"View.yaml">
+type private ViewConfig = FSharp.Configuration.YamlConfig<"Examples/View.yaml">
 
 
 let SerializeView (view : View) =
