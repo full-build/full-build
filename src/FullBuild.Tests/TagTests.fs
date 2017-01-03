@@ -14,6 +14,7 @@
 
 module TagTests
 
+open System
 open NUnit.Framework
 open FsUnit
 
@@ -35,3 +36,25 @@ let parse_tag_full () =
                             Tag.TagInfo.Incremental = false }
 
     tagInfo |> should equal expectedTagInfo
+
+[<Test>]
+let parse_failures () =
+    (fun () -> Tag.Parse "fullbuild-beta-4.5" |> ignore) |> should throw typeof<Exception>
+    (fun () -> Tag.Parse "fullbuild-beta-4.5-pouet" |> ignore) |> should throw typeof<Exception>
+    (fun () -> Tag.Parse "fullbuild2-beta-4.5-inc" |> ignore) |> should throw typeof<Exception>
+
+[<Test>]
+let format_taginfo_inc() =
+    let tagInfo = { Tag.TagInfo.Branch = "master"
+                    Tag.TagInfo.BuildNumber = "1.2.3"
+                    Tag.TagInfo.Incremental = true }
+    let tag = Tag.Format tagInfo
+    tag |> should equal "fullbuild-master-1.2.3-inc"
+
+[<Test>]
+let format_taginfo_full() =
+    let tagInfo = { Tag.TagInfo.Branch = "beta"
+                    Tag.TagInfo.BuildNumber = "4.5.6"
+                    Tag.TagInfo.Incremental = false }
+    let tag = Tag.Format tagInfo
+    tag |> should equal "fullbuild-beta-4.5.6-full"

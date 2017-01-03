@@ -43,17 +43,14 @@ let SaveAnthology (antho : Anthology) =
 let SaveProjectsRepository (repo : RepositoryId) (projects : Projects) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
-    let fbRepoDir = repoDir |> IoHelpers.GetSubDirectory ".full-build"
-    fbRepoDir.Create()
-    let projectsFile = fbRepoDir |> IoHelpers.GetFile "projects"
+    let projectsFile = repoDir |> IoHelpers.GetFile ".fbprojects"
     ProjectsSerializer.Save projectsFile projects    
 
 let LoadProjectsRepository (repo : RepositoryId) : Projects =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
-    let fbRepoDir = repoDir |> IoHelpers.GetSubDirectory ".full-build"
-    if fbRepoDir.Exists |> not then failwithf "Can't load projects in reposiory %s" repo.toString
-    let projectsFile = fbRepoDir |> IoHelpers.GetFile "projects"
+    if not repoDir.Exists then failwithf "Can't load projects in repository %s" repo.toString
+    let projectsFile = repoDir |> IoHelpers.GetFile ".fbprojects"
     ProjectsSerializer.Load projectsFile
 
 let LoadView (viewId :ViewId) : View =
