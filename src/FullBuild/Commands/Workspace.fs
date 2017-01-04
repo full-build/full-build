@@ -292,11 +292,14 @@ let Index (indexInfo : CLI.Commands.IndexRepositories) =
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) indexInfo.Filters
     if selectedRepos = Set.empty then failwith "Empty repository selection"
 
-    selectedRepos |> Core.Indexation.IndexWorkspace wsDir antho
-                  |> Core.Indexation.UpdatePackages
-                  |> Core.Package.Simplify
-                  |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
-                  |> Configuration.SaveAnthology
+    let indexation = selectedRepos |> Core.Indexation.IndexWorkspace wsDir antho
+    if indexInfo.Check then
+        indexation |> fst |> Core.Indexation.CheckAnthologyProjectsInRepository antho selectedRepos
+    else
+        indexation |> Core.Indexation.UpdatePackages
+                   |> Core.Package.Simplify
+                   |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
+                   |> Configuration.SaveAnthology
 
 let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from

@@ -73,11 +73,8 @@ let tryMain argv =
     | Command.PublishApplications pubInfo -> Commands.Application.Publish pubInfo
     | Command.BindProject bindInfo -> Commands.Application.BindProject bindInfo
 
-    // unused
-//    | Command.QueryUnused queryInfo -> Commands.Query.QueryUnused queryInfo
-    | Command.Query queryInfo -> Commands.Query.Query queryInfo
-
     // misc
+    | Command.Query queryInfo -> Commands.Query.Query queryInfo
     | Command.Upgrade verStatus -> Commands.Upgrade.Upgrade verStatus
     | Command.FinalizeUpgrade processId -> Commands.Upgrade.FinalizeUpgrade processId
     | Command.Migrate -> Commands.Migrate.Migrate ()

@@ -41,7 +41,8 @@ type UpdateGuids =
     { Filters : string set }
 
 type IndexRepositories =
-    { Filters : string set }
+    { Filters : string set 
+      Check : bool }
 
 type ConvertRepositories =
     { Filters : string set }

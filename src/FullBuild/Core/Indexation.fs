@@ -192,6 +192,38 @@ let ConsolidateAnthology () =
     Configuration.SaveAnthology consAntho                                                                                
 
 
+let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
+    let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
+    let untouchedProjects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
+
+    if untouchedPreviousProjects <> untouchedProjects then
+        printfn "Missing repositories for indexation"
+        let prevGroups = untouchedPreviousProjects |> Seq.groupBy (fun x -> x.Repository)
+                                                   |> Seq.map (fun (repo, prjs) -> repo, prjs |> set)
+                                                   |> dict
+        let currGroups = untouchedProjects |> Seq.groupBy (fun x -> x.Repository)
+                                           |> Seq.map (fun (repo, prjs) -> repo, prjs |> set)
+                                           |> dict
+
+        for kvp in prevGroups do
+            let prevProjects = kvp.Value
+            let currProjects = currGroups.[kvp.Key]
+            if prevProjects <> currProjects then
+                printfn "%s" kvp.Key.toString
+
+        failwithf "Missing repositories for indexation"
+
+    let modifiedProjects = antho.Projects |> Seq.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
+                                          |> Seq.groupBy (fun x -> x.Repository)
+                                          |> Seq.map (fun (r, p) -> r, p |> Set.ofSeq)
+                                          |> dict
+
+    for kvp in modifiedProjects do
+        let repo = kvp.Key
+        let projects = { ProjectsSerializer.Projects = kvp.Value }
+        let currentProjects = Configuration.LoadProjectsRepository repo
+        if currentProjects <> projects then failwithf "Repository %s must be indexed" repo.toString
+
 let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
     let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
     let untouchedProjects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
