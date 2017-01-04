@@ -22,7 +22,7 @@ open Anthology
 [<Test>]
 let CheckErrorInvoked () =
     let result = CLI.CommandLine.Parse [ "workspace"; "blah blah" ]
-    let expected = Command.Error MainCommand.Unknown
+    let expected = Command.Error MainCommand.Usage
     result |> should equal expected
 
 [<Test>]
