@@ -135,10 +135,7 @@ let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
     Set.union remainingProjects newProjects
 
 
-// WARNING: paket.dependencies modified
-let IndexWorkspace (grepos : Graph.Repository set) =
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let antho = Configuration.LoadAnthology()
+let IndexWorkspace wsDir antho (grepos : Graph.Repository set) =
     let repos = antho.Repositories |> Set.filter (fun x -> grepos |> Set.exists (fun y -> y.Name = x.Repository.Name.toString))
                                    |> Set.map (fun x -> x.Repository)
     let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos
@@ -151,11 +148,13 @@ let IndexWorkspace (grepos : Graph.Repository set) =
         displayConflicts conflicts
         failwith "Conflict(s) detected"
 
-    let anthoWithIndexedProjects = { antho
-                                     with Projects = allProjects |> Set.ofList }
+    let anthoWithNewProjects = { antho
+                                 with Projects = allProjects |> Set.ofList }
+    let newAntho = Core.Simplify.SimplifyAnthologyWithoutPackage anthoWithNewProjects
+    (newAntho, parsedProjects)
 
-    let newAntho = Core.Simplify.SimplifyAnthologyWithoutPackage anthoWithIndexedProjects
-
+// WARNING: paket.dependencies modified
+let UpdatePackages (antho, parsedProjects) =
     /// here we optimize anthology and dependencies in order to speed up package retrieval after conversion
     /// warning: big side effect (paket.dependencies is modified)
     // automaticaly migrate packages to project - this will avoid retrieving them
@@ -163,17 +162,17 @@ let IndexWorkspace (grepos : Graph.Repository set) =
     let packagesToAdd = detectNewDependencies parsedProjects
     Tools.Paket.AppendDependencies packagesToAdd
 
-    let allPackages = Tools.Paket.ParsePaketDependencies ()
+    let currentPackages = Tools.Paket.ParsePaketDependencies ()
     let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
                                       |> Set.unionMany
-    let unusedPackages = allPackages - usedPackages
+    let unusedPackages = usedPackages - currentPackages
     Tools.Paket.RemoveDependencies unusedPackages
 
     // if changes then install packages
     if packagesToAdd <> Set.empty || unusedPackages <> Set.empty then
-        Core.Package.InstallPackages newAntho.NuGets
+        Core.Package.InstallPackages antho.NuGets
 
-    newAntho
+    antho
 
 
 let ConsolidateAnthology () = 

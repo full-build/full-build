@@ -43,7 +43,6 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
               printfn "%s" name
 
 
-
 let Create (createInfo : CLI.Commands.SetupWorkspace) =
     let wsDir = DirectoryInfo(createInfo.Path)
     wsDir.Create()
@@ -103,6 +102,8 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     // update binaries with observable baseline
     Core.BuildArtifacts.PullReferenceBinaries graph checkoutInfo.Version
 
+    // consolidate anthology
+    Core.Indexation.ConsolidateAnthology()
 
 let Init (initInfo : CLI.Commands.InitWorkspace) =
     let wsDir = DirectoryInfo(initInfo.Path)
@@ -284,14 +285,16 @@ let History (historyInfo : CLI.Commands.History) =
     Generators.History.Save histType version revisions
 
 let Index (indexInfo : CLI.Commands.IndexRepositories) =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     let antho = Configuration.LoadAnthology()
     let graph = antho |> Graph.from
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) indexInfo.Filters
     if selectedRepos = Set.empty then failwith "Empty repository selection"
 
-    selectedRepos |> Core.Indexation.IndexWorkspace
-                  |> Core.Package.Simplify 
+    selectedRepos |> Core.Indexation.IndexWorkspace wsDir antho
+                  |> Core.Indexation.UpdatePackages
+                  |> Core.Package.Simplify
                   |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
                   |> Configuration.SaveAnthology
 
