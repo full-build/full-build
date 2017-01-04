@@ -72,9 +72,6 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
 
 
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
-    // consolidate all repositories in global anthology
-    Core.Indexation.ConsolidateAnthology ()
-
     let graph = Configuration.LoadAnthology() |> Graph.from
 
     // copy bin content
