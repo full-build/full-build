@@ -24,6 +24,7 @@ let Publish (graph : Graph) (tagInfo : Tag.TagInfo) =
     let appDir = Env.GetFolder Env.Folder.AppOutput
     let versionDir = DirectoryInfo(graph.ArtifactsDir) |> GetSubDirectory tag
     let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
+    let versionLine = sprintf "%s:%s:%s" tagInfo.BuildNumber tag tagInfo.Branch
 
     try
         let doPublish = not versionDir.Exists
@@ -44,12 +45,12 @@ let Publish (graph : Graph) (tagInfo : Tag.TagInfo) =
 
         let latestVersionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
 
-        File.AppendAllLines(latestVersionFile.FullName, [tag])
+        File.AppendAllLines(latestVersionFile.FullName, [versionLine])
         printfn "[version] %s" tag
         for app in appDir |> EnumerateChildren do
             printfn "[appversion] %s" app.Name
             let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
-            File.AppendAllLines(versionFile.FullName, [tag])
+            File.AppendAllLines(versionFile.FullName, [versionLine])
     with
         _ -> versionDir.Refresh ()
              if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
