@@ -19,7 +19,7 @@ let (|Incremental|Full|Unknown|) x =
     | _ -> Unknown
 
 let Parse (tag : string) : TagInfo =
-    let items = tag.Split('-') |> List.ofArray
+    let items = tag.Split('_') |> List.ofArray
     match items with
     | [FullBuild; branch; version; Incremental] -> { TagInfo.Branch = branch; TagInfo.BuildNumber = version; TagInfo.Incremental = true }
     | [FullBuild; branch; version; Full] -> { TagInfo.Branch = branch; TagInfo.BuildNumber = version; TagInfo.Incremental = false }
@@ -27,4 +27,4 @@ let Parse (tag : string) : TagInfo =
 
 let Format (tagInfo : TagInfo) : string =
     let inc = tagInfo.Incremental ? ("inc", "full")
-    sprintf "fullbuild-%s-%s-%s" tagInfo.Branch tagInfo.BuildNumber inc
+    sprintf "fullbuild_%s_%s_%s" tagInfo.Branch tagInfo.BuildNumber inc

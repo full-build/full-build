@@ -21,7 +21,7 @@ open FsUnit
 
 [<Test>]
 let parse_tag_incremental () =
-    let tagInfo = Tag.Parse "fullbuild-master-1.2.3-inc"
+    let tagInfo = Tag.Parse "fullbuild_master_1.2.3_inc"
     let expectedTagInfo = { Tag.TagInfo.Branch = "master"
                             Tag.TagInfo.BuildNumber = "1.2.3"
                             Tag.TagInfo.Incremental = true }
@@ -30,7 +30,7 @@ let parse_tag_incremental () =
 
 [<Test>]
 let parse_tag_full () =
-    let tagInfo = Tag.Parse "fullbuild-beta-4.5-full"
+    let tagInfo = Tag.Parse "fullbuild_beta_4.5_full"
     let expectedTagInfo = { Tag.TagInfo.Branch = "beta"
                             Tag.TagInfo.BuildNumber = "4.5"
                             Tag.TagInfo.Incremental = false }
@@ -39,9 +39,9 @@ let parse_tag_full () =
 
 [<Test>]
 let parse_failures () =
-    (fun () -> Tag.Parse "fullbuild-beta-4.5" |> ignore) |> should throw typeof<Exception>
-    (fun () -> Tag.Parse "fullbuild-beta-4.5-pouet" |> ignore) |> should throw typeof<Exception>
-    (fun () -> Tag.Parse "fullbuild2-beta-4.5-inc" |> ignore) |> should throw typeof<Exception>
+    (fun () -> Tag.Parse "fullbuild_beta_4.5" |> ignore) |> should throw typeof<Exception>
+    (fun () -> Tag.Parse "fullbuild_beta_4.5_pouet" |> ignore) |> should throw typeof<Exception>
+    (fun () -> Tag.Parse "fullbuild2_beta_4.5_inc" |> ignore) |> should throw typeof<Exception>
 
 [<Test>]
 let format_taginfo_inc() =
@@ -49,7 +49,7 @@ let format_taginfo_inc() =
                     Tag.TagInfo.BuildNumber = "1.2.3"
                     Tag.TagInfo.Incremental = true }
     let tag = Tag.Format tagInfo
-    tag |> should equal "fullbuild-master-1.2.3-inc"
+    tag |> should equal "fullbuild_master_1.2.3_inc"
 
 [<Test>]
 let format_taginfo_full() =
@@ -57,4 +57,4 @@ let format_taginfo_full() =
                     Tag.TagInfo.BuildNumber = "4.5.6"
                     Tag.TagInfo.Incremental = false }
     let tag = Tag.Format tagInfo
-    tag |> should equal "fullbuild-beta-4.5.6-full"
+    tag |> should equal "fullbuild_beta_4.5.6_full"

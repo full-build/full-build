@@ -86,7 +86,7 @@ with
 
     member this.Baseline : Baseline =
         let branch = Configuration.LoadBranch()
-        let tagFilter = sprintf "fullbuild-%s-*" branch
+        let tagFilter = sprintf "fullbuild_%s_*" branch
         match Tools.Vcs.FindLatestMatchingTag wsDir graph.MasterRepository tagFilter with
         | Some tag -> let tagInfo = Tag.Parse tag
                       Baseline(graph, tagInfo, false)

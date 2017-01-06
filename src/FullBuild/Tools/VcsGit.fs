@@ -122,7 +122,9 @@ let GitIgnore (repoDir : DirectoryInfo) =
 let GitFindLatestMatchingTag (repoDir : DirectoryInfo) (filter : string) : string option =
     let args = sprintf "describe --match %A" filter
     let res = ExecGetOutput "git" args repoDir Map.empty
-    if res.Out.Length = 1 then Some res.Out.[0]
+    if res.Out.Length = 1 then 
+        let res = Some (res.Out.[0].Split('-').[0])
+        res
     else None
 
 let GitTagToHash (repoDir : DirectoryInfo) (tag : string) : string =

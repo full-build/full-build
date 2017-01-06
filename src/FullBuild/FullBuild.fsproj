@@ -26,8 +26,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>
-    </StartArguments>
+    <StartArguments>history</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
