@@ -57,6 +57,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="$(SolutionDir)/.full-build/projects/libproject.targets" />
   <Import Project="$(SolutionDir)\.full-build\projects\libproject.targets" />
 </Project>

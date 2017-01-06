@@ -307,8 +307,6 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) convertInfo.Filters
     if selectedRepos = Set.empty then failwith "Empty repository selection"
 
-    selectedRepos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Name)
-
     let builder2repos = selectedRepos |> Seq.groupBy (fun x -> x.Builder)
     for builder2repo in builder2repos do
         let (builder, repos) = builder2repo

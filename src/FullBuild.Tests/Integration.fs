@@ -49,20 +49,16 @@ let CheckSourceBuildIsSameAsBinaryBuild () =
                               "mainproject.exe"
                               "mainproject.exe.config"
                               "mainproject.exe.mdb"
-                              "Mono.Cecil.dll"
-                              "Mono.Cecil.Mdb.dll"
-                              "Mono.Cecil.Pdb.dll"
-                              "Mono.Cecil.Rocks.dll" ] |> set
+                              "Zlib.Portable.dll" 
+                              "Zlib.Portable.xml" ] |> set
 
     let expectedFilesWindows = [ "libproject.dll"
                                  "libproject.pdb"
                                  "mainproject.exe"
                                  "mainproject.exe.config"
                                  "mainproject.pdb"
-                                 "Mono.Cecil.dll"
-                                 "Mono.Cecil.Mdb.dll"
-                                 "Mono.Cecil.Pdb.dll"
-                                 "Mono.Cecil.Rocks.dll" ] |> set
+                                 "Zlib.Portable.dll" 
+                                 "Zlib.Portable.xml" ] |> set
 
     let expectedFiles = Env.IsMono() ? (expectedFilesMono, expectedFilesWindows)
                          

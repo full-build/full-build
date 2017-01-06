@@ -51,6 +51,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="$(SolutionDir)/.full-build/packages/Mono.Cecil\package.targets" />
-  <Import Project="$(SolutionDir)\.full-build\packages\Mono.Cecil\package.targets" />
+  <Import Project="$(SolutionDir)\.full-build\packages\Zlib.Portable\package.targets" />
 </Project>

@@ -2,7 +2,7 @@
   <Import Project="$(SolutionDir)\.full-build\views\$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)\tests\MainProject/MainProject.csproj" Condition="'$(FullBuild_mainproject)' != ''">
-      <Project>{a65f7dbf-3c8c-4d5d-b38f-752e9fd7b265}</Project>
+      <Project>{A65F7DBF-3C8C-4D5D-B38F-752E9FD7B265}</Project>
       <Name>mainproject</Name>
     </ProjectReference>
     <Reference Include="$(SolutionDir)\.full-build\bin\mainproject.exe" Condition="'$(FullBuild_mainproject)' == ''">

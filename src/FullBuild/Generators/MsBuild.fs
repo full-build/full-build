@@ -118,11 +118,13 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
             || attr.StartsWith(MSBUILD_PROJECT_FOLDER2, StringComparison.CurrentCultureIgnoreCase)
+            || attr.StartsWith(MSBUILD_PROJECT_FOLDER3, StringComparison.CurrentCultureIgnoreCase)
 
     let filterFullBuildPackage (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
         attr.StartsWith(MSBUILD_PACKAGE_FOLDER, StringComparison.CurrentCultureIgnoreCase)
             || attr.StartsWith(MSBUILD_PACKAGE_FOLDER2, StringComparison.CurrentCultureIgnoreCase)
+            || attr.StartsWith(MSBUILD_PACKAGE_FOLDER3, StringComparison.CurrentCultureIgnoreCase)
 
     let filterFullBuildTargets (xel : XElement) =
         let attr = (!> (xel.Attribute (NsNone + "Project")) : string) |> ToWindows

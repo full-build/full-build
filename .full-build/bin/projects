@@ -58,7 +58,7 @@ projects:
         - assembly: system.xml
         - assembly: system.xml.linq
       packages:
-        - package: Mono.Cecil
+        - package: Zlib.Portable
       projects: []
     - guid: a65f7dbf-3c8c-4d5d-b38f-752e9fd7b265
       file: tests/MainProject/MainProject.csproj

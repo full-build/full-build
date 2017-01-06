@@ -2,7 +2,7 @@
   <Import Project="$(SolutionDir)\.full-build\views\$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)\tests\LibProject/LibProject.csproj" Condition="'$(FullBuild_libproject)' != ''">
-      <Project>{4198a8ad-aa7a-45b2-8086-646b8715bec6}</Project>
+      <Project>{4198A8AD-AA7A-45B2-8086-646B8715BEC6}</Project>
       <Name>libproject</Name>
     </ProjectReference>
     <Reference Include="$(SolutionDir)\.full-build\bin\libproject.dll" Condition="'$(FullBuild_libproject)' == ''">
