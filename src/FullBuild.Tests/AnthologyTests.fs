@@ -44,7 +44,7 @@ let CheckToRepository () =
 let CheckEqualityWithPermutation () =
     let antho1 = {
         MinVersion = "1.2.3.4"
-        Artifacts = @"c:\toto"
+        Binaries = @"c:\toto"
         NuGets = []
         MasterRepository = { Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" ; Branch = None}
         Repositories = [ { Builder = BuilderType.MSBuild
@@ -70,7 +70,7 @@ let CheckEqualityWithPermutation () =
 
     let antho2 = {
         MinVersion = "1.2.3.4"
-        Artifacts = @"c:\toto"
+        Binaries = @"c:\toto"
         NuGets = []
         MasterRepository = { Name = RepositoryId.from ".full-build"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp-full-build" ; Branch = None}
         Repositories = [ { Builder = BuilderType.MSBuild

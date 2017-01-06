@@ -209,14 +209,17 @@ type Application =
 
 type Anthology =
     { MinVersion : string
-      Artifacts : string
+      Binaries : string
       NuGets : RepositoryUrl list
       Vcs : VcsType
       MasterRepository : Repository
       Repositories : BuildableRepository set
-      Projects : Project set
       Applications : Application set
+      Projects : Project set
       Tester : TestRunnerType }
+
+
+
 
 type Baseline =
     { Incremental : bool

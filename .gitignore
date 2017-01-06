@@ -10,6 +10,7 @@ obj
 /tests/cs-*
 packages
 views
+history.txt
 !/bootstrap/packages
 !/bootstrap/bin
 !/bootstrap/views

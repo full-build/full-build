@@ -30,14 +30,21 @@ let private projectCanBeProcessed (fileName : FileInfo) =
 
 let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) =
     repoDir |> IoHelpers.FindKnownProjects
-            |> Seq.filter projectCanBeProcessed
-            |> Seq.map (parser repoDir repoRef)
+            |> List.filter projectCanBeProcessed
+            |> List.map (parser repoDir repoRef)
 
-let private parseWorkspaceProjects (parser) (wsDir : DirectoryInfo) (repos : Repository seq) =
+let private printParseStatus (repoDir : DirectoryInfo) =
+    let repo = RepositoryId.from(repoDir.Name)
+    IoHelpers.DisplayHighlight repo.toString
+    repoDir
+
+let private parseWorkspaceProjects parser (wsDir : DirectoryInfo) (repos : Repository seq) =
     repos |> Seq.map (fun x -> GetSubDirectory x.Name.toString wsDir)
           |> Seq.filter (fun x -> x.Exists)
+          |> Seq.map printParseStatus
           |> Seq.map (fun x -> parseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
           |> Seq.concat
+          |> List.ofSeq
 
 
 // NOTE: should be private
@@ -88,13 +95,11 @@ let rec private displayConflicts (conflicts : ConflictType list) =
 
 let private detectNewDependencies (projects : Parsers.MSBuild.ProjectDescriptor seq) =
     // add new packages (with correct version requirement)
-    let foundPackages = projects |> Seq.map (fun x -> x.Packages)
-                                 |> Seq.concat
     let existingPackages = Tools.Paket.ParsePaketDependencies ()
-    let packagesToAdd = foundPackages |> Seq.filter (fun x -> Set.contains x.Id existingPackages |> not)
-                                      |> Seq.distinctBy (fun x -> x.Id)
-                                      |> Set
-    packagesToAdd
+    projects |> Seq.collect (fun x -> x.Packages)
+             |> Seq.filter (fun x -> Set.contains x.Id existingPackages |> not)
+             |> Seq.distinctBy (fun x -> x.Id)
+             |> Set.ofSeq
 
 
 
@@ -130,20 +135,12 @@ let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
     Set.union remainingProjects newProjects
 
 
-// this function has 2 side effects:
-// * update paket.dependencies (both sources and packages)
-// * anthology
-let IndexWorkspace (grepos : Graph.Repository set) =
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let antho = Configuration.LoadAnthology()
+let IndexWorkspace wsDir antho (grepos : Graph.Repository set) =
     let repos = antho.Repositories |> Set.filter (fun x -> grepos |> Set.exists (fun y -> y.Name = x.Repository.Name.toString))
                                    |> Set.map (fun x -> x.Repository)
     let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos
 
-    let packagesToAdd = detectNewDependencies parsedProjects
-    Tools.Paket.AppendDependencies packagesToAdd
-
-    let projects = parsedProjects |> Seq.map (fun x -> x.Project)
+    let projects = parsedProjects |> List.map (fun x -> x.Project)
                                   |> Set
     let allProjects = MergeProjects projects antho.Projects |> Set.toList
     let conflicts = findConflicts allProjects |> List.ofSeq
@@ -151,23 +148,111 @@ let IndexWorkspace (grepos : Graph.Repository set) =
         displayConflicts conflicts
         failwith "Conflict(s) detected"
 
-    let newAntho = { antho
-                     with Projects = allProjects |> Set.ofList }
-    newAntho
+    let anthoWithNewProjects = { antho
+                                 with Projects = allProjects |> Set.ofList }
+    let newAntho = Core.Simplify.SimplifyAnthologyWithoutPackage anthoWithNewProjects
+    (newAntho, parsedProjects)
 
-let Optimize (newAntho : Anthology) =
-    /// BEGIN HACK : here we optimize anthology and dependencies in order to speed up package retrieval after conversion
-    ///              warning: big side effect (anthology and paket.dependencies are modified)
+// WARNING: paket.dependencies modified
+let UpdatePackages (antho, parsedProjects) =
+    /// here we optimize anthology and dependencies in order to speed up package retrieval after conversion
+    /// warning: big side effect (paket.dependencies is modified)
     // automaticaly migrate packages to project - this will avoid retrieving them
-    let simplifiedAntho = Simplify.SimplifyAnthologyWithoutPackage newAntho
-    Configuration.SaveAnthology simplifiedAntho
-
     // remove unused packages  - this will avoid downloading them for nothing
-    let allPackages = Tools.Paket.ParsePaketDependencies ()
-    let usedPackages = simplifiedAntho.Projects |> Set.map (fun x -> x.PackageReferences)
-                                                |> Set.unionMany
-    let unusedPackages = Set.difference allPackages usedPackages
-    Tools.Paket.RemoveDependencies unusedPackages
-    /// END HACK
+    let packagesToAdd = detectNewDependencies parsedProjects
+    Tools.Paket.AppendDependencies packagesToAdd
 
-    simplifiedAntho
+    let currentPackages = Tools.Paket.ParsePaketDependencies ()
+    let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
+                                      |> Set.unionMany
+    let unusedPackages = usedPackages - currentPackages
+    Tools.Paket.RemoveDependencies unusedPackages
+
+    // if changes then install packages
+    if packagesToAdd <> Set.empty || unusedPackages <> Set.empty then
+        Core.Package.InstallPackages antho.NuGets
+
+    antho
+
+
+let ConsolidateAnthology () = 
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let antho = Configuration.LoadAnthology ()
+
+    // update anthology
+    let mutable consAntho = antho
+    for repo in antho.Repositories do
+        let repoDir = wsDir |> GetSubDirectory repo.Repository.Name.toString
+        if repoDir.Exists then
+            let repoProjects = Configuration.LoadProjectsRepository repo.Repository.Name
+            let newProjects = consAntho.Projects |> Set.filter (fun x -> x.Repository <> repo.Repository.Name)
+                                                 |> Set.union repoProjects.Projects
+            consAntho <- { consAntho
+                           with Projects = newProjects }
+    Configuration.SaveAnthology consAntho                                                                                
+
+
+let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
+    let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
+    let untouchedProjects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
+
+    if untouchedPreviousProjects <> untouchedProjects then
+        printfn "Missing repositories for indexation"
+        let prevGroups = untouchedPreviousProjects |> Seq.groupBy (fun x -> x.Repository)
+                                                   |> Seq.map (fun (repo, prjs) -> repo, prjs |> set)
+                                                   |> dict
+        let currGroups = untouchedProjects |> Seq.groupBy (fun x -> x.Repository)
+                                           |> Seq.map (fun (repo, prjs) -> repo, prjs |> set)
+                                           |> dict
+
+        for kvp in prevGroups do
+            let prevProjects = kvp.Value
+            let currProjects = currGroups.[kvp.Key]
+            if prevProjects <> currProjects then
+                printfn "%s" kvp.Key.toString
+
+        failwithf "Missing repositories for indexation"
+
+    let modifiedProjects = antho.Projects |> Seq.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
+                                          |> Seq.groupBy (fun x -> x.Repository)
+                                          |> Seq.map (fun (r, p) -> r, p |> Set.ofSeq)
+                                          |> dict
+
+    for kvp in modifiedProjects do
+        let repo = kvp.Key
+        let projects = { ProjectsSerializer.Projects = kvp.Value }
+        let currentProjects = Configuration.LoadProjectsRepository repo
+        if currentProjects <> projects then failwithf "Repository %s must be indexed" repo.toString
+
+let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
+    let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
+    let untouchedProjects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
+
+    if untouchedPreviousProjects <> untouchedProjects then
+        printfn "Missing repositories for indexation"
+        let prevGroups = untouchedPreviousProjects |> Seq.groupBy (fun x -> x.Repository)
+                                                   |> Seq.map (fun (repo, prjs) -> repo, prjs |> set)
+                                                   |> dict
+        let currGroups = untouchedProjects |> Seq.groupBy (fun x -> x.Repository)
+                                           |> Seq.map (fun (repo, prjs) -> repo, prjs |> set)
+                                           |> dict
+
+        for kvp in prevGroups do
+            let prevProjects = kvp.Value
+            let currProjects = currGroups.[kvp.Key]
+            if prevProjects <> currProjects then
+                printfn "%s" kvp.Key.toString
+
+        failwithf "Missing repositories for indexation"
+
+    let modifiedProjects = antho.Projects |> Seq.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
+                                          |> Seq.groupBy (fun x -> x.Repository)
+                                          |> Seq.map (fun (r, p) -> r, p |> Set.ofSeq)
+                                          |> dict
+
+    for kvp in modifiedProjects do
+        let repo = kvp.Key
+        let projects = { ProjectsSerializer.Projects = kvp.Value }
+        Configuration.SaveProjectsRepository repo projects
+
+    antho

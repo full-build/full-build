@@ -203,7 +203,7 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
             "PropertyGroup", hasNoChild
         ]
 
-    seekAndDestroy |> Seq.iter (fun (x, y) -> cproj.Descendants(NsMsBuild + x).Where(y).Remove())
+    seekAndDestroy |> List.iter (fun (x, y) -> cproj.Descendants(NsMsBuild + x).Where(y).Remove())
     cproj
 
 
@@ -233,9 +233,10 @@ let private convertProject (xproj : XDocument) (project : Project) =
         let prjFile = repoDir |> GetFile project.ProjectFile
         let prjDir = Path.GetDirectoryName (prjFile.FullName) |> DirectoryInfo
         let infoFile = prjDir |> GetFile fileName
-        let content = File.ReadAllLines (infoFile.FullName) |> List.ofSeq
-                                                            |> patchAssemblyVersion
-        File.WriteAllLines(infoFile.FullName, content)
+        if infoFile.Exists then
+            let content = File.ReadAllLines (infoFile.FullName) |> List.ofSeq
+                                                                |> patchAssemblyVersion
+            File.WriteAllLines(infoFile.FullName, content)
 
     let cproj = cleanupProject xproj project
 

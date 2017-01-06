@@ -94,7 +94,7 @@ let UpdateArtifactBindingRedirects (artifactDir : DirectoryInfo) =
 
     let dllConfigs = artifactDir.GetFiles ("*.dll") |> Seq.map getAssemblyConfig
     let exeConfigs = artifactDir.GetFiles ("*.exe") |> Seq.map getAssemblyConfig
-    let templateConfig = artifactDir |> GetFile "app.template.config" |> Seq.singleton
+    let templateConfig = artifactDir |> GetFile "app.template.config" |> List.singleton
 
     exeConfigs
         |> Seq.append dllConfigs

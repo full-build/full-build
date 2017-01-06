@@ -25,11 +25,11 @@ let TestAssemblies (filters : string set) (excludes : string set) =
     let projects = selectedViews |> Set.map (fun x -> x.Projects)
                                    |> Set.unionMany
                                    |> Set.filter (fun x -> x.HasTests)
-    let artifactDirs = projects |> Set.map (fun x -> sprintf "%s/%s" x.Repository.Name x.ProjectFile)
-                                |> Seq.map (fun x -> wsDir |> IoHelpers.GetFile x)
-                                |> Seq.map (fun x -> x.Directory)
-                                |> Seq.map (fun x -> x |> IoHelpers.GetSubDirectory "bin")
-    artifactDirs |> Seq.iter Core.Bindings.UpdateArtifactBindingRedirects
+    projects |> Set.map (fun x -> sprintf "%s/%s" x.Repository.Name x.ProjectFile)
+             |> Seq.map (fun x -> wsDir |> IoHelpers.GetFile x)
+             |> Seq.map (fun x -> x.Directory)
+             |> Seq.map (fun x -> x |> IoHelpers.GetSubDirectory "bin")
+             |> Seq.iter Core.Bindings.UpdateArtifactBindingRedirects
 
     // then test assemblies
     let assemblies = projects |> Set.map (fun x -> x.BinFile)

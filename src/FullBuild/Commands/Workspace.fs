@@ -43,7 +43,6 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
               printfn "%s" name
 
 
-
 let Create (createInfo : CLI.Commands.SetupWorkspace) =
     let wsDir = DirectoryInfo(createInfo.Path)
     wsDir.Create()
@@ -70,9 +69,9 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     finally
         Environment.CurrentDirectory <- currDir
 
-        
+
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Configuration.LoadAnthology() |> Graph.from
 
     // copy bin content
     let baselineRepository = Baselines.from graph
@@ -103,6 +102,8 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     // update binaries with observable baseline
     Core.BuildArtifacts.PullReferenceBinaries graph checkoutInfo.Version
 
+    // consolidate anthology
+    Core.Indexation.ConsolidateAnthology()
 
 let Init (initInfo : CLI.Commands.InitWorkspace) =
     let wsDir = DirectoryInfo(initInfo.Path)
@@ -165,7 +166,6 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
                             |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
 
         pullResults |> Exec.CheckMultipleResponseCode
-
         Install ()
 
     if pullInfo.Bin then
@@ -173,6 +173,10 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
         let baseline = baselineRepository.Baseline
         let tag = Tag.Format baseline.Info
         Core.BuildArtifacts.PullReferenceBinaries graph tag
+
+    // consolidate anthology
+    Core.Indexation.ConsolidateAnthology()
+
 
 let Exec (execInfo : CLI.Commands.Exec) =
     let graph = Configuration.LoadAnthology() |> Graph.from
@@ -281,16 +285,21 @@ let History (historyInfo : CLI.Commands.History) =
     Generators.History.Save histType version revisions
 
 let Index (indexInfo : CLI.Commands.IndexRepositories) =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let antho = Configuration.LoadAnthology()
+    let graph = antho |> Graph.from
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) indexInfo.Filters
     if selectedRepos = Set.empty then failwith "Empty repository selection"
 
-    selectedRepos |> Seq.iter (fun x -> IoHelpers.DisplayHighlight  x.Name)
-    selectedRepos |> Core.Indexation.IndexWorkspace
-                  |> Core.Indexation.Optimize
-                  |> Core.Package.Simplify
-                  |> Configuration.SaveAnthology
+    let indexation = selectedRepos |> Core.Indexation.IndexWorkspace wsDir antho
+    if indexInfo.Check then
+        indexation |> fst |> Core.Indexation.CheckAnthologyProjectsInRepository antho selectedRepos
+    else
+        indexation |> Core.Indexation.UpdatePackages
+                   |> Core.Package.Simplify
+                   |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
+                   |> Configuration.SaveAnthology
 
 let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from
@@ -303,7 +312,9 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let builder2repos = selectedRepos |> Seq.groupBy (fun x -> x.Builder)
     for builder2repo in builder2repos do
         let (builder, repos) = builder2repo
-        Core.Conversion.Convert builder (set repos)
+        for repo in repos do
+            IoHelpers.DisplayHighlight repo.Name
+            Core.Conversion.Convert builder (Set.singleton repo)
 
     // setup additional files for views to work correctly
     let confDir = Env.GetFolder Env.Folder.Config

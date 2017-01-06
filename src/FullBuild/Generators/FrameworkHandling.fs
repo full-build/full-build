@@ -239,8 +239,8 @@ type FrameworkIdentifier =
 
     member x.IsCompatible y = 
         x = y || 
-          (x.SupportedPlatforms |> Seq.exists (fun x' -> x' = y && not (x'.IsSameCategoryAs x))) || 
-          (y.SupportedPlatforms |> Seq.exists (fun y' -> y' = x && not (y'.IsSameCategoryAs y)))
+          (x.SupportedPlatforms |> List.exists (fun x' -> x' = y && not (x'.IsSameCategoryAs x))) || 
+          (y.SupportedPlatforms |> List.exists (fun y' -> y' = x && not (y'.IsSameCategoryAs y)))
 
     member x.IsAtLeast y =
         if x.IsSameCategoryAs y then
@@ -248,7 +248,7 @@ type FrameworkIdentifier =
         else 
             let isCompatible() = 
                 y.SupportedPlatforms
-                |> Seq.exists x.IsAtLeast
+                |> List.exists x.IsAtLeast
 
             match x,y with
             | DotNetStandard _, DotNetFramework _ -> isCompatible()
@@ -261,7 +261,7 @@ type FrameworkIdentifier =
         else 
             let isCompatible() = 
                 y.SupportedPlatforms
-                |> Seq.exists x.IsAtMost
+                |> List.exists x.IsAtMost
 
             match x,y with
             | DotNetStandard _, DotNetFramework _ -> isCompatible()

@@ -29,9 +29,9 @@ let private displayApp (app : Graph.Application) =
 
 let private filterApp (graph : Graph.Graph) (version : string) (app : Graph.Application) =
     async {
-        let hasVersion = Core.BuildArtifacts.FetchVersionsForArtifact graph app |> Seq.contains version
-        return if hasVersion then Seq.singleton app
-               else Seq.empty
+        let hasVersion = Core.BuildArtifacts.FetchVersionsForArtifact graph app |> List.contains version
+        return if hasVersion then List.singleton app
+               else List.empty
     }
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
@@ -44,10 +44,10 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
                                                       |> Set.unionMany
 
     let apps = PatternMatching.FilterMatch applications (fun x -> x.Name) (set pubInfo.Filters)
-    let runApps = apps |> Seq.map asyncPublish
-
     let maxThrottle = if pubInfo.Multithread then (System.Environment.ProcessorCount*2) else 1
-    runApps |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously |> ignore
+    apps |> Seq.map asyncPublish
+         |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously 
+         |> ignore
 
     let appFolder = Env.GetFolder Env.Folder.AppOutput
     appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter IoHelpers.ForceDelete

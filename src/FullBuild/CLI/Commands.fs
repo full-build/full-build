@@ -41,7 +41,8 @@ type UpdateGuids =
     { Filters : string set }
 
 type IndexRepositories =
-    { Filters : string set }
+    { Filters : string set 
+      Check : bool }
 
 type ConvertRepositories =
     { Filters : string set }
@@ -183,6 +184,7 @@ type MainCommand =
     | PublishApp
     | Query
     | Bind
+    | Migrate
     | Unknown
 
 
@@ -194,6 +196,7 @@ type Command =
     | Usage
     | Upgrade of string
     | FinalizeUpgrade of int
+    | Migrate
 
     // workspace
     | SetupWorkspace of SetupWorkspace

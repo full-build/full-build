@@ -7,16 +7,24 @@ type TagInfo =
       BuildNumber : string 
       Incremental : bool }
 
+let (|FullBuild|Unknown|) x =
+    match x with
+    | "fullbuild" -> FullBuild
+    | _ -> Unknown
+
+let (|Incremental|Full|Unknown|) x =
+    match x with
+    | "inc" -> Incremental
+    | "full" -> Full
+    | _ -> Unknown
+
 let Parse (tag : string) : TagInfo =
-    let items = tag.Split('-')
-    if (items.Length <> 4 || items.[0] <> "fullbuild") then failwithf "Unknown tag"
-    let branch = items.[1]
-    let buildNumber = items.[2]
-    let buildType = items.[3]
-    { TagInfo.Branch = branch
-      TagInfo.BuildNumber = buildNumber
-      TagInfo.Incremental = buildType = "incremental" }
+    let items = tag.Split('_') |> List.ofArray
+    match items with
+    | [FullBuild; branch; version; Incremental] -> { TagInfo.Branch = branch; TagInfo.BuildNumber = version; TagInfo.Incremental = true }
+    | [FullBuild; branch; version; Full] -> { TagInfo.Branch = branch; TagInfo.BuildNumber = version; TagInfo.Incremental = false }
+    | _ -> failwithf "Unknown tag"
 
 let Format (tagInfo : TagInfo) : string =
-    let inc = tagInfo.Incremental ? ("incremental", "full")
-    sprintf "fullbuild-%s-%s-%s" tagInfo.Branch tagInfo.BuildNumber inc
+    let inc = tagInfo.Incremental ? ("inc", "full")
+    sprintf "fullbuild_%s_%s_%s" tagInfo.Branch tagInfo.BuildNumber inc

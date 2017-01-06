@@ -25,7 +25,7 @@ let writeText (version : string) (revisions : (Graph.Repository * string list) s
         yield sprintf "version %s" version
         for (repo, rev) in revisions do
             yield sprintf "==> %s" repo.Name
-            yield! rev |> Seq.map (sprintf "%s")
+            yield! rev |> List.map (sprintf "%s")
     }
 
 
@@ -36,7 +36,7 @@ let writeHtml (version : string) (revisions : (Graph.Repository * string list) s
         yield sprintf "<h2>version %s</h2>" version
         for (repo, rev) in revisions do
             yield sprintf "<b>%s</b><br>" repo.Name
-            yield! rev |> Seq.map (sprintf "%s<br>")
+            yield! rev |> List.map (sprintf "%s<br>")
             yield "<br>"
         yield "</body>"
     }
@@ -54,4 +54,4 @@ let Save (histType : HistoryType) (version : string) (revisions : (Graph.Reposit
     printfn "version %s" version
     for (repo, rev) in revisions do
         IoHelpers.DisplayHighlight repo.Name
-        rev |> Seq.iter (printfn "%s")
+        rev |> List.iter (printfn "%s")

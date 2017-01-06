@@ -27,7 +27,7 @@ let GetFrameworkDependencies (xnuspec : XDocument) =
         |> Seq.filter (fun x -> x.Name.LocalName = "frameworkAssembly")
         |> Seq.map (fun x -> !> x.Attribute(NsNone + "assemblyName") : string)
         |> Seq.map AssemblyId.from
-        |> set
+        |> Set.ofSeq
 
 let GetPackageDependencies (xnuspec : XDocument) =
     let pkgsDir = Env.GetFolder Env.Folder.Package
@@ -61,7 +61,7 @@ let rec BuildPackageDependencies (packages : PackageId seq) =
 let ComputePackagesRoots (package2packages : Map<PackageId, PackageId set>) =
     let roots = package2packages |> Map.filter (fun pkg _ -> not <| Map.exists (fun _ files -> files |> Set.contains pkg) package2packages)
                                  |> Seq.map (fun x -> x.Key)
-                                 |> Set
+                                 |> Set.ofSeq
     roots
 
 let GetDependencyNuspec packageName = 

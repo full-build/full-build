@@ -5,6 +5,7 @@ v3.2
   * Tag for baseline (issue #114)
   * Support for .fbignore to avoid deleting files on conversion (issue #147)
   * --debug option to display full callstack on crash
+  * Projects are managed per repository (issue #111)
 
 v3.1
   * Create view from application (issue #112)

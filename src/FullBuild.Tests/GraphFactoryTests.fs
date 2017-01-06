@@ -27,17 +27,21 @@ open TestHelpers
 
 [<Test>]
 let ConvertToGraph () =
-    let fileSimplified = FileInfo(testFile "anthology-graph.yaml")
-    let anthology = AnthologySerializer.Load fileSimplified
-
+    let artifactsFile = FileInfo(testFile "graph-artifacts.yaml")
+    let projectsFile = FileInfo(testFile "graph-projects.yaml")
+    let artifacts = ArtifactsSerializer.Load artifactsFile
+    let projects = ProjectsSerializer.Load projectsFile
+    let anthology = AnthologySerializer.Deserialize artifacts projects
     let graph = Graph.from anthology
 
-    let apps = graph.Applications |> Seq.map (fun x -> x.Name) |> set
+    let apps = graph.Applications |> Seq.map (fun x -> x.Name) 
+                                  |> Set.ofSeq
     let expectedApps = [ "cassandrasharp-log4net"
                          "cqlplus" ] |> set
     apps |> should equal expectedApps
 
-    let repos = graph.Repositories |> Seq.map (fun x -> x.Name, x.Projects |> Seq.map (fun x -> x.ProjectId) |> set) |> set
+    let repos = graph.Repositories |> Seq.map (fun x -> x.Name, x.Projects |> Seq.map (fun x -> x.ProjectId) |> set) 
+                                   |> Set.ofSeq
     let expectedRepos = [ "cassandra-sharp", [ "apache.cassandra"
                                                "cassandrasharp.interfaces"
                                                "cassandrasharp"

@@ -20,10 +20,10 @@ let extractAndTryGetProfile = Collections.memoize (fun path ->
     let platforms = extractPlatforms path
     let filtered =
       platforms
-      |> List.filter (fun p -> knownInPortable |> Seq.exists ((=) p))
+      |> List.filter (fun p -> knownInPortable |> List.exists ((=) p))
       |> List.sort
 
-    KnownTargetProfiles.AllPortableProfiles |> Seq.tryFind (snd >> List.sort >> (=) filtered)
+    KnownTargetProfiles.AllPortableProfiles |> List.tryFind (snd >> List.sort >> (=) filtered)
     |> Option.map PortableProfile)
 
 let getPlatformPenalty =
@@ -123,7 +123,7 @@ let findBestMatch =
 
         let findBestPortableMatch findPenalty (portableProfile:TargetProfile) paths =
             paths
-            |> Seq.tryFind (fun p -> extractAndTryGetProfile p = Some portableProfile)
+            |> List.tryFind (fun p -> extractAndTryGetProfile p = Some portableProfile)
             |> Option.map (fun p -> p, findPenalty)
 
         match supported with
@@ -193,7 +193,7 @@ let getCondition (referenceCondition:string option) (allTargets: TargetProfile l
         let fullyContained = 
             KnownTargetProfiles.AllDotNetProfiles 
             |> List.filter matchF
-            |> List.forall (fun p -> targets |> Seq.exists ((=) p))
+            |> List.forall (fun p -> targets |> List.exists ((=) p))
 
         if fullyContained then
             (sprintf "$(TargetFrameworkIdentifier) == '%s'" typeName,"") :: processed,targets |> List.filter (matchF >> not)
@@ -240,7 +240,7 @@ let getCondition (referenceCondition:string option) (allTargets: TargetProfile l
         let andString = 
             conditions
             |> List.map (fun (group,conditions) ->
-                match List.ofSeq (conditions |> Seq.map snd |> Set.ofSeq) with
+                match List.ofSeq (conditions |> List.map snd |> Set.ofSeq) with
                 | [ "" ] -> group
                 | [] -> "false"
                 | [ detail ] -> sprintf "%s And %s" group detail

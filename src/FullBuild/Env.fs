@@ -23,7 +23,8 @@ let private PROJECT_FOLDER = "projects"
 let private PACKAGE_FOLDER = "packages"
 let BIN_FOLDER = "bin"
 let OBJ_FOLDER = "obj"
-let ANTHOLOGY_FILENAME = "anthology"
+let ARTIFACTS_FILENAME = "artifacts"
+let PROJECTS_FILENAME = "projects"
 let BASELINE_FILENAME = "baseline"
 let VERSION_FILENAME = "version"
 let BRANCH_FILENAME = "branch"
@@ -100,8 +101,14 @@ let GetFsGlobalAssemblyInfoFileName() =
 let GetCsGlobalAssemblyInfoFileName() =
     GetFolder Folder.Bin |> GetFile CS_GLOBAL_ASSEMBLYINFO_FILENAME
 
-let GetAnthologyFile() =
-    GetFolder Folder.Config |> GetFile ANTHOLOGY_FILENAME
+let GetArtifactsFile() =
+    GetFolder Folder.Config |> GetFile ARTIFACTS_FILENAME
+
+let GetProjectsFile() =
+    GetFolder Folder.Bin |> GetFile PROJECTS_FILENAME
+
+let GetBaselineFile() =
+    GetFolder Folder.Config  |> GetFile BASELINE_FILENAME
 
 let GetViewFile viewName =
     GetFolder Folder.View |> GetFile (AddExt Extension.View viewName)

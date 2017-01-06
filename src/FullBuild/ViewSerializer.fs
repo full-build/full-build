@@ -64,13 +64,5 @@ let Save (filename : FileInfo) (view : View) =
 
 let Load (filename : FileInfo) : View =
     let content = File.ReadAllText (filename.FullName)
-//    { Name = "toto"
-//      Filters = Set.empty
-//      Parameters = Set.empty
-//      Builder = Anthology.BuilderType.MSBuild
-//      SourceOnly = true
-//      Parents = true
-//      Modified = true }
-
     DeserializeView content
 

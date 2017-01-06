@@ -47,7 +47,7 @@ let private generateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
     let pkgDir = Env.GetFolder Env.Folder.Package
     let dlls = fxLibs.EnumerateFiles("*.dll")
     let exes = fxLibs.EnumerateFiles("*.exes")
-    let files = Seq.append dlls exes
+    let files = Seq.append dlls exes |> List.ofSeq
     let itemGroup = generateItemGroupContent pkgDir files
     XElement(NsMsBuild + "When",
         XAttribute(NsNone + "Condition", condition),

@@ -136,12 +136,15 @@ let GetFilewithoutRootDirectory (file : string) =
     file.Substring(idx+1)
 
 let consoleLock = System.Object()
-let DisplayHighlight s =
-    let display () =
+
+let DisplayHighlight (s : string) =
+    let display () =        
         let oldColor = Console.ForegroundColor
-        Console.ForegroundColor <- ConsoleColor.Cyan
-        Console.WriteLine("{0}", [|s|])
-        Console.ForegroundColor <- oldColor
+        try
+            Console.ForegroundColor <- ConsoleColor.Cyan
+            Console.WriteLine("- {0}", s)
+        finally
+            Console.ForegroundColor <- oldColor
 
     lock consoleLock display
 
@@ -157,6 +160,7 @@ let FindKnownProjects (repoDir : DirectoryInfo) =
      AddExt VbProj "*"
      AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories))
                         |> Seq.concat
+                        |> List.ofSeq
 
 let EnumerateChildren (dir : DirectoryInfo) =
     dir.EnumerateFileSystemInfos()

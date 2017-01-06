@@ -34,7 +34,6 @@ let GenerateProjectArtifacts () =
     let repos = graph.Repositories
 
     let builder2repos = repos |> Seq.groupBy (fun x -> x.Builder)
-
     for (builder, repos) in builder2repos do
         let projects = repos |> Seq.map (fun x -> x.Projects)
                              |> Set.unionMany

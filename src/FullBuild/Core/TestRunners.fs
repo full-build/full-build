@@ -23,7 +23,7 @@ let excludeListToArgs (excludes : string list) =
     | [] -> ""
     | [x] -> let excludeArgs = sprintf "cat != %s" x
              sprintf "--where %A" excludeArgs
-    | x :: tail -> let excludeArgs = excludes |> Seq.fold (fun s t -> sprintf "%s && cat != %s" s t) ("")
+    | x :: tail -> let excludeArgs = excludes |> List.fold (fun s t -> sprintf "%s && cat != %s" s t) ("")
                    sprintf "--where %A" excludeArgs
 
 

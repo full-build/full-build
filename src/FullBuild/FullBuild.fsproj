@@ -26,8 +26,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>
-    </StartArguments>
+    <StartArguments>history</StartArguments>
     <StartWorkingDirectory>
     </StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -100,6 +99,8 @@
     <Compile Include="IoHelpers.fs" />
     <Compile Include="Env.fs" />
     <Compile Include="Anthology.fs" />
+    <Compile Include="ArtifactsSerializer.fs" />
+    <Compile Include="ProjectsSerializer.fs" />
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="ViewSerializer.fs" />
     <Compile Include="Configuration.fs" />
@@ -138,8 +139,9 @@
     <Compile Include="Core\BuildArtifacts.fs" />
     <Compile Include="Core\Simplify.fs" />
     <Compile Include="Core\Conversion.fs" />
-    <Compile Include="Core\Indexation.fs" />
     <Compile Include="Core\Package.fs" />
+    <Compile Include="Core\Indexation.fs" />
+    <Compile Include="Migration\AnthologyLoader2.fs" />
     <Compile Include="Commands\View.fs" />
     <Compile Include="Commands\Repo.fs" />
     <Compile Include="Commands\Workspace.fs" />
@@ -149,11 +151,14 @@
     <Compile Include="Commands\NuGet.fs" />
     <Compile Include="Commands\Package.fs" />
     <Compile Include="Commands\Query.fs" />
+    <Compile Include="Commands\Migrate.fs" />
     <Compile Include="Program.fs" />
     <None Include="Examples\Library.nuspec" />
     <None Include="Examples\ghreleasefeed.json" />
     <None Include="Examples\view.yaml" />
     <None Include="Examples\anthology.yaml" />
+    <None Include="Examples\anthology2.yaml" />
+    <None Include="Examples\artifacts.yaml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

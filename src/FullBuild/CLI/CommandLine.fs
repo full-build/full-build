@@ -237,46 +237,41 @@ let private (|PublisherType|_|) name =
 
 let private commandSetup (args : string list) =
     match args with
-    | Param vcs
-      :: Param masterRepository
-      :: Param masterArtifacts
-      :: [Param path] -> Command.SetupWorkspace { MasterRepository = masterRepository
-                                                  MasterArtifacts = masterArtifacts
-                                                  Type = StringHelpers.fromString<Graph.VcsType> vcs
-                                                  Path = path }
+    | Param vcs :: Param masterRepository :: Param masterArtifacts :: [Param path] 
+        -> Command.SetupWorkspace { MasterRepository = masterRepository
+                                    MasterArtifacts = masterArtifacts
+                                    Type = StringHelpers.fromString<Graph.VcsType> vcs
+                                    Path = path }
     | _ -> Command.Error MainCommand.Setup
 
 let private commandInit (args : string list) =
     match args with
-    | Param vcs
-      :: Param masterRepository
-      :: [Param path] -> Command.InitWorkspace { MasterRepository = masterRepository
-                                                 Type = StringHelpers.fromString<Graph.VcsType> vcs
-                                                 Path = path }
+    | Param vcs :: Param masterRepository :: [Param path] 
+        -> Command.InitWorkspace { MasterRepository = masterRepository
+                                   Type = StringHelpers.fromString<Graph.VcsType> vcs
+                                   Path = path }
     | _ -> Command.Error MainCommand.Init
 
 
 let rec private commandExec (all : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.All
-      :: tail -> tail |> commandExec true
+    | TokenOption TokenOption.All :: tail -> tail |> commandExec true
     | [Param cmd] -> Command.Exec { Command = cmd; All = all }
     | _ -> Command.Error MainCommand.Exec
 
 let rec private commandTest (excludes : string list) (args : string list) =
     match args with
-    | TokenOption TokenOption.Exclude
-      :: Param category
-      :: tail -> tail |> commandTest (category :: excludes)
+    | TokenOption TokenOption.Exclude :: Param category :: tail -> tail |> commandTest (category :: excludes)
     | [] -> Command.Error MainCommand.Test
     | Params filters -> Command.TestAssemblies { Filters = set filters; Excludes = set excludes }
     | _ -> Command.Error MainCommand.Test
 
 
-let rec private commandIndex (args : string list) =
+let rec private commandIndex (check : bool) (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Index
-    | Params filters -> Command.IndexRepositories { Filters = set filters }
+    | TokenOption TokenOption.Test :: tail -> tail |> commandIndex true
+    | Params filters -> Command.IndexRepositories { Filters = set filters; Check = check }
     | _ -> Command.Error MainCommand.Index
 
 let private commandConvert (args : string list) =
@@ -533,6 +528,11 @@ let rec private commandQuery (project : bool) (nuget : bool) (view : string opti
     | _ -> Command.Error MainCommand.Query
 
 
+let private commandMigrate (args : string list) =
+    match args with
+    | [] -> Command.Migrate
+    | _ -> Command.Error MainCommand.Migrate
+
 let Parse (args : string list) : Command =
     match args with
     | [Token Token.Version] -> Command.Version
@@ -542,7 +542,7 @@ let Parse (args : string list) : Command =
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
     | Token Token.Test :: cmdArgs -> cmdArgs |> commandTest []
-    | Token Token.Index :: cmdArgs -> cmdArgs |> commandIndex
+    | Token Token.Index :: cmdArgs -> cmdArgs |> commandIndex false
     | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false true
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
@@ -583,8 +583,9 @@ let Parse (args : string list) : Command =
     | Token Token.Query :: cmdArgs -> cmdArgs |> commandQuery false false None
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
-    | FullBuildView viewFile :: [] -> Command.FullBuildView { FilePath = viewFile }
-    | _ -> Command.Error MainCommand.Unknown
+    | Token Token.Migrate :: cmdArgs -> cmdArgs |> commandMigrate
+    | [FullBuildView viewFile] -> Command.FullBuildView { FilePath = viewFile }
+    | _ -> Command.Error MainCommand.Usage
 
 
 let IsDebug (args : string list) : (bool * string list) =
@@ -636,7 +637,7 @@ let UsageContent() =
         MainCommand.Test, "test [--exclude <category>]* <viewId-wildcard>+ : test assemblies (match repository/project)"
         MainCommand.GraphView, "graph [--all] <viewId> : graph view content (project, packages, assemblies)"
         MainCommand.Exec, "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
-        MainCommand.Index, "index <repoId-wildcard>+ : index repositories"
+        MainCommand.Index, "index [--test] <repoId-wildcard>+ : index repositories"
         MainCommand.Convert, "convert <repoId-wildcard> : convert projects in repositories"
         MainCommand.Pull, "pull [--src|--bin|--latest-bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
         MainCommand.Push, "push [--all] <buildNumber> : push a baseline from current repositories version and display version"
@@ -664,7 +665,7 @@ let UsageContent() =
         MainCommand.Unknown, ""
         MainCommand.AddApp, "add app <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         MainCommand.DropApp, "drop app <appId> : drop application"
-        MainCommand.ListApp, "list app [--version <versionId>] : list applications"
+        MainCommand.ListApp, "list app [--version <versionId>]: list applications"
         MainCommand.Unknown, ""
         MainCommand.Query, "query <--unused-projects|--packages> [--view <viewId>] : query items"
         MainCommand.Unknown, ""
@@ -675,12 +676,12 @@ let UsageContent() =
 
 
 let PrintUsage (what : MainCommand) =
-    let lines = UsageContent () |> Seq.filter (fun (cmd, _) -> cmd = what || what = MainCommand.Unknown)
-                                |> Seq.map (fun (_, desc) -> desc)
+    let lines = UsageContent () |> List.filter (fun (cmd, _) -> cmd = what || what = MainCommand.Unknown)
+                                |> List.map (fun (_, desc) -> desc)
 
     printfn "Usage:"
     for line in lines do
         printfn "  %s" line
 
 let PrintVersion () =
-    VersionContent() |> Seq.iter (fun x -> printfn "%s" x)
+    VersionContent() |> List.iter (fun x -> printfn "%s" x)
