@@ -51,7 +51,7 @@ let private getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.map IoHelpers.ToWindows
-                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER) || x.StartsWith(MSBUILD_PROJECT_FOLDER2))
+                 |> Seq.filter (fun x -> (IoHelpers.ToWindows x).StartsWith(MSBUILD_PROJECT_FOLDER))
                  |> Seq.map IoHelpers.ToPlatformPath
                  |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectId.from)
                  |> Set.ofSeq
@@ -119,7 +119,7 @@ let private getFullBuildPackages (prjDoc : XDocument)  =
     let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                  |> Seq.map IoHelpers.ToWindows
-                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER) || x.StartsWith(MSBUILD_PACKAGE_FOLDER2))
+                 |> Seq.filter (fun x -> (IoHelpers.ToWindows x).StartsWith(MSBUILD_PACKAGE_FOLDER))
                  |> Seq.map IoHelpers.ToPlatformPath
                  |> Seq.map parseFullBuildPackage
                  |> Set.ofSeq
