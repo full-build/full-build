@@ -21,12 +21,19 @@ open ProjectsSerializer
 type WorkspaceConfiguration = 
     { Repositories : Repository list }
 
-let LoadAnthology() : Anthology = 
+let LoadArtifacts() : ArtifactsSerializer.Artifacts =
     let artifactsFile = GetArtifactsFile ()
     let artifacts = ArtifactsSerializer.Load artifactsFile
+    artifacts
 
+let LoadProjects() : ProjectsSerializer.Projects =
     let projectsFile = GetProjectsFile ()
     let projects = ProjectsSerializer.Load projectsFile
+    projects
+
+let LoadAnthology() : Anthology = 
+    let artifacts = LoadArtifacts()
+    let projects = LoadProjects()
 
     let antho = AnthologySerializer.Deserialize artifacts projects
     antho

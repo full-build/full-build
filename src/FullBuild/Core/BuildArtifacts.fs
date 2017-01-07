@@ -70,8 +70,8 @@ let FetchVersionsForArtifact (graph : Graph) (app : Application) =
     lines |> Seq.map toVersion
           |> List.ofSeq
 
-let PullReferenceBinaries (graph : Graph) version =
-    let artifactDir = graph.ArtifactsDir |> DirectoryInfo
+let PullReferenceBinaries (artifacts : string) version =
+    let artifactDir = artifacts |> DirectoryInfo
 
     let versionDir = artifactDir |> GetSubDirectory version
     if versionDir.Exists then

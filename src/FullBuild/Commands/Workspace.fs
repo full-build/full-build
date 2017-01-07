@@ -100,10 +100,14 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     branchResults |> Exec.CheckMultipleResponseCode
 
     // update binaries with observable baseline
-    Core.BuildArtifacts.PullReferenceBinaries graph checkoutInfo.Version
+    Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir checkoutInfo.Version
 
     // consolidate anthology
     Core.Indexation.ConsolidateAnthology()
+
+let Install () =
+    Core.Package.RestorePackages ()
+    Core.Conversion.GenerateProjectArtifacts()
 
 let Init (initInfo : CLI.Commands.InitWorkspace) =
     let wsDir = DirectoryInfo(initInfo.Path)
@@ -113,13 +117,26 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
     else
         let graph = Graph.init initInfo.MasterRepository initInfo.Type
         Tools.Vcs.Clone wsDir graph.MasterRepository true |> Exec.PrintOutput |> Exec.CheckResponseCode
-        let branchInfo = { CLI.Commands.BranchWorkspace.Branch = Some graph.MasterRepository.Branch }
-        Branch branchInfo
 
+        let currDir = Environment.CurrentDirectory
+        try
+            Environment.CurrentDirectory <- wsDir.FullName
+            let artifacts = Configuration.LoadArtifacts()
 
-let Install () =
-    Core.Package.RestorePackages ()
-    Core.Conversion.GenerateProjectArtifacts()
+            let branchInfo = { CLI.Commands.BranchWorkspace.Branch = Some graph.MasterRepository.Branch }
+            Branch branchInfo
+
+            // update binaries with observable baseline
+            let baselineRepository = Baselines.from graph
+            let baseline = baselineRepository.Baseline
+            let tag = Tag.Format baseline.Info
+            Core.BuildArtifacts.PullReferenceBinaries artifacts.Binaries tag
+
+            Install()
+
+        finally
+            Environment.CurrentDirectory <- currDir
+
 
 
 let consoleProgressBar max =
@@ -172,7 +189,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
         let baselineRepository = Baselines.from graph
         let baseline = baselineRepository.Baseline
         let tag = Tag.Format baseline.Info
-        Core.BuildArtifacts.PullReferenceBinaries graph tag
+        Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir tag
 
     // consolidate anthology
     Core.Indexation.ConsolidateAnthology()
