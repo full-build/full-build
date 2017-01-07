@@ -308,6 +308,8 @@ let Index (indexInfo : CLI.Commands.IndexRepositories) =
                    |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
                    |> Configuration.SaveAnthology
 
+    Install()
+
 let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
