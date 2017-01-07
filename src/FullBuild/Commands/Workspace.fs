@@ -245,24 +245,14 @@ let UpdateGuid (updInfo : CLI.Commands.UpdateGuids) =
             xdoc.Save(prjFile.FullName)
 
 let History (historyInfo : CLI.Commands.History) =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Configuration.LoadAnthology() |> Graph.from
     let baselineRepository = Baselines.from graph
     let baseline = baselineRepository.Baseline
 
-    // newBaseline contains only cloned repositories
-    // this means deltaBookmarks can contain non cloned repositories
-    // before computing history, ensure repositories are correctly cloned
-    let newBaseline = baselineRepository.CreateBaseline false "temp"
-    let deltaBookmarks = baseline - newBaseline
-
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-
-    // header
-    let version = Tools.Vcs.Tip wsDir graph.MasterRepository
-
     // body
-    let lastCommit = Tools.Vcs.LastCommit wsDir graph.MasterRepository "baseline"
-    let revision = Tools.Vcs.Log wsDir graph.MasterRepository lastCommit.[0]
+    let tag = Tag.Format baseline.Info
+    let revision = Tools.Vcs.Log wsDir graph.MasterRepository tag
 
     let revisions = seq {
         // master repo
@@ -271,18 +261,18 @@ let History (historyInfo : CLI.Commands.History) =
         | _ -> yield graph.MasterRepository, revision
 
         // other repositories then
-        for bookmark in deltaBookmarks do
-            if bookmark.Repository.IsCloned then
-                let revision = Tools.Vcs.Log wsDir bookmark.Repository bookmark.Version
+        for repo in graph.Repositories do
+            if repo.IsCloned then
+                let revision = Tools.Vcs.Log wsDir repo tag
                 match revision with
                 | [] -> ()
-                | _ -> yield bookmark.Repository, revision
+                | _ -> yield repo, revision
     }
 
     let histType = if historyInfo.Html then Generators.History.HistoryType.Html
                                        else Generators.History.HistoryType.Text
 
-    Generators.History.Save histType version revisions
+    Generators.History.Save histType tag revisions
 
 let Index (indexInfo : CLI.Commands.IndexRepositories) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
