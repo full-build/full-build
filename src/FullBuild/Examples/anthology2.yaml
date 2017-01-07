@@ -2,19 +2,19 @@
     minversion: 2.5.0
     artifacts: C:\Binaries
     nugets:
-      - nuget: https://www.nuget.org/api/v2/
+      - nuget: this should be a uri
     test: nunit
     vcs: git
     mainrepository:
-        uri: http://www.google.com
+        uri: this should be a uri
     repositories:
         - repo: id1
           branch: fullbuild
           build: msbuild
-          uri: http://www.google.com
+          uri: this should be a uri
         - repo: id1
           build: msbuild
-          uri: http://www.google.com
+          uri: this should be a urihttp://www.google.com
     apps:
         - name: FullBuild
           type: copy

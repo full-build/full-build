@@ -141,5 +141,5 @@ let GitTag (repoDir : DirectoryInfo) (tag : string) =
     let argsTag = sprintf @"tag -a %s -m %A" tag comment
     checkedExec noBuffering "git" argsTag repoDir Map.empty
 
-    let argsPush = sprintf @"push %s" tag
+    let argsPush = sprintf @"push origin %s" tag
     checkedExec noBuffering "git" argsPush repoDir Map.empty

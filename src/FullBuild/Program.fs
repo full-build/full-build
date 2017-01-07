@@ -15,13 +15,12 @@
 module Main
 open CLI.Commands
 
-let tryMain argv =
+let processMain argv =
     Env.CheckLicense ()
     Commands.Workspace.CheckMinVersion ()
 
     let cmd = CLI.CommandLine.Parse (argv |> Seq.toList)
 
-    let stopWatch = System.Diagnostics.Stopwatch.StartNew()
     match cmd with
     // workspace
     | Command.SetupWorkspace setupInfo -> Commands.Workspace.Create setupInfo
@@ -82,23 +81,28 @@ let tryMain argv =
     | Command.Usage -> CLI.CommandLine.PrintUsage MainCommand.Unknown
     | Command.Error errInfo -> CLI.CommandLine.PrintUsage errInfo
 
-    stopWatch.Stop()
-    let elapsed = stopWatch.Elapsed
-    //printfn "Completed in %d seconds." ((int)elapsed.TotalSeconds)
-
     let retCode = match cmd with
                   | Command.Error _ -> 5
                   | _ -> 0
     retCode
 
-[<EntryPoint>]
-let main argv =
-    let debug, args = CLI.CommandLine.IsDebug (argv |> List.ofArray)
+
+let tryMain verbose argv =
     try
-        tryMain args
+        processMain argv
     with
-        x -> if debug |> not then printfn "Error: %s" x.Message
+        x -> if verbose |> not then printfn "Error: %s" x.Message
              else printfn "---------------------------------------------------"
                   printfn "%A" x
                   printfn "---------------------------------------------------"
              5
+
+[<EntryPoint>]
+let main argv =
+    let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+    let verbose, args = CLI.CommandLine.IsVerbose (argv |> List.ofArray)
+    let retCode = tryMain verbose args
+    stopWatch.Stop()
+    let elapsed = stopWatch.Elapsed
+    if verbose then printfn "Completed in %d seconds." ((int)elapsed.TotalSeconds)
+    retCode

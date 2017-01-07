@@ -32,7 +32,7 @@ let private parseContent (lines : string seq) =
 let private updateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
     seq {
         for source in sources do
-            let sourceUri = source.toLocalOrUrl
+            let sourceUri = source.toString
             yield sprintf "source %s" sourceUri
 
         for line in lines do

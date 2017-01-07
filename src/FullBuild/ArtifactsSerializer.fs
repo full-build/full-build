@@ -43,7 +43,7 @@ let Serialize (artifacts : Artifacts) =
     config.artifacts.nugets.Clear()
     for nuget in artifacts.NuGets do
         let cnuget = ArtifactsConfig.artifacts_Type.nugets_Item_Type()
-        cnuget.nuget <- Uri(nuget.toString)
+        cnuget.nuget <- nuget.toString
         config.artifacts.nugets.Add (cnuget)
 
     config.artifacts.repositories.Clear()
@@ -51,7 +51,7 @@ let Serialize (artifacts : Artifacts) =
     for repo in repos do
         let crepo = ArtifactsConfig.artifacts_Type.repositories_Item_Type()
         crepo.repo <- repo.Repository.Name.toString
-        crepo.uri <- Uri (repo.Repository.Url.toString)
+        crepo.uri <- repo.Repository.Url.toString
         crepo.build <- repo.Builder.toString
 
         match repo.Repository.Branch with
@@ -60,7 +60,7 @@ let Serialize (artifacts : Artifacts) =
         config.artifacts.repositories.Add crepo
 
     let cmainrepo = config.artifacts.mainrepository
-    cmainrepo.uri <- Uri (artifacts.MasterRepository.Url.toString)
+    cmainrepo.uri <- artifacts.MasterRepository.Url.toString
 
     config.artifacts.apps.Clear ()
     for app in artifacts.Applications do
