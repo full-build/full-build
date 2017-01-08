@@ -6,6 +6,8 @@ v3.2
   * Support for .fbignore to avoid deleting files on conversion (issue #147)
   * --debug option to display full callstack on crash
   * Projects are managed per repository (issue #111)
+  * Breaking changes for some commands (view/repo/app before verb)
+  * Enhanced help
 
 v3.1
   * Create view from application (issue #112)
