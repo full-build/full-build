@@ -633,7 +633,7 @@ let VersionContent() =
 
 let UsageContent() =
     let content = [
-        [MainCommand.Usage], "help [<command>]: display help"
+        [MainCommand.Usage], "help [<command|workspace|repo|view|app>]: display help on command or area"
         [MainCommand.Version], "version : display full-build version"
         [MainCommand.Workspace; MainCommand.Setup], "setup <git|gerrit> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         [MainCommand.Workspace; MainCommand.Init], "init <git|gerrit> <master-repository> <local-path> : initialize a new workspace in given path"
