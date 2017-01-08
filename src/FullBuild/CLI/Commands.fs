@@ -159,25 +159,30 @@ type MainCommand =
     | UpgradeGuids
     | Test
     | History
+    | Repository
     | ListRepository
     | AddRepository
-    | CloneRepository
+    | Clone
     | DropRepository
+    | View
     | ListView
     | AddView
     | DropView
     | DescribeView
-    | GraphView
+    | Graph
     | BuildView
     | RebuildView
     | AlterView
     | OpenView
+    | NuGet
     | AddNuGet
     | ListNuget
+    | Package
     | ListPackage
     | InstallPackage
     | UpdatePackage
     | OutdatedPackage
+    | App
     | ListApp
     | AddApp
     | DropApp
@@ -193,7 +198,7 @@ type Command =
     | Error of MainCommand
 
     | Version
-    | Usage
+    | Usage of MainCommand
     | Upgrade of string
     | FinalizeUpgrade of int
     | Migrate
@@ -224,7 +229,7 @@ type Command =
     | AddView of AddView
     | DropView of ViewName
     | DescribeView of ViewName
-    | GraphView of GraphView
+    | Graph of GraphView
     | BuildView of BuildView
     | AlterView of AlterView
     | OpenView of OpenView

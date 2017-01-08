@@ -28,7 +28,7 @@ let CheckErrorInvoked () =
 [<Test>]
 let CheckUsageInvoked () =
     let result = CLI.CommandLine.Parse [ "help" ]
-    let expected = Command.Usage
+    let expected = Command.Usage MainCommand.Unknown
     result |> should equal expected
 
 

@@ -97,7 +97,6 @@ type private Token =
     | Push
     | Graph
     | Install
-    | Simplify
     | Outdated
     | Publish
     | Pull
@@ -289,17 +288,17 @@ let rec private commandClone (shallow : bool) (all : bool) (mt : bool) (args : s
     | TokenOption TokenOption.Multithread :: tail -> printfn "WARNING: clone --mt is deprecated"
                                                      tail |> commandClone shallow all true
     | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandClone shallow all false
-    | [] -> Command.Error MainCommand.CloneRepository
+    | [] -> Command.Error MainCommand.Clone
     | Params filters -> Command.CloneRepositories { Filters = set filters; Shallow = shallow; All = all; Multithread = mt }
-    | _ -> Command.Error MainCommand.CloneRepository
+    | _ -> Command.Error MainCommand.Clone
 
 
 
 let rec private commandGraph (all : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.All :: tail -> tail |> commandGraph true
-    | [ViewId name] -> Command.GraphView { Name = name ; All = all }
-    | _ -> Command.Error MainCommand.GraphView
+    | [ViewId name] -> Command.Graph { Name = name ; All = all }
+    | _ -> Command.Error MainCommand.Graph
 
 let rec private commandPublish (mt : bool) view (args : string list) =
     match args with
@@ -505,10 +504,45 @@ let private commandMigrate (args : string list) =
     | [] -> Command.Migrate
     | _ -> Command.Error MainCommand.Migrate
 
+let private commandHelp (args : string list) =
+    let cmd = match args with
+              | Token Token.Version :: _ -> MainCommand.Version
+              | Token Token.Help :: _ -> MainCommand.Usage
+              | Token Token.Update :: _ -> MainCommand.Upgrade
+              | Token Token.Setup :: _ -> MainCommand.Setup
+              | Token Token.Init :: _ -> MainCommand.Init
+              | Token Token.Exec :: _ -> MainCommand.Usage
+              | Token Token.Test :: _ -> MainCommand.Test
+              | Token Token.Index :: _ -> MainCommand.Index
+              | Token Token.Convert :: _ -> MainCommand.Convert
+              | Token Token.Clone :: _ -> MainCommand.Clone
+              | Token Token.Graph :: _ -> MainCommand.Graph
+              | Token Token.Publish :: _ -> MainCommand.PublishApp
+              | Token Token.Build :: _ -> MainCommand.BuildView
+              | Token Token.Rebuild :: _ -> MainCommand.RebuildView
+              | Token Token.Checkout :: _ -> MainCommand.Checkout
+              | Token Token.Branch :: _ -> MainCommand.Branch
+              | Token Token.Push :: _ -> MainCommand.Push
+              | Token Token.Pull :: _ -> MainCommand.Pull
+              | Token Token.Clean :: _ -> MainCommand.Clean
+              | Token Token.Bind :: _ -> MainCommand.Bind
+              | Token Token.History :: _ -> MainCommand.History
+              | Token Token.Install :: _ -> MainCommand.InstallPackage
+              | Token Token.Query :: _ -> MainCommand.Query
+              | Token Token.UpdateGuids :: _ -> MainCommand.UpgradeGuids
+              | Token Token.Migrate :: _ -> MainCommand.Migrate
+              | Token Token.Package :: _ -> MainCommand.Package
+              | Token Token.Repo :: _ -> MainCommand.Repository
+              | Token Token.NuGet :: _ -> MainCommand.NuGet
+              | Token Token.View :: _ -> MainCommand.View
+              | Token Token.App :: _ -> MainCommand.App
+              | _ -> MainCommand.Unknown
+    Command.Usage cmd
+
 let Parse (args : string list) : Command =
     match args with
     | [Token Token.Version] -> Command.Version
-    | [Token Token.Help] -> Command.Usage
+    | Token Token.Help :: cmdArgs -> cmdArgs |> commandHelp
     | Token Token.Upgrade :: cmdArgs -> cmdArgs |> commandUpgrade "stable"
     | Token Token.Setup :: cmdArgs -> cmdArgs |> commandSetup
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
@@ -530,27 +564,27 @@ let Parse (args : string list) : Command =
     | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory false
 
     | Token Token.Install :: cmdArgs -> cmdArgs |> commandInstall
-    | Token Token.Update :: Token Token.Package :: cmdArgs -> cmdArgs |> commandUpdate
-    | Token Token.Outdated :: Token Token.Package :: cmdArgs -> cmdArgs |> commandOutdated
-    | Token Token.List :: Token Token.Package :: cmdArgs -> cmdArgs |> commandListPackage
+    | Token Token.Package :: Token Token.Update :: cmdArgs -> cmdArgs |> commandUpdate
+    | Token Token.Package :: Token Token.Outdated :: cmdArgs -> cmdArgs |> commandOutdated
+    | Token Token.Package :: Token Token.List :: cmdArgs -> cmdArgs |> commandListPackage
 
-    | Token Token.Add :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandAddRepo None Graph.BuilderType.MSBuild
-    | Token Token.Drop :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandDropRepo
-    | Token Token.List :: Token Token.Repo :: cmdArgs -> cmdArgs |> commandListRepo
+    | Token Token.Repo :: Token Token.Add :: cmdArgs -> cmdArgs |> commandAddRepo None Graph.BuilderType.MSBuild
+    | Token Token.Repo :: Token Token.Drop :: cmdArgs -> cmdArgs |> commandDropRepo
+    | Token Token.Repo :: Token Token.List :: cmdArgs -> cmdArgs |> commandListRepo
 
-    | Token Token.Add :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandAddNuGet
-    | Token Token.List :: Token Token.NuGet :: cmdArgs -> cmdArgs |> commandListNuGet
+    | Token Token.NuGet :: Token Token.Add :: cmdArgs -> cmdArgs |> commandAddNuGet
+    | Token Token.NuGet :: Token Token.List :: cmdArgs -> cmdArgs |> commandListNuGet
 
     | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false None false false
-    | Token Token.Drop :: Token Token.View :: cmdArgs -> cmdArgs |> commandDropView
-    | Token Token.List :: Token Token.View :: cmdArgs -> cmdArgs |> commandListView
-    | Token Token.Describe :: Token Token.View :: cmdArgs -> cmdArgs |> commandDescribeView
-    | Token Token.Alter :: Token Token.View :: cmdArgs -> cmdArgs |> commandAlterView None None None
+    | Token Token.View :: Token Token.Drop :: cmdArgs -> cmdArgs |> commandDropView
+    | Token Token.View :: Token Token.List :: cmdArgs -> cmdArgs |> commandListView
+    | Token Token.View :: Token Token.Describe :: cmdArgs -> cmdArgs |> commandDescribeView
+    | Token Token.View :: Token Token.Alter :: cmdArgs -> cmdArgs |> commandAlterView None None None
     | Token Token.Open :: cmdArgs -> cmdArgs |> commandOpenView
 
-    | Token Token.Add :: Token Token.App :: cmdArgs -> cmdArgs |> commandAddApp
-    | Token Token.Drop :: Token Token.App :: cmdArgs -> cmdArgs |> commandDropApp
-    | Token Token.List :: Token Token.App :: cmdArgs -> cmdArgs |> commandListApp None
+    | Token Token.App :: Token Token.Add :: cmdArgs -> cmdArgs |> commandAddApp
+    | Token Token.App :: Token Token.Drop :: cmdArgs -> cmdArgs |> commandDropApp
+    | Token Token.App :: Token Token.List :: cmdArgs -> cmdArgs |> commandListApp None
 
     | Token Token.Query :: cmdArgs -> cmdArgs |> commandQuery false false None
 
@@ -594,61 +628,61 @@ let VersionContent() =
 
 let UsageContent() =
     let content = [
-        MainCommand.Usage, "help : display this help"
-        MainCommand.Version, "version : display full-build version"
-        MainCommand.Setup, "setup <git|gerrit> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
-        MainCommand.Init, "init <git|gerrit> <master-repository> <local-path> : initialize a new workspace in given path"
-        MainCommand.CloneRepository, "clone [--nomt] [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
-        MainCommand.Checkout, "checkout <version> : checkout workspace to version"
-        MainCommand.Branch, "branch [<branch>] : switch to branch"
-        MainCommand.InstallPackage, "install : install packages"
-        MainCommand.AddView, "view [--down] [--up] [--modified] [--app <app-wildcard>] [--static] [--test] <viewId> <viewId-wildcard>+ : add repositories to view"
-        MainCommand.OpenView, "open <viewId> : open view with your favorite ide"
-        MainCommand.BuildView, "build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
-        MainCommand.RebuildView, "rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"
-        MainCommand.Test, "test [--exclude <category>]* <viewId-wildcard>+ : test assemblies (match repository/project)"
-        MainCommand.GraphView, "graph [--all] <viewId> : graph view content (project, packages, assemblies)"
-        MainCommand.Exec, "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
-        MainCommand.Index, "index [--test] <repoId-wildcard>+ : index repositories"
-        MainCommand.Convert, "convert <repoId-wildcard> : convert projects in repositories"
-        MainCommand.Pull, "pull [--src|--bin|--latest-bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
-        MainCommand.Push, "push [--full] <buildNumber> : push a baseline from current repositories version and display version"
-        MainCommand.PublishApp, "publish [--nomt] [--view <viewId>] <appId-wildcard> : publish application"
-        MainCommand.Bind, "bind <projectId-wildcard>+ : update bindings"
-        MainCommand.Clean, "clean : DANGER! reset and clean workspace (interactive command)"
-        MainCommand.History, "history [--html] : display history since last baseline"
-        MainCommand.Upgrade, "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
-        MainCommand.Unknown, ""
-        MainCommand.UpdatePackage, "update package : update packages"
-        MainCommand.OutdatedPackage, "outdated package : display outdated packages"
-        MainCommand.ListPackage, "list package : list packages"
-        MainCommand.Unknown, ""
-        MainCommand.AddRepository, "add repo [--branch <branch>] <repoId> <repo-uri> : declare a new repository"
-        MainCommand.DropRepository, "drop repo <repoId> : drop repository"
-        MainCommand.ListRepository, "list repo : list repositories"
-        MainCommand.Unknown, ""
-        MainCommand.AddNuGet, "add nuget <nuget-uri> : add nuget uri"
-        MainCommand.ListNuget, "list nuget : list NuGet feeds"
-        MainCommand.Unknown, ""
-        MainCommand.DropView, "drop view <viewId> : drop view"
-        MainCommand.ListView, "list view : list views"
-        MainCommand.DescribeView, "describe view <name> : describe view"
-        MainCommand.AlterView, "alter view [--default] [--up|--bin] [--down|--bin] <viewId> : alter view"
-        MainCommand.Unknown, ""
-        MainCommand.AddApp, "add app <appId> <copy|zip> <projectId>+ : create new application from given project ids"
-        MainCommand.DropApp, "drop app <appId> : drop application"
-        MainCommand.ListApp, "list app [--version <versionId>]: list applications"
-        MainCommand.Unknown, ""
-        MainCommand.Query, "query <--unused-projects|--packages> [--view <viewId>] : query items"
-        MainCommand.Unknown, ""
-        MainCommand.UpgradeGuids, "update-guids : DANGER! change guids of all projects in given repository (interactive command)" ]
+        [MainCommand.Usage], "help : display this help"
+        [MainCommand.Version], "version : display full-build version"
+        [MainCommand.Setup], "setup <git|gerrit> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
+        [MainCommand.Init], "init <git|gerrit> <master-repository> <local-path> : initialize a new workspace in given path"
+        [MainCommand.Repository; MainCommand.Clone], "clone [--nomt] [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
+        [MainCommand.Checkout], "checkout <version> : checkout workspace to version"
+        [MainCommand.Branch], "branch [<branch>] : switch to branch"
+        [MainCommand.InstallPackage], "install : install packages"
+        [MainCommand.View; MainCommand.AddView], "view [--down] [--up] [--modified] [--app <app-wildcard>] [--static] [--test] <viewId> <viewId-wildcard>+ : add repositories to view"
+        [MainCommand.View; MainCommand.OpenView], "open <viewId> : open view with your favorite ide"
+        [MainCommand.View; MainCommand.BuildView], "build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
+        [MainCommand.View; MainCommand.RebuildView], "rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"
+        [MainCommand.Test], "test [--exclude <category>]* <viewId-wildcard>+ : test assemblies (match repository/project)"
+        [MainCommand.View; MainCommand.Graph], "graph [--all] <viewId> : graph view content (project, packages, assemblies)"
+        [MainCommand.Exec], "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
+        [MainCommand.Index], "index [--test] <repoId-wildcard>+ : index repositories"
+        [MainCommand.Convert], "convert <repoId-wildcard> : convert projects in repositories"
+        [MainCommand.Pull], "pull [--src|--bin|--latest-bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
+        [MainCommand.Push], "push [--full] <buildNumber> : push a baseline from current repositories version and display version"
+        [MainCommand.PublishApp], "publish [--nomt] [--view <viewId>] <appId-wildcard> : publish application"
+        [MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
+        [MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
+        [MainCommand.History], "history [--html] : display history since last baseline"
+        [MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
+        [MainCommand.Unknown], ""
+        [MainCommand.Package; MainCommand.UpdatePackage], "package update: update packages"
+        [MainCommand.Package; MainCommand.OutdatedPackage], "package outdated : display outdated packages"
+        [MainCommand.Package; MainCommand.ListPackage], "package list : list packages"
+        [MainCommand.Unknown], ""
+        [MainCommand.Repository; MainCommand.AddRepository], "repo add [--branch <branch>] <repoId> <repo-uri> : declare a new repository"
+        [MainCommand.Repository; MainCommand.DropRepository], "repo drop <repoId> : drop repository"
+        [MainCommand.Repository; MainCommand.ListRepository], "repo list : list repositories"
+        [MainCommand.Unknown], ""
+        [MainCommand.NuGet; MainCommand.AddNuGet], "nuget add <nuget-uri> : add nuget uri"
+        [MainCommand.NuGet; MainCommand.ListNuget], "nuget list : list NuGet feeds"
+        [MainCommand.Unknown], ""
+        [MainCommand.View; MainCommand.DropView], "view drop <viewId> : drop view"
+        [MainCommand.View; MainCommand.ListView], "view list : list views"
+        [MainCommand.View; MainCommand.DescribeView], "view describe <name> : describe view"
+        [MainCommand.View; MainCommand.AlterView], "view alter [--default] [--up|--bin] [--down|--bin] <viewId> : alter view"
+        [MainCommand.Unknown], ""
+        [MainCommand.App; MainCommand.AddApp], "app add <appId> <copy|zip> <projectId>+ : create new application from given project ids"
+        [MainCommand.App; MainCommand.DropApp], "app drop <appId> : drop application"
+        [MainCommand.App; MainCommand.ListApp], "app list [--version <versionId>]: list applications"
+        [MainCommand.Unknown], ""
+        [MainCommand.Query], "query <--unused-projects|--packages> [--view <viewId>] : query items"
+        [MainCommand.Unknown], ""
+        [MainCommand.UpgradeGuids], "update-guids : DANGER! change guids of all projects in given repository (interactive command)" ]
 
     content
 
 
 
 let PrintUsage (what : MainCommand) =
-    let lines = UsageContent () |> List.filter (fun (cmd, _) -> cmd = what || what = MainCommand.Unknown)
+    let lines = UsageContent () |> List.filter (fun (cmd, _) -> cmd |> Seq.contains what || what = MainCommand.Unknown)
                                 |> List.map (fun (_, desc) -> desc)
 
     printfn "Usage:"

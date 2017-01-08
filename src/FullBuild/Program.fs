@@ -50,7 +50,7 @@ let processMain argv =
     | Command.DropView viewInfo -> Commands.View.Drop viewInfo.Name
     | Command.ListViews -> Commands.View.List ()
     | Command.DescribeView viewInfo -> Commands.View.Describe viewInfo.Name
-    | Command.GraphView viewInfo -> Commands.View.Graph viewInfo
+    | Command.Graph viewInfo -> Commands.View.Graph viewInfo
     | Command.BuildView viewInfo -> Commands.View.Build viewInfo
     | Command.AlterView viewInfo -> Commands.View.Alter viewInfo
     | Command.OpenView viewInfo -> Commands.View.Open viewInfo
@@ -78,7 +78,7 @@ let processMain argv =
     | Command.FinalizeUpgrade processId -> Commands.Upgrade.FinalizeUpgrade processId
     | Command.Migrate -> Commands.Migrate.Migrate ()
     | Command.Version -> CLI.CommandLine.PrintVersion ()
-    | Command.Usage -> CLI.CommandLine.PrintUsage MainCommand.Unknown
+    | Command.Usage mainCmd -> CLI.CommandLine.PrintUsage mainCmd
     | Command.Error errInfo -> CLI.CommandLine.PrintUsage errInfo
 
     let retCode = match cmd with
