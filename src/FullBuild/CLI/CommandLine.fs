@@ -49,7 +49,7 @@ type private TokenOption =
     | Packages
     | Test
     | Full
-    | Use
+    | Ref
 
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -80,7 +80,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--packages" -> Some TokenOption.Packages
     | "--test" -> Some TokenOption.Test
     | "--full" -> Some TokenOption.Full
-    | "--use" -> Some TokenOption.Use
+    | "--ref" -> Some TokenOption.Ref
     | _ -> None
 
 type private Token =
@@ -401,7 +401,7 @@ let private commandListNuGet (args : string list) =
 let rec private commandAddView (upReferences : bool) (downReferences : bool) (modified : bool) (app : string option) (staticView : bool) (test: bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Up :: tail -> tail |> commandAddView true downReferences modified app staticView test
-    | TokenOption TokenOption.Use :: tail -> tail |> commandAddView true downReferences modified app staticView test
+    | TokenOption TokenOption.Ref :: tail -> tail |> commandAddView true downReferences modified app staticView test
     | TokenOption TokenOption.Down :: tail -> tail |> commandAddView upReferences true modified app staticView test
     | TokenOption TokenOption.Src :: tail -> tail |> commandAddView upReferences true modified app staticView test
     | TokenOption TokenOption.Modified :: tail -> tail |> commandAddView upReferences downReferences true app staticView test
@@ -641,7 +641,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Checkout], "checkout <version> : checkout workspace to version"
         [MainCommand.Workspace; MainCommand.Branch], "branch [<branch>] : switch to branch"
         [MainCommand.Workspace; MainCommand.InstallPackage], "install : install packages"
-        [MainCommand.View; MainCommand.AddView], "view [--down] [--up] [--modified] [--app <app-wildcard>] [--static] [--test] <viewId> <viewId-wildcard>+ : add repositories to view"
+        [MainCommand.View; MainCommand.AddView], "view [--down|--src] [--up|--ref] [--modified] [--app <app-wildcard>] [--static] [--test] <viewId> <viewId-wildcard>+ : add repositories to view"
         [MainCommand.View; MainCommand.OpenView], "open <viewId> : open view with your favorite ide"
         [MainCommand.View; MainCommand.BuildView], "build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
         [MainCommand.View; MainCommand.RebuildView], "rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"
