@@ -302,13 +302,13 @@ let rec private commandGraph (all : bool) (args : string list) =
 
 let rec private commandPublish (mt : bool) view (args : string list) =
     match args with
-    | [] -> Command.Error MainCommand.PublishApp
+    | [] -> Command.Error MainCommand.Publish
     | TokenOption TokenOption.Multithread :: tail -> printfn "WARNING: publish --mt is deprecated"
                                                      tail |> commandPublish true view
     | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandPublish false view
     | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish mt (Some name)
     | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = mt}
-    | _ -> Command.Error MainCommand.PublishApp
+    | _ -> Command.Error MainCommand.Publish
 
 
 let rec private commandBuild (config : string) (clean : bool) (multithread : bool) (version : string option) (args : string list) =
@@ -506,6 +506,7 @@ let private commandMigrate (args : string list) =
 
 let private commandHelp (args : string list) =
     let cmd = match args with
+              | Token Token.Workspace :: _ -> MainCommand.Workspace
               | Token Token.Version :: _ -> MainCommand.Version
               | Token Token.Help :: _ -> MainCommand.Usage
               | Token Token.Update :: _ -> MainCommand.Upgrade
@@ -517,7 +518,7 @@ let private commandHelp (args : string list) =
               | Token Token.Convert :: _ -> MainCommand.Convert
               | Token Token.Clone :: _ -> MainCommand.Clone
               | Token Token.Graph :: _ -> MainCommand.Graph
-              | Token Token.Publish :: _ -> MainCommand.PublishApp
+              | Token Token.Publish :: _ -> MainCommand.Publish
               | Token Token.Build :: _ -> MainCommand.BuildView
               | Token Token.Rebuild :: _ -> MainCommand.RebuildView
               | Token Token.Checkout :: _ -> MainCommand.Checkout
@@ -575,11 +576,11 @@ let Parse (args : string list) : Command =
     | Token Token.NuGet :: Token Token.Add :: cmdArgs -> cmdArgs |> commandAddNuGet
     | Token Token.NuGet :: Token Token.List :: cmdArgs -> cmdArgs |> commandListNuGet
 
-    | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false None false false
     | Token Token.View :: Token Token.Drop :: cmdArgs -> cmdArgs |> commandDropView
     | Token Token.View :: Token Token.List :: cmdArgs -> cmdArgs |> commandListView
     | Token Token.View :: Token Token.Describe :: cmdArgs -> cmdArgs |> commandDescribeView
     | Token Token.View :: Token Token.Alter :: cmdArgs -> cmdArgs |> commandAlterView None None None
+    | Token Token.View :: cmdArgs -> cmdArgs |> commandAddView false false false None false false
     | Token Token.Open :: cmdArgs -> cmdArgs |> commandOpenView
 
     | Token Token.App :: Token Token.Add :: cmdArgs -> cmdArgs |> commandAddApp
@@ -628,30 +629,30 @@ let VersionContent() =
 
 let UsageContent() =
     let content = [
-        [MainCommand.Usage], "help : display this help"
+        [MainCommand.Usage], "help [<command>]: display help"
         [MainCommand.Version], "version : display full-build version"
-        [MainCommand.Setup], "setup <git|gerrit> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
-        [MainCommand.Init], "init <git|gerrit> <master-repository> <local-path> : initialize a new workspace in given path"
+        [MainCommand.Workspace; MainCommand.Setup], "setup <git|gerrit> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
+        [MainCommand.Workspace; MainCommand.Init], "init <git|gerrit> <master-repository> <local-path> : initialize a new workspace in given path"
         [MainCommand.Repository; MainCommand.Clone], "clone [--nomt] [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
-        [MainCommand.Checkout], "checkout <version> : checkout workspace to version"
-        [MainCommand.Branch], "branch [<branch>] : switch to branch"
-        [MainCommand.InstallPackage], "install : install packages"
+        [MainCommand.Workspace; MainCommand.Checkout], "checkout <version> : checkout workspace to version"
+        [MainCommand.Workspace; MainCommand.Branch], "branch [<branch>] : switch to branch"
+        [MainCommand.Workspace; MainCommand.InstallPackage], "install : install packages"
         [MainCommand.View; MainCommand.AddView], "view [--down] [--up] [--modified] [--app <app-wildcard>] [--static] [--test] <viewId> <viewId-wildcard>+ : add repositories to view"
         [MainCommand.View; MainCommand.OpenView], "open <viewId> : open view with your favorite ide"
         [MainCommand.View; MainCommand.BuildView], "build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
         [MainCommand.View; MainCommand.RebuildView], "rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"
-        [MainCommand.Test], "test [--exclude <category>]* <viewId-wildcard>+ : test assemblies (match repository/project)"
+        [MainCommand.View; MainCommand.Test], "test [--exclude <category>]* <viewId-wildcard>+ : test assemblies (match repository/project)"
         [MainCommand.View; MainCommand.Graph], "graph [--all] <viewId> : graph view content (project, packages, assemblies)"
-        [MainCommand.Exec], "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
-        [MainCommand.Index], "index [--test] <repoId-wildcard>+ : index repositories"
-        [MainCommand.Convert], "convert <repoId-wildcard> : convert projects in repositories"
-        [MainCommand.Pull], "pull [--src|--bin|--latest-bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
-        [MainCommand.Push], "push [--full] <buildNumber> : push a baseline from current repositories version and display version"
-        [MainCommand.PublishApp], "publish [--nomt] [--view <viewId>] <appId-wildcard> : publish application"
-        [MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
-        [MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
-        [MainCommand.History], "history [--html] : display history since last baseline"
-        [MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
+        [MainCommand.Workspace; MainCommand.Exec], "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
+        [MainCommand.Workspace; MainCommand.Index], "index [--test] <repoId-wildcard>+ : index repositories"
+        [MainCommand.Workspace; MainCommand.Convert], "convert <repoId-wildcard> : convert projects in repositories"
+        [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin|--latest-bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
+        [MainCommand.Workspace; MainCommand.Push], "push [--full] <buildNumber> : push a baseline from current repositories version and display version"
+        [MainCommand.App; MainCommand.Publish], "publish [--nomt] [--view <viewId>] <appId-wildcard> : publish application"
+        [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
+        [MainCommand.Workspace; MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
+        [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
+        [MainCommand.Workspace; MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
         [MainCommand.Unknown], ""
         [MainCommand.Package; MainCommand.UpdatePackage], "package update: update packages"
         [MainCommand.Package; MainCommand.OutdatedPackage], "package outdated : display outdated packages"
@@ -673,9 +674,9 @@ let UsageContent() =
         [MainCommand.App; MainCommand.DropApp], "app drop <appId> : drop application"
         [MainCommand.App; MainCommand.ListApp], "app list [--version <versionId>]: list applications"
         [MainCommand.Unknown], ""
-        [MainCommand.Query], "query <--unused-projects|--packages> [--view <viewId>] : query items"
+        [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages> [--view <viewId>] : query items"
         [MainCommand.Unknown], ""
-        [MainCommand.UpgradeGuids], "update-guids : DANGER! change guids of all projects in given repository (interactive command)" ]
+        [MainCommand.Workspace; MainCommand.UpgradeGuids], "update-guids : DANGER! change guids of all projects in given repository (interactive command)" ]
 
     content
 

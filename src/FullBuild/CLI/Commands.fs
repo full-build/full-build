@@ -186,10 +186,11 @@ type MainCommand =
     | ListApp
     | AddApp
     | DropApp
-    | PublishApp
+    | Publish
     | Query
     | Bind
     | Migrate
+    | Workspace
     | Unknown
 
 
