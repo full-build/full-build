@@ -49,6 +49,7 @@ type private TokenOption =
     | Packages
     | Test
     | Full
+    | Use
 
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -79,6 +80,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--packages" -> Some TokenOption.Packages
     | "--test" -> Some TokenOption.Test
     | "--full" -> Some TokenOption.Full
+    | "--use" -> Some TokenOption.Use
     | _ -> None
 
 type private Token =
@@ -399,7 +401,9 @@ let private commandListNuGet (args : string list) =
 let rec private commandAddView (upReferences : bool) (downReferences : bool) (modified : bool) (app : string option) (staticView : bool) (test: bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Up :: tail -> tail |> commandAddView true downReferences modified app staticView test
+    | TokenOption TokenOption.Use :: tail -> tail |> commandAddView true downReferences modified app staticView test
     | TokenOption TokenOption.Down :: tail -> tail |> commandAddView upReferences true modified app staticView test
+    | TokenOption TokenOption.Src :: tail -> tail |> commandAddView upReferences true modified app staticView test
     | TokenOption TokenOption.Modified :: tail -> tail |> commandAddView upReferences downReferences true app staticView test
     | TokenOption TokenOption.App :: appFilter :: tail -> tail |> commandAddView upReferences downReferences modified (Some appFilter) staticView test
     | TokenOption TokenOption.Static :: tail -> tail |> commandAddView upReferences downReferences modified app true test
