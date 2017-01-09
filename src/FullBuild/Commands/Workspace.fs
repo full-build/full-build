@@ -196,13 +196,13 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
 
 
 let Exec (execInfo : CLI.Commands.Exec) =
+    let branch = Configuration.LoadBranch()
     let graph = Configuration.LoadAnthology() |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let execRepos = match execInfo.All with
                     | true -> graph.Repositories |> Set.add graph.MasterRepository
                     | _ -> graph.Repositories
 
-    let branch = Configuration.LoadBranch()
     for repo in execRepos do
         let repoDir = wsDir |> GetSubDirectory repo.Name
         if repoDir.Exists then
@@ -210,8 +210,8 @@ let Exec (execInfo : CLI.Commands.Exec) =
                          "FB_REPO_PATH", repoDir.FullName
                          "FB_REPO_URL", repo.Uri
                          "FB_REPO_BRANCH", repo.Branch
-                         "FB_WKS", wsDir.FullName
-                         "FB_BRANCH", branch ] |> Map.ofSeq
+                         "FB_BRANCH", branch
+                         "FB_WKS", wsDir.FullName ] |> Map.ofSeq
             let args = sprintf @"/c ""%s""" execInfo.Command
 
             try
