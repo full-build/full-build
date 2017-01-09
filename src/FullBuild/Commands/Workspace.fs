@@ -202,13 +202,16 @@ let Exec (execInfo : CLI.Commands.Exec) =
                     | true -> graph.Repositories |> Set.add graph.MasterRepository
                     | _ -> graph.Repositories
 
+    let branch = Configuration.LoadBranch()
     for repo in execRepos do
         let repoDir = wsDir |> GetSubDirectory repo.Name
         if repoDir.Exists then
-            let vars = [ "FB_NAME", repo.Name
-                         "FB_PATH", repoDir.FullName
-                         "FB_URL", repo.Uri
-                         "FB_WKS", wsDir.FullName ] |> Map.ofSeq
+            let vars = [ "FB_REPO_NAME", repo.Name
+                         "FB_REPO_PATH", repoDir.FullName
+                         "FB_REPO_URL", repo.Uri
+                         "FB_REPO_BRANCH", repo.Branch
+                         "FB_WKS", wsDir.FullName
+                         "FB_BRANCH", branch ] |> Map.ofSeq
             let args = sprintf @"/c ""%s""" execInfo.Command
 
             try
