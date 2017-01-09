@@ -8,6 +8,7 @@ v3.2
   * Projects are managed per repository (issue #111)
   * Breaking changes for some commands (view/repo/app before verb)
   * Enhanced help
+  * New environment variables for exec: FB_REPO_BRANCH and FB_BRANCH
 
 v3.1
   * Create view from application (issue #112)
