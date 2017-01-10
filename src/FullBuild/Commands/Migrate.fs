@@ -8,3 +8,11 @@ let Migrate () =
         Configuration.SaveAnthology antho
         anthoFile.Delete()
 
+        let projects = antho.Projects |> Seq.groupBy (fun x -> x.Repository)
+                                      |> Seq.map (fun (r, p) -> r, p |> Set.ofSeq)
+                                      |> dict
+
+        for kvp in projects do
+            let repo = kvp.Key
+            let projects = { ProjectsSerializer.Projects = kvp.Value }
+            Configuration.SaveProjectsRepository repo projects
