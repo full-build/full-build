@@ -165,7 +165,7 @@ let UpdatePackages (antho, parsedProjects) =
     let currentPackages = Tools.Paket.ParsePaketDependencies ()
     let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
                                       |> Set.unionMany
-    let unusedPackages = usedPackages - currentPackages
+    let unusedPackages = currentPackages - usedPackages
     Tools.Paket.RemoveDependencies unusedPackages
 
     // if changes then install packages

@@ -26,8 +26,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>init git c:\src\oss\full-build\qa\local\full-build c:\src\oss\full-build\qa\qa-init</StartArguments>
-    <StartWorkingDirectory>c:\src\oss\full-build\qa\qa-cassandrasharp</StartWorkingDirectory>
+    <StartArguments>index *</StartArguments>
+    <StartWorkingDirectory>c:\src\avp</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>

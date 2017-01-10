@@ -116,16 +116,16 @@ let private generateProjectCopyTarget (project : Project) =
 let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
     let filterFullBuildProject (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string 
-        let file = attr |> IoHelpers.ToWindows
+        let file = attr |> ToWindows |> MigratePath
         file.StartsWith(MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
 
     let filterFullBuildPackage (xel : XElement) =
         let attr = !> (xel.Attribute (NsNone + "Project")) : string
-        let file = attr |> IoHelpers.ToWindows
+        let file = attr |> ToWindows |> MigratePath
         file.StartsWith(MSBUILD_PACKAGE_FOLDER, StringComparison.CurrentCultureIgnoreCase)
 
     let filterFullBuildTargets (xel : XElement) =
-        let attr = (!> (xel.Attribute (NsNone + "Project")) : string) |> ToWindows
+        let attr = (!> (xel.Attribute (NsNone + "Project")) : string) |> ToWindows |> MigratePath
         attr.EndsWith(@".full-build\full-build.targets", StringComparison.CurrentCultureIgnoreCase)
 
     let filterNuget (xel : XElement) =

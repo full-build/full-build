@@ -73,6 +73,8 @@ let ToUnix (f : string) : string =
     if f |> isNull then f
     else f.Replace(@"\", @"/")
 
+let MigratePath (path : string) =
+    path.Replace("$(FBWorkspaceDir)", "$(SolutionDir)")
 
 let GetSubDirectory (subDir : string) (dir : DirectoryInfo) : DirectoryInfo =
     let newPath = Path.Combine(dir.FullName, subDir)
