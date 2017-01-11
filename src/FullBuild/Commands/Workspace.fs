@@ -70,16 +70,27 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
         Environment.CurrentDirectory <- currDir
 
 
-let Push (pushInfo : CLI.Commands.PushWorkspace) =
+let TagWorkspace (tagInfo : CLI.Commands.TagWorkspace) =
     let graph = Configuration.LoadAnthology() |> Graph.from
 
     // copy bin content
     let baselineRepository = Baselines.from graph
-    let newBaseline = baselineRepository.CreateBaseline pushInfo.Incremental pushInfo.BuildNumber
+    let newBaseline = baselineRepository.CreateBaseline tagInfo.Incremental tagInfo.BuildNumber
+    newBaseline.Save()
+
+    // print tag information
+    let tag = Tag.Format newBaseline.Info
+    printfn "[version] %s" tag
+
+
+let Push () =
+    let graph = Configuration.LoadAnthology() |> Graph.from
+
+    // copy bin content
+    let baselineRepository = Baselines.from graph
+    let newBaseline = baselineRepository.Baseline
     Core.BuildArtifacts.Publish graph newBaseline.Info
 
-    // then publish baseline
-    newBaseline.Save()
 
 let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     // checkout repositories

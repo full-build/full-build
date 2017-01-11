@@ -110,7 +110,7 @@
     <Compile Include="Tools\Paket.fs" />
     <Compile Include="Tools\VcsGit.fs" />
     <Compile Include="Tools\Vcs.fs" />
-    <Compile Include="Tools\Tag.fs" />
+    <Compile Include="Tag.fs" />
     <Compile Include="Baselines.fsi" />
     <Compile Include="Baselines.fs" />
     <Compile Include="Views.fsi" />

@@ -123,7 +123,7 @@ type PullWorkspace =
       Multithread : bool
       View : string option }
 
-type PushWorkspace =
+type TagWorkspace =
     { BuildNumber : string
       Incremental : bool }
 
@@ -191,6 +191,7 @@ type MainCommand =
     | Bind
     | Migrate
     | Workspace
+    | Tag
     | Unknown
 
 
@@ -209,7 +210,8 @@ type Command =
     | InitWorkspace of InitWorkspace
     | IndexRepositories of IndexRepositories
     | ConvertRepositories of ConvertRepositories
-    | PushWorkspace of PushWorkspace
+    | PushWorkspace
+    | TagWorkspace of TagWorkspace
     | CheckoutWorkspace of CheckoutVersion
     | BranchWorkspace of BranchWorkspace
     | PullWorkspace of PullWorkspace

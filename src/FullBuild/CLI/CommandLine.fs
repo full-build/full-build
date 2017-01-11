@@ -97,6 +97,7 @@ type private Token =
     | Index
     | Convert
     | Push
+    | Tag
     | Graph
     | Install
     | Outdated
@@ -151,6 +152,7 @@ let private (|Token|_|) (token : string) =
     | "index" -> Some Index
     | "convert" -> Some Convert
     | "push" -> Some Push
+    | "tag" -> Some Tag
     | "graph" -> Some Graph
     | "install" -> Some Install
     | "outdated" -> Some Outdated
@@ -333,10 +335,15 @@ let private commandBranch (args : string list) =
     | [] -> Command.BranchWorkspace {Branch = None}
     | _ -> Command.Error MainCommand.Branch
 
-let rec private commandPush (full : bool) (args : string list) =
+let rec private commandTag (full : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Full :: tail -> tail |> commandPush true
-    | [Param buildNumber] -> Command.PushWorkspace {BuildNumber = buildNumber; Incremental = not full }
+    | TokenOption TokenOption.Full :: tail -> tail |> commandTag true
+    | [Param buildNumber] -> Command.TagWorkspace {BuildNumber = buildNumber; Incremental = not full }
+    | _ -> Command.Error MainCommand.Tag
+
+let rec private commandPush (args : string list) =
+    match args with
+    | [] -> Command.PushWorkspace
     | _ -> Command.Error MainCommand.Push
 
 let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
@@ -528,6 +535,7 @@ let private commandHelp (args : string list) =
               | Token Token.Checkout :: _ -> MainCommand.Checkout
               | Token Token.Branch :: _ -> MainCommand.Branch
               | Token Token.Push :: _ -> MainCommand.Push
+              | Token Token.Tag :: _ -> MainCommand.Tag
               | Token Token.Pull :: _ -> MainCommand.Pull
               | Token Token.Clean :: _ -> MainCommand.Clean
               | Token Token.Bind :: _ -> MainCommand.Bind
@@ -562,7 +570,8 @@ let Parse (args : string list) : Command =
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
-    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush false
+    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush
+    | Token Token.Tag :: cmdArgs -> cmdArgs |> commandTag false
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false true None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
@@ -651,7 +660,8 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Index], "index [--test] <repoId-wildcard>+ : index repositories"
         [MainCommand.Workspace; MainCommand.Convert], "convert <repoId-wildcard> : convert projects in repositories"
         [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin|--latest-bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
-        [MainCommand.Workspace; MainCommand.Push], "push [--full] <buildNumber> : push a baseline from current repositories version and display version"
+        [MainCommand.App; MainCommand.Push], "push : push apps"
+        [MainCommand.Workspace; MainCommand.Tag], "tag [--full] <buildNumber> : tag workspace"
         [MainCommand.App; MainCommand.Publish], "publish [--nomt] [--view <viewId>] <appId-wildcard> : publish application"
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
