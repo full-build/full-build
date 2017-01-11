@@ -24,21 +24,21 @@ type private ViewConfig = FSharp.Configuration.YamlConfig<"Examples/View.yaml">
 
 let SerializeView (view : View) =
     let config = new ViewConfig()
-    config.view.builder <- view.Builder.toString
-    config.view.name <- view.Name
-    config.view.filters.Clear()
+    config.builder <- view.Builder.toString
+    config.name <- view.Name
+    config.filters.Clear()
     for filter in view.Filters do
-        let filterItem = ViewConfig.view_Type.filters_Item_Type()
+        let filterItem = ViewConfig.filters_Item_Type()
         filterItem.filter <- filter
-        config.view.filters.Add filterItem
+        config.filters.Add filterItem
 
-    config.view.referencedBy <- view.UpReferences
-    config.view.references <- view.DownReferences
-    config.view.modified <- view.Modified
-    config.view.tests <- view.Tests
-    config.view.appfilter <- match view.AppFilter with
-                             | None -> null
-                             | Some appFilter -> appFilter
+    config.referencedBy <- view.UpReferences
+    config.references <- view.DownReferences
+    config.modified <- view.Modified
+    config.tests <- view.Tests
+    config.appfilter <- match view.AppFilter with
+                        | None -> null
+                        | Some appFilter -> appFilter
 
     config.ToString()
 
@@ -46,16 +46,16 @@ let SerializeView (view : View) =
 let DeserializeView content =
     let config = new ViewConfig()
     config.LoadText content
-    { Name = config.view.name
-      Filters = config.view.filters
+    { Name = config.name
+      Filters = config.filters
                 |> Seq.map (fun x -> x.filter)
                 |> Set.ofSeq
-      Builder = BuilderType.from config.view.builder
-      UpReferences = config.view.referencedBy
-      DownReferences = config.view.references
-      Modified = config.view.modified 
-      Tests = config.view.tests
-      AppFilter = (config.view.appfilter |> isNull) ? (None, Some config.view.appfilter) }
+      Builder = BuilderType.from config.builder
+      UpReferences = config.referencedBy
+      DownReferences = config.references
+      Modified = config.modified 
+      Tests = config.tests
+      AppFilter = (config.appfilter |> isNull) ? (None, Some config.appfilter) }
 
 
 let Save (filename : FileInfo) (view : View) =

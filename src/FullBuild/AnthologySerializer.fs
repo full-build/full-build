@@ -18,8 +18,6 @@ open Anthology
 open ArtifactsSerializer
 open ProjectsSerializer
 
-type private AnthologyConfig = FSharp.Configuration.YamlConfig<"Examples/anthology.yaml">
-
 
 let Serialize (antho : Anthology) =
     let artifacts = { MinVersion = antho.MinVersion

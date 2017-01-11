@@ -1,11 +1,10 @@
-﻿view:
-    name: viewname
-    filters:
-        - filter: toto/*
-        - filter: titi/*
-    builder: msbuild
-    references: true
-    referencedBy: true
-    modified: true
-    appfilter : blah*
-    tests: false
+﻿name: viewname
+filters:
+    - filter: toto/*
+    - filter: titi/*
+builder: msbuild
+references: true
+referencedBy: true
+modified: true
+appfilter : blah*
+tests: false

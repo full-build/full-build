@@ -24,7 +24,7 @@ type Projects =
     { Projects : Project set }
 
 
-type private ProjectsConfig = FSharp.Configuration.YamlConfig<"projects.yaml">
+type private ProjectsConfig = FSharp.Configuration.YamlConfig<"Examples/projects.yaml">
 
 
 

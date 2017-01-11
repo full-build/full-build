@@ -36,20 +36,20 @@ type private ArtifactsConfig = FSharp.Configuration.YamlConfig<"Examples/artifac
 
 let Serialize (artifacts : Artifacts) =
     let config = new ArtifactsConfig()
-    config.artifacts.binaries <- artifacts.Binaries
-    config.artifacts.vcs <- artifacts.Vcs.toString
-    config.artifacts.minversion <- artifacts.MinVersion
+    config.binaries <- artifacts.Binaries
+    config.vcs <- artifacts.Vcs.toString
+    config.minversion <- artifacts.MinVersion
 
-    config.artifacts.nugets.Clear()
+    config.nugets.Clear()
     for nuget in artifacts.NuGets do
-        let cnuget = ArtifactsConfig.artifacts_Type.nugets_Item_Type()
+        let cnuget = ArtifactsConfig.nugets_Item_Type()
         cnuget.nuget <- nuget.toString
-        config.artifacts.nugets.Add (cnuget)
+        config.nugets.Add (cnuget)
 
-    config.artifacts.repositories.Clear()
+    config.repositories.Clear()
     let repos = artifacts.Repositories
     for repo in repos do
-        let crepo = ArtifactsConfig.artifacts_Type.repositories_Item_Type()
+        let crepo = ArtifactsConfig.repositories_Item_Type()
         crepo.repo <- repo.Repository.Name.toString
         crepo.uri <- repo.Repository.Url.toString
         crepo.build <- repo.Builder.toString
@@ -57,39 +57,39 @@ let Serialize (artifacts : Artifacts) =
         match repo.Repository.Branch with
         | None -> crepo.branch <- null
         | Some x -> crepo.branch <- x.toString
-        config.artifacts.repositories.Add crepo
+        config.repositories.Add crepo
 
-    let cmainrepo = config.artifacts.mainrepository
+    let cmainrepo = config.mainrepository
     cmainrepo.uri <- artifacts.MasterRepository.Url.toString
 
-    config.artifacts.apps.Clear ()
+    config.apps.Clear ()
     for app in artifacts.Applications do
-        let capp = ArtifactsConfig.artifacts_Type.apps_Item_Type()
+        let capp = ArtifactsConfig.apps_Item_Type()
         capp.name <- app.Name.toString
         capp.``type`` <- app.Publisher.toString
         capp.projects.Clear ()
         for project in app.Projects do
-            let cproject = ArtifactsConfig.artifacts_Type.apps_Item_Type.projects_Item_Type()
+            let cproject = ArtifactsConfig.apps_Item_Type.projects_Item_Type()
             cproject.project <- project.toString
             capp.projects.Add (cproject)
-        config.artifacts.apps.Add (capp)
+        config.apps.Add (capp)
 
-    config.artifacts.test <- artifacts.Tester.toString
+    config.test <- artifacts.Tester.toString
 
     config.ToString()
 
 let Deserialize (content) =
-    let rec convertToNuGets (items : ArtifactsConfig.artifacts_Type.nugets_Item_Type list) =
+    let rec convertToNuGets (items : ArtifactsConfig.nugets_Item_Type list) =
         match items with
         | [] -> []
         | x :: tail -> (RepositoryUrl.from (x.nuget)) :: convertToNuGets tail
 
-    let convertToRepository (item : ArtifactsConfig.artifacts_Type.mainrepository_Type) : Repository =
+    let convertToRepository (item : ArtifactsConfig.mainrepository_Type) : Repository =
         { Url = RepositoryUrl.from (item.uri)
           Branch = None
           Name = RepositoryId.from Env.MASTER_REPO }
 
-    let rec convertToBuildableRepositories (items : ArtifactsConfig.artifacts_Type.repositories_Item_Type list) =
+    let rec convertToBuildableRepositories (items : ArtifactsConfig.repositories_Item_Type list) =
         match items with
         | [] -> Set.empty
         | x :: tail -> let maybeBranch = if String.IsNullOrEmpty(x.branch) then None
@@ -99,7 +99,7 @@ let Deserialize (content) =
                                                                                        Name = RepositoryId.from x.repo }
                                                                         Builder = BuilderType.from x.build }
 
-    let rec convertToApplications (items : ArtifactsConfig.artifacts_Type.apps_Item_Type list) =
+    let rec convertToApplications (items : ArtifactsConfig.apps_Item_Type list) =
         match items with
         | [] -> Set.empty
         | x :: tail -> let appName = ApplicationId.from x.name
@@ -114,16 +114,16 @@ let Deserialize (content) =
     let config = new ArtifactsConfig()
     config.LoadText content
 
-    let repos = convertToBuildableRepositories (config.artifacts.repositories |> List.ofSeq)
-    let mainRepo = convertToRepository (config.artifacts.mainrepository)
-    { MinVersion = config.artifacts.minversion
-      Binaries = config.artifacts.binaries
-      Vcs = VcsType.from config.artifacts.vcs
-      NuGets = convertToNuGets (config.artifacts.nugets |> List.ofSeq)
+    let repos = convertToBuildableRepositories (config.repositories |> List.ofSeq)
+    let mainRepo = convertToRepository (config.mainrepository)
+    { MinVersion = config.minversion
+      Binaries = config.binaries
+      Vcs = VcsType.from config.vcs
+      NuGets = convertToNuGets (config.nugets |> List.ofSeq)
       MasterRepository = mainRepo
       Repositories = repos
-      Applications = convertToApplications (config.artifacts.apps |> List.ofSeq)
-      Tester = convertToTestRunner (config.artifacts.test) }
+      Applications = convertToApplications (config.apps |> List.ofSeq)
+      Tester = convertToTestRunner (config.test) }
 
 let Save (filename : FileInfo) (artifacts : Artifacts) =
     let content = Serialize artifacts

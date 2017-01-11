@@ -156,8 +156,8 @@
     <None Include="Examples\ghreleasefeed.json" />
     <None Include="Examples\view.yaml" />
     <None Include="Examples\anthology.yaml" />
-    <None Include="Examples\anthology2.yaml" />
     <None Include="Examples\artifacts.yaml" />
+    <None Include="Examples\projects.yaml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
