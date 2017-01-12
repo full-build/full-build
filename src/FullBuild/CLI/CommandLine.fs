@@ -140,7 +140,7 @@ let (|FullBuildView|_|) (viewFile : string) =
 let private (|Token|_|) (token : string) =
     match token with
     | "version" -> Some Version
-    | "workspace" -> Some Workspace
+    | "wks" -> Some Workspace
 
     | "help" -> Some Help
     | "upgrade" -> Some Upgrade
@@ -289,8 +289,6 @@ let rec private commandClone (shallow : bool) (all : bool) (mt : bool) (args : s
     match args with
     | TokenOption TokenOption.Shallow :: tail -> tail |> commandClone true all mt
     | TokenOption TokenOption.All :: tail -> tail |> commandClone shallow true mt
-    | TokenOption TokenOption.Multithread :: tail -> printfn "WARNING: clone --mt is deprecated"
-                                                     tail |> commandClone shallow all true
     | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandClone shallow all false
     | [] -> Command.Error MainCommand.Clone
     | Params filters -> Command.CloneRepositories { Filters = set filters; Shallow = shallow; All = all; Multithread = mt }
@@ -307,8 +305,6 @@ let rec private commandGraph (all : bool) (args : string list) =
 let rec private commandPublish (mt : bool) view (push : bool) (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Publish
-    | TokenOption TokenOption.Multithread :: tail -> printfn "WARNING: publish --mt is deprecated"
-                                                     tail |> commandPublish true view push
     | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandPublish false view push
     | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish mt (Some name) push
     | TokenOption TokenOption.Push :: tail -> tail |> commandPublish mt view true
@@ -636,7 +632,7 @@ let VersionContent() =
 
 let UsageContent() =
     let content = [
-        [MainCommand.Usage], "help [<command|workspace|repo|view|app>]: display help on command or area"
+        [MainCommand.Usage], "help [<command|wks|repo|view|app>]: display help on command or area"
         [MainCommand.Version], "version : display full-build version"
         [MainCommand.Workspace; MainCommand.Setup], "setup <git|gerrit> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         [MainCommand.Workspace; MainCommand.Init], "init <git|gerrit> <master-repository> <local-path> : initialize a new workspace in given path"
