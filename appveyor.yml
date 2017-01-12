@@ -47,7 +47,7 @@ init:
       }
       Write-Host "Building version $env:APPVEYOR_BUILD_VERSION $env:BUILD_VERSION_STATUS"
 
-shallow_clone: true
+shallow_clone: false
 
 build_script:
   - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION% %BUILD_VERSION_STATUS%
