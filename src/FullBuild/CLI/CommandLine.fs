@@ -655,6 +655,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
         [MainCommand.Workspace; MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
+        [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages> [--view <viewId>] : query items"
         [MainCommand.Workspace; MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
         [MainCommand.Workspace; MainCommand.UpgradeGuids], "update-guids : DANGER! change guids of all projects in given repository (interactive command)" 
         [MainCommand.Unknown], ""
@@ -676,9 +677,7 @@ let UsageContent() =
         [MainCommand.Unknown], ""
         [MainCommand.App; MainCommand.AddApp], "app add <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         [MainCommand.App; MainCommand.DropApp], "app drop <appId> : drop application"
-        [MainCommand.App; MainCommand.ListApp], "app list [--version <versionId>]: list applications"
-        [MainCommand.Unknown], ""
-        [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages> [--view <viewId>] : query items" ]
+        [MainCommand.App; MainCommand.ListApp], "app list [--version <versionId>]: list applications" ]
 
     content
 
