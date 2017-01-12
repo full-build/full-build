@@ -89,9 +89,6 @@ let rec GetFolder folder =
     | Folder.Bin -> GetFolder Folder.Config |> CreateSubDirectory BIN_FOLDER
     | Folder.Installation -> getInstallationFolder()
 
-let GetVersionFileName() =
-    GetFolder Folder.Bin |> GetFile VERSION_FILENAME
-
 let GetFsGlobalAssemblyInfoFileName() =
     GetFolder Folder.Bin |> GetFile FS_GLOBAL_ASSEMBLYINFO_FILENAME
 

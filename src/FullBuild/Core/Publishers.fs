@@ -24,7 +24,8 @@ let private checkErrorCode (execResult:Exec.ExecResult) =
 
 type private PublishApp =
     { Name : string
-      App : Application }
+      App : Application 
+      Version : string }
 
 
 let private publishCopy (app : PublishApp) =
@@ -46,8 +47,8 @@ let private publishCopy (app : PublishApp) =
             printfn "[WARNING] Can't publish application %A without repository" app.Name
 
 let private publishZip (app : PublishApp) =
-    let tmpApp = { Name = ".tmp-" + app.Name
-                   App = app.App }
+    let tmpApp = { app
+                   with Name = ".tmp-" + app.Name }
     publishCopy tmpApp
 
     let appDir = GetFolder Env.Folder.AppOutput
@@ -58,8 +59,8 @@ let private publishZip (app : PublishApp) =
     System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Optimal, false)
 
 let private publishDocker (app : PublishApp) =
-    let tmpApp = { Name = ".tmp-docker"
-                   App = app.App }
+    let tmpApp = { app
+                   with Name = ".tmp-docker" }
     publishCopy tmpApp
 
     let appDir = GetFolder Env.Folder.AppOutput
@@ -72,8 +73,8 @@ let private publishDocker (app : PublishApp) =
     sourceFolder.Delete(true)
 
 let private publishNuget (app : PublishApp) =
-    let tmpApp = { Name = ".tmp-nuget-" + app.Name
-                   App = app.App }
+    let tmpApp = { app
+                   with Name = ".tmp-nuget-" + app.Name }
     publishCopy tmpApp
 
     let appDir = GetFolder Env.Folder.AppOutput
@@ -87,7 +88,7 @@ let private publishNuget (app : PublishApp) =
     match nuspec with
     | Some nuspecFile ->
         Generators.Packagers.UpdateDependencies nuspecFile
-        let version = defaultArg (Builders.getCurrentBuildVersion()) "1.0.0"
+        let version = app.Version
         let nugetArgs = sprintf "pack %s -version %s" nuspecFile.Name version
         Exec.Exec "nuget" nugetArgs sourceFolder Map.empty |> Exec.CheckResponseCode
         targetFolder.Create()
@@ -96,14 +97,14 @@ let private publishNuget (app : PublishApp) =
         sourceFolder.Delete(true)
     | None -> failwith (sprintf "No nuspec found for the application %s" app.Name)
 
-let PublishWithPublisher (app : Application) =
+let PublishWithPublisher (version : string) (app : Application) =
     let publisher = 
         match app.Publisher with
         | PublisherType.Copy -> publishCopy
         | PublisherType.Zip -> publishZip
         | PublisherType.Docker -> publishDocker
         | PublisherType.NuGet -> publishNuget
-    { Name = app.Name; App = app }
+    { Name = app.Name; App = app; Version = version }
         |> publisher
 
 

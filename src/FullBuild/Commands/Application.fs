@@ -18,10 +18,10 @@ open IoHelpers
 open Env
 open PatternMatching
 
-let private asyncPublish (app : Graph.Application) =
+let private asyncPublish (version : string) (app : Graph.Application) =
     async {
         DisplayHighlight app.Name
-        Core.Publishers.PublishWithPublisher app
+        Core.Publishers.PublishWithPublisher version app
     }
 
 let private displayApp (app : Graph.Application) =
@@ -36,6 +36,11 @@ let private filterApp (graph : Graph.Graph) (version : string) (app : Graph.Appl
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
+    let baselines = Baselines.from graph
+    let baseline = baselines.Baseline
+    let tagInfo = baseline.Info
+    let version = Tag.Format tagInfo
+
     let viewRepository = Views.from graph
     let applications = match pubInfo.View with
                        | None -> graph.Applications
@@ -45,7 +50,7 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
 
     let apps = PatternMatching.FilterMatch applications (fun x -> x.Name) (set pubInfo.Filters)
     let maxThrottle = if pubInfo.Multithread then (System.Environment.ProcessorCount*2) else 1
-    apps |> Seq.map asyncPublish
+    apps |> Seq.map (asyncPublish version)
          |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously 
          |> ignore
 

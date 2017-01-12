@@ -39,16 +39,6 @@ let writeVersionMsbuild version =
     let csFile = Env.GetCsGlobalAssemblyInfoFileName()
     File.WriteAllLines(csFile.FullName, generateVersionCs version)
 
-    let versionFile = Env.GetVersionFileName()
-    File.WriteAllText(versionFile.FullName, (sprintf "%s" version))
-
-let getCurrentBuildVersion () =
-    let versionFile = Env.GetVersionFileName()
-    if versionFile.Exists then 
-        versionFile.FullName |> File.ReadAllText |> Some
-    else 
-        None
-
 let buildSkip (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
     ()
 
