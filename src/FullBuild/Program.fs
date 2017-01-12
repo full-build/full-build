@@ -27,7 +27,6 @@ let processMain argv =
     | Command.InitWorkspace initInfo -> Commands.Workspace.Init initInfo
     | Command.IndexRepositories indexInfo -> Commands.Workspace.Index indexInfo
     | Command.ConvertRepositories convertInfo -> Commands.Workspace.Convert convertInfo
-    | Command.PushWorkspace -> Commands.Workspace.Push ()
     | Command.TagWorkspace tagInfo -> Commands.Workspace.TagWorkspace tagInfo
     | Command.CheckoutWorkspace version -> Commands.Workspace.Checkout version
     | Command.BranchWorkspace branch -> Commands.Workspace.Branch branch

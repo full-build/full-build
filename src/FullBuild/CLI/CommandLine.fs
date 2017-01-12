@@ -50,6 +50,7 @@ type private TokenOption =
     | Test
     | Full
     | Ref
+    | Push
 
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -81,6 +82,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--test" -> Some TokenOption.Test
     | "--full" -> Some TokenOption.Full
     | "--ref" -> Some TokenOption.Ref
+    | "--push" -> Some TokenOption.Push
     | _ -> None
 
 type private Token =
@@ -96,7 +98,6 @@ type private Token =
     | Rebuild
     | Index
     | Convert
-    | Push
     | Tag
     | Graph
     | Install
@@ -151,7 +152,6 @@ let private (|Token|_|) (token : string) =
     | "rebuild" -> Some Rebuild
     | "index" -> Some Index
     | "convert" -> Some Convert
-    | "push" -> Some Push
     | "tag" -> Some Tag
     | "graph" -> Some Graph
     | "install" -> Some Install
@@ -304,14 +304,15 @@ let rec private commandGraph (all : bool) (args : string list) =
     | [ViewId name] -> Command.Graph { Name = name ; All = all }
     | _ -> Command.Error MainCommand.Graph
 
-let rec private commandPublish (mt : bool) view (args : string list) =
+let rec private commandPublish (mt : bool) view (push : bool) (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Publish
     | TokenOption TokenOption.Multithread :: tail -> printfn "WARNING: publish --mt is deprecated"
-                                                     tail |> commandPublish true view
-    | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandPublish false view
-    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish mt (Some name)
-    | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = mt}
+                                                     tail |> commandPublish true view push
+    | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandPublish false view push
+    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish mt (Some name) push
+    | TokenOption TokenOption.Push :: tail -> tail |> commandPublish mt view true
+    | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = mt; Push = push }
     | _ -> Command.Error MainCommand.Publish
 
 
@@ -340,11 +341,6 @@ let rec private commandTag (full : bool) (args : string list) =
     | TokenOption TokenOption.Full :: tail -> tail |> commandTag true
     | [Param buildNumber] -> Command.TagWorkspace {BuildNumber = buildNumber; Incremental = not full }
     | _ -> Command.Error MainCommand.Tag
-
-let rec private commandPush (args : string list) =
-    match args with
-    | [] -> Command.PushWorkspace
-    | _ -> Command.Error MainCommand.Push
 
 let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
     match args with
@@ -534,7 +530,6 @@ let private commandHelp (args : string list) =
               | Token Token.Rebuild :: _ -> MainCommand.RebuildView
               | Token Token.Checkout :: _ -> MainCommand.Checkout
               | Token Token.Branch :: _ -> MainCommand.Branch
-              | Token Token.Push :: _ -> MainCommand.Push
               | Token Token.Tag :: _ -> MainCommand.Tag
               | Token Token.Pull :: _ -> MainCommand.Pull
               | Token Token.Clean :: _ -> MainCommand.Clean
@@ -565,12 +560,11 @@ let Parse (args : string list) : Command =
     | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false true
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
-    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish true None
+    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish true None false
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
-    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush
     | Token Token.Tag :: cmdArgs -> cmdArgs |> commandTag false
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false true None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
@@ -660,9 +654,8 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Index], "index [--test] <repoId-wildcard>+ : index repositories"
         [MainCommand.Workspace; MainCommand.Convert], "convert <repoId-wildcard> : convert projects in repositories"
         [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin|--latest-bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
-        [MainCommand.App; MainCommand.Push], "push : push apps"
         [MainCommand.Workspace; MainCommand.Tag], "tag [--full] <buildNumber> : tag workspace"
-        [MainCommand.App; MainCommand.Publish], "publish [--nomt] [--view <viewId>] <appId-wildcard> : publish application"
+        [MainCommand.App; MainCommand.Publish], "publish [--nomt] [--view <viewId>] [--push] <appId-wildcard> : publish applications"
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"

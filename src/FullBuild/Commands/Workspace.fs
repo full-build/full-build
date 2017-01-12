@@ -83,15 +83,6 @@ let TagWorkspace (tagInfo : CLI.Commands.TagWorkspace) =
     printfn "[version] %s" tag
 
 
-let Push () =
-    let graph = Configuration.LoadAnthology() |> Graph.from
-
-    // copy bin content
-    let baselineRepository = Baselines.from graph
-    let newBaseline = baselineRepository.Baseline
-    Core.BuildArtifacts.Publish graph newBaseline.Info
-
-
 let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     // checkout repositories
     DisplayHighlight ".full-build"

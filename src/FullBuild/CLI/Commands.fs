@@ -70,7 +70,8 @@ type ViewName =
 type PublishApplications =
     { View: string option
       Filters : string list
-      Multithread : bool }
+      Multithread : bool 
+      Push : bool }
 
 type CheckoutVersion =
     { Version : string }
@@ -150,7 +151,6 @@ type MainCommand =
     | Init
     | Index
     | Convert
-    | Push
     | Checkout
     | Branch
     | Pull
@@ -210,7 +210,6 @@ type Command =
     | InitWorkspace of InitWorkspace
     | IndexRepositories of IndexRepositories
     | ConvertRepositories of ConvertRepositories
-    | PushWorkspace
     | TagWorkspace of TagWorkspace
     | CheckoutWorkspace of CheckoutVersion
     | BranchWorkspace of BranchWorkspace

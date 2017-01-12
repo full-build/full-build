@@ -52,6 +52,12 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let appFolder = Env.GetFolder Env.Folder.AppOutput
     appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter IoHelpers.ForceDelete
 
+    // copy bin content
+    if pubInfo.Push then
+        let baselineRepository = Baselines.from graph
+        let newBaseline = baselineRepository.Baseline
+        Core.BuildArtifacts.Publish graph newBaseline.Info
+
 let List (appInfo : CLI.Commands.ListApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let apps = match appInfo.Version with
