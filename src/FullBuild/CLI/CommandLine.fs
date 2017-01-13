@@ -27,7 +27,6 @@ type private TokenOption =
     | Down
     | All
     | Bin
-    | LatestBin
     | Src
     | Exclude
     | Multithread
@@ -58,7 +57,6 @@ let private (|TokenOption|_|) (token : string) =
     | "--up" -> Some TokenOption.Up
     | "--down" -> Some TokenOption.Down
     | "--bin" -> Some TokenOption.Bin
-    | "--latest-bin" -> Some TokenOption.LatestBin
     | "--src" -> Some TokenOption.Src
     | "--all" -> Some TokenOption.All
     | "--exclude" -> Some TokenOption.Exclude
@@ -649,7 +647,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Exec], "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         [MainCommand.Workspace; MainCommand.Index], "index [--test] <repoId-wildcard>+ : index repositories"
         [MainCommand.Workspace; MainCommand.Convert], "convert <repoId-wildcard> : convert projects in repositories"
-        [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin|--latest-bin] [--nomt] [--rebase] [--view <viewId>]: update to latest version - rebase if requested (ff is default)"
+        [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--nomt] [--rebase] [--view <viewId>]: update to matching binaries - rebase if requested (ff is default)"
         [MainCommand.Workspace; MainCommand.Tag], "tag [--full] <buildNumber> : tag workspace"
         [MainCommand.App; MainCommand.Publish], "publish [--nomt] [--view <viewId>] [--push] <appId-wildcard> : publish applications"
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
