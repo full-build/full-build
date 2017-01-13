@@ -67,7 +67,7 @@ let private removeDependenciesContent (lines : string seq) (packages : PackageId
 
 let private executePaketCommand cmd =
     let confDir = Env.GetFolder Env.Folder.Config
-    Exec.Exec "paket.exe" cmd confDir Map.empty |> Exec.CheckResponseCode
+    Exec.Exec "paket.exe" cmd confDir Map.empty "Paket" |> Exec.CheckResponseCode
 
 let UpdateSources (sources : RepositoryUrl list) =
     let confDir = Env.GetFolder Env.Folder.Config
