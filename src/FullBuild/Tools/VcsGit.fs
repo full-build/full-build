@@ -43,19 +43,20 @@ let GitPull (repoDir : DirectoryInfo) (rebase : bool) =
 
 let GitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=%H"
-    checkedExecReadLine "git" args "dummy" repoDir Map.empty
+    checkedExecReadLine "dummy" "git" args repoDir Map.empty
 
 let GitClean (repoDir : DirectoryInfo) (repo : Repository) =
     let resetArgs = sprintf "reset --hard origin/%s" repo.Branch
-    checkedExec noBuffering "git" (sprintf "checkout %s" repo.Branch) repo.Name repoDir Map.empty
-    checkedExec noBuffering "git" resetArgs repo.Name repoDir Map.empty
-    checkedExec noBuffering "git" "clean -fxd" repo.Name repoDir Map.empty
+    let info = sprintf "checkout %s" repo.Branch
+    checkedExec noBuffering info "git" repo.Name repoDir Map.empty
+    checkedExec noBuffering info "git" resetArgs repoDir Map.empty
+    checkedExec noBuffering info "git" "clean -fxd" repoDir Map.empty
 
 let GitIs (repo : Repository) =
     try
         let currDir = IoHelpers.CurrentFolder()
         let args = sprintf @"ls-remote -h %s" repo.Uri
-        checkedExecReadLine "git" args "dummy" currDir Map.empty |> ignore
+        checkedExecReadLine "dummy" "git" args currDir Map.empty |> ignore
         true
     with
         _ -> false
@@ -88,17 +89,17 @@ let GitCheckout (repoDir : DirectoryInfo) (version : string) =
 let GitHistory (repoDir : DirectoryInfo) (version : string) =
     let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version
     try
-        checkedExecReadLine "git" args "dummy" repoDir Map.empty
+        checkedExecReadLine "dummy" "git" args repoDir Map.empty
     with
         _ -> [sprintf "Failed to get history from version %A - please pull !" version]
 
 let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
     let args = sprintf @"log -1 --format=%%H %s" relativeFile
-    checkedExecReadLine "git" args "dummy" repoDir Map.empty
+    checkedExecReadLine "dummy" "git" args repoDir Map.empty
 
 let GitLogs (repoDir : DirectoryInfo) =
     let args = sprintf @"log --format=%%H"
-    checkedExecReadLine "git" args "dummy" repoDir Map.empty
+    checkedExecReadLine "dummy" "git" args repoDir Map.empty
 
 let GitIgnore (repoDir : DirectoryInfo) =
     let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"
@@ -117,7 +118,7 @@ let GitFindLatestMatchingTag (repoDir : DirectoryInfo) (filter : string) : strin
 
 let GitTagToHash (repoDir : DirectoryInfo) (tag : string) : string =
     let args = sprintf @"rev-list --format=""%%H %%s"" -n 1 %s" tag
-    let res = checkedExecReadLine "git" args "dummy" repoDir Map.empty
+    let res = checkedExecReadLine "dummy" "git" args repoDir Map.empty
     let items = res.[0].Split(' ')
     items.[0]
 
@@ -127,7 +128,7 @@ let GitHead (repoDir : DirectoryInfo) () =
 let GitTag (repoDir : DirectoryInfo) (tag : string) =
     let comment = "fullbuild"
     let argsTag = sprintf @"tag -a %s -m %A" tag comment
-    checkedExec noBuffering "git" argsTag "dummy" repoDir Map.empty
+    checkedExec noBuffering "dummy" "git" argsTag repoDir Map.empty
 
     let argsPush = sprintf @"push origin %s" tag
-    checkedExec noBuffering "git" argsPush "dummy" repoDir Map.empty
+    checkedExec noBuffering "dummy" "git" argsPush repoDir Map.empty
