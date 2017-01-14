@@ -55,9 +55,6 @@ let Clean (wsDir : DirectoryInfo) (repo : Repository) =
 let Log (wsDir : DirectoryInfo) (repo : Repository) (version : string) =
     (chooseVcs wsDir repo.Vcs repo GitHistory) version
 
-let Logs (wsDir : DirectoryInfo) (repo : Repository) =
-    (chooseVcs wsDir repo.Vcs repo GitLogs)
-
 let LastCommit (wsDir : DirectoryInfo) (repo : Repository) (relativeFile : string) =
     (chooseVcs wsDir repo.Vcs repo GitLastCommit) relativeFile
 

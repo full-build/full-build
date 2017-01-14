@@ -124,7 +124,7 @@ let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) (readOnly : boo
                   else "/A-:R"
 
     let args = sprintf "%s /MIR /MT /NP /NFL /NDL /NJH /NJS %A %A" setRead source.FullName target.FullName
-    Exec.Exec "robocopy.exe" args currDir Map.empty "Copy" |> checkErrorCode
+    Exec.Exec "robocopy.exe" args currDir Map.empty |> checkErrorCode
 
 let GetExtension (file : FileInfo) =
     file.Extension.Replace(".", "")

@@ -30,7 +30,7 @@ let printPull ((repo, execResult) : (Repository * Exec.ExecResult)) =
                                 execResult |> Exec.PrintOutput)
 
 let private checkoutRepo wsDir (checkoutInfo : CLI.Commands.CheckoutVersion) (repo : Repository) = async {
-    return (repo, Tools.Vcs.Checkout wsDir repo checkoutInfo.Version repo.Name) |> printPull
+    return (repo, Tools.Vcs.Checkout wsDir repo checkoutInfo.Version) |> printPull
 }
 
 
@@ -89,7 +89,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = graph.MasterRepository
-    Tools.Vcs.Checkout wsDir mainRepo checkoutInfo.Version (sprintf "checkout repository %s" mainRepo.Name) |> Exec.CheckResponseCode
+    Tools.Vcs.Checkout wsDir mainRepo checkoutInfo.Version |> Exec.CheckResponseCode
 
     // checkout each repository now
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -155,7 +155,7 @@ let consoleProgressBar max =
 let consoleLock = System.Object()
 
 let private cloneRepo wsDir rebase (repo : Repository) = async {
-    return (repo, Tools.Vcs.Pull wsDir repo rebase (sprintf "pull repository %s" repo.Name)) |> printPull
+    return (repo, Tools.Vcs.Pull wsDir repo rebase) |> printPull
 }
 
 let Pull (pullInfo : CLI.Commands.PullWorkspace) =
@@ -219,8 +219,8 @@ let Exec (execInfo : CLI.Commands.Exec) =
             try
                 DisplayHighlight repo.Name
 
-                if Env.IsMono () then Exec.Exec "sh" ("-c " + args) repoDir vars "dummy" |> Exec.CheckResponseCode
-                else Exec.Exec "cmd" args repoDir vars "dummy" |> Exec.CheckResponseCode
+                if Env.IsMono () then Exec.Exec "sh" ("-c " + args) repoDir vars |> Exec.CheckResponseCode
+                else Exec.Exec "cmd" args repoDir vars |> Exec.CheckResponseCode
             with e -> printfn "*** %s" e.Message
 
 let Clean () =

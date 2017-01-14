@@ -28,8 +28,7 @@ type private MonitorCommand =
 type ExecResult = 
     { ResultCode: int
       Out: string list
-      Error: string list
-      Info : string }
+      Error: string list }
 
 let private defaultPSI (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) redirect =
     let psi = ProcessStartInfo (FileName = command,
@@ -47,7 +46,7 @@ let private defaultPSI (command : string) (args : string) (dir : DirectoryInfo) 
     psi
     
 
-let private supervisedExec redirect (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) (info : string) =
+let private supervisedExec redirect (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
     let psi = defaultPSI command args dir vars redirect
     use proc = Process.Start (psi)
     if proc |> isNull then failwith "Failed to start process"
@@ -65,7 +64,7 @@ let private supervisedExec redirect (command : string) (args : string) (dir : Di
     let asyncCode = async { proc.WaitForExit(); return proc.ExitCode |> MonitorCommand.End }
     let res = [ asyncCode ; asyncOut ; asyncErr ] |> Async.Parallel |> Async.RunSynchronously 
     match res.[0], res.[1], res.[2] with
-    | MonitorCommand.End code, MonitorCommand.Out out, MonitorCommand.Err err -> { ResultCode=code; Out=out; Error=err; Info = info }
+    | MonitorCommand.End code, MonitorCommand.Out out, MonitorCommand.Err err -> { ResultCode=code; Out=out; Error=err }
     | _ -> failwith "Unexpected results"
 
 let Exec = 
@@ -84,8 +83,13 @@ let PrintOutput execResult =
     execResult
 
 let private resultToError execResult = 
-    if execResult.ResultCode <> 0 then Some (execResult.ResultCode |> sprintf "Operation '%s' failed with error %d" execResult.Info)
+    if execResult.ResultCode <> 0 then execResult.ResultCode |> sprintf "Operation failed with error %d" |> Some
     else None
+
+let GetOutput execResult =
+    match execResult |> resultToError with
+    | Some error -> failwith error
+    | None -> execResult.Out
 
 let CheckResponseCode execResult =
     match execResult |> resultToError with

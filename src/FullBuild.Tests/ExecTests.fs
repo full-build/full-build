@@ -27,10 +27,10 @@ let private checkErrorCode (execResult:Exec.ExecResult) =
 let CheckExecOk () =
     if not <| Env.IsMono() then
         let currDir = IoHelpers.CurrentFolder ()
-        Exec.Exec "cmd" "/c dir >nul" currDir Map.empty "dummy" |> checkErrorCode
+        Exec.Exec "cmd" "/c dir >nul" currDir Map.empty |> checkErrorCode
 
 [<Test>]
 let CheckExecFailure () =
     let currDir = IoHelpers.CurrentFolder ()
-    (fun () -> Exec.Exec "gloubiboulga" "" currDir Map.empty "dummy" |> checkErrorCode |> ignore) |> should throw typeof<System.ComponentModel.Win32Exception>
+    (fun () -> Exec.Exec "gloubiboulga" "" currDir Map.empty |> checkErrorCode |> ignore) |> should throw typeof<System.ComponentModel.Win32Exception>
 

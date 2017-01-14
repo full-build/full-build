@@ -18,9 +18,6 @@ open Env
 open System.IO
 open Graph
 
-let private checkErrorCode (execResult:Exec.ExecResult) =
-    if execResult.ResultCode < 0 then failwithf "Process failed with error %d" execResult.ResultCode
-
 
 type private PublishApp =
     { Name : string
@@ -37,8 +34,8 @@ let private publishCopy (app : PublishApp) =
             let projFile = repoDir |> GetFile project.ProjectFile
             let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name projFile.FullName
 
-            if Env.IsMono () then Exec.Exec "xbuild" args wsDir Map.empty app.App.Name |> checkErrorCode
-            else Exec.Exec "msbuild" args wsDir Map.empty app.Name |> checkErrorCode
+            if Env.IsMono () then Exec.Exec "xbuild" args wsDir Map.empty |> Exec.CheckResponseCode
+            else Exec.Exec "msbuild" args wsDir Map.empty |> Exec.CheckResponseCode
 
             let appDir = GetFolder Env.Folder.AppOutput
             let artifactDir = appDir |> GetSubDirectory app.Name
@@ -69,7 +66,7 @@ let private publishDocker (app : PublishApp) =
     if targetFile.Exists then targetFile.Delete()
 
     let dockerArgs = sprintf "build -t %s ." app.Name
-    Exec.Exec "docker" dockerArgs sourceFolder Map.empty app.App.Name |> checkErrorCode
+    Exec.Exec "docker" dockerArgs sourceFolder Map.empty |> Exec.CheckResponseCode
     sourceFolder.Delete(true)
 
 let private publishNuget (app : PublishApp) =
@@ -90,7 +87,7 @@ let private publishNuget (app : PublishApp) =
         Generators.Packagers.UpdateDependencies nuspecFile
         let version = app.Version
         let nugetArgs = sprintf "pack %s -version %s" nuspecFile.Name version
-        Exec.Exec "nuget" nugetArgs sourceFolder Map.empty app.App.Name |> Exec.CheckResponseCode
+        Exec.Exec "nuget" nugetArgs sourceFolder Map.empty |> Exec.CheckResponseCode
         targetFolder.Create()
         for file in sourceFolder.EnumerateFiles("*.nupkg") do 
             file.MoveTo(Path.Combine(targetFolder.FullName, file.Name)) |> ignore

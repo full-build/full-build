@@ -18,45 +18,31 @@ open System.IO
 open Graph
 open Exec
 
-let private checkErrorCode execResult =
-    if execResult.ResultCode <> 0 then failwithf "Process failed with error %d" execResult.ResultCode
-
-let private noBuffering code out err =
-    ()
-
-let private checkedExec onEnd info =
-    let ycheck execResult =
-        onEnd execResult.ResultCode execResult.Out execResult.Error
-        execResult |> checkErrorCode
-    fun x y z s -> Exec x y z s info |> ycheck
-
-let private checkedExecReadLine info =
-    fun x y z s ->
-        let res = ExecGetOutput x y z s info
-        res |> checkErrorCode
-        res.Out @ res.Error
 
 let GitPull (repoDir : DirectoryInfo) (rebase : bool) =
     let dorebase = if rebase then "--rebase" else "--ff-only"
     let args = sprintf "pull %s" dorebase
-    ExecGetOutput "git" args repoDir Map.empty
+    Exec "git" args repoDir Map.empty
 
 let GitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=%H"
-    checkedExecReadLine "dummy" "git" args repoDir Map.empty
+    ExecGetOutput "git" args repoDir Map.empty |> GetOutput |> Seq.head
 
 let GitClean (repoDir : DirectoryInfo) (repo : Repository) =
+    let cleanArgs = "clean -fxd"
+    Exec "git" cleanArgs repoDir Map.empty |> CheckResponseCode
+
+    let checkoutArgs = sprintf "checkout %s" repo.Branch
+    Exec "git" checkoutArgs repoDir Map.empty |> CheckResponseCode
+
     let resetArgs = sprintf "reset --hard origin/%s" repo.Branch
-    let info = sprintf "checkout %s" repo.Branch
-    checkedExec noBuffering info "git" repo.Name repoDir Map.empty
-    checkedExec noBuffering info "git" resetArgs repoDir Map.empty
-    checkedExec noBuffering info "git" "clean -fxd" repoDir Map.empty
+    Exec "git" "checkout" repoDir Map.empty |> CheckResponseCode
 
 let GitIs (repo : Repository) =
     try
         let currDir = IoHelpers.CurrentFolder()
         let args = sprintf @"ls-remote -h %s" repo.Uri
-        checkedExecReadLine "dummy" "git" args currDir Map.empty |> ignore
+        Exec "git" args currDir Map.empty |> CheckResponseCode
         true
     with
         _ -> false
@@ -69,7 +55,7 @@ let GitClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallo
     let args = sprintf @"clone %s --quiet %s %s %A" url bronly depth target.FullName
 
     let currDir = IoHelpers.CurrentFolder ()
-    ExecGetOutput "git" args currDir Map.empty repo.Name
+    Exec "git" args currDir Map.empty
 
 let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
     let res = GitClone repo target url shallow
@@ -84,22 +70,22 @@ let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (sha
 
 let GitCheckout (repoDir : DirectoryInfo) (version : string) =
     let args = sprintf "checkout %A" version
-    ExecGetOutput "git" args repoDir Map.empty
+    Exec "git" args repoDir Map.empty
 
 let GitHistory (repoDir : DirectoryInfo) (version : string) =
     let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version
     try
-        checkedExecReadLine "dummy" "git" args repoDir Map.empty
+        ExecGetOutput "git" args repoDir Map.empty |> GetOutput
     with
         _ -> [sprintf "Failed to get history from version %A - please pull !" version]
 
 let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
     let args = sprintf @"log -1 --format=%%H %s" relativeFile
-    checkedExecReadLine "dummy" "git" args repoDir Map.empty
+    ExecGetOutput "git" args repoDir Map.empty |> GetOutput |> Seq.head
 
-let GitLogs (repoDir : DirectoryInfo) =
-    let args = sprintf @"log --format=%%H"
-    checkedExecReadLine "dummy" "git" args repoDir Map.empty
+//let GitLogs (repoDir : DirectoryInfo) =
+//    let args = sprintf @"log --format=%%H"
+//    checkedExecReadLine "dummy" "git" args repoDir Map.empty
 
 let GitIgnore (repoDir : DirectoryInfo) =
     let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"
@@ -109,17 +95,17 @@ let GitIgnore (repoDir : DirectoryInfo) =
     srcGitIgnore.CopyTo(dstGitIgnore.FullName) |> ignore
 
 let GitFindLatestMatchingTag (repoDir : DirectoryInfo) (filter : string) : string option =
-    let args = sprintf "describe --match %A" filter
-    let res = ExecGetOutput "git" args repoDir Map.empty "dummy"
-    if res.Out.Length = 1 then 
-        let res = Some (res.Out.[0].Split('-').[0])
-        res
-    else None
+    try
+        let args = sprintf "describe --match %A" filter
+        let res = ExecGetOutput "git" args repoDir Map.empty |> GetOutput |> Seq.head
+        res.Split('-').[0] |> Some
+    with
+        _ -> None
 
 let GitTagToHash (repoDir : DirectoryInfo) (tag : string) : string =
     let args = sprintf @"rev-list --format=""%%H %%s"" -n 1 %s" tag
-    let res = checkedExecReadLine "dummy" "git" args repoDir Map.empty
-    let items = res.[0].Split(' ')
+    let res = ExecGetOutput "git" args repoDir Map.empty |> GetOutput |> Seq.head
+    let items = res.Split(' ')
     items.[0]
 
 let GitHead (repoDir : DirectoryInfo) () =
@@ -128,7 +114,7 @@ let GitHead (repoDir : DirectoryInfo) () =
 let GitTag (repoDir : DirectoryInfo) (tag : string) =
     let comment = "fullbuild"
     let argsTag = sprintf @"tag -a %s -m %A" tag comment
-    checkedExec noBuffering "dummy" "git" argsTag repoDir Map.empty
+    Exec "git" argsTag repoDir Map.empty |> CheckResponseCode
 
     let argsPush = sprintf @"push origin %s" tag
-    checkedExec noBuffering "dummy" "git" argsPush repoDir Map.empty
+    Exec "git" argsPush repoDir Map.empty |> CheckResponseCode
