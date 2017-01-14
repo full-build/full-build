@@ -16,8 +16,6 @@ module ExecTests
 
 open NUnit.Framework
 open FsUnit
-open System
-open System.IO
 
 
 [<Test>]
