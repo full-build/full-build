@@ -675,7 +675,7 @@ let UsageContent() =
         [MainCommand.Unknown], ""
         [MainCommand.App; MainCommand.AddApp], "app add <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         [MainCommand.App; MainCommand.DropApp], "app drop <appId> : drop application"
-        [MainCommand.App; MainCommand.ListApp], "app list [--version <buildNumber>]: list applications" ]
+        [MainCommand.App; MainCommand.ListApp], "app list [--version <buildNumber>] : list applications" ]
 
     content
 

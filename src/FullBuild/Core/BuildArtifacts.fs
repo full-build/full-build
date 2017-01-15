@@ -24,7 +24,7 @@ let Publish (graph : Graph) (tagInfo : Tag.TagInfo) =
     let appDir = Env.GetFolder Env.Folder.AppOutput
     let versionDir = DirectoryInfo(graph.ArtifactsDir) |> GetSubDirectory tag
     let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
-    let versionLine = sprintf "%s:%s:%s" tagInfo.BuildNumber tag tagInfo.Branch
+    let versionLine = sprintf "%s" tag
 
     try
         let doPublish = not versionDir.Exists
@@ -63,11 +63,10 @@ let FetchVersionsForArtifact (graph : Graph) (app : Application) =
     let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
     let lines = System.IO.File.ReadAllLines (versionFile.FullName)
 
-    let toVersion (line : string) =
-        line.Split(':').[0]
-
-    lines |> Seq.map toVersion
+    lines |> Seq.map Tag.Parse
           |> List.ofSeq
+
+
 
 let PullReferenceBinaries (artifacts : string) version =
     let artifactDir = artifacts |> DirectoryInfo

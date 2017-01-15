@@ -27,11 +27,24 @@ let private asyncPublish (version : string) (app : Graph.Application) =
 let private displayApp (app : Graph.Application) =
     printfn "%s" app.Name
 
-let private filterApp (graph : Graph.Graph) (version : string) (app : Graph.Application) =
+let private displayAppVersion ((app : Graph.Application), (tag : Tag.TagInfo)) =
+    let tag = Tag.Format tag
+    printfn "%s : %s" app.Name tag
+
+
+let private checkAppHasVersion (version : string) (graph : Graph.Graph) (app : Graph.Application) =
     async {
-        let hasVersion = Core.BuildArtifacts.FetchVersionsForArtifact graph app |> List.contains version
-        return if hasVersion then List.singleton app
-               else List.empty
+        let version = Core.BuildArtifacts.FetchVersionsForArtifact graph app |> List.tryFind (fun x -> x.BuildNumber = version)
+        return if version.IsSome then Some app
+               else None
+    }
+
+let private getLastVersionForApp (graph : Graph.Graph) (app : Graph.Application) =
+    async {
+        let versions = Core.BuildArtifacts.FetchVersionsForArtifact graph app
+        return match versions |> List.tryLast with
+               | None -> None
+               | Some version -> Some (app, version)
     }
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
@@ -65,14 +78,19 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
 
 let List (appInfo : CLI.Commands.ListApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
-    let apps = match appInfo.Version with
-               | None -> graph.Applications |> Set.toSeq
-               | Some version -> let maxThrottle = System.Environment.ProcessorCount*4
-                                 graph.Applications |> Seq.filter (fun (x : Graph.Application) -> x.Publisher = Graph.PublisherType.Zip)
-                                                    |> Seq.map (filterApp graph version)
-                                                    |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
-                                                    |> Seq.concat
-    apps |> Seq.iter displayApp
+    match appInfo.Version with
+    | None -> let maxThrottle = System.Environment.ProcessorCount*4
+              graph.Applications |> Seq.filter (fun (x : Graph.Application) -> x.Publisher = Graph.PublisherType.Zip)
+                                 |> Seq.map (getLastVersionForApp graph)
+                                 |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
+                                 |> Seq.choose id
+                                 |> Seq.iter displayAppVersion
+    | Some version -> let maxThrottle = System.Environment.ProcessorCount*4
+                      graph.Applications |> Seq.filter (fun (x : Graph.Application) -> x.Publisher = Graph.PublisherType.Zip)
+                                         |> Seq.map (checkAppHasVersion version graph)
+                                         |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
+                                         |> Seq.choose id
+                                         |> Seq.iter displayApp
 
 let Add (addInfo : CLI.Commands.AddApplication) =
     let graph = Configuration.LoadAnthology () |> Graph.from
