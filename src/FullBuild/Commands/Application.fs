@@ -34,7 +34,7 @@ let private displayAppVersion ((app : Graph.Application), (tag : Tag.TagInfo)) =
 
 let private checkAppHasVersion (version : string) (graph : Graph.Graph) (app : Graph.Application) =
     async {
-        let version = Core.BuildArtifacts.FetchVersionsForArtifact graph app |> List.tryFind (fun x -> x.BuildNumber = version)
+        let version = Core.BuildArtifacts.FetchVersionsForArtifact graph app |> List.tryFind (fun x -> (Tag.Format x).Contains(version))                                                                                                       
         return if version.IsSome then Some app
                else None
     }
