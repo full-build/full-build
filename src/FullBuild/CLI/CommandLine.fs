@@ -648,7 +648,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Index], "index [--test] <repoId-wildcard>+ : index repositories"
         [MainCommand.Workspace; MainCommand.Convert], "convert <repoId-wildcard> : convert projects in repositories"
         [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--nomt] [--rebase] [--view <viewId>]: update sources & binaries - rebase if requested (ff is default)"
-        [MainCommand.Workspace; MainCommand.Tag], "tag [--full] <buildNumber> : tag workspace"
+        [MainCommand.Workspace; MainCommand.Tag], "tag [--full] <buildNumber> : tag workspace with provided build number"
         [MainCommand.App; MainCommand.Publish], "publish [--nomt] [--view <viewId>] [--push] <appId-wildcard> : publish applications"
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
@@ -675,7 +675,7 @@ let UsageContent() =
         [MainCommand.Unknown], ""
         [MainCommand.App; MainCommand.AddApp], "app add <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         [MainCommand.App; MainCommand.DropApp], "app drop <appId> : drop application"
-        [MainCommand.App; MainCommand.ListApp], "app list [--version <versionId>]: list applications" ]
+        [MainCommand.App; MainCommand.ListApp], "app list [--version <buildNumber>]: list applications" ]
 
     content
 
