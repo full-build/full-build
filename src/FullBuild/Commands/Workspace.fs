@@ -258,7 +258,11 @@ let History (historyInfo : CLI.Commands.History) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Configuration.LoadAnthology() |> Graph.from
     let baselineRepository = Baselines.from graph
-    let baseline = baselineRepository.Baseline
+    let baseline = 
+        try
+            baselineRepository.Baseline
+        with
+            _ -> baselineRepository.CreateBaseline false "temp"
 
     // body
     let tag = Tag.Format baseline.Info
