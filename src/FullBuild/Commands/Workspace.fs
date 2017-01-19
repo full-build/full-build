@@ -258,35 +258,25 @@ let History (historyInfo : CLI.Commands.History) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Configuration.LoadAnthology() |> Graph.from
     let baselineRepository = Baselines.from graph
-    let baseline = 
-        try
-            baselineRepository.Baseline
-        with
-            _ -> baselineRepository.CreateBaseline false "temp"
+    let previousBaseline = baselineRepository.Baseline
+    let baseline = baselineRepository.CreateBaseline false "temp"
 
-    // body
-    let tag = Tag.Format baseline.Info
-    let revision = Tools.Vcs.Log wsDir graph.MasterRepository tag
+    let diff = previousBaseline - baseline
 
     let revisions = seq {
-        // master repo
-        match revision with
-        | [] -> ()
-        | _ -> yield graph.MasterRepository, revision
-
         // other repositories then
-        for repo in graph.Repositories do
-            if repo.IsCloned then
-                let revision = Tools.Vcs.Log wsDir repo tag
+        for bookmark in diff do
+            if bookmark.Repository.IsCloned then
+                let revision = Tools.Vcs.Log wsDir bookmark.Repository bookmark.Version
                 match revision with
                 | [] -> ()
-                | _ -> yield repo, revision
+                | _ -> yield bookmark.Repository, revision
     }
 
     let histType = if historyInfo.Html then Generators.History.HistoryType.Html
                                        else Generators.History.HistoryType.Text
 
-    Generators.History.Save histType tag revisions
+    Generators.History.Save histType revisions
 
 let Index (indexInfo : CLI.Commands.IndexRepositories) =
     let wsDir = Env.GetFolder Env.Folder.Workspace

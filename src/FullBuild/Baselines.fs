@@ -90,7 +90,8 @@ with
         match Tools.Vcs.FindLatestMatchingTag wsDir graph.MasterRepository tagFilter with
         | Some tag -> let tagInfo = Tag.Parse tag
                       Baseline(graph, tagInfo, false)
-        | _ -> failwith "Failure to find latest tag"
+        | _ -> let tagInfo = { Tag.TagInfo.Branch = branch; Tag.TagInfo.BuildNumber = "dummy"; Tag.TagInfo.Incremental = false}
+               Baseline(graph, tagInfo, true)
 
     member this.CreateBaseline (incremental : bool) (buildNumber : string) : Baseline =
         let graph = Configuration.LoadAnthology() |> Graph.from

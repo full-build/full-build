@@ -22,6 +22,5 @@ type HistoryType =
 
 
 val Save: histType : HistoryType
-       -> version : string
        -> revisions : (Graph.Repository*string list) seq
        -> unit
