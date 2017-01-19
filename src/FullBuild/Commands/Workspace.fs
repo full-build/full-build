@@ -42,6 +42,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     | None -> let name = Configuration.LoadBranch()
               printfn "%s" name
 
+    Core.Indexation.ConsolidateAnthology()
 
 let Create (createInfo : CLI.Commands.SetupWorkspace) =
     let wsDir = DirectoryInfo(createInfo.Path)
