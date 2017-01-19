@@ -123,19 +123,9 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         let currDir = Environment.CurrentDirectory
         try
             Environment.CurrentDirectory <- wsDir.FullName
-            let artifacts = Configuration.LoadArtifacts()
 
             let branchInfo = { CLI.Commands.BranchWorkspace.Branch = Some graph.MasterRepository.Branch }
             Branch branchInfo
-
-            // update binaries with observable baseline
-            let baselineRepository = Baselines.from graph
-            let baseline = baselineRepository.Baseline
-            let tag = Tag.Format baseline.Info
-            Core.BuildArtifacts.PullReferenceBinaries artifacts.Binaries tag
-
-            Install()
-
         finally
             Environment.CurrentDirectory <- currDir
 
