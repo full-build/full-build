@@ -65,8 +65,7 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
         let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
         publishSource.CopyTo(publishTarget.FullName) |> ignore
 
-        let branchInfo = { CLI.Commands.BranchWorkspace.Branch = Some graph.MasterRepository.Branch }
-        Branch branchInfo
+        Configuration.SaveBranch graph.MasterRepository.Branch
     finally
         Environment.CurrentDirectory <- currDir
 
@@ -124,9 +123,7 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         let currDir = Environment.CurrentDirectory
         try
             Environment.CurrentDirectory <- wsDir.FullName
-
-            let branchInfo = { CLI.Commands.BranchWorkspace.Branch = Some graph.MasterRepository.Branch }
-            Branch branchInfo
+            Configuration.SaveBranch graph.MasterRepository.Branch
         finally
             Environment.CurrentDirectory <- currDir
 
