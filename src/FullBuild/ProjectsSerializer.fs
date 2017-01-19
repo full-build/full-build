@@ -109,5 +109,8 @@ let Save (filename : FileInfo) (projects : Projects) =
     File.WriteAllText(filename.FullName, content)
 
 let Load (filename : FileInfo) : Projects =
-    let content = File.ReadAllText (filename.FullName)
-    Deserialize content
+    if filename.Exists then
+        let content = File.ReadAllText (filename.FullName)
+        Deserialize content
+    else
+        { Projects = Set.empty }
