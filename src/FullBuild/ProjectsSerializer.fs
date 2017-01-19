@@ -40,7 +40,7 @@ let Serialize (projects : Projects) =
         cproject.fx.profile <- project.FxProfile.toString
         cproject.fx.identifier <- project.FxIdentifier.toString
         cproject.out <- sprintf "%s.%s" project.Output.toString project.OutputType.toString
-        cproject.file <- sprintf "%s/%s" project.Repository.toString project.RelativeProjectFile.toString
+        cproject.file <- sprintf @"%s\%s" project.Repository.toString project.RelativeProjectFile.toString
         cproject.tests <- project.HasTests
         cproject.assemblies.Clear ()
         for assembly in project.AssemblyReferences do
