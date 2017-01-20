@@ -57,7 +57,8 @@ with
                                // in fine, we only have new repositories and modified repositories
                                let baselineRepo = Baselines.from this.Graph
                                let newBaseline = baselineRepo.CreateBaseline Baselines.BuildType.Draft "temp"
-                               newBaseline - baselineRepo.Baseline
+                               let oldBaseline = baselineRepo.FindBaseline Baselines.BuildStatus.Complete
+                               newBaseline - oldBaseline
                            else Set.empty
 
         let modProjects = modBookmarks |> Set.map (fun x -> x.Repository.Projects)

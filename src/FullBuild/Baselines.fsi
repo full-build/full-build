@@ -23,6 +23,11 @@ type BuildType =
     | Incremental
     | Draft
 
+[<RequireQualifiedAccess>]
+type BuildStatus =
+    | Complete
+    | Draft
+
 [<RequireQualifiedAccess; Sealed>]
 type TagInfo =
     member Branch: string
@@ -51,7 +56,9 @@ with
 
 
 and [<Sealed>] Factory =
-    member Baseline : Baseline
+    member FindBaseline: draft : BuildStatus
+                      -> Baseline
+
     member CreateBaseline: buildType : BuildType
                         -> buildNumber : string
                         -> Baseline

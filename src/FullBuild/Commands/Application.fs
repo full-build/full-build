@@ -16,7 +16,6 @@ module Commands.Application
 open Collections
 open IoHelpers
 open Env
-open PatternMatching
 
 let private asyncPublish (version : string) (app : Graph.Application) =
     async {
@@ -50,7 +49,7 @@ let private getLastVersionForApp (graph : Graph.Graph) (app : Graph.Application)
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let baselines = Baselines.from graph
-    let baseline = baselines.Baseline
+    let baseline = baselines.FindBaseline Baselines.BuildStatus.Draft
     let tagInfo = baseline.Info
     let version = tagInfo.Format()
 
@@ -72,9 +71,7 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
 
     // copy bin content
     if pubInfo.Push then
-        let baselineRepository = Baselines.from graph
-        let newBaseline = baselineRepository.Baseline
-        Core.BuildArtifacts.Publish graph newBaseline.Info
+        Core.BuildArtifacts.Publish graph baseline.Info
 
 let List (appInfo : CLI.Commands.ListApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from

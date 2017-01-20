@@ -26,6 +26,12 @@ type BuildType =
     | Draft
 
 [<RequireQualifiedAccess>]
+type BuildStatus =
+    | Complete
+    | Draft
+
+
+[<RequireQualifiedAccess>]
 type TagInfo =
     { BuildBranch : string
       BuildNumber : string 
@@ -115,13 +121,15 @@ type Factory(graph : Graph) = class end
 with
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
-    member this.Baseline : Baseline =
+    member this.FindBaseline (status : BuildStatus) : Baseline =
         let branch = Configuration.LoadBranch()
-        let tagFilter = sprintf "fullbuild_%s_*_*" branch
+        let tagFilter = match status with
+                        | BuildStatus.Draft -> sprintf "fullbuild_%s_*" branch
+                        | BuildStatus.Complete -> sprintf "fullbuild_%s_*_*" branch
         match Tools.Vcs.FindLatestMatchingTag wsDir graph.MasterRepository tagFilter with
         | Some tag -> let tagInfo = TagInfo.Parse tag
                       Baseline(graph, tagInfo, false)
-        | _ -> let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = "dummy"; TagInfo.BuildType = BuildType.Draft}
+        | _ -> let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = "temp"; TagInfo.BuildType = BuildType.Draft}
                Baseline(graph, tagInfo, true)
 
     member this.CreateBaseline (buildType : BuildType) (buildNumber : string) : Baseline =
