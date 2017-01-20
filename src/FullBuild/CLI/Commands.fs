@@ -71,7 +71,7 @@ type PublishApplications =
     { View: string option
       Filters : string list
       Multithread : bool 
-      Push : bool }
+      Incremental : bool option }
 
 type CheckoutVersion =
     { Version : string }
@@ -125,8 +125,7 @@ type PullWorkspace =
       View : string option }
 
 type TagWorkspace =
-    { BuildNumber : string
-      Incremental : bool option }
+    { BuildNumber : string }
 
 type BindProject =
     { Filters : string set }

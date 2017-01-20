@@ -302,13 +302,14 @@ let rec private commandGraph (all : bool) (args : string list) =
     | [ViewId name] -> Command.Graph { Name = name ; All = all }
     | _ -> Command.Error MainCommand.Graph
 
-let rec private commandPublish (mt : bool) view (push : bool) (args : string list) =
+let rec private commandPublish (mt : bool) view (inc : bool option) (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Publish
-    | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandPublish false view push
-    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish mt (Some name) push
-    | TokenOption TokenOption.Push :: tail -> tail |> commandPublish mt view true
-    | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = mt; Push = push }
+    | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandPublish false view inc
+    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish mt (Some name) inc
+    | TokenOption TokenOption.Inc :: tail -> tail |> commandPublish mt view (Some true)
+    | TokenOption TokenOption.Full :: tail -> tail |> commandPublish mt view (Some false)
+    | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = mt; Incremental = inc }
     | _ -> Command.Error MainCommand.Publish
 
 
@@ -332,11 +333,9 @@ let private commandBranch (args : string list) =
     | [] -> Command.BranchWorkspace {Branch = None}
     | _ -> Command.Error MainCommand.Branch
 
-let rec private commandTag (inc : bool option) (args : string list) =
+let rec private commandTag (args : string list) =
     match args with
-    | TokenOption TokenOption.Full :: tail -> tail |> commandTag (Some false)
-    | TokenOption TokenOption.Inc :: tail -> tail |> commandTag (Some true)
-    | [Param buildNumber] -> Command.TagWorkspace {BuildNumber = buildNumber; Incremental = inc }
+    | [Param buildNumber] -> Command.TagWorkspace {BuildNumber = buildNumber }
     | _ -> Command.Error MainCommand.Tag
 
 let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
@@ -557,12 +556,12 @@ let Parse (args : string list) : Command =
     | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false true
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
-    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish true None false
+    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish true None None
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
-    | Token Token.Tag :: cmdArgs -> cmdArgs |> commandTag None
+    | Token Token.Tag :: cmdArgs -> cmdArgs |> commandTag
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false true None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind

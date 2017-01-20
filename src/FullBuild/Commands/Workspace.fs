@@ -75,12 +75,7 @@ let TagWorkspace (tagInfo : CLI.Commands.TagWorkspace) =
 
     // copy bin content
     let baselineRepository = Baselines.from graph
-    let buildType = match tagInfo.Incremental with
-                    | None -> Baselines.BuildType.Draft
-                    | Some true -> Baselines.BuildType.Incremental
-                    | Some false -> Baselines.BuildType.Full
-
-    let newBaseline = baselineRepository.CreateBaseline buildType tagInfo.BuildNumber
+    let newBaseline = baselineRepository.CreateBaseline Baselines.BuildType.Draft tagInfo.BuildNumber
     newBaseline.Save()
 
     // print tag information
