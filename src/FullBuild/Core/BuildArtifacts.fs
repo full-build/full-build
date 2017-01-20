@@ -19,8 +19,8 @@ open Graph
 open Collections
 
 
-let Publish (graph : Graph) (tagInfo : Tag.TagInfo) =
-    let tag = Tag.Format tagInfo
+let Publish (graph : Graph) (tagInfo : Baselines.TagInfo) =
+    let tag = tagInfo.Format()
     let appDir = Env.GetFolder Env.Folder.AppOutput
     let versionDir = DirectoryInfo(graph.ArtifactsDir) |> GetSubDirectory tag
     let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
@@ -63,7 +63,7 @@ let FetchVersionsForArtifact (graph : Graph) (app : Application) =
     let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
     let lines = System.IO.File.ReadAllLines (versionFile.FullName)
 
-    lines |> Seq.map Tag.Parse
+    lines |> Seq.map Baselines.TagInfo.Parse
           |> List.ofSeq
 
 

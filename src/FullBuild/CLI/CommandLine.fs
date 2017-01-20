@@ -48,6 +48,7 @@ type private TokenOption =
     | Packages
     | Test
     | Full
+    | Inc
     | Ref
     | Push
 
@@ -79,6 +80,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--packages" -> Some TokenOption.Packages
     | "--test" -> Some TokenOption.Test
     | "--full" -> Some TokenOption.Full
+    | "--inc" -> Some TokenOption.Inc
     | "--ref" -> Some TokenOption.Ref
     | "--push" -> Some TokenOption.Push
     | _ -> None
@@ -330,10 +332,11 @@ let private commandBranch (args : string list) =
     | [] -> Command.BranchWorkspace {Branch = None}
     | _ -> Command.Error MainCommand.Branch
 
-let rec private commandTag (full : bool) (args : string list) =
+let rec private commandTag (inc : bool option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Full :: tail -> tail |> commandTag true
-    | [Param buildNumber] -> Command.TagWorkspace {BuildNumber = buildNumber; Incremental = not full }
+    | TokenOption TokenOption.Full :: tail -> tail |> commandTag (Some false)
+    | TokenOption TokenOption.Inc :: tail -> tail |> commandTag (Some true)
+    | [Param buildNumber] -> Command.TagWorkspace {BuildNumber = buildNumber; Incremental = inc }
     | _ -> Command.Error MainCommand.Tag
 
 let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
@@ -559,7 +562,7 @@ let Parse (args : string list) : Command =
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
-    | Token Token.Tag :: cmdArgs -> cmdArgs |> commandTag false
+    | Token Token.Tag :: cmdArgs -> cmdArgs |> commandTag None
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false true None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
@@ -648,7 +651,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Index], "index [--test] <repoId-wildcard>+ : index repositories"
         [MainCommand.Workspace; MainCommand.Convert], "convert <repoId-wildcard> : convert projects in repositories"
         [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--nomt] [--rebase] [--view <viewId>]: update sources & binaries - rebase if requested (ff is default)"
-        [MainCommand.Workspace; MainCommand.Tag], "tag [--full] <buildNumber> : tag workspace with provided build number"
+        [MainCommand.Workspace; MainCommand.Tag], "tag [--full|--inc] <buildNumber> : tag workspace with provided build number"
         [MainCommand.App; MainCommand.Publish], "publish [--nomt] [--view <viewId>] [--push] <appId-wildcard> : publish applications"
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"

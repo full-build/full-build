@@ -27,14 +27,14 @@ let private asyncPublish (version : string) (app : Graph.Application) =
 let private displayApp (app : Graph.Application) =
     printfn "%s" app.Name
 
-let private displayAppVersion ((app : Graph.Application), (tag : Tag.TagInfo)) =
-    let tag = Tag.Format tag
+let private displayAppVersion ((app : Graph.Application), (tag : Baselines.TagInfo)) =
+    let tag = tag.Format()
     printfn "%s : %s" app.Name tag
 
 
 let private checkAppHasVersion (version : string) (graph : Graph.Graph) (app : Graph.Application) =
     async {
-        let version = Core.BuildArtifacts.FetchVersionsForArtifact graph app |> List.tryFind (fun x -> (Tag.Format x).Contains(version))                                                                                                       
+        let version = Core.BuildArtifacts.FetchVersionsForArtifact graph app |> List.tryFind (fun x -> x.Format().Contains(version))                                                                                                       
         return if version.IsSome then Some app
                else None
     }
@@ -52,7 +52,7 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let baselines = Baselines.from graph
     let baseline = baselines.Baseline
     let tagInfo = baseline.Info
-    let version = Tag.Format tagInfo
+    let version = tagInfo.Format()
 
     let viewRepository = Views.from graph
     let applications = match pubInfo.View with

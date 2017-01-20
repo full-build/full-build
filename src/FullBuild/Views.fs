@@ -56,7 +56,7 @@ with
                                // this will add new repositories if necessary and discard unchanged repositories
                                // in fine, we only have new repositories and modified repositories
                                let baselineRepo = Baselines.from this.Graph
-                               let newBaseline = baselineRepo.CreateBaseline true "temp"
+                               let newBaseline = baselineRepo.CreateBaseline Baselines.BuildType.Draft "temp"
                                newBaseline - baselineRepo.Baseline
                            else Set.empty
 

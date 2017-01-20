@@ -17,6 +17,24 @@ module Baselines
 open Collections
 open Graph
 
+[<RequireQualifiedAccess>]
+type BuildType =
+    | Full
+    | Incremental
+    | Draft
+
+[<RequireQualifiedAccess; Sealed>]
+type TagInfo =
+    member Branch: string
+    member Version: string
+    member Type: BuildType
+
+    member Format: unit
+                -> string
+
+    static member Parse: string
+                      -> TagInfo
+
 type [<Sealed>] Bookmark = interface System.IComparable
 with
     member Repository : Repository
@@ -24,7 +42,7 @@ with
 
 and [<Sealed>] Baseline = interface System.IComparable
 with
-    member Info: Tag.TagInfo
+    member Info: TagInfo
 
     static member (-): Baseline*Baseline
                     -> Bookmark set
@@ -34,7 +52,7 @@ with
 
 and [<Sealed>] Factory =
     member Baseline : Baseline
-    member CreateBaseline: incremental : bool
+    member CreateBaseline: buildType : BuildType
                         -> buildNumber : string
                         -> Baseline
 

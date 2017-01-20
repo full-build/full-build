@@ -19,6 +19,38 @@ open Collections
 
 #nowarn "0346" // GetHashCode missing
 
+[<RequireQualifiedAccess>]
+type BuildType =
+    | Full
+    | Incremental
+    | Draft
+
+[<RequireQualifiedAccess>]
+type TagInfo =
+    { BuildBranch : string
+      BuildNumber : string 
+      BuildType : BuildType }
+with
+    member this.Branch = this.BuildBranch
+
+    member this.Version = this.BuildNumber
+
+    member this.Type = this.BuildType
+
+    member this.Format() =
+        match this.Type with
+        | BuildType.Full -> sprintf "fullbuild_%s_%s_full" this.Branch this.BuildNumber
+        | BuildType.Incremental -> sprintf "fullbuild_%s_%s_inc" this.Branch this.BuildNumber
+        | BuildType.Draft -> sprintf "fullbuild_%s_%s" this.Branch this.BuildNumber
+
+    static member Parse (tag : string) =
+        let items = tag.Split('_') |> List.ofArray
+        match items with
+        | ["fullbuild"; branch; version; "full"] -> { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = version; TagInfo.BuildType = BuildType.Full }
+        | ["fullbuild"; branch; version; "inc"] -> { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = version; TagInfo.BuildType = BuildType.Incremental }
+        | ["fullbuild"; branch; version] -> { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = version; TagInfo.BuildType = BuildType.Draft }
+        | _ -> failwithf "Unknown tag"
+        
 
 // =====================================================================================================
 
@@ -38,7 +70,7 @@ with
 // =====================================================================================================
 
 [<Sealed>]
-type Baseline(graph : Graph, tagInfo : Tag.TagInfo, isHead : bool) = class end
+type Baseline(graph : Graph, tagInfo : TagInfo, isHead : bool) = class end
 with
     let mutable bookmarks : Bookmark set option = None
     let collectBookmarks () =
@@ -48,7 +80,7 @@ with
 
             let wsDir = Env.GetFolder Env.Folder.Workspace
             let res = repos |> Set.map (fun x -> let tag = if isHead then Tools.Vcs.Head wsDir x
-                                                            else Tag.Format tagInfo
+                                                            else tagInfo.Format()
                                                  let hash = Tools.Vcs.TagToHash wsDir x tag
                                                  Bookmark(graph, x, hash))
             bookmarks <- Some res
@@ -70,9 +102,8 @@ with
         changes
 
     member this.Save () : unit =
-        let branch = Configuration.LoadBranch()
         let wsDir = Env.GetFolder Env.Folder.Workspace
-        let tag = Tag.Format tagInfo
+        let tag = tagInfo.Format()
 
         graph.Repositories |> Set.iter (fun x -> Tools.Vcs.Tag wsDir x tag)
         Tools.Vcs.Tag wsDir graph.MasterRepository tag
@@ -86,17 +117,17 @@ with
 
     member this.Baseline : Baseline =
         let branch = Configuration.LoadBranch()
-        let tagFilter = sprintf "fullbuild_%s_*" branch
+        let tagFilter = sprintf "fullbuild_%s_*_*" branch
         match Tools.Vcs.FindLatestMatchingTag wsDir graph.MasterRepository tagFilter with
-        | Some tag -> let tagInfo = Tag.Parse tag
+        | Some tag -> let tagInfo = TagInfo.Parse tag
                       Baseline(graph, tagInfo, false)
-        | _ -> let tagInfo = { Tag.TagInfo.Branch = branch; Tag.TagInfo.BuildNumber = "dummy"; Tag.TagInfo.Incremental = false}
+        | _ -> let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = "dummy"; TagInfo.BuildType = BuildType.Draft}
                Baseline(graph, tagInfo, true)
 
-    member this.CreateBaseline (incremental : bool) (buildNumber : string) : Baseline =
+    member this.CreateBaseline (buildType : BuildType) (buildNumber : string) : Baseline =
         let graph = Configuration.LoadAnthology() |> Graph.from
         let branch = Configuration.LoadBranch()
-        let tagInfo = { Tag.TagInfo.Branch = branch; Tag.TagInfo.BuildNumber = buildNumber; Tag.TagInfo.Incremental = incremental }
+        let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = buildNumber; TagInfo.BuildType = buildType }
         Baseline(graph, tagInfo, true)
 
 // =====================================================================================================

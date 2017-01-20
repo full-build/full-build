@@ -17,44 +17,48 @@ module TagTests
 open System
 open NUnit.Framework
 open FsUnit
+open Baselines
+
+[<Test>]
+let ``parse tag incremental`` () =
+    let tag = "fullbuild_master_1.2.3_inc"
+    let tagInfo = tag |> TagInfo.Parse
+
+    tagInfo.Branch |> should equal "master"
+    tagInfo.Version |> should equal "1.2.3"
+    tagInfo.Type |> should equal BuildType.Incremental
+
+[<Test>]
+let ``parse tag full`` () =
+    let tag = "fullbuild_beta_4.5_full"
+    let tagInfo = tag |> TagInfo.Parse
+
+    tagInfo.Branch |> should equal "beta"
+    tagInfo.Version |> should equal "4.5"
+    tagInfo.Type |> should equal BuildType.Full
+
+[<Test>]
+let ``parse tag draft`` () =
+    let tag = "fullbuild_beta_4.5"
+    let tagInfo = tag |> TagInfo.Parse
+
+    tagInfo.Branch |> should equal "beta"
+    tagInfo.Version |> should equal "4.5"
+    tagInfo.Type |> should equal BuildType.Draft
 
 
 [<Test>]
-let parse_tag_incremental () =
-    let tagInfo = Tag.Parse "fullbuild_master_1.2.3_inc"
-    let expectedTagInfo = { Tag.TagInfo.Branch = "master"
-                            Tag.TagInfo.BuildNumber = "1.2.3"
-                            Tag.TagInfo.Incremental = true }
+let ``parse failures`` () =
+    (fun () -> TagInfo.Parse "fullbuild_beta_4.5_pouet" |> ignore) |> should throw typeof<Exception>
+    (fun () -> TagInfo.Parse "fullbuild2_beta_4.5_inc" |> ignore) |> should throw typeof<Exception>
 
-    tagInfo |> should equal expectedTagInfo
 
 [<Test>]
-let parse_tag_full () =
-    let tagInfo = Tag.Parse "fullbuild_beta_4.5_full"
-    let expectedTagInfo = { Tag.TagInfo.Branch = "beta"
-                            Tag.TagInfo.BuildNumber = "4.5"
-                            Tag.TagInfo.Incremental = false }
-
-    tagInfo |> should equal expectedTagInfo
+let ``format taginfo inc`` () =
+    let tag = "fullbuild_master_1.2.3_inc"
+    tag |> TagInfo.Parse |> fun x -> x.Format() |> should equal tag
 
 [<Test>]
-let parse_failures () =
-    (fun () -> Tag.Parse "fullbuild_beta_4.5" |> ignore) |> should throw typeof<Exception>
-    (fun () -> Tag.Parse "fullbuild_beta_4.5_pouet" |> ignore) |> should throw typeof<Exception>
-    (fun () -> Tag.Parse "fullbuild2_beta_4.5_inc" |> ignore) |> should throw typeof<Exception>
-
-[<Test>]
-let format_taginfo_inc() =
-    let tagInfo = { Tag.TagInfo.Branch = "master"
-                    Tag.TagInfo.BuildNumber = "1.2.3"
-                    Tag.TagInfo.Incremental = true }
-    let tag = Tag.Format tagInfo
-    tag |> should equal "fullbuild_master_1.2.3_inc"
-
-[<Test>]
-let format_taginfo_full() =
-    let tagInfo = { Tag.TagInfo.Branch = "beta"
-                    Tag.TagInfo.BuildNumber = "4.5.6"
-                    Tag.TagInfo.Incremental = false }
-    let tag = Tag.Format tagInfo
-    tag |> should equal "fullbuild_beta_4.5.6_full"
+let ``format taginfo full`` () =
+    let tag = "fullbuild_beta_4.5.6_full"
+    tag |> TagInfo.Parse |> fun x -> x.Format() |> should equal tag

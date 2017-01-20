@@ -75,11 +75,16 @@ let TagWorkspace (tagInfo : CLI.Commands.TagWorkspace) =
 
     // copy bin content
     let baselineRepository = Baselines.from graph
-    let newBaseline = baselineRepository.CreateBaseline tagInfo.Incremental tagInfo.BuildNumber
+    let buildType = match tagInfo.Incremental with
+                    | None -> Baselines.BuildType.Draft
+                    | Some true -> Baselines.BuildType.Incremental
+                    | Some false -> Baselines.BuildType.Full
+
+    let newBaseline = baselineRepository.CreateBaseline buildType tagInfo.BuildNumber
     newBaseline.Save()
 
     // print tag information
-    let tag = Tag.Format newBaseline.Info
+    let tag = newBaseline.Info.Format()
     printfn "[version] %s" tag
 
 
@@ -178,7 +183,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     if pullInfo.Bin then
         let baselineRepository = Baselines.from graph
         let baseline = baselineRepository.Baseline
-        let tag = Tag.Format baseline.Info
+        let tag = baseline.Info.Format()
         Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir tag
 
     // consolidate anthology
@@ -259,7 +264,7 @@ let History (historyInfo : CLI.Commands.History) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let baselineRepository = Baselines.from graph
     let previousBaseline = baselineRepository.Baseline
-    let baseline = baselineRepository.CreateBaseline false "temp"
+    let baseline = baselineRepository.CreateBaseline Baselines.BuildType.Draft "temp"
 
     let diff = previousBaseline - baseline
 

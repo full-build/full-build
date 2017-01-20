@@ -126,7 +126,7 @@ type PullWorkspace =
 
 type TagWorkspace =
     { BuildNumber : string
-      Incremental : bool }
+      Incremental : bool option }
 
 type BindProject =
     { Filters : string set }
