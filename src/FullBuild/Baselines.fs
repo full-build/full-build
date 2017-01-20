@@ -74,8 +74,8 @@ with
         let wsDir = Env.GetFolder Env.Folder.Workspace
         let tag = Tag.Format tagInfo
 
-        Tools.Vcs.Tag wsDir graph.MasterRepository tag
         graph.Repositories |> Set.iter (fun x -> Tools.Vcs.Tag wsDir x tag)
+        Tools.Vcs.Tag wsDir graph.MasterRepository tag
 
 // =====================================================================================================
 
