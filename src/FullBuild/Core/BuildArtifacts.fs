@@ -24,7 +24,7 @@ let Publish (graph : Graph) (tagInfo : Baselines.TagInfo) =
     let appDir = Env.GetFolder Env.Folder.AppOutput
     let versionDir = DirectoryInfo(graph.ArtifactsDir) |> GetSubDirectory tag
     let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
-    let versionLine = sprintf "%s" tag
+    let versionLine = sprintf "%s:%s:%s" tagInfo.Version tag tagInfo.Branch
 
     try
         let doPublish = not versionDir.Exists
