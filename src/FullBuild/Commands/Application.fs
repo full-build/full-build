@@ -55,7 +55,7 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
                     | Some true -> Baselines.BuildType.Incremental
                     | Some false -> Baselines.BuildType.Full
     let baseline = baselines.CreateBaseline buildType draftBaseline.Info.Version
-    let version = baseline.Info.Format()
+    let version = baseline.Info.Version
 
     let viewRepository = Views.from graph
     let applications = match pubInfo.View with

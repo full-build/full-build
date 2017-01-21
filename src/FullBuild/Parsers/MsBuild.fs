@@ -173,7 +173,7 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let paketPackages = getPaketPackages xprj
     let packages = nugetPackages + fbPackages + pkgRefPackages + paketPackages
     let pkgRefs = packages |> Set.map (fun x -> x.Id)
-    let hasTests = assemblyRef.toString.EndsWith(".tests")
+    let hasTests = assemblyRef.toString.EndsWith("tests")
 
     { Packages = packages
       Project = { Repository = repoRef
