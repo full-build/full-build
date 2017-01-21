@@ -33,7 +33,7 @@ let runnerNUnit (includes : string set) (excludes : string set) =
     let wsDir = GetFolder Env.Folder.Workspace
     let files = includes |> Set.fold (fun s t -> sprintf @"%s %A" s t) ""
     let excludeArgs = excludeListToArgs (excludes |> List.ofSeq)
-    let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs
+    let args = sprintf @"%s %s --noheader --dispose-runners ""--result=TestResult.xml;format=nunit2""" files excludeArgs
     Exec "nunit3-console.exe" args wsDir Map.empty |> CheckResponseCode
 
 let chooseTestRunner (runnerType : TestRunnerType) nunitRunner =
