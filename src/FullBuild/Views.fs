@@ -61,7 +61,7 @@ with
                                let delta = newBaseline - oldBaseline
 
                                // if master repository is modified then all repositories are modified !
-                               if delta |> Seq.exists (fun x -> x.Repository = this.Graph.MasterRepository) then newBaseline.Bookmarks
+                               if delta |> Seq.exists (fun x -> x.Repository.Name = this.Graph.MasterRepository.Name) then newBaseline.Bookmarks
                                else delta
 
                            else Set.empty
