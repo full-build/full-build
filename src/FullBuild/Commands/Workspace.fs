@@ -78,10 +78,6 @@ let TagWorkspace (tagInfo : CLI.Commands.TagWorkspace) =
     let newBaseline = baselineRepository.CreateBaseline Baselines.BuildType.Draft tagInfo.BuildNumber
     newBaseline.Save()
 
-    // print tag information
-    let tag = newBaseline.Info.Format()
-    printfn "[version] %s" tag
-
 
 let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     // checkout repositories

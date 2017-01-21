@@ -78,6 +78,11 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
         Core.BuildArtifacts.Publish graph baseline.Info
         baseline.Save()
 
+        // print tag information
+        let tag = baseline.Info.Format()
+        printfn "[version] %s" tag
+
+
 let List (appInfo : CLI.Commands.ListApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     match appInfo.Version with
