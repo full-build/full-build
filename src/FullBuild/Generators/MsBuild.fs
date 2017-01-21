@@ -209,10 +209,10 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
 
 let private convertProject (xproj : XDocument) (project : Project) =
     let setOutputPath (xel : XElement) =
-        xel.Value <- BIN_FOLDER
+        xel.Value <- BIN_FOLDER + "\\"
 
     let setDocumentation (xel : XElement) =
-        let fileName = sprintf "%s%s.xml" BIN_FOLDER project.Output.Name
+        let fileName = sprintf "%s\%s.xml" BIN_FOLDER project.Output.Name
         xel.Value <- fileName
 
     let filterAssemblyInfo (xel : XElement) =

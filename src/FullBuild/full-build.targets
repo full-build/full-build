@@ -14,7 +14,7 @@
     <FBApp>*** undefined ***</FBApp>
     <FBContentFolder>$(SolutionDir)\apps\$(FBApp)</FBContentFolder>
     <FBBinFolder>$(FBContentFolder)</FBBinFolder>
-    <FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)\bin</FBBinFolder>
+    <FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)\bin\</FBBinFolder>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,7 +38,7 @@
     <CreateItem Include="$(OutputPath)/**/*.*">
       <Output TaskParameter="Include" ItemName="Binaries"/>
     </CreateItem>
-    <Copy SourceFiles="@(Binaries)" DestinationFolder="$(FBBinFolder)\%(Binaries.RecursiveDir)" UseHardlinksIfPossible="$(FBUseHardLink)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(Binaries)" DestinationFolder="$(FBBinFolder)%(Binaries.RecursiveDir)" UseHardlinksIfPossible="$(FBUseHardLink)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
