@@ -16,6 +16,7 @@ module Baselines
 
 open Graph
 open Collections
+open IoHelpers
 
 #nowarn "0346" // GetHashCode missing
 
@@ -29,6 +30,15 @@ type BuildType =
 type BuildStatus =
     | Complete
     | Draft
+
+
+let printTag ((repo, execResult) : (Repository * Exec.ExecResult)) =
+    lock consoleLock (fun () -> IoHelpers.DisplayHighlight repo.Name
+                                execResult |> Exec.PrintOutput)
+
+let private tagRepo wsDir (tag : string) (repo : Repository) = async {
+    return (repo, Tools.Vcs.Tag wsDir repo tag) |> printTag
+}
 
 
 [<RequireQualifiedAccess>]
@@ -111,8 +121,13 @@ with
         let wsDir = Env.GetFolder Env.Folder.Workspace
         let tag = tagInfo.Format()
 
-        graph.Repositories |> Set.iter (fun x -> Tools.Vcs.Tag wsDir x tag)
-        Tools.Vcs.Tag wsDir graph.MasterRepository tag
+        let maxThrottle = System.Environment.ProcessorCount*4
+        let tagResults = graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
+                         |> Seq.map (tagRepo wsDir tag)
+                         |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
+        tagResults |> Exec.CheckMultipleResponseCode
+
+        Tools.Vcs.Tag wsDir graph.MasterRepository tag |> Exec.CheckResponseCode
 
 // =====================================================================================================
 

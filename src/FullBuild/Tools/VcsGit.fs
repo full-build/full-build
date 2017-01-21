@@ -110,7 +110,8 @@ let GitHead (repoDir : DirectoryInfo) () =
 let GitTag (repoDir : DirectoryInfo) (tag : string) =
     let comment = "fullbuild"
     let argsTag = sprintf @"tag -a %s -m %A" tag comment
-    Exec "git" argsTag repoDir Map.empty |> CheckResponseCode
-
-    let argsPush = sprintf @"push origin %s" tag
-    Exec "git" argsPush repoDir Map.empty |> CheckResponseCode
+    let res = ExecGetOutput "git" argsTag repoDir Map.empty
+    if res.ResultCode <> 0 then res
+    else
+        let argsPush = sprintf @"push origin %s" tag
+        ExecGetOutput "git" argsPush repoDir Map.empty

@@ -30,7 +30,7 @@ let Unclone (wsDir : DirectoryInfo) (repo : Repository) =
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name
     if repoDir.Exists then repoDir.Delete(true)
 
-let Clone (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) =
+let Clone (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) : Exec.ExecResult =
     let gitCloneFunc = if repo.Vcs = VcsType.Gerrit then GerritClone repo
                                                     else GitClone repo
     (chooseVcs wsDir repo.Vcs repo gitCloneFunc) repo.Uri shallow
@@ -45,7 +45,7 @@ let Checkout (wsDir : DirectoryInfo) (repo : Repository) (version : string) =
 let Ignore (wsDir : DirectoryInfo) (repo : Repository) =
     chooseVcs wsDir repo.Vcs repo  GitIgnore
 
-let Pull (wsDir : DirectoryInfo) (repo : Repository) (rebase : bool) =
+let Pull (wsDir : DirectoryInfo) (repo : Repository) (rebase : bool) : Exec.ExecResult =
     (chooseVcs wsDir repo.Vcs repo GitPull) rebase
 
 let Clean (wsDir : DirectoryInfo) (repo : Repository) =
@@ -67,5 +67,5 @@ let TagToHash (wsDir : DirectoryInfo) (repo : Repository) (tag : string) : strin
 let Head (wsDir : DirectoryInfo) (repo : Repository) : string =
     (chooseVcs wsDir repo.Vcs repo GitHead) ()
    
-let Tag (wsDir : DirectoryInfo) (repo : Repository) (tag : string): unit =
+let Tag (wsDir : DirectoryInfo) (repo : Repository) (tag : string) : Exec.ExecResult =
     (chooseVcs wsDir repo.Vcs repo GitTag) tag
