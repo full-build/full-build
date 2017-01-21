@@ -1,4 +1,4 @@
-v3.2
+v4.0
   * Better support for NuGet
   * Fix outstanding issues with Xamarin Studio and Visual Studio on macOS
   * Get rid of $(FBWorkspaceDir) as NCrunch does not work anyway
@@ -9,6 +9,7 @@ v3.2
   * Breaking changes for some commands (view/repo/app before verb)
   * Enhanced help
   * New environment variables for exec: FB_REPO_BRANCH and FB_BRANCH
+  * Commands have undergo a lot of changes
 
 v3.1
   * Create view from application (issue #112)
