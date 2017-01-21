@@ -22,7 +22,7 @@ open Exec
 let GitPull (repoDir : DirectoryInfo) (rebase : bool) =
     let dorebase = if rebase then "--rebase" else "--ff-only"
     let args = sprintf "pull %s" dorebase
-    Exec "git" args repoDir Map.empty
+    ExecGetOutput "git" args repoDir Map.empty
 
 let GitTip (repoDir : DirectoryInfo) =
     let args = @"log -1 --format=%H"
@@ -55,7 +55,7 @@ let GitClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallo
     let args = sprintf @"clone %s --quiet %s %s %A" url bronly depth target.FullName
 
     let currDir = IoHelpers.CurrentFolder ()
-    Exec "git" args currDir Map.empty
+    ExecGetOutput "git" args currDir Map.empty
 
 let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
     let res = GitClone repo target url shallow
@@ -82,10 +82,6 @@ let GitHistory (repoDir : DirectoryInfo) (version : string) =
 let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
     let args = sprintf @"log -1 --format=%%H %s" relativeFile
     ExecGetOutput "git" args repoDir Map.empty |> GetOutput |> Seq.head
-
-//let GitLogs (repoDir : DirectoryInfo) =
-//    let args = sprintf @"log --format=%%H"
-//    checkedExecReadLine "dummy" "git" args repoDir Map.empty
 
 let GitIgnore (repoDir : DirectoryInfo) =
     let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"
