@@ -114,7 +114,7 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         printf "[WARNING] Workspace already exists - skipping"
     else
         let graph = Graph.init initInfo.MasterRepository initInfo.Type
-        Tools.Vcs.Clone wsDir graph.MasterRepository true |> Exec.PrintOutput |> Exec.CheckResponseCode
+        Tools.Vcs.Clone wsDir graph.MasterRepository false |> Exec.PrintOutput |> Exec.CheckResponseCode
 
         let currDir = Environment.CurrentDirectory
         try
