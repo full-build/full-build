@@ -212,7 +212,7 @@ let private convertProject (xproj : XDocument) (project : Project) =
         xel.Value <- BIN_FOLDER
 
     let setDocumentation (xel : XElement) =
-        let fileName = sprintf "%s/%s.xml" BIN_FOLDER project.Output.Name
+        let fileName = sprintf "%s%s.xml" BIN_FOLDER project.Output.Name
         xel.Value <- fileName
 
     let filterAssemblyInfo (xel : XElement) =

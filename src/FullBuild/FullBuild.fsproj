@@ -19,11 +19,11 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>bin</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>5</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
+    <DocumentationFile>bin\fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>--verbose tag --full 1.0.0</StartArguments>
     <StartWorkingDirectory>c:\src\oss\full-build\qa\qa-setup</StartWorkingDirectory>
@@ -35,11 +35,11 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>bin</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>5</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin/fullbuild.xml</DocumentationFile>
+    <DocumentationFile>bin\fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
