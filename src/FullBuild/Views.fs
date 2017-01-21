@@ -58,7 +58,12 @@ with
                                let baselineRepo = Baselines.from this.Graph
                                let newBaseline = baselineRepo.CreateBaseline Baselines.BuildType.Draft "temp"
                                let oldBaseline = baselineRepo.FindBaseline Baselines.BuildStatus.Complete
-                               newBaseline - oldBaseline
+                               let delta = newBaseline - oldBaseline
+
+                               // if master repository is modified then all repositories are modified !
+                               if delta |> Seq.exists (fun x -> x.Repository = this.Graph.MasterRepository) then newBaseline.Bookmarks
+                               else delta
+
                            else Set.empty
 
         let modProjects = modBookmarks |> Set.map (fun x -> x.Repository.Projects)

@@ -49,6 +49,8 @@ and [<Sealed>] Baseline = interface System.IComparable
 with
     member Info: TagInfo
 
+    member Bookmarks: Bookmark set
+
     static member (-): Baseline*Baseline
                     -> Bookmark set
     member Save: unit
