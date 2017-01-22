@@ -55,17 +55,29 @@ with
 
     member this.Format() =
         match this.Type with
-        | BuildType.Full -> sprintf "fullbuild_%s_%s_full" this.Branch this.BuildNumber
-        | BuildType.Incremental -> sprintf "fullbuild_%s_%s_inc" this.Branch this.BuildNumber
-        | BuildType.Draft -> sprintf "fullbuild_%s_%s" this.Branch this.BuildNumber
+        | BuildType.Full -> sprintf "fullbuild/%s/%s_full" this.Branch this.BuildNumber
+        | BuildType.Incremental -> sprintf "fullbuild/%s/%s_inc" this.Branch this.BuildNumber
+        | BuildType.Draft -> sprintf "fullbuild/%s/%s" this.Branch this.BuildNumber
 
     static member Parse (tag : string) =
-        let items = tag.Split('_') |> List.ofArray
-        match items with
-        | ["fullbuild"; branch; version; "full"] -> { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = version; TagInfo.BuildType = BuildType.Full }
-        | ["fullbuild"; branch; version; "inc"] -> { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = version; TagInfo.BuildType = BuildType.Incremental }
-        | ["fullbuild"; branch; version] -> { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = version; TagInfo.BuildType = BuildType.Draft }
-        | _ -> failwithf "Unknown tag"
+        if tag.StartsWith("fullbuild/") |> not then failwithf "Unknown tag"
+        let tag = tag.Substring("fullbuild/".Length)
+        let isFull = tag.EndsWith("_full")
+        let isInc = tag.EndsWith("_inc")
+        let isDraft = (isFull || isInc) |> not
+        let tag = if isFull then tag.Substring(0, tag.Length-"_full".Length)
+                  else if isInc then tag.Substring(0, tag.Length-"_inc".Length)
+                       else tag
+        let idx = tag.LastIndexOf('/')
+        if(-1 = idx) then failwithf "Unknown tag"
+
+        let branch = tag.Substring(0, idx)
+        let version = tag.Substring(idx+1)
+
+        let buildType = if isFull then BuildType.Full
+                        else if isInc then BuildType.Incremental
+                        else BuildType.Draft
+        { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = version; TagInfo.BuildType = buildType }
         
 
 // =====================================================================================================
@@ -141,8 +153,8 @@ with
     member this.FindBaseline (status : BuildStatus) : Baseline =
         let branch = Configuration.LoadBranch()
         let tagFilter = match status with
-                        | BuildStatus.Draft -> sprintf "fullbuild_%s_*" branch
-                        | BuildStatus.Complete -> sprintf "fullbuild_%s_*_*" branch
+                        | BuildStatus.Draft -> sprintf "fullbuild/%s/*" branch
+                        | BuildStatus.Complete -> sprintf "fullbuild/%s/*_*" branch
         match Tools.Vcs.FindLatestMatchingTag wsDir graph.MasterRepository tagFilter with
         | Some tag -> let tagInfo = TagInfo.Parse tag
                       Baseline(graph, tagInfo, false)

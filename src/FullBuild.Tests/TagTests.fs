@@ -21,7 +21,7 @@ open Baselines
 
 [<Test>]
 let ``parse tag incremental`` () =
-    let tag = "fullbuild_master_1.2.3_inc"
+    let tag = "fullbuild/master/1.2.3_inc"
     let tagInfo = tag |> TagInfo.Parse
 
     tagInfo.Branch |> should equal "master"
@@ -30,7 +30,7 @@ let ``parse tag incremental`` () =
 
 [<Test>]
 let ``parse tag full`` () =
-    let tag = "fullbuild_beta_4.5_full"
+    let tag = "fullbuild/beta/4.5_full"
     let tagInfo = tag |> TagInfo.Parse
 
     tagInfo.Branch |> should equal "beta"
@@ -39,7 +39,7 @@ let ``parse tag full`` () =
 
 [<Test>]
 let ``parse tag draft`` () =
-    let tag = "fullbuild_beta_4.5"
+    let tag = "fullbuild/beta/4.5"
     let tagInfo = tag |> TagInfo.Parse
 
     tagInfo.Branch |> should equal "beta"
@@ -49,16 +49,21 @@ let ``parse tag draft`` () =
 
 [<Test>]
 let ``parse failures`` () =
-    (fun () -> TagInfo.Parse "fullbuild_beta_4.5_pouet" |> ignore) |> should throw typeof<Exception>
+    (fun () -> TagInfo.Parse "fullbuild/beta_4.5_pouet" |> ignore) |> should throw typeof<Exception>
     (fun () -> TagInfo.Parse "fullbuild2_beta_4.5_inc" |> ignore) |> should throw typeof<Exception>
 
 
 [<Test>]
 let ``format taginfo inc`` () =
-    let tag = "fullbuild_master_1.2.3_inc"
+    let tag = "fullbuild/master/1.2.3_inc"
     tag |> TagInfo.Parse |> fun x -> x.Format() |> should equal tag
 
 [<Test>]
 let ``format taginfo full`` () =
-    let tag = "fullbuild_beta_4.5.6_full"
+    let tag = "fullbuild/beta/4.5.6_full"
+    tag |> TagInfo.Parse |> fun x -> x.Format() |> should equal tag
+
+[<Test>]
+let ``check slash is supported in branch`` () =
+    let tag = "fullbuild/feature/branch/4.5.6_full"
     tag |> TagInfo.Parse |> fun x -> x.Format() |> should equal tag
