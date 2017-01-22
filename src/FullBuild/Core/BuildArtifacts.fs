@@ -62,6 +62,7 @@ let Publish (graph : Graph) (tagInfo : Baselines.TagInfo) =
 let FetchVersionsForArtifact (graph : Graph) (app : Application) =
     let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
     let lines = System.IO.File.ReadAllLines (versionFile.FullName)
+                |> Seq.map (fun x -> x.Split(':').[1])
 
     lines |> Seq.map Baselines.TagInfo.Parse
           |> List.ofSeq
