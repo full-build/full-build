@@ -61,7 +61,10 @@ with
                                let delta = newBaseline - oldBaseline
 
                                // if master repository is modified then all repositories are modified !
-                               if delta |> Seq.exists (fun x -> x.Repository.Name = this.Graph.MasterRepository.Name) then newBaseline.Bookmarks
+                               let isFullRebuild = delta |> Seq.exists (fun x -> x.Repository.Name = this.Graph.MasterRepository.Name)
+                                                   || oldBaseline.IsHead
+
+                               if isFullRebuild then newBaseline.Bookmarks
                                else delta
 
                            else Set.empty

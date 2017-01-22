@@ -51,6 +51,8 @@ with
 
     member Bookmarks: Bookmark set
 
+    member IsHead : bool
+
     static member (-): Baseline*Baseline
                     -> Bookmark set
     member Save: unit

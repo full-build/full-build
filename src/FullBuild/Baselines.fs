@@ -110,6 +110,8 @@ with
 
     member this.Info = tagInfo
 
+    member this.IsHead = isHead
+
     member this.Bookmarks : Bookmark set = 
         collectBookmarks()
 
