@@ -29,20 +29,38 @@ let printPull ((repo, execResult) : (Repository * Exec.ExecResult)) =
     lock consoleLock (fun () -> IoHelpers.DisplayHighlight repo.Name
                                 execResult |> Exec.PrintOutput)
 
-let private checkoutRepo wsDir (checkoutInfo : CLI.Commands.CheckoutVersion) (repo : Repository) = async {
-    return (repo, Tools.Vcs.Checkout wsDir repo checkoutInfo.Version) |> printPull
+let private checkoutRepo wsDir (version : string) (repo : Repository) = async {
+    return (repo, Tools.Vcs.Checkout wsDir repo version) |> printPull
 }
 
 
 
 
 let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
+    let graph = Configuration.LoadAnthology() |> Graph.from
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+
+    let switchToBranch (branch : string option) (repo : Repository) =
+        let br = match branch with
+                 | None -> repo.Branch
+                 | Some x -> x
+        IoHelpers.DisplayHighlight repo.Name
+        Tools.Vcs.Checkout wsDir repo br |> Exec.PrintOutput
+
     match branchInfo.Branch with
-    | Some x -> Configuration.SaveBranch x
+    | Some x -> let branch = (x = graph.MasterRepository.Branch) ? (None, Some x)
+                let res1 = switchToBranch branch graph.MasterRepository
+                let graph = Configuration.LoadAnthology() |> Graph.from
+                let res2 = graph.Repositories |> Seq.map (switchToBranch branch)
+                let res = res1 |> Seq.singleton |> Seq.append res2
+                if res |> Seq.exists (fun x -> x.ResultCode <> 0) then
+                    printfn "WARNING: failed to checkout some repositories"
+
+                Core.Indexation.ConsolidateAnthology()
+                Configuration.SaveBranch x
     | None -> let name = Configuration.LoadBranch()
               printfn "%s" name
 
-    Core.Indexation.ConsolidateAnthology()
 
 let Create (createInfo : CLI.Commands.SetupWorkspace) =
     let wsDir = DirectoryInfo(createInfo.Path)
@@ -80,6 +98,8 @@ let TagWorkspace (tagInfo : CLI.Commands.TagWorkspace) =
 
 
 let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
+    let tag = checkoutInfo.Version |> Baselines.TagInfo.Parse
+
     // checkout repositories
     DisplayHighlight ".full-build"
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -92,16 +112,13 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     let repos = graph.Repositories
     let maxThrottle = System.Environment.ProcessorCount*4
     let branchResults = repos |> Seq.filter (fun x -> x.IsCloned)
-                              |> Seq.map (checkoutRepo wsDir checkoutInfo)
+                              |> Seq.map (checkoutRepo wsDir checkoutInfo.Version)
                               |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
-
     branchResults |> Exec.CheckMultipleResponseCode
 
-    // update binaries with observable baseline
+    Configuration.SaveBranch tag.Branch
     Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir checkoutInfo.Version
 
-    // consolidate anthology
-    Core.Indexation.ConsolidateAnthology()
 
 let Install () =
     Core.Package.RestorePackages ()

@@ -327,7 +327,7 @@ let private commandCheckout (args : string list) =
 
 let private commandBranch (args : string list) =
     match args with
-    |  [version] -> Command.BranchWorkspace {Branch = Some version}
+    | [name] -> Command.BranchWorkspace {Branch = Some name}
     | [] -> Command.BranchWorkspace {Branch = None}
     | _ -> Command.Error MainCommand.Branch
 
@@ -633,8 +633,8 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Setup], "setup <git|gerrit> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         [MainCommand.Workspace; MainCommand.Init], "init <git|gerrit> <master-repository> <local-path> : initialize a new workspace in given path"
         [MainCommand.Repository; MainCommand.Clone], "clone [--nomt] [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
-        [MainCommand.Workspace; MainCommand.Checkout], "checkout <version> : checkout workspace to version"
-        [MainCommand.Workspace; MainCommand.Branch], "branch [<branch>] : switch to branch"
+        [MainCommand.Workspace; MainCommand.Checkout], "checkout [version] : checkout workspace or reset to default version"
+        [MainCommand.Workspace; MainCommand.Branch], "branch [branch] : switch to branch"
         [MainCommand.Workspace; MainCommand.InstallPackage], "install : install packages"
         [MainCommand.View; MainCommand.AddView], "view [--src] [--ref] [--modified] [--app <app-wildcard>] [--static] [--test] <viewId> <viewId-wildcard>+ : add repositories to view"
         [MainCommand.View; MainCommand.OpenView], "open <viewId> : open view with your favorite ide"
