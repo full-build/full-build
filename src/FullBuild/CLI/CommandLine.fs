@@ -47,6 +47,7 @@ type private TokenOption =
     | UnusedProjects
     | Packages
     | Test
+    | Check
     | Full
     | Inc
     | Ref
@@ -79,6 +80,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--unused-projects" -> Some TokenOption.UnusedProjects
     | "--packages" -> Some TokenOption.Packages
     | "--test" -> Some TokenOption.Test
+    | "--check" -> Some TokenOption.Test
     | "--full" -> Some TokenOption.Full
     | "--inc" -> Some TokenOption.Inc
     | "--ref" -> Some TokenOption.Ref
@@ -275,7 +277,7 @@ let rec private commandTest (excludes : string list) (args : string list) =
 let rec private commandIndex (check : bool) (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Index
-    | TokenOption TokenOption.Test :: tail -> tail |> commandIndex true
+    | TokenOption TokenOption.Check :: tail -> tail |> commandIndex true
     | Params filters -> Command.IndexRepositories { Filters = set filters; Check = check }
     | _ -> Command.Error MainCommand.Index
 
@@ -647,7 +649,7 @@ let UsageContent() =
         [MainCommand.View; MainCommand.Test], "test [--exclude <category>]* <viewId-wildcard>+ : test assemblies (match repository/project)"
         [MainCommand.View; MainCommand.Graph], "graph [--all] <viewId> : graph view content (project, packages, assemblies)"
         [MainCommand.Workspace; MainCommand.Exec], "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
-        [MainCommand.Workspace; MainCommand.Index], "index [--test] <repoId-wildcard>+ : index repositories"
+        [MainCommand.Workspace; MainCommand.Index], "index [--check] <repoId-wildcard>+ : index repositories"
         [MainCommand.Workspace; MainCommand.Convert], "convert <repoId-wildcard> : convert projects in repositories"
         [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--nomt] [--rebase] [--view <viewId>]: update sources & binaries - rebase if requested (ff is default)"
         [MainCommand.Workspace; MainCommand.Tag], "tag [--full|--inc] <buildNumber> : tag workspace with provided build number"
