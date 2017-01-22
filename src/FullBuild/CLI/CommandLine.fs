@@ -23,8 +23,6 @@ open Anthology
 
 type private TokenOption =
     | Debug
-    | Up
-    | Down
     | All
     | Bin
     | Src
@@ -56,8 +54,6 @@ type private TokenOption =
 let private (|TokenOption|_|) (token : string) =
     match token with
     | "--debug" -> Some TokenOption.Debug
-    | "--up" -> Some TokenOption.Up
-    | "--down" -> Some TokenOption.Down
     | "--bin" -> Some TokenOption.Bin
     | "--src" -> Some TokenOption.Src
     | "--all" -> Some TokenOption.All
@@ -401,9 +397,7 @@ let private commandListNuGet (args : string list) =
 
 let rec private commandAddView (upReferences : bool) (downReferences : bool) (modified : bool) (app : string option) (staticView : bool) (test: bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Up :: tail -> tail |> commandAddView true downReferences modified app staticView test
     | TokenOption TokenOption.Ref :: tail -> tail |> commandAddView true downReferences modified app staticView test
-    | TokenOption TokenOption.Down :: tail -> tail |> commandAddView upReferences true modified app staticView test
     | TokenOption TokenOption.Src :: tail -> tail |> commandAddView upReferences true modified app staticView test
     | TokenOption TokenOption.Modified :: tail -> tail |> commandAddView upReferences downReferences true app staticView test
     | TokenOption TokenOption.App :: appFilter :: tail -> tail |> commandAddView upReferences downReferences modified (Some appFilter) staticView test
@@ -437,8 +431,8 @@ let private commandDescribeView (args : string list) =
 let rec private commandAlterView (forceDefault : bool option) (forceUpReferences : bool option) (forceDownReferences : bool option) (args : string list) =
     match args with
     | TokenOption TokenOption.Default :: tail -> tail |> commandAlterView (Some true) forceUpReferences forceDownReferences
-    | TokenOption TokenOption.Up :: tail -> tail |> commandAlterView forceDefault (Some true) forceDownReferences
-    | TokenOption TokenOption.Down :: tail -> tail |> commandAlterView forceDefault forceUpReferences (Some true)
+    | TokenOption TokenOption.Ref :: tail -> tail |> commandAlterView forceDefault (Some true) forceDownReferences
+    | TokenOption TokenOption.Src :: tail -> tail |> commandAlterView forceDefault forceUpReferences (Some true)
     | TokenOption TokenOption.Bin :: tail -> tail |> commandAlterView forceDefault (Some false) (Some false)
     | [ViewId name] -> Command.AlterView { Name = name ; Default = forceDefault; UpReferences = forceUpReferences; DownReferences = forceDownReferences }
     | _ -> Command.Error MainCommand.AlterView
@@ -642,7 +636,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Checkout], "checkout <version> : checkout workspace to version"
         [MainCommand.Workspace; MainCommand.Branch], "branch [<branch>] : switch to branch"
         [MainCommand.Workspace; MainCommand.InstallPackage], "install : install packages"
-        [MainCommand.View; MainCommand.AddView], "view [--down|--src] [--up|--ref] [--modified] [--app <app-wildcard>] [--static] [--test] <viewId> <viewId-wildcard>+ : add repositories to view"
+        [MainCommand.View; MainCommand.AddView], "view [--src] [--ref] [--modified] [--app <app-wildcard>] [--static] [--test] <viewId> <viewId-wildcard>+ : add repositories to view"
         [MainCommand.View; MainCommand.OpenView], "open <viewId> : open view with your favorite ide"
         [MainCommand.View; MainCommand.BuildView], "build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
         [MainCommand.View; MainCommand.RebuildView], "rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"
