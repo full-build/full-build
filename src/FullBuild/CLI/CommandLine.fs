@@ -80,7 +80,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--unused-projects" -> Some TokenOption.UnusedProjects
     | "--packages" -> Some TokenOption.Packages
     | "--test" -> Some TokenOption.Test
-    | "--check" -> Some TokenOption.Test
+    | "--check" -> Some TokenOption.Check
     | "--full" -> Some TokenOption.Full
     | "--inc" -> Some TokenOption.Inc
     | "--ref" -> Some TokenOption.Ref

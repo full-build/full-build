@@ -290,8 +290,7 @@ let Index (indexInfo : CLI.Commands.IndexRepositories) =
                    |> Core.Package.Simplify
                    |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
                    |> Configuration.SaveAnthology
-
-    Install()
+        Install()
 
 let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from
