@@ -64,7 +64,14 @@ let FetchVersionsForArtifact (graph : Graph) (app : Application) =
     let lines = System.IO.File.ReadAllLines (versionFile.FullName)
                 |> Seq.map (fun x -> x.Split(':').[1])
 
-    lines |> Seq.map Baselines.TagInfo.Parse
+    let tryParseTag x =
+        try
+            x |> Baselines.TagInfo.Parse |> Some
+        with
+            _ -> None
+
+    lines |> Seq.map tryParseTag
+          |> Seq.choose id
           |> List.ofSeq
 
 
