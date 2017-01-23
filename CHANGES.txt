@@ -4,7 +4,7 @@ v4.0
   * Get rid of $(FBWorkspaceDir) as NCrunch does not work anyway
   * Tag for baseline (issue #114)
   * Support for .fbignore to avoid deleting files on conversion (issue #147)
-  * --debug option to display full callstack on crash
+  * --verbose option to display more information on crash
   * Projects are managed per repository (issue #111)
   * Breaking changes for some commands (view/repo/app before verb)
   * Enhanced help
