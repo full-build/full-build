@@ -22,6 +22,7 @@ type Extension =
     | View
     | Solution
     | Targets
+    | FbProj
     | CsProj
     | FsProj
     | VbProj
@@ -40,6 +41,7 @@ let GetExtensionString ext =
     | View -> "fbsln"
     | Solution -> "sln"
     | Targets -> "targets"
+    | FbProj -> "fbproj"
     | CsProj -> "csproj"
     | FsProj -> "fsproj"
     | VbProj -> "vbproj"
@@ -158,7 +160,8 @@ let Try action =
 
 
 let FindKnownProjects (repoDir : DirectoryInfo) =
-    [AddExt CsProj "*"
+    [AddExt FbProj "*"
+     AddExt CsProj "*"
      AddExt VbProj "*"
      AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories))
                         |> Seq.concat
