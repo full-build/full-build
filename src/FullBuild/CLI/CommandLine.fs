@@ -298,12 +298,12 @@ let rec private commandGraph (all : bool) (args : string list) =
     | [ViewId name] -> Command.Graph { Name = name ; All = all }
     | _ -> Command.Error MainCommand.Graph
 
-let rec private commandPublish  view (inc : bool) buildNumber (args : string list) =
+let rec private commandPublish  view inc buildNumber (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Publish
     | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish (Some name) inc buildNumber
     | TokenOption TokenOption.Full :: tail -> tail |> commandPublish view false buildNumber
-    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandPublish view inc buildNumber
+    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandPublish view inc (Some version)
     | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = true; Incremental = inc; Version = buildNumber }
     | _ -> Command.Error MainCommand.Publish
 
