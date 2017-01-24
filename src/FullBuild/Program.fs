@@ -91,13 +91,11 @@ let tryMain verbose argv =
     try
         processMain argv
     with
-        x -> let oldColor = System.Console.ForegroundColor
-             System.Console.ForegroundColor <- System.ConsoleColor.Red
-             if verbose |> not then printfn "Error:\n%s" x.Message
-             else printfn "---------------------------------------------------"
-                  printfn "%A" x
-                  printfn "---------------------------------------------------"
-             System.Console.ForegroundColor <- oldColor
+        x -> let err = if verbose |> not then sprintf "Error:\n%s" x.Message
+                       else let sep = "---------------------------------------------------"
+                            sprintf "%s\n%A\n%s" sep x sep
+               
+             IoHelpers.DisplayError err
              5
 
 [<EntryPoint>]

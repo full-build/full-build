@@ -22,10 +22,6 @@ type Extension =
     | View
     | Solution
     | Targets
-    | PssProj
-    | CsProj
-    | FsProj
-    | VbProj
     | NuSpec
     | Dgml
     | App
@@ -41,10 +37,6 @@ let GetExtensionString ext =
     | View -> "fbsln"
     | Solution -> "sln"
     | Targets -> "targets"
-    | PssProj -> "pssproj"
-    | CsProj -> "csproj"
-    | FsProj -> "fsproj"
-    | VbProj -> "vbproj"
     | NuSpec -> "nuspec"
     | Dgml -> "dgml"
     | App -> "app"
@@ -141,16 +133,22 @@ let GetFilewithoutRootDirectory (file : string) =
 
 let consoleLock = System.Object()
 
-let DisplayHighlight (s : string) =
+let ConsoleDisplay (c : ConsoleColor) (s : string) =
     let display () =        
         let oldColor = Console.ForegroundColor
         try
-            Console.ForegroundColor <- ConsoleColor.Cyan
+            Console.ForegroundColor <- c
             Console.WriteLine("- {0}", s)
         finally
             Console.ForegroundColor <- oldColor
 
     lock consoleLock display
+
+
+
+let DisplayHighlight = ConsoleDisplay ConsoleColor.Cyan
+let DisplayError = ConsoleDisplay ConsoleColor.Red
+
 
 let Try action =
     try
@@ -160,12 +158,11 @@ let Try action =
 
 
 let FindKnownProjects (repoDir : DirectoryInfo) =
-    [AddExt PssProj "*"
-     AddExt CsProj "*"
-     AddExt VbProj "*"
-     AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories))
-                        |> Seq.concat
-                        |> List.ofSeq
+    [ "*.pssproj"
+      "*.csproj"
+      "*.vbproj"
+      "*.fsproj" ] 
+        |> Seq.collect (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories))
 
 let EnumerateChildren (dir : DirectoryInfo) =
     dir.EnumerateFileSystemInfos()
