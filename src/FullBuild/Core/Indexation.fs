@@ -30,8 +30,8 @@ let private projectCanBeProcessed (fileName : FileInfo) =
 
 let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) =
     repoDir |> IoHelpers.FindKnownProjects
-            |> List.filter projectCanBeProcessed
-            |> List.map (parser repoDir repoRef)
+            |> Seq.filter projectCanBeProcessed
+            |> Seq.map (parser repoDir repoRef)
 
 let private printParseStatus (repoDir : DirectoryInfo) =
     let repo = RepositoryId.from(repoDir.Name)
