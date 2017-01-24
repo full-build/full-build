@@ -107,8 +107,7 @@ let GitTagToHash (repoDir : DirectoryInfo) (tag : string) : string =
 let GitHead (repoDir : DirectoryInfo) () =
     "HEAD"
 
-let GitTag (repoDir : DirectoryInfo) (tag : string) =
-    let comment = "fullbuild"
+let GitTag (repoDir : DirectoryInfo) (tag : string) (comment : string) =
     let argsTag = sprintf @"tag -a %s -m %A" tag comment
     let res = ExecGetOutput "git" argsTag repoDir Map.empty
     if res.ResultCode <> 0 then res

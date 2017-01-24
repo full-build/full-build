@@ -96,7 +96,6 @@ type private Token =
     | Rebuild
     | Index
     | Convert
-    | Tag
     | Graph
     | Install
     | Outdated
@@ -150,7 +149,6 @@ let private (|Token|_|) (token : string) =
     | "rebuild" -> Some Rebuild
     | "index" -> Some Index
     | "convert" -> Some Convert
-    | "tag" -> Some Tag
     | "graph" -> Some Graph
     | "install" -> Some Install
     | "outdated" -> Some Outdated
@@ -300,14 +298,13 @@ let rec private commandGraph (all : bool) (args : string list) =
     | [ViewId name] -> Command.Graph { Name = name ; All = all }
     | _ -> Command.Error MainCommand.Graph
 
-let rec private commandPublish (mt : bool) view (inc : bool option) (args : string list) =
+let rec private commandPublish  view (inc : bool) buildNumber (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Publish
-    | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandPublish false view inc
-    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish mt (Some name) inc
-    | TokenOption TokenOption.Inc :: tail -> tail |> commandPublish mt view (Some true)
-    | TokenOption TokenOption.Full :: tail -> tail |> commandPublish mt view (Some false)
-    | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = mt; Incremental = inc }
+    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish (Some name) inc buildNumber
+    | TokenOption TokenOption.Full :: tail -> tail |> commandPublish view false buildNumber
+    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandPublish view inc buildNumber
+    | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = true; Incremental = inc; Version = buildNumber }
     | _ -> Command.Error MainCommand.Publish
 
 
@@ -330,11 +327,6 @@ let private commandBranch (args : string list) =
     | [name] -> Command.BranchWorkspace {Branch = Some name}
     | [] -> Command.BranchWorkspace {Branch = None}
     | _ -> Command.Error MainCommand.Branch
-
-let rec private commandTag (args : string list) =
-    match args with
-    | [Param buildNumber] -> Command.TagWorkspace {BuildNumber = buildNumber }
-    | _ -> Command.Error MainCommand.Tag
 
 let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
     match args with
@@ -522,7 +514,6 @@ let private commandHelp (args : string list) =
               | Token Token.Rebuild :: _ -> MainCommand.RebuildView
               | Token Token.Checkout :: _ -> MainCommand.Checkout
               | Token Token.Branch :: _ -> MainCommand.Branch
-              | Token Token.Tag :: _ -> MainCommand.Tag
               | Token Token.Pull :: _ -> MainCommand.Pull
               | Token Token.Clean :: _ -> MainCommand.Clean
               | Token Token.Bind :: _ -> MainCommand.Bind
@@ -552,12 +543,11 @@ let Parse (args : string list) : Command =
     | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false true
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
-    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish true None None
+    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish None true None
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
-    | Token Token.Tag :: cmdArgs -> cmdArgs |> commandTag
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false true None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
@@ -646,8 +636,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Index], "index [--check] <repoId-wildcard>+ : index repositories"
         [MainCommand.Workspace; MainCommand.Convert], "convert <repoId-wildcard> : convert projects in repositories"
         [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--nomt] [--rebase] [--view <viewId>]: update sources & binaries - rebase if requested (ff is default)"
-        [MainCommand.Workspace; MainCommand.Tag], "tag [--full|--inc] <buildNumber> : tag workspace with provided build number"
-        [MainCommand.App; MainCommand.Publish], "publish [--nomt] [--view <viewId>] [--push] <appId-wildcard> : publish applications"
+        [MainCommand.App; MainCommand.Publish], "publish [--nomt] [--view <viewId>] [--push <buildNumber>] <appId-wildcard> : publish applications"
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
         [MainCommand.Workspace; MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"

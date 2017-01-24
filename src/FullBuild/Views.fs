@@ -56,8 +56,8 @@ with
                                // this will add new repositories if necessary and discard unchanged repositories
                                // in fine, we only have new repositories and modified repositories
                                let baselineRepo = Baselines.from this.Graph
-                               let newBaseline = baselineRepo.CreateBaseline Baselines.BuildType.Draft "temp"
-                               let oldBaseline = baselineRepo.FindBaseline Baselines.BuildStatus.Complete
+                               let newBaseline = baselineRepo.CreateBaseline "temp"
+                               let oldBaseline = baselineRepo.FindBaseline ()
                                let delta = newBaseline - oldBaseline
 
                                // if master repository is modified then all repositories are modified !

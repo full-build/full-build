@@ -20,64 +20,36 @@ open IoHelpers
 
 #nowarn "0346" // GetHashCode missing
 
-[<RequireQualifiedAccess>]
-type BuildType =
-    | Full
-    | Incremental
-    | Draft
-
-[<RequireQualifiedAccess>]
-type BuildStatus =
-    | Complete
-    | Draft
-
-
 let printTag ((repo, execResult) : (Repository * Exec.ExecResult)) =
     lock consoleLock (fun () -> IoHelpers.DisplayInfo repo.Name
                                 execResult |> Exec.PrintOutput)
 
-let private tagRepo wsDir (tag : string) (repo : Repository) = async {
-    return (repo, Tools.Vcs.Tag wsDir repo tag) |> printTag
+let private tagRepo wsDir (tag : string) (comment : string) (repo : Repository) = async {
+    return (repo, Tools.Vcs.Tag wsDir repo tag comment) |> printTag
 }
 
 
 [<RequireQualifiedAccess>]
 type TagInfo =
     { BuildBranch : string
-      BuildNumber : string 
-      BuildType : BuildType }
+      BuildNumber : string }
 with
     member this.Branch = this.BuildBranch
 
     member this.Version = this.BuildNumber
 
-    member this.Type = this.BuildType
-
     member this.Format() =
-        match this.Type with
-        | BuildType.Full -> sprintf "fullbuild/%s/%s_full" this.Branch this.BuildNumber
-        | BuildType.Incremental -> sprintf "fullbuild/%s/%s_inc" this.Branch this.BuildNumber
-        | BuildType.Draft -> sprintf "fullbuild/%s/%s" this.Branch this.BuildNumber
+        sprintf "fullbuild/%s/%s" this.Branch this.BuildNumber
 
     static member Parse (tag : string) =
         if tag.StartsWith("fullbuild/") |> not then failwithf "Unknown tag"
         let tag = tag.Substring("fullbuild/".Length)
-        let isFull = tag.EndsWith("_full")
-        let isInc = tag.EndsWith("_inc")
-        let isDraft = (isFull || isInc) |> not
-        let tag = if isFull then tag.Substring(0, tag.Length-"_full".Length)
-                  else if isInc then tag.Substring(0, tag.Length-"_inc".Length)
-                       else tag
         let idx = tag.LastIndexOf('/')
         if(-1 = idx) then failwithf "Unknown tag"
 
         let branch = tag.Substring(0, idx)
         let version = tag.Substring(idx+1)
-
-        let buildType = if isFull then BuildType.Full
-                        else if isInc then BuildType.Incremental
-                        else BuildType.Draft
-        { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = version; TagInfo.BuildType = buildType }
+        { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = version }
         
 
 // =====================================================================================================
@@ -131,17 +103,17 @@ with
         let changes = Set.difference ref.Bookmarks target.Bookmarks
         changes
 
-    member this.Save () : unit =
+    member this.Save (comment : string) : unit =
         let wsDir = Env.GetFolder Env.Folder.Workspace
         let tag = tagInfo.Format()
 
         let maxThrottle = System.Environment.ProcessorCount*4
         let tagResults = graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
-                         |> Seq.map (tagRepo wsDir tag)
+                         |> Seq.map (tagRepo wsDir tag comment)
                          |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
         tagResults |> Exec.CheckMultipleResponseCode
 
-        Tools.Vcs.Tag wsDir graph.MasterRepository tag |> Exec.CheckResponseCode
+        Tools.Vcs.Tag wsDir graph.MasterRepository tag comment |> Exec.CheckResponseCode
 
 // =====================================================================================================
 
@@ -150,21 +122,19 @@ type Factory(graph : Graph) = class end
 with
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
-    member this.FindBaseline (status : BuildStatus) : Baseline =
+    member this.FindBaseline () : Baseline =
         let branch = Configuration.LoadBranch()
-        let tagFilter = match status with
-                        | BuildStatus.Draft -> sprintf "fullbuild/%s/*" branch
-                        | BuildStatus.Complete -> sprintf "fullbuild/%s/*_*" branch
+        let tagFilter = sprintf "fullbuild/%s/*" branch
         match Tools.Vcs.FindLatestMatchingTag wsDir graph.MasterRepository tagFilter with
         | Some tag -> let tagInfo = TagInfo.Parse tag
                       Baseline(graph, tagInfo, false)
-        | _ -> let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = "temp"; TagInfo.BuildType = BuildType.Draft}
+        | _ -> let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = "temp" }
                Baseline(graph, tagInfo, true)
 
-    member this.CreateBaseline (buildType : BuildType) (buildNumber : string) : Baseline =
+    member this.CreateBaseline (buildNumber : string) : Baseline =
         let graph = Configuration.LoadAnthology() |> Graph.from
         let branch = Configuration.LoadBranch()
-        let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = buildNumber; TagInfo.BuildType = buildType }
+        let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = buildNumber }
         Baseline(graph, tagInfo, true)
 
 // =====================================================================================================

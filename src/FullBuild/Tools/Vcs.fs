@@ -67,5 +67,5 @@ let TagToHash (wsDir : DirectoryInfo) (repo : Repository) (tag : string) : strin
 let Head (wsDir : DirectoryInfo) (repo : Repository) : string =
     (chooseVcs wsDir repo.Vcs repo GitHead) ()
    
-let Tag (wsDir : DirectoryInfo) (repo : Repository) (tag : string) : Exec.ExecResult =
-    (chooseVcs wsDir repo.Vcs repo GitTag) tag
+let Tag (wsDir : DirectoryInfo) (repo : Repository) (tag : string) (comment : string) : Exec.ExecResult =
+    (chooseVcs wsDir repo.Vcs repo GitTag) tag comment

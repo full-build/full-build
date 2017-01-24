@@ -17,22 +17,11 @@ module Baselines
 open Collections
 open Graph
 
-[<RequireQualifiedAccess>]
-type BuildType =
-    | Full
-    | Incremental
-    | Draft
-
-[<RequireQualifiedAccess>]
-type BuildStatus =
-    | Complete
-    | Draft
-
 [<RequireQualifiedAccess; Sealed>]
 type TagInfo =
     member Branch: string
+
     member Version: string
-    member Type: BuildType
 
     member Format: unit
                 -> string
@@ -55,16 +44,15 @@ with
 
     static member (-): Baseline*Baseline
                     -> Bookmark set
-    member Save: unit
+    member Save: comment : string
               -> unit
 
 
 and [<Sealed>] Factory =
-    member FindBaseline: draft : BuildStatus
+    member FindBaseline: unit 
                       -> Baseline
 
-    member CreateBaseline: buildType : BuildType
-                        -> buildNumber : string
+    member CreateBaseline: buildNumber : string
                         -> Baseline
 
 val from: graph : Graph

@@ -49,12 +49,8 @@ let private getLastVersionForApp (graph : Graph.Graph) (app : Graph.Application)
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let baselines = Baselines.from graph
-    let draftBaseline = baselines.FindBaseline Baselines.BuildStatus.Draft
-    let buildType = match pubInfo.Incremental with
-                    | None -> Baselines.BuildType.Draft
-                    | Some true -> Baselines.BuildType.Incremental
-                    | Some false -> Baselines.BuildType.Full
-    let baseline = baselines.CreateBaseline buildType draftBaseline.Info.Version
+    let draftBaseline = baselines.FindBaseline ()
+    let baseline = baselines.CreateBaseline draftBaseline.Info.Version
     let version = baseline.Info.Version
 
     let viewRepository = Views.from graph
@@ -74,9 +70,10 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
     appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter IoHelpers.ForceDelete
 
     // copy bin content
-    if pubInfo.Incremental <> None then
+    if pubInfo.Version.IsSome then
+        let comment = pubInfo.Incremental ? ("incremental", "full")
         Core.BuildArtifacts.Publish graph baseline.Info
-        baseline.Save()
+        baseline.Save comment
 
         // print tag information
         let tag = baseline.Info.Format()

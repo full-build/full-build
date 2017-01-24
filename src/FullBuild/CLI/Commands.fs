@@ -71,7 +71,8 @@ type PublishApplications =
     { View: string option
       Filters : string list
       Multithread : bool 
-      Incremental : bool option }
+      Incremental : bool
+      Version : string option }
 
 type CheckoutVersion =
     { Version : string }
@@ -123,9 +124,6 @@ type PullWorkspace =
       Rebase : bool
       Multithread : bool
       View : string option }
-
-type TagWorkspace =
-    { BuildNumber : string }
 
 type BindProject =
     { Filters : string set }
@@ -190,7 +188,6 @@ type MainCommand =
     | Bind
     | Migrate
     | Workspace
-    | Tag
     | Unknown
 
 
@@ -209,7 +206,6 @@ type Command =
     | InitWorkspace of InitWorkspace
     | IndexRepositories of IndexRepositories
     | ConvertRepositories of ConvertRepositories
-    | TagWorkspace of TagWorkspace
     | CheckoutWorkspace of CheckoutVersion
     | BranchWorkspace of BranchWorkspace
     | PullWorkspace of PullWorkspace

@@ -87,16 +87,6 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     finally
         Environment.CurrentDirectory <- currDir
 
-
-let TagWorkspace (tagInfo : CLI.Commands.TagWorkspace) =
-    let graph = Configuration.LoadAnthology() |> Graph.from
-
-    // copy bin content
-    let baselineRepository = Baselines.from graph
-    let newBaseline = baselineRepository.CreateBaseline Baselines.BuildType.Draft tagInfo.BuildNumber
-    newBaseline.Save()
-
-
 let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     let tag = checkoutInfo.Version |> Baselines.TagInfo.Parse
 
@@ -190,7 +180,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
 
     if pullInfo.Bin then
         let baselineRepository = Baselines.from graph
-        let baseline = baselineRepository.FindBaseline Baselines.BuildStatus.Complete
+        let baseline = baselineRepository.FindBaseline ()
         let tag = baseline.Info.Format()
         Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir tag
 
@@ -271,8 +261,8 @@ let History (historyInfo : CLI.Commands.History) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Configuration.LoadAnthology() |> Graph.from
     let baselineRepository = Baselines.from graph
-    let previousBaseline = baselineRepository.FindBaseline Baselines.BuildStatus.Complete
-    let baseline = baselineRepository.CreateBaseline Baselines.BuildType.Draft "temp"
+    let previousBaseline = baselineRepository.FindBaseline ()
+    let baseline = baselineRepository.CreateBaseline "temp"
 
     let diff = previousBaseline - baseline
 
