@@ -303,7 +303,7 @@ let rec private commandPublish  view inc buildNumber (args : string list) =
     | [] -> Command.Error MainCommand.Publish
     | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish (Some name) inc buildNumber
     | TokenOption TokenOption.Full :: tail -> tail |> commandPublish view false buildNumber
-    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandPublish view inc (Some version)
+    | TokenOption TokenOption.Push :: version :: tail -> tail |> commandPublish view inc (Some version)
     | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = true; Incremental = inc; Version = buildNumber }
     | _ -> Command.Error MainCommand.Publish
 
@@ -636,7 +636,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Index], "index [--check] <repoId-wildcard>+ : index repositories"
         [MainCommand.Workspace; MainCommand.Convert], "convert <repoId-wildcard> : convert projects in repositories"
         [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--nomt] [--rebase] [--view <viewId>]: update sources & binaries - rebase if requested (ff is default)"
-        [MainCommand.App; MainCommand.Publish], "publish [--nomt] [--view <viewId>] [--push <buildNumber>] <appId-wildcard> : publish applications"
+        [MainCommand.App; MainCommand.Publish], "publish [--view <viewId>] [--full] [--push <buildNumber>] <appId-wildcard> : publish applications"
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
         [MainCommand.Workspace; MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
