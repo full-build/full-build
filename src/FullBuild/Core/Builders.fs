@@ -40,13 +40,11 @@ let writeVersionMsbuild version =
     let csFile = Env.GetCsGlobalAssemblyInfoFileName()
     File.WriteAllLines(csFile.FullName, generateVersionCs version)
 
-let buildSkip (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
+let buildSkip (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
     ()
 
-let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
-    match version with
-    | Some givenVersion -> writeVersionMsbuild givenVersion
-    | _ -> ()
+let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
+    writeVersionMsbuild version
 
     let target = if clean then "Rebuild"
                  else "Build"
@@ -70,6 +68,6 @@ let chooseBuilder (builderType : BuilderType) msbuildBuilder skipBuilder =
                   | BuilderType.Skip -> skipBuilder
     builder
 
-let BuildWithBuilder (builder : BuilderType) (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
+let BuildWithBuilder (builder : BuilderType) (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
     (chooseBuilder builder buildMsbuild buildSkip) viewFile config clean multithread version
 

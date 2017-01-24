@@ -25,7 +25,7 @@ let BIN_FOLDER = @"bin"
 let ARTIFACTS_FILENAME = "artifacts"
 let PROJECTS_FILENAME = ".fbprojects"
 let BASELINE_FILENAME = "baseline"
-let VERSION_FILENAME = "version"
+let VERSION_FILENAME = ".fbversion"
 let BRANCH_FILENAME = "branch"
 let FS_GLOBAL_ASSEMBLYINFO_FILENAME = "BuildVersionAssemblyInfo.fs"
 let CS_GLOBAL_ASSEMBLYINFO_FILENAME = "BuildVersionAssemblyInfo.cs"
@@ -117,6 +117,9 @@ let GetSolutionDefinesFile viewName =
 
 let GetBranchFile () =
     GetFolder Folder.View |> GetFile BRANCH_FILENAME
+
+let GetVersionFile () =
+    GetFolder Folder.Bin |> GetFile VERSION_FILENAME
 
 let IsMono () =
     let monoRuntime = System.Type.GetType ("Mono.Runtime")

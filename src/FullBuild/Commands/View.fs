@@ -86,9 +86,14 @@ let Build (cmd : CLI.Commands.BuildView) =
                          | None -> failwith "Can't determine view name"
                          | Some x -> x
 
+    let version = match cmd.Version with
+                  | Some x -> x
+                  | None -> "0.0.0"
+    Configuration.SaveVersion version
+
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
-    Core.Builders.BuildWithBuilder view.Builder slnFile cmd.Config cmd.Clean cmd.Multithread cmd.Version
+    Core.Builders.BuildWithBuilder view.Builder slnFile cmd.Config cmd.Clean cmd.Multithread version
 
 let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Configuration.LoadAnthology() |> Graph.from

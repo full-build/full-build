@@ -48,9 +48,7 @@ let private getLastVersionForApp (graph : Graph.Graph) (app : Graph.Application)
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
-    let version = match pubInfo.Version with
-                  | Some x -> x
-                  | None -> "0.0.0"
+    let version = Configuration.LoadVersion ()
 
     let viewRepository = Views.from graph
     let applications = match pubInfo.View with
@@ -72,7 +70,7 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
     if pubInfo.Version.IsSome then
         let baselines = Baselines.from graph
         let comment = pubInfo.Incremental ? ("incremental", "full")
-        let baseline = baselines.CreateBaseline version
+        let baseline = baselines.CreateBaseline pubInfo.Version.Value
         Core.BuildArtifacts.Publish graph baseline.Info
         baseline.Save comment
 
