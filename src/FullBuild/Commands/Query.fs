@@ -28,7 +28,7 @@ let private queryUnusedProjects (graph : Graph) =
     let unusedProjects = graph.Projects - (allUsedProjects + projectsUnitTests)
 
     if 0 < unusedProjects.Count then 
-        IoHelpers.DisplayHighlight "Unused projects"
+        IoHelpers.DisplayInfo "Unused projects"
         let groupedProjects = unusedProjects |> Seq.groupBy (fun x -> x.Repository)
         for repo, projects in groupedProjects do
             printfn "%s" repo.Name
@@ -49,11 +49,11 @@ let private queryPackages (projects : Project set) =
                                               |> Set.unionMany) - packages
 
     if 0 < packages.Count || 0 < packagesunittests.Count then
-        IoHelpers.DisplayHighlight "Used packages"
+        IoHelpers.DisplayInfo "Used packages"
         for package in packages do
             printfn "%s" package.Name
 
-        IoHelpers.DisplayHighlight "Used packages in unit tests"
+        IoHelpers.DisplayInfo "Used packages in unit tests"
         for package in packagesunittests do
             printfn "%s" package.Name
     else

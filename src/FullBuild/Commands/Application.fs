@@ -19,7 +19,7 @@ open Env
 
 let private asyncPublish (version : string) (app : Graph.Application) =
     async {
-        DisplayHighlight app.Name
+        DisplayInfo app.Name
         Core.Publishers.PublishWithPublisher version app
     }
 

@@ -146,7 +146,7 @@ let ConsoleDisplay (c : ConsoleColor) (s : string) =
 
 
 
-let DisplayHighlight = ConsoleDisplay ConsoleColor.Cyan
+let DisplayInfo = ConsoleDisplay ConsoleColor.Cyan
 let DisplayError = ConsoleDisplay ConsoleColor.Red
 
 

@@ -20,7 +20,7 @@ open Graph
 let consoleLock = System.Object()
 
 let printClone ((repo, execResult) : (Repository * Exec.ExecResult)) =
-    lock consoleLock (fun () -> IoHelpers.DisplayHighlight repo.Name
+    lock consoleLock (fun () -> IoHelpers.DisplayInfo repo.Name
                                 execResult |> Exec.PrintOutput)
 
 let private cloneRepoAndInit wsDir shallow (repo : Repository) =

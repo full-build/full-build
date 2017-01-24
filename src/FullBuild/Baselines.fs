@@ -33,7 +33,7 @@ type BuildStatus =
 
 
 let printTag ((repo, execResult) : (Repository * Exec.ExecResult)) =
-    lock consoleLock (fun () -> IoHelpers.DisplayHighlight repo.Name
+    lock consoleLock (fun () -> IoHelpers.DisplayInfo repo.Name
                                 execResult |> Exec.PrintOutput)
 
 let private tagRepo wsDir (tag : string) (repo : Repository) = async {

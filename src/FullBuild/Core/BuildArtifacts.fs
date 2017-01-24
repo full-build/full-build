@@ -81,9 +81,9 @@ let PullReferenceBinaries (artifacts : string) version =
 
     let versionDir = artifactDir |> GetSubDirectory version
     if versionDir.Exists then
-        DisplayHighlight (sprintf "Copying binaries %s" version)
+        DisplayInfo (sprintf "Copying binaries %s" version)
         let sourceBinDir = versionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
         let targetBinDir = Env.GetFolder Env.Folder.Bin
         IoHelpers.CopyFolder sourceBinDir targetBinDir false
     else
-        DisplayHighlight "[WARNING] No reference binaries found"
+        DisplayInfo "[WARNING] No reference binaries found"

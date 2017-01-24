@@ -26,7 +26,7 @@ open Graph
 
 
 let printPull ((repo, execResult) : (Repository * Exec.ExecResult)) =
-    lock consoleLock (fun () -> IoHelpers.DisplayHighlight repo.Name
+    lock consoleLock (fun () -> IoHelpers.DisplayInfo repo.Name
                                 execResult |> Exec.PrintOutput)
 
 let private checkoutRepo wsDir (version : string) (repo : Repository) = async {
@@ -44,7 +44,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
         let br = match branch with
                  | None -> repo.Branch
                  | Some x -> x
-        IoHelpers.DisplayHighlight repo.Name
+        IoHelpers.DisplayInfo repo.Name
         Tools.Vcs.Checkout wsDir repo br |> Exec.PrintOutput
 
     match branchInfo.Branch with
@@ -101,7 +101,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     let tag = checkoutInfo.Version |> Baselines.TagInfo.Parse
 
     // checkout repositories
-    DisplayHighlight ".full-build"
+    DisplayInfo ".full-build"
     let graph = Configuration.LoadAnthology () |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = graph.MasterRepository
@@ -218,7 +218,7 @@ let Exec (execInfo : CLI.Commands.Exec) =
             let args = sprintf @"/c ""%s""" execInfo.Command
 
             try
-                DisplayHighlight repo.Name
+                DisplayInfo repo.Name
 
                 if Env.IsMono () then Exec.Exec "sh" ("-c " + args) repoDir vars |> Exec.CheckResponseCode
                 else Exec.Exec "cmd" args repoDir vars |> Exec.CheckResponseCode
@@ -245,10 +245,10 @@ let Clean () =
         // clean existing repositories
         for repo in newAntho.Repositories do
             if repo.IsCloned then
-                DisplayHighlight repo.Name
+                DisplayInfo repo.Name
                 Tools.Vcs.Clean wsDir repo
 
-        DisplayHighlight newAntho.MasterRepository.Name
+        DisplayInfo newAntho.MasterRepository.Name
         Tools.Vcs.Clean wsDir newAntho.MasterRepository
 
 let UpdateGuid (updInfo : CLI.Commands.UpdateGuids) =
@@ -319,7 +319,7 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     for builder2repo in builder2repos do
         let (builder, repos) = builder2repo
         for repo in repos do
-            IoHelpers.DisplayHighlight repo.Name
+            IoHelpers.DisplayInfo repo.Name
             Core.Conversion.Convert builder (Set.singleton repo)
 
     // setup additional files for views to work correctly
