@@ -70,6 +70,10 @@ let private publishDocker (app : PublishApp) =
     Exec "docker" dockerArgs sourceFolder Map.empty |> CheckResponseCode
     sourceFolder.Delete(true)
 
+    let imgFile = appDir |> GetSubDirectory app.Name
+    let saveArgs = sprintf "save -o %s" imgFile.FullName
+    Exec "docker" saveArgs sourceFolder Map.empty |> CheckResponseCode
+
 let private publishNuget (app : PublishApp) =
     let tmpApp = { app
                    with Name = ".tmp-nuget-" + app.Name }
