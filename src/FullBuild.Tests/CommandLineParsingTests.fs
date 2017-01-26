@@ -35,5 +35,5 @@ let CheckUsageInvoked () =
 [<Test>]
 let CheckRepositoriesConvert () =
     let result = CLI.CommandLine.Parse [ "convert"; "*" ]
-    let expected = Command.ConvertRepositories { Filters = set ["*"] }
+    let expected = Command.ConvertRepositories { Filters = set ["*"]; Check = false }
     result |> should equal expected

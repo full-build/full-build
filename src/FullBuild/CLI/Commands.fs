@@ -45,7 +45,8 @@ type IndexRepositories =
       Check : bool }
 
 type ConvertRepositories =
-    { Filters : string set }
+    { Filters : string set 
+      Check : bool }
 
 type TestAssemblies =
     { Filters : string set
@@ -204,7 +205,6 @@ type Command =
     // workspace
     | SetupWorkspace of SetupWorkspace
     | InitWorkspace of InitWorkspace
-    | IndexRepositories of IndexRepositories
     | ConvertRepositories of ConvertRepositories
     | CheckoutWorkspace of CheckoutVersion
     | BranchWorkspace of BranchWorkspace

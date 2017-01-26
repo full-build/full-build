@@ -35,7 +35,7 @@
   <Target Name="FBPublish">
     <Copy SourceFiles="@(Content)" DestinationFolder="$(FBContentFolder)\%(Content.RelativeDir)" UseHardlinksIfPossible="$(FBUseHardLink)" SkipUnchangedFiles="true" />
 
-    <CreateItem Include="$(OutputPath)/**/*.*">
+    <CreateItem Include="$(OutputPath)\**\*.*">
       <Output TaskParameter="Include" ItemName="Binaries"/>
     </CreateItem>
     <Copy SourceFiles="@(Binaries)" DestinationFolder="$(FBBinFolder)%(Binaries.RecursiveDir)" UseHardlinksIfPossible="$(FBUseHardLink)" SkipUnchangedFiles="true" />

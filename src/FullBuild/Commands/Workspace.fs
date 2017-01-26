@@ -35,6 +35,15 @@ let private checkoutRepo wsDir (version : string) (repo : Repository) = async {
 
 
 
+let pullMatchingBinaries () =
+    let graph = Configuration.LoadAnthology () |> Graph.from
+    let baselineRepository = Baselines.from graph
+    let baseline = baselineRepository.FindBaseline ()
+    let tag = baseline.Info.Format()
+    Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir tag
+
+
+
 
 let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     let graph = Configuration.LoadAnthology() |> Graph.from
@@ -58,6 +67,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
 
                 Core.Indexation.ConsolidateAnthology()
                 Configuration.SaveBranch x
+                pullMatchingBinaries ()
     | None -> let name = Configuration.LoadBranch()
               printfn "%s" name
 
@@ -129,6 +139,7 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
             Environment.CurrentDirectory <- wsDir.FullName
             Configuration.SaveBranch graph.MasterRepository.Branch
             Configuration.SaveVersion "0.0.0"
+            pullMatchingBinaries ()
         finally
             Environment.CurrentDirectory <- currDir
 
@@ -181,10 +192,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
         Install ()
 
     if pullInfo.Bin then
-        let baselineRepository = Baselines.from graph
-        let baseline = baselineRepository.FindBaseline ()
-        let tag = baseline.Info.Format()
-        Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir tag
+        pullMatchingBinaries ()
 
     // consolidate anthology
     Core.Indexation.ConsolidateAnthology()
@@ -283,16 +291,16 @@ let History (historyInfo : CLI.Commands.History) =
 
     Generators.History.Save histType revisions
 
-let Index (indexInfo : CLI.Commands.IndexRepositories) =
+let private index (convertInfo : CLI.Commands.ConvertRepositories) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let antho = Configuration.LoadAnthology()
     let graph = antho |> Graph.from
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
-    let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) indexInfo.Filters
+    let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) convertInfo.Filters
     if selectedRepos = Set.empty then failwith "Empty repository selection"
 
     let indexation = selectedRepos |> Core.Indexation.IndexWorkspace wsDir antho
-    if indexInfo.Check then
+    if convertInfo.Check then
         indexation |> fst |> Core.Indexation.CheckAnthologyProjectsInRepository antho selectedRepos
     else
         indexation |> Core.Indexation.UpdatePackages
@@ -301,7 +309,7 @@ let Index (indexInfo : CLI.Commands.IndexRepositories) =
                    |> Configuration.SaveAnthology
         Install()
 
-let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
+let convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) convertInfo.Filters
@@ -311,7 +319,7 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     for builder2repo in builder2repos do
         let (builder, repos) = builder2repo
         for repo in repos do
-            IoHelpers.DisplayInfo repo.Name
+            IoHelpers.DisplayInfo ("converting "+ repo.Name)
             Core.Conversion.Convert builder (Set.singleton repo)
 
     // setup additional files for views to work correctly
@@ -320,6 +328,13 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let publishSource = installDir |> GetFile Env.FULLBUILD_TARGETS
     let publishTarget = confDir |> GetFile Env.FULLBUILD_TARGETS
     publishSource.CopyTo(publishTarget.FullName, true) |> ignore
+
+
+let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
+    convertInfo |> index
+    if convertInfo.Check |> not then
+        convertInfo |> convert
+        
 
 let CheckMinVersion () =
     try

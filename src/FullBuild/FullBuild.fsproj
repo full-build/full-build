@@ -26,8 +26,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>publish --full cqlplus.zip</StartArguments>
-    <StartWorkingDirectory>c:\src\oss\full-build\qa\qa-setup</StartWorkingDirectory>
+    <StartArguments>convert --check *</StartArguments>
+    <StartWorkingDirectory>c:\src\oss\full-build\qa\qa-init</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>

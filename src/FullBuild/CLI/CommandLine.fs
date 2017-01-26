@@ -94,7 +94,6 @@ type private Token =
     | Update
     | Build
     | Rebuild
-    | Index
     | Convert
     | Graph
     | Install
@@ -147,7 +146,6 @@ let private (|Token|_|) (token : string) =
     | "update" -> Some Update
     | "build" -> Some Build
     | "rebuild" -> Some Rebuild
-    | "index" -> Some Index
     | "convert" -> Some Convert
     | "graph" -> Some Graph
     | "install" -> Some Install
@@ -268,17 +266,11 @@ let rec private commandTest (excludes : string list) (args : string list) =
     | _ -> Command.Error MainCommand.Test
 
 
-let rec private commandIndex (check : bool) (args : string list) =
-    match args with
-    | [] -> Command.Error MainCommand.Index
-    | TokenOption TokenOption.Check :: tail -> tail |> commandIndex true
-    | Params filters -> Command.IndexRepositories { Filters = set filters; Check = check }
-    | _ -> Command.Error MainCommand.Index
-
-let private commandConvert (args : string list) =
+let rec private commandConvert (check : bool) (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Convert
-    | Params filters -> Command.ConvertRepositories { Filters = set filters }
+    | TokenOption TokenOption.Check :: tail -> tail |> commandConvert true
+    | Params filters -> Command.ConvertRepositories { Filters = set filters; Check = check }
     | _ -> Command.Error MainCommand.Convert
 
 let rec private commandClone (shallow : bool) (all : bool) (mt : bool) (args : string list) =
@@ -505,7 +497,6 @@ let private commandHelp (args : string list) =
               | Token Token.Init :: _ -> MainCommand.Init
               | Token Token.Exec :: _ -> MainCommand.Usage
               | Token Token.Test :: _ -> MainCommand.Test
-              | Token Token.Index :: _ -> MainCommand.Index
               | Token Token.Convert :: _ -> MainCommand.Convert
               | Token Token.Clone :: _ -> MainCommand.Clone
               | Token Token.Graph :: _ -> MainCommand.Graph
@@ -539,8 +530,7 @@ let Parse (args : string list) : Command =
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
     | Token Token.Test :: cmdArgs -> cmdArgs |> commandTest []
-    | Token Token.Index :: cmdArgs -> cmdArgs |> commandIndex false
-    | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert
+    | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert false
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false true
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
     | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish None true None
@@ -633,10 +623,9 @@ let UsageContent() =
         [MainCommand.View; MainCommand.Test], "test [--exclude <category>]* <viewId-wildcard>+ : test assemblies (match repository/project)"
         [MainCommand.View; MainCommand.Graph], "graph [--all] <viewId> : graph view content (project, packages, assemblies)"
         [MainCommand.Workspace; MainCommand.Exec], "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
-        [MainCommand.Workspace; MainCommand.Index], "index [--check] <repoId-wildcard>+ : index repositories"
-        [MainCommand.Workspace; MainCommand.Convert], "convert <repoId-wildcard> : convert projects in repositories"
+        [MainCommand.Workspace; MainCommand.Convert], "convert [--check] <repoId-wildcard> : convert projects in repositories"
         [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--nomt] [--rebase] [--view <viewId>]: update sources & binaries - rebase if requested (ff is default)"
-        [MainCommand.App; MainCommand.Publish], "publish [--view <viewId>] [--full] [--push <buildNumber>] <appId-wildcard> : publish applications"
+        [MainCommand.Workspace; MainCommand.Publish], "publish [--view <viewId>] [--full] [--push <buildNumber>] <appId-wildcard> : publish artifacts and tag repositories"
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
         [MainCommand.Workspace; MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"

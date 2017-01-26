@@ -35,7 +35,7 @@ let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir :
 
 let private printParseStatus (repoDir : DirectoryInfo) =
     let repo = RepositoryId.from(repoDir.Name)
-    IoHelpers.DisplayInfo repo.toString
+    IoHelpers.DisplayInfo ("indexing "+ repo.toString)
     repoDir
 
 let private parseWorkspaceProjects parser (wsDir : DirectoryInfo) (repos : Repository seq) =
