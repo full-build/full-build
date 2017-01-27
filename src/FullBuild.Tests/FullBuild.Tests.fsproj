@@ -51,6 +51,7 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
+  <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -58,7 +59,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
   <ItemGroup>
     <Compile Include="TestHelpers.fs" />
     <Compile Include="CollectionsTests.fs" />

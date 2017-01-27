@@ -10,7 +10,8 @@ v4.0
   * Enhanced help
   * New environment variables for exec: FB_REPO_BRANCH and FB_BRANCH
   * Commands have undergo a lot of changes
-  * index/convert is dead, long live convert !
+  * Index/convert is dead, long live convert !
+  * Fix misplaced import full-build target
 
 v3.1
   * Create view from application (issue #112)

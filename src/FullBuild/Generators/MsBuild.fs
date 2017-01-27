@@ -265,11 +265,13 @@ let private convertProject (xproj : XDocument) (project : Project) =
     | None -> ()
 
     // import fb target
-    let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
+    let lastImport = cproj.Descendants(NsMsBuild + "Import").LastOrDefault()
+    let lastItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").Last()
+    let startOfImport = (lastImport |> isNull) ? (lastItemGroup, lastImport)
     let importFB = XElement (NsMsBuild + "Import",
                        XAttribute (NsNone + "Project",
                                    @"$(SolutionDir)\.full-build\full-build.targets"))
-    firstItemGroup.AddBeforeSelf (importFB)
+    startOfImport.AddAfterSelf (importFB)
 
     // add project references
     for projectReference in project.References do
