@@ -265,8 +265,8 @@ let private convertProject (xproj : XDocument) (project : Project) =
     | None -> ()
 
     // import fb target
-    let lastImport = cproj.Descendants(NsMsBuild + "Import").LastOrDefault()
-    let lastItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").Last()
+    let lastImport = upcast cproj.Descendants(NsMsBuild + "Import").LastOrDefault() : XNode
+    let lastItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").Last().PreviousNode
     let startOfImport = (lastImport |> isNull) ? (lastItemGroup, lastImport)
     let importFB = XElement (NsMsBuild + "Import",
                        XAttribute (NsNone + "Project",
