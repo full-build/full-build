@@ -10,6 +10,7 @@ set BUILD_VERSION=%1
 set BUILD_STATUS=%2
 
 call install-tools.cmd || goto :ko
+call build-bootstrap.cmd || goto :ko
 call build-src.cmd %BUILD_VERSION% || goto :ko
 call publish.cmd %BUILD_VERSION% %BUILD_STATUS% || goto :ko
 call run-tests.cmd || goto :ko
