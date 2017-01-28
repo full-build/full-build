@@ -88,10 +88,10 @@ let List (appInfo : CLI.Commands.ListApplications) =
                                  |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
                                  |> Seq.choose id
                                  |> Seq.iter displayAppVersion
-               | Some version -> let maxThrottle = System.Environment.ProcessorCount*4
+    | Some version -> let maxThrottle = System.Environment.ProcessorCount*4
                       graph.Applications |> Seq.filter (fun (x : Graph.Application) -> x.Publisher = Graph.PublisherType.Zip)
                                          |> Seq.map (checkAppHasVersion version graph)
-                                                    |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
+                                         |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
                                          |> Seq.choose id
                                          |> Seq.iter displayApp
 
