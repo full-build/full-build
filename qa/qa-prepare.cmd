@@ -7,7 +7,7 @@ set LOCALCSCREPO=%HERE%local\cassandra-sharp-contrib-org
 set LOCALBIN=%HERE%local\bin-org
 
 set PAKET=paket.exe
-set PATH=%PATH%;%HERE%packages\Paket\tools
+set PATH=%PATH%;%HERE%..\packages\Paket\tools
 
 cd %HERE%
 rmdir /s /q %LOCALFOLDER%
