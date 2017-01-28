@@ -14,7 +14,6 @@ call build-bootstrap.cmd || goto :ko
 call build-src.cmd %BUILD_VERSION% || goto :ko
 call publish.cmd %BUILD_VERSION% %BUILD_STATUS% || goto :ko
 call run-tests.cmd || goto :ko
-call run-qa.cmd || goto :ko
 goto :ok
 
 :ok
