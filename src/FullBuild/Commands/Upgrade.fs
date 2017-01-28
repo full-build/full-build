@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ open System.Diagnostics
 open System.IO.Compression
 open FSharp.Data
 
-type GitRelease = JsonProvider<"ghreleasefeed.json">
+type GitRelease = JsonProvider<"Examples/ghreleasefeed.json">
 
 let private getLatestReleaseUrl (verStatus : string) =
     let tag = sprintf "-%s" verStatus
@@ -56,7 +56,7 @@ let private waitProcessToExit processId =
         | _ -> reraise()
 
 let private getSameFiles (firstDir:DirectoryInfo) (secondDir:DirectoryInfo) =
-    firstDir.GetFiles() |> Seq.where(fun x-> (secondDir |> IoHelpers.GetFile x.Name).Exists)
+    firstDir.GetFiles() |> Array.where(fun x-> (secondDir |> IoHelpers.GetFile x.Name).Exists)
 
 let Upgrade (tag : string) =
     let (zipUrl, ver) = getLatestReleaseUrl tag

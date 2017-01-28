@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ let private generateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo 
         for file in files do
             let assemblyName = Path.GetFileNameWithoutExtension (file.FullName)
             let relativePath = ComputeRelativeFilePath pkgDir file
-            let hintPath = sprintf "%s%s" MSBUILD_PACKAGE_FOLDER relativePath |> ToUnix
+            let hintPath = sprintf "%s%s" MSBUILD_PACKAGE_FOLDER relativePath |> ToWindows
             yield XElement(NsMsBuild + "Reference",
                     XAttribute(NsNone + "Include", assemblyName),
                     XElement(NsMsBuild + "HintPath", hintPath),
@@ -38,7 +38,7 @@ let private generateItemGroupContent (pkgDir : DirectoryInfo) (files : FileInfo 
 
 let private generateItemGroupCopyContent (pkgDir : DirectoryInfo) (fxLibs : DirectoryInfo) =
     let relativePath = ComputeRelativeDirPath pkgDir fxLibs
-    let files = sprintf "$(FBWorkspaceDir)/.full-build/packages/%s/**/*.*" relativePath
+    let files = sprintf @"$(SolutionDir)\.full-build\packages\%s\**\*.*" relativePath
     let copyFiles = XElement(NsMsBuild + "FBCopyFiles",
                         XAttribute(NsNone + "Include", files))
     copyFiles
@@ -47,7 +47,7 @@ let private generateItemGroup (fxLibs : DirectoryInfo) (condition : string) =
     let pkgDir = Env.GetFolder Env.Folder.Package
     let dlls = fxLibs.EnumerateFiles("*.dll")
     let exes = fxLibs.EnumerateFiles("*.exes")
-    let files = Seq.append dlls exes
+    let files = Seq.append dlls exes |> List.ofSeq
     let itemGroup = generateItemGroupContent pkgDir files
     XElement(NsMsBuild + "When",
         XAttribute(NsNone + "Condition", condition),

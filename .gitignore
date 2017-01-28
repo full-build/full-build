@@ -1,3 +1,7 @@
+qa/local
+qa/qa-setup
+qa/qa-init
+tools/paket.exe
 *.user
 *.suo
 *.cache
@@ -10,6 +14,7 @@ obj
 /tests/cs-*
 packages
 views
+history.txt
 !/bootstrap/packages
 !/bootstrap/bin
 !/bootstrap/views
@@ -21,4 +26,3 @@ Settings.FSharpLint
 all.userprefs
 *.mdb
 /refbin
-

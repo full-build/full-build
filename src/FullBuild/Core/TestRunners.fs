@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ module Core.TestRunners
 open Env
 open Collections
 open Graph
+open Exec
 
 
 let excludeListToArgs (excludes : string list) =
@@ -23,7 +24,7 @@ let excludeListToArgs (excludes : string list) =
     | [] -> ""
     | [x] -> let excludeArgs = sprintf "cat != %s" x
              sprintf "--where %A" excludeArgs
-    | x :: tail -> let excludeArgs = excludes |> Seq.fold (fun s t -> sprintf "%s && cat != %s" s t) ("")
+    | x :: tail -> let excludeArgs = excludes |> List.fold (fun s t -> sprintf "%s && cat != %s" s t) ("")
                    sprintf "--where %A" excludeArgs
 
 
@@ -33,7 +34,7 @@ let runnerNUnit (includes : string set) (excludes : string set) =
     let files = includes |> Set.fold (fun s t -> sprintf @"%s %A" s t) ""
     let excludeArgs = excludeListToArgs (excludes |> List.ofSeq)
     let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs
-    Exec.Exec "nunit3-console.exe" args wsDir Map.empty |> Exec.CheckResponseCode
+    Exec "nunit3-console.exe" args wsDir Map.empty |> CheckResponseCode
 
 let chooseTestRunner (runnerType : TestRunnerType) nunitRunner =
     let runner = match runnerType with

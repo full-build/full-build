@@ -1,13 +1,13 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
+  <Import Project="$(SolutionDir)\.full-build\views\$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <ItemGroup>
-    <ProjectReference Include="$(FBWorkspaceDir)/tests/LibProject/LibProject.csproj" Condition="'$(FullBuild_libproject)' != ''">
-      <Project>{4198a8ad-aa7a-45b2-8086-646b8715bec6}</Project>
+    <ProjectReference Include="$(SolutionDir)\tests\LibProject/LibProject.csproj" Condition="'$(FullBuild_libproject)' != ''">
+      <Project>{4198A8AD-AA7A-45B2-8086-646B8715BEC6}</Project>
       <Name>libproject</Name>
     </ProjectReference>
-    <Reference Include="$(FBWorkspaceDir)/.full-build/bin/libproject.dll" Condition="'$(FullBuild_libproject)' == ''">
+    <Reference Include="$(SolutionDir)\.full-build\bin\libproject.dll" Condition="'$(FullBuild_libproject)' == ''">
       <Private>true</Private>
     </Reference>
   </ItemGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/projects/libproject-copy.targets" Condition="'$(FullBuild_libprojectCopy)' == ''" />
+  <Import Project="$(SolutionDir)\.full-build\projects\libproject-copy.targets" Condition="'$(FullBuild_libprojectCopy)' == ''" />
 </Project>

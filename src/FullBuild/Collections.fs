@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,6 +19,16 @@ open FSharp.Collections
 type set<'T when 'T : comparison> = Set<'T>
 
 let (?) (q: bool) (yes: 'a, no: 'a) = if q then yes else no
+
+let unwrap<'T> (value : 'T option) =
+    match value with
+    | Some x -> x
+    | _ -> failwith "Expecting value"
+
+let orDefault<'T> (defValue : 'T) (value : 'T option) =
+    match value with
+    | Some x -> x
+    | None -> defValue
 
 
 let compareTo<'T, 'U> (this : 'T) (other : System.Object) (fieldOf : 'T -> 'U) =

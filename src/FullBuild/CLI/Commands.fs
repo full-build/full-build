@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -41,10 +41,12 @@ type UpdateGuids =
     { Filters : string set }
 
 type IndexRepositories =
-    { Filters : string set }
+    { Filters : string set 
+      Check : bool }
 
 type ConvertRepositories =
-    { Filters : string set }
+    { Filters : string set 
+      Check : bool }
 
 type TestAssemblies =
     { Filters : string set
@@ -69,7 +71,9 @@ type ViewName =
 type PublishApplications =
     { View: string option
       Filters : string list
-      Multithread : bool }
+      Multithread : bool 
+      Incremental : bool
+      Version : string option }
 
 type CheckoutVersion =
     { Version : string }
@@ -118,15 +122,9 @@ type AddRepository =
 type PullWorkspace =
     { Sources : bool
       Bin : bool
-      LatestBin : bool
       Rebase : bool
       Multithread : bool
       View : string option }
-
-type PushWorkspace =
-    { BuildNumber : string
-      Branch : string option
-      Incremental : bool }
 
 type BindProject =
     { Filters : string set }
@@ -151,7 +149,6 @@ type MainCommand =
     | Init
     | Index
     | Convert
-    | Push
     | Checkout
     | Branch
     | Pull
@@ -160,31 +157,38 @@ type MainCommand =
     | UpgradeGuids
     | Test
     | History
+    | Repository
     | ListRepository
     | AddRepository
-    | CloneRepository
+    | Clone
     | DropRepository
+    | View
     | ListView
     | AddView
     | DropView
     | DescribeView
-    | GraphView
+    | Graph
     | BuildView
     | RebuildView
     | AlterView
     | OpenView
+    | NuGet
     | AddNuGet
     | ListNuget
+    | Package
     | ListPackage
     | InstallPackage
     | UpdatePackage
     | OutdatedPackage
+    | App
     | ListApp
     | AddApp
     | DropApp
-    | PublishApp
+    | Publish
     | Query
     | Bind
+    | Migrate
+    | Workspace
     | Unknown
 
 
@@ -193,16 +197,15 @@ type Command =
     | Error of MainCommand
 
     | Version
-    | Usage
+    | Usage of MainCommand
     | Upgrade of string
     | FinalizeUpgrade of int
+    | Migrate
 
     // workspace
     | SetupWorkspace of SetupWorkspace
     | InitWorkspace of InitWorkspace
-    | IndexRepositories of IndexRepositories
     | ConvertRepositories of ConvertRepositories
-    | PushWorkspace of PushWorkspace
     | CheckoutWorkspace of CheckoutVersion
     | BranchWorkspace of BranchWorkspace
     | PullWorkspace of PullWorkspace
@@ -223,7 +226,7 @@ type Command =
     | AddView of AddView
     | DropView of ViewName
     | DescribeView of ViewName
-    | GraphView of GraphView
+    | Graph of GraphView
     | BuildView of BuildView
     | AlterView of AlterView
     | OpenView of OpenView

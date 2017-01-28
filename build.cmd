@@ -1,25 +1,27 @@
-echo on
+rem build twice - this is ok:
+rem 1/ first time is to bootstrap the build
+rem 2/ second time is to build using new version (ie: self build)
+rem both build ensure compatibility on version update
+
+@echo off
 setlocal
 
-set VERSION=%1
-if [%VERSION%] == [] set VERSION=999.0.0
-echo building version %VERSION%
-set VERSION=%VERSION%.*
+set BUILD_VERSION=%1
+set BUILD_STATUS=%2
 
-set HERE=%~dp0
-set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%;%HERE%\tools
-
-call :dobuild || goto :ko
+call install-tools.cmd || goto :ko
+call build-bootstrap.cmd || goto :ko
+call build-src.cmd %BUILD_VERSION% || goto :ko
+call publish.cmd %BUILD_VERSION% %BUILD_STATUS% || goto :ko
+call run-tests.cmd || goto :ko
 goto :ok
 
-:dobuild
-refbin\fullbuild install || goto :ko
-refbin\fullbuild view fullbuild src/* || goto :ko
-refbin\fullbuild rebuild --version %VERSION% fullbuild || goto :ko
-goto :eof
-
 :ok
+cd %HERE%
+echo *** BUILD SUCCESSFUL ***
 exit /b 0
 
 :ko
+echo *** BUILD FAILURE ***
+cd %HERE%
 exit /b 5

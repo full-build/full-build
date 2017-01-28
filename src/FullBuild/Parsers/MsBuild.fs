@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -43,15 +43,18 @@ let private getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     // VS project references
     let prjRefs = xdoc.Descendants(NsMsBuild + "ProjectReference")
                   |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
+                  |> Seq.map IoHelpers.ToWindows
                   |> Seq.map (fun x -> getProjectOutput prjDir x |> ProjectId.from)
-                  |> Set
+                  |> Set.ofSeq
 
     // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
-                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER) || x.StartsWith(MSBUILD_PROJECT_FOLDER2))
+                 |> Seq.map (IoHelpers.MigratePath << IoHelpers.ToWindows)
+                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER))
+                 |> Seq.map IoHelpers.ToPlatformPath
                  |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectId.from)
-                 |> Set
+                 |> Set.ofSeq
 
     prjRefs |> Set.union fbRefs
 
@@ -115,22 +118,24 @@ let private getPackageFromPaketReference (xel : XElement) =
 let private getFullBuildPackages (prjDoc : XDocument)  =
     let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
-                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER) || x.StartsWith(MSBUILD_PACKAGE_FOLDER2))
+                 |> Seq.map (IoHelpers.MigratePath << IoHelpers.ToWindows)
+                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER))
+                 |> Seq.map IoHelpers.ToPlatformPath
                  |> Seq.map parseFullBuildPackage
-                 |> Set
+                 |> Set.ofSeq
     fbPkgs
 
 let private getPackageReferencePackages (prjDoc : XDocument)  =
     let fbPkgs = prjDoc.Descendants(NsMsBuild + "PackageReference")
                  |> Seq.map parsePackageReferencePackage
-                 |> Set
+                 |> Set.ofSeq
     fbPkgs
 
 let private getPaketPackages (prjDoc : XDocument)  =
     let paketPkgs = prjDoc.Descendants(NsMsBuild + "Reference")
                     |> Seq.filter isPaketReference
                     |> Seq.map getPackageFromPaketReference
-                    |> Set
+                    |> Set.ofSeq
     paketPkgs
 
 // NOTE: should be private
@@ -168,7 +173,7 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let paketPackages = getPaketPackages xprj
     let packages = nugetPackages + fbPackages + pkgRefPackages + paketPackages
     let pkgRefs = packages |> Set.map (fun x -> x.Id)
-    let hasTests = assemblyRef.toString.EndsWith(".tests")
+    let hasTests = assemblyRef.toString.EndsWith("tests")
 
     { Packages = packages
       Project = { Repository = repoRef

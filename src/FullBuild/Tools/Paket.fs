@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ open Anthology
 open System.IO
 open IoHelpers
 open Collections
+open Exec
 
 let private parseContent (lines : string seq) =
     seq {
@@ -32,7 +33,7 @@ let private parseContent (lines : string seq) =
 let private updateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
     seq {
         for source in sources do
-            let sourceUri = source.toLocalOrUrl
+            let sourceUri = source.toString
             yield sprintf "source %s" sourceUri
 
         for line in lines do
@@ -67,9 +68,9 @@ let private removeDependenciesContent (lines : string seq) (packages : PackageId
 
 let private executePaketCommand cmd =
     let confDir = Env.GetFolder Env.Folder.Config
-    Exec.Exec "paket.exe" cmd confDir Map.empty |> Exec.CheckResponseCode
+    Exec "paket.exe" cmd confDir Map.empty |> CheckResponseCode
 
-let UpdateSources (sources : RepositoryUrl seq) =
+let UpdateSources (sources : RepositoryUrl list) =
     let confDir = Env.GetFolder Env.Folder.Config
     let paketDep = confDir |> GetFile "paket.dependencies"
     let oldContent = if paketDep.Exists then File.ReadAllLines (paketDep.FullName) |> Array.toSeq
@@ -87,22 +88,20 @@ let ParsePaketDependencies () =
     else
         Set.empty
 
-let AppendDependencies (packages : Package seq) =
-    let confDir = Env.GetFolder Env.Folder.Config
-    let paketDep = confDir |> GetFile "paket.dependencies"
-
-
-    let content = generateDependenciesContent packages
-    File.AppendAllLines (paketDep.FullName, content)
+let AppendDependencies (packages : Package set) =
+    if packages <> Set.empty then
+        let confDir = Env.GetFolder Env.Folder.Config
+        let paketDep = confDir |> GetFile "paket.dependencies"
+        let content = generateDependenciesContent packages
+        File.AppendAllLines (paketDep.FullName, content)
 
 let RemoveDependencies (packages : PackageId set) =
-    let confDir = Env.GetFolder Env.Folder.Config
-    let paketDep = confDir |> GetFile "paket.dependencies"
-    let content = File.ReadAllLines (paketDep.FullName)
-    let newContent = removeDependenciesContent content packages
-    File.WriteAllLines (paketDep.FullName, newContent)
-
-
+    if packages <> Set.empty then
+        let confDir = Env.GetFolder Env.Folder.Config
+        let paketDep = confDir |> GetFile "paket.dependencies"
+        let content = File.ReadAllLines (paketDep.FullName)
+        let newContent = removeDependenciesContent content packages
+        File.WriteAllLines (paketDep.FullName, newContent)
 
 
 let PaketInstall () =

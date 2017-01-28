@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -29,9 +29,14 @@ let CheckGenerateDgmlNoDependency () =
     let currFolder = TestContext.CurrentContext.TestDirectory
     try
         System.Environment.CurrentDirectory <- TestContext.CurrentContext.TestDirectory
+
         let expectedDgml = XDocument.Load(testFile "single-node.dgml")
-        let file = FileInfo(testFile "anthology-view.yaml")
-        let graph = AnthologySerializer.Load file |> Graph.from
+
+        let artifactsFile = FileInfo(testFile "view-artifacts.yaml")
+        let projectsFile = FileInfo(testFile "view-projects.yaml")
+        let artifacts = ArtifactsSerializer.Load artifactsFile
+        let projects = ProjectsSerializer.Load projectsFile
+        let graph = AnthologySerializer.Deserialize artifacts projects |> Graph.from
         let viewRepository = Views.from graph
         let projects = graph.Projects
         let goal = projects |> selectProjects ["g"]
@@ -49,15 +54,20 @@ let CheckGenerateDgmlWithDependencies () =
     try
         System.Environment.CurrentDirectory <- TestContext.CurrentContext.TestDirectory
         let expectedDgml = XDocument.Load(testFile "single-node-dependencies.dgml")
-        let file = FileInfo(testFile "anthology-view.yaml")
-        let graph = AnthologySerializer.Load file |> Graph.from
+
+        let artifactsFile = FileInfo(testFile "view-artifacts.yaml")
+        let projectsFile = FileInfo(testFile "view-projects.yaml")
+        let artifacts = ArtifactsSerializer.Load artifactsFile
+        let projects = ProjectsSerializer.Load projectsFile
+        let graph = AnthologySerializer.Deserialize artifacts projects |> Graph.from
+
         let viewRepository = Views.from graph
         let projects = graph.Projects
         let goal = projects |> selectProjects ["g"]
 
         let view = viewRepository.CreateView "test" (set ["*/g"]) true false false None false Graph.BuilderType.MSBuild
         let res = Generators.Dgml.GraphContent view.Projects true
-        printfn "%s" (res.ToString())
+
         res.ToString() |> should equal (expectedDgml.ToString())
     finally
         System.Environment.CurrentDirectory <- currFolder

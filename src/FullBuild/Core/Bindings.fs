@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ let UpdateArtifactBindingRedirects (artifactDir : DirectoryInfo) =
 
     let dllConfigs = artifactDir.GetFiles ("*.dll") |> Seq.map getAssemblyConfig
     let exeConfigs = artifactDir.GetFiles ("*.exe") |> Seq.map getAssemblyConfig
-    let templateConfig = artifactDir |> GetFile "app.template.config" |> Seq.singleton
+    let templateConfig = artifactDir |> GetFile "app.template.config" |> List.singleton
 
     exeConfigs
         |> Seq.append dllConfigs

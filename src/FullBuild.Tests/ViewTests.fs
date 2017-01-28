@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -23,16 +23,26 @@ open TestHelpers
 open Collections
 
 
+let loadGraph artifactsFile projectsFile =
+    let artifactsFile = FileInfo(testFile artifactsFile)
+    let projectsFile = FileInfo(testFile projectsFile)
+    let artifacts = ArtifactsSerializer.Load artifactsFile
+    let projects = ProjectsSerializer.Load projectsFile
+    let anthology = AnthologySerializer.Deserialize artifacts projects
+    let graph = Graph.from anthology
+    graph
+
+
+
 [<Test>]
 let CheckGenerateSolution () =
-    let anthoFile = FileInfo(testFile "anthology-simplified.yaml")
-    let antho = AnthologySerializer.Load anthoFile
-    let graph = antho |> Graph.from 
+    let graph = loadGraph "graph-artifacts.yaml" "graph-projects.yaml"
     let content = graph.Projects |> set
                                  |> GenerateSolutionContent
 
     let expectedFile = testFile "anthology-solution.txt"
     let expectedLines = System.IO.File.ReadAllLines expectedFile
+
     content |> should equal expectedLines
 
 
@@ -51,8 +61,8 @@ let CheckSingleProjectSelection () =
     //     / \ /
     //    A   B
     // 
-    let file = FileInfo(testFile "anthology-view.yaml")
-    let graph = AnthologySerializer.Load file |> Graph.from
+    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+
     let viewRepository = Views.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["g"]
@@ -75,8 +85,8 @@ let CheckClosureSelection () =
     //     / \ /
     //    A   B
     // 
-    let file = FileInfo(testFile "anthology-view.yaml")
-    let graph = AnthologySerializer.Load file |> Graph.from
+    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+
     let viewRepository = Views.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "c"; "e"; "f"; "g"]
@@ -100,8 +110,8 @@ let checkSelectAllDependencies () =
     //     / \ /
     //    A   B
     // 
-    let file = FileInfo(testFile "anthology-view.yaml")
-    let graph = AnthologySerializer.Load file |> Graph.from
+    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+
     let viewRepository = Views.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "e"; "f"; "g"]
@@ -124,8 +134,8 @@ let CheckAllReferencedBy () =
     //     / \ /
     //    A   B
     // 
-    let file = FileInfo(testFile "anthology-view.yaml")
-    let graph = AnthologySerializer.Load file |> Graph.from
+    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+
     let viewRepository = Views.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["b"; "c"; "d"; "e"; "f"; "g"]
@@ -149,8 +159,8 @@ let CheckSelect2ProjectsWithoutParentButWithCommonChildrenSourceOnly () =
     //     / \ /
     //    A   B
     // 
-    let file = FileInfo(testFile "anthology-view.yaml")
-    let graph = AnthologySerializer.Load file |> Graph.from
+    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+
     let viewRepository = Views.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "d"; "e"; "f"; "g"]
@@ -173,8 +183,8 @@ let CheckSelect2LeafProjectsSourceOnly () =
     //     / \ /
     //    A   B
     // 
-    let file = FileInfo(testFile "anthology-view.yaml")
-    let graph = AnthologySerializer.Load file |> Graph.from
+    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+
     let viewRepository = Views.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"]
@@ -197,8 +207,8 @@ let CheckSelectProjectsWithHoleSourceOnly () =
     //     / \ /
     //    A   B
     // 
-    let file = FileInfo(testFile "anthology-view.yaml")
-    let graph = AnthologySerializer.Load file |> Graph.from
+    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+
     let viewRepository = Views.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "e"; "f"; "g"]
@@ -221,8 +231,8 @@ let CheckSelectReferencedBy () =
     //     / \ /
     //    A   B
     // 
-    let file = FileInfo(testFile "anthology-view.yaml")
-    let graph = AnthologySerializer.Load file |> Graph.from
+    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+
     let viewRepository = Views.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "c"; "e"; "f"; "g"]
@@ -245,8 +255,8 @@ let CheckSelectReferencesAndReferencedBy () =
     //     / \ /
     //    A   B
     // 
-    let file = FileInfo(testFile "anthology-view.yaml")
-    let graph = AnthologySerializer.Load file |> Graph.from
+    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+
     let viewRepository = Views.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "e"; "f"; "g"]
@@ -268,8 +278,8 @@ let CheckSelectFromAppDown () =
     //     / \ /
     //    A   B
     // 
-    let file = FileInfo(testFile "anthology-view.yaml")
-    let graph = AnthologySerializer.Load file |> Graph.from
+    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+
     let viewRepository = Views.from graph
     let projects = graph.Projects
     let goal = projects |> selectProjects ["a"; "b"; "c"; "d"; "e"]

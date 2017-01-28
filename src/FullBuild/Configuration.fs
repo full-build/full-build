@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -14,27 +14,51 @@
 
 module Configuration
 
-open Anthology
 open Env
+open Anthology
+open ProjectsSerializer
 
 type WorkspaceConfiguration = 
     { Repositories : Repository list }
 
+let LoadArtifacts() : ArtifactsSerializer.Artifacts =
+    let artifactsFile = GetArtifactsFile ()
+    let artifacts = ArtifactsSerializer.Load artifactsFile
+    artifacts
+
+let LoadProjects() : ProjectsSerializer.Projects =
+    let projectsFile = GetProjectsFile ()
+    let projects = ProjectsSerializer.Load projectsFile
+    projects
+
 let LoadAnthology() : Anthology = 
-    let anthoFn = GetAnthologyFile ()
-    AnthologySerializer.Load anthoFn
+    let artifacts = LoadArtifacts()
+    let projects = LoadProjects()
 
-let SaveAnthology  = 
-    let anthoFn = GetAnthologyFile ()
-    AnthologySerializer.Save anthoFn
+    let antho = AnthologySerializer.Deserialize artifacts projects
+    antho
 
-let LoadBaseline() : Baseline =
-    let baselineFile = GetBaselineFile ()
-    BaselineSerializer.Load baselineFile
+let SaveAnthology (antho : Anthology) = 
+    let (artifacts, projects) = AnthologySerializer.Serialize antho
 
-let SaveBaseline =
-    let baselineFile = GetBaselineFile ()
-    BaselineSerializer.Save baselineFile
+    let artifactsFile = GetArtifactsFile ()
+    ArtifactsSerializer.Save artifactsFile artifacts
+
+    let projectsFile = GetProjectsFile ()
+    ProjectsSerializer.Save projectsFile projects
+
+let SaveProjectsRepository (repo : RepositoryId) (projects : Projects) =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
+    let projectsFile = repoDir |> IoHelpers.GetFile ".fbprojects"
+    ProjectsSerializer.Save projectsFile projects    
+
+let LoadProjectsRepository (repo : RepositoryId) : Projects =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
+    if not repoDir.Exists then failwithf "Can't load projects in repository %s" repo.toString
+    let projectsFile = repoDir |> IoHelpers.GetFile ".fbprojects"
+    ProjectsSerializer.Load projectsFile
 
 let LoadView (viewId :ViewId) : View =
     let viewFile = GetViewFile viewId.toString 
@@ -75,10 +99,10 @@ let private setDefaultView (viewId : ViewId) =
     System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
 
 let ViewExistsAndNotCorrupted viewName =
-    [|viewName |> Env.GetSolutionFile; 
-      viewName |> Env.GetSolutionDefinesFile; 
-      viewName |> Env.GetViewFile|]
-        |> Array.forall(fun x->x.Exists)
+    [| viewName |> Env.GetSolutionFile
+       viewName |> Env.GetSolutionDefinesFile
+       viewName |> Env.GetViewFile |] |> Array.forall(fun x -> x.Exists)
+
 let SaveView (viewId : ViewId) view (isDefault : bool option) =
     let viewFile = GetViewFile viewId.toString
     ViewSerializer.Save viewFile view
@@ -90,3 +114,21 @@ let SaveView (viewId : ViewId) view (isDefault : bool option) =
 let ViewExists viewName =
     let viewFile = GetViewFile viewName 
     viewFile.Exists
+
+let LoadBranch () : string =
+    let file = Env.GetBranchFile ()
+    let branch = System.IO.File.ReadAllText(file.FullName)
+    branch
+
+let SaveBranch (branch : string) : unit =
+    let file = Env.GetBranchFile ()
+    System.IO.File.WriteAllText(file.FullName, branch)
+
+let LoadVersion () : string =
+    let file = Env.GetVersionFile()
+    let version = System.IO.File.ReadAllText(file.FullName)
+    version
+
+let SaveVersion (version : string) : unit =
+    let file = Env.GetVersionFile()
+    System.IO.File.WriteAllText(file.FullName, version)

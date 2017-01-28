@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ open System.IO
 open IoHelpers
 open Env
 open Graph
+open Exec
 
 let generateVersionFs version =
     [|
@@ -39,23 +40,11 @@ let writeVersionMsbuild version =
     let csFile = Env.GetCsGlobalAssemblyInfoFileName()
     File.WriteAllLines(csFile.FullName, generateVersionCs version)
 
-    let versionFile = Env.GetVersionFileName()
-    File.WriteAllText(versionFile.FullName, (sprintf "%s" version))
-
-let getCurrentBuildVersion () =
-    let versionFile = Env.GetVersionFileName()
-    if versionFile.Exists then 
-        versionFile.FullName |> File.ReadAllText |> Some
-    else 
-        None
-
-let buildSkip (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
+let buildSkip (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
     ()
 
-let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
-    match version with
-    | Some givenVersion -> writeVersionMsbuild givenVersion
-    | _ -> ()
+let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
+    writeVersionMsbuild version
 
     let target = if clean then "Rebuild"
                  else "Build"
@@ -70,8 +59,8 @@ let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multith
     let argConfig = sprintf "/p:Configuration=%s" config
     let args = sprintf "/nologo %s %s %s %A" argTarget argMt argConfig viewFile.Name
 
-    if Env.IsMono () then Exec.Exec "xbuild" args wsDir Map.empty |> Exec.CheckResponseCode
-    else Exec.Exec "msbuild" args wsDir Map.empty |> Exec.CheckResponseCode
+    if Env.IsMono () then Exec "xbuild" args wsDir Map.empty |> CheckResponseCode
+    else Exec "msbuild" args wsDir Map.empty |> CheckResponseCode
 
 let chooseBuilder (builderType : BuilderType) msbuildBuilder skipBuilder =
     let builder = match builderType with
@@ -79,6 +68,6 @@ let chooseBuilder (builderType : BuilderType) msbuildBuilder skipBuilder =
                   | BuilderType.Skip -> skipBuilder
     builder
 
-let BuildWithBuilder (builder : BuilderType) (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string option) =
+let BuildWithBuilder (builder : BuilderType) (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
     (chooseBuilder builder buildMsbuild buildSkip) viewFile config clean multithread version
 

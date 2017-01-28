@@ -1,6 +1,6 @@
 source https://www.nuget.org/api/v2/
-nuget fsunit
 nuget FSharp.Configuration
 nuget FSharp.Core
-nuget Mono.Cecil
 nuget FSharp.Data
+nuget Zlib.Portable
+nuget fsunit

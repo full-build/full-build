@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@ open IoHelpers
 open Env
 open System.IO
 open Graph
-
-let private checkErrorCode (execResult:Exec.ExecResult) =
-    if execResult.ResultCode < 0 then failwithf "Process failed with error %d" execResult.ResultCode
+open Exec
 
 
 type private PublishApp =
     { Name : string
-      App : Application }
+      App : Application 
+      Version : string }
 
 
 let private publishCopy (app : PublishApp) =
@@ -36,8 +35,8 @@ let private publishCopy (app : PublishApp) =
             let projFile = repoDir |> GetFile project.ProjectFile
             let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name projFile.FullName
 
-            if Env.IsMono () then Exec.Exec "xbuild" args wsDir Map.empty |> checkErrorCode
-            else Exec.Exec "msbuild" args wsDir Map.empty |> checkErrorCode
+            if Env.IsMono () then Exec "xbuild" args wsDir Map.empty |> CheckResponseCode
+            else Exec "msbuild" args wsDir Map.empty |> CheckResponseCode
 
             let appDir = GetFolder Env.Folder.AppOutput
             let artifactDir = appDir |> GetSubDirectory app.Name
@@ -46,8 +45,8 @@ let private publishCopy (app : PublishApp) =
             printfn "[WARNING] Can't publish application %A without repository" app.Name
 
 let private publishZip (app : PublishApp) =
-    let tmpApp = { Name = ".tmp-" + app.Name
-                   App = app.App }
+    let tmpApp = { app
+                   with Name = ".tmp-" + app.Name }
     publishCopy tmpApp
 
     let appDir = GetFolder Env.Folder.AppOutput
@@ -58,8 +57,8 @@ let private publishZip (app : PublishApp) =
     System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Optimal, false)
 
 let private publishDocker (app : PublishApp) =
-    let tmpApp = { Name = ".tmp-docker"
-                   App = app.App }
+    let tmpApp = { app
+                   with Name = ".tmp-docker" }
     publishCopy tmpApp
 
     let appDir = GetFolder Env.Folder.AppOutput
@@ -68,12 +67,16 @@ let private publishDocker (app : PublishApp) =
     if targetFile.Exists then targetFile.Delete()
 
     let dockerArgs = sprintf "build -t %s ." app.Name
-    Exec.Exec "docker" dockerArgs sourceFolder Map.empty |> checkErrorCode
+    Exec "docker" dockerArgs sourceFolder Map.empty |> CheckResponseCode
     sourceFolder.Delete(true)
 
+    let imgFile = appDir |> GetSubDirectory app.Name
+    let saveArgs = sprintf "save -o %s" imgFile.FullName
+    Exec "docker" saveArgs sourceFolder Map.empty |> CheckResponseCode
+
 let private publishNuget (app : PublishApp) =
-    let tmpApp = { Name = ".tmp-nuget-" + app.Name
-                   App = app.App }
+    let tmpApp = { app
+                   with Name = ".tmp-nuget-" + app.Name }
     publishCopy tmpApp
 
     let appDir = GetFolder Env.Folder.AppOutput
@@ -86,23 +89,24 @@ let private publishNuget (app : PublishApp) =
 
     match nuspec with
     | Some nuspecFile ->
-        let version =  defaultArg (Builders.getCurrentBuildVersion()) "1.0.0"
+        Generators.Packagers.UpdateDependencies nuspecFile
+        let version = app.Version
         let nugetArgs = sprintf "pack %s -version %s" nuspecFile.Name version
-        Exec.Exec "nuget" nugetArgs sourceFolder Map.empty |> Exec.CheckResponseCode
+        Exec "nuget" nugetArgs sourceFolder Map.empty |> CheckResponseCode
         targetFolder.Create()
         for file in sourceFolder.EnumerateFiles("*.nupkg") do 
             file.MoveTo(Path.Combine(targetFolder.FullName, file.Name)) |> ignore
         sourceFolder.Delete(true)
     | None -> failwith (sprintf "No nuspec found for the application %s" app.Name)
 
-let PublishWithPublisher (app : Application) =
+let PublishWithPublisher (version : string) (app : Application) =
     let publisher = 
         match app.Publisher with
         | PublisherType.Copy -> publishCopy
         | PublisherType.Zip -> publishZip
         | PublisherType.Docker -> publishDocker
         | PublisherType.NuGet -> publishNuget
-    { Name = app.Name; App = app }
+    { Name = app.Name; App = app; Version = version }
         |> publisher
 
 

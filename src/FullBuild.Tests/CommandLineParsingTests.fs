@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -22,18 +22,18 @@ open Anthology
 [<Test>]
 let CheckErrorInvoked () =
     let result = CLI.CommandLine.Parse [ "workspace"; "blah blah" ]
-    let expected = Command.Error MainCommand.Unknown
+    let expected = Command.Error MainCommand.Usage
     result |> should equal expected
 
 [<Test>]
 let CheckUsageInvoked () =
     let result = CLI.CommandLine.Parse [ "help" ]
-    let expected = Command.Usage
+    let expected = Command.Usage MainCommand.Unknown
     result |> should equal expected
 
 
 [<Test>]
 let CheckRepositoriesConvert () =
     let result = CLI.CommandLine.Parse [ "convert"; "*" ]
-    let expected = Command.ConvertRepositories { Filters = set ["*"] }
+    let expected = Command.ConvertRepositories { Filters = set ["*"]; Check = false }
     result |> should equal expected

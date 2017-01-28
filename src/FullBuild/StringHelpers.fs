@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -44,3 +44,6 @@ let GenerateGuidFromString (input : string) =
 let containsIgnoreCase (x : string) (y : string) =
     x.IndexOf(y, System.StringComparison.CurrentCultureIgnoreCase) <> -1
 
+let toVSGuid (guid : System.Guid) =
+    guid.ToString("D").ToUpperInvariant()
+ 

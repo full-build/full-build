@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -56,8 +56,17 @@ with
                                // this will add new repositories if necessary and discard unchanged repositories
                                // in fine, we only have new repositories and modified repositories
                                let baselineRepo = Baselines.from this.Graph
-                               let newBaseline = baselineRepo.CreateBaseline true
-                               newBaseline - baselineRepo.Baseline
+                               let newBaseline = baselineRepo.CreateBaseline "temp"
+                               let oldBaseline = baselineRepo.FindBaseline ()
+                               let delta = newBaseline - oldBaseline
+
+                               // if master repository is modified then all repositories are modified !
+                               let isFullRebuild = delta |> Seq.exists (fun x -> x.Repository.Name = this.Graph.MasterRepository.Name)
+                                                   || oldBaseline.IsHead
+
+                               if isFullRebuild then newBaseline.Bookmarks
+                               else delta
+
                            else Set.empty
 
         let modProjects = modBookmarks |> Set.map (fun x -> x.Repository.Projects)

@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,13 +17,11 @@ open Anthology
 open IoHelpers
 open System.IO
 open System.Xml.Linq
-open System.Linq
-open XmlHelpers
 open Env
 open Collections
 open Simplify
 
-let private installPackages (nugets : RepositoryUrl list) =
+let InstallPackages (nugets : RepositoryUrl list) =
     Tools.Paket.UpdateSources nugets
     Tools.Paket.PaketInstall ()
     Generators.Package.GeneratePackageImports()
@@ -46,21 +44,8 @@ let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
     let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
     let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
     let files = Seq.append dlls exes |> Seq.map AssemblyId.from
-                                     |> Set
+                                     |> Set.ofSeq
     Set.difference files fxDependencies
-
-let private simplifyAnthologyWithPackages (antho) =
-    let promotedPackageAntho = SimplifyAnthologyWithoutPackage antho
-
-    let packages = promotedPackageAntho.Projects |> Set.map (fun x -> x.PackageReferences)
-                                                 |> Set.unionMany
-    let package2packages = Parsers.PackageRelationship.BuildPackageDependencies packages
-    let allPackages = package2packages |> Seq.map (fun x -> x.Key)
-    let package2files = allPackages |> Seq.map (fun x -> (x, gatherAllAssemblies x))
-                                    |> Map
-    let newAntho = SimplifyAnthologyWithPackages antho package2files package2packages
-    removeUnusedPackages newAntho
-    newAntho
 
 let RestorePackages () =
     Tools.Paket.PaketRestore ()
@@ -71,7 +56,11 @@ let UpdatePackages () =
     Generators.Package.GeneratePackageImports()
 
 let Simplify (antho : Anthology) =
-    installPackages antho.NuGets
-
-    let newAntho = simplifyAnthologyWithPackages antho
+    let packages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
+                                  |> Set.unionMany
+    let package2packages = Parsers.PackageRelationship.BuildPackageDependencies packages
+    let package2files = package2packages |> Seq.map (fun kvp -> (kvp.Key, gatherAllAssemblies kvp.Key))
+                                         |> Map
+    let newAntho = SimplifyAnthologyWithPackages antho package2files package2packages
+    removeUnusedPackages newAntho
     newAntho

@@ -1,4 +1,3 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -20,10 +19,10 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>bin</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin/fullbuild.tests.xml</DocumentationFile>
+    <DocumentationFile>bin\fullbuild.tests.xml</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
   </PropertyGroup>
@@ -31,10 +30,10 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>bin</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin/fullbuild.tests.xml</DocumentationFile>
+    <DocumentationFile>bin\fullbuild.tests.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -52,6 +51,7 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
+  <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -59,7 +59,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="../../.full-build/full-build.targets" />
   <ItemGroup>
     <Compile Include="TestHelpers.fs" />
     <Compile Include="CollectionsTests.fs" />
@@ -68,11 +67,12 @@
     <Compile Include="PatternMatchingTests.fs" />
     <Compile Include="EnvTests.fs" />
     <Compile Include="ExecTests.fs" />
+    <Compile Include="TagTests.fs" />
     <Compile Include="GraphFactoryTests.fs" />
     <Compile Include="MsBuildHelpersTests.fs" />
     <Compile Include="AnthologyTests.fs" />
-    <Compile Include="BaselineSerializerTests.fs" />
-    <Compile Include="AnthologySerializerTests.fs" />
+    <Compile Include="ArtifactsSerializerTests.fs" />
+    <Compile Include="ProjectsSerializerTests.fs" />
     <Compile Include="ViewSerializerTests.fs" />
     <Compile Include="ProjectParsingTests.fs" />
     <Compile Include="CommandLineParsingTests.fs" />
@@ -84,10 +84,28 @@
     <Compile Include="IndexationTests.fs" />
     <Compile Include="Integration.fs" />
     <None Include="app.config" />
-    <None Include="anthology-graph.yaml">
+    <None Include="view-artifacts.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="anthology-view.yaml">
+    <None Include="view-projects.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="graph-artifacts.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="graph-projects.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="indexed-artifacts.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="indexed-projects.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="simplified-artifacts.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="simplified-projects.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="single-node-dependencies.dgml">
@@ -97,9 +115,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="ProjectWithInvalidRefs.fsproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="anthology-indexed.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="paket-simplified.dependencies">
@@ -126,9 +141,6 @@
     <None Include="anthology-solution.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="anthology-simplified.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="single-node.dgml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -144,6 +156,6 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/projects/fullbuild.targets" />
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/fsunit/package.targets" />
+  <Import Project="$(SolutionDir)\.full-build\projects\fullbuild.targets" />
+  <Import Project="$(SolutionDir)\.full-build\packages\fsunit\package.targets" />
 </Project>

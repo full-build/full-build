@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -84,16 +84,14 @@ with
 type RepositoryUrl = private RepositoryUrl of string
 with
     member this.toString = (fun (RepositoryUrl x) -> x)this
-    member this.toLocalOrUrl = let uri = Uri(this.toString)
-                               let sourceUri = match uri.Scheme with
-                                               | x when x = Uri.UriSchemeFile -> uri.LocalPath
-                                               | _ -> uri.ToString()
-                               sourceUri
+//    member this.toLocalOrUrl = let uri = Uri(this.toString)
+//                               let sourceUri = match uri.Scheme with
+//                                               | x when x = Uri.UriSchemeFile -> uri.LocalPath
+//                                               | _ -> uri.ToString()
+//                               sourceUri
 
     static member from (maybeUri : Uri) = RepositoryUrl.from (maybeUri.ToString())
-    static member from (maybeUri : string) = let uri = Uri(maybeUri.ToLowerInvariant())
-                                             if uri.IsWellFormedOriginalString() then RepositoryUrl (maybeUri.ToLowerInvariant())
-                                             else failwithf "Invalid uri %A" uri
+    static member from (maybeUri : string) = RepositoryUrl (maybeUri.ToLowerInvariant())
 
 [<RequireQualifiedAccess>]
 type BuilderType =
@@ -131,7 +129,7 @@ with
 
 type ProjectUniqueId = private ProjectUniqueId of Guid
 with
-    member this.toString = (fun (ProjectUniqueId x) -> x.ToString("D")) this
+    member this.toString = (fun (ProjectUniqueId x) -> x |> StringHelpers.toVSGuid) this
     static member from (guid : Guid) = ProjectUniqueId guid
 
 type ProjectId = private ProjectId of string
@@ -142,7 +140,7 @@ with
 
 type ProjectType = private ProjectType of Guid
 with
-    member this.toString = (fun (ProjectType x) -> x.ToString("D")) this
+    member this.toString = (fun (ProjectType x) -> x |> StringHelpers.toVSGuid) this
     static member from (guid : Guid) = ProjectType guid
 
 type FxInfo = private FxInfo of string option
@@ -209,14 +207,17 @@ type Application =
 
 type Anthology =
     { MinVersion : string
-      Artifacts : string
+      Binaries : string
       NuGets : RepositoryUrl list
       Vcs : VcsType
       MasterRepository : Repository
       Repositories : BuildableRepository set
-      Projects : Project set
       Applications : Application set
+      Projects : Project set
       Tester : TestRunnerType }
+
+
+
 
 type Baseline =
     { Incremental : bool

@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ let GenerateProjectArtifacts () =
     let repos = graph.Repositories
 
     let builder2repos = repos |> Seq.groupBy (fun x -> x.Builder)
-
     for (builder, repos) in builder2repos do
         let projects = repos |> Seq.map (fun x -> x.Projects)
                              |> Set.unionMany

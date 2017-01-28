@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ let Add (cmd : CLI.Commands.AddView) =
                                          Graph.BuilderType.MSBuild
 
     let projects = view.Projects
-    if projects = Set.empty then printfn "WARNING: empty project selection"
+    if projects = Set.empty then printfn "WARNING: Empty project selection"
 
     // save view information first
     view.Save None
@@ -86,9 +86,14 @@ let Build (cmd : CLI.Commands.BuildView) =
                          | None -> failwith "Can't determine view name"
                          | Some x -> x
 
+    let version = match cmd.Version with
+                  | Some x -> x
+                  | None -> "0.0.0"
+    Configuration.SaveVersion version
+
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
-    Core.Builders.BuildWithBuilder view.Builder slnFile cmd.Config cmd.Clean cmd.Multithread cmd.Version
+    Core.Builders.BuildWithBuilder view.Builder slnFile cmd.Config cmd.Clean cmd.Multithread version
 
 let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
@@ -104,7 +109,7 @@ let Alter (cmd : CLI.Commands.AlterView) =
                                             view.Builder
 
     let projects = depView.Projects
-    if projects = Set.empty then printfn "WARNING: empty project selection"
+    if projects = Set.empty then printfn "WARNING: Empty project selection"
 
     depView.Save cmd.Default
 

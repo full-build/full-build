@@ -1,0 +1,23 @@
+os: Visual Studio 2015
+
+environment:
+  GITHUB_TOKEN:
+    secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
+
+skip_tags: true
+
+shallow_clone: true
+
+build_script:
+  - cmd: |
+      prepare.cmd
+      qa-setup.cmd
+      qa-init.cmd
+
+test: off
+  
+notifications:
+  - provider: Slack
+    incoming_webhook:
+      secure: gA2eVzMFIFRHZpWx6bDTbKCKGFOWEe3zRukzC4PTWklKnLTsIzm/TLqa/oGgPSFiSR7DsBLKpp1Tkd4eIEy2QlzqAwFx4IknxGh4igmbB7k=
+    channel: '#tests'

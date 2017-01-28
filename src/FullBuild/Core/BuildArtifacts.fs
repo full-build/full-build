@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,18 +16,15 @@ module Core.BuildArtifacts
 open System.IO
 open IoHelpers
 open Graph
+open Collections
 
 
-let Publish (graph : Graph) (branch : string option) buildnum hash =
-    let graph = Configuration.LoadAnthology () |> Graph.from
-    let mainRepo = graph.MasterRepository
-    let wsDir = Env.GetFolder Env.Folder.Workspace
+let Publish (graph : Graph) (tagInfo : Baselines.TagInfo) =
+    let tag = tagInfo.Format()
     let appDir = Env.GetFolder Env.Folder.AppOutput
-    let versionDir = DirectoryInfo(graph.ArtifactsDir) |> GetSubDirectory hash
+    let versionDir = DirectoryInfo(graph.ArtifactsDir) |> GetSubDirectory tag
     let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
-    let buildTag = match branch with
-                      | None -> sprintf "%s:%s:default" buildnum hash
-                      | Some br -> sprintf "%s:%s:%s" buildnum hash br
+    let versionLine = sprintf "%s:%s:%s" tagInfo.Version tag tagInfo.Branch
 
     try
         let doPublish = not versionDir.Exists
@@ -42,21 +39,17 @@ let Publish (graph : Graph) (branch : string option) buildnum hash =
             let appTargetDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_APPS_FOLDER
             IoHelpers.CopyFolder appDir appTargetDir true
 
-            // publish
-            Try (fun () -> Tools.Vcs.Push wsDir mainRepo)
-
             tmpVersionDir.MoveTo(versionDir.FullName)
         else
             printfn "[WARNING] Build output already exists - skipping"
 
         let latestVersionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
 
-        File.AppendAllLines(latestVersionFile.FullName, [buildTag])
-        printfn "[version] %s" hash
-        for app in appDir |> EnumarateFiles do
+        File.AppendAllLines(latestVersionFile.FullName, [versionLine])
+        for app in appDir |> EnumerateChildren do
             printfn "[appversion] %s" app.Name
             let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
-            File.AppendAllLines(versionFile.FullName, [buildTag])
+            File.AppendAllLines(versionFile.FullName, [versionLine])
     with
         _ -> versionDir.Refresh ()
              if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")
@@ -69,67 +62,28 @@ let Publish (graph : Graph) (branch : string option) buildnum hash =
 let FetchVersionsForArtifact (graph : Graph) (app : Application) =
     let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
     let lines = System.IO.File.ReadAllLines (versionFile.FullName)
+                |> Seq.map (fun x -> x.Split(':').[1])
 
-    let toVersion (line : string) =
-        line.Split(':').[0]
+    let tryParseTag x =
+        try
+            x |> Baselines.TagInfo.Parse |> Some
+        with
+            _ -> None
 
-    lines |> Seq.map toVersion
+    lines |> Seq.map tryParseTag
+          |> Seq.choose id
+          |> List.ofSeq
 
-let PullReferenceBinaries (graph : Graph) version =
-    let artifactDir = graph.ArtifactsDir |> DirectoryInfo
+
+
+let PullReferenceBinaries (artifacts : string) version =
+    let artifactDir = artifacts |> DirectoryInfo
 
     let versionDir = artifactDir |> GetSubDirectory version
     if versionDir.Exists then
-        DisplayHighlight (sprintf "Getting binaries %s" version)
+        DisplayInfo (sprintf "Copying binaries %s" version)
         let sourceBinDir = versionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
         let targetBinDir = Env.GetFolder Env.Folder.Bin
         IoHelpers.CopyFolder sourceBinDir targetBinDir false
     else
-        DisplayHighlight "[WARNING] No reference binaries found"
-
-
-
-let findLatestVersion (graph : Graph) (repoVersions : string list) =
-    // get built versions in a list => first is the most recent
-    let versionsFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
-    let builtVersions = File.ReadAllLines(versionsFile.FullName) |> Seq.map (fun x -> x.Split(':')) 
-                                                                 |> List.ofSeq
-                                                                 |> List.rev
-    let versionsInMaster = builtVersions |> List.filter (fun x -> x.[2] = graph.MasterRepository.Branch)
-    if versionsInMaster |> List.length = 0 then failwith "Can't find compatible version"
-    let latestVersion = versionsInMaster.[0].[1]
-    latestVersion
-
-let findMostRecentVersion (graph : Graph) (repoVersions : string list) =
-    // get built versions in a list => first is the most recent
-    let versionsFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
-    let builtVersions = File.ReadAllLines(versionsFile.FullName) |> Seq.map (fun x -> x.Split(':')) 
-                                                                 |> List.ofSeq
-                                                                 |> List.rev
-    let fbVersions = builtVersions |> List.map (fun x -> x.[1])
-
-    let hashIsCompiled hash =
-        repoVersions |> List.contains hash
-
-    let rec findHash versions =
-        match versions with
-        | version :: tail -> if hashIsCompiled version then Some version
-                             else findHash tail
-        | [] -> None
-
-    let latestBuiltVersion = findHash fbVersions
-    match latestBuiltVersion with
-    | Some x -> x
-    | _ -> let versionsInMaster = builtVersions |> List.filter (fun x -> x.[2] = graph.MasterRepository.Branch)
-           if versionsInMaster |> List.length = 0 then failwith "Can't find compatible version"
-           let latestVersion = versionsInMaster.[0].[1]
-           printfn "WARNING: can't find compatible version - using latest build from %A" graph.MasterRepository.Branch
-           latestVersion
-
-let PullLatestBinaries (graph : Graph) (repoVersions : string list) =
-    let mostRecentVersion = findLatestVersion graph repoVersions
-    PullReferenceBinaries graph mostRecentVersion
-
-let PullLatestCompatibleBinaries (graph : Graph) (repoVersions : string list) =
-    let mostRecentVersion = findMostRecentVersion graph repoVersions
-    PullReferenceBinaries graph mostRecentVersion
+        DisplayInfo "[WARNING] No reference binaries found"

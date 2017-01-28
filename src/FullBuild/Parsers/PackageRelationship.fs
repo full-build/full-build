@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ open System.Linq
 open System.Xml.Linq
 open Collections
 open XmlHelpers
-
+open Env
 
 let GetFrameworkDependencies (xnuspec : XDocument) =
     xnuspec.Descendants()
         |> Seq.filter (fun x -> x.Name.LocalName = "frameworkAssembly")
         |> Seq.map (fun x -> !> x.Attribute(NsNone + "assemblyName") : string)
         |> Seq.map AssemblyId.from
-        |> set
+        |> Set.ofSeq
 
 let GetPackageDependencies (xnuspec : XDocument) =
     let pkgsDir = Env.GetFolder Env.Folder.Package
@@ -61,6 +61,12 @@ let rec BuildPackageDependencies (packages : PackageId seq) =
 let ComputePackagesRoots (package2packages : Map<PackageId, PackageId set>) =
     let roots = package2packages |> Map.filter (fun pkg _ -> not <| Map.exists (fun _ files -> files |> Set.contains pkg) package2packages)
                                  |> Seq.map (fun x -> x.Key)
-                                 |> Set
+                                 |> Set.ofSeq
     roots
 
+let GetDependencyNuspec packageName = 
+    Env.GetFolder Folder.Package
+    |> GetSubDirectory packageName
+    |> GetFile(sprintf "%s.nuspec" packageName)
+    |> fun x -> x.FullName
+      

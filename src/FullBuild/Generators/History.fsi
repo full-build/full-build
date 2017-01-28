@@ -1,5 +1,5 @@
 ﻿
-//   Copyright 2014-2016 Pierre Chalamet
+//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -22,6 +22,5 @@ type HistoryType =
 
 
 val Save: histType : HistoryType
-       -> version : string
        -> revisions : (Graph.Repository*string list) seq
        -> unit

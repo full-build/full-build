@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ let TransformSingleAssemblyToProjectOrPackage (package2files : Map<PackageId, As
     let file2package = package2files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
                                      |> Map.toSeq
                                      |> Seq.map (fun (id, nugetFiles) -> (nugetFiles |> Seq.head, id))
-                                     |> Map
+                                     |> Map.ofSeq
 
     let rec convertAssemblies (projects : Project set) (assemblies : AssemblyId list) (project : Project) : Project =
         match assemblies with
@@ -64,7 +64,8 @@ let TransformSingleAssemblyToProjectOrPackage (package2files : Map<PackageId, As
 
 
 let TransformPackageToProject (projects : Project set) : Project set =
-    let packages = projects |> Seq.collect (fun x -> x.PackageReferences) |> Set
+    let packages = projects |> Seq.collect (fun x -> x.PackageReferences) 
+                            |> Set.ofSeq
 
     let pkg2prj = Map.ofSeq <| seq {
         for package in packages do
@@ -78,9 +79,13 @@ let TransformPackageToProject (projects : Project set) : Project set =
     let res = seq {
         for project in projects do
             let selection = pkg2prj |> Seq.filter (fun x ->project.PackageReferences |> Set.contains x.Key)
-            let removeAssembly = selection |> Seq.map (fun x -> AssemblyId.from x.Key.toString) |> Set
-            let removePackage = selection |> Seq.map (fun x -> x.Key) |> Set
-            let addProject = selection |> Seq.map (fun x -> x.Value) |> Set
+                                    |> List.ofSeq
+            let removeAssembly = selection |> Seq.map (fun x -> AssemblyId.from x.Key.toString) 
+                                           |> Set.ofSeq
+            let removePackage = selection |> Seq.map (fun x -> x.Key) 
+                                          |> Set.ofSeq
+            let addProject = selection |> Seq.map (fun x -> x.Value) 
+                                       |> Set.ofSeq
             let newProject = { project
                                with AssemblyReferences = Set.difference project.AssemblyReferences removeAssembly
                                     PackageReferences = Set.difference project.PackageReferences removePackage
@@ -94,7 +99,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
     let file2package = package2files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
                                      |> Map.toSeq
                                      |> Seq.map (fun (id, nugetFiles) -> (nugetFiles |> Seq.head, id))
-                                     |> Map
+                                     |> Map.ofSeq
 
     // convert assemblies to
     let rec convertPackageFiles (file2packageScoped : Map<AssemblyId, PackageId>) (newProjects : ProjectId set) (newPackages : PackageId set) (files : AssemblyId list) =
@@ -138,7 +143,7 @@ let TransformPackagesToProjectsAndPackages (package2packages : Map<PackageId, Pa
             let simplifiedPackagesRoot = Parsers.PackageRelationship.ComputePackagesRoots simplifiedUsedPackages
             let removeAssemblies = projects |> Seq.filter (fun x -> newProjects |> Set.contains x.ProjectId)
                                             |> Seq.map (fun x -> x.Output)
-                                            |> Set
+                                            |> Set.ofSeq
             let newProject = { project
                                with PackageReferences = simplifiedPackagesRoot
                                     AssemblyReferences = Set.difference project.AssemblyReferences removeAssemblies

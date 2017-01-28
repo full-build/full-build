@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ open Graph
 let consoleLock = System.Object()
 
 let printClone ((repo, execResult) : (Repository * Exec.ExecResult)) =
-    lock consoleLock (fun () -> IoHelpers.DisplayHighlight repo.Name
+    lock consoleLock (fun () -> IoHelpers.DisplayInfo repo.Name
                                 execResult |> Exec.PrintOutput)
 
 let private cloneRepoAndInit wsDir shallow (repo : Repository) =

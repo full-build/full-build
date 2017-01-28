@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,6 +17,18 @@ module Baselines
 open Collections
 open Graph
 
+[<RequireQualifiedAccess; Sealed>]
+type TagInfo =
+    member Branch: string
+
+    member Version: string
+
+    member Format: unit
+                -> string
+
+    static member Parse: string
+                      -> TagInfo
+
 type [<Sealed>] Bookmark = interface System.IComparable
 with
     member Repository : Repository
@@ -24,16 +36,23 @@ with
 
 and [<Sealed>] Baseline = interface System.IComparable
 with
-    member IsIncremental: bool
+    member Info: TagInfo
+
     member Bookmarks: Bookmark set
+
+    member IsHead : bool
+
     static member (-): Baseline*Baseline
                     -> Bookmark set
-    member Save: unit
+    member Save: comment : string
               -> unit
 
+
 and [<Sealed>] Factory =
-    member Baseline : Baseline
-    member CreateBaseline: incremental : bool
+    member FindBaseline: unit 
+                      -> Baseline
+
+    member CreateBaseline: buildNumber : string
                         -> Baseline
 
 val from: graph : Graph

@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ let private projectToProjectType (filename : string) =
     let file = FileInfo(filename)
     let ext2projType = Map [ (".csproj", "fae04ec0-301f-11d3-bf4b-00c04f79efbc")
                              (".fsproj", "f2a71f9b-5d33-465a-a702-920d77279786")
-                             (".vbproj", "f184b08f-c81c-45f6-a57f-5abd9991f28f") ]
+                             (".vbproj", "f184b08f-c81c-45f6-a57f-5abd9991f28f") 
+                             (".pssproj", "f5034706-568f-408a-b7b3-4d38c6db8a32")]
     let prjType = ext2projType.[file.Extension]
     prjType
 
@@ -51,7 +52,7 @@ let GenerateSolutionContent (projects : Project set) =
             yield "EndProject"
 
         let repositories = projects |> Set.map (fun x -> let guid = GenerateGuidFromString (x.Repository.Name)
-                                                         (x.Repository, guid.ToString("D")))
+                                                         (x.Repository, guid |> StringHelpers.toVSGuid))
                                     |> Map
         for repository in repositories do
             let repo = repository.Key.Name
@@ -91,4 +92,4 @@ let GenerateSolutionDefines (projects : Project set) =
             XAttribute(NsNone + "Condition", "'$(FullBuild_Config)' == ''"),
                 XElement (NsMsBuild + "PropertyGroup",
                     XElement(NsMsBuild + "FullBuild_Config", "Y"),
-                    projects |> Seq.map (fun x -> XElement (NsMsBuild + (MsBuildProjectPropertyName x), "Y") ) ) ) )
+                        projects |> Seq.map (fun x -> XElement (NsMsBuild + (MsBuildProjectPropertyName x), "Y") ) ) ) )

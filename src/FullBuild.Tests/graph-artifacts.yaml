@@ -1,0 +1,23 @@
+artifacts:
+  minversion: 0.0.0.0
+  binaries: C:\Binaries
+  nugets:
+    - nuget: https://www.nuget.org/api/v2/
+  mainrepository:
+    uri: https://github.com/pchalamet/cassandra-sharp-full-build
+  repositories:
+    - repo: cassandra-sharp
+      type: git
+      uri: https://github.com/pchalamet/cassandra-sharp
+    - repo: cassandra-sharp-contrib
+      type: git
+      uri: https://github.com/pchalamet/cassandra-sharp-contrib
+  apps:
+    - name: cqlplus
+      type: zip
+      projects: 
+        - project: cqlplus
+    - name: cassandrasharp-log4net
+      type: zip
+      projects: 
+        - project: cassandrasharp.contrib.log4net

@@ -21,7 +21,7 @@ environment:
   GITHUB_TOKEN:
     secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
 
-version: 3.1.{build}
+version: 4.0.{build}
 
 skip_tags: true
 
@@ -47,10 +47,11 @@ init:
       }
       Write-Host "Building version $env:APPVEYOR_BUILD_VERSION $env:BUILD_VERSION_STATUS"
 
-shallow_clone: true
+shallow_clone: false
 
 build_script:
-  - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION% %BUILD_VERSION_STATUS%
+  - cmd: build.cmd %APPVEYOR_BUILD_VERSION% %BUILD_VERSION_STATUS%
+  - cmd: run-qa.cmd
   
 test_script:
   - ps: . .\Push-TestResult.ps1

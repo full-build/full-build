@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -143,7 +143,7 @@ let private graphCategories (repos : Repository set) =
             XAttribute(NsNone + "Background", value))
 
     seq {
-        yield! (allCategories |> Seq.map generateCategory)
+        yield! (allCategories |> List.map generateCategory)
 
         for repo in repos do
             yield XElement(NsDgml + "Category",
@@ -172,7 +172,7 @@ let private graphProperties () =
             XAttribute(NsNone + "Label", label),
             XAttribute(NsNone + "DataType", dataType))
 
-    allProperties |> Seq.map generateProperty
+    allProperties |> List.map generateProperty
 
 let private graphStyles () =
     XElement(NsDgml + "Styles",

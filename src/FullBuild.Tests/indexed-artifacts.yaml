@@ -1,0 +1,16 @@
+artifacts:
+  minversion: 0.0.0.0
+  binaries: C:\Binaries
+  nugets:
+    - nuget: https://www.nuget.org/api/v2/
+  repositories:
+    - repo: .full-build
+      type: git
+      uri: https://github.com/pchalamet/cassandra-sharp-full-build
+    - repo: cassandra-sharp
+      type: git
+      uri: https://github.com/pchalamet/cassandra-sharp
+    - repo: cassandra-sharp-contrib
+      type: git
+      uri: https://github.com/pchalamet/cassandra-sharp-contrib
+  apps: []

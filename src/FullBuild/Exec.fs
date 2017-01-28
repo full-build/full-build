@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -25,11 +25,10 @@ type private MonitorCommand =
     | Err of string list
     | End of int
 
-type ExecResult = {
-    ResultCode: int
-    Out: string list
-    Error: string list
-}
+type ExecResult = 
+    { ResultCode: int
+      Out: string list
+      Error: string list }
 
 let private defaultPSI (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) redirect =
     let psi = ProcessStartInfo (FileName = command,
@@ -84,8 +83,13 @@ let PrintOutput execResult =
     execResult
 
 let private resultToError execResult = 
-    if execResult.ResultCode <> 0 then Some (execResult.ResultCode |> sprintf "Process failed with error %d")
+    if execResult.ResultCode <> 0 then execResult.ResultCode |> sprintf "Operation failed with error %d" |> Some
     else None
+
+let GetOutput execResult =
+    match execResult |> resultToError with
+    | Some error -> failwith error
+    | None -> execResult.Out
 
 let CheckResponseCode execResult =
     match execResult |> resultToError with

@@ -1,0 +1,65 @@
+﻿projects:
+    - guid: 4c116d6d-22ff-4b9c-80fd-de0e6d0a96b6
+      file: src/a.csproj
+      out: a.dll
+      fx: 
+        version: v4.5
+      assemblies: []
+      packages: []
+      projects: []
+    - guid: 386c73d8-95dc-4684-ba6c-20f4cd63e42a
+      file: src/b.csproj
+      out: b.dll
+      fx: 
+        version: v4.5
+      assemblies: []
+      packages: []
+      projects: []
+    - guid: 2904bc7b-8b30-41f1-8160-02b5281704b4
+      file: src/c.csproj
+      out: c.dll
+      fx: 
+        version: v4.5
+      assemblies: []
+      packages: []
+      projects:
+        - project: a
+        - project: b
+    - guid: 209eab33-f903-4195-bc2d-03d086129168
+      file: src/d.csproj
+      out: d.dll
+      fx: 
+        version: v4.5
+      assemblies: []
+      packages: []
+      projects:
+        - project: b
+    - guid: d7b81c18-45df-44dc-853d-8cab07e1ad97
+      file: src/e.csproj
+      out: e.dll
+      fx: 
+        version: v4.5
+      assemblies: []
+      packages: []
+      projects:
+        - project: c
+    - guid: 78c2e0d4-b410-4702-af93-71db7db228d0
+      file: src/f.csproj
+      out: f.dll
+      fx: 
+        version: v4.5
+      assemblies: []
+      packages: []
+      projects:
+        - project: c
+    - guid: eb5c2f2b-d117-47b0-8067-305b4bae9aa2
+      file: src/g.csproj
+      out: g.dll
+      fx: 
+        version: v4.5
+      assemblies: []
+      packages: []
+      projects:
+        - project: e
+        - project: f
+

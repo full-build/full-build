@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -18,17 +18,10 @@ open System.IO
 open System.Xml.Linq
 
 
-// http://ss64.com/nt/robocopy-exit.html
-let private checkErrorCode (execResult:Exec.ExecResult) =
-    if execResult.ResultCode > 7 then failwithf "Process failed with error %d" execResult.ResultCode
-
 type Extension =
     | View
     | Solution
     | Targets
-    | CsProj
-    | FsProj
-    | VbProj
     | NuSpec
     | Dgml
     | App
@@ -44,9 +37,6 @@ let GetExtensionString ext =
     | View -> "fbsln"
     | Solution -> "sln"
     | Targets -> "targets"
-    | CsProj -> "csproj"
-    | FsProj -> "fsproj"
-    | VbProj -> "vbproj"
     | NuSpec -> "nuspec"
     | Dgml -> "dgml"
     | App -> "app"
@@ -60,9 +50,21 @@ let GetExtensionString ext =
 let AddExt (ext : Extension) (fileName : string) : string =
     ext |> GetExtensionString |> sprintf "%s.%s" fileName
 
+let ToPlatformPath (f : string) : string =
+    let sep = sprintf "%c" System.IO.Path.DirectorySeparatorChar
+    if f |> isNull then f
+    else f.Replace(@"\", sep) 
+
+let ToWindows (f : string) : string =
+    if f |> isNull then f
+    else f.Replace(@"/", @"\")
+
 let ToUnix (f : string) : string =
-    if f = null then f
-    else f.Replace(@"\", "/")
+    if f |> isNull then f
+    else f.Replace(@"\", @"/")
+
+let MigratePath (path : string) =
+    path.Replace("$(FBWorkspaceDir)", "$(SolutionDir)")
 
 let GetSubDirectory (subDir : string) (dir : DirectoryInfo) : DirectoryInfo =
     let newPath = Path.Combine(dir.FullName, subDir)
@@ -78,7 +80,7 @@ let GetFile (fileName : string) (dir : DirectoryInfo) : FileInfo =
     FileInfo (fullFileName)
 
 let rec private computeRelativePathInc (topDir : DirectoryInfo) (childDir : DirectoryInfo) (path : string) =
-    if topDir.FullName = childDir.FullName then path |> ToUnix
+    if topDir.FullName = childDir.FullName then path |> ToWindows
     else
         let newPath = Path.Combine(childDir.Name, path)
         computeRelativePathInc topDir childDir.Parent newPath
@@ -107,33 +109,46 @@ let CurrentFolder() : DirectoryInfo =
 
 
 let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) (readOnly : bool) =
+    // http://ss64.com/nt/robocopy-exit.html
+    let checkRobocopyErrorCode (execResult:Exec.ExecResult) =
+        if execResult.ResultCode > 7 then failwithf "Process failed with error %d" execResult.ResultCode
+
     let currDir = CurrentFolder()
     let setRead = if readOnly then "/A+:R"
                   else "/A-:R"
 
-    let args = sprintf "%s /MIR /MT /NP /NFL /NDL /NJH /NJS %A %A" setRead source.FullName target.FullName
-    Exec.Exec "robocopy.exe" args currDir Map.empty |> checkErrorCode
+    let args = sprintf "%A %A %s /MIR /NFL /NDL /NJH /NJS /nc /ns /np" source.FullName target.FullName setRead
+    Exec.Exec "robocopy.exe" args currDir Map.empty |> checkRobocopyErrorCode
 
 let GetExtension (file : FileInfo) =
     file.Extension.Replace(".", "")
 
 let GetRootDirectory (file : string) =
-    let idx = file.IndexOf('/')
+    let idx = (file |> ToWindows).IndexOf('\\')
     file.Substring(0, idx)
 
 let GetFilewithoutRootDirectory (file : string) =
-    let idx = file.IndexOf('/')
+    let idx = (file |> ToWindows).IndexOf('\\')
     file.Substring(idx+1)
 
 let consoleLock = System.Object()
-let DisplayHighlight s =
-    let display () =
+
+let ConsoleDisplay (c : ConsoleColor) (s : string) =
+    let display () =        
         let oldColor = Console.ForegroundColor
-        Console.ForegroundColor <- ConsoleColor.Cyan
-        Console.WriteLine("{0}", [|s|])
-        Console.ForegroundColor <- oldColor
+        try
+            Console.ForegroundColor <- c
+            Console.WriteLine("- {0}", s)
+        finally
+            Console.ForegroundColor <- oldColor
 
     lock consoleLock display
+
+
+
+let DisplayInfo = ConsoleDisplay ConsoleColor.Cyan
+let DisplayError = ConsoleDisplay ConsoleColor.Red
+
 
 let Try action =
     try
@@ -143,13 +158,14 @@ let Try action =
 
 
 let FindKnownProjects (repoDir : DirectoryInfo) =
-    [AddExt CsProj "*"
-     AddExt VbProj "*"
-     AddExt FsProj "*"] |> Seq.map (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories))
-                        |> Seq.concat
+    [ "*.pssproj"
+      "*.csproj"
+      "*.vbproj"
+      "*.fsproj" ] 
+        |> Seq.collect (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories))
 
-let EnumarateFiles (dir : DirectoryInfo) =
-    dir.EnumerateFiles()
+let EnumerateChildren (dir : DirectoryInfo) =
+    dir.EnumerateFileSystemInfos()
 
 let SaveFileIfNecessary (file : FileInfo) (content : string) =
     let overwrite = (file.Exists |> not) || File.ReadAllText(file.FullName) <> content

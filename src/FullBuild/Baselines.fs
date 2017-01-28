@@ -1,4 +1,4 @@
-﻿//   Copyright 2014-2016 Pierre Chalamet
+﻿//   Copyright 2014-2017 Pierre Chalamet
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,77 +16,128 @@ module Baselines
 
 open Graph
 open Collections
+open IoHelpers
 
 #nowarn "0346" // GetHashCode missing
 
+let printTag ((repo, execResult) : (Repository * Exec.ExecResult)) =
+    lock consoleLock (fun () -> IoHelpers.DisplayInfo repo.Name
+                                execResult |> Exec.PrintOutput)
+
+let private tagRepo wsDir (tag : string) (comment : string) (repo : Repository) = async {
+    return (repo, Tools.Vcs.Tag wsDir repo tag comment) |> printTag
+}
+
+
+[<RequireQualifiedAccess>]
+type TagInfo =
+    { BuildBranch : string
+      BuildNumber : string }
+with
+    member this.Branch = this.BuildBranch
+
+    member this.Version = this.BuildNumber
+
+    member this.Format() =
+        sprintf "fullbuild/%s/%s" this.Branch this.BuildNumber
+
+    static member Parse (tag : string) =
+        if tag.StartsWith("fullbuild/") |> not then failwithf "Unknown tag"
+        let tag = tag.Substring("fullbuild/".Length)
+        let idx = tag.LastIndexOf('/')
+        if(-1 = idx) then failwithf "Unknown tag"
+
+        let branch = tag.Substring(0, idx)
+        let version = tag.Substring(idx+1)
+        { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = version }
+        
 
 // =====================================================================================================
 
-type [<CustomEquality; CustomComparison>] Bookmark =
-    { Graph : Graph
-      Bookmark : Anthology.Bookmark }
+[<Sealed>]
+type Bookmark(graph : Graph, repository : Repository, hash : string) = class end
 with
     override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
-        member this.CompareTo(other) = compareTo this other (fun x -> x.Bookmark)
+        member this.CompareTo(other) = compareTo this other (fun x -> sprintf "%s %s" x.Repository.Name x.Version)
 
     member this.Repository =
-        this.Graph.Repositories |> Seq.find (fun x -> x.Name = this.Bookmark.Repository.toString)
+        repository
 
-    member this.Version = this.Bookmark.Version.toString
+    member this.Version = hash
 
 // =====================================================================================================
 
-and [<CustomEquality; CustomComparison>] Baseline =
-    { Graph : Graph
-      Baseline : Anthology.Baseline }
+[<Sealed>]
+type Baseline(graph : Graph, tagInfo : TagInfo, isHead : bool) = class end
 with
+    let mutable bookmarks : Bookmark set option = None
+    let collectBookmarks () =
+        if bookmarks = None then
+            let repos = graph.MasterRepository |> Set.singleton
+                                               |> Set.union graph.Repositories
+
+            let wsDir = Env.GetFolder Env.Folder.Workspace
+            let res = repos |> Set.map (fun x -> let tag = if isHead then Tools.Vcs.Head wsDir x
+                                                            else tagInfo.Format()
+                                                 let hash = Tools.Vcs.TagToHash wsDir x tag
+                                                 Bookmark(graph, x, hash))
+            bookmarks <- Some res
+
+        bookmarks.Value
+
     override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
-        member this.CompareTo(other) = compareTo this other (fun x -> x.Baseline)
+        member this.CompareTo(other) = compareTo this other (fun x -> x.Info)
 
-    member this.IsIncremental = this.Baseline.Incremental
+    member this.Info = tagInfo
 
-    member this.Bookmarks =
-        this.Baseline.Bookmarks |> Set.map (fun x -> { Graph = this.Graph; Bookmark = x })
+    member this.IsHead = isHead
 
-    static member (-) (ref : Baseline, target : Baseline) =
+    member this.Bookmarks : Bookmark set = 
+        collectBookmarks()
+
+    static member (-) (ref : Baseline, target : Baseline) : Bookmark set =
         let changes = Set.difference ref.Bookmarks target.Bookmarks
         changes
 
-    member this.Save () =
-        Configuration.SaveBaseline this.Baseline
+    member this.Save (comment : string) : unit =
+        let wsDir = Env.GetFolder Env.Folder.Workspace
+        let tag = tagInfo.Format()
+
+        let maxThrottle = System.Environment.ProcessorCount*4
+        let tagResults = graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
+                         |> Seq.map (tagRepo wsDir tag comment)
+                         |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
+        tagResults |> Exec.CheckMultipleResponseCode
+
+        Tools.Vcs.Tag wsDir graph.MasterRepository tag comment |> Exec.CheckResponseCode
 
 // =====================================================================================================
 
-and [<Sealed>] Factory(graph : Graph) =
-    member this.Baseline =
-        let baseline = Configuration.LoadBaseline()
-        { Graph = graph; Baseline = baseline }
+[<Sealed>] 
+type Factory(graph : Graph) = class end
+with
+    let wsDir = Env.GetFolder Env.Folder.Workspace
 
-    member this.CreateBaseline (incremental : bool) =
-        let wsDir = Env.GetFolder Env.Folder.Workspace
+    member this.FindBaseline () : Baseline =
+        let branch = Configuration.LoadBranch()
+        let tagFilter = sprintf "fullbuild/%s/*" branch
+        match Tools.Vcs.FindLatestMatchingTag wsDir graph.MasterRepository tagFilter with
+        | Some tag -> let tagInfo = TagInfo.Parse tag
+                      Baseline(graph, tagInfo, false)
+        | _ -> let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = "temp" }
+               Baseline(graph, tagInfo, true)
 
-        // get current repositories status
-        let newBookmarks = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
-                                              |> Set.map (fun x -> { Anthology.Bookmark.Repository = Anthology.RepositoryId.from x.Name
-                                                                     Anthology.Bookmark.Version = Anthology.BookmarkVersion (Tools.Vcs.Tip wsDir x) })
+    member this.CreateBaseline (buildNumber : string) : Baseline =
+        let graph = Configuration.LoadAnthology() |> Graph.from
+        let branch = Configuration.LoadBranch()
+        let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = buildNumber }
+        Baseline(graph, tagInfo, true)
 
-        let repo2bookmark = this.Baseline.Bookmarks |> Seq.map (fun x -> x.Bookmark.Repository, x.Bookmark)
-                                                    |> dict
-
-        let oldBookmarks = graph.Repositories |> Set.filter (fun x -> incremental && x.IsCloned |> not)
-                                              |> Set.map (fun x -> repo2bookmark.[Anthology.RepositoryId.from x.Name])
-
-        let bookmarks = oldBookmarks + newBookmarks
-
-        let baseline = { Anthology.Baseline.Incremental = incremental
-                         Anthology.Baseline.Bookmarks = bookmarks }
-        { Graph = graph
-          Baseline = baseline }
-
+// =====================================================================================================
 
 let from graph =
     Factory(graph)

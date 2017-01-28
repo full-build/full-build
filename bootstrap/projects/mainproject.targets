@@ -1,13 +1,13 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(FBWorkspaceDir)/.full-build/views/$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
+  <Import Project="$(SolutionDir)\.full-build\views\$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <ItemGroup>
-    <ProjectReference Include="$(FBWorkspaceDir)/tests/MainProject/MainProject.csproj" Condition="'$(FullBuild_mainproject)' != ''">
-      <Project>{a65f7dbf-3c8c-4d5d-b38f-752e9fd7b265}</Project>
+    <ProjectReference Include="$(SolutionDir)\tests\MainProject/MainProject.csproj" Condition="'$(FullBuild_mainproject)' != ''">
+      <Project>{A65F7DBF-3C8C-4D5D-B38F-752E9FD7B265}</Project>
       <Name>mainproject</Name>
     </ProjectReference>
-    <Reference Include="$(FBWorkspaceDir)/.full-build/bin/mainproject.exe" Condition="'$(FullBuild_mainproject)' == ''">
+    <Reference Include="$(SolutionDir)\.full-build\bin\mainproject.exe" Condition="'$(FullBuild_mainproject)' == ''">
       <Private>true</Private>
     </Reference>
   </ItemGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/projects/mainproject-copy.targets" Condition="'$(FullBuild_mainprojectCopy)' == ''" />
+  <Import Project="$(SolutionDir)\.full-build\projects\mainproject-copy.targets" Condition="'$(FullBuild_mainprojectCopy)' == ''" />
 </Project>
