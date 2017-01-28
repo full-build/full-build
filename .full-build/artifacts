@@ -7,6 +7,10 @@ vcs: git
 mainrepository:
   uri: http://www.google.com/
 repositories:
+  - repo: qa
+    branch: master
+    build: skip
+    uri: https://github.com/pchalamet/full-build
   - repo: src
     branch: master
     build: msbuild

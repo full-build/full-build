@@ -1,3 +1,7 @@
+qa/local
+qa/qa-setup
+qa/qa-init
+tools/paket.exe
 *.user
 *.suo
 *.cache
