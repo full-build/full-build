@@ -50,7 +50,7 @@ init:
 shallow_clone: false
 
 build_script:
-  - cmd: build-all.cmd %APPVEYOR_BUILD_VERSION% %BUILD_VERSION_STATUS%
+  - cmd: build.cmd %APPVEYOR_BUILD_VERSION% %BUILD_VERSION_STATUS%
   
 test_script:
   - ps: . .\Push-TestResult.ps1
