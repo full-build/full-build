@@ -28,3 +28,7 @@ apps:
     type: zip
     projects:
       - project: fullbuild
+  - name: fullbuild.docker
+    type: docker
+    projects:
+      - project: fullbuild
