@@ -68,11 +68,11 @@ let private publishDocker (app : PublishApp) =
 
     let dockerArgs = sprintf "build -t %s ." app.Name
     Exec "docker" dockerArgs sourceFolder Map.empty |> CheckResponseCode
-    sourceFolder.Delete(true)
 
     let imgFile = appDir |> GetSubDirectory app.Name
-    let saveArgs = sprintf "save -o %s" imgFile.FullName
+    let saveArgs = sprintf "save -o %s %s" imgFile.FullName app.Name
     Exec "docker" saveArgs sourceFolder Map.empty |> CheckResponseCode
+    sourceFolder.Delete(true)
 
 let private publishNuget (app : PublishApp) =
     let tmpApp = { app
