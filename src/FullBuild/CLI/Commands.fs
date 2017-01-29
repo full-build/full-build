@@ -73,7 +73,8 @@ type PublishApplications =
       Filters : string list
       Multithread : bool 
       Incremental : bool
-      Version : string option }
+      Version : string option 
+      Push : bool }
 
 type CheckoutVersion =
     { Version : string }

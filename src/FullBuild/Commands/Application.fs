@@ -48,7 +48,9 @@ let private getLastVersionForApp (graph : Graph.Graph) (app : Graph.Application)
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
-    let version = Configuration.LoadVersion ()
+    let version = match pubInfo.Version with
+                  | Some x -> x
+                  | None -> "0.0.0alpha"
 
     let viewRepository = Views.from graph
     let applications = match pubInfo.View with
@@ -67,7 +69,7 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
     appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter IoHelpers.ForceDelete
 
     // copy bin content
-    if pubInfo.Version.IsSome then
+    if pubInfo.Push then
         let baselines = Baselines.from graph
         let comment = pubInfo.Incremental ? ("incremental", "full")
         let baseline = baselines.CreateBaseline pubInfo.Version.Value

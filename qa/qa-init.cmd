@@ -7,7 +7,6 @@ set FULLBUILD=fullbuild.exe --verbose
 
 set PATH=%HERE%packages\NUnit.ConsoleRunner\tools;%PATH%
 set PATH=%HERE%packages\Paket\tools;%PATH%
-set PATH=%HERE%packages\full-build\tools;%PATH%
 
 set LOCALFBREPO=%HERE%local\full-build
 set LOCALCSREPO=%HERE%local\cassandra-sharp
@@ -55,7 +54,7 @@ git push origin master:master
 popd
 
 %FULLBUILD% history || goto :ko
-%FULLBUILD% publish --push %VERSION% --view all *  || goto :ko
+%FULLBUILD% publish --version %VERSION% --push --view all *  || goto :ko
 %FULLBUILD% app list --version %VERSION% || goto :ko
 
 

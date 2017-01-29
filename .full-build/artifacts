@@ -20,6 +20,10 @@ repositories:
     build: msbuild
     uri: https://github.com/pchalamet/full-build
 apps:
+  - name: full-build.nupkg
+    type: nuget
+    projects:
+      - project: fullbuild
   - name: full-build
     type: copy
     projects:

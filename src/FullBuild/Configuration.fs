@@ -123,12 +123,3 @@ let LoadBranch () : string =
 let SaveBranch (branch : string) : unit =
     let file = Env.GetBranchFile ()
     System.IO.File.WriteAllText(file.FullName, branch)
-
-let LoadVersion () : string =
-    let file = Env.GetVersionFile()
-    let version = System.IO.File.ReadAllText(file.FullName)
-    version
-
-let SaveVersion (version : string) : unit =
-    let file = Env.GetVersionFile()
-    System.IO.File.WriteAllText(file.FullName, version)

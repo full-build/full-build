@@ -1,6 +1,5 @@
 NUGET
   remote: https://www.nuget.org/api/v2
-    full-build (4.0.502-alpha)
     NUnit.ConsoleRunner (3.5)
     NUnit.Extension.NUnitProjectLoader (3.5)
     NUnit.Extension.NUnitV2Driver (3.6)

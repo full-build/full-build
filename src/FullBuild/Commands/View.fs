@@ -89,7 +89,6 @@ let Build (cmd : CLI.Commands.BuildView) =
     let version = match cmd.Version with
                   | Some x -> x
                   | None -> "0.0.0"
-    Configuration.SaveVersion version
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)

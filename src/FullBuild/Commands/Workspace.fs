@@ -94,7 +94,6 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
         publishSource.CopyTo(publishTarget.FullName) |> ignore
 
         Configuration.SaveBranch graph.MasterRepository.Branch
-        Configuration.SaveVersion "0.0.0"
     finally
         Environment.CurrentDirectory <- currDir
 
@@ -138,7 +137,6 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         try
             Environment.CurrentDirectory <- wsDir.FullName
             Configuration.SaveBranch graph.MasterRepository.Branch
-            Configuration.SaveVersion "0.0.0"
             pullMatchingBinaries ()
         finally
             Environment.CurrentDirectory <- currDir

@@ -75,6 +75,9 @@
       <Link>CHANGES.txt</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="fullbuild.nuspec">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="full-build.targets">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

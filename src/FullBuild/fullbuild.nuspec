@@ -14,6 +14,6 @@
     <tags>net partial full build system developer productivity</tags>
   </metadata>
   <files>
-    <file src="apps\full-build\*" target="tools" />
+    <file src="*" target="tools" />
   </files>
 </package>
