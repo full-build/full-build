@@ -64,6 +64,45 @@ artifacts:
     name: nuget
 
 deploy:
+  - provider: GitHub
+    release: 'full-build v$(appveyor_build_version) stable'
+    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
+    auth_token:
+      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
+    artifact: apps/full-build.zip
+    draft: false
+    prerelease: false
+    force_update: true
+    on:
+      branch: master
+      appveyor_repo_tag: false
+
+  - provider: GitHub
+    release: 'full-build v$(appveyor_build_version) beta'
+    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
+    auth_token:
+      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
+    artifact: apps/full-build.zip
+    draft: false
+    prerelease: true
+    force_update: true
+    on:
+      branch: /release\/.*/
+      appveyor_repo_tag: false
+      
+  - provider: GitHub
+    release: 'full-build v$(appveyor_build_version) alpha'
+    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
+    auth_token:
+      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
+    artifact: apps/full-build.zip
+    draft: true
+    prerelease: true
+    force_update: true
+    on:
+      branch: develop
+      appveyor_repo_tag: false
+
   - provider: NuGet
     api_key:
       secure: Fa/KRLSPeo1w78xW6Yb6FJv3amW/BRcLKpy7DW7e0/mdsiug7GBA36twg2HOUCSS
