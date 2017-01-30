@@ -77,6 +77,7 @@ with
         if bookmarks = None then
             let repos = graph.MasterRepository |> Set.singleton
                                                |> Set.union graph.Repositories
+                                               |> Set.filter (fun x -> x.IsCloned)
 
             let wsDir = Env.GetFolder Env.Folder.Workspace
             let res = repos |> Set.map (fun x -> let tag = if isHead then Tools.Vcs.Head wsDir x
