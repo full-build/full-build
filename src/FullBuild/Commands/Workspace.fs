@@ -137,7 +137,6 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         try
             Environment.CurrentDirectory <- wsDir.FullName
             Configuration.SaveBranch graph.MasterRepository.Branch
-            pullMatchingBinaries ()
         finally
             Environment.CurrentDirectory <- currDir
 
