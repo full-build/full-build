@@ -54,7 +54,8 @@ git push origin master:master
 popd
 
 %FULLBUILD% history || goto :ko
-%FULLBUILD% publish --version %VERSION% --push --view all *  || goto :ko
+%FULLBUILD% publish --version %VERSION% --view all *  || goto :ko
+%FULLBUILD% push %VERSION% || goto :ko
 %FULLBUILD% app list --version %VERSION% || goto :ko
 
 

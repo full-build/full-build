@@ -99,6 +99,7 @@ type private Token =
     | Install
     | Outdated
     | Publish
+    | Push
     | Pull
     | Checkout
     | Branch
@@ -151,6 +152,7 @@ let private (|Token|_|) (token : string) =
     | "install" -> Some Install
     | "outdated" -> Some Outdated
     | "publish" -> Some Publish
+    | "push" -> Some Push
     | "pull" -> Some Pull
     | "checkout" -> Some Checkout
     | "branch" -> Some Branch
@@ -290,14 +292,19 @@ let rec private commandGraph (all : bool) (args : string list) =
     | [ViewId name] -> Command.Graph { Name = name ; All = all }
     | _ -> Command.Error MainCommand.Graph
 
-let rec private commandPublish  view inc buildNumber push (args : string list) =
+let rec private commandPublish view buildNumber (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Publish
-    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish (Some name) inc buildNumber push
-    | TokenOption TokenOption.Full :: tail -> tail |> commandPublish view false buildNumber push
-    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandPublish view inc (Some version) push
-    | TokenOption TokenOption.Push :: tail -> tail |> commandPublish view inc buildNumber true
-    | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = true; Incremental = inc; Version = buildNumber; Push = push }
+    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish (Some name) buildNumber
+    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandPublish view (Some version)
+    | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = true; Version = buildNumber }
+    | _ -> Command.Error MainCommand.Publish
+
+let rec private commandPush inc (args : string list) =
+    match args with
+    | [] -> Command.Error MainCommand.Push
+    | TokenOption TokenOption.Full :: tail -> tail |> commandPush true
+    | [version] -> Command.PushWorkspace { Incremental = inc; Version = version }
     | _ -> Command.Error MainCommand.Publish
 
 
@@ -534,7 +541,8 @@ let Parse (args : string list) : Command =
     | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert false
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false true
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
-    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish None true None false
+    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish None None
+    | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush false
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
@@ -626,7 +634,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Exec], "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         [MainCommand.Workspace; MainCommand.Convert], "convert [--check] <repoId-wildcard> : convert projects in repositories"
         [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--nomt] [--rebase] [--view <viewId>]: update sources & binaries - rebase if requested (ff is default)"
-        [MainCommand.Workspace; MainCommand.Publish], "publish [--view <viewId>] [--full] [--version <buildNumber>] [--push] <appId-wildcard> : publish artifacts and tag repositories"
+        [MainCommand.Workspace; MainCommand.Push], "push [--full] <buildNumber> : push artifacts and tag repositories"
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
         [MainCommand.Workspace; MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
@@ -650,6 +658,7 @@ let UsageContent() =
         [MainCommand.View; MainCommand.DescribeView], "view describe <name> : describe view"
         [MainCommand.View; MainCommand.AlterView], "view alter [--default] [--src] [--ref] <viewId> : alter view"
         [MainCommand.Unknown], ""
+        [MainCommand.App; MainCommand.Publish], "publish [--view <viewId>] [--version <buildNumber>] <appId-wildcard> : publish artifacts"
         [MainCommand.App; MainCommand.AddApp], "app add <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         [MainCommand.App; MainCommand.DropApp], "app drop <appId> : drop application"
         [MainCommand.App; MainCommand.ListApp], "app list [--version <buildNumber>] : list applications" ]

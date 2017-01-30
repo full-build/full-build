@@ -72,9 +72,12 @@ type PublishApplications =
     { View: string option
       Filters : string list
       Multithread : bool 
-      Incremental : bool
-      Version : string option 
-      Push : bool }
+      Version : string option }
+
+type PushWorkspace =
+    { Version : string
+      Incremental : bool }
+
 
 type CheckoutVersion =
     { Version : string }
@@ -186,6 +189,7 @@ type MainCommand =
     | AddApp
     | DropApp
     | Publish
+    | Push
     | Query
     | Bind
     | Migrate
@@ -215,6 +219,7 @@ type Command =
     | UpdateGuids of UpdateGuids
     | TestAssemblies of TestAssemblies
     | History of History
+    | PushWorkspace of PushWorkspace
 
     // repository
     | ListRepositories

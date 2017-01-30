@@ -34,6 +34,7 @@ let processMain argv =
     | Command.UpdateGuids updInfo -> Commands.Workspace.UpdateGuid updInfo
     | Command.History histInfo -> Commands.Workspace.History histInfo
     | Command.InstallPackages -> Commands.Workspace.Install ()
+    | Command.PushWorkspace pushInfo -> Commands.Workspace.Push pushInfo
 
     | Command.TestAssemblies testInfo -> Commands.Test.TestAssemblies testInfo.Filters testInfo.Excludes
 

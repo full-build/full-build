@@ -68,19 +68,6 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let appFolder = Env.GetFolder Env.Folder.AppOutput
     appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter IoHelpers.ForceDelete
 
-    // copy bin content
-    if pubInfo.Push then
-        let baselines = Baselines.from graph
-        let comment = pubInfo.Incremental ? ("incremental", "full")
-        let baseline = baselines.CreateBaseline pubInfo.Version.Value
-        Core.BuildArtifacts.Publish graph baseline.Info
-        baseline.Save comment
-
-        // print tag information
-        let tag = baseline.Info.Format()
-        printfn "[version] %s" tag
-
-
 let List (appInfo : CLI.Commands.ListApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     match appInfo.Version with

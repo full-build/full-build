@@ -73,7 +73,8 @@ git commit -am "qa"
 git push origin master:master
 popd
 
-%FULLBUILD% publish --full --version %VERSION% --push cqlplus.zip || goto :ko
+%FULLBUILD% publish --version %VERSION% cqlplus.zip || goto :ko
+%FULLBUILD% push --full %VERSION% || goto :ko
 %FULLBUILD% app list || goto :ko
 %FULLBUILD% app list --version %VERSION% || goto :ko
 

@@ -344,3 +344,20 @@ let CheckMinVersion () =
     with
         // we are probably not in a workspace
         _ -> ()
+
+
+let Push (pushInfo : CLI.Commands.PushWorkspace) =
+    let graph = Configuration.LoadAnthology () |> Graph.from
+
+    let baselines = Baselines.from graph
+    let comment = pushInfo.Incremental ? ("incremental", "full")
+    let baseline = baselines.CreateBaseline pushInfo.Version
+
+    // copy bin content
+    Core.BuildArtifacts.Publish graph baseline.Info
+    baseline.Save comment
+
+    // print tag information
+    let tag = baseline.Info.Format()
+    printfn "[version] %s" tag
+
