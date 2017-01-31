@@ -416,7 +416,7 @@ let projectConsistencyCheck (antho : Anthology.Anthology) =
     if unknowns <> Set.empty then
         printfn "Found invalid project references :"
         for unknown in unknowns do
-            printf "- %s" unknown.toString
+            printfn "- %s" unknown.toString
         failwithf "Found invalid project references"
     antho
 
@@ -427,7 +427,7 @@ let repositoryConsistencyCheck (antho : Anthology.Anthology) =
     if unknowns <> Set.empty then
         printfn "Found invalid repository references :"
         for unknown in unknowns do
-            printf "- %s" unknown.toString
+            printfn "- %s" unknown.toString
         failwithf "Found invalid repository references"
     antho
 
