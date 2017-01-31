@@ -81,12 +81,19 @@ let private publishNuget (app : PublishApp) =
 
     let appDir = GetFolder Env.Folder.AppOutput
     let tmpFolder = appDir |> GetSubDirectory tmpApp.Name
+    let tmp2Folder = appDir |> GetSubDirectory (".tmp-nuget2-" + app.Name)
+    tmp2Folder.Create()
 
     let nuspec = tmpFolder.EnumerateFiles("*.nuspec")  |> Seq.head
     Generators.Packagers.UpdateDependencies nuspec
     let version = app.Version
-    let nugetArgs = sprintf "pack -NoDefaultExcludes -NoPackageAnalysis -NonInteractive -OutputDirectory %s -version %s %s" appDir.FullName version nuspec.Name
+    let nugetArgs = sprintf "pack -NoDefaultExcludes -NoPackageAnalysis -NonInteractive -OutputDirectory %s -version %s %s" tmp2Folder.FullName version nuspec.Name
     Exec "nuget" nugetArgs tmpFolder Map.empty |> CheckResponseCode
+    let nugetFile = tmp2Folder.EnumerateFiles() |> Seq.exactlyOne
+    let targetFile = appDir |> GetFile app.Name
+    nugetFile.MoveTo(targetFile.FullName)
+
+    tmp2Folder.Delete(true)
     tmpFolder.Delete(true)
 
 let PublishWithPublisher (version : string) (app : Application) =
