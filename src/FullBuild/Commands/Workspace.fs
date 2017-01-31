@@ -50,17 +50,21 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     let switchToBranch (branch : string option) (repo : Repository) =
-        let br = match branch with
-                 | None -> repo.Branch
-                 | Some x -> x
-        IoHelpers.DisplayInfo repo.Name
-        Tools.Vcs.Checkout wsDir repo br |> Exec.PrintOutput
+        async {
+            let br = match branch with
+                     | None -> repo.Branch
+                     | Some x -> x
+            IoHelpers.DisplayInfo repo.Name
+            let res = Tools.Vcs.Checkout wsDir repo br |> Exec.PrintOutput
+            return res
+        }
 
     match branchInfo.Branch with
     | Some x -> let branch = (x = graph.MasterRepository.Branch) ? (None, Some x)
-                let res1 = switchToBranch branch graph.MasterRepository
+                let res1 = switchToBranch branch graph.MasterRepository |> Async.RunSynchronously
                 let graph = Configuration.LoadAnthology() |> Graph.from
-                let res2 = graph.Repositories |> Seq.filter (fun x -> x.IsCloned) |> Seq.map (switchToBranch branch)
+                let res2 = graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
+                                              |> Threading.ParExec (switchToBranch branch)
                 let res = res1 |> Seq.singleton |> Seq.append res2
                 if res |> Seq.exists (fun x -> x.ResultCode <> 0) then
                     printfn "WARNING: failed to checkout some repositories"
@@ -110,7 +114,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     // checkout each repository now
     let graph = Configuration.LoadAnthology () |> Graph.from
     let repos = graph.Repositories
-    let branchResults = repos |> Seq.filter (fun x -> x.IsCloned) 
+    let branchResults = repos |> Seq.filter (fun x -> x.IsCloned)
                               |> Threading.ParExec (checkoutRepo wsDir checkoutInfo.Version)
     branchResults |> Exec.CheckMultipleResponseCode
 
@@ -324,7 +328,7 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
     convertInfo |> index
     if convertInfo.Check |> not then
         convertInfo |> convert
-        
+
 
 let CheckMinVersion () =
     try
