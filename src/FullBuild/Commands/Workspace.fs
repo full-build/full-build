@@ -334,11 +334,11 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
 let CheckMinVersion () =
     try
         let fbVersion = Env.FullBuildVersion ()
-        let graph = Configuration.LoadAnthology () |> Graph.from
-        let minVersion = System.Version.Parse graph.MinVersion
+        let artifacts = Configuration.LoadArtifacts()
+        let minVersion = System.Version.Parse artifacts.MinVersion
 
         if fbVersion < minVersion then
-            failwithf "Minimum full-build version requirement: %s" graph.MinVersion
+            failwithf "Minimum full-build version requirement: %s" artifacts.MinVersion
     with
         // we are probably not in a workspace
         _ -> ()
