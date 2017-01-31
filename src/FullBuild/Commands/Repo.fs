@@ -40,12 +40,9 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Configuration.LoadAnthology() |> Graph.from
     let selectedRepos = PatternMatching.FilterMatch graph.Repositories (fun x -> x.Name) cmd.Filters
-    let maxThrottle = cmd.Multithread ? (System.Environment.ProcessorCount*4, 1)
-    let cloneResults =
-        selectedRepos |> Set.filter (fun x -> not x.IsCloned)
-                  |> Seq.map (cloneRepoAndInit wsDir cmd.Shallow)
-                  |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously 
-    cloneResults |> Exec.CheckMultipleResponseCode
+    selectedRepos |> Set.filter (fun x -> not x.IsCloned)
+                  |> Threading.ParExec (cloneRepoAndInit wsDir cmd.Shallow)
+                  |> Exec.CheckMultipleResponseCode
 
 let Add (cmd : CLI.Commands.AddRepository) =
     let graph = Configuration.LoadAnthology () |> Graph.from

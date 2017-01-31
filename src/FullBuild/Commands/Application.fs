@@ -66,9 +66,7 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
                                                       |> Set.unionMany
 
     let apps = PatternMatching.FilterMatch applications (fun x -> x.Name) (set pubInfo.Filters)
-    let maxThrottle = if pubInfo.Multithread then (System.Environment.ProcessorCount*2) else 1
-    apps |> Seq.map (asyncPublish version)
-         |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously 
+    apps |> Threading.ParExec (asyncPublish version)
          |> ignore
 
     let appFolder = Env.GetFolder Env.Folder.AppOutput
@@ -77,16 +75,12 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
 let List (appInfo : CLI.Commands.ListApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
     match appInfo.Version with
-    | None -> let maxThrottle = System.Environment.ProcessorCount*4
-              graph.Applications |> Seq.filter (fun (x : Graph.Application) -> x.Publisher = Graph.PublisherType.Zip)
-                                 |> Seq.map (getLastVersionForApp graph)
-                                 |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
+    | None -> graph.Applications |> Seq.filter (fun (x : Graph.Application) -> x.Publisher = Graph.PublisherType.Zip)
+                                 |> Threading.ParExec (getLastVersionForApp graph)
                                  |> Seq.choose id
                                  |> Seq.iter displayAppVersion
-    | Some version -> let maxThrottle = System.Environment.ProcessorCount*4
-                      graph.Applications |> Seq.filter (fun (x : Graph.Application) -> x.Publisher = Graph.PublisherType.Zip)
-                                         |> Seq.map (checkAppHasVersion version graph)
-                                         |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
+    | Some version -> graph.Applications |> Seq.filter (fun (x : Graph.Application) -> x.Publisher = Graph.PublisherType.Zip)
+                                         |> Threading.ParExec (checkAppHasVersion version graph)
                                          |> Seq.choose id
                                          |> Seq.iter displayApp
 

@@ -108,11 +108,9 @@ with
         let wsDir = Env.GetFolder Env.Folder.Workspace
         let tag = tagInfo.Format()
 
-        let maxThrottle = System.Environment.ProcessorCount*4
-        let tagResults = graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
-                         |> Seq.map (tagRepo wsDir tag comment)
-                         |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
-        tagResults |> Exec.CheckMultipleResponseCode
+        graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
+                           |> Threading.ParExec (tagRepo wsDir tag comment)
+                           |> Exec.CheckMultipleResponseCode
 
         Tools.Vcs.Tag wsDir graph.MasterRepository tag comment |> Exec.CheckResponseCode
 

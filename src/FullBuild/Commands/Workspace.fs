@@ -60,7 +60,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     | Some x -> let branch = (x = graph.MasterRepository.Branch) ? (None, Some x)
                 let res1 = switchToBranch branch graph.MasterRepository
                 let graph = Configuration.LoadAnthology() |> Graph.from
-                let res2 = graph.Repositories |> Seq.map (switchToBranch branch)
+                let res2 = graph.Repositories |> Seq.filter (fun x -> x.IsCloned) |> Seq.map (switchToBranch branch)
                 let res = res1 |> Seq.singleton |> Seq.append res2
                 if res |> Seq.exists (fun x -> x.ResultCode <> 0) then
                     printfn "WARNING: failed to checkout some repositories"
@@ -110,10 +110,8 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     // checkout each repository now
     let graph = Configuration.LoadAnthology () |> Graph.from
     let repos = graph.Repositories
-    let maxThrottle = System.Environment.ProcessorCount*4
-    let branchResults = repos |> Seq.filter (fun x -> x.IsCloned)
-                              |> Seq.map (checkoutRepo wsDir checkoutInfo.Version)
-                              |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
+    let branchResults = repos |> Seq.filter (fun x -> x.IsCloned) 
+                              |> Threading.ParExec (checkoutRepo wsDir checkoutInfo.Version)
     branchResults |> Exec.CheckMultipleResponseCode
 
     Configuration.SaveBranch tag.Branch
@@ -178,14 +176,9 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
                              | Some viewName -> let view = viewRepository.Views |> Seq.find (fun x -> x.Name = viewName)
                                                 let repos = view.Projects |> Set.map (fun x -> x.Repository)
                                                 repos
-        let maxThrottle = pullInfo.Multithread ? (System.Environment.ProcessorCount*4, 1)
-
-        let pullResults = selectedRepos
-                            |> Seq.filter (fun x -> x.IsCloned)
-                            |> Seq.map (cloneRepo wsDir pullInfo.Rebase)
-                            |> Threading.throttle maxThrottle |> Async.Parallel |> Async.RunSynchronously
-
-        pullResults |> Exec.CheckMultipleResponseCode
+        selectedRepos |> Seq.filter (fun x -> x.IsCloned)
+                      |> Threading.ParExec (cloneRepo wsDir pullInfo.Rebase)
+                      |> Exec.CheckMultipleResponseCode
         Install ()
 
     if pullInfo.Bin then
