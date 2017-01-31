@@ -41,7 +41,6 @@ type private TokenOption =
     | Beta
     | App
     | Static
-    | NoMultithread
     | UnusedProjects
     | Packages
     | Test
@@ -50,6 +49,7 @@ type private TokenOption =
     | Inc
     | Ref
     | Push
+    | Status
 
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -72,7 +72,6 @@ let private (|TokenOption|_|) (token : string) =
     | "--beta" -> Some TokenOption.Beta
     | "--app" -> Some TokenOption.App
     | "--static" -> Some TokenOption.Static
-    | "--nomt" -> Some TokenOption.NoMultithread
     | "--unused-projects" -> Some TokenOption.UnusedProjects
     | "--packages" -> Some TokenOption.Packages
     | "--test" -> Some TokenOption.Test
@@ -81,6 +80,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--inc" -> Some TokenOption.Inc
     | "--ref" -> Some TokenOption.Ref
     | "--push" -> Some TokenOption.Push
+    | "--status" -> Some TokenOption.Status
     | _ -> None
 
 type private Token =
@@ -275,13 +275,12 @@ let rec private commandConvert (check : bool) (args : string list) =
     | Params filters -> Command.ConvertRepositories { Filters = set filters; Check = check }
     | _ -> Command.Error MainCommand.Convert
 
-let rec private commandClone (shallow : bool) (all : bool) (mt : bool) (args : string list) =
+let rec private commandClone (shallow : bool) (all : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.Shallow :: tail -> tail |> commandClone true all mt
-    | TokenOption TokenOption.All :: tail -> tail |> commandClone shallow true mt
-    | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandClone shallow all false
+    | TokenOption TokenOption.Shallow :: tail -> tail |> commandClone true all
+    | TokenOption TokenOption.All :: tail -> tail |> commandClone shallow true
     | [] -> Command.Error MainCommand.Clone
-    | Params filters -> Command.CloneRepositories { Filters = set filters; Shallow = shallow; All = all; Multithread = mt }
+    | Params filters -> Command.CloneRepositories { Filters = set filters; Shallow = shallow; All = all; Multithread = true }
     | _ -> Command.Error MainCommand.Clone
 
 
@@ -292,12 +291,13 @@ let rec private commandGraph (all : bool) (args : string list) =
     | [ViewId name] -> Command.Graph { Name = name ; All = all }
     | _ -> Command.Error MainCommand.Graph
 
-let rec private commandPublish view buildNumber (args : string list) =
+let rec private commandPublish view version status (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Publish
-    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish (Some name) buildNumber
-    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandPublish view (Some version)
-    | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = true; Version = buildNumber }
+    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish (Some name) version status
+    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandPublish view (Some version) status
+    | TokenOption TokenOption.Status :: status :: tail -> tail |> commandPublish view version (Some status)
+    | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = true; Version = version; Status = status }
     | _ -> Command.Error MainCommand.Publish
 
 let rec private commandPush inc (args : string list) =
@@ -328,14 +328,13 @@ let private commandBranch (args : string list) =
     | [] -> Command.BranchWorkspace {Branch = None}
     | _ -> Command.Error MainCommand.Branch
 
-let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (multithread : bool) (view : string option) (args : string list) =
+let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (view : string option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Src :: tail -> tail |> commandPull true false rebase multithread view
-    | TokenOption TokenOption.Bin :: tail -> tail |> commandPull false true rebase multithread view
-    | TokenOption TokenOption.Rebase :: tail -> tail |> commandPull src bin true multithread view
-    | TokenOption TokenOption.NoMultithread :: tail -> tail |> commandPull src bin rebase false view
-    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPull true true rebase multithread (Some name)
-    | [] -> Command.PullWorkspace { Sources = src ; Bin = bin; Rebase = rebase; Multithread = multithread; View = view }
+    | TokenOption TokenOption.Src :: tail -> tail |> commandPull true false rebase view
+    | TokenOption TokenOption.Bin :: tail -> tail |> commandPull false true rebase view
+    | TokenOption TokenOption.Rebase :: tail -> tail |> commandPull src bin true view
+    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPull true true rebase (Some name)
+    | [] -> Command.PullWorkspace { Sources = src ; Bin = bin; Rebase = rebase; Multithread = true; View = view }
     | _ -> Command.Error MainCommand.Pull
 
 let private commandClean (args : string list) =
@@ -539,15 +538,15 @@ let Parse (args : string list) : Command =
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
     | Token Token.Test :: cmdArgs -> cmdArgs |> commandTest []
     | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert false
-    | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false true
+    | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
-    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish None None
+    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish None None None
     | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush false
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
-    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false true None
+    | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
     | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory false
@@ -621,7 +620,7 @@ let UsageContent() =
         [MainCommand.Version], "version : display full-build version"
         [MainCommand.Workspace; MainCommand.Setup], "setup <git|gerrit> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
         [MainCommand.Workspace; MainCommand.Init], "init <git|gerrit> <master-repository> <local-path> : initialize a new workspace in given path"
-        [MainCommand.Repository; MainCommand.Clone], "clone [--nomt] [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
+        [MainCommand.Repository; MainCommand.Clone], "clone [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
         [MainCommand.Workspace; MainCommand.Checkout], "checkout [version] : checkout workspace or reset to default version"
         [MainCommand.Workspace; MainCommand.Branch], "branch [branch] : switch to branch"
         [MainCommand.Workspace; MainCommand.InstallPackage], "install : install packages"
@@ -633,8 +632,8 @@ let UsageContent() =
         [MainCommand.View; MainCommand.Graph], "graph [--all] <viewId> : graph view content (project, packages, assemblies)"
         [MainCommand.Workspace; MainCommand.Exec], "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         [MainCommand.Workspace; MainCommand.Convert], "convert [--check] <repoId-wildcard> : convert projects in repositories"
-        [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--nomt] [--rebase] [--view <viewId>]: update sources & binaries - rebase if requested (ff is default)"
-        [MainCommand.Workspace; MainCommand.Push], "push [--full] <buildNumber> : push artifacts and tag repositories"
+        [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--rebase] [--view <viewId>]: update sources & binaries - rebase if requested (ff is default)"
+        [MainCommand.Workspace; MainCommand.Push], "push [--full] <version> : push artifacts and tag repositories"
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
         [MainCommand.Workspace; MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
@@ -658,7 +657,7 @@ let UsageContent() =
         [MainCommand.View; MainCommand.DescribeView], "view describe <name> : describe view"
         [MainCommand.View; MainCommand.AlterView], "view alter [--default] [--src] [--ref] <viewId> : alter view"
         [MainCommand.Unknown], ""
-        [MainCommand.App; MainCommand.Publish], "publish [--view <viewId>] [--version <buildNumber>] <appId-wildcard> : publish artifacts"
+        [MainCommand.App; MainCommand.Publish], "publish [--view <viewId>] [--version <version>] [--status <status>] <appId-wildcard> : publish artifacts"
         [MainCommand.App; MainCommand.AddApp], "app add <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         [MainCommand.App; MainCommand.DropApp], "app drop <appId> : drop application"
         [MainCommand.App; MainCommand.ListApp], "app list [--version <buildNumber>] : list applications" ]

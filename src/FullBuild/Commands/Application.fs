@@ -48,9 +48,15 @@ let private getLastVersionForApp (graph : Graph.Graph) (app : Graph.Application)
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
-    let version = match pubInfo.Version with
-                  | Some x -> x
-                  | None -> "0.0.0alpha"
+
+    // build a semver version
+    let buildNumber = match pubInfo.Version with
+                      | Some x -> x
+                      | None -> "0.0.0"
+    let status = match pubInfo.Status with
+                 | None -> ""
+                 | Some x -> sprintf "-%s" x
+    let version = sprintf "%s%s" buildNumber status
 
     let viewRepository = Views.from graph
     let applications = match pubInfo.View with

@@ -72,7 +72,8 @@ type PublishApplications =
     { View: string option
       Filters : string list
       Multithread : bool 
-      Version : string option }
+      Version : string option 
+      Status : string option }
 
 type PushWorkspace =
     { Version : string
