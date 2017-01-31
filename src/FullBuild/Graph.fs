@@ -414,7 +414,7 @@ let projectConsistencyCheck (antho : Anthology.Anthology) =
     let knownProjects = antho.Projects |> Set.map (fun x -> x.ProjectId)
     let unknowns  = projectRefs - knownProjects
     if unknowns <> Set.empty then
-        printfn "Found invalid project references :"
+        printfn "Found invalid project references:"
         for unknown in unknowns do
             printfn "- %s" unknown.toString
         failwithf "Found invalid project references"
@@ -425,7 +425,7 @@ let repositoryConsistencyCheck (antho : Anthology.Anthology) =
     let knownRepos = antho.Repositories |> Set.map (fun x -> x.Repository.Name)
     let unknowns  = repoRefs - knownRepos
     if unknowns <> Set.empty then
-        printfn "Found invalid repository references :"
+        printfn "Found invalid repository references:"
         for unknown in unknowns do
             printfn "- %s" unknown.toString
         failwithf "Found invalid repository references"
