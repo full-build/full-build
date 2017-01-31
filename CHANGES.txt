@@ -12,6 +12,7 @@ v4.0
   * Commands have undergo a lot of changes
   * Index/convert is dead, long live convert !
   * Fix misplaced import full-build target
+  * Doctor takes care of workspace sanity !
 
 v3.1
   * Create view from application (issue #112)

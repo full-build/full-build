@@ -138,7 +138,7 @@ let ConsoleDisplay (c : ConsoleColor) (s : string) =
         let oldColor = Console.ForegroundColor
         try
             Console.ForegroundColor <- c
-            Console.WriteLine("- {0}", s)
+            Console.WriteLine(s)
         finally
             Console.ForegroundColor <- oldColor
 
@@ -146,8 +146,8 @@ let ConsoleDisplay (c : ConsoleColor) (s : string) =
 
 
 
-let DisplayInfo = ConsoleDisplay ConsoleColor.Cyan
-let DisplayError = ConsoleDisplay ConsoleColor.Red
+let DisplayInfo msg = ConsoleDisplay ConsoleColor.Cyan ("- " + msg)
+let DisplayError msg = ConsoleDisplay ConsoleColor.Red msg
 
 
 let Try action =

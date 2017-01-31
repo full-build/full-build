@@ -195,6 +195,7 @@ type MainCommand =
     | Bind
     | Migrate
     | Workspace
+    | Doctor
     | Unknown
 
 
@@ -221,6 +222,7 @@ type Command =
     | TestAssemblies of TestAssemblies
     | History of History
     | PushWorkspace of PushWorkspace
+    | Doctor
 
     // repository
     | ListRepositories

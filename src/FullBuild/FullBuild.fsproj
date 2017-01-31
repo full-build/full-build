@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -29,7 +30,8 @@
     <StartWorkingDirectory>c:\src\oss\full-build\qa\qa-init</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
-    <NoWarn></NoWarn>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -140,6 +142,7 @@
     <Compile Include="Core\Conversion.fs" />
     <Compile Include="Core\Package.fs" />
     <Compile Include="Core\Indexation.fs" />
+    <Compile Include="Core\Doctor.fs" />
     <Compile Include="Migration\AnthologyLoader2.fs" />
     <Compile Include="Commands\View.fs" />
     <Compile Include="Commands\Repo.fs" />

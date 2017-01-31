@@ -409,36 +409,9 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
 
 // =====================================================================================================
 
-let projectConsistencyCheck (antho : Anthology.Anthology) =
-    let projectRefs = antho.Projects |> Set.map (fun x -> x.ProjectReferences) |> Set.unionMany
-    let knownProjects = antho.Projects |> Set.map (fun x -> x.ProjectId)
-    let unknowns  = projectRefs - knownProjects
-    if unknowns <> Set.empty then
-        printfn "Found invalid project references:"
-        for unknown in unknowns do
-            printfn "- %s" unknown.toString
-        failwithf "Found invalid project references"
-    antho
-
-let repositoryConsistencyCheck (antho : Anthology.Anthology) =
-    let repoRefs = antho.Projects |> Set.map (fun x -> x.Repository)
-    let knownRepos = antho.Repositories |> Set.map (fun x -> x.Repository.Name)
-    let unknowns  = repoRefs - knownRepos
-    if unknowns <> Set.empty then
-        printfn "Found invalid repository references:"
-        for unknown in unknowns do
-            printfn "- %s" unknown.toString
-        failwithf "Found invalid repository references"
-    antho
-
-
-let consistencyCheck (antho : Anthology.Anthology) =
-    antho |> projectConsistencyCheck
-          |> repositoryConsistencyCheck
-
 
 let from (antho : Anthology.Anthology) : Graph =
-    antho |> consistencyCheck |> Graph
+    antho |> Graph
 
 let create (uri : string) (artifacts : string) vcs runner =
     let repo = { Anthology.Name = Anthology.RepositoryId.from Env.MASTER_REPO

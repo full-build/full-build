@@ -56,7 +56,7 @@ let SaveProjectsRepository (repo : RepositoryId) (projects : Projects) =
 let LoadProjectsRepository (repo : RepositoryId) : Projects =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
-    if not repoDir.Exists then failwithf "Can't load projects in repository %s" repo.toString
+    if repoDir.Exists |> not then failwithf "Can't find .fbprojects in repository %A" repo.toString
     let projectsFile = repoDir |> IoHelpers.GetFile ".fbprojects"
     ProjectsSerializer.Load projectsFile
 

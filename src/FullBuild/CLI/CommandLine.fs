@@ -127,6 +127,7 @@ type private Token =
     | Clean
     | UpdateGuids
     | Migrate
+    | Doctor
 
 let (|FullBuildView|_|) (viewFile : string) =
     if viewFile.EndsWith(IoHelpers.Extension.View |> IoHelpers.GetExtensionString |> sprintf ".%s") && System.IO.File.Exists(viewFile) then
@@ -180,6 +181,7 @@ let private (|Token|_|) (token : string) =
 
     | "update-guids" -> Some UpdateGuids
     | "migrate" -> Some Migrate
+    | "doctor" -> Some Doctor
     | _ -> None
 
 
@@ -274,6 +276,11 @@ let rec private commandConvert (check : bool) (args : string list) =
     | TokenOption TokenOption.Check :: tail -> tail |> commandConvert true
     | Params filters -> Command.ConvertRepositories { Filters = set filters; Check = check }
     | _ -> Command.Error MainCommand.Convert
+
+let private commandDoctor (args : string list ) =
+    match args with
+    | [] -> Command.Doctor
+    | _ -> Command.Error MainCommand.Doctor
 
 let rec private commandClone (shallow : bool) (all : bool) (args : string list) =
     match args with
@@ -538,6 +545,7 @@ let Parse (args : string list) : Command =
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
     | Token Token.Test :: cmdArgs -> cmdArgs |> commandTest []
     | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert false
+    | Token Token.Doctor :: cmdArgs -> cmdArgs |> commandDoctor
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
     | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish None None None
@@ -632,6 +640,7 @@ let UsageContent() =
         [MainCommand.View; MainCommand.Graph], "graph [--all] <viewId> : graph view content (project, packages, assemblies)"
         [MainCommand.Workspace; MainCommand.Exec], "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         [MainCommand.Workspace; MainCommand.Convert], "convert [--check] <repoId-wildcard> : convert projects in repositories"
+        [MainCommand.Workspace; MainCommand.Doctor], "doctor : check workspace consistency"
         [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--rebase] [--view <viewId>]: update sources & binaries - rebase if requested (ff is default)"
         [MainCommand.Workspace; MainCommand.Push], "push [--full] <version> : push artifacts and tag repositories"
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"

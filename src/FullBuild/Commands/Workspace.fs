@@ -54,9 +54,12 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
             let br = match branch with
                      | None -> repo.Branch
                      | Some x -> x
-            IoHelpers.DisplayInfo repo.Name
-            let res = Tools.Vcs.Checkout wsDir repo br |> Exec.PrintOutput
-            return res
+
+            let displayBranchOutput () =
+                IoHelpers.DisplayInfo repo.Name
+                Tools.Vcs.Checkout wsDir repo br |> Exec.PrintOutput
+
+            return lock(consoleLock) (fun () -> displayBranchOutput ())
         }
 
     match branchInfo.Branch with
@@ -359,3 +362,11 @@ let Push (pushInfo : CLI.Commands.PushWorkspace) =
     let tag = baseline.Info.Format()
     printfn "[version] %s" tag
 
+let Doctor () =
+    try
+        Doctor.Check()
+
+        printfn "Doctor says everything is alright !"
+    with
+        exn -> printfn "%s"exn.Message
+               failwith "Doctor found something wrong !"
