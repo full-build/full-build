@@ -295,6 +295,7 @@ let private index (convertInfo : CLI.Commands.ConvertRepositories) =
 
     let indexation = selectedRepos |> Core.Indexation.IndexWorkspace wsDir antho
     if convertInfo.Check then
+        indexation |> fst |> Graph.from |> ignore
         indexation |> fst |> Core.Indexation.CheckAnthologyProjectsInRepository antho selectedRepos
     else
         indexation |> Core.Indexation.UpdatePackages
