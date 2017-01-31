@@ -19,7 +19,7 @@ open XmlHelpers
 
 #nowarn "0346" // GetHashCode missing
 
-[<RequireQualifiedAccess>] 
+[<RequireQualifiedAccess>]
 type PackageVersion =
     | PackageVersion of string
     | Unspecified
@@ -92,7 +92,7 @@ with
         let xnuspec = System.Xml.Linq.XDocument.Load (nuspecFile.FullName)
         Package.GetPackageDependencies xnuspec |> Set.map (fun x -> { Graph = this.Graph
                                                                       Package = x })
-        
+
     member this.FxAssemblies : Assembly set =
         let pkgsDir = Env.GetFolder Env.Folder.Package
         let pkgDir = pkgsDir |> IoHelpers.GetSubDirectory (this.Package.toString)
@@ -102,7 +102,7 @@ with
 
 // =====================================================================================================
 
-and [<CustomEquality; CustomComparison>] Assembly = 
+and [<CustomEquality; CustomComparison>] Assembly =
     { Graph : Graph
       Assembly : Anthology.AssemblyId }
 with
@@ -117,7 +117,7 @@ with
 
 and [<CustomEquality; CustomComparison>] Application =
     { Graph : Graph
-      Application : Anthology.Application } 
+      Application : Anthology.Application }
 with
     override this.Equals(other : System.Object) = refEquals this other
 
@@ -136,7 +136,7 @@ with
         this.Application.Projects |> Set.map (fun x -> this.Graph.ProjectMap.[x])
 
     member this.Delete () =
-        let newAntho = { this.Graph.Anthology 
+        let newAntho = { this.Graph.Anthology
                          with Applications = this.Graph.Anthology.Applications |> Set.remove this.Application }
         Graph(newAntho)
 
@@ -153,7 +153,7 @@ with
 
     member this.Name : string = this.Repository.Name.toString
 
-    member this.Builder = 
+    member this.Builder =
         let buildableRepo = this.Graph.Anthology.Repositories |> Seq.tryFind (fun x -> x.Repository.Name = this.Repository.Name)
         match buildableRepo with
         | Some repo -> match repo.Builder with
@@ -173,24 +173,33 @@ with
     member this.Uri = this.Repository.Url.toString
 
     member this.Projects =
-        let repositoryId = this.Repository.Name
-        this.Graph.Anthology.Projects |> Set.filter (fun x -> x.Repository = repositoryId)
-                                      |> Set.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
+        try
+            let repositoryId = this.Repository.Name
+            this.Graph.Anthology.Projects |> Set.filter (fun x -> x.Repository = repositoryId)
+                                          |> Set.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
+        with
+            _ -> failwithf "Failure to find projects for repository %A" this.Name
 
     member this.IsCloned =
         let wsDir = Env.GetFolder Env.Folder.Workspace
         let repoDir = wsDir |> IoHelpers.GetSubDirectory this.Name
         repoDir.Exists
 
-    member this.References = 
-        this.Projects |> Set.map (fun x -> x.References |> Set.map (fun y -> y.Repository))
-                      |> Set.unionMany
-                      |> Set.remove this
+    member this.References =
+        try
+            this.Projects |> Set.map (fun x -> x.References |> Set.map (fun y -> y.Repository))
+                          |> Set.unionMany
+                          |> Set.remove this
+        with
+            _ -> failwithf "Failure to find references for repository %A" this.Name
 
-    member this.ReferencedBy = 
-        this.Projects |> Set.map (fun x -> x.ReferencedBy |> Set.map (fun y -> y.Repository))
-                      |> Set.unionMany
-                      |> Set.remove this
+    member this.ReferencedBy =
+        try
+            this.Projects |> Set.map (fun x -> x.ReferencedBy |> Set.map (fun y -> y.Repository))
+                          |> Set.unionMany
+                          |> Set.remove this
+        with
+            _ -> failwithf "Failure to find referencedBy for repository %A" this.Name
 
     static member Closure (seeds : Repository set) =
         Algorithm.Closure seeds (fun x -> x.References) (fun x -> x.ReferencedBy)
@@ -198,7 +207,7 @@ with
     member this.Delete () =
         let repositoryId = this.Repository.Name
         let newAntho = { this.Graph.Anthology
-                         with Repositories = this.Graph.Anthology.Repositories |> Set.filter (fun x -> x.Repository.Name <> repositoryId) 
+                         with Repositories = this.Graph.Anthology.Repositories |> Set.filter (fun x -> x.Repository.Name <> repositoryId)
                               Projects = this.Graph.Anthology.Projects |> Set.filter (fun x -> x.Repository <> repositoryId) }
         Graph(newAntho)
 
@@ -230,12 +239,12 @@ with
         this.Graph.Anthology.Projects |> Set.filter (fun x -> x.ProjectReferences |> Set.contains projectId)
                                       |> Set.map (fun x -> this.Graph.ProjectMap.[x.ProjectId])
 
-    member this.ProjectFile = 
+    member this.ProjectFile =
         this.Project.RelativeProjectFile.toString
 
     member this.Output = this.Graph.AssemblyMap.[this.Project.Output]
 
-    member this.BinFile = 
+    member this.BinFile =
         let repo = this.Repository.Name
         let path = System.IO.Path.GetDirectoryName(this.ProjectFile)
         let ass = this.Output.Name
@@ -266,10 +275,10 @@ with
 
     member this.HasTests = this.Project.HasTests
 
-    member this.AssemblyReferences = 
+    member this.AssemblyReferences =
         this.Project.AssemblyReferences |> Set.map (fun x -> this.Graph.AssemblyMap.[x])
 
-    member this.PackageReferences = 
+    member this.PackageReferences =
         this.Project.PackageReferences |> Set.map (fun x -> this.Graph.PackageMap.[x])
 
     static member CollectProjects (collector : Project -> Project set) (projects : Project set) =
@@ -310,7 +319,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
         packageMap
 
     member this.AssemblyMap : System.Collections.Generic.IDictionary<Anthology.AssemblyId, Assembly> =
-        if assemblyMap |> isNull then 
+        if assemblyMap |> isNull then
             let outputAss = anthology.Projects |> Seq.map (fun x -> x.Output)
                                                |> Set
             assemblyMap <- anthology.Projects |> Set.map (fun x -> x.AssemblyReferences)
@@ -321,8 +330,8 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
         assemblyMap
 
     member this.RepositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> =
-        if repositoryMap |> isNull then 
-            repositoryMap <- anthology.Repositories |> Seq.map (fun x -> x.Repository.Name, { Graph = this; Repository = x.Repository})                                 
+        if repositoryMap |> isNull then
+            repositoryMap <- anthology.Repositories |> Seq.map (fun x -> x.Repository.Name, { Graph = this; Repository = x.Repository})
                                                     |> dict
         repositoryMap
 
@@ -332,7 +341,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
                                                      |> dict
         applicationMap
 
-    member this.ProjectMap : System.Collections.Generic.IDictionary<Anthology.ProjectId, Project> = 
+    member this.ProjectMap : System.Collections.Generic.IDictionary<Anthology.ProjectId, Project> =
         if projectMap |> isNull then
             projectMap <- anthology.Projects |> Seq.map (fun x -> x.ProjectId, { Graph = this; Project = x } )
                                              |> dict
@@ -370,7 +379,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
         let app = { Anthology.Application.Name = Anthology.ApplicationId.from name
                     Anthology.Application.Publisher = pub
                     Anthology.Application.Projects = projectIds }
-        let newAntho = { anthology 
+        let newAntho = { anthology
                          with Applications = anthology.Applications |> Set.add app }
         Graph(newAntho)
 
