@@ -67,12 +67,14 @@ let SaveAnthology (antho : Anthology) =
     ArtifactsSerializer.Save artifactsFile artifacts
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    for repo in artifacts.Repositories do
-        let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Repository.Name.toString
+    let repo2projects = projects |> Seq.groupBy (fun x -> x.Repository) |> dict
+    for repo2project in repo2projects do
+        let repo = repo2project.Key
+        let repoProjects = repo2project.Value
+        let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
         if repoDir.Exists then
-            let repoProjects = projects |> Set.filter (fun x -> x.Repository = repo.Repository.Name)
-            saveProjectsRepository repo.Repository.Name repoProjects
-            
+            let repoProjects = projects |> Set.filter (fun x -> x.Repository = repo)
+            saveProjectsRepository repo repoProjects
 
 let SaveConsolidatedAnthology (antho : Anthology) =
     let (artifacts, projects) = AnthologySerializer.Serialize antho
