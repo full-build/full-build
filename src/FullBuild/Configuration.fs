@@ -26,18 +26,18 @@ let LoadArtifacts() : ArtifactsSerializer.Artifacts =
     let artifacts = ArtifactsSerializer.Load artifactsFile
     artifacts
 
-let LoadProjects() : Project set =
+let private loadProjects() : Project set =
     let projectsFile = GetProjectsFile ()
     let projects = ProjectsSerializer.Load projectsFile
     projects
 
-let SaveProjectsRepository (repo : RepositoryId) (projects : Project set) =
+let private saveProjectsRepository (repo : RepositoryId) (projects : Project set) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
     let projectsFile = repoDir |> IoHelpers.GetFile ".fbprojects"
     ProjectsSerializer.Save projectsFile projects    
 
-let LoadProjectsRepository (repo : RepositoryId) : Project set =
+let private loadProjectsRepository (repo : RepositoryId) : Project set =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
     if repoDir.Exists |> not then failwithf "Can't find .fbprojects in repository %A" repo.toString
@@ -47,12 +47,12 @@ let LoadProjectsRepository (repo : RepositoryId) : Project set =
 
 let LoadAnthology() : Anthology = 
     let artifacts = LoadArtifacts()
-    let mutable projects = LoadProjects()
+    let mutable projects = loadProjects()
     let wsDir = Env.GetFolder Env.Folder.Workspace
     for repo in artifacts.Repositories do
         let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Repository.Name.toString
         if repoDir.Exists then
-            let repoProjects = LoadProjectsRepository repo.Repository.Name
+            let repoProjects = loadProjectsRepository repo.Repository.Name
             projects <- projects |> Set.filter (fun x -> x.Repository <> repo.Repository.Name)
                                  |> Set.union repoProjects
 
@@ -71,7 +71,7 @@ let SaveAnthology (antho : Anthology) =
         let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Repository.Name.toString
         if repoDir.Exists then
             let repoProjects = projects |> Set.filter (fun x -> x.Repository = repo.Repository.Name)
-            SaveProjectsRepository repo.Repository.Name repoProjects
+            saveProjectsRepository repo.Repository.Name repoProjects
             
 
 let SaveConsolidatedAnthology (antho : Anthology) =

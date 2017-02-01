@@ -192,7 +192,6 @@ let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Grap
             let currProjects = currGroups.[kvp.Key]
             if prevProjects <> currProjects then
                 printfn "%s" kvp.Key.toString
-
         failwithf "Missing repositories for indexation"
 
     let modifiedProjects = antho.Projects |> Seq.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
@@ -203,7 +202,7 @@ let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Grap
     for kvp in modifiedProjects do
         let repo = kvp.Key
         let projects = kvp.Value
-        let currentProjects = Configuration.LoadProjectsRepository repo
+        let currentProjects = previousAntho.Projects |> Set.filter (fun x -> x.Repository = kvp.Key)
         if currentProjects <> projects then failwithf "Repository %s must be indexed" repo.toString
 
 let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
@@ -224,17 +223,8 @@ let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph
             let currProjects = currGroups.[kvp.Key]
             if prevProjects <> currProjects then
                 printfn "%s" kvp.Key.toString
-
         failwithf "Missing repositories for indexation"
-
-    let modifiedProjects = antho.Projects |> Seq.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
-                                          |> Seq.groupBy (fun x -> x.Repository)
-                                          |> Seq.map (fun (r, p) -> r, p |> Set.ofSeq)
-                                          |> dict
-
-    for kvp in modifiedProjects do
-        let repo = kvp.Key
-        let projects = kvp.Value
-        Configuration.SaveProjectsRepository repo projects
+    
+    antho |> Configuration.SaveAnthology
 
     antho

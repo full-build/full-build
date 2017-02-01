@@ -38,21 +38,27 @@ let private consistencyCheck antho =
           |> repositoryConsistencyCheck
 
 
-
-let Check () =
-    let antho = Configuration.LoadAnthology ()
-
-    // check .fbprojects is available in each buildable repository
+// check .fbprojects is available in each buildable repository
+let checkFbProjectsInRepo (antho : Anthology.Anthology) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    antho.Repositories |> Seq.filter (fun x -> x.Builder = Anthology.BuilderType.MSBuild
-                                               && (wsDir |> IoHelpers.GetSubDirectory x.Repository.Name.toString).Exists)
-                       |> Seq.iter (fun x -> x.Repository.Name |> Configuration.LoadProjectsRepository |> ignore)
+    let repoWithoutProjects = antho.Repositories |> Seq.filter (fun x -> x.Builder = Anthology.BuilderType.MSBuild)
+                                                    |> Seq.filter (fun x -> (wsDir |> IoHelpers.GetSubDirectory x.Repository.Name.toString).Exists |> not)
+    if repoWithoutProjects <> Seq.empty then
+        let err = repoWithoutProjects |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.Repository.Name.toString) "Found repositories without .fbprojects:"
+        failwith err
+    antho
 
-    // check graph consistency (projects & repository)
-    antho |> consistencyCheck |> ignore
 
+let checkArtifactDir (antho : Anthology.Anthology) =
     // check artifact directory
     let artifactDir = antho.Binaries |> System.IO.DirectoryInfo
     if artifactDir.Exists |> not then 
         failwithf "Artifacts directory %A is not available" antho.Binaries
+    antho
 
+let Check () =
+    let antho = Configuration.LoadAnthology ()
+    antho |> checkFbProjectsInRepo
+          |> consistencyCheck
+          |> checkArtifactDir
+          |> ignore
