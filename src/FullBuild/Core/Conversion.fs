@@ -18,8 +18,7 @@ open Graph
 
 
 let private convertMsBuild (repos : Repository set) =
-    let projects = repos |> Set.filter (fun x -> x.Builder = BuilderType.MSBuild)
-                         |> Set.map (fun x -> x.Projects)
+    let projects = repos |> Set.map (fun x -> x.Projects)
                          |> Set.unionMany
     Generators.MSBuild.GenerateProjects projects IoHelpers.XDocSaver
     Generators.MSBuild.ConvertProjects projects IoHelpers.XDocLoader IoHelpers.XDocSaver

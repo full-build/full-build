@@ -305,7 +305,7 @@ let private index (convertInfo : CLI.Commands.ConvertRepositories) =
 
 let convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let graph = Configuration.LoadAnthology() |> Graph.from
-    let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
+    let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned) |> Set.filter (fun x -> x.Builder = BuilderType.MSBuild)
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) convertInfo.Filters
     if selectedRepos = Set.empty then failwith "Empty repository selection"
 
