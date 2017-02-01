@@ -70,7 +70,7 @@ let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (sha
 
 let GitCheckout (repoDir : DirectoryInfo) (version : string) =
     let args = sprintf "checkout %A" version
-    Exec "git" args repoDir Map.empty
+    ExecGetOutput "git" args repoDir Map.empty
 
 let GitHistory (repoDir : DirectoryInfo) (version : string) =
     let args = sprintf @"log --format=""%%H %%ae %%s"" %s..HEAD" version

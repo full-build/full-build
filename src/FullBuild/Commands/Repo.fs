@@ -17,17 +17,6 @@ module Commands.Repo
 open Collections
 open Graph
 
-let consoleLock = System.Object()
-
-let printClone ((repo, execResult) : (Repository * Exec.ExecResult)) =
-    lock consoleLock (fun () -> IoHelpers.DisplayInfo repo.Name
-                                execResult |> Exec.PrintOutput)
-
-let private cloneRepoAndInit wsDir shallow (repo : Repository) =
-    async {
-        return (repo, Tools.Vcs.Clone wsDir repo shallow) |> printClone
-    }
-
 let List() =
     let graph = Configuration.LoadAnthology() |> Graph.from
 
@@ -37,6 +26,12 @@ let List() =
     graph.Repositories |> Seq.iter printRepo
 
 let Clone (cmd : CLI.Commands.CloneRepositories) =
+    let cloneRepoAndInit wsDir shallow (repo : Repository) =
+        async {
+            let res = Tools.Vcs.Clone wsDir repo shallow
+            return res |> IoHelpers.PrintOutput repo.Name
+        }
+
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Configuration.LoadAnthology() |> Graph.from
     let selectedRepos = PatternMatching.FilterMatch graph.Repositories (fun x -> x.Name) cmd.Filters

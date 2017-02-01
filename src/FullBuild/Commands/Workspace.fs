@@ -25,16 +25,6 @@ open System
 open Graph
 
 
-let printPull ((repo, execResult) : (Repository * Exec.ExecResult)) =
-    lock consoleLock (fun () -> IoHelpers.DisplayInfo repo.Name
-                                execResult |> Exec.PrintOutput)
-
-let private checkoutRepo wsDir (version : string) (repo : Repository) = async {
-    return (repo, Tools.Vcs.Checkout wsDir repo version) |> printPull
-}
-
-
-
 let pullMatchingBinaries () =
     let graph = Configuration.LoadAnthology () |> Graph.from
     let baselineRepository = Baselines.from graph
@@ -55,11 +45,8 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
                      | None -> repo.Branch
                      | Some x -> x
 
-            let displayBranchOutput () =
-                IoHelpers.DisplayInfo repo.Name
-                Tools.Vcs.Checkout wsDir repo br |> Exec.PrintOutput
-
-            return lock(consoleLock) (fun () -> displayBranchOutput ())
+            let res = Tools.Vcs.Checkout wsDir repo br
+            return res |> IoHelpers.PrintOutput repo.Name
         }
 
     match branchInfo.Branch with
@@ -87,7 +74,8 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     try
         Environment.CurrentDirectory <- wsDir.FullName
         let graph = Graph.create createInfo.MasterRepository createInfo.MasterArtifacts createInfo.Type TestRunnerType.NUnit
-        Tools.Vcs.Clone wsDir graph.MasterRepository true |> Exec.PrintOutput |> Exec.CheckResponseCode
+        Tools.Vcs.Clone wsDir graph.MasterRepository true |> IoHelpers.PrintOutput "Cloning master repository"        
+                                                          |> Exec.CheckResponseCode
         graph.Save()
 
         Tools.Vcs.Ignore wsDir graph.MasterRepository
@@ -113,6 +101,11 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     let mainRepo = graph.MasterRepository
     Tools.Vcs.Checkout wsDir mainRepo checkoutInfo.Version |> Exec.CheckResponseCode
 
+    let checkoutRepo wsDir (version : string) (repo : Repository) = async {
+        let res = Tools.Vcs.Checkout wsDir repo version
+        return res |> IoHelpers.PrintOutput repo.Name
+    }
+
     // checkout each repository now
     let graph = Configuration.LoadAnthology () |> Graph.from
     let repos = graph.Repositories
@@ -135,7 +128,8 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         printf "[WARNING] Workspace already exists - skipping"
     else
         let graph = Graph.init initInfo.MasterRepository initInfo.Type
-        Tools.Vcs.Clone wsDir graph.MasterRepository false |> Exec.PrintOutput |> Exec.CheckResponseCode
+        Tools.Vcs.Clone wsDir graph.MasterRepository false |> IoHelpers.PrintOutput "Cloning master repository"
+                                                           |> Exec.CheckResponseCode
 
         let currDir = Environment.CurrentDirectory
         try
@@ -157,11 +151,6 @@ let consoleProgressBar max =
             }
         loop 1)
 
-let consoleLock = System.Object()
-
-let private cloneRepo wsDir rebase (repo : Repository) = async {
-    return (repo, Tools.Vcs.Pull wsDir repo rebase) |> printPull
-}
 
 let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
@@ -172,16 +161,22 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     let graph = Configuration.LoadAnthology () |> Graph.from
 
     if pullInfo.Sources then
+        let cloneRepo wsDir rebase (repo : Repository) = async {
+            let res = Tools.Vcs.Pull wsDir repo rebase
+            return res |> IoHelpers.PrintOutput repo.Name
+        }
+
         graph.MasterRepository
             |> cloneRepo wsDir pullInfo.Rebase
             |> Async.RunSynchronously
             |> Exec.CheckResponseCode
-
+  
         let selectedRepos = match pullInfo.View with
                              | None -> graph.Repositories
                              | Some viewName -> let view = viewRepository.Views |> Seq.find (fun x -> x.Name = viewName)
                                                 let repos = view.Projects |> Set.map (fun x -> x.Repository)
                                                 repos
+
         selectedRepos |> Seq.filter (fun x -> x.IsCloned)
                       |> Threading.ParExec (cloneRepo wsDir pullInfo.Rebase)
                       |> Exec.CheckMultipleResponseCode

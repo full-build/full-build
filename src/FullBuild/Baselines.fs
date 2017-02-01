@@ -20,14 +20,6 @@ open IoHelpers
 
 #nowarn "0346" // GetHashCode missing
 
-let printTag ((repo, execResult) : (Repository * Exec.ExecResult)) =
-    lock consoleLock (fun () -> IoHelpers.DisplayInfo repo.Name
-                                execResult |> Exec.PrintOutput)
-
-let private tagRepo wsDir (tag : string) (comment : string) (repo : Repository) = async {
-    return (repo, Tools.Vcs.Tag wsDir repo tag comment) |> printTag
-}
-
 
 [<RequireQualifiedAccess>]
 type TagInfo =
@@ -107,6 +99,11 @@ with
     member this.Save (comment : string) : unit =
         let wsDir = Env.GetFolder Env.Folder.Workspace
         let tag = tagInfo.Format()
+
+        let tagRepo wsDir (tag : string) (comment : string) (repo : Repository) = async {
+            let res = Tools.Vcs.Tag wsDir repo tag comment
+            return res |> IoHelpers.PrintOutput repo.Name
+        }
 
         graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
                            |> Threading.ParExec (tagRepo wsDir tag comment)

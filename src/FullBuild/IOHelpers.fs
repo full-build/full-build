@@ -131,20 +131,13 @@ let GetFilewithoutRootDirectory (file : string) =
     let idx = (file |> ToWindows).IndexOf('\\')
     file.Substring(idx+1)
 
-let consoleLock = System.Object()
-
 let ConsoleDisplay (c : ConsoleColor) (s : string) =
-    let display () =        
-        let oldColor = Console.ForegroundColor
-        try
-            Console.ForegroundColor <- c
-            Console.WriteLine(s)
-        finally
-            Console.ForegroundColor <- oldColor
-
-    lock consoleLock display
-
-
+    let oldColor = Console.ForegroundColor
+    try
+        Console.ForegroundColor <- c
+        Console.WriteLine(s)
+    finally
+        Console.ForegroundColor <- oldColor
 
 let DisplayInfo msg = ConsoleDisplay ConsoleColor.Cyan ("- " + msg)
 let DisplayError msg = ConsoleDisplay ConsoleColor.Red msg
@@ -194,3 +187,15 @@ let rec EnsureForceDelete (dir : DirectoryInfo) (limit : int) =
                   EnsureForceDelete dir (limit - 1)
                else
                   reraise()
+
+
+let PrintOutput info (execResult : Exec.ExecResult) =
+    let rec printl lines =
+        match lines with
+        | line :: tail -> printfn "%s" line; printl tail
+        | [] -> ()
+
+    info |> DisplayInfo
+    execResult.Out |> printl
+    execResult.Error |> printl
+    execResult

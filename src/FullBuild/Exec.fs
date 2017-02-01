@@ -17,6 +17,7 @@ module Exec
 open System.Diagnostics
 open System.IO
 
+let consoleLock = System.Object()
 
 
 [<NoComparison; RequireQualifiedAccess>]
@@ -72,15 +73,6 @@ let Exec =
 
 let ExecGetOutput =
     supervisedExec true 
-
-let PrintOutput execResult =
-    let rec printl lines =
-        match lines with
-        | line :: tail -> printfn "%s" line; printl tail
-        | [] -> ()
-    execResult.Out |> printl
-    execResult.Error |> printl
-    execResult
 
 let private resultToError execResult = 
     if execResult.ResultCode <> 0 then execResult.ResultCode |> sprintf "Operation failed with error %d" |> Some
