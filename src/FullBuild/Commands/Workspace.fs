@@ -72,7 +72,6 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
                 if res |> Seq.exists (fun x -> x.ResultCode <> 0) then
                     printfn "WARNING: failed to checkout some repositories"
 
-                Core.Indexation.ConsolidateAnthology()
                 Configuration.SaveBranch x
                 pullMatchingBinaries ()
     | None -> let name = Configuration.LoadBranch()
@@ -190,9 +189,6 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
 
     if pullInfo.Bin then
         pullMatchingBinaries ()
-
-    // consolidate anthology
-    Core.Indexation.ConsolidateAnthology()
 
 
 let Exec (execInfo : CLI.Commands.Exec) =
@@ -348,13 +344,15 @@ let CheckMinVersion () =
 
 
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let antho = Configuration.LoadAnthology ()
+    let graph = antho |> Graph.from
 
     let baselines = Baselines.from graph
     let comment = pushInfo.Incremental ? ("incremental", "full")
     let baseline = baselines.CreateBaseline pushInfo.Version
 
     // copy bin content
+    antho |> Configuration.SaveConsolidatedAnthology
     Core.BuildArtifacts.Publish graph baseline.Info
     baseline.Save comment
 

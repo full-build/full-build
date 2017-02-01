@@ -174,24 +174,6 @@ let UpdatePackages (antho, parsedProjects) =
 
     antho
 
-
-let ConsolidateAnthology () = 
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let antho = Configuration.LoadAnthology ()
-
-    // update anthology
-    let mutable consAntho = antho
-    for repo in antho.Repositories do
-        let repoDir = wsDir |> GetSubDirectory repo.Repository.Name.toString
-        if repoDir.Exists then
-            let repoProjects = Configuration.LoadProjectsRepository repo.Repository.Name
-            let newProjects = consAntho.Projects |> Set.filter (fun x -> x.Repository <> repo.Repository.Name)
-                                                 |> Set.union repoProjects.Projects
-            consAntho <- { consAntho
-                           with Projects = newProjects }
-    Configuration.SaveAnthology consAntho                                                                                
-
-
 let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
     let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
     let untouchedProjects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
@@ -220,7 +202,7 @@ let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Grap
 
     for kvp in modifiedProjects do
         let repo = kvp.Key
-        let projects = { ProjectsSerializer.Projects = kvp.Value }
+        let projects = kvp.Value
         let currentProjects = Configuration.LoadProjectsRepository repo
         if currentProjects <> projects then failwithf "Repository %s must be indexed" repo.toString
 
@@ -252,7 +234,7 @@ let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph
 
     for kvp in modifiedProjects do
         let repo = kvp.Key
-        let projects = { ProjectsSerializer.Projects = kvp.Value }
+        let projects = kvp.Value
         Configuration.SaveProjectsRepository repo projects
 
     antho

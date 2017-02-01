@@ -17,25 +17,24 @@ module ProjectsSerializerTests
 open FsUnit
 open NUnit.Framework
 open Anthology
-open ProjectsSerializer
 open StringHelpers
 
 [<Test>]
 let CheckSaveLoadProjects () =
-    let projects1 = {
-        Projects = [ { Output = AssemblyId.from "cqlplus"
-                       ProjectId = ProjectId.from "cqlplus"
-                       OutputType = OutputType.Exe
-                       UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
-                       RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
-                       FxVersion = FxInfo.from "v4.5"
-                       FxProfile = FxInfo.from null
-                       FxIdentifier = FxInfo.from null
-                       HasTests = false
-                       ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set
-                       AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Data"; AssemblyId.from "System.Xml"] |> set
-                       PackageReferences = [ PackageId.from "NLog" ; PackageId.from "Rx-Main" ] |> Set
-                       Repository = RepositoryId.from "cassandra-sharp" } ] |> set }
+    let projects1 =
+       [ { Output = AssemblyId.from "cqlplus"
+                    ProjectId = ProjectId.from "cqlplus"
+                    OutputType = OutputType.Exe
+                    UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
+                    RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
+                    FxVersion = FxInfo.from "v4.5"
+                    FxProfile = FxInfo.from null
+                    FxIdentifier = FxInfo.from null
+                    HasTests = false
+                    ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set
+                    AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Data"; AssemblyId.from "System.Xml"] |> set
+                    PackageReferences = [ PackageId.from "NLog" ; PackageId.from "Rx-Main" ] |> Set
+                    Repository = RepositoryId.from "cassandra-sharp" } ] |> set
 
     let res = ProjectsSerializer.Serialize projects1
     printfn "%s" res
