@@ -137,6 +137,7 @@ let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
 
 let IndexWorkspace wsDir antho (grepos : Graph.Repository set) =
     let repos = antho.Repositories |> Set.filter (fun x -> grepos |> Set.exists (fun y -> y.Name = x.Repository.Name.toString))
+                                   |> Set.filter (fun x -> x.Builder = BuilderType.MSBuild)
                                    |> Set.map (fun x -> x.Repository)
     let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos
 
@@ -174,24 +175,6 @@ let UpdatePackages (antho, parsedProjects) =
 
     antho
 
-
-let ConsolidateAnthology () = 
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let antho = Configuration.LoadAnthology ()
-
-    // update anthology
-    let mutable consAntho = antho
-    for repo in antho.Repositories do
-        let repoDir = wsDir |> GetSubDirectory repo.Repository.Name.toString
-        if repoDir.Exists then
-            let repoProjects = Configuration.LoadProjectsRepository repo.Repository.Name
-            let newProjects = consAntho.Projects |> Set.filter (fun x -> x.Repository <> repo.Repository.Name)
-                                                 |> Set.union repoProjects.Projects
-            consAntho <- { consAntho
-                           with Projects = newProjects }
-    Configuration.SaveAnthology consAntho                                                                                
-
-
 let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
     let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
     let untouchedProjects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
@@ -210,7 +193,6 @@ let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Grap
             let currProjects = currGroups.[kvp.Key]
             if prevProjects <> currProjects then
                 printfn "%s" kvp.Key.toString
-
         failwithf "Missing repositories for indexation"
 
     let modifiedProjects = antho.Projects |> Seq.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
@@ -220,8 +202,8 @@ let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Grap
 
     for kvp in modifiedProjects do
         let repo = kvp.Key
-        let projects = { ProjectsSerializer.Projects = kvp.Value }
-        let currentProjects = Configuration.LoadProjectsRepository repo
+        let projects = kvp.Value
+        let currentProjects = previousAntho.Projects |> Set.filter (fun x -> x.Repository = kvp.Key)
         if currentProjects <> projects then failwithf "Repository %s must be indexed" repo.toString
 
 let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
@@ -242,17 +224,8 @@ let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph
             let currProjects = currGroups.[kvp.Key]
             if prevProjects <> currProjects then
                 printfn "%s" kvp.Key.toString
-
         failwithf "Missing repositories for indexation"
-
-    let modifiedProjects = antho.Projects |> Seq.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString))
-                                          |> Seq.groupBy (fun x -> x.Repository)
-                                          |> Seq.map (fun (r, p) -> r, p |> Set.ofSeq)
-                                          |> dict
-
-    for kvp in modifiedProjects do
-        let repo = kvp.Key
-        let projects = { ProjectsSerializer.Projects = kvp.Value }
-        Configuration.SaveProjectsRepository repo projects
+    
+    antho |> Configuration.SaveAnthology
 
     antho

@@ -13,7 +13,7 @@
 
     <FBApp>*** undefined ***</FBApp>
     <FBContentFolder>$(SolutionDir)\apps\$(FBApp)</FBContentFolder>
-    <FBBinFolder>$(FBContentFolder)</FBBinFolder>
+    <FBBinFolder>$(FBContentFolder)\</FBBinFolder>
     <FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)\bin\</FBBinFolder>
   </PropertyGroup>
 

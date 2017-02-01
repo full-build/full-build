@@ -14,9 +14,9 @@
 
 module AnthologySerializer
 
+open Collections
 open Anthology
 open ArtifactsSerializer
-open ProjectsSerializer
 
 
 let Serialize (antho : Anthology) =
@@ -28,10 +28,9 @@ let Serialize (antho : Anthology) =
                       Repositories = antho.Repositories
                       Applications = antho.Applications
                       Tester = antho.Tester }
-    let projects = { Projects = antho.Projects }
-    (artifacts, projects)    
+    (artifacts, antho.Projects)    
 
-let Deserialize (artifacts : ArtifactsSerializer.Artifacts) (projects : ProjectsSerializer.Projects) =
+let Deserialize (artifacts : ArtifactsSerializer.Artifacts) (projects : Project set) =
     { MinVersion = artifacts.MinVersion
       Binaries = artifacts.Binaries
       NuGets = artifacts.NuGets
@@ -39,5 +38,5 @@ let Deserialize (artifacts : ArtifactsSerializer.Artifacts) (projects : Projects
       MasterRepository = artifacts.MasterRepository
       Repositories = artifacts.Repositories
       Applications = artifacts.Applications
-      Projects = projects.Projects
+      Projects = projects
       Tester = artifacts.Tester }

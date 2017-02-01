@@ -16,12 +16,8 @@ module ProjectsSerializer
 
 open Anthology
 open System.IO
-open System
 open Collections
 open StringHelpers
-
-type Projects =
-    { Projects : Project set }
 
 
 type private ProjectsConfig = FSharp.Configuration.YamlConfig<"Examples/projects.yaml">
@@ -29,11 +25,11 @@ type private ProjectsConfig = FSharp.Configuration.YamlConfig<"Examples/projects
 
 
 
-let Serialize (projects : Projects) =
+let Serialize (projects : Project set) =
     let config = new ProjectsConfig()
 
     config.projects.Clear()
-    for project in projects.Projects do
+    for project in projects do
         let cproject = ProjectsConfig.projects_Item_Type()
         cproject.guid <- project.UniqueProjectId.toString
         cproject.fx.version <- project.FxVersion.toString
@@ -102,15 +98,15 @@ let Deserialize (content) =
     let config = new ProjectsConfig()
     config.LoadText content
 
-    { Projects = convertToProjects (config.projects |> List.ofSeq) }
+    convertToProjects (config.projects |> List.ofSeq)
 
-let Save (filename : FileInfo) (projects : Projects) =
+let Save (filename : FileInfo) (projects : Project set) =
     let content = Serialize projects
     File.WriteAllText(filename.FullName, content)
 
-let Load (filename : FileInfo) : Projects =
+let Load (filename : FileInfo) : Project set =
     if filename.Exists then
         let content = File.ReadAllText (filename.FullName)
         Deserialize content
     else
-        { Projects = Set.empty }
+        Set.empty

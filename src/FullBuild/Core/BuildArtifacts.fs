@@ -46,10 +46,12 @@ let Publish (graph : Graph) (tagInfo : Baselines.TagInfo) =
         let latestVersionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile "versions"
 
         File.AppendAllLines(latestVersionFile.FullName, [versionLine])
-        for app in appDir |> EnumerateChildren do
-            printfn "[appversion] %s" app.Name
-            let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
-            File.AppendAllLines(versionFile.FullName, [versionLine])
+        for app in graph.Applications do
+            let appArtifact = appDir |> GetFile app.Name
+            if appArtifact.Exists then
+                printfn "[appversion] %s" app.Name
+                let versionFile = DirectoryInfo(graph.ArtifactsDir) |> GetFile (sprintf "%s.versions" app.Name)
+                File.AppendAllLines(versionFile.FullName, [versionLine])
     with
         _ -> versionDir.Refresh ()
              if versionDir.Exists then versionDir.MoveTo(versionDir.FullName + ".failed")

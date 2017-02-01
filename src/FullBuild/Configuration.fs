@@ -15,8 +15,8 @@
 module Configuration
 
 open Env
+open Collections
 open Anthology
-open ProjectsSerializer
 
 type WorkspaceConfiguration = 
     { Repositories : Repository list }
@@ -26,17 +26,39 @@ let LoadArtifacts() : ArtifactsSerializer.Artifacts =
     let artifacts = ArtifactsSerializer.Load artifactsFile
     artifacts
 
-let LoadProjects() : ProjectsSerializer.Projects =
+let private loadProjects() : Project set =
     let projectsFile = GetProjectsFile ()
     let projects = ProjectsSerializer.Load projectsFile
     projects
 
+let private saveProjectsRepository (repo : RepositoryId) (projects : Project set) =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
+    let projectsFile = repoDir |> IoHelpers.GetFile ".fbprojects"
+    ProjectsSerializer.Save projectsFile projects    
+
+let private loadProjectsRepository (repo : RepositoryId) : Project set =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
+    if repoDir.Exists |> not then failwithf "Can't find .fbprojects in repository %A" repo.toString
+    let projectsFile = repoDir |> IoHelpers.GetFile ".fbprojects"
+    ProjectsSerializer.Load projectsFile
+
+
 let LoadAnthology() : Anthology = 
     let artifacts = LoadArtifacts()
-    let projects = LoadProjects()
+    let mutable projects = loadProjects()
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    for repo in artifacts.Repositories do
+        let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Repository.Name.toString
+        if repoDir.Exists then
+            let repoProjects = loadProjectsRepository repo.Repository.Name
+            projects <- projects |> Set.filter (fun x -> x.Repository <> repo.Repository.Name)
+                                 |> Set.union repoProjects
 
     let antho = AnthologySerializer.Deserialize artifacts projects
     antho
+
 
 let SaveAnthology (antho : Anthology) = 
     let (artifacts, projects) = AnthologySerializer.Serialize antho
@@ -44,21 +66,25 @@ let SaveAnthology (antho : Anthology) =
     let artifactsFile = GetArtifactsFile ()
     ArtifactsSerializer.Save artifactsFile artifacts
 
-    let projectsFile = GetProjectsFile ()
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let repo2projects = projects |> Seq.groupBy (fun x -> x.Repository) |> dict
+    for repo2project in repo2projects do
+        let repo = repo2project.Key
+        let repoProjects = repo2project.Value
+        let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
+        if repoDir.Exists then
+            let repoProjects = projects |> Set.filter (fun x -> x.Repository = repo)
+            saveProjectsRepository repo repoProjects
+
+let SaveConsolidatedAnthology (antho : Anthology) =
+    let (artifacts, projects) = AnthologySerializer.Serialize antho
+
+    let artifactsFile = GetArtifactsFile ()
+    ArtifactsSerializer.Save artifactsFile artifacts
+
+    let projectsFile = GetProjectsFile()
     ProjectsSerializer.Save projectsFile projects
 
-let SaveProjectsRepository (repo : RepositoryId) (projects : Projects) =
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
-    let projectsFile = repoDir |> IoHelpers.GetFile ".fbprojects"
-    ProjectsSerializer.Save projectsFile projects    
-
-let LoadProjectsRepository (repo : RepositoryId) : Projects =
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
-    if repoDir.Exists |> not then failwithf "Can't find .fbprojects in repository %A" repo.toString
-    let projectsFile = repoDir |> IoHelpers.GetFile ".fbprojects"
-    ProjectsSerializer.Load projectsFile
 
 let LoadView (viewId :ViewId) : View =
     let viewFile = GetViewFile viewId.toString 
