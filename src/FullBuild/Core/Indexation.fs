@@ -137,6 +137,7 @@ let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
 
 let IndexWorkspace wsDir antho (grepos : Graph.Repository set) =
     let repos = antho.Repositories |> Set.filter (fun x -> grepos |> Set.exists (fun y -> y.Name = x.Repository.Name.toString))
+                                   |> Set.filter (fun x -> x.Builder = BuilderType.MSBuild)
                                    |> Set.map (fun x -> x.Repository)
     let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos
 
