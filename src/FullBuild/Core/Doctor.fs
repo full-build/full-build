@@ -42,8 +42,9 @@ let private consistencyCheck antho =
 let checkFbProjectsInRepo (antho : Anthology.Anthology) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repoWithoutProjects = antho.Repositories |> Seq.filter (fun x -> x.Builder = Anthology.BuilderType.MSBuild)
-                                                    |> Seq.filter (fun x -> (wsDir |> IoHelpers.GetSubDirectory x.Repository.Name.toString).Exists |> not)
-    if repoWithoutProjects <> Seq.empty then
+                                                 |> Seq.filter (fun x -> (wsDir |> IoHelpers.GetSubDirectory x.Repository.Name.toString).Exists |> not)
+                                                 |> List.ofSeq
+    if repoWithoutProjects <> List.empty then
         let err = repoWithoutProjects |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.Repository.Name.toString) "Found repositories without .fbprojects:"
         failwith err
     antho
