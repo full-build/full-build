@@ -26,17 +26,23 @@ let List() =
     graph.Repositories |> Seq.iter printRepo
 
 let Clone (cmd : CLI.Commands.CloneRepositories) =
-    let cloneRepoAndInit wsDir shallow (repo : Repository) =
+    let cloneRepoAndInit wsDir shallow branch (repo : Repository) =
         async {
-            let res = Tools.Vcs.Clone wsDir repo shallow
+            let br = match branch with
+                     | Some x -> x
+                     | None -> repo.Branch
+            let res = Tools.Vcs.Clone wsDir repo shallow br
             return res |> IoHelpers.PrintOutput repo.Name
         }
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Configuration.LoadAnthology() |> Graph.from
     let selectedRepos = PatternMatching.FilterMatch graph.Repositories (fun x -> x.Name) cmd.Filters
+    let branch = Configuration.LoadBranch()
+    let br = if branch = graph.MasterRepository.Branch then None
+             else Some branch
     selectedRepos |> Set.filter (fun x -> not x.IsCloned)
-                  |> Threading.ParExec (cloneRepoAndInit wsDir cmd.Shallow)
+                  |> Threading.ParExec (cloneRepoAndInit wsDir cmd.Shallow br)
                   |> Exec.CheckMultipleResponseCode
 
 let Add (cmd : CLI.Commands.AddRepository) =

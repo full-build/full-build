@@ -47,8 +47,8 @@ let GitIs (repo : Repository) =
     with
         _ -> false
 
-let GitClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
-    let bronly = sprintf "--branch %s --no-single-branch" repo.Branch
+let GitClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) (branch : string) =
+    let bronly = sprintf "--branch %s --no-single-branch" branch
     let depth = if shallow then "--depth=3"
                 else ""
 

@@ -74,8 +74,9 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     try
         Environment.CurrentDirectory <- wsDir.FullName
         let graph = Graph.create createInfo.MasterRepository createInfo.MasterArtifacts createInfo.Type TestRunnerType.NUnit
-        Tools.Vcs.Clone wsDir graph.MasterRepository true |> IoHelpers.PrintOutput "Cloning master repository"        
-                                                          |> Exec.CheckResponseCode
+        let br = graph.MasterRepository.Branch
+        Tools.Vcs.Clone wsDir graph.MasterRepository true br |> IoHelpers.PrintOutput "Cloning master repository"        
+                                                             |> Exec.CheckResponseCode
         graph.Save()
 
         Tools.Vcs.Ignore wsDir graph.MasterRepository
@@ -128,8 +129,9 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         printf "[WARNING] Workspace already exists - skipping"
     else
         let graph = Graph.init initInfo.MasterRepository initInfo.Type
-        Tools.Vcs.Clone wsDir graph.MasterRepository false |> IoHelpers.PrintOutput "Cloning master repository"
-                                                           |> Exec.CheckResponseCode
+        let br = graph.MasterRepository.Branch
+        Tools.Vcs.Clone wsDir graph.MasterRepository false br |> IoHelpers.PrintOutput "Cloning master repository"
+                                                              |> Exec.CheckResponseCode
 
         let currDir = Environment.CurrentDirectory
         try
