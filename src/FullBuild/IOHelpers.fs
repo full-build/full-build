@@ -131,6 +131,8 @@ let GetFilewithoutRootDirectory (file : string) =
     let idx = (file |> ToWindows).IndexOf('\\')
     file.Substring(idx+1)
 
+let consoleLock = System.Object()
+
 let ConsoleDisplay (c : ConsoleColor) (s : string) =
     let oldColor = Console.ForegroundColor
     try
@@ -195,7 +197,10 @@ let PrintOutput info (execResult : Exec.ExecResult) =
         | line :: tail -> printfn "%s" line; printl tail
         | [] -> ()
 
-    info |> DisplayInfo
-    execResult.Out |> printl
-    execResult.Error |> printl
-    execResult
+    let display () =
+        info |> DisplayInfo
+        execResult.Out |> printl
+        execResult.Error |> printl
+        execResult
+
+    lock consoleLock display

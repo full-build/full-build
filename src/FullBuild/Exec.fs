@@ -17,8 +17,6 @@ module Exec
 open System.Diagnostics
 open System.IO
 
-let consoleLock = System.Object()
-
 
 [<NoComparison; RequireQualifiedAccess>]
 type private MonitorCommand =
