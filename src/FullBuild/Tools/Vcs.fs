@@ -30,10 +30,10 @@ let Unclone (wsDir : DirectoryInfo) (repo : Repository) =
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name
     if repoDir.Exists then repoDir.Delete(true)
 
-let Clone (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) (branch : string) : Exec.ExecResult =
+let Clone (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) : Exec.ExecResult =
     let gitCloneFunc = if repo.Vcs = VcsType.Gerrit then GerritClone repo
                                                     else GitClone repo
-    (chooseVcs wsDir repo.Vcs repo gitCloneFunc) repo.Uri shallow branch
+    (chooseVcs wsDir repo.Vcs repo gitCloneFunc) repo.Uri shallow
 
 let Tip (wsDir : DirectoryInfo) (repo : Repository) =
     (chooseVcs wsDir repo.Vcs repo GitTip).[0]

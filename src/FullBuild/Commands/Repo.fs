@@ -28,10 +28,11 @@ let List() =
 let Clone (cmd : CLI.Commands.CloneRepositories) =
     let cloneRepoAndInit wsDir shallow branch (repo : Repository) =
         async {
+            let res = Tools.Vcs.Clone wsDir repo shallow
             let br = match branch with
                      | Some x -> x
                      | None -> repo.Branch
-            let res = Tools.Vcs.Clone wsDir repo shallow br
+            Tools.Vcs.Checkout wsDir repo br |> ignore
             return res |> IoHelpers.PrintOutput repo.Name
         }
 
