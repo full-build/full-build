@@ -49,6 +49,15 @@ let checkFbProjectsInRepo (antho : Anthology.Anthology) =
         failwith err
     antho
 
+let checkApps (antho : Anthology.Anthology) =
+    let appProjects = antho.Applications |> Set.map (fun x -> x.Projects) |> Set.unionMany
+    let knownProjects = antho.Projects |> Set.map (fun x -> x.ProjectId)
+    let unknowns  = appProjects - knownProjects
+    if unknowns <> Set.empty then
+        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.toString) "Found invalid application references:"
+        failwith err
+    antho
+
 
 let checkArtifactDir (antho : Anthology.Anthology) =
     // check artifact directory
