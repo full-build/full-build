@@ -34,9 +34,12 @@ let pullMatchingBinaries () =
 
 
 
+let Install () =
+    Core.Package.RestorePackages ()
+    Core.Conversion.GenerateProjectArtifacts()
+
 
 let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
-    let graph = Configuration.LoadAnthology() |> Graph.from
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     let switchToBranch (branch : string option) (repo : Repository) =
@@ -50,8 +53,10 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
         }
 
     match branchInfo.Branch with
-    | Some x -> let branch = (x = graph.MasterRepository.Branch) ? (None, Some x)
+    | Some x -> let graph = Configuration.LoadAnthology() |> Graph.from
+                let branch = (x = graph.MasterRepository.Branch) ? (None, Some x)
                 let res1 = switchToBranch branch graph.MasterRepository |> Async.RunSynchronously
+
                 let graph = Configuration.LoadAnthology() |> Graph.from
                 let res2 = graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
                                               |> Threading.ParExec (switchToBranch branch)
@@ -61,6 +66,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
 
                 Configuration.SaveBranch x
                 pullMatchingBinaries ()
+                Install()
     | None -> let name = Configuration.LoadBranch()
               printfn "%s" name
 
@@ -116,11 +122,8 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
 
     Configuration.SaveBranch tag.Branch
     Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir checkoutInfo.Version
+    Install()
 
-
-let Install () =
-    Core.Package.RestorePackages ()
-    Core.Conversion.GenerateProjectArtifacts()
 
 let Init (initInfo : CLI.Commands.InitWorkspace) =
     let wsDir = DirectoryInfo(initInfo.Path)
