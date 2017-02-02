@@ -24,7 +24,6 @@ type private ViewConfig = FSharp.Configuration.YamlConfig<"Examples/View.yaml">
 
 let SerializeView (view : View) =
     let config = new ViewConfig()
-    config.builder <- view.Builder.toString
     config.name <- view.Name
     config.filters.Clear()
     for filter in view.Filters do
@@ -50,7 +49,6 @@ let DeserializeView content =
       Filters = config.filters
                 |> Seq.map (fun x -> x.filter)
                 |> Set.ofSeq
-      Builder = BuilderType.from config.builder
       UpReferences = config.referencedBy
       DownReferences = config.references
       Modified = config.modified 

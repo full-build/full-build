@@ -2,7 +2,6 @@
 filters:
     - filter: toto/*
     - filter: titi/*
-builder: msbuild
 references: true
 referencedBy: true
 modified: true

@@ -47,10 +47,6 @@ with
 type PackageVersion =
     | PackageVersion of string
     | Unspecified
-with
-    member this.toString = match this with
-                           | PackageVersion x -> x
-                           | Unspecified -> "<unspecified>"
 
 type PackageId = private PackageId of string
 with
@@ -84,7 +80,6 @@ with
 type RepositoryUrl = private RepositoryUrl of string
 with
     member this.toString = (fun (RepositoryUrl x) -> x)this
-    static member from (maybeUri : Uri) = RepositoryUrl.from (maybeUri.ToString())
     static member from (maybeUri : string) = RepositoryUrl (maybeUri.ToLowerInvariant())
 
 [<RequireQualifiedAccess>]
@@ -207,7 +202,6 @@ type Baseline =
 type View =
     { Name : string
       Filters : string set
-      Builder : BuilderType
       UpReferences : bool
       DownReferences : bool
       Modified : bool 

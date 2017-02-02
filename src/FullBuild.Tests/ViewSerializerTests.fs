@@ -22,7 +22,6 @@ open Anthology
 let CheckSaveLoadView () =
     let view1 = { Name = "toto"
                   Filters = ["cassandra-sharp/*"] |> Set
-                  Builder = BuilderType.MSBuild
                   UpReferences = false 
                   DownReferences = true 
                   Modified = false 

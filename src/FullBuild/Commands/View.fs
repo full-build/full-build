@@ -31,7 +31,6 @@ let Add (cmd : CLI.Commands.AddView) =
                                          cmd.Modified
                                          cmd.AppFilter
                                          cmd.Tests
-                                         Graph.BuilderType.MSBuild
 
     let projects = view.Projects
     if projects = Set.empty then printfn "WARNING: Empty project selection"
@@ -74,7 +73,6 @@ let Describe name =
     let graph = Configuration.LoadAnthology() |> Graph.from
     let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = name)
-    let builder = StringHelpers.toString view.Builder
     view.Filters |> Seq.iter (fun x -> printfn "%s" x)
 
 let Build (cmd : CLI.Commands.BuildView) =
@@ -92,7 +90,7 @@ let Build (cmd : CLI.Commands.BuildView) =
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
-    Core.Builders.BuildWithBuilder view.Builder slnFile cmd.Config cmd.Clean cmd.Multithread version
+    Core.Builders.BuildWithBuilder BuilderType.MSBuild slnFile cmd.Config cmd.Clean cmd.Multithread version
 
 let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Configuration.LoadAnthology() |> Graph.from
@@ -105,7 +103,6 @@ let Alter (cmd : CLI.Commands.AlterView) =
                                             view.Modified
                                             view.AppFilter
                                             view.Tests
-                                            view.Builder
 
     let projects = depView.Projects
     if projects = Set.empty then printfn "WARNING: Empty project selection"
