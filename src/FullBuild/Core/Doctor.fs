@@ -69,6 +69,7 @@ let checkArtifactDir (antho : Anthology.Anthology) =
 let Check () =
     let antho = Configuration.LoadAnthology ()
     antho |> checkFbProjectsInRepo
+          |> checkApps
           |> consistencyCheck
           |> checkArtifactDir
           |> ignore
