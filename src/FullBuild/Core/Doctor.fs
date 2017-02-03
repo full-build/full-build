@@ -33,7 +33,7 @@ let private repositoryConsistencyCheck (antho : Anthology.Anthology) =
         failwith err
     antho
 
-let private consistencyCheck antho = 
+let private consistencyCheck antho =
     antho |> projectConsistencyCheck
           |> repositoryConsistencyCheck
 
@@ -42,8 +42,10 @@ let private consistencyCheck antho =
 let checkFbProjectsInRepo (antho : Anthology.Anthology) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repoWithoutProjects = antho.Repositories |> Seq.filter (fun x -> x.Builder = Anthology.BuilderType.MSBuild)
-                                                 |> Seq.filter (fun x -> (wsDir |> IoHelpers.GetSubDirectory x.Repository.Name.toString).Exists |> not)
+                                                 |> Seq.filter (fun x -> (wsDir |> IoHelpers.GetSubDirectory x.Repository.Name.toString).Exists)
+                                                 |> Seq.filter (fun x -> (wsDir |> IoHelpers.GetSubDirectory x.Repository.Name.toString |> IoHelpers.GetFile ".fbprojects").Exists |> not)
                                                  |> List.ofSeq
+
     if repoWithoutProjects <> List.empty then
         let err = repoWithoutProjects |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.Repository.Name.toString) "Found repositories without .fbprojects:"
         failwith err
@@ -62,7 +64,7 @@ let checkApps (antho : Anthology.Anthology) =
 let checkArtifactDir (antho : Anthology.Anthology) =
     // check artifact directory
     let artifactDir = antho.Binaries |> System.IO.DirectoryInfo
-    if artifactDir.Exists |> not then 
+    if artifactDir.Exists |> not then
         failwithf "Artifacts directory %A is not available" antho.Binaries
     antho
 
