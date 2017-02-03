@@ -26,14 +26,16 @@ let List() =
     graph.Repositories |> Seq.iter printRepo
 
 let Clone (cmd : CLI.Commands.CloneRepositories) =
-    let cloneRepoAndInit wsDir shallow branch (repo : Repository) =
+    let cloneRepoAndInit wsDir shallow (branch : string option) (repo : Repository) =
         async {
-            let res = Tools.Vcs.Clone wsDir repo shallow
-            let br = match branch with
-                     | Some x -> x
-                     | None -> repo.Branch
-            Tools.Vcs.Checkout wsDir repo br |> ignore
-            return res |> IoHelpers.PrintOutput repo.Name
+            let res = Tools.Vcs.Clone wsDir repo shallow |> IoHelpers.PrintOutput (sprintf "Cloning %s" repo.Name)
+            res |> Exec.CheckResponseCode
+
+            if branch.IsSome then
+                Tools.Vcs.Checkout wsDir repo branch.Value |> IoHelpers.PrintOutput (sprintf "Checkouting %s" repo.Name)
+                                                           |> ignore
+            
+            return res
         }
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
