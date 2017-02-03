@@ -42,7 +42,7 @@ with
         let branch = tag.Substring(0, idx)
         let version = tag.Substring(idx+1)
         { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = version }
-        
+
 
 // =====================================================================================================
 
@@ -74,7 +74,11 @@ with
             let wsDir = Env.GetFolder Env.Folder.Workspace
             let res = repos |> Set.map (fun x -> let tag = if isHead then Tools.Vcs.Head wsDir x
                                                             else tagInfo.Format()
-                                                 let hash = Tools.Vcs.TagToHash wsDir x tag
+                                                 let hash = try
+                                                                Tools.Vcs.TagToHash wsDir x tag
+                                                            with
+                                                                _ -> Tools.Vcs.Head wsDir x
+
                                                  Bookmark(graph, x, hash))
             bookmarks <- Some res
 
@@ -89,7 +93,7 @@ with
 
     member this.IsHead = isHead
 
-    member this.Bookmarks : Bookmark set = 
+    member this.Bookmarks : Bookmark set =
         collectBookmarks()
 
     static member (-) (ref : Baseline, target : Baseline) : Bookmark set =
@@ -113,7 +117,7 @@ with
 
 // =====================================================================================================
 
-[<Sealed>] 
+[<Sealed>]
 type Factory(graph : Graph) = class end
 with
     let wsDir = Env.GetFolder Env.Folder.Workspace
