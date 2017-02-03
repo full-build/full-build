@@ -33,14 +33,15 @@ let private displayAppVersion ((app : Graph.Application), (tag : Baselines.TagIn
 
 let private checkAppHasVersion (version : string) (graph : Graph.Graph) (app : Graph.Application) =
     async {
-        let version = Core.BuildArtifacts.FetchVersionsForArtifact graph app |> List.tryFind (fun x -> x.Format().Contains(version))                                                                                                       
+        let version = Core.BuildArtifacts.FetchVersionsForArtifact graph app |> List.tryFind (fun x -> x.Format().Contains(version))
         return if version.IsSome then Some app
                else None
     }
 
-let private getLastVersionForApp (graph : Graph.Graph) (app : Graph.Application) =
+let private getLastVersionForApp (graph : Graph.Graph) (branch : string) (app : Graph.Application) =
     async {
         let versions = Core.BuildArtifacts.FetchVersionsForArtifact graph app
+                            |> List.filter (fun x -> x.Branch = branch)
         return match versions |> List.tryLast with
                | None -> None
                | Some version -> Some (app, version)
@@ -74,9 +75,10 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
 
 let List (appInfo : CLI.Commands.ListApplications) =
     let graph = Configuration.LoadAnthology () |> Graph.from
+    let branch = Configuration.LoadBranch()
     match appInfo.Version with
     | None -> graph.Applications |> Seq.filter (fun (x : Graph.Application) -> x.Publisher = Graph.PublisherType.Zip)
-                                 |> Threading.ParExec (getLastVersionForApp graph)
+                                 |> Threading.ParExec (getLastVersionForApp graph branch)
                                  |> Seq.choose id
                                  |> Seq.iter displayAppVersion
     | Some version -> graph.Applications |> Seq.filter (fun (x : Graph.Application) -> x.Publisher = Graph.PublisherType.Zip)
