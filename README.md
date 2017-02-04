@@ -34,7 +34,7 @@ Platform|Status
         * .net v4.0 x64 : C:\Windows\Microsoft.NET\Framework64\v4.0.30319
 	* Add Nuget to your environment variables
 		* nuget.exe cli : https://dist.nuget.org/index.html
-    * Run build-all.cmd
+    * Run build.cmd
 
 * On Linux/OSX
     * Install .net 4.5
@@ -53,7 +53,7 @@ Contributors:
   * Sergii Salata
 
 # licence
-   Copyright 2014-2016 Pierre Chalamet
+   Copyright 2014-2017 Pierre Chalamet
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
