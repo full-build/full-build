@@ -51,7 +51,7 @@ type PackageVersion =
 type PackageId = private PackageId of string
 with
     member this.toString = (fun (PackageId x) -> x)this
-    static member from (id : string) = PackageId (id)
+    static member from (id : string) = PackageId (id.ToLowerInvariant())
 
 type Package =
     { Id : PackageId

@@ -23,7 +23,7 @@ open StringHelpers
 let CheckReferences () =
     AssemblyId.from "badaboum" |> should equal <| AssemblyId.from "BADABOUM"
 
-    PackageId.from "badaboum" |> should not' (equal <| PackageId.from "BADABOUM")
+    PackageId.from "badaboum" |> should equal <| PackageId.from "BADABOUM"
     PackageId.from "badaboum" |> should equal <| PackageId.from "badaboum"
 
     RepositoryId.from "badaboum" |> should equal <| RepositoryId.from "BADABOUM"

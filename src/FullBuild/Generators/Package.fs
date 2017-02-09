@@ -177,8 +177,6 @@ let private generateTargetForPackageCopy (package : Package) =
     let pkgDir = pkgsDir |> GetSubDirectory (package.Name)
     let libDir = pkgDir |> GetSubDirectory "lib"
 
-    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.Name))
-    let xnuspec = XDocument.Load (nuspecFile.FullName)
     let dependencies = package.Dependencies
 
     let imports = generateDependenciesCopyContent dependencies

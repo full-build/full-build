@@ -312,10 +312,11 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
 
     member this.PackageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> =
         if packageMap |> isNull then
-            packageMap <- anthology.Projects |> Set.map (fun x -> x.PackageReferences)
-                                             |> Set.unionMany
-                                             |> Seq.map (fun x -> x, { Graph = this; Package = x})
-                                             |> dict
+            let pkgDir = Env.GetFolder Env.Folder.Package
+            packageMap <- pkgDir.EnumerateDirectories() |> Seq.map (fun x -> x.Name |> Anthology.PackageId.from)
+                                                        |> Set.ofSeq                                                    
+                                                        |> Seq.map (fun x -> x, { Graph = this; Package = x})
+                                                        |> dict
         packageMap
 
     member this.AssemblyMap : System.Collections.Generic.IDictionary<Anthology.AssemblyId, Assembly> =

@@ -51,4 +51,4 @@ let CheckProjectPropertyName () =
 let CheckPackagePropertyName () =
     let package = "Rx-Core" |> PackageId.from
     let propName = PackagePropertyName package
-    propName |> should equal "FullBuild_Rx_Core_Pkg"
+    propName |> should equal "FullBuild_rx_core_Pkg"
