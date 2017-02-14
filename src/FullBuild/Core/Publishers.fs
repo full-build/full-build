@@ -22,7 +22,7 @@ open Exec
 
 type private PublishApp =
     { Name : string
-      App : Application 
+      App : Application
       Version : string }
 
 
@@ -54,7 +54,7 @@ let private publishZip (app : PublishApp) =
     let targetFile = appDir |> GetFile app.Name
     if targetFile.Exists then targetFile.Delete()
 
-    System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Optimal, false)
+    System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Fastest, false)
 
 let private publishDocker (app : PublishApp) =
     let tmpApp = { app
@@ -97,7 +97,7 @@ let private publishNuget (app : PublishApp) =
     tmpFolder.Delete(true)
 
 let PublishWithPublisher (version : string) (app : Application) =
-    let publisher = 
+    let publisher =
         match app.Publisher with
         | PublisherType.Copy -> publishCopy
         | PublisherType.Zip -> publishZip
