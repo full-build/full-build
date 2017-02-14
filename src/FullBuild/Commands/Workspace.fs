@@ -64,8 +64,8 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
                     printfn "WARNING: failed to checkout some repositories"
 
                 Configuration.SaveBranch x
-                pullMatchingBinaries ()
                 Install()
+                pullMatchingBinaries ()
     | None -> let name = Configuration.LoadBranch()
               printfn "%s" name
 
@@ -84,6 +84,9 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
         graph.Save()
 
         Tools.Vcs.Ignore wsDir graph.MasterRepository
+
+        Tools.Paket.UpdateSources List.empty
+        Tools.Paket.PaketUpdate()
 
         // setup additional files for views to work correctly
         let installDir = Env.GetFolder Env.Folder.Installation
@@ -119,8 +122,8 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     branchResults |> Exec.CheckMultipleResponseCode
 
     Configuration.SaveBranch tag.Branch
-    Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir checkoutInfo.Version
     Install()
+    Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir checkoutInfo.Version
 
 
 let Init (initInfo : CLI.Commands.InitWorkspace) =
