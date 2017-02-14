@@ -92,9 +92,9 @@ let GitIgnore (repoDir : DirectoryInfo) =
 
 let GitFindLatestMatchingTag (repoDir : DirectoryInfo) (filter : string) : string option =
     try
-        let args = sprintf "describe --match %A" filter
+        let args = sprintf "describe --abbrev=0 --match %A" filter
         let res = ExecGetOutput "git" args repoDir Map.empty |> GetOutput |> Seq.head
-        res.Split('-').[0] |> Some
+        res |> Some
     with
         _ -> None
 
