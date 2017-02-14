@@ -1,11 +1,11 @@
+mainrepository:
+  uri: http://www.google.com/
 minversion: 0.0.0
 binaries: C:\Binaries
 nugets:
   - nuget: https://www.nuget.org/api/v2/
 test: nunit
 vcs: git
-mainrepository:
-  uri: http://www.google.com/
 repositories:
   - repo: qa
     branch: master
