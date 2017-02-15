@@ -270,11 +270,12 @@ let rec private commandTest (excludes : string list) (args : string list) =
     | _ -> Command.Error MainCommand.Test
 
 
-let rec private commandConvert (check : bool) (args : string list) =
+let rec private commandConvert (check : bool) (reset : bool) (args : string list) =
     match args with
     | [] -> Command.Error MainCommand.Convert
-    | TokenOption TokenOption.Check :: tail -> tail |> commandConvert true
-    | Params filters -> Command.ConvertRepositories { Filters = set filters; Check = check }
+    | TokenOption TokenOption.Check :: tail -> tail |> commandConvert true reset
+    | TokenOption TokenOption.Reset :: tail -> tail |> commandConvert check true
+    | Params filters -> Command.ConvertRepositories { Filters = set filters; Check = check; Reset = reset }
     | _ -> Command.Error MainCommand.Convert
 
 let private commandDoctor (args : string list ) =
@@ -544,7 +545,7 @@ let Parse (args : string list) : Command =
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
     | Token Token.Test :: cmdArgs -> cmdArgs |> commandTest []
-    | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert false
+    | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert false false
     | Token Token.Doctor :: cmdArgs -> cmdArgs |> commandDoctor
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false

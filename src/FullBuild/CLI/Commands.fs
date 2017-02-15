@@ -46,7 +46,8 @@ type IndexRepositories =
 
 type ConvertRepositories =
     { Filters : string set 
-      Check : bool }
+      Check : bool 
+      Reset : bool }
 
 type TestAssemblies =
     { Filters : string set

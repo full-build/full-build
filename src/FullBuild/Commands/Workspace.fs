@@ -325,7 +325,8 @@ let convert (convertInfo : CLI.Commands.ConvertRepositories) =
 
 
 let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
-    convertInfo |> index
+    if convertInfo.Reset |> not then
+        convertInfo |> index
     if convertInfo.Check |> not then
         convertInfo |> convert
 
