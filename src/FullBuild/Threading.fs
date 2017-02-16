@@ -30,10 +30,10 @@ let private throttle n fs =
         }
 
 
-let ParExec fn from = 
-    let maxThrottle = System.Environment.ProcessorCount*4
+let ParExec fn from =
+    let maxThrottle = 4
     let results = from |> Seq.map fn
-                       |> throttle maxThrottle 
-                       |> Async.Parallel 
+                       |> throttle maxThrottle
+                       |> Async.Parallel
                        |> Async.RunSynchronously
     results
