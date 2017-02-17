@@ -91,7 +91,7 @@ let private publishNuget (app : PublishApp) =
     Exec "nuget" nugetArgs tmpFolder Map.empty |> CheckResponseCode
     let nugetFile = tmp2Folder.EnumerateFiles() |> Seq.exactlyOne
     let targetFile = appDir |> GetFile app.Name
-    nugetFile.MoveTo(targetFile.FullName)
+    nugetFile.CopyTo(targetFile.FullName, true) |> ignore
 
     tmp2Folder.Delete(true)
     tmpFolder.Delete(true)
