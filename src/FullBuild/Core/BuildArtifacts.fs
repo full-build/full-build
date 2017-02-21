@@ -80,6 +80,7 @@ let FetchVersionsForArtifact (graph : Graph) (app : Application) =
 
 let PullReferenceBinaries (artifacts : string) version =
     let artifactDir = artifacts |> DirectoryInfo
+    if artifactDir.Exists |> not then failwithf "Failure to access actifacts folder"
 
     let versionDir = artifactDir |> GetSubDirectory version
     if versionDir.Exists then

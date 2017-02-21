@@ -362,10 +362,5 @@ let Push (pushInfo : CLI.Commands.PushWorkspace) =
     printfn "[version] %s" tag
 
 let Doctor () =
-    try
-        Doctor.Check()
-
-        printfn "Doctor says everything is alright !"
-    with
-        exn -> printfn "%s"exn.Message
-               failwith "Doctor found something wrong !"
+    if Doctor.Check() then failwith "Doctor found something wrong !"
+    else printfn "Doctor says everything is alright !"

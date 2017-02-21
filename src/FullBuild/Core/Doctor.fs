@@ -15,23 +15,27 @@
 module Doctor
 
 
-let private projectConsistencyCheck (antho : Anthology.Anthology) =
+let private projectConsistencyCheck ((error,antho) : bool * Anthology.Anthology) =
     let projectRefs = antho.Projects |> Set.map (fun x -> x.ProjectReferences) |> Set.unionMany
     let knownProjects = antho.Projects |> Set.map (fun x -> x.ProjectId)
     let unknowns  = projectRefs - knownProjects
-    if unknowns <> Set.empty then
-        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.toString) "Found invalid project references:"
-        failwith err
-    antho
+    let hasErrors = unknowns <> Set.empty
+    if hasErrors then
+        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.toString) ""
+        IoHelpers.DisplayError "Invalid projects references:"
+        printfn "%s" err
+    (error || hasErrors, antho)
 
-let private repositoryConsistencyCheck (antho : Anthology.Anthology) =
+let private repositoryConsistencyCheck ((error,antho) : bool * Anthology.Anthology) =
     let repoRefs = antho.Projects |> Set.map (fun x -> x.Repository)
     let knownRepos = antho.Repositories |> Set.map (fun x -> x.Repository.Name)
     let unknowns  = repoRefs - knownRepos
-    if unknowns <> Set.empty then
-        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.toString) "Found invalid repository references:"
-        failwith err
-    antho
+    let hasErrors = unknowns <> Set.empty
+    if hasErrors then
+        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.toString) ""
+        IoHelpers.DisplayError "Invalid repositories references:"
+        printfn "%s" err
+    (error || unknowns <> Set.empty, antho)
 
 let private consistencyCheck antho =
     antho |> projectConsistencyCheck
@@ -39,39 +43,47 @@ let private consistencyCheck antho =
 
 
 // check .fbprojects is available in each buildable repository
-let checkFbProjectsInRepo (antho : Anthology.Anthology) =
+let checkFbProjectsInRepo ((error,antho) : bool * Anthology.Anthology) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repoWithoutProjects = antho.Repositories |> Seq.filter (fun x -> x.Builder = Anthology.BuilderType.MSBuild)
                                                  |> Seq.filter (fun x -> (wsDir |> IoHelpers.GetSubDirectory x.Repository.Name.toString).Exists)
                                                  |> Seq.filter (fun x -> (wsDir |> IoHelpers.GetSubDirectory x.Repository.Name.toString |> IoHelpers.GetFile ".fbprojects").Exists |> not)
                                                  |> List.ofSeq
 
-    if repoWithoutProjects <> List.empty then
-        let err = repoWithoutProjects |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.Repository.Name.toString) "Found repositories without .fbprojects:"
-        failwith err
-    antho
+    let hasErrors = repoWithoutProjects <> List.empty
+    if hasErrors then
+        let err = repoWithoutProjects |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.Repository.Name.toString) ""
+        IoHelpers.DisplayError "Found non indexed repositories:"
+        printfn "%s" err
+    (error || hasErrors, antho)
 
-let checkApps (antho : Anthology.Anthology) =
+
+let checkApps ((error,antho) : bool * Anthology.Anthology) =
     let appProjects = antho.Applications |> Set.map (fun x -> x.Projects) |> Set.unionMany
     let knownProjects = antho.Projects |> Set.map (fun x -> x.ProjectId)
     let unknowns  = appProjects - knownProjects
-    if unknowns <> Set.empty then
-        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.toString) "Found invalid application references:"
-        failwith err
-    antho
+    let hasErrors = unknowns <> Set.empty
+    if hasErrors then
+        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.toString) ""
+        IoHelpers.DisplayError "Found invalid application references:"
+        printfn "%s" err
+    (error || hasErrors, antho)
 
 
-let checkArtifactDir (antho : Anthology.Anthology) =
+let checkArtifactDir ((error,antho) : bool * Anthology.Anthology) =
     // check artifact directory
     let artifactDir = antho.Binaries |> System.IO.DirectoryInfo
-    if artifactDir.Exists |> not then
-        failwithf "Artifacts directory %A is not available" antho.Binaries
-    antho
+    let hasErrors = artifactDir.Exists |> not
+    if hasErrors then
+        let err = sprintf "- %s\n" antho.Binaries
+        IoHelpers.DisplayError "Artifacts folder is not available:"
+        printfn "%s" err
+    (error || hasErrors, antho)
 
 let Check () =
     let antho = Configuration.LoadAnthology ()
-    antho |> checkFbProjectsInRepo
-          |> checkApps
-          |> consistencyCheck
-          |> checkArtifactDir
-          |> ignore
+    (false, antho) |> checkFbProjectsInRepo
+                   |> checkApps
+                   |> consistencyCheck
+                   |> checkArtifactDir
+                   |> fst
