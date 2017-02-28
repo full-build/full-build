@@ -53,7 +53,7 @@ let AddExt (ext : Extension) (fileName : string) : string =
 let ToPlatformPath (f : string) : string =
     let sep = sprintf "%c" System.IO.Path.DirectorySeparatorChar
     if f |> isNull then f
-    else f.Replace(@"\", sep) 
+    else f.Replace(@"\", sep)
 
 let ToWindows (f : string) : string =
     if f |> isNull then f
@@ -156,7 +156,7 @@ let FindKnownProjects (repoDir : DirectoryInfo) =
     [ "*.pssproj"
       "*.csproj"
       "*.vbproj"
-      "*.fsproj" ] 
+      "*.fsproj" ]
         |> Seq.collect (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories))
 
 let EnumerateChildren (dir : DirectoryInfo) =
@@ -204,3 +204,21 @@ let PrintOutput info (execResult : Exec.ExecResult) =
         execResult
 
     lock consoleLock display
+
+
+
+
+
+let rec ForceReadOnly (thisDir : DirectoryInfo) =
+    thisDir.Attributes <- thisDir.Attributes ||| FileAttributes.ReadOnly;
+    for file in thisDir.EnumerateFiles() do
+        file.Attributes <- file.Attributes ||| FileAttributes.ReadOnly;
+    for dir in thisDir.EnumerateDirectories() do
+        ForceReadOnly dir
+
+let rec ForceReadWriteOnly (thisDir : DirectoryInfo) =
+    thisDir.Attributes <- thisDir.Attributes &&& ~~~ FileAttributes.ReadOnly;
+    for file in thisDir.EnumerateFiles() do
+        file.Attributes <- file.Attributes &&& ~~~ FileAttributes.ReadOnly;
+    for dir in thisDir.EnumerateDirectories() do
+        ForceReadWriteOnly dir

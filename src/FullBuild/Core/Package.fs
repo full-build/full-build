@@ -22,9 +22,33 @@ open Collections
 open Simplify
 
 let InstallPackages (nugets : RepositoryUrl list) =
+    let pkgsDir = Env.GetFolder Env.Folder.Package
+    IoHelpers.ForceReadWriteOnly pkgsDir
+
     Tools.Paket.UpdateSources nugets
     Tools.Paket.PaketInstall ()
     Generators.Package.GeneratePackageImports()
+
+    IoHelpers.ForceReadOnly pkgsDir
+
+let RestorePackages () =
+    let pkgsDir = Env.GetFolder Env.Folder.Package
+    IoHelpers.ForceReadWriteOnly pkgsDir
+
+    Tools.Paket.PaketRestore ()
+    Generators.Package.GeneratePackageImports()
+
+    IoHelpers.ForceReadOnly pkgsDir
+
+let UpdatePackages () =
+    let pkgsDir = Env.GetFolder Env.Folder.Package
+    IoHelpers.ForceReadWriteOnly pkgsDir
+
+    Tools.Paket.PaketUpdate ()
+    Generators.Package.GeneratePackageImports()
+
+    IoHelpers.ForceReadOnly pkgsDir
+
 
 let private removeUnusedPackages (antho : Anthology) =
     let packages = Tools.Paket.ParsePaketDependencies ()
@@ -47,13 +71,6 @@ let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
                                      |> Set.ofSeq
     Set.difference files fxDependencies
 
-let RestorePackages () =
-    Tools.Paket.PaketRestore ()
-    Generators.Package.GeneratePackageImports()
-
-let UpdatePackages () =
-    Tools.Paket.PaketUpdate ()
-    Generators.Package.GeneratePackageImports()
 
 let Simplify (antho : Anthology) =
     let packages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
