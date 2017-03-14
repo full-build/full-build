@@ -24,16 +24,17 @@ type private MonitorCommand =
     | Err of string list
     | End of int
 
-type ExecResult = 
+type ExecResult =
     { ResultCode: int
+      Info : string
       Out: string list
       Error: string list }
 
 let private defaultPSI (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) redirect =
     let psi = ProcessStartInfo (FileName = command,
                                 Arguments = args,
-                                UseShellExecute = false, 
-                                WorkingDirectory = dir.FullName, 
+                                UseShellExecute = false,
+                                WorkingDirectory = dir.FullName,
                                 LoadUserProfile = true)
     for var in vars do
         psi.EnvironmentVariables.Add(var.Key, var.Value)
@@ -43,7 +44,7 @@ let private defaultPSI (command : string) (args : string) (dir : DirectoryInfo) 
         psi.RedirectStandardError <- true
 
     psi
-    
+
 
 let private supervisedExec redirect (command : string) (args : string) (dir : DirectoryInfo) (vars : Map<string, string>) =
     let psi = defaultPSI command args dir vars redirect
@@ -61,19 +62,19 @@ let private supervisedExec redirect (command : string) (args : string) (dir : Di
     let asyncErr = if redirect then async { return read proc.StandardError List.empty |> MonitorCommand.Err }
                                else async { return List.empty |> MonitorCommand.Err }
     let asyncCode = async { proc.WaitForExit(); return proc.ExitCode |> MonitorCommand.End }
-    let res = [ asyncCode ; asyncOut ; asyncErr ] |> Async.Parallel |> Async.RunSynchronously 
+    let res = [ asyncCode ; asyncOut ; asyncErr ] |> Async.Parallel |> Async.RunSynchronously
     match res.[0], res.[1], res.[2] with
-    | MonitorCommand.End code, MonitorCommand.Out out, MonitorCommand.Err err -> { ResultCode=code; Out=out; Error=err }
+    | MonitorCommand.End code, MonitorCommand.Out out, MonitorCommand.Err err -> { ResultCode=code; Out=out; Error=err; Info = sprintf "%s %s @ %s" command args dir.FullName }
     | _ -> failwith "Unexpected results"
 
-let Exec = 
+let Exec =
     supervisedExec false
 
 let ExecGetOutput =
-    supervisedExec true 
+    supervisedExec true
 
-let private resultToError execResult = 
-    if execResult.ResultCode <> 0 then execResult.ResultCode |> sprintf "Operation failed with error %d" |> Some
+let private resultToError execResult =
+    if execResult.ResultCode <> 0 then (sprintf "Operation '%s' failed with error %d" execResult.Info execResult.ResultCode) |> Some
     else None
 
 let GetOutput execResult =
