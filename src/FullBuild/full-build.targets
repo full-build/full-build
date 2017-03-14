@@ -1,7 +1,5 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <FBUseHardLink>true</FBUseHardLink>
-
     <FBIsWebProject>false</FBIsWebProject>
     <FBIsWebProject Condition="'$(OutputType)'=='library' and '$(WebProjectOutputDir)' != ''">true</FBIsWebProject>
     <FBIsTestProject>false</FBIsTestProject>
@@ -26,19 +24,19 @@
   </Target>
 
   <Target Name="FBCopyBin" AfterTargets="Build">
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName)$(TargetExt)" DestinationFolder="$(SolutionDir)\.full-build\bin\" Condition="Exists('$(OutputPath)$(AssemblyName)$(TargetExt)')" SkipUnchangedFiles="true" UseHardlinksIfPossible="$(FBUseHardLink)" />
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(SolutionDir)\.full-build\bin\" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" ContinueOnError="true" SkipUnchangedFiles="true" UseHardlinksIfPossible="$(FBUseHardLink)" />
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName)$(TargetExt).mdb" DestinationFolder="$(SolutionDir)\.full-build\bin\" Condition="Exists('$(OutputPath)$(AssemblyName)$(TargetExt).mdb')" ContinueOnError="true" SkipUnchangedFiles="true" UseHardlinksIfPossible="$(FBUseHardLink)" />
-    <Copy SourceFiles="@(FBCopyFiles)" DestinationFolder="$(OutputPath)" Condition="Exists('%(FBCopyFiles.FullPath)')" SkipUnchangedFiles="true" ContinueOnError="true" UseHardlinksIfPossible="$(FBUseHardLink)" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName)$(TargetExt)" DestinationFolder="$(SolutionDir)\.full-build\bin\" Condition="Exists('$(OutputPath)$(AssemblyName)$(TargetExt)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(SolutionDir)\.full-build\bin\" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" ContinueOnError="true" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName)$(TargetExt).mdb" DestinationFolder="$(SolutionDir)\.full-build\bin\" Condition="Exists('$(OutputPath)$(AssemblyName)$(TargetExt).mdb')" ContinueOnError="true" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(FBCopyFiles)" DestinationFolder="$(OutputPath)" Condition="Exists('%(FBCopyFiles.FullPath)')" ContinueOnError="true" SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="FBPublish">
-    <Copy SourceFiles="@(Content)" DestinationFolder="$(FBContentFolder)\%(Content.RelativeDir)" UseHardlinksIfPossible="$(FBUseHardLink)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(Content)" DestinationFolder="$(FBContentFolder)\%(Content.RelativeDir)" SkipUnchangedFiles="true" />
 
     <CreateItem Include="$(OutputPath)\**\*.*">
       <Output TaskParameter="Include" ItemName="Binaries"/>
     </CreateItem>
-    <Copy SourceFiles="@(Binaries)" DestinationFolder="$(FBBinFolder)%(Binaries.RecursiveDir)" UseHardlinksIfPossible="$(FBUseHardLink)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(Binaries)" DestinationFolder="$(FBBinFolder)%(Binaries.RecursiveDir)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
