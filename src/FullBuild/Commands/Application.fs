@@ -19,8 +19,11 @@ open Env
 
 let private asyncPublish (version : string) (app : Graph.Application) =
     async {
-        DisplayInfo app.Name
-        Core.Publishers.PublishWithPublisher version app
+        try
+            DisplayInfo app.Name
+            Core.Publishers.PublishWithPublisher version app
+        with
+            exn -> raise (System.ApplicationException(sprintf "Failed to publish application %A" app.Name, exn))
     }
 
 let private displayApp (app : Graph.Application) =
