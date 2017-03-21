@@ -93,7 +93,9 @@ let AppendDependencies (packages : Package set) =
         let confDir = Env.GetFolder Env.Folder.Config
         let paketDep = confDir |> GetFile "paket.dependencies"
         let content = generateDependenciesContent packages
-        File.AppendAllLines (paketDep.FullName, content)
+        let oldContent = File.ReadAllLines(paketDep.FullName)
+
+        File.WriteAllLines (paketDep.FullName, content |> Seq.append oldContent)
 
 let RemoveDependencies (packages : PackageId set) =
     if packages <> Set.empty then
