@@ -179,20 +179,21 @@ with
 type Application =
     { Name : ApplicationId
       Publisher : PublisherType
-      Projects : ProjectId set }
+      Project : ProjectId }
 
-type Anthology =
+type Globals =
     { MinVersion : string
       Binaries : string
       NuGets : RepositoryUrl list
       Vcs : VcsType
       MasterRepository : Repository
       Repositories : BuildableRepository set
-      Applications : Application set
-      Projects : Project set
       Tester : TestRunnerType }
 
 
+type Anthology =
+    { Applications : Application set
+      Projects : Project set }
 
 
 type Baseline =
@@ -204,6 +205,6 @@ type View =
       Filters : string set
       UpReferences : bool
       DownReferences : bool
-      Modified : bool 
-      AppFilter : string option 
+      Modified : bool
+      AppFilter : string option
       Tests : bool }

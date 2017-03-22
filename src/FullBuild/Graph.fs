@@ -132,13 +132,13 @@ with
                             | Anthology.PublisherType.Docker -> PublisherType.Docker
                             | Anthology.PublisherType.NuGet -> PublisherType.NuGet
 
-    member this.Projects =
-        this.Application.Projects |> Set.map (fun x -> this.Graph.ProjectMap.[x])
+    member this.Project =
+        this.Graph.ProjectMap.[this.Application.Project]
 
     member this.Delete () =
         let newAntho = { this.Graph.Anthology
                          with Applications = this.Graph.Anthology.Applications |> Set.remove this.Application }
-        Graph(newAntho)
+        Graph(newAntho, this.Graph.Globals)
 
 // =====================================================================================================
 
@@ -154,14 +154,14 @@ with
     member this.Name : string = this.Repository.Name.toString
 
     member this.Builder =
-        let buildableRepo = this.Graph.Anthology.Repositories |> Seq.tryFind (fun x -> x.Repository.Name = this.Repository.Name)
+        let buildableRepo = this.Graph.Globals.Repositories |> Seq.tryFind (fun x -> x.Repository.Name = this.Repository.Name)
         match buildableRepo with
         | Some repo -> match repo.Builder with
                        | Anthology.BuilderType.MSBuild -> BuilderType.MSBuild
                        | Anthology.BuilderType.Skip -> BuilderType.Skip
         | _ -> BuilderType.Skip
 
-    member this.Vcs = match this.Graph.Anthology.Vcs with
+    member this.Vcs = match this.Graph.Globals.Vcs with
                       | Anthology.VcsType.Gerrit -> VcsType.Gerrit
                       | Anthology.VcsType.Git -> VcsType.Git
 
@@ -206,10 +206,11 @@ with
 
     member this.Delete () =
         let repositoryId = this.Repository.Name
+        let newGlobals = { this.Graph.Globals
+                           with Repositories = this.Graph.Globals.Repositories |> Set.filter (fun x -> x.Repository.Name <> repositoryId) }
         let newAntho = { this.Graph.Anthology
-                         with Repositories = this.Graph.Anthology.Repositories |> Set.filter (fun x -> x.Repository.Name <> repositoryId)
-                              Projects = this.Graph.Anthology.Projects |> Set.filter (fun x -> x.Repository <> repositoryId) }
-        Graph(newAntho)
+                         with Projects = this.Graph.Anthology.Projects |> Set.filter (fun x -> x.Repository <> repositoryId) }
+        Graph(newAntho, newGlobals)
 
 // =====================================================================================================
 
@@ -227,7 +228,7 @@ with
 
     member this.Applications =
         let projectId = this.Project.ProjectId
-        this.Graph.Anthology.Applications |> Set.filter (fun x -> x.Projects |> Set.contains projectId)
+        this.Graph.Anthology.Applications |> Set.filter (fun x -> x.Project = projectId)
                                           |> Set.map (fun x -> this.Graph.ApplicationMap.[x.Name])
 
     member this.References : Project set =
@@ -300,7 +301,7 @@ with
 
 // =====================================================================================================
 
-and [<Sealed>] Graph(anthology : Anthology.Anthology) =
+and [<Sealed>] Graph(anthology : Anthology.Anthology, globals : Anthology.Globals) =
     let mutable assemblyMap : System.Collections.Generic.IDictionary<Anthology.AssemblyId, Assembly> = null
     let mutable packageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> = null
     let mutable repositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> = null
@@ -309,12 +310,13 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
     let mutable packageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> = null
 
     member this.Anthology : Anthology.Anthology = anthology
+    member this.Globals : Anthology.Globals = globals
 
     member this.PackageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> =
         if packageMap |> isNull then
             let pkgDir = Env.GetFolder Env.Folder.Package
             packageMap <- pkgDir.EnumerateDirectories() |> Seq.map (fun x -> x.Name |> Anthology.PackageId.from)
-                                                        |> Set.ofSeq                                                    
+                                                        |> Set.ofSeq
                                                         |> Seq.map (fun x -> x, { Graph = this; Package = x})
                                                         |> dict
         packageMap
@@ -332,8 +334,8 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
 
     member this.RepositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> =
         if repositoryMap |> isNull then
-            repositoryMap <- anthology.Repositories |> Seq.map (fun x -> x.Repository.Name, { Graph = this; Repository = x.Repository})
-                                                    |> dict
+            repositoryMap <- globals.Repositories |> Seq.map (fun x -> x.Repository.Name, { Graph = this; Repository = x.Repository})
+                                                  |> dict
         repositoryMap
 
     member this.ApplicationMap : System.Collections.Generic.IDictionary<Anthology.ApplicationId, Application> =
@@ -348,9 +350,9 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
                                              |> dict
         projectMap
 
-    member this.MinVersion = this.Anthology.MinVersion
+    member this.MinVersion = globals.MinVersion
 
-    member this.MasterRepository = { Graph = this; Repository = this.Anthology.MasterRepository }
+    member this.MasterRepository = { Graph = this; Repository = globals.MasterRepository }
 
     member this.Repositories = this.RepositoryMap.Values |> set
 
@@ -362,32 +364,31 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
 
     member this.Projects = this.ProjectMap.Values |> set
 
-    member this.NuGets = this.Anthology.NuGets |> List.map (fun x -> x.toString)
+    member this.NuGets = globals.NuGets |> List.map (fun x -> x.toString)
 
     member this.TestRunner =
-        match this.Anthology.Tester with
+        match globals.Tester with
         | Anthology.TestRunnerType.NUnit -> TestRunnerType.NUnit
 
-    member this.ArtifactsDir = this.Anthology.Binaries
+    member this.ArtifactsDir = globals.Binaries
 
-    member this.CreateApp name publisher (projects : Project set) =
+    member this.CreateApp name publisher (project : Project) =
         let pub = match publisher with
                   | PublisherType.Zip -> Anthology.PublisherType.Zip
                   | PublisherType.Copy -> Anthology.PublisherType.Copy
                   | PublisherType.Docker -> Anthology.PublisherType.Docker
                   | PublisherType.NuGet -> Anthology.PublisherType.NuGet
-        let projectIds = projects |> Set.map (fun x -> Anthology.ProjectId.from x.Output.Name)
         let app = { Anthology.Application.Name = Anthology.ApplicationId.from name
                     Anthology.Application.Publisher = pub
-                    Anthology.Application.Projects = projectIds }
+                    Anthology.Application.Project = Anthology.ProjectId.from project.ProjectId }
         let newAntho = { anthology
                          with Applications = anthology.Applications |> Set.add app }
-        Graph(newAntho)
+        Graph(newAntho, globals)
 
     member this.CreateNuGet (url : string) =
-        let newAntho = { anthology
-                         with NuGets = anthology.NuGets @ [Anthology.RepositoryUrl.from url] |> List.distinct }
-        Graph(newAntho)
+        let newGlobals = { globals
+                           with NuGets = globals.NuGets @ [Anthology.RepositoryUrl.from url] |> List.distinct }
+        Graph(anthology, globals)
 
     member this.CreateRepo name (url : string) builder (branch : string option) =
         let repoBranch = match branch with
@@ -400,9 +401,9 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
                            | BuilderType.MSBuild -> Anthology.BuilderType.MSBuild
                            | BuilderType.Skip -> Anthology.BuilderType.Skip
         let buildableRepo = { Anthology.Repository = repo; Anthology.Builder = repoBuilder }
-        let newAntho = { anthology
-                         with Repositories = anthology.Repositories |> Set.add buildableRepo }
-        Graph(newAntho)
+        let newGlobals = { globals
+                           with Repositories = globals.Repositories |> Set.add buildableRepo }
+        Graph(anthology, newGlobals)
 
     member this.Save () =
         Configuration.SaveAnthology this.Anthology
@@ -411,8 +412,8 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology) =
 // =====================================================================================================
 
 
-let from (antho : Anthology.Anthology) : Graph =
-    antho |> Graph
+let from (antho : Anthology.Anthology) (globals : Anthology.Globals) : Graph =
+    Graph (antho, globals)
 
 let create (uri : string) (artifacts : string) vcs runner =
     let repo = { Anthology.Name = Anthology.RepositoryId.from Env.MASTER_REPO
@@ -426,16 +427,17 @@ let create (uri : string) (artifacts : string) vcs runner =
     let anthoRunner = match runner with
                       | TestRunnerType.NUnit -> Anthology.TestRunnerType.NUnit
 
-    let antho = { Anthology.Anthology.MinVersion = Env.FullBuildVersion().ToString()
-                  Anthology.Anthology.Binaries = artifacts
-                  Anthology.Anthology.NuGets = []
-                  Anthology.Anthology.MasterRepository = repo
-                  Anthology.Anthology.Repositories = Set.empty
-                  Anthology.Anthology.Projects = Set.empty
-                  Anthology.Anthology.Applications = Set.empty
-                  Anthology.Anthology.Tester = anthoRunner
-                  Anthology.Anthology.Vcs = anthoVcs }
-    from antho
+    let globals = { Anthology.Globals.MinVersion = Env.FullBuildVersion().ToString()
+                    Anthology.Globals.Binaries = artifacts
+                    Anthology.Globals.NuGets = []
+                    Anthology.Globals.MasterRepository = repo
+                    Anthology.Globals.Repositories = Set.empty
+                    Anthology.Globals.Tester = anthoRunner
+                    Anthology.Globals.Vcs = anthoVcs }
+
+    let antho =  { Anthology.Anthology.Projects = Set.empty
+                   Anthology.Anthology.Applications = Set.empty}
+    from antho globals
 
 
 let init uri vcs =

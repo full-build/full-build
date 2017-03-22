@@ -2,8 +2,8 @@
 binaries: C:\Binaries
 nugets:
     - nuget: this should be a uri
-test: nunit
 vcs: git
+test: nunit
 mainrepository:
     uri: this should be a uri
 repositories:
@@ -14,9 +14,3 @@ repositories:
     - repo: id1
       build: msbuild
       uri: this should be a uri
-apps:
-    - name: FullBuild
-      type: copy
-      projects:
-        - project: fullbuild1
-        - project: fullbuild2

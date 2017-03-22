@@ -28,21 +28,20 @@ type private PublishApp =
 
 let private publishCopy (app : PublishApp) =
     let wsDir = GetFolder Env.Folder.Workspace
-    let projects = app.App.Projects
-    for project in projects do
-        let repoDir = wsDir |> GetSubDirectory (project.Repository.Name)
-        if repoDir.Exists then
-            let projFile = repoDir |> GetFile project.ProjectFile
-            let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name projFile.FullName
+    let project = app.App.Project
+    let repoDir = wsDir |> GetSubDirectory (project.Repository.Name)
+    if repoDir.Exists then
+        let projFile = repoDir |> GetFile project.ProjectFile
+        let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name projFile.FullName
 
-            if Env.IsMono () then Exec "xbuild" args wsDir Map.empty |> CheckResponseCode
-            else Exec "msbuild" args wsDir Map.empty |> CheckResponseCode
+        if Env.IsMono () then Exec "xbuild" args wsDir Map.empty |> CheckResponseCode
+        else Exec "msbuild" args wsDir Map.empty |> CheckResponseCode
 
-            let appDir = GetFolder Env.Folder.AppOutput
-            let artifactDir = appDir |> GetSubDirectory app.Name
-            Bindings.UpdateArtifactBindingRedirects artifactDir
-        else
-            printfn "[WARNING] Can't publish application %A without repository" app.Name
+        let appDir = GetFolder Env.Folder.AppOutput
+        let artifactDir = appDir |> GetSubDirectory app.Name
+        Bindings.UpdateArtifactBindingRedirects artifactDir
+    else
+        printfn "[WARNING] Can't publish application %A without repository" app.Name
 
 let private publishZip (app : PublishApp) =
     let tmpApp = { app

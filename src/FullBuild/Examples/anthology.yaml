@@ -1,38 +1,19 @@
-﻿anthology:
-    minversion: 2.5.0
-    artifacts: C:\Binaries
-    nugets:
-      - nuget: this should be a uri
-    test: nunit
-    vcs: git
-    mainrepository:
-        uri: this should be a uri
-    repositories:
-        - repo: id1
-          branch: fullbuild
-          build: msbuild
-          uri: this should be a uri
-        - repo: id1
-          build: msbuild
-          uri: this should be a uri
-    apps:
-        - name: FullBuild
-          type: copy
-          projects:
-            - project: fullbuild1
-            - project: fullbuild2
-    projects:
-        - guid: f2a71f9b-5d33-465a-a702-920d77279786
-          file: src/Project.csproj
-          out: fullbuild.tests
-          fx: 
-            version: v7.1
-            profile: Profile3
-            identifier: WindowsPhone
-          tests: true
-          assemblies:
-              - assembly: id1
-          packages:
-              - package: id1
-          projects:
-              - project: fullbuild
+﻿apps:
+    - name: FullBuild
+      type: copy
+      project: fullbuild1
+projects:
+    - guid: f2a71f9b-5d33-465a-a702-920d77279786
+      file: src/Project.csproj
+      out: fullbuild.tests
+      fx:
+        version: v7.1
+        profile: Profile3
+        identifier: WindowsPhone
+      tests: true
+      assemblies:
+          - assembly: id1
+      packages:
+          - package: id1
+      projects:
+          - project: fullbuild

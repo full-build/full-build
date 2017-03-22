@@ -17,7 +17,7 @@ module Graph
 
 open Collections
 
-[<RequireQualifiedAccess>] 
+[<RequireQualifiedAccess>]
 type PackageVersion =
     | PackageVersion of string
     | Unspecified
@@ -63,7 +63,7 @@ and [<Sealed>] Application = interface System.IComparable
 with
     member Name : string
     member Publisher : PublisherType
-    member Projects: Project set
+    member Project: Project
     member Delete: unit
                 -> Graph
 
@@ -112,8 +112,8 @@ with
 and [<Sealed>] Graph =
     member MinVersion: string
     member MasterRepository : Repository
-    member Repositories : Repository set  
-    member Assemblies : Assembly set  
+    member Repositories : Repository set
+    member Assemblies : Assembly set
     member Applications : Application set
     member Projects : Project set
     member TestRunner : TestRunnerType
@@ -138,7 +138,9 @@ and [<Sealed>] Graph =
     member Save: unit
               -> unit
 
-val from : Anthology.Anthology -> Graph 
+val from : Anthology.Anthology
+        -> Anthology.Globals
+        -> Graph
 
 val create: uri : string
          -> artifacts : string

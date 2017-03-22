@@ -99,10 +99,9 @@
     <Compile Include="Threading.fs" />
     <Compile Include="Exec.fs" />
     <Compile Include="IoHelpers.fs" />
-    <Compile Include="Env.fs" />
     <Compile Include="Anthology.fs" />
-    <Compile Include="ArtifactsSerializer.fs" />
-    <Compile Include="ProjectsSerializer.fs" />
+    <Compile Include="Env.fs" />
+    <Compile Include="GlobalsSerializer.fs" />
     <Compile Include="AnthologySerializer.fs" />
     <Compile Include="ViewSerializer.fs" />
     <Compile Include="Configuration.fs" />
@@ -142,7 +141,6 @@
     <Compile Include="Core\Package.fs" />
     <Compile Include="Core\Indexation.fs" />
     <Compile Include="Core\Doctor.fs" />
-    <Compile Include="Migration\AnthologyLoader2.fs" />
     <Compile Include="Commands\View.fs" />
     <Compile Include="Commands\Workspace.fs" />
     <Compile Include="Commands\Repo.fs" />
@@ -158,8 +156,7 @@
     <None Include="Examples\ghreleasefeed.json" />
     <None Include="Examples\view.yaml" />
     <None Include="Examples\anthology.yaml" />
-    <None Include="Examples\artifacts.yaml" />
-    <None Include="Examples\projects.yaml" />
+    <None Include="Examples\globals.yaml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

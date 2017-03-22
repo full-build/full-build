@@ -334,7 +334,7 @@ let Convert (convertInfo : CLI.Commands.ConvertRepositories) =
 let CheckMinVersion () =
     try
         let fbVersion = Env.FullBuildVersion ()
-        let artifacts = Configuration.LoadArtifacts()
+        let artifacts = Configuration.LoadGlobals()
         let minVersion = System.Version.Parse artifacts.MinVersion
 
         if fbVersion < minVersion then
