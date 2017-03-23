@@ -30,7 +30,7 @@ let Convert builder (repos : Repository set) =
     | Graph.BuilderType.Skip -> ()
 
 let GenerateProjectArtifacts () =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Graph.load()
     let repos = graph.Repositories
 
     let builder2repos = repos |> Seq.groupBy (fun x -> x.Builder)

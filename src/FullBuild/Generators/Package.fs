@@ -201,6 +201,6 @@ let rec collectDependencies (packages : Package set) =
 
 
 let GeneratePackageImports () =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     graph.Packages |> collectDependencies
                    |> Seq.iter generateTargetsForPackage

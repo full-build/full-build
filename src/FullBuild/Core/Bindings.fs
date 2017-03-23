@@ -75,7 +75,7 @@ let private forceBindings (bindings : XElement) (appConfig : FileInfo) =
     config.Save(appConfig.FullName)
 
 let private anthologyAssemblies () =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let assemblies = graph.Projects |> Seq.map (fun x -> x.Output.Name)
                                     |> Set
     assemblies

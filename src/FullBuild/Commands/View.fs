@@ -22,7 +22,7 @@ let Add (cmd : CLI.Commands.AddView) =
     if cmd.Filters.Length = 0 && not cmd.Modified && cmd.AppFilter.IsNone then
         failwith "Expecting at least one filter"
     
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let viewRepository = Views.from graph
     let view = viewRepository.CreateView cmd.Name
                                          (cmd.Filters |> Set.ofList)
@@ -50,7 +50,7 @@ let Add (cmd : CLI.Commands.AddView) =
     SaveFileIfNecessary slnFile slnContent
 
 let Drop name =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.tryFind (fun x -> x.Name = name)
     match view with 
@@ -58,7 +58,7 @@ let Drop name =
     | None -> ()
 
 let List () =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let viewRepository = Views.from graph
     let views = viewRepository.Views
     let defaultView = viewRepository.DefaultView
@@ -70,13 +70,13 @@ let List () =
     views |> Seq.iter printViewInfo
 
 let Describe name =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = name)
     view.Filters |> Seq.iter (fun x -> printfn "%s" x)
 
 let Build (cmd : CLI.Commands.BuildView) =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let viewRepository = Views.from graph
     let view = match cmd.Name with
                | Some x -> viewRepository.Views |> Seq.find (fun y -> y.Name = x)
@@ -93,7 +93,7 @@ let Build (cmd : CLI.Commands.BuildView) =
     Core.Builders.BuildWithBuilder BuilderType.MSBuild slnFile cmd.Config cmd.Clean cmd.Multithread version
 
 let Alter (cmd : CLI.Commands.AlterView) =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let depView = viewRepository.CreateView view.Name
@@ -110,7 +110,7 @@ let Alter (cmd : CLI.Commands.AlterView) =
     depView.Save cmd.Default
 
 let Open (cmd : CLI.Commands.OpenView) =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let wsDir = Env.GetFolder Env.Folder.Workspace
@@ -132,7 +132,7 @@ let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
         |> Open
 
 let Graph (cmd : CLI.Commands.GraphView) =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let projects = view.Projects

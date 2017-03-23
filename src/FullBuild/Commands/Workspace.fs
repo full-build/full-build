@@ -26,7 +26,7 @@ open Graph
 
 
 let pullMatchingBinaries () =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Graph.load()
     let baselineRepository = Baselines.from graph
     let baseline = baselineRepository.FindBaseline ()
     let tag = baseline.Info.Format()
@@ -52,11 +52,11 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
         }
 
     match branchInfo.Branch with
-    | Some x -> let graph = Configuration.LoadAnthology() |> Graph.from
+    | Some x -> let graph = Graph.load()
                 let branch = (x = graph.MasterRepository.Branch) ? (None, Some x)
                 let res1 = switchToBranch branch graph.MasterRepository |> Async.RunSynchronously
 
-                let graph = Configuration.LoadAnthology() |> Graph.from
+                let graph = Graph.load()
                 let res2 = graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
                                               |> Threading.ParExec (switchToBranch branch)
                 let res = res1 |> Seq.singleton |> Seq.append res2
@@ -104,7 +104,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
 
     // checkout repositories
     DisplayInfo ".full-build"
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Graph.load()
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let mainRepo = graph.MasterRepository
     Tools.Vcs.Checkout wsDir mainRepo checkoutInfo.Version |> Exec.CheckResponseCode
@@ -115,7 +115,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     }
 
     // checkout each repository now
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Graph.load()
     let repos = graph.Repositories
     let branchResults = repos |> Seq.filter (fun x -> x.IsCloned)
                               |> Threading.ParExec (checkoutRepo wsDir checkoutInfo.Version)
@@ -158,12 +158,12 @@ let consoleProgressBar max =
 
 
 let Pull (pullInfo : CLI.Commands.PullWorkspace) =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Graph.load()
     let viewRepository = Views.from graph
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
     // refresh graph just in case something has changed
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Graph.load()
 
     if pullInfo.Sources then
         let cloneRepo wsDir rebase (repo : Repository) = async {
@@ -193,7 +193,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
 
 let Exec (execInfo : CLI.Commands.Exec) =
     let branch = Configuration.LoadBranch()
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let execRepos = match execInfo.All with
                     | true -> graph.Repositories |> Set.add graph.MasterRepository
@@ -224,31 +224,31 @@ let Clean () =
         // rollback master repository but save back the old anthology
         // if the cleanup fails we can still continue again this operation
         // master repository will be cleaned again as final step
-        let oldGraph = Configuration.LoadAnthology () |> Graph.from
+        let oldGraph = Graph.load()
         let wsDir = Env.GetFolder Env.Folder.Workspace
         Tools.Vcs.Clean wsDir oldGraph.MasterRepository
-        let newAntho = Configuration.LoadAnthology() |> Graph.from
+        let newGraph = Graph.load()
         oldGraph.Save()
 
         // remove repositories
-        let reposToRemove = Set.difference oldGraph.Repositories newAntho.Repositories
+        let reposToRemove = Set.difference oldGraph.Repositories newGraph.Repositories
         reposToRemove |> Seq.filter (fun x -> x.IsCloned)
                       |> Seq.iter (Tools.Vcs.Unclone wsDir)
 
         // clean existing repositories
-        for repo in newAntho.Repositories do
+        for repo in newGraph.Repositories do
             if repo.IsCloned then
                 DisplayInfo repo.Name
                 Tools.Vcs.Clean wsDir repo
 
-        DisplayInfo newAntho.MasterRepository.Name
-        Tools.Vcs.Clean wsDir newAntho.MasterRepository
+        DisplayInfo newGraph.MasterRepository.Name
+        Tools.Vcs.Clean wsDir newGraph.MasterRepository
 
 let UpdateGuid (updInfo : CLI.Commands.UpdateGuids) =
     printfn "DANGER ! You will change all project guids for selected repository. Do you want to continue [Yes to confirm] ?"
     let res = Console.ReadLine()
     if res = "Yes" then
-        let graph = Configuration.LoadAnthology () |> Graph.from
+        let graph = Graph.load()
         let wsDir = Env.GetFolder Env.Folder.Workspace
         let selectedProjects = PatternMatching.FilterMatch (graph.Projects) (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) updInfo.Filters
         let projects = selectedProjects |> Set.filter (fun x -> x.Repository.IsCloned)
@@ -262,7 +262,7 @@ let UpdateGuid (updInfo : CLI.Commands.UpdateGuids) =
 
 let History (historyInfo : CLI.Commands.History) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let baselineRepository = Baselines.from graph
     let previousBaseline = baselineRepository.FindBaseline ()
     let baseline = baselineRepository.CreateBaseline "temp"
@@ -286,25 +286,26 @@ let History (historyInfo : CLI.Commands.History) =
 
 let private index (convertInfo : CLI.Commands.ConvertRepositories) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let antho = Configuration.LoadAnthology()
-    let graph = antho |> Graph.from
+    let graph = Graph.load()
+    let antho = graph.Anthology
+    let globals = graph.Globals
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) convertInfo.Filters
     if selectedRepos = Set.empty then failwith "Empty repository selection"
 
-    let indexation = selectedRepos |> Core.Indexation.IndexWorkspace wsDir antho
+    let indexation = selectedRepos |> Core.Indexation.IndexWorkspace wsDir globals antho
     if convertInfo.Check then
-        indexation |> fst |> Graph.from |> ignore
+        indexation |> fst |> Graph.from globals |> ignore
         indexation |> fst |> Core.Indexation.CheckAnthologyProjectsInRepository antho selectedRepos
     else
-        indexation |> Core.Indexation.UpdatePackages
+        indexation |> Core.Indexation.UpdatePackages globals
                    |> Core.Package.Simplify
                    |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
                    |> Configuration.SaveAnthology
         Install()
 
 let convert (convertInfo : CLI.Commands.ConvertRepositories) =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let repos = graph.Repositories |> Set.filter (fun x -> x.IsCloned) |> Set.filter (fun x -> x.Builder = BuilderType.MSBuild)
     let selectedRepos = PatternMatching.FilterMatch repos (fun x -> x.Name) convertInfo.Filters
     if selectedRepos = Set.empty then failwith "Empty repository selection"
@@ -345,15 +346,14 @@ let CheckMinVersion () =
 
 
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
-    let antho = Configuration.LoadAnthology ()
-    let graph = antho |> Graph.from
+    let graph = Graph.load()
 
     let baselines = Baselines.from graph
     let comment = pushInfo.Incremental ? ("incremental", "full")
     let baseline = baselines.CreateBaseline pushInfo.Version
 
     // copy bin content
-    antho |> Configuration.SaveConsolidatedAnthology
+    graph.Anthology |> Configuration.SaveConsolidatedAnthology
     Core.BuildArtifacts.Publish graph baseline.Info
     baseline.Save comment
 

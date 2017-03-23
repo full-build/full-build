@@ -119,3 +119,10 @@ projects:
       projects:
         - project: cassandrasharp
         - project: cassandrasharp.interfaces
+  apps:
+    - name: cqlplus
+      type: zip
+      project: cqlplus
+    - name: cassandrasharp-log4net
+      type: zip
+      project: cassandrasharp.contrib.log4net

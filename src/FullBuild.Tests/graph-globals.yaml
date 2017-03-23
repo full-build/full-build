@@ -12,12 +12,3 @@ artifacts:
     - repo: cassandra-sharp-contrib
       type: git
       uri: https://github.com/pchalamet/cassandra-sharp-contrib
-  apps:
-    - name: cqlplus
-      type: zip
-      projects: 
-        - project: cqlplus
-    - name: cassandrasharp-log4net
-      type: zip
-      projects: 
-        - project: cassandrasharp.contrib.log4net

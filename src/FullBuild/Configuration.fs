@@ -52,10 +52,12 @@ let LoadAnthology() : Anthology =
     globalAnthology
 
 
-let SaveAnthology (antho : Anthology) =
+let SaveConsolidatedAnthology (antho : Anthology) =
     let artifactsFile = GetGlobalsFile ()
     AnthologySerializer.Save artifactsFile antho
 
+
+let SaveAnthology (antho : Anthology) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repo2projects = antho.Projects |> Seq.groupBy (fun x -> x.Repository) |> dict
     let repo2apps = antho.Applications |> Seq.groupBy (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectId = x.Project) |> (fun x -> x.Repository))

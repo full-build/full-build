@@ -120,10 +120,12 @@ and [<Sealed>] Graph =
     member ArtifactsDir : string
     member NuGets : string list
     member Packages: Package set
+    member Anthology : Anthology.Anthology
+    member Globals : Anthology.Globals
 
     member CreateApp: name : string
                    -> publisher : PublisherType
-                   -> projects : Project set
+                   -> project : Project
                    -> Graph
 
     member CreateNuGet: url : string
@@ -138,8 +140,8 @@ and [<Sealed>] Graph =
     member Save: unit
               -> unit
 
-val from : Anthology.Anthology
-        -> Anthology.Globals
+val from : Anthology.Globals
+        -> Anthology.Anthology
         -> Graph
 
 val create: uri : string
@@ -151,3 +153,6 @@ val create: uri : string
 val init: uri : string
        -> vcs : VcsType
        -> Graph
+
+val load : unit
+        -> Graph

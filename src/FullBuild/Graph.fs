@@ -138,7 +138,7 @@ with
     member this.Delete () =
         let newAntho = { this.Graph.Anthology
                          with Applications = this.Graph.Anthology.Applications |> Set.remove this.Application }
-        Graph(newAntho, this.Graph.Globals)
+        Graph(this.Graph.Globals, newAntho)
 
 // =====================================================================================================
 
@@ -210,7 +210,7 @@ with
                            with Repositories = this.Graph.Globals.Repositories |> Set.filter (fun x -> x.Repository.Name <> repositoryId) }
         let newAntho = { this.Graph.Anthology
                          with Projects = this.Graph.Anthology.Projects |> Set.filter (fun x -> x.Repository <> repositoryId) }
-        Graph(newAntho, newGlobals)
+        Graph(newGlobals, newAntho)
 
 // =====================================================================================================
 
@@ -301,7 +301,7 @@ with
 
 // =====================================================================================================
 
-and [<Sealed>] Graph(anthology : Anthology.Anthology, globals : Anthology.Globals) =
+and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Anthology) =
     let mutable assemblyMap : System.Collections.Generic.IDictionary<Anthology.AssemblyId, Assembly> = null
     let mutable packageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> = null
     let mutable repositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> = null
@@ -383,12 +383,12 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology, globals : Anthology.Global
                     Anthology.Application.Project = Anthology.ProjectId.from project.ProjectId }
         let newAntho = { anthology
                          with Applications = anthology.Applications |> Set.add app }
-        Graph(newAntho, globals)
+        Graph(globals, newAntho)
 
     member this.CreateNuGet (url : string) =
         let newGlobals = { globals
                            with NuGets = globals.NuGets @ [Anthology.RepositoryUrl.from url] |> List.distinct }
-        Graph(anthology, globals)
+        Graph(globals, anthology)
 
     member this.CreateRepo name (url : string) builder (branch : string option) =
         let repoBranch = match branch with
@@ -403,7 +403,7 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology, globals : Anthology.Global
         let buildableRepo = { Anthology.Repository = repo; Anthology.Builder = repoBuilder }
         let newGlobals = { globals
                            with Repositories = globals.Repositories |> Set.add buildableRepo }
-        Graph(anthology, newGlobals)
+        Graph(newGlobals, anthology)
 
     member this.Save () =
         Configuration.SaveAnthology this.Anthology
@@ -412,8 +412,8 @@ and [<Sealed>] Graph(anthology : Anthology.Anthology, globals : Anthology.Global
 // =====================================================================================================
 
 
-let from (antho : Anthology.Anthology) (globals : Anthology.Globals) : Graph =
-    Graph (antho, globals)
+let from (globals : Anthology.Globals) (antho : Anthology.Anthology) : Graph =
+    Graph (globals, antho)
 
 let create (uri : string) (artifacts : string) vcs runner =
     let repo = { Anthology.Name = Anthology.RepositoryId.from Env.MASTER_REPO
@@ -437,8 +437,13 @@ let create (uri : string) (artifacts : string) vcs runner =
 
     let antho =  { Anthology.Anthology.Projects = Set.empty
                    Anthology.Anthology.Applications = Set.empty}
-    from antho globals
+    from globals antho
 
 
 let init uri vcs =
     create uri "dummy" vcs TestRunnerType.NUnit
+
+let load () =
+    let globals = Configuration.LoadGlobals()
+    let anthology = Configuration.LoadAnthology()
+    from globals anthology

@@ -18,9 +18,7 @@ open Collections
 
 
 let private queryUnusedProjects (graph : Graph) =
-    let rootProjects = graph.Applications |> Set.map (fun x -> x.Projects)
-                                          |> Set.unionMany
-
+    let rootProjects = graph.Applications |> Set.map (fun x -> x.Project)
     let allUsedProjects = Project.TransitiveReferences rootProjects
     let projectsUnitTests = allUsedProjects |> Set.map (fun x -> x.ReferencedBy |> Set.filter (fun y -> y.HasTests))
                                             |> Set.unionMany
@@ -60,8 +58,7 @@ let private queryPackages (projects : Project set) =
         printfn "No packages found"
 
 let Query (queryInfo : CLI.Commands.Query) =
-    let antho = Configuration.LoadAnthology()
-    let graph = antho |> Graph.from
+    let graph = Graph.load()
 
     if queryInfo.UnusedProjects then queryUnusedProjects graph
 

@@ -51,7 +51,7 @@ let private getLastVersionForApp (graph : Graph.Graph) (branch : string) (app : 
     }
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Graph.load()
 
     // build a semver version
     let buildNumber = match pubInfo.Version with
@@ -77,7 +77,7 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
     appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter IoHelpers.ForceDelete
 
 let List (appInfo : CLI.Commands.ListApplications) =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Graph.load()
     let branch = Configuration.LoadBranch()
     match appInfo.Version with
     | None -> graph.Applications |> Seq.filter (fun (x : Graph.Application) -> x.Publisher = Graph.PublisherType.Zip)
@@ -90,19 +90,21 @@ let List (appInfo : CLI.Commands.ListApplications) =
                                          |> Seq.iter displayApp
 
 let Add (addInfo : CLI.Commands.AddApplication) =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Graph.load()
     let projects = PatternMatching.FilterMatch graph.Projects (fun x -> x.Output.Name) addInfo.Projects
-    let newGraph = graph.CreateApp addInfo.Name addInfo.Publisher projects
+    if projects.Count <> 1 then failwith "Selection leads to more than one project"
+    let project = projects |> Seq.exactlyOne
+    let newGraph = graph.CreateApp addInfo.Name addInfo.Publisher project
     newGraph.Save()
 
 let Drop (appName : string) =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Graph.load()
     let app = graph.Applications |> Seq.find (fun x -> x.Name = appName)
     let newGraph = app.Delete()
     newGraph.Save()
 
 let BindProject (bindInfo : CLI.Commands.BindProject) =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let wsDir = Env.GetFolder Folder.Workspace
 
     // select only available repositories
