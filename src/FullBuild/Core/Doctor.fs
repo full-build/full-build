@@ -47,7 +47,7 @@ let checkFbProjectsInRepo ((error,antho,globals) : bool * Anthology.Anthology * 
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repoWithoutProjects = globals.Repositories |> Seq.filter (fun x -> x.Builder = Anthology.BuilderType.MSBuild)
                                                    |> Seq.filter (fun x -> (wsDir |> IoHelpers.GetSubDirectory x.Repository.Name.toString).Exists)
-                                                   |> Seq.filter (fun x -> (wsDir |> IoHelpers.GetSubDirectory x.Repository.Name.toString |> IoHelpers.GetFile ".fbprojects").Exists |> not)
+                                                   |> Seq.filter (fun x -> (wsDir |> IoHelpers.GetSubDirectory x.Repository.Name.toString |> IoHelpers.GetFile ".anthology").Exists |> not)
                                                    |> List.ofSeq
 
     let hasErrors = repoWithoutProjects <> List.empty
