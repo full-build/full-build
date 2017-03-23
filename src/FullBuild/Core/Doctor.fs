@@ -21,7 +21,7 @@ let private projectConsistencyCheck ((error,antho,globals) : bool * Anthology.An
     let unknowns  = projectRefs - knownProjects
     let hasErrors = unknowns <> Set.empty
     if hasErrors then
-        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.toString) ""
+        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s- %s\n" s t.toString) ""
         IoHelpers.DisplayError "Invalid projects references:"
         printfn "%s" err
     (error || hasErrors, antho, globals)
@@ -32,7 +32,7 @@ let private repositoryConsistencyCheck ((error,antho,globals) : bool * Anthology
     let unknowns  = repoRefs - knownRepos
     let hasErrors = unknowns <> Set.empty
     if hasErrors then
-        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.toString) ""
+        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s- %s\n" s t.toString) ""
         IoHelpers.DisplayError "Invalid repositories references:"
         printfn "%s" err
     (error || unknowns <> Set.empty, antho, globals)
@@ -52,7 +52,7 @@ let checkFbProjectsInRepo ((error,antho,globals) : bool * Anthology.Anthology * 
 
     let hasErrors = repoWithoutProjects <> List.empty
     if hasErrors then
-        let err = repoWithoutProjects |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.Repository.Name.toString) ""
+        let err = repoWithoutProjects |> Seq.fold (fun s t -> sprintf "%s- %s\n" s t.Repository.Name.toString) ""
         IoHelpers.DisplayError "Found non indexed repositories:"
         printfn "%s" err
     (error || hasErrors, antho, globals)
@@ -64,7 +64,7 @@ let checkApps ((error,antho,globals) : bool * Anthology.Anthology * Anthology.Gl
     let unknowns  = appProjects - knownProjects
     let hasErrors = unknowns <> Set.empty
     if hasErrors then
-        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s\n- %s" s t.toString) ""
+        let err = unknowns |> Seq.fold (fun s t -> sprintf "%s- %s\n" s t.toString) ""
         IoHelpers.DisplayError "Found invalid application references:"
         printfn "%s" err
     (error || hasErrors, antho, globals)

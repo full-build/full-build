@@ -1,6 +1,7 @@
 artifacts:
   minversion: 0.0.0.0
   binaries: C:\Binaries
+  test: nunit
   nugets:
     - nuget: https://www.nuget.org/api/v2/
   repositories:
@@ -10,9 +11,3 @@ artifacts:
     - repo: src
       type: git
       uri: https://github.com/pchalamet/view
-  apps:
-    - name: ed-app.zip
-      type: zip
-      projects:
-        - project: e
-        - project: d

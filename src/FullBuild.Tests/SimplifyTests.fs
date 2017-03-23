@@ -22,17 +22,14 @@ open System.IO
 open TestHelpers
 
 
-let loadAnthology artifactsFile projectsFile =
-    let artifactsFile = FileInfo(testFile artifactsFile)
-    let projectsFile = FileInfo(testFile projectsFile)
-    let artifacts = ArtifactsSerializer.Load artifactsFile
-    let projects = ProjectsSerializer.Load projectsFile
-    let anthology = AnthologySerializer.Deserialize artifacts projects
+let loadAnthology anthologyFile =
+    let anthologyFile = FileInfo(testFile anthologyFile)
+    let anthology = AnthologySerializer.Load anthologyFile
     anthology
 
 [<Test>]
 let CheckSimplifyAssemblies () =
-    let anthology = loadAnthology "indexed-artifacts.yaml" "indexed-projects.yaml"
+    let anthology = loadAnthology "indexed-anthology.yaml"
 
     let package2Files = Map.empty
 
@@ -58,8 +55,8 @@ let CheckSimplifyAssemblies () =
 
 [<Test>]
 let CheckSimplifyAnthology () =
-    let anthology = loadAnthology "indexed-artifacts.yaml" "indexed-projects.yaml"
-    let expectedAnthology = loadAnthology "simplified-artifacts.yaml" "simplified-projects.yaml"
+    let anthology = loadAnthology "indexed-anthology.yaml"
+    let expectedAnthology = loadAnthology "simplified-anthology.yaml"
 
     let package2files = Map [ (PackageId.from "log4net", Set [AssemblyId.from "log4net"])
                               (PackageId.from "Moq", Set [AssemblyId.from "moq"; AssemblyId.from "Moq.Silverlight" ])

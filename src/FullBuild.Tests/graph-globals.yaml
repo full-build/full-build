@@ -1,6 +1,7 @@
 artifacts:
   minversion: 0.0.0.0
   binaries: C:\Binaries
+  test: nunit
   nugets:
     - nuget: https://www.nuget.org/api/v2/
   mainrepository:

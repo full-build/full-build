@@ -32,11 +32,11 @@ let CheckGenerateDgmlNoDependency () =
 
         let expectedDgml = XDocument.Load(testFile "single-node.dgml")
 
-        let artifactsFile = FileInfo(testFile "view-artifacts.yaml")
-        let projectsFile = FileInfo(testFile "view-projects.yaml")
-        let artifacts = ArtifactsSerializer.Load artifactsFile
-        let projects = ProjectsSerializer.Load projectsFile
-        let graph = AnthologySerializer.Deserialize artifacts projects |> Graph.from
+        let globalsFile = FileInfo(testFile "view-globals.yaml")
+        let anthologyFile = FileInfo(testFile "view-anthology.yaml")
+        let globals = GlobalsSerializer.Load globalsFile
+        let anthology = AnthologySerializer.Load anthologyFile
+        let graph = Graph.from globals anthology
         let viewRepository = Views.from graph
         let projects = graph.Projects
         let goal = projects |> selectProjects ["g"]
@@ -55,11 +55,11 @@ let CheckGenerateDgmlWithDependencies () =
         System.Environment.CurrentDirectory <- TestContext.CurrentContext.TestDirectory
         let expectedDgml = XDocument.Load(testFile "single-node-dependencies.dgml")
 
-        let artifactsFile = FileInfo(testFile "view-artifacts.yaml")
-        let projectsFile = FileInfo(testFile "view-projects.yaml")
-        let artifacts = ArtifactsSerializer.Load artifactsFile
-        let projects = ProjectsSerializer.Load projectsFile
-        let graph = AnthologySerializer.Deserialize artifacts projects |> Graph.from
+        let globalsFile = FileInfo(testFile "view-globals.yaml")
+        let anthologyFile = FileInfo(testFile "view-anthology.yaml")
+        let globals = GlobalsSerializer.Load globalsFile
+        let anthology = AnthologySerializer.Load anthologyFile
+        let graph = Graph.from globals anthology
 
         let viewRepository = Views.from graph
         let projects = graph.Projects

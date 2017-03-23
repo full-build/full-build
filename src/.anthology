@@ -40,3 +40,13 @@ projects:
       - package: FSharp.Core
       - package: FSharp.Data
     projects: []
+apps:
+  - name: full-build
+    type: copy
+    project: fullbuild
+  - name: full-build.nupkg
+    type: nuget
+    project: fullbuild
+  - name: full-build.zip
+    type: zip
+    project: fullbuild

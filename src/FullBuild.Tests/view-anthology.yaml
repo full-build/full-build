@@ -62,4 +62,7 @@
       projects:
         - project: e
         - project: f
-
+apps:
+    - name: ed-app.zip
+      type: zip
+      project: e

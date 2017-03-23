@@ -83,10 +83,10 @@
     <Compile Include="IndexationTests.fs" />
     <Compile Include="Integration.fs" />
     <None Include="app.config" />
-    <None Include="view-artifacts.yaml">
+    <None Include="view-globals.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="view-projects.yaml">
+    <None Include="view-anthology.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="graph-globals.yaml">
@@ -95,16 +95,16 @@
     <None Include="graph-anthology.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="indexed-artifacts.yaml">
+    <None Include="indexed-globals.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="indexed-projects.yaml">
+    <None Include="indexed-anthology.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="simplified-artifacts.yaml">
+    <None Include="simplified-globals.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="simplified-projects.yaml">
+    <None Include="simplified-anthology.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="single-node-dependencies.dgml">

@@ -39,3 +39,4 @@ projects:
     packages: []
     projects:
       - project: libproject
+apps: []

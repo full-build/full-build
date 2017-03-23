@@ -37,8 +37,9 @@ let LoadAnthology() : Anthology =
 
     // load global anthology and override with local anthologies
     let globalAnthologyFile = GetGlobalAnthologyFile()
-    let mutable globalAnthology = AnthologySerializer.Load globalAnthologyFile
-    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let mutable globalAnthology = if globalAnthologyFile.Exists then AnthologySerializer.Load globalAnthologyFile
+                                  else { Applications = Set.empty ; Projects = Set.empty }
+
     for repo in globals.Repositories do
         let localAnthologyFile = GetLocalAnthologyFile repo.Repository.Name
         if localAnthologyFile.Exists then
@@ -46,7 +47,7 @@ let LoadAnthology() : Anthology =
             globalAnthology <- { globalAnthology
                                  with Projects = globalAnthology.Projects |> Set.filter (fun x -> x.Repository <> repo.Repository.Name)
                                                                           |> Set.union localAnthology.Projects
-                                      Applications = globalAnthology.Applications |> Set.filter (fun x -> localAnthology.Applications |> Set.exists (fun y -> y.Name <> y.Name) |> not)
+                                      Applications = globalAnthology.Applications |> Set.filter (fun x -> localAnthology.Applications |> Set.exists (fun y -> x.Name = y.Name) |> not)
                                                                                   |> Set.union localAnthology.Applications }
 
     globalAnthology

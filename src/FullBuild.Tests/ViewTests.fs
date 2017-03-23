@@ -23,20 +23,19 @@ open TestHelpers
 open Collections
 
 
-let loadGraph artifactsFile projectsFile =
-    let artifactsFile = FileInfo(testFile artifactsFile)
-    let projectsFile = FileInfo(testFile projectsFile)
-    let artifacts = ArtifactsSerializer.Load artifactsFile
-    let projects = ProjectsSerializer.Load projectsFile
-    let anthology = AnthologySerializer.Deserialize artifacts projects
-    let graph = Graph.from anthology
+let loadGraph globalsFile anthologyFile =
+    let globalsFile = FileInfo(testFile globalsFile)
+    let anthologyFile = FileInfo(testFile anthologyFile)
+    let globals = GlobalsSerializer.Load globalsFile
+    let anthology = AnthologySerializer.Load anthologyFile
+    let graph = Graph.from globals anthology
     graph
 
 
 
 [<Test>]
 let CheckGenerateSolution () =
-    let graph = loadGraph "graph-artifacts.yaml" "graph-projects.yaml"
+    let graph = loadGraph "graph-globals.yaml" "graph-anthology.yaml"
     let content = graph.Projects |> set
                                  |> GenerateSolutionContent
 
@@ -61,7 +60,7 @@ let CheckSingleProjectSelection () =
     //     / \ /
     //    A   B
     // 
-    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+    let graph = loadGraph "view-globals.yaml" "view-anthology.yaml"
 
     let viewRepository = Views.from graph
     let projects = graph.Projects
@@ -85,7 +84,7 @@ let CheckClosureSelection () =
     //     / \ /
     //    A   B
     // 
-    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+    let graph = loadGraph "view-globals.yaml" "view-anthology.yaml"
 
     let viewRepository = Views.from graph
     let projects = graph.Projects
@@ -110,7 +109,7 @@ let checkSelectAllDependencies () =
     //     / \ /
     //    A   B
     // 
-    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+    let graph = loadGraph "view-globals.yaml" "view-anthology.yaml"
 
     let viewRepository = Views.from graph
     let projects = graph.Projects
@@ -134,7 +133,7 @@ let CheckAllReferencedBy () =
     //     / \ /
     //    A   B
     // 
-    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+    let graph = loadGraph "view-globals.yaml" "view-anthology.yaml"
 
     let viewRepository = Views.from graph
     let projects = graph.Projects
@@ -159,7 +158,7 @@ let CheckSelect2ProjectsWithoutParentButWithCommonChildrenSourceOnly () =
     //     / \ /
     //    A   B
     // 
-    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+    let graph = loadGraph "view-globals.yaml" "view-anthology.yaml"
 
     let viewRepository = Views.from graph
     let projects = graph.Projects
@@ -183,7 +182,7 @@ let CheckSelect2LeafProjectsSourceOnly () =
     //     / \ /
     //    A   B
     // 
-    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+    let graph = loadGraph "view-globals.yaml" "view-anthology.yaml"
 
     let viewRepository = Views.from graph
     let projects = graph.Projects
@@ -207,7 +206,7 @@ let CheckSelectProjectsWithHoleSourceOnly () =
     //     / \ /
     //    A   B
     // 
-    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+    let graph = loadGraph "view-globals.yaml" "view-anthology.yaml"
 
     let viewRepository = Views.from graph
     let projects = graph.Projects
@@ -231,7 +230,7 @@ let CheckSelectReferencedBy () =
     //     / \ /
     //    A   B
     // 
-    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+    let graph = loadGraph "view-globals.yaml" "view-anthology.yaml"
 
     let viewRepository = Views.from graph
     let projects = graph.Projects
@@ -255,7 +254,7 @@ let CheckSelectReferencesAndReferencedBy () =
     //     / \ /
     //    A   B
     // 
-    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+    let graph = loadGraph "view-globals.yaml" "view-anthology.yaml"
 
     let viewRepository = Views.from graph
     let projects = graph.Projects
@@ -278,11 +277,11 @@ let CheckSelectFromAppDown () =
     //     / \ /
     //    A   B
     // 
-    let graph = loadGraph "view-artifacts.yaml" "view-projects.yaml"
+    let graph = loadGraph "view-globals.yaml" "view-anthology.yaml"
 
     let viewRepository = Views.from graph
     let projects = graph.Projects
-    let goal = projects |> selectProjects ["a"; "b"; "c"; "d"; "e"]
+    let goal = projects |> selectProjects ["a"; "b"; "c"; "e"]
 
     let view = viewRepository.CreateView "test" Set.empty true false false (Some "ed-app*") false
 

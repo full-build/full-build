@@ -119,7 +119,7 @@ projects:
       projects:
         - project: cassandrasharp
         - project: cassandrasharp.interfaces
-  apps:
+apps:
     - name: cqlplus
       type: zip
       project: cqlplus
