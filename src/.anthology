@@ -1,11 +1,21 @@
+apps:
+  - name: full-build
+    type: copy
+    project: fullbuild
+  - name: full-build.nupkg
+    type: nuget
+    project: fullbuild
+  - name: full-build.zip
+    type: zip
+    project: fullbuild
 projects:
-  - fx:
+  - guid: FAAF3B40-EA78-4EAF-9859-863FF16F6058
+    file: src\FullBuild.Tests\FullBuild.Tests.fsproj
+    out: fullbuild.tests.dll
+    fx:
       version: v4.6
       profile: null
       identifier: null
-    guid: FAAF3B40-EA78-4EAF-9859-863FF16F6058
-    file: src\FullBuild.Tests\FullBuild.Tests.fsproj
-    out: fullbuild.tests.dll
     tests: true
     assemblies:
       - assembly: system
@@ -18,13 +28,32 @@ projects:
       - package: fsunit
     projects:
       - project: fullbuild
-  - fx:
+  - guid: BDDA8044-0655-4D66-B1FE-F62487E6F186
+    file: src\FullBuildMigrate\FullBuildMigrate.fsproj
+    out: fullbuildmigrate.exe
+    fx:
+      version: v4.5.2
+      profile: null
+      identifier: null
+    tests: false
+    assemblies:
+      - assembly: mscorlib
+      - assembly: system
+      - assembly: system.core
+      - assembly: system.numerics
+      - assembly: system.xml
+      - assembly: system.xml.linq
+    packages:
+      - package: fsharp.configuration
+      - package: fsharp.core
+    projects: []
+  - guid: 5FDE3939-C144-4287-BC57-A96EC2D1A9DA
+    file: src\FullBuild\FullBuild.fsproj
+    out: fullbuild.exe
+    fx:
       version: v4.6
       profile: null
       identifier: null
-    guid: 5FDE3939-C144-4287-BC57-A96EC2D1A9DA
-    file: src\FullBuild\FullBuild.fsproj
-    out: fullbuild.exe
     tests: false
     assemblies:
       - assembly: system
@@ -36,17 +65,7 @@ projects:
       - assembly: system.xml
       - assembly: system.xml.linq
     packages:
-      - package: FSharp.Configuration
-      - package: FSharp.Core
-      - package: FSharp.Data
+      - package: fsharp.configuration
+      - package: fsharp.core
+      - package: fsharp.data
     projects: []
-apps:
-  - name: full-build
-    type: copy
-    project: fullbuild
-  - name: full-build.nupkg
-    type: nuget
-    project: fullbuild
-  - name: full-build.zip
-    type: zip
-    project: fullbuild

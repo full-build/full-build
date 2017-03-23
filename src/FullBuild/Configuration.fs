@@ -68,7 +68,9 @@ let SaveAnthology (antho : Anthology) =
         let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
         if repoDir.Exists then
             let localProjects = repo2project.Value |> set
-            let localApps = repo2apps.[repo2project.Key] |> set
+            let localApps = match repo2apps.TryGetValue(repo2project.Key) with
+                            | true, x -> x |> Set.ofSeq
+                            | false, _ -> Set.empty
             let localAntho = { Projects = localProjects
                                Applications = localApps }
             let localAnthologyFile = GetLocalAnthologyFile repo
