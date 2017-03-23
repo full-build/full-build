@@ -16,7 +16,7 @@ module Commands.Test
 open Collections
 
 let TestAssemblies (filters : string set) (excludes : string set) =
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let viewRepository = Views.from graph
     let selectedViews = PatternMatching.FilterMatch viewRepository.Views (fun x -> x.Name) filters
 

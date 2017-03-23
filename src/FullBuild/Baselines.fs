@@ -132,7 +132,9 @@ with
                Baseline(graph, tagInfo, true)
 
     member this.CreateBaseline (buildNumber : string) : Baseline =
-        let graph = Configuration.LoadAnthology() |> Graph.from
+        let globals = Configuration.LoadGlobals()
+        let antho = Configuration.LoadAnthology()
+        let graph = Graph.from globals antho
         let branch = Configuration.LoadBranch()
         let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = buildNumber }
         Baseline(graph, tagInfo, true)

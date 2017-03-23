@@ -19,16 +19,3 @@ repositories:
     branch: master
     build: msbuild
     uri: https://github.com/pchalamet/full-build
-apps:
-  - name: full-build
-    type: copy
-    projects:
-      - project: fullbuild
-  - name: full-build.nupkg
-    type: nuget
-    projects:
-      - project: fullbuild
-  - name: full-build.zip
-    type: zip
-    projects:
-      - project: fullbuild

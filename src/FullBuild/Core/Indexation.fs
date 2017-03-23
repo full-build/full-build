@@ -135,10 +135,10 @@ let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
     Set.union remainingProjects newProjects
 
 
-let IndexWorkspace wsDir antho (grepos : Graph.Repository set) =
-    let repos = antho.Repositories |> Set.filter (fun x -> grepos |> Set.exists (fun y -> y.Name = x.Repository.Name.toString))
-                                   |> Set.filter (fun x -> x.Builder = BuilderType.MSBuild)
-                                   |> Set.map (fun x -> x.Repository)
+let IndexWorkspace wsDir (globals : Globals) (antho : Anthology) (grepos : Graph.Repository set) =
+    let repos = globals.Repositories |> Set.filter (fun x -> grepos |> Set.exists (fun y -> y.Name = x.Repository.Name.toString))
+                                     |> Set.filter (fun x -> x.Builder = BuilderType.MSBuild)
+                                     |> Set.map (fun x -> x.Repository)
     let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos
 
     let projects = parsedProjects |> List.map (fun x -> x.Project)
@@ -155,7 +155,7 @@ let IndexWorkspace wsDir antho (grepos : Graph.Repository set) =
     (newAntho, parsedProjects)
 
 // WARNING: paket.dependencies modified
-let UpdatePackages (antho, parsedProjects) =
+let UpdatePackages globals (antho, parsedProjects) =
     /// here we optimize anthology and dependencies in order to speed up package retrieval after conversion
     /// warning: big side effect (paket.dependencies is modified)
     // automaticaly migrate packages to project - this will avoid retrieving them
@@ -171,7 +171,7 @@ let UpdatePackages (antho, parsedProjects) =
 
     // if changes then install packages
     if packagesToAdd <> Set.empty || unusedPackages <> Set.empty then
-        Core.Package.InstallPackages antho.NuGets
+        Core.Package.InstallPackages globals.NuGets
 
     antho
 

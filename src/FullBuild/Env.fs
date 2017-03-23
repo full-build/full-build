@@ -22,8 +22,8 @@ let private VIEW_FOLDER = "views"
 let private PROJECT_FOLDER = "projects"
 let private PACKAGE_FOLDER = "packages"
 let BIN_FOLDER = @"bin"
-let ARTIFACTS_FILENAME = "artifacts"
-let PROJECTS_FILENAME = ".fbprojects"
+let GLOBALS_FILENAME = "globals"
+let ANTHOLOGY_FILENAME = ".anthology"
 let BASELINE_FILENAME = "baseline"
 let BRANCH_FILENAME = "branch"
 let FS_GLOBAL_ASSEMBLYINFO_FILENAME = "BuildVersionAssemblyInfo.fs"
@@ -77,7 +77,7 @@ type Folder =
 
 let rec GetFolder folder =
     match folder with
-    | Folder.Current -> CurrentFolder() 
+    | Folder.Current -> CurrentFolder()
     | Folder.Workspace -> CurrentFolder() |> workspaceFolderSearch
     | Folder.AppOutput -> GetFolder Folder.Workspace |> CreateSubDirectory MSBUILD_APP_OUTPUT
     | Folder.Config -> GetFolder Folder.Workspace |> CreateSubDirectory MASTER_REPO
@@ -93,14 +93,16 @@ let GetFsGlobalAssemblyInfoFileName() =
 let GetCsGlobalAssemblyInfoFileName() =
     GetFolder Folder.Bin |> GetFile CS_GLOBAL_ASSEMBLYINFO_FILENAME
 
-let GetArtifactsFile() =
-    GetFolder Folder.Config |> GetFile ARTIFACTS_FILENAME
+let GetGlobalsFile() =
+    GetFolder Folder.Config |> GetFile GLOBALS_FILENAME
 
-let GetProjectsFile() =
-    GetFolder Folder.Bin |> GetFile PROJECTS_FILENAME
+let GetGlobalAnthologyFile() =
+    GetFolder Folder.Bin |> GetFile ANTHOLOGY_FILENAME
 
-let GetBaselineFile() =
-    GetFolder Folder.Config  |> GetFile BASELINE_FILENAME
+let GetLocalAnthologyFile (repository : Anthology.RepositoryId) =
+    Folder.Workspace |> GetFolder
+                     |> GetSubDirectory repository.toString
+                     |> GetFile ANTHOLOGY_FILENAME
 
 let GetViewFile viewName =
     GetFolder Folder.View |> GetFile (AddExt Extension.View viewName)
@@ -135,4 +137,3 @@ let FullBuildVersion () =
     let fbAssembly = getFullBuildAssembly ()
     let version = fbAssembly.GetName().Version
     version
-        

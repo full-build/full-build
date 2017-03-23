@@ -18,8 +18,7 @@ open Collections
 open Graph
 
 let List() =
-    let graph = Configuration.LoadAnthology() |> Graph.from
-
+    let graph = Graph.load ()
     let printRepo (repo : Repository) =
         printfn "%s : %s [%A]" repo.Name repo.Uri (StringHelpers.toString repo.Builder)
 
@@ -39,7 +38,7 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
         }
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let graph = Configuration.LoadAnthology() |> Graph.from
+    let graph = Graph.load()
     let selectedRepos = PatternMatching.FilterMatch graph.Repositories (fun x -> x.Name) cmd.Filters
     let branch = Configuration.LoadBranch()
     let br = if branch = graph.MasterRepository.Branch then None
@@ -50,12 +49,12 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
     Workspace.Install()
 
 let Add (cmd : CLI.Commands.AddRepository) =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Graph.load()
     let newGraph = graph.CreateRepo cmd.Name cmd.Url cmd.Builder cmd.Branch
     newGraph.Save()
 
 let Drop (name : string) =
-    let graph = Configuration.LoadAnthology () |> Graph.from
+    let graph = Graph.load()
     let repo = graph.Repositories |> Seq.find (fun x -> x.Name = name)
     let referencingProjects = repo.Projects |> Set.map (fun x -> x.ReferencedBy)
                                             |> Set.unionMany

@@ -71,8 +71,7 @@ with
 
         let appProjects = match this.AppFilter with
                           | Some appFilter -> let apps = PatternMatching.FilterMatch this.Graph.Applications (fun x -> x.Name) (Set.singleton appFilter)
-                                              apps |> Set.map (fun x -> x.Projects)
-                                                             |> Set.unionMany
+                                              apps |> Set.map (fun x -> x.Project)
                           | None -> Set.empty
 
         let viewProjects = Project.Closure (projects + modProjects + appProjects)

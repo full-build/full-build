@@ -17,77 +17,67 @@ module Configuration
 open Env
 open Collections
 open Anthology
+open System.IO
 
-type WorkspaceConfiguration = 
+type WorkspaceConfiguration =
     { Repositories : Repository list }
 
-let LoadArtifacts() : ArtifactsSerializer.Artifacts =
-    let artifactsFile = GetArtifactsFile ()
-    let artifacts = ArtifactsSerializer.Load artifactsFile
+let LoadGlobals() : Globals =
+    let artifactsFile = GetGlobalsFile ()
+    let artifacts = GlobalsSerializer.Load artifactsFile
     artifacts
 
-let private loadProjects() : Project set =
-    let projectsFile = GetProjectsFile ()
-    let projects = ProjectsSerializer.Load projectsFile
-    projects
+let SaveGlobals (globals : Globals) =
+    let artifactsFile = GetGlobalsFile ()
+    GlobalsSerializer.Save artifactsFile globals
 
-let private saveProjectsRepository (repo : RepositoryId) (projects : Project set) =
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
-    let projectsFile = repoDir |> IoHelpers.GetFile ".fbprojects"
-    ProjectsSerializer.Save projectsFile projects    
+let LoadAnthology() : Anthology =
+    let globalsFile = GetGlobalsFile()
+    let globals = GlobalsSerializer.Load globalsFile
 
-let private loadProjectsRepository (repo : RepositoryId) : Project set =
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
-    if repoDir.Exists |> not then failwithf "Can't find .fbprojects in repository %A" repo.toString
-    let projectsFile = repoDir |> IoHelpers.GetFile ".fbprojects"
-    ProjectsSerializer.Load projectsFile
+    // load global anthology and override with local anthologies
+    let globalAnthologyFile = GetGlobalAnthologyFile()
+    let mutable globalAnthology = if globalAnthologyFile.Exists then AnthologySerializer.Load globalAnthologyFile
+                                  else { Applications = Set.empty ; Projects = Set.empty }
 
+    for repo in globals.Repositories do
+        let localAnthologyFile = GetLocalAnthologyFile repo.Repository.Name
+        if localAnthologyFile.Exists then
+            let localAnthology = AnthologySerializer.Load localAnthologyFile
+            globalAnthology <- { globalAnthology
+                                 with Projects = globalAnthology.Projects |> Set.filter (fun x -> x.Repository <> repo.Repository.Name)
+                                                                          |> Set.union localAnthology.Projects
+                                      Applications = globalAnthology.Applications |> Set.filter (fun x -> localAnthology.Applications |> Set.exists (fun y -> x.Name = y.Name) |> not)
+                                                                                  |> Set.union localAnthology.Applications }
 
-let LoadAnthology() : Anthology = 
-    let artifacts = LoadArtifacts()
-    let mutable projects = loadProjects()
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    for repo in artifacts.Repositories do
-        let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Repository.Name.toString
-        if repoDir.Exists then
-            let repoProjects = loadProjectsRepository repo.Repository.Name
-            projects <- projects |> Set.filter (fun x -> x.Repository <> repo.Repository.Name)
-                                 |> Set.union repoProjects
+    globalAnthology
 
-    let antho = AnthologySerializer.Deserialize artifacts projects
-    antho
-
-
-let SaveAnthology (antho : Anthology) = 
-    let (artifacts, projects) = AnthologySerializer.Serialize antho
-
-    let artifactsFile = GetArtifactsFile ()
-    ArtifactsSerializer.Save artifactsFile artifacts
-
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let repo2projects = projects |> Seq.groupBy (fun x -> x.Repository) |> dict
-    for repo2project in repo2projects do
-        let repo = repo2project.Key
-        let repoProjects = repo2project.Value
-        let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
-        if repoDir.Exists then
-            let repoProjects = projects |> Set.filter (fun x -> x.Repository = repo)
-            saveProjectsRepository repo repoProjects
 
 let SaveConsolidatedAnthology (antho : Anthology) =
-    let (artifacts, projects) = AnthologySerializer.Serialize antho
+    let artifactsFile = GetGlobalsFile ()
+    AnthologySerializer.Save artifactsFile antho
 
-    let artifactsFile = GetArtifactsFile ()
-    ArtifactsSerializer.Save artifactsFile artifacts
 
-    let projectsFile = GetProjectsFile()
-    ProjectsSerializer.Save projectsFile projects
-
+let SaveAnthology (antho : Anthology) =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let repo2projects = antho.Projects |> Seq.groupBy (fun x -> x.Repository) |> dict
+    let repo2apps = antho.Applications |> Seq.groupBy (fun x -> antho.Projects |> Seq.find (fun y -> y.ProjectId = x.Project) |> (fun x -> x.Repository))
+                                       |> dict
+    for repo2project in repo2projects do
+        let repo = repo2project.Key
+        let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
+        if repoDir.Exists then
+            let localProjects = repo2project.Value |> set
+            let localApps = match repo2apps.TryGetValue(repo2project.Key) with
+                            | true, x -> x |> Set.ofSeq
+                            | false, _ -> Set.empty
+            let localAntho = { Projects = localProjects
+                               Applications = localApps }
+            let localAnthologyFile = GetLocalAnthologyFile repo
+            AnthologySerializer.Save localAnthologyFile localAntho
 
 let LoadView (viewId :ViewId) : View =
-    let viewFile = GetViewFile viewId.toString 
+    let viewFile = GetViewFile viewId.toString
     if not viewFile.Exists then failwithf "View %A does not exist" viewId.toString
     ViewSerializer.Load viewFile
 
@@ -97,7 +87,7 @@ let DefaultView () : ViewId option =
     if defaultFile.Exists then
         let viewName = System.IO.File.ReadAllText(defaultFile.FullName)
         Some (Anthology.ViewId viewName)
-    else    
+    else
         None
 
 let DeleteDefaultView() =
@@ -138,7 +128,7 @@ let SaveView (viewId : ViewId) view (isDefault : bool option) =
     | Some true -> setDefaultView viewId
 
 let ViewExists viewName =
-    let viewFile = GetViewFile viewName 
+    let viewFile = GetViewFile viewName
     viewFile.Exists
 
 let LoadBranch () : string =

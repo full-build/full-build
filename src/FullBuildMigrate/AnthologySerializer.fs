@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-module Migration.AnthologyLoader2
+module AnthologySerializer
 
 open Anthology
 open System.IO
@@ -22,43 +22,72 @@ open StringHelpers
 
 type private AnthologyConfig = FSharp.Configuration.YamlConfig<"Examples/anthology.yaml">
 
+
+let Serialize (anthology : Anthology) =
+    let config = new AnthologyConfig()
+    // apps
+    config.apps.Clear ()
+    for app in anthology.Applications do
+        let capp = AnthologyConfig.apps_Item_Type()
+        capp.name <- app.Name.toString
+        capp.``type`` <- app.Publisher.toString
+        capp.project <- app.Project.toString
+        config.apps.Add (capp)
+    // projects
+    config.projects.Clear()
+    for project in anthology.Projects do
+        let cproject = AnthologyConfig.projects_Item_Type()
+        cproject.guid <- project.UniqueProjectId.toString
+        cproject.fx.version <- project.FxVersion.toString
+        cproject.fx.profile <- project.FxProfile.toString
+        cproject.fx.identifier <- project.FxIdentifier.toString
+        cproject.out <- sprintf "%s.%s" project.Output.toString project.OutputType.toString
+        cproject.file <- sprintf @"%s\%s" project.Repository.toString project.RelativeProjectFile.toString
+        cproject.tests <- project.HasTests
+        cproject.assemblies.Clear ()
+        for assembly in project.AssemblyReferences do
+            let cass = AnthologyConfig.projects_Item_Type.assemblies_Item_Type()
+            cass.assembly <- assembly.toString
+            cproject.assemblies.Add (cass)
+        cproject.packages.Clear ()
+        for package in project.PackageReferences do
+            let cpackage = AnthologyConfig.projects_Item_Type.packages_Item_Type()
+            cpackage.package <- package.toString
+            cproject.packages.Add (cpackage)
+        cproject.projects.Clear ()
+        for project in project.ProjectReferences do
+            let cprojectref = AnthologyConfig.projects_Item_Type.projects_Item_Type()
+            cprojectref.project <- project.toString
+            cproject.projects.Add (cprojectref)
+        config.projects.Add cproject
+    config.ToString()
+
 let Deserialize (content) =
-    let rec convertToNuGets (items : AnthologyConfig.anthology_Type.nugets_Item_Type list) =
-        match items with
-        | [] -> []
-        | x :: tail -> (RepositoryUrl.from (x.nuget)) :: convertToNuGets tail
-
-    let convertToRepository (item : AnthologyConfig.anthology_Type.mainrepository_Type) : Repository =
-        { Url = RepositoryUrl.from (item.uri)
-          Branch = None
-          Name = RepositoryId.from Env.MASTER_REPO }
-
-    let rec convertToBuildableRepositories (items : AnthologyConfig.anthology_Type.repositories_Item_Type list) =
+    let rec convertToApplications (items : AnthologyConfig.apps_Item_Type list) =
         match items with
         | [] -> Set.empty
-        | x :: tail -> let maybeBranch = if String.IsNullOrEmpty(x.branch) then None
-                                         else x.branch |> BranchId.from |> Some
-                       convertToBuildableRepositories tail |> Set.add { Repository = { Branch = maybeBranch
-                                                                                       Url = RepositoryUrl.from (x.uri)
-                                                                                       Name = RepositoryId.from x.repo }
-                                                                        Builder = BuilderType.from x.build }
+        | x :: tail -> let appName = ApplicationId.from x.name
+                       let publishType = PublisherType.from x.``type``
+                       let project = ProjectId.from x.project
+                       let app = { Name = appName ; Publisher = publishType; Project = project }
+                       convertToApplications tail |> Set.add app
 
-    let rec convertToAssemblies (items : AnthologyConfig.anthology_Type.projects_Item_Type.assemblies_Item_Type list) =
+    let rec convertToAssemblies (items : AnthologyConfig.projects_Item_Type.assemblies_Item_Type list) =
         match items with
         | [] -> Set.empty
         | x :: tail -> convertToAssemblies tail |> Set.add (AssemblyId.from x.assembly)
 
-    let rec convertToPackages (items : AnthologyConfig.anthology_Type.projects_Item_Type.packages_Item_Type list) =
+    let rec convertToPackages (items : AnthologyConfig.projects_Item_Type.packages_Item_Type list) =
         match items with
         | [] -> Set.empty
         | x :: tail -> convertToPackages tail |> Set.add (PackageId.from x.package)
 
-    let rec convertToProjectRefs (items : AnthologyConfig.anthology_Type.projects_Item_Type.projects_Item_Type list) =
+    let rec convertToProjectRefs (items : AnthologyConfig.projects_Item_Type.projects_Item_Type list) =
         match items with
         | [] -> Set.empty
         | x :: tail -> convertToProjectRefs tail |> Set.add (x.project |> ProjectId.from)
 
-    let rec convertToProjects (items : AnthologyConfig.anthology_Type.projects_Item_Type list) =
+    let rec convertToProjects (items : AnthologyConfig.projects_Item_Type list) =
         match items with
         | [] -> Set.empty
         | x :: tail -> let ext = IoHelpers.GetExtension (FileInfo(x.out))
@@ -80,35 +109,18 @@ let Deserialize (content) =
                                                             PackageReferences = convertToPackages (x.packages |> List.ofSeq)
                                                             ProjectReferences = convertToProjectRefs (x.projects |> List.ofSeq) }
 
-    let rec convertToApplications (items : AnthologyConfig.anthology_Type.apps_Item_Type list) =
-        match items with
-        | [] -> Set.empty
-        | x :: tail -> let appName = ApplicationId.from x.name
-                       let publishType = PublisherType.from x.``type``
-                       let projects = x.projects |> Seq.map (fun x -> ProjectId.from x.project) |> Set.ofSeq
-                       let app = { Name = appName ; Publisher = publishType; Projects = projects }
-                       convertToApplications tail |> Set.add app
-
     let convertToTestRunner (item : string) =
         TestRunnerType.from item
-
-    let convertToBuilder (item : string) =
-        BuilderType.from item
 
     let config = new AnthologyConfig()
     config.LoadText content
 
-    let repos = convertToBuildableRepositories (config.anthology.repositories |> List.ofSeq)
-    let mainRepo = convertToRepository (config.anthology.mainrepository)
-    { MinVersion = config.anthology.minversion
-      Binaries = config.anthology.artifacts
-      Vcs = VcsType.from config.anthology.vcs
-      NuGets = convertToNuGets (config.anthology.nugets |> List.ofSeq)
-      MasterRepository = mainRepo
-      Repositories = repos
-      Projects = convertToProjects (config.anthology.projects |> List.ofSeq)
-      Applications = convertToApplications (config.anthology.apps |> List.ofSeq)
-      Tester = convertToTestRunner (config.anthology.test) }
+    { Applications = convertToApplications (config.apps |> List.ofSeq)
+      Projects = convertToProjects (config.projects |> List.ofSeq) }
+
+let Save (filename : FileInfo) (anthology : Anthology) =
+    let content = Serialize anthology
+    File.WriteAllText(filename.FullName, content)
 
 let Load (filename : FileInfo) : Anthology =
     let content = File.ReadAllText (filename.FullName)
