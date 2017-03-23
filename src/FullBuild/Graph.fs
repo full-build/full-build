@@ -406,6 +406,7 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
         Graph(newGlobals, anthology)
 
     member this.Save () =
+        Configuration.SaveGlobals this.Globals
         Configuration.SaveAnthology this.Anthology
 
 
