@@ -388,7 +388,7 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
     member this.CreateNuGet (url : string) =
         let newGlobals = { globals
                            with NuGets = globals.NuGets @ [Anthology.RepositoryUrl.from url] |> List.distinct }
-        Graph(globals, anthology)
+        Graph(newGlobals, anthology)
 
     member this.CreateRepo name (url : string) builder (branch : string option) =
         let repoBranch = match branch with
