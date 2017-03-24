@@ -131,7 +131,7 @@ type private Token =
 let (|FullBuildView|_|) (viewFile : string) =
     if viewFile.EndsWith(IoHelpers.Extension.View |> IoHelpers.GetExtensionString |> sprintf ".%s") && System.IO.File.Exists(viewFile) then
         Some viewFile
-    else 
+    else
         None
 
 let private (|Token|_|) (token : string) =
@@ -238,7 +238,7 @@ let private (|PublisherType|_|) name =
 
 let private commandSetup (args : string list) =
     match args with
-    | Param vcs :: Param masterRepository :: Param masterArtifacts :: [Param path] 
+    | Param vcs :: Param masterRepository :: Param masterArtifacts :: [Param path]
         -> Command.SetupWorkspace { MasterRepository = masterRepository
                                     MasterArtifacts = masterArtifacts
                                     Type = StringHelpers.fromString<Graph.VcsType> vcs
@@ -247,7 +247,7 @@ let private commandSetup (args : string list) =
 
 let private commandInit (args : string list) =
     match args with
-    | Param vcs :: Param masterRepository :: [Param path] 
+    | Param vcs :: Param masterRepository :: [Param path]
         -> Command.InitWorkspace { MasterRepository = masterRepository
                                    Type = StringHelpers.fromString<Graph.VcsType> vcs
                                    Path = path }
@@ -366,10 +366,12 @@ let private commandOutdated (args : string list) =
 let rec private commandAddRepo (branch : string option) (builder : Graph.BuilderType) (args : string list) =
     match args with
     | TokenOption TokenOption.Branch :: Param branch :: tail -> tail |> commandAddRepo (Some branch) builder
-    | Param name :: [Param url] -> Command.AddRepository { Name = name
-                                                           Url = url
-                                                           Branch = branch
-                                                           Builder = builder }
+    | Param name :: vcs :: Param url :: tester :: [builder] -> Command.AddRepository { Name = name
+                                                                                       Url = url
+                                                                                       Branch = branch
+                                                                                       Vcs = StringHelpers.fromString<Graph.VcsType> vcs
+                                                                                       Builder = StringHelpers.fromString<Graph.BuilderType> builder
+                                                                                       Tester = StringHelpers.fromString<Graph.TestRunnerType> tester }
     | _ -> Command.Error MainCommand.AddRepository
 
 let private commandDropRepo (args : string list) =
@@ -489,8 +491,8 @@ let rec private commandQuery (project : bool) (nuget : bool) (view : string opti
     | TokenOption TokenOption.UnusedProjects :: tail -> tail |> commandQuery true nuget view
     | TokenOption TokenOption.Packages :: tail -> tail |> commandQuery project true view
     | TokenOption TokenOption.View :: ViewId viewName :: tail -> tail |> commandQuery project true (Some viewName)
-    | [] when project || nuget -> Command.Query { UnusedProjects = project 
-                                                  UsedPackages = nuget 
+    | [] when project || nuget -> Command.Query { UnusedProjects = project
+                                                  UsedPackages = nuget
                                                   View = view }
     | _ -> Command.Error MainCommand.Query
 
@@ -640,13 +642,13 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
         [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages> [--view <viewId>] : query items"
         [MainCommand.Workspace; MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
-        [MainCommand.Workspace; MainCommand.UpgradeGuids], "update-guids : DANGER! change guids of all projects in given repository (interactive command)" 
+        [MainCommand.Workspace; MainCommand.UpgradeGuids], "update-guids : DANGER! change guids of all projects in given repository (interactive command)"
         [MainCommand.Unknown], ""
         [MainCommand.Package; MainCommand.UpdatePackage], "package update: update packages"
         [MainCommand.Package; MainCommand.OutdatedPackage], "package outdated : display outdated packages"
         [MainCommand.Package; MainCommand.ListPackage], "package list : list packages"
         [MainCommand.Unknown], ""
-        [MainCommand.Repository; MainCommand.AddRepository], "repo add [--branch <branch>] <repoId> <repo-uri> : declare a new repository"
+        [MainCommand.Repository; MainCommand.AddRepository], "repo add [--branch <branch>] <repoId> <repo-vcs> <repo-uri> <repo-tester> <repo-builder> : declare a new repository"
         [MainCommand.Repository; MainCommand.DropRepository], "repo drop <repoId> : drop repository"
         [MainCommand.Repository; MainCommand.ListRepository], "repo list : list repositories"
         [MainCommand.Unknown], ""

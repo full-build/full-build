@@ -2,15 +2,18 @@
 binaries: C:\Binaries
 nugets:
     - nuget: this should be a uri
-vcs: git
-test: nunit
 mainrepository:
     uri: this should be a uri
+    vcs: git
 repositories:
     - repo: id1
       branch: fullbuild
       build: msbuild
       uri: this should be a uri
+      vcs: git
+      test: nunit
     - repo: id1
       build: msbuild
       uri: this should be a uri
+      vcs: git
+      test: nunit
