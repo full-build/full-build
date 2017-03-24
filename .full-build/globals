@@ -4,18 +4,22 @@ minversion: 0.0.0
 binaries: C:\Binaries
 nugets:
   - nuget: https://www.nuget.org/api/v2/
-test: nunit
-vcs: git
 repositories:
   - repo: qa
     branch: master
     build: skip
     uri: https://github.com/pchalamet/full-build
+    test: nunit
+    vcs: git
   - repo: src
     branch: master
     build: msbuild
     uri: https://github.com/pchalamet/full-build
+    test: nunit
+    vcs: git
   - repo: tests
     branch: master
     build: msbuild
+    test: nunit
+    vcs: git
     uri: https://github.com/pchalamet/full-build
