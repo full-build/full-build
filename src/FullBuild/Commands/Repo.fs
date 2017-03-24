@@ -33,7 +33,7 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
             if branch.IsSome then
                 Tools.Vcs.Checkout wsDir repo branch.Value |> IoHelpers.PrintOutput (sprintf "Checkouting %s" repo.Name)
                                                            |> ignore
-            
+
             return res
         }
 
@@ -50,7 +50,7 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
 
 let Add (cmd : CLI.Commands.AddRepository) =
     let graph = Graph.load()
-    let newGraph = graph.CreateRepo cmd.Name cmd.Url cmd.Builder cmd.Branch
+    let newGraph = graph.CreateRepo cmd.Name cmd.Vcs cmd.Url cmd.Builder cmd.Tester cmd.Branch
     newGraph.Save()
 
 let Drop (name : string) =
@@ -61,7 +61,7 @@ let Drop (name : string) =
     let referencingRepos = referencingProjects |> Set.map (fun x -> x.Repository)
                                                |> Set.remove repo
     if referencingRepos = Set.empty then
-        let newGraph = repo.Delete() 
+        let newGraph = repo.Delete()
         newGraph.Save()
     else
         printfn "Repository %s is referenced from following projects:" name

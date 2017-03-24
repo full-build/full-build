@@ -78,8 +78,8 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     let currDir = Environment.CurrentDirectory
     try
         Environment.CurrentDirectory <- wsDir.FullName
-        let graph = Graph.create createInfo.MasterRepository createInfo.MasterArtifacts createInfo.Type TestRunnerType.NUnit
-        Tools.Vcs.Clone wsDir graph.MasterRepository true |> IoHelpers.PrintOutput "Cloning master repository"        
+        let graph = Graph.create createInfo.Type createInfo.MasterRepository createInfo.MasterArtifacts
+        Tools.Vcs.Clone wsDir graph.MasterRepository true |> IoHelpers.PrintOutput "Cloning master repository"
                                                           |> Exec.CheckResponseCode
         graph.Save()
 
@@ -175,7 +175,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
             |> cloneRepo wsDir pullInfo.Rebase
             |> Async.RunSynchronously
             |> Exec.CheckResponseCode
-  
+
         let selectedRepos = match pullInfo.View with
                              | None -> graph.Repositories
                              | Some viewName -> let view = viewRepository.Views |> Seq.find (fun x -> x.Name = viewName)

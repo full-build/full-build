@@ -90,14 +90,22 @@ with
      member this.toString = toString this
      static member from s = fromString<BuilderType> s
 
+type TestRunnerType =
+    | NUnit
+with
+     member this.toString = toString this
+     static member from s = fromString<TestRunnerType> s
+
 type Repository =
     { Url : RepositoryUrl
       Name : RepositoryId
-      Branch : BranchId option }
+      Branch : BranchId option
+      Vcs : VcsType }
 
 type BuildableRepository =
     { Repository : Repository
-      Builder : BuilderType }
+      Builder : BuilderType
+      Tester : TestRunnerType }
 
 type BookmarkVersion = BookmarkVersion of string
 with
@@ -170,12 +178,6 @@ with
      member this.toString = toString this
      static member from s = fromString<PublisherType> s
 
-type TestRunnerType =
-    | NUnit
-with
-     member this.toString = toString this
-     static member from s = fromString<TestRunnerType> s
-
 type Application =
     { Name : ApplicationId
       Publisher : PublisherType
@@ -185,10 +187,8 @@ type Globals =
     { MinVersion : string
       Binaries : string
       NuGets : RepositoryUrl list
-      Vcs : VcsType
       MasterRepository : Repository
-      Repositories : BuildableRepository set
-      Tester : TestRunnerType }
+      Repositories : BuildableRepository set }
 
 
 type Anthology =

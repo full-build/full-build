@@ -37,8 +37,8 @@ echo framework: net45 > paket.dependencies
 popd
 
 %FULLBUILD% nuget add https://www.nuget.org/api/v2/ || goto :ko
-%FULLBUILD% repo add cassandra-sharp %LOCALCSREPO% || goto :ko
-%FULLBUILD% repo add cassandra-sharp-contrib %LOCALCSCREPO% || goto :ko
+%FULLBUILD% repo add cassandra-sharp git %LOCALCSREPO% nunit msbuild || goto :ko
+%FULLBUILD% repo add cassandra-sharp-contrib git %LOCALCSCREPO% nunit msbuild || goto :ko
 %FULLBUILD% clone * || goto :ko
 %FULLBUILD% branch || goto :ko
 %FULLBUILD% repo list || goto :ko

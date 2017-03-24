@@ -41,12 +41,12 @@ type UpdateGuids =
     { Filters : string set }
 
 type IndexRepositories =
-    { Filters : string set 
+    { Filters : string set
       Check : bool }
 
 type ConvertRepositories =
-    { Filters : string set 
-      Check : bool 
+    { Filters : string set
+      Check : bool
       Reset : bool }
 
 type TestAssemblies =
@@ -61,9 +61,9 @@ type AddView =
       Filters : string list
       UpReferences : bool
       DownReferences : bool
-      Modified : bool 
+      Modified : bool
       AppFilter : string option
-      Static : bool 
+      Static : bool
       Tests : bool }
 
 type ViewName =
@@ -72,8 +72,8 @@ type ViewName =
 type PublishApplications =
     { View: string option
       Filters : string list
-      Multithread : bool 
-      Version : string option 
+      Multithread : bool
+      Version : string option
       Status : string option }
 
 type PushWorkspace =
@@ -123,7 +123,9 @@ type AddRepository =
     { Name : string
       Url : string
       Branch : string option
-      Builder : Graph.BuilderType }
+      Builder : Graph.BuilderType
+      Tester : Graph.TestRunnerType
+      Vcs : Graph.VcsType }
 
 type PullWorkspace =
     { Sources : bool

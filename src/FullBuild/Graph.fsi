@@ -73,6 +73,7 @@ with
     member Builder : BuilderType
     member Projects: Project set
     member Vcs : VcsType
+    member Tester : TestRunnerType
     member Branch : string
     member Uri : string
     member IsCloned: bool
@@ -116,7 +117,6 @@ and [<Sealed>] Graph =
     member Assemblies : Assembly set
     member Applications : Application set
     member Projects : Project set
-    member TestRunner : TestRunnerType
     member ArtifactsDir : string
     member NuGets : string list
     member Packages: Package set
@@ -132,8 +132,10 @@ and [<Sealed>] Graph =
                      -> Graph
 
     member CreateRepo: name : string
+                    -> vcs : VcsType
                     -> url : string
                     -> builder : BuilderType
+                    -> runner : TestRunnerType
                     -> branch : string option
                     -> Graph
 
@@ -144,10 +146,9 @@ val from : Anthology.Globals
         -> Anthology.Anthology
         -> Graph
 
-val create: uri : string
+val create: vcs : VcsType
+         -> uri : string
          -> artifacts : string
-         -> vcs : VcsType
-         -> runner : TestRunnerType
          -> Graph
 
 val init: uri : string

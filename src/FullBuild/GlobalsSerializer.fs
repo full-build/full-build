@@ -26,7 +26,6 @@ type private GlobalsConfig = FSharp.Configuration.YamlConfig<"Examples/globals.y
 let Serialize (artifacts : Globals) =
     let config = new GlobalsConfig()
     config.binaries <- artifacts.Binaries
-    config.vcs <- artifacts.Vcs.toString
     config.minversion <- artifacts.MinVersion
 
     config.nugets.Clear()
@@ -42,6 +41,8 @@ let Serialize (artifacts : Globals) =
         crepo.repo <- repo.Repository.Name.toString
         crepo.uri <- repo.Repository.Url.toString
         crepo.build <- repo.Builder.toString
+        crepo.vcs <- repo.Repository.Vcs.toString
+        crepo.test <- repo.Tester.toString
 
         match repo.Repository.Branch with
         | None -> crepo.branch <- null
@@ -50,9 +51,6 @@ let Serialize (artifacts : Globals) =
 
     let cmainrepo = config.mainrepository
     cmainrepo.uri <- artifacts.MasterRepository.Url.toString
-
-    // tester
-    config.test <- artifacts.Tester.toString
 
     config.ToString()
 
@@ -65,7 +63,8 @@ let Deserialize (content) =
     let convertToRepository (item : GlobalsConfig.mainrepository_Type) : Repository =
         { Url = RepositoryUrl.from (item.uri)
           Branch = None
-          Name = RepositoryId.from Env.MASTER_REPO }
+          Name = RepositoryId.from Env.MASTER_REPO
+          Vcs = VcsType.from item.vcs }
 
     let rec convertToBuildableRepositories (items : GlobalsConfig.repositories_Item_Type list) =
         match items with
@@ -74,8 +73,10 @@ let Deserialize (content) =
                                          else x.branch |> BranchId.from |> Some
                        convertToBuildableRepositories tail |> Set.add { Repository = { Branch = maybeBranch
                                                                                        Url = RepositoryUrl.from (x.uri)
-                                                                                       Name = RepositoryId.from x.repo }
-                                                                        Builder = BuilderType.from x.build }
+                                                                                       Name = RepositoryId.from x.repo
+                                                                                       Vcs = VcsType.from x.vcs }
+                                                                        Builder = BuilderType.from x.build
+                                                                        Tester = TestRunnerType.from x.test }
 
     let convertToTestRunner (item : string) =
         TestRunnerType.from item
@@ -87,11 +88,9 @@ let Deserialize (content) =
     let mainRepo = convertToRepository (config.mainrepository)
     { MinVersion = config.minversion
       Binaries = config.binaries
-      Vcs = VcsType.from config.vcs
       NuGets = convertToNuGets (config.nugets |> List.ofSeq)
       MasterRepository = mainRepo
-      Repositories = repos
-      Tester = TestRunnerType.from config.test }
+      Repositories = repos }
 
 let Save (filename : FileInfo) (artifacts : Globals) =
     let content = Serialize artifacts

@@ -161,9 +161,16 @@ with
                        | Anthology.BuilderType.Skip -> BuilderType.Skip
         | _ -> BuilderType.Skip
 
-    member this.Vcs = match this.Graph.Globals.Vcs with
+    member this.Vcs = match this.Repository.Vcs with
                       | Anthology.VcsType.Gerrit -> VcsType.Gerrit
                       | Anthology.VcsType.Git -> VcsType.Git
+
+    member this.Tester =
+        let buildableRepo = this.Graph.Globals.Repositories |> Seq.tryFind (fun x -> x.Repository.Name = this.Repository.Name)
+        match buildableRepo with
+        | Some repo -> match repo.Tester with
+                       | Anthology.TestRunnerType.NUnit -> TestRunnerType.NUnit
+        | _ -> failwithf "Repository %A is not buildable" this.Repository.Name
 
     member this.Branch = match this.Repository.Branch with
                          | Some x -> x.toString
@@ -366,10 +373,6 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
 
     member this.NuGets = globals.NuGets |> List.map (fun x -> x.toString)
 
-    member this.TestRunner =
-        match globals.Tester with
-        | Anthology.TestRunnerType.NUnit -> TestRunnerType.NUnit
-
     member this.ArtifactsDir = globals.Binaries
 
     member this.CreateApp name publisher (project : Project) =
@@ -390,17 +393,28 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
                            with NuGets = globals.NuGets @ [Anthology.RepositoryUrl.from url] |> List.distinct }
         Graph(newGlobals, anthology)
 
-    member this.CreateRepo name (url : string) builder (branch : string option) =
+    member this.CreateRepo name vcs (url : string) builder tester (branch : string option) =
         let repoBranch = match branch with
                          | Some x -> Some (Anthology.BranchId.from x)
                          | None -> None
+        let anthoRunner = match tester with
+                          | TestRunnerType.NUnit -> Anthology.TestRunnerType.NUnit
+        let anthoVcs = match vcs with
+                       | VcsType.Gerrit -> Anthology.VcsType.Gerrit
+                       | VcsType.Git -> Anthology.VcsType.Git
+        let repoVcs = match vcs with
+                      | VcsType.Git -> Anthology.VcsType.Git
+                      | VcsType.Gerrit -> Anthology.VcsType.Gerrit
         let repo = { Anthology.Name = Anthology.RepositoryId.from name
                      Anthology.Url = Anthology.RepositoryUrl.from url
-                     Anthology.Branch = repoBranch }
+                     Anthology.Branch = repoBranch
+                     Anthology.Vcs = repoVcs }
         let repoBuilder = match builder with
-                           | BuilderType.MSBuild -> Anthology.BuilderType.MSBuild
-                           | BuilderType.Skip -> Anthology.BuilderType.Skip
-        let buildableRepo = { Anthology.Repository = repo; Anthology.Builder = repoBuilder }
+                          | BuilderType.MSBuild -> Anthology.BuilderType.MSBuild
+                          | BuilderType.Skip -> Anthology.BuilderType.Skip
+        let repoTester = match tester with
+                         | TestRunnerType.NUnit -> Anthology.TestRunnerType.NUnit
+        let buildableRepo = { Anthology.Repository = repo; Anthology.Builder = repoBuilder; Anthology.Tester = repoTester }
         let newGlobals = { globals
                            with Repositories = globals.Repositories |> Set.add buildableRepo }
         Graph(newGlobals, anthology)
@@ -416,25 +430,20 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
 let from (globals : Anthology.Globals) (antho : Anthology.Anthology) : Graph =
     Graph (globals, antho)
 
-let create (uri : string) (artifacts : string) vcs runner =
+let create vcs (uri : string) (artifacts : string) =
+    let repoVcs = match vcs with
+                    | VcsType.Git -> Anthology.VcsType.Git
+                    | VcsType.Gerrit -> Anthology.VcsType.Gerrit
     let repo = { Anthology.Name = Anthology.RepositoryId.from Env.MASTER_REPO
                  Anthology.Url = Anthology.RepositoryUrl.from uri
-                 Anthology.Branch = None }
-
-    let anthoVcs = match vcs with
-                   | VcsType.Gerrit -> Anthology.VcsType.Gerrit
-                   | VcsType.Git -> Anthology.VcsType.Git
-
-    let anthoRunner = match runner with
-                      | TestRunnerType.NUnit -> Anthology.TestRunnerType.NUnit
+                 Anthology.Branch = None
+                 Anthology.Vcs = repoVcs }
 
     let globals = { Anthology.Globals.MinVersion = Env.FullBuildVersion().ToString()
                     Anthology.Globals.Binaries = artifacts
                     Anthology.Globals.NuGets = []
                     Anthology.Globals.MasterRepository = repo
-                    Anthology.Globals.Repositories = Set.empty
-                    Anthology.Globals.Tester = anthoRunner
-                    Anthology.Globals.Vcs = anthoVcs }
+                    Anthology.Globals.Repositories = Set.empty }
 
     let antho =  { Anthology.Anthology.Projects = Set.empty
                    Anthology.Anthology.Applications = Set.empty}
@@ -442,7 +451,7 @@ let create (uri : string) (artifacts : string) vcs runner =
 
 
 let init uri vcs =
-    create uri "dummy" vcs TestRunnerType.NUnit
+    create vcs uri "dummy"
 
 let load () =
     let globals = Configuration.LoadGlobals()

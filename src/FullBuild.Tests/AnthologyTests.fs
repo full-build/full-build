@@ -29,16 +29,23 @@ let CheckReferences () =
     RepositoryId.from "badaboum" |> should equal <| RepositoryId.from "BADABOUM"
 
 let CheckToRepository () =
-    let repoGit = { Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"; Branch = None}
+    let repoGit = { Name = RepositoryId.from "cassandra-sharp"
+                    Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"
+                    Branch = None
+                    Vcs = VcsType.Git }
     repoGit |> should equal { Name = RepositoryId.from "cassandra-sharp"
                               Branch = None
-                              Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" } 
+                              Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"
+                              Vcs = VcsType.Git }
 
-    let repoHg = { Name = RepositoryId.from "cassandra-sharp"; Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"; Branch = None }
+    let repoHg = { Name = RepositoryId.from "cassandra-sharp"
+                   Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"
+                   Branch = None
+                   Vcs = VcsType.Git }
     repoHg |> should equal { Name = RepositoryId.from "cassandra-sharp"
                              Branch = None
-                             Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp" } 
-
+                             Url = RepositoryUrl.from "https://github.com/pchalamet/cassandra-sharp"
+                             Vcs = VcsType.Git }
 
 [<Test>]
 let CheckEqualityWithPermutation () =
@@ -71,7 +78,7 @@ let CheckEqualityWithPermutation () =
                        ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set
                        AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                        PackageReferences = Set.empty
-                       Repository = RepositoryId.from "cassandra-sharp" } ] |> set 
+                       Repository = RepositoryId.from "cassandra-sharp" } ] |> set
         Applications = Set.empty }
-        
+
     antho1 |> should equal antho2

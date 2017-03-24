@@ -32,5 +32,7 @@ let TestAssemblies (filters : string set) (excludes : string set) =
              |> Seq.iter Core.Bindings.UpdateArtifactBindingRedirects
 
     // then test assemblies
-    let assemblies = projects |> Set.map (fun x -> x.BinFile)
-    (Core.TestRunners.TestWithTestRunner graph.TestRunner) assemblies excludes
+    let runner2assemblies = projects |> Seq.groupBy (fun x -> x.Repository.Tester)
+    for runner, assemblies in runner2assemblies do
+        let bins = assemblies |> Seq.map (fun x -> x.BinFile) |> set
+        (Core.TestRunners.TestWithTestRunner runner) bins excludes
