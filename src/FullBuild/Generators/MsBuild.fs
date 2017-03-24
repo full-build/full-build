@@ -266,12 +266,10 @@ let private convertProject (xproj : XDocument) (project : Project) =
 
     // import fb target
     let lastImport = upcast cproj.Descendants(NsMsBuild + "Import").LastOrDefault() : XNode
-    let lastItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").Last().PreviousNode
-    let startOfImport = (lastImport |> isNull) ? (lastItemGroup, lastImport)
     let importFB = XElement (NsMsBuild + "Import",
                        XAttribute (NsNone + "Project",
                                    @"$(SolutionDir)\.full-build\full-build.targets"))
-    startOfImport.AddAfterSelf (importFB)
+    lastImport.AddAfterSelf (importFB)
 
     // add project references
     for projectReference in project.References do
@@ -286,6 +284,13 @@ let private convertProject (xproj : XDocument) (project : Project) =
         let import = XElement (NsMsBuild + "Import",
                         XAttribute (NsNone + "Project", importFile))
         cproj.Root.LastNode.AddAfterSelf(import)
+
+    // move all <Import /> before the first ItemGroup (ie: source code)
+    let allImports = cproj.Descendants(NsMsBuild + "Import").ToList()
+    let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
+    for import in allImports do
+        import.Remove()
+        firstItemGroup.AddBeforeSelf(import)
     cproj
 
 let private convertProjectContent (xproj : XDocument) (project : Project) =
