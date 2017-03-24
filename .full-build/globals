@@ -1,5 +1,6 @@
 mainrepository:
   uri: http://www.google.com/
+  vcs: git
 minversion: 0.0.0
 binaries: C:\Binaries
 nugets:
