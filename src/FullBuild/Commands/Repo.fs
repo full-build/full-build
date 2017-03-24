@@ -20,7 +20,7 @@ open Graph
 let List() =
     let graph = Graph.load ()
     let printRepo (repo : Repository) =
-        printfn "%s : %s [%A]" repo.Name repo.Uri (StringHelpers.toString repo.Builder)
+        printfn "%s : %s [%s %s %s]" repo.Name repo.Uri (StringHelpers.toString repo.Vcs) (StringHelpers.toString repo.Builder) (StringHelpers.toString repo.Tester)
 
     graph.Repositories |> Seq.iter printRepo
 
