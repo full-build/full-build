@@ -126,7 +126,6 @@ type private Token =
 
     | Clean
     | UpdateGuids
-    | Migrate
     | Doctor
 
 let (|FullBuildView|_|) (viewFile : string) =
@@ -180,7 +179,6 @@ let private (|Token|_|) (token : string) =
     | "unused" -> Some Unused
 
     | "update-guids" -> Some UpdateGuids
-    | "migrate" -> Some Migrate
     | "doctor" -> Some Doctor
     | _ -> None
 
@@ -497,11 +495,6 @@ let rec private commandQuery (project : bool) (nuget : bool) (view : string opti
     | _ -> Command.Error MainCommand.Query
 
 
-let private commandMigrate (args : string list) =
-    match args with
-    | [] -> Command.Migrate
-    | _ -> Command.Error MainCommand.Migrate
-
 let private commandHelp (args : string list) =
     let cmd = match args with
               | Token Token.Workspace :: _ -> MainCommand.Workspace
@@ -527,7 +520,6 @@ let private commandHelp (args : string list) =
               | Token Token.Install :: _ -> MainCommand.InstallPackage
               | Token Token.Query :: _ -> MainCommand.Query
               | Token Token.UpdateGuids :: _ -> MainCommand.UpgradeGuids
-              | Token Token.Migrate :: _ -> MainCommand.Migrate
               | Token Token.Package :: _ -> MainCommand.Package
               | Token Token.Repo :: _ -> MainCommand.Repository
               | Token Token.NuGet :: _ -> MainCommand.NuGet
@@ -586,7 +578,6 @@ let Parse (args : string list) : Command =
     | Token Token.Query :: cmdArgs -> cmdArgs |> commandQuery false false None
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
-    | Token Token.Migrate :: cmdArgs -> cmdArgs |> commandMigrate
     | [FullBuildView viewFile] -> Command.FullBuildView { FilePath = viewFile }
     | _ -> Command.Error MainCommand.Usage
 

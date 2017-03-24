@@ -194,7 +194,6 @@ type MainCommand =
     | Push
     | Query
     | Bind
-    | Migrate
     | Workspace
     | Doctor
     | Unknown
@@ -208,7 +207,6 @@ type Command =
     | Usage of MainCommand
     | Upgrade of string
     | FinalizeUpgrade of int
-    | Migrate
 
     // workspace
     | SetupWorkspace of SetupWorkspace

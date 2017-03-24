@@ -5,6 +5,7 @@ open IoHelpers
 
 [<EntryPoint>]
 let main argv = 
+    printfn "Migrating from v4.0 to v4.1"
     let wsDir = System.Environment.CurrentDirectory |> DirectoryInfo
     
     // load artifacts
