@@ -54,7 +54,7 @@ let LoadAnthology() : Anthology =
 
 
 let SaveConsolidatedAnthology (antho : Anthology) =
-    let artifactsFile = GetGlobalsFile ()
+    let artifactsFile = GetGlobalAnthologyFile ()
     AnthologySerializer.Save artifactsFile antho
 
 
