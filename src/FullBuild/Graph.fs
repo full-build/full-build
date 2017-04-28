@@ -49,6 +49,7 @@ type VcsType =
 [<RequireQualifiedAccess>]
 type TestRunnerType =
     | NUnit
+    | Skip
 
 
 // =====================================================================================================
@@ -170,6 +171,7 @@ with
         match buildableRepo with
         | Some repo -> match repo.Tester with
                        | Anthology.TestRunnerType.NUnit -> TestRunnerType.NUnit
+                       | Anthology.TestRunnerType.Skip -> TestRunnerType.Skip
         | _ -> failwithf "Repository %A is not buildable" this.Repository.Name
 
     member this.Branch = match this.Repository.Branch with
@@ -397,8 +399,6 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
         let repoBranch = match branch with
                          | Some x -> Some (Anthology.BranchId.from x)
                          | None -> None
-        let anthoRunner = match tester with
-                          | TestRunnerType.NUnit -> Anthology.TestRunnerType.NUnit
         let anthoVcs = match vcs with
                        | VcsType.Gerrit -> Anthology.VcsType.Gerrit
                        | VcsType.Git -> Anthology.VcsType.Git
@@ -414,6 +414,7 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
                           | BuilderType.Skip -> Anthology.BuilderType.Skip
         let repoTester = match tester with
                          | TestRunnerType.NUnit -> Anthology.TestRunnerType.NUnit
+                         | TestRunnerType.Skip -> Anthology.TestRunnerType.Skip
         let buildableRepo = { Anthology.Repository = repo; Anthology.Builder = repoBuilder; Anthology.Tester = repoTester }
         let newGlobals = { globals
                            with Repositories = globals.Repositories |> Set.add buildableRepo }

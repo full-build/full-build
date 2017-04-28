@@ -92,6 +92,7 @@ with
 
 type TestRunnerType =
     | NUnit
+    | Skip
 with
      member this.toString = toString this
      static member from s = fromString<TestRunnerType> s

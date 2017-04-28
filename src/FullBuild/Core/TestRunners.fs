@@ -36,10 +36,14 @@ let runnerNUnit (includes : string set) (excludes : string set) =
     let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs
     Exec "nunit3-console.exe" args wsDir Map.empty |> CheckResponseCode
 
-let chooseTestRunner (runnerType : TestRunnerType) nunitRunner =
+let runnerSkip (includes : string set) (excludes : string set) =
+    ()
+
+let chooseTestRunner (runnerType : TestRunnerType) nunitRunner skipRunner =
     let runner = match runnerType with
                  | TestRunnerType.NUnit -> nunitRunner
+                 | TestRunnerType.Skip -> skipRunner
     runner
 
 let TestWithTestRunner (runnerType : TestRunnerType) (includes : string set) (excludes : string set) =
-    (chooseTestRunner runnerType runnerNUnit) includes excludes
+    (chooseTestRunner runnerType runnerNUnit runnerSkip) includes excludes

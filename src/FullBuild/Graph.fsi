@@ -47,6 +47,7 @@ type VcsType =
 [<RequireQualifiedAccess>]
 type TestRunnerType =
     | NUnit
+    | Skip
 
 [<Sealed>]
 type Package  = interface System.IComparable
