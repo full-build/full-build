@@ -3,14 +3,14 @@
 full-build is a smart build system allowing to either compile all your projects in one shot or to define on the fly small solution files to build parts of your system individually without building everything else.
 
 full-build paradigms are based on the fact that:
-- nuget must not be used to store teams artifacts - only external dependencies
+- Nuget must not be used to store teams artifacts - only external dependencies
 - solution files are not good to manage enterprise point of view (global consistency) and developer point of view (local development)
 - global consistency is required to ensure the whole system can be rebuilt from sources only
 
 full-build provides following benefits:
-* Manage teams repositories (git or mercurial) as single workspace
-* Handle NuGet packages consistency at workspace level
-* Allow a full consistent build (all sources + external NuGet) for CI
+* Manage teams repositories (git only) as single workspace
+* Handle Nuget packages consistency at workspace level
+* Allow a full consistent build (all sources + external Nuget) for CI
 * Focus developer on selected repositories (local builds based on full build outputs)
 * Promote code review and low-coupling between developers
 
@@ -26,14 +26,9 @@ Platform|Status
 * On windows
     * Install .net 4.5
     * Install F# 4
-    * Install Nunit > 3.0 (http://www.nunit.org/index.php?p=download)
-    * Add Nunit nunit3-console.exe to your environment variables 
-       * C:\Program Files (x86)\NUnit.org\nunit-console
-    * Add MSBuild to your environment variables 
-        * .net v4.0 x86 : C:\Windows\Microsoft.NET\Framework\v4.0.30319
-        * .net v4.0 x64 : C:\Windows\Microsoft.NET\Framework64\v4.0.30319
-	* Add Nuget to your environment variables
-		* nuget.exe cli : https://dist.nuget.org/index.html
+    * Install NUnit (v3+) and add it to your PATH
+	* Install Nuget and add it to your PATH
+    * Ensure MSBuild is available on your PATH (v14+)
     * Run build.cmd
 
 * On Linux/OSX
@@ -46,11 +41,7 @@ Once build is done, binaries are in refbin folder.
 Note that before using Visual Studio or Xamarin Studio, you have to compile first as this setup development environment. Solution fullbuild.sln can then be used.
 
 # contribution
-Contributions are welcomed. Ensure you have read CONTRIBUTING.md and LICENSE.txt before sending PR.
-
-Contributors:
-  * Pierre Chalamet
-  * Sergii Salata
+Contributions are welcomed. Ensure you have read CONTRIBUTING.md and LICENSE.txt before sending PR. Ensure you discussed with the maintainers before submitting a PR please.
 
 # licence
    Copyright 2014-2017 Pierre Chalamet
