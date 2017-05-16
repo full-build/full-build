@@ -3,7 +3,7 @@
       type: copy
       project: fullbuild1
 projects:
-    - guid: f2a71f9b-5d33-465a-a702-920d77279786 this is a guid
+    - guid: f2a71f9b-5d33-465a-a702-920d77279786
       file: src/Project.csproj
       out: fullbuild.tests
       fx:
