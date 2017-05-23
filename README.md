@@ -21,6 +21,7 @@ Check out [full-build.io](http://full-build.io)
 Platform|Status
 --------|------
 .net 4.5|[![build status](https://ci.appveyor.com/api/projects/status/github/full-build/full-build?branch=master)](https://ci.appveyor.com/project/full-build/full-build/branch/master)
+NuGet|[![NuGet](https://buildstats.info/nuget/full-build)](http://nuget.org/packages/full-build) [![NuGet](https://img.shields.io/nuget/vpre/opencover.svg)](http://nuget.org/packages/full-build
 
 # how to build
 * On windows
