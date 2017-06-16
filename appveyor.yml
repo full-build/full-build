@@ -51,7 +51,6 @@ shallow_clone: false
 
 build_script:
   - cmd: build.cmd %APPVEYOR_BUILD_VERSION% %BUILD_VERSION_STATUS%
-  - cmd: run-qa.cmd
   
 test_script:
   - ps: . .\Push-TestResult.ps1
