@@ -29,7 +29,7 @@ taskkill /im tgitcache.exe
 goto :qa_folder_delete
 :qa_folder_deleted
 
-%FULLBUILD% setup git %LOCALFBREPO% %LOCALBIN% %QAFOLDER% || goto :ko
+%FULLBUILD% setup git file://%LOCALFBREPO% %LOCALBIN% %QAFOLDER% || goto :ko
 cd %QAFOLDER% || goto :ko
 
 pushd .full-build
