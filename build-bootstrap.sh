@@ -15,6 +15,7 @@ function failure
 mkdir .full-build/bin
 mkdir .full-build/views
 pushd .full-build
+mono ../tools/paket.bootstrapper.exe
 mono ../tools/paket.exe install
 popd
 cp -r bootstrap/bin .full-build/
