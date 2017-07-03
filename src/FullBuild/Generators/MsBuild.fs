@@ -217,7 +217,8 @@ let private convertProject (xproj : XDocument) (project : Project) =
 
     let filterAssemblyInfo (xel : XElement) =
         let fileName = !> xel.Attribute(XNamespace.None + "Include") : string
-        fileName.IndexOf("AssemblyInfo.", StringComparison.CurrentCultureIgnoreCase) <> -1
+        if fileName |> isNull then false
+        else fileName.IndexOf("AssemblyInfo.", StringComparison.CurrentCultureIgnoreCase) <> -1
 
     let rec patchAssemblyVersion (lines : string list) =
         match lines with
