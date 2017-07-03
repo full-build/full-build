@@ -230,7 +230,7 @@ let private convertProject (xproj : XDocument) (project : Project) =
     let patchAssemblyInfo (xel : XElement) =
         let fileName = !> xel.Attribute(XNamespace.None + "Include") : string
         let repoDir = Env.GetFolder Folder.Workspace |> GetSubDirectory project.Repository.Name
-        let prjFile = repoDir |> GetFile project.ProjectFile
+        let prjFile = repoDir |> GetFile (project.ProjectFile |> IoHelpers.ToPlatformPath)
         let prjDir = Path.GetDirectoryName (prjFile.FullName) |> DirectoryInfo
         let infoFile = prjDir |> GetFile fileName
         if infoFile.Exists then
@@ -302,7 +302,7 @@ let ConvertProjects (projects : Project seq) xdocLoader xdocSaver =
     for project in projects do
         if project.Repository.IsCloned then
             let repoDir = wsDir |> IoHelpers.GetSubDirectory project.Repository.Name
-            let projFile = repoDir |> GetFile project.ProjectFile
+            let projFile = repoDir |> GetFile (project.ProjectFile |> IoHelpers.ToPlatformPath)
             let maybexproj = xdocLoader projFile
             match maybexproj with
             | Some xproj -> let convxproj = convertProjectContent xproj project
