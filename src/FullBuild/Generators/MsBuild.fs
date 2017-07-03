@@ -293,9 +293,13 @@ let private convertProject (xproj : XDocument) (project : Project) =
         firstItemGroup.AddBeforeSelf(import)
     cproj
 
+
 let private convertProjectContent (xproj : XDocument) (project : Project) =
-    let convxproj = convertProject xproj project
-    convxproj
+    try
+        let convxproj = convertProject xproj project
+        convxproj
+    with
+        e -> exn(sprintf "Failed to convert project %A" (project.ProjectId), e) |> raise
 
 let ConvertProjects (projects : Project seq) xdocLoader xdocSaver =
     let wsDir = Env.GetFolder Env.Folder.Workspace
