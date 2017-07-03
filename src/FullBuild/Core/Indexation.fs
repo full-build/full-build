@@ -80,8 +80,8 @@ let rec findConflicts (projects : Project list) =
 let rec private displayConflicts (conflicts : ConflictType list) =
     let displayConflict (p1 : Project) (p2 : Project) (msg : string) =
         printfn "Conflict detected between projects (%s) : " msg
-        printfn " - %s/%s" p1.Repository.toString p1.RelativeProjectFile.toString
-        printfn " - %s/%s" p2.Repository.toString p2.RelativeProjectFile.toString
+        printfn " - %s/%s" p1.Repository.toString (p1.RelativeProjectFile.toString |> IoHelpers.ToPlatformPath)
+        printfn " - %s/%s" p2.Repository.toString (p2.RelativeProjectFile.toString |> IoHelpers.ToPlatformPath)
 
     match conflicts with
     | SameGuid (p1, p2) :: tail -> displayConflict p1 p2 "same guid"
