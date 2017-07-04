@@ -7,13 +7,15 @@ let Closure<'T when 'T : comparison> (seeds : 'T set) (getName : 'T -> string) (
         Set.fold (fun s n -> s + (explore n next path s)) boundaries nextNodes
 
     and explore (node : 'T) (next : 'T -> 'T set) (path : 'T list) (boundaries : 'T set) =
-        if path |> List.contains node then 
-            let spath = path 
+        let hasCycle = path |> List.contains node
+        let currPath = node :: path
+
+        if hasCycle then 
+            let spath = currPath 
                         |> Seq.map getName
-                        |> Seq.fold (fun s t -> sprintf "%s -> %A" s t) ""
+                        |> Seq.foldBack (fun s t -> sprintf "%s -> %A" s t) ""
             failwithf "Projects cycle detected: %s" spath
 
-        let currPath = node :: path
         if boundaries |> Set.contains node then
             currPath |> set
         else
