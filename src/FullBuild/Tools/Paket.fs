@@ -49,7 +49,7 @@ let private generateDependenciesContent (packages : Package seq) =
     seq {
         for package in packages do
             match package.Version with
-            | PackageVersion.PackageVersion x -> yield sprintf "nuget %s ~> %s" (package.Id.toString) x
+            | PackageVersion.PackageVersion x -> yield sprintf "nuget %s" (package.Id.toString)
             | PackageVersion.Unspecified -> yield sprintf "nuget %s" (package.Id.toString)
     }
 
