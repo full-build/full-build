@@ -13,7 +13,8 @@ let Closure<'T when 'T : comparison> (seeds : 'T set) (getName : 'T -> string) (
         if hasCycle then 
             let spath = currPath 
                         |> Seq.map getName
-                        |> String.concat " <- "
+                        |> Seq.rev
+                        |> String.concat " -> "
             failwithf "Projects cycle detected: %s" spath
 
         if boundaries |> Set.contains node then
