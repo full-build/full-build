@@ -13,4 +13,4 @@ NUGET
       NUnit.Extension.NUnitV2ResultWriter (>= 3.5)
       NUnit.Extension.TeamCityEventListener (>= 1.0.2)
       NUnit.Extension.VSProjectLoader (>= 3.5)
-    Paket (3.33.5)
+    Paket (5.4.5)
