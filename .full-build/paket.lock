@@ -3,9 +3,9 @@ NUGET
     FSharp.Configuration (0.6.2)
     FSharp.Core (4.0.0.1)
     FSharp.Data (2.3.2)
-      Zlib.Portable (>= 1.11) - framework: portable-net45+sl5+win8, portable-net45+win8, portable-net45+win8+wp8+wpa81
+      Zlib.Portable (>= 1.11) - restriction: || (>= portable-net45+win8+sl5) (>= portable-net45+win8+wp8+wpa81)
     FsUnit (2.3.2)
       FSharp.Core (>= 3.1.2.5)
       NUnit (3.5)
     NUnit (3.5)
-    Zlib.Portable (1.11) - framework: portable-net45+sl5+win8, portable-net45+win8, portable-net45+win8+wp8+wpa81
+    Zlib.Portable (1.11) - restriction: || (>= portable-net45+win8+sl5) (>= portable-net45+win8+wp8+wpa81)

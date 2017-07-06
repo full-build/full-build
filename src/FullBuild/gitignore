@@ -1,5 +1,4 @@
-﻿packages
-projects
-views
-bin
-version
+﻿packages/
+projects/
+views/
+bin/

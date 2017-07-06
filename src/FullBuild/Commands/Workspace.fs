@@ -34,8 +34,14 @@ let pullMatchingBinaries () =
 
 
 
-let Install () =
+let Restore () =
     Core.Package.RestorePackages ()
+    Core.Conversion.GenerateProjectArtifacts()
+
+
+let private Install (nugets : string list) =
+    nugets |> List.map Anthology.RepositoryUrl.from
+           |> Core.Package.InstallPackages
     Core.Conversion.GenerateProjectArtifacts()
 
 
@@ -64,7 +70,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
                     printfn "WARNING: failed to checkout some repositories"
 
                 Configuration.SaveBranch x
-                Install()
+                Restore()
                 pullMatchingBinaries ()
     | None -> let name = Configuration.LoadBranch()
               printfn "%s" name
@@ -122,7 +128,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     branchResults |> Exec.CheckMultipleResponseCode
 
     Configuration.SaveBranch tag.Branch
-    Install()
+    Restore()
     Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir checkoutInfo.Version
 
 
@@ -185,7 +191,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
         selectedRepos |> Seq.filter (fun x -> x.IsCloned)
                       |> Threading.ParExec (cloneRepo wsDir pullInfo.Rebase)
                       |> Exec.CheckMultipleResponseCode
-        Install ()
+        Restore()
 
     if pullInfo.Bin then
         pullMatchingBinaries ()
@@ -302,7 +308,7 @@ let private index (convertInfo : CLI.Commands.ConvertRepositories) =
                    |> Core.Package.Simplify
                    |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
                    |> Configuration.SaveAnthology
-        Install()
+        Install graph.NuGets
 
 let convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let graph = Graph.load()

@@ -205,20 +205,3 @@ let PrintOutput info (execResult : Exec.ExecResult) =
 
     lock consoleLock display
 
-
-
-
-
-let rec ForceReadOnly (thisDir : DirectoryInfo) =
-    thisDir.Attributes <- thisDir.Attributes ||| FileAttributes.ReadOnly;
-    for file in thisDir.EnumerateFiles() do
-        file.Attributes <- file.Attributes ||| FileAttributes.ReadOnly;
-    for dir in thisDir.EnumerateDirectories() do
-        ForceReadOnly dir
-
-let rec ForceReadWriteOnly (thisDir : DirectoryInfo) =
-    thisDir.Attributes <- thisDir.Attributes &&& ~~~ FileAttributes.ReadOnly;
-    for file in thisDir.EnumerateFiles() do
-        file.Attributes <- file.Attributes &&& ~~~ FileAttributes.ReadOnly;
-    for dir in thisDir.EnumerateDirectories() do
-        ForceReadWriteOnly dir

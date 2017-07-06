@@ -46,7 +46,7 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
     selectedRepos |> Set.filter (fun x -> not x.IsCloned)
                   |> Threading.ParExec (cloneRepoAndInit wsDir cmd.Shallow br)
                   |> Exec.CheckMultipleResponseCode
-    Workspace.Install()
+    Workspace.Restore()
 
 let Add (cmd : CLI.Commands.AddRepository) =
     let graph = Graph.load()

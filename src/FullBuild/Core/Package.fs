@@ -22,33 +22,17 @@ open Collections
 open Simplify
 
 let InstallPackages (nugets : RepositoryUrl list) =
-    let pkgsDir = Env.GetFolder Env.Folder.Package
-    IoHelpers.ForceReadWriteOnly pkgsDir
-
     Tools.Paket.UpdateSources nugets
     Tools.Paket.PaketInstall ()
     Generators.Package.GeneratePackageImports()
 
-    IoHelpers.ForceReadOnly pkgsDir
-
 let RestorePackages () =
-    let pkgsDir = Env.GetFolder Env.Folder.Package
-    IoHelpers.ForceReadWriteOnly pkgsDir
-
     Tools.Paket.PaketRestore ()
     Generators.Package.GeneratePackageImports()
 
-    IoHelpers.ForceReadOnly pkgsDir
-
 let UpdatePackages () =
-    let pkgsDir = Env.GetFolder Env.Folder.Package
-    IoHelpers.ForceReadWriteOnly pkgsDir
-
     Tools.Paket.PaketUpdate ()
     Generators.Package.GeneratePackageImports()
-
-    IoHelpers.ForceReadOnly pkgsDir
-
 
 let private removeUnusedPackages (antho : Anthology) =
     let packages = Tools.Paket.ParsePaketDependencies ()
