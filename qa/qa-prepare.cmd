@@ -1,4 +1,5 @@
 setlocal
+echo on
 set HERE=%~dp0
 set LOCALFOLDER=%HERE%local
 set LOCALFBREPO=%HERE%local\full-build-org
@@ -14,6 +15,9 @@ rmdir /s /q %LOCALFOLDER%
 
 rem create binaries folder
 mkdir %LOCALBIN%
+
+git config --global user.email "full-build@appveyor.com"
+git config --global user.name "AppVeyor"
 
 rem creating master repository
 mkdir %LOCALFBREPO%
