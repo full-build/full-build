@@ -56,25 +56,18 @@ popd
 %FULLBUILD% app add cqlplus.zip zip cqlplus || goto :ko
 
 pushd .full-build
-git rm -r --cached .
-git add .gitignore
-git add full-build.targets
-git add globals
-git add paket.dependencies
-git add paket.lock
-git commit -m "qa"
+git add *
+git commit -am "qa"
 git push origin master:master
 popd
 
 pushd cassandra-sharp
-git rm -r --cached .
 git add *
 git commit -am "qa"
 git push origin master:master
 popd
 
 pushd cassandra-sharp-contrib
-git rm -r --cached .
 git add *
 git commit -am "qa"
 git push origin master:master
