@@ -43,6 +43,8 @@ type BuilderType =
 type VcsType =
     | Git
     | Gerrit
+    | Hg
+    | Svn
 
 [<RequireQualifiedAccess>]
 type TestRunnerType =

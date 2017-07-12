@@ -45,6 +45,8 @@ type BuilderType =
 type VcsType =
     | Git
     | Gerrit
+    | Hg
+    | Svn
 
 [<RequireQualifiedAccess>]
 type TestRunnerType =
@@ -165,6 +167,8 @@ with
     member this.Vcs = match this.Repository.Vcs with
                       | Anthology.VcsType.Gerrit -> VcsType.Gerrit
                       | Anthology.VcsType.Git -> VcsType.Git
+                      | Anthology.VcsType.Hg -> VcsType.Hg
+                      | Anthology.VcsType.Svn -> VcsType.Svn
 
     member this.Tester =
         let buildableRepo = this.Graph.Globals.Repositories |> Seq.tryFind (fun x -> x.Repository.Name = this.Repository.Name)
@@ -178,6 +182,8 @@ with
                          | Some x -> x.toString
                          | None -> match this.Vcs with
                                    | VcsType.Gerrit | VcsType.Git -> "master"
+                                   | VcsType.Hg -> "main" 
+                                   | VcsType.Svn -> "trunk"
 
     member this.Uri = this.Repository.Url.toString
 
@@ -399,12 +405,11 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
         let repoBranch = match branch with
                          | Some x -> Some (Anthology.BranchId.from x)
                          | None -> None
-        let anthoVcs = match vcs with
-                       | VcsType.Gerrit -> Anthology.VcsType.Gerrit
-                       | VcsType.Git -> Anthology.VcsType.Git
         let repoVcs = match vcs with
-                      | VcsType.Git -> Anthology.VcsType.Git
                       | VcsType.Gerrit -> Anthology.VcsType.Gerrit
+                       | VcsType.Git -> Anthology.VcsType.Git
+                       | VcsType.Hg -> Anthology.VcsType.Hg
+                       | VcsType.Svn -> Anthology.VcsType.Svn        
         let repo = { Anthology.Name = Anthology.RepositoryId.from name
                      Anthology.Url = Anthology.RepositoryUrl.from url
                      Anthology.Branch = repoBranch
@@ -435,6 +440,8 @@ let create vcs (uri : string) (artifacts : string) =
     let repoVcs = match vcs with
                     | VcsType.Git -> Anthology.VcsType.Git
                     | VcsType.Gerrit -> Anthology.VcsType.Gerrit
+                    | VcsType.Hg -> Anthology.VcsType.Hg
+                    | VcsType.Svn -> Anthology.VcsType.Svn
     let repo = { Anthology.Name = Anthology.RepositoryId.from Env.MASTER_REPO
                  Anthology.Url = Anthology.RepositoryUrl.from uri
                  Anthology.Branch = None

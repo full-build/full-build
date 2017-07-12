@@ -23,6 +23,8 @@ let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gi
     let f = match vcsType with
             | VcsType.Git -> gitFun
             | VcsType.Gerrit -> gitFun
+            | VcsType.Hg -> failwith "Hg is not implemented"
+            | VcsType.Svn -> failwith "Svn is not implemented"
     f repoDir
 
 

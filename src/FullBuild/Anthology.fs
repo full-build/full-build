@@ -61,6 +61,8 @@ type Package =
 type VcsType =
     | Gerrit
     | Git
+    | Hg
+    | Svn
 with
      member this.toString = toString this
      static member from s = fromString<VcsType> s
