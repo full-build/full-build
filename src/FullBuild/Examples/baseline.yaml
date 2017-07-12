@@ -1,0 +1,7 @@
+﻿branch: master
+buildnumber: b4881
+repositories:
+    - name: repo1
+      version: ASD423DS
+    - name: repo2
+      version: DSA132DF

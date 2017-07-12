@@ -91,6 +91,8 @@ let Build (cmd : CLI.Commands.BuildView) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
     Core.Builders.BuildWithBuilder BuilderType.MSBuild slnFile cmd.Config cmd.Clean cmd.Multithread version
+    let baselines = Baselines.from graph
+    baselines.UpdateBaseline version
 
 let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Graph.load()

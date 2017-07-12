@@ -24,7 +24,8 @@ let private PACKAGE_FOLDER = "packages"
 let BIN_FOLDER = @"bin"
 let GLOBALS_FILENAME = "globals"
 let ANTHOLOGY_FILENAME = ".anthology"
-let BASELINE_FILENAME = "baseline"
+let BASELINE_FILENAME = ".baseline"
+let BASELINE_TEMPORARY_FILENAME = "_baseline"
 let BRANCH_FILENAME = "branch"
 let FS_GLOBAL_ASSEMBLYINFO_FILENAME = "BuildVersionAssemblyInfo.fs"
 let CS_GLOBAL_ASSEMBLYINFO_FILENAME = "BuildVersionAssemblyInfo.cs"
@@ -92,6 +93,12 @@ let GetFsGlobalAssemblyInfoFileName() =
 
 let GetCsGlobalAssemblyInfoFileName() =
     GetFolder Folder.Bin |> GetFile CS_GLOBAL_ASSEMBLYINFO_FILENAME
+
+let GetBaselineFile () =
+    GetFolder Folder.Bin |> GetFile BASELINE_FILENAME
+
+let GetTemporaryBaselineFile () =
+    GetFolder Folder.Bin |> GetFile BASELINE_TEMPORARY_FILENAME
 
 let GetGlobalsFile() =
     GetFolder Folder.Config |> GetFile GLOBALS_FILENAME

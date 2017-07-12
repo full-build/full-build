@@ -22,22 +22,22 @@ open Baselines
 [<Test>]
 let ``parse tag`` () =
     let tag = "fullbuild/master/1.2.3"
-    let tagInfo = tag |> TagInfo.Parse
+    let tagInfo = tag |> BuildInfo.Parse
 
     tagInfo.Branch |> should equal "master"
     tagInfo.Version |> should equal "1.2.3"
 
 [<Test>]
 let ``parse failures`` () =
-    (fun () -> TagInfo.Parse "/beta_4.5_pouet" |> ignore) |> should throw typeof<Exception>
-    (fun () -> TagInfo.Parse "fullbuild2_beta_4.5_inc" |> ignore) |> should throw typeof<Exception>
+    (fun () -> BuildInfo.Parse "/beta_4.5_pouet" |> ignore) |> should throw typeof<Exception>
+    (fun () -> BuildInfo.Parse "fullbuild2_beta_4.5_inc" |> ignore) |> should throw typeof<Exception>
 
 [<Test>]
 let ``format taginfo`` () =
     let tag = "fullbuild/master/1.2.3"
-    tag |> TagInfo.Parse |> fun x -> x.Format() |> should equal tag
+    tag |> BuildInfo.Parse |> fun x -> x.Format() |> should equal tag
 
 [<Test>]
 let ``check slash is supported in branch`` () =
     let tag = "fullbuild/feature/branch/4.5.6"
-    tag |> TagInfo.Parse |> fun x -> x.Format() |> should equal tag
+    tag |> BuildInfo.Parse |> fun x -> x.Format() |> should equal tag

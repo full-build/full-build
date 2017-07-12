@@ -19,12 +19,15 @@ open Graph
 open Collections
 
 
-let Publish (graph : Graph) (tagInfo : Baselines.TagInfo) =
-    let tag = tagInfo.Format()
+let Publish (graph : Graph) =
+    let baselines = Baselines.from graph
+    let baseline = baselines.GetPulledBaseline() |> Option.get
+    
+    let tag = baseline.Info.Format()
     let appDir = Env.GetFolder Env.Folder.AppOutput
     let versionDir = DirectoryInfo(graph.ArtifactsDir) |> GetSubDirectory tag
     let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
-    let versionLine = sprintf "%s:%s:%s" tagInfo.Version tag tagInfo.Branch
+    let versionLine = sprintf "%s:%s:%s" baseline.Info.Version tag baseline.Info.Branch
 
     try
         let doPublish = not versionDir.Exists
@@ -68,7 +71,7 @@ let FetchVersionsForArtifact (graph : Graph) (app : Application) =
 
     let tryParseTag x =
         try
-            x |> Baselines.TagInfo.Parse |> Some
+            x |> Baselines.BuildInfo.Parse |> Some
         with
             _ -> None
 
@@ -77,14 +80,21 @@ let FetchVersionsForArtifact (graph : Graph) (app : Application) =
           |> List.ofSeq
 
 
-
-let PullReferenceBinaries (artifacts : string) version =
+let PullReferenceBinaries (artifacts : string) branch version =
     let artifactDir = artifacts |> DirectoryInfo
     if artifactDir.Exists |> not then failwithf "Failure to access actifacts folder"
 
-    let versionDir = artifactDir |> GetSubDirectory version
-    if versionDir.Exists then
-        DisplayInfo (sprintf "Copying binaries %s" version)
+    let branchDir = artifactDir |> GetSubDirectory branch
+    if branchDir.Exists then
+        let versionDir = 
+            match version with
+            | Some version -> 
+                branchDir 
+                |> GetSubDirectory version
+            | None -> 
+                branchDir.EnumerateDirectories() 
+                |> Seq.maxBy (fun d -> d.Name |> System.Version.Parse) 
+        DisplayInfo (sprintf "Copying binaries %s" versionDir.Name)
         let sourceBinDir = versionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
         let targetBinDir = Env.GetFolder Env.Folder.Bin
         IoHelpers.CopyFolder sourceBinDir targetBinDir false
