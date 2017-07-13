@@ -34,13 +34,13 @@ let SvnClean (repoDir : DirectoryInfo) (repo : Repository) =
     SvnPull repoDir false |> CheckResponseCode
     
 let SvnClone (target : DirectoryInfo) (url : string) (shallow : bool) =
-    let args = sprintf @"clone %s %s" url target.FullName
+    let args = sprintf @"checkout %s %s" url target.FullName
 
     let currDir = IoHelpers.CurrentFolder ()
     ExecGetOutput SVN_CMD args currDir Map.empty
 
 let SvnCheckout (repoDir : DirectoryInfo) (version : string) =
-    let args = sprintf "checkout %A" version
+    let args = sprintf "update -r:%A" version
     ExecGetOutput SVN_CMD args repoDir Map.empty
 
 let SvnHistory (repoDir : DirectoryInfo) (version : string) =

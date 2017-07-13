@@ -82,7 +82,7 @@ with
 type RepositoryUrl = private RepositoryUrl of string
 with
     member this.toString = (fun (RepositoryUrl x) -> x)this
-    static member from (maybeUri : string) = RepositoryUrl (maybeUri.ToLowerInvariant())
+    static member from (maybeUri : string) = RepositoryUrl maybeUri
 
 [<RequireQualifiedAccess>]
 type BuilderType =
