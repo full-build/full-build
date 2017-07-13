@@ -44,6 +44,10 @@ let CheckGenerateDgmlNoDependency () =
         let view = viewRepository.CreateView "test" (set ["*/g"]) false false false None false
         let res = Generators.Dgml.GraphContent view.Projects true
 
+        res.ToString() |> printfn "%s" 
+        expectedDgml.ToString() |> printfn "%s" 
+        
+
         res.ToString() |> should equal (expectedDgml.ToString())
     finally
         System.Environment.CurrentDirectory <- currFolder
