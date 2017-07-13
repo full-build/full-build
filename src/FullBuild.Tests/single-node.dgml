@@ -1,6 +1,6 @@
 ﻿<DirectedGraph Layout="Sugiyama" GraphDirection="TopToBottom" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
   <Nodes>
-    <Node Id="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" Label="g" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" IsTest="true" Output="g" OutputType="Dll" />
+    <Node Id="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" Label="g" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" IsTest="true" Output="g" OutputType="dll" />
     <Node Id="D7B81C18-45DF-44DC-853D-8CAB07E1AD97" Label="e" Category="ProjectImport" />
     <Node Id="78C2E0D4-B410-4702-AF93-71DB7DB228D0" Label="f" Category="ProjectImport" />
     <Node Id="src" Label="src" Group="Expanded" />

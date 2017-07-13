@@ -24,8 +24,8 @@ let private generateProjectNode (project : Project) =
 
     let label = System.IO.Path.GetFileNameWithoutExtension(project.ProjectFile)
     let output = project.Output.Name
-    let outputType = project.OutputType.ToString()
-
+    let outputType = project.OutputType |> StringHelpers.toString
+ 
     let fxVersion = match project.FxVersion with
                     | Some x -> XAttribute(NsNone + "FxVersion", x)
                     | None -> null
