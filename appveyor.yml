@@ -21,7 +21,7 @@ environment:
   GITHUB_TOKEN:
     secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
 
-version: 4.1.{build}
+version: 4.2.{build}
 
 skip_tags: true
 
