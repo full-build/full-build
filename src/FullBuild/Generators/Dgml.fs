@@ -23,7 +23,7 @@ let private generateProjectNode (project : Project) =
     let cat = isTest ? ( "TestProject", "Project")
 
     let label = System.IO.Path.GetFileNameWithoutExtension(project.ProjectFile)
-    let output = project.Output
+    let output = project.Output.Name
     let outputType = project.OutputType
 
     let fxVersion = match project.FxVersion with
