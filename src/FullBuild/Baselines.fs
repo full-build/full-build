@@ -22,7 +22,7 @@ open IoHelpers
 
 
 [<RequireQualifiedAccess>]
-type TagInfo =
+type BuildInfo =
     { BuildBranch : string
       BuildNumber : string }
 with
@@ -41,16 +41,17 @@ with
 
         let branch = tag.Substring(0, idx)
         let version = tag.Substring(idx+1)
-        { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = version }
+        { BuildInfo.BuildBranch = branch; BuildInfo.BuildNumber = version }
 
 
 // =====================================================================================================
 
 [<Sealed>]
-type Bookmark(graph : Graph, repository : Repository, hash : string) = class end
+type Bookmark(repository : Repository, hash : string) = class end
 with
     override this.Equals(other : System.Object) = refEquals this other
 
+    //not comparable, max equitable
     interface System.IComparable with
         member this.CompareTo(other) = compareTo this other (fun x -> sprintf "%s %s" x.Repository.Name x.Version)
 
@@ -61,59 +62,23 @@ with
 
 // =====================================================================================================
 
+type private BaselineFile = FSharp.Configuration.YamlConfig<"Examples/baseline.yaml">
+
 [<Sealed>]
-type Baseline(graph : Graph, tagInfo : TagInfo, isHead : bool) = class end
+type Baseline(buildInfo : BuildInfo, bookmarks : Bookmark set) = class end
 with
-    let mutable bookmarks : Bookmark set option = None
-    let collectBookmarks () =
-        if bookmarks = None then
-            let repos = graph.MasterRepository |> Set.singleton
-                                               |> Set.union graph.Repositories
-                                               |> Set.filter (fun x -> x.IsCloned)
-
-            let wsDir = Env.GetFolder Env.Folder.Workspace
-            let res = repos |> Set.map (fun x -> let tag = if isHead then Tools.Vcs.Head wsDir x
-                                                            else tagInfo.Format()
-                                                 let hash = try
-                                                                Tools.Vcs.TagToHash wsDir x tag
-                                                            with
-                                                                _ -> Tools.Vcs.Head wsDir x
-
-                                                 Bookmark(graph, x, hash))
-            bookmarks <- Some res
-
-        bookmarks.Value
-
     override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
         member this.CompareTo(other) = compareTo this other (fun x -> x.Info)
 
-    member this.Info = tagInfo
+    member this.Info = buildInfo
 
-    member this.IsHead = isHead
-
-    member this.Bookmarks : Bookmark set =
-        collectBookmarks()
+    member this.Bookmarks : Bookmark set = bookmarks
 
     static member (-) (ref : Baseline, target : Baseline) : Bookmark set =
         let changes = Set.difference ref.Bookmarks target.Bookmarks
         changes
-
-    member this.Save (comment : string) : unit =
-        let wsDir = Env.GetFolder Env.Folder.Workspace
-        let tag = tagInfo.Format()
-
-        let tagRepo wsDir (tag : string) (comment : string) (repo : Repository) = async {
-            let res = Tools.Vcs.Tag wsDir repo tag comment
-            return res |> IoHelpers.PrintOutput repo.Name
-        }
-
-        graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
-                           |> Threading.ParExec (tagRepo wsDir tag comment)
-                           |> Exec.CheckMultipleResponseCode
-
-        Tools.Vcs.Tag wsDir graph.MasterRepository tag comment |> Exec.CheckResponseCode
 
 // =====================================================================================================
 
@@ -122,23 +87,106 @@ type Factory(graph : Graph) = class end
 with
     let wsDir = Env.GetFolder Env.Folder.Workspace
 
-    member this.FindBaseline () : Baseline =
+    let parseBaselineFile (filePath:string) =
+        let baselineFile = BaselineFile()
+        filePath |> baselineFile.Load
+        let buildInfo = { BuildInfo.BuildBranch = baselineFile.branch; BuildInfo.BuildNumber = baselineFile.buildnumber }
+        let repositories = 
+            graph.Repositories 
+            |> Set.add graph.MasterRepository 
+            |> Seq.map(fun r -> r.Name, r) 
+            |> Map.ofSeq
+        let bookmarks = 
+                baselineFile.repositories 
+                    |> Seq.map (fun x -> Bookmark(repositories |> Map.find x.name, x.version))
+                    |> Set.ofSeq
+        Baseline(buildInfo, bookmarks)    
+        
+    let serializeBaseline (baseline:Baseline) =
+        let repositories = 
+            baseline.Bookmarks 
+            |> Seq.map(fun b -> let r = BaselineFile.repositories_Item_Type()
+                                r.name <- b.Repository.Name
+                                r.version <- b.Version
+                                r)
+            |> Array.ofSeq
+        let baselineFile = BaselineFile()
+        baselineFile.branch <- baseline.Info.Branch
+        baselineFile.buildnumber <- baseline.Info.BuildNumber
+        baselineFile.repositories <- repositories
+        baselineFile
+
+    let getClonedReposBookmarks () =
+        let getRepoHash wsDir (repo : Repository) = async {
+            let changesetId = Tools.Vcs.LastCommit wsDir repo ""
+            return Bookmark(repo, changesetId)
+        }
+        graph.Repositories 
+        |> Set.add graph.MasterRepository
+        |> Seq.filter (fun x -> x.IsCloned)
+        |> Threading.ParExec (getRepoHash wsDir)
+        |> Set.ofSeq
+    
+    let updateBookmarks (source:Bookmark set) (overrideWith:Bookmark set) =
+        let dif = 
+            source 
+            |> Seq.where(fun b -> overrideWith 
+                                    |> Seq.exists (fun b1 -> b1.Repository.Name = b.Repository.Name) 
+                                    |> not) 
+            |> Set.ofSeq
+        Set.union dif overrideWith
+
+    member this.GetPulledBaseline () : Baseline option =
+        let baselineFileInfo = Env.GetBaselineFile() 
+        if baselineFileInfo.Exists then
+            baselineFileInfo.FullName |> parseBaselineFile |> Some
+        else
+            None
+
+    member this.GetSourcesBaseline () : Baseline =
+        let pulledBaseline = this.GetPulledBaseline()
+        let sourcesBookmarks = getClonedReposBookmarks ()
+
+        let resultBaseline = 
+            match pulledBaseline with
+            | Some baseline -> updateBookmarks baseline.Bookmarks sourcesBookmarks
+            | None -> sourcesBookmarks
+
+        let branch = Configuration.LoadBranch()
+        let buildInfo = { BuildInfo.BuildBranch = branch; BuildInfo.BuildNumber = "1.0.0" }
+        Baseline(buildInfo, resultBaseline) 
+
+    member this.GetBinariesBaseline () : Baseline option =
+        let baselineFileInfo = Env.GetTemporaryBaselineFile()
+        if baselineFileInfo.Exists then
+            baselineFileInfo.FullName |> parseBaselineFile |> Some
+        else
+            None
+               
+    member this.UpdateBaseline (buildNumber : string) : unit =
+        let branch = Configuration.LoadBranch()
+        let buildInfo = { BuildInfo.BuildBranch = branch; BuildInfo.BuildNumber = buildNumber }
+
+        let wsDir = Env.GetFolder Env.Folder.Workspace
+
+        let sourcesBasline = this.GetSourcesBaseline()
+        let baseline = Baseline(buildInfo, sourcesBasline.Bookmarks)
+        let baselineFile = serializeBaseline baseline
+        Env.GetTemporaryBaselineFile().FullName |> baselineFile.Save
+
+     member this.FindMatchingBuildInfo () : BuildInfo option =
         let branch = Configuration.LoadBranch()
         let tagFilter = sprintf "fullbuild/%s/*" branch
         match Tools.Vcs.FindLatestMatchingTag wsDir graph.MasterRepository tagFilter with
-        | Some tag -> let tagInfo = TagInfo.Parse tag
-                      Baseline(graph, tagInfo, false)
-        | _ -> let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = "temp" }
-               Baseline(graph, tagInfo, true)
-
-    member this.CreateBaseline (buildNumber : string) : Baseline =
-        let globals = Configuration.LoadGlobals()
-        let antho = Configuration.LoadAnthology()
-        let graph = Graph.from globals antho
-        let branch = Configuration.LoadBranch()
-        let tagInfo = { TagInfo.BuildBranch = branch; TagInfo.BuildNumber = buildNumber }
-        Baseline(graph, tagInfo, true)
-
+        | Some tag -> BuildInfo.Parse tag |> Some
+        | _ -> None
+        
+    member this.TagMasterRepository (comment : string) : unit =
+        let wsDir = Env.GetFolder Env.Folder.Workspace
+        let baseline = this.GetPulledBaseline() |> Option.get
+        let tag = baseline.Info.Format()
+        
+        Tools.Vcs.Tag wsDir graph.MasterRepository tag comment |> Exec.CheckResponseCode
 // =====================================================================================================
 
 let from graph =

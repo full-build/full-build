@@ -18,7 +18,7 @@ open Collections
 open Graph
 
 [<RequireQualifiedAccess; Sealed>]
-type TagInfo =
+type BuildInfo =
     member Branch: string
 
     member Version: string
@@ -27,7 +27,7 @@ type TagInfo =
                 -> string
 
     static member Parse: string
-                      -> TagInfo
+                      -> BuildInfo
 
 type [<Sealed>] Bookmark = interface System.IComparable
 with
@@ -36,24 +36,35 @@ with
 
 and [<Sealed>] Baseline = interface System.IComparable
 with
-    member Info: TagInfo
+    member Info: BuildInfo
 
     member Bookmarks: Bookmark set
 
-    member IsHead : bool
-
     static member (-): Baseline*Baseline
                     -> Bookmark set
-    member Save: comment : string
-              -> unit
 
 
 and [<Sealed>] Factory =
-    member FindBaseline: unit 
+    //The baseline of pulled binaries
+    member GetPulledBaseline: unit 
+                      -> Baseline option
+    
+    //The baseline of the sources (pulled baseline += cloned)
+    member GetSourcesBaseline: unit 
                       -> Baseline
 
-    member CreateBaseline: buildNumber : string
-                        -> Baseline
+    //The baseline of the current content of "bin" folder (pulled baseline += built)
+    member GetBinariesBaseline: unit 
+                      -> Baseline option
 
+    //Create temp baseline (pulled baseline += cloned), should take the repos list as param(or view)
+    member UpdateBaseline: buildNumber: string
+                        -> unit
+    
+    member FindMatchingBuildInfo: unit
+                            -> BuildInfo option
+
+    member TagMasterRepository: string
+                            -> unit
 val from: graph : Graph
        -> Factory

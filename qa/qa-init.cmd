@@ -34,6 +34,7 @@ cd %QAFOLDER% || goto :ko
 %FULLBUILD% view all * || goto :ko
 %FULLBUILD% view csc cassandra-sharp-contrib/* || goto :ko
 %FULLBUILD% build all || goto :ko
+%FULLBUILD% build --version %VERSION% all || goto :ko
 
 pushd .full-build
 git add *

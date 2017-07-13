@@ -29,8 +29,8 @@ let private asyncPublish (version : string) (app : Graph.Application) =
 let private displayApp (app : Graph.Application) =
     printfn "%s" app.Name
 
-let private displayAppVersion ((app : Graph.Application), (tag : Baselines.TagInfo)) =
-    let tag = tag.Format()
+let private displayAppVersion ((app : Graph.Application), (buildInfo : Baselines.BuildInfo)) =
+    let tag = buildInfo.Format()
     printfn "%s : %s" app.Name tag
 
 

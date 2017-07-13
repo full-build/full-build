@@ -53,13 +53,17 @@ with
                                // this will add new repositories if necessary and discard unchanged repositories
                                // in fine, we only have new repositories and modified repositories
                                let baselineRepo = Baselines.from this.Graph
-                               let newBaseline = baselineRepo.CreateBaseline "temp"
-                               let oldBaseline = baselineRepo.FindBaseline ()
-                               let delta = newBaseline - oldBaseline
+
+                               let newBaseline = baselineRepo.GetSourcesBaseline()
+                               let oldBaseline = baselineRepo.GetPulledBaseline() 
+
+                               let delta = 
+                                    match oldBaseline with
+                                    | Some oldBaseline -> newBaseline - oldBaseline
+                                    | None -> newBaseline.Bookmarks
 
                                // if master repository is modified then all repositories are modified !
                                let isFullRebuild = delta |> Seq.exists (fun x -> x.Repository.Name = this.Graph.MasterRepository.Name)
-                                                   || oldBaseline.IsHead
 
                                if isFullRebuild then newBaseline.Bookmarks
                                else delta
