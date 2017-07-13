@@ -93,6 +93,7 @@ let PullReferenceBinaries (artifacts : string) branch version =
                 |> GetSubDirectory version
             | None -> 
                 branchDir.EnumerateDirectories() 
+                |> Seq.where(fun d -> d.Name |> System.Version.TryParse |> fun (success, version) -> success)
                 |> Seq.maxBy (fun d -> d.Name |> System.Version.Parse) 
         DisplayInfo (sprintf "Copying binaries %s" versionDir.Name)
         let sourceBinDir = versionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
