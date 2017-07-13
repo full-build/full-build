@@ -1,3 +1,8 @@
+v4.2
+  * apps are supported in repositories
+  * add minimal support for Mercurial
+  * add minimal support for Subversion
+  
 v4.0
   * Better support for NuGet
   * Fix outstanding issues with Xamarin Studio and Visual Studio on macOS

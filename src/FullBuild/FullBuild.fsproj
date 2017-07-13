@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -24,11 +25,12 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>--verbose setup git c:\src\oss\full-build\full-build\qa\local\full-build c:\src\oss\full-build\full-build\qa\local\bin c:\src\oss\full-build\full-build\qa\qa-setup2</StartArguments>
-    <StartWorkingDirectory>c:\src\oss\full-build\full-build\</StartWorkingDirectory>
+    <StartArguments>publish --view gen *</StartArguments>
+    <StartWorkingDirectory>C:\Development\fullbuild\</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
-    <NoWarn></NoWarn>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -111,6 +113,8 @@
     <Compile Include="Graph.fsi" />
     <Compile Include="Graph.fs" />
     <Compile Include="Tools\Paket.fs" />
+    <Compile Include="Tools\VcsHg.fs" />
+    <Compile Include="Tools\VcsSvn.fs" />
     <Compile Include="Tools\VcsGit.fs" />
     <Compile Include="Tools\Vcs.fs" />
     <Compile Include="Baselines.fsi" />
@@ -154,9 +158,10 @@
     <Compile Include="Program.fs" />
     <None Include="Examples\Library.nuspec" />
     <None Include="Examples\ghreleasefeed.json" />
-    <None Include="Examples\view.yaml" />
     <None Include="Examples\anthology.yaml" />
+    <None Include="Examples\baseline.yaml" />
     <None Include="Examples\globals.yaml" />
+    <None Include="Examples\view.yaml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

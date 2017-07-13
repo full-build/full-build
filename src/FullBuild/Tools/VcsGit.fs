@@ -79,10 +79,6 @@ let GitHistory (repoDir : DirectoryInfo) (version : string) =
     with
         _ -> [sprintf "Failed to get history from version %A - please pull !" version]
 
-let GitLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
-    let args = sprintf @"log -1 --format=%%H %s" relativeFile
-    ExecGetOutput "git" args repoDir Map.empty |> GetOutput |> Seq.head
-
 let GitIgnore (repoDir : DirectoryInfo) =
     let dstGitIgnore = repoDir |> IoHelpers.GetFile ".gitignore"
 
