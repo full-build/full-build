@@ -17,36 +17,60 @@ module Tools.VcsSvn
 open System.IO
 open Graph
 open Exec
+open IoHelpers
 
 
 let SVN_CMD = "svn" 
 
+
+
+let private GetBranchDirectory (repoDir : DirectoryInfo) =
+    let fbBranch = Configuration.LoadBranch()
+    let svnBranch = match fbBranch with
+                    | "master" -> "trunk" 
+                    | x -> x
+    repoDir |> GetSubDirectory svnBranch
+
+
 let SvnPull (repoDir : DirectoryInfo) (rebase : bool) =
-    ExecGetOutput SVN_CMD "update" repoDir Map.empty
+    let brDir = repoDir |> GetBranchDirectory
+    ExecGetOutput SVN_CMD "update" brDir Map.empty
 
 let SvnTip (repoDir : DirectoryInfo) =
-    ExecGetOutput "svnversion" "" repoDir Map.empty |> GetOutput |> Seq.head
+    let brDir = repoDir |> GetBranchDirectory
+    ExecGetOutput "svnversion" "" brDir Map.empty |> GetOutput |> Seq.head
 
 let SvnClean (repoDir : DirectoryInfo) (repo : Repository) =
+    let brDir = repoDir |> GetBranchDirectory
     let cleanArgs = "cleanup"
-    Exec SVN_CMD cleanArgs repoDir Map.empty |> CheckResponseCode
+    Exec SVN_CMD cleanArgs brDir Map.empty |> CheckResponseCode
 
-    SvnPull repoDir false |> CheckResponseCode
+    SvnPull brDir false |> CheckResponseCode
     
 let SvnClone (target : DirectoryInfo) (url : string) (shallow : bool) =
-    let args = sprintf @"checkout %s %s" url target.FullName
+    let fbBranch = Configuration.LoadBranch()
+    let svnBranch = match fbBranch with
+                    | "master" -> "trunk" 
+                    | x -> x
+
+    let urlBranch = sprintf "%s/%s" url svnBranch
+    let brDir = target |> GetBranchDirectory
+
+    let args = sprintf @"checkout %s %s" urlBranch brDir.FullName
 
     let currDir = IoHelpers.CurrentFolder ()
     ExecGetOutput SVN_CMD args currDir Map.empty
 
 let SvnCheckout (repoDir : DirectoryInfo) (version : string) =
+    IoHelpers.DisplayError "WARNING: checkout is not supported on Subversion" 
     let args = sprintf "update -r:%A" version
     ExecGetOutput SVN_CMD args repoDir Map.empty
 
 let SvnHistory (repoDir : DirectoryInfo) (version : string) =
+    let brDir = repoDir |> GetBranchDirectory
     let args = sprintf @"log -r%s:HEAD" version
     try
-        ExecGetOutput SVN_CMD args repoDir Map.empty |> GetOutput
+        ExecGetOutput SVN_CMD args brDir Map.empty |> GetOutput
     with
         _ -> [sprintf "Failed to get history from version %A - please pull !" version]
 
