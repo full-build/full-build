@@ -47,20 +47,21 @@ with
 and [<Sealed>] Factory =
     //The baseline of the current content of "bin" folder (pulled baseline += built)
     member GetBaseline: unit 
-                      -> Baseline option
+                     -> Baseline option
     
     //The baseline of the sources (pulled baseline += cloned repos)
     member GetSourcesBaseline: unit 
-                      -> Baseline
+                            -> Baseline
 
     //Create temp baseline (pulled baseline += cloned), should take the repos list as param(or view)
     member UpdateBaseline: buildNumber: string
                         -> unit
     
     member FindMatchingBuildInfo: unit
-                            -> BuildInfo option
+                               -> BuildInfo option
 
     member TagMasterRepository: string
-                            -> unit
+                             -> unit
+
 val from: graph : Graph
        -> Factory
