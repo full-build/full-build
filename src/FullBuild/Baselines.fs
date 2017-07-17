@@ -136,7 +136,7 @@ with
             |> Set.ofSeq
         Set.union dif overrideWith
 
-    member this.GetPulledBaseline () : Baseline option =
+    member this.GetBaseline () : Baseline option =
         let baselineFileInfo = Env.GetBaselineFile() 
         if baselineFileInfo.Exists then
             baselineFileInfo.FullName |> parseBaselineFile |> Some
@@ -144,7 +144,7 @@ with
             None
 
     member this.GetSourcesBaseline () : Baseline =
-        let pulledBaseline = this.GetPulledBaseline()
+        let pulledBaseline = this.GetBaseline()
         let sourcesBookmarks = getClonedReposBookmarks ()
 
         let resultBaseline = 
@@ -155,14 +155,7 @@ with
         let branch = Configuration.LoadBranch()
         let buildInfo = { BuildInfo.BuildBranch = branch; BuildInfo.BuildNumber = "1.0.0" }
         Baseline(buildInfo, resultBaseline) 
-
-    member this.GetBinariesBaseline () : Baseline option =
-        let baselineFileInfo = Env.GetTemporaryBaselineFile()
-        if baselineFileInfo.Exists then
-            baselineFileInfo.FullName |> parseBaselineFile |> Some
-        else
-            None
-               
+       
     member this.UpdateBaseline (buildNumber : string) : unit =
         let branch = Configuration.LoadBranch()
         let buildInfo = { BuildInfo.BuildBranch = branch; BuildInfo.BuildNumber = buildNumber }
@@ -172,7 +165,7 @@ with
         let sourcesBasline = this.GetSourcesBaseline()
         let baseline = Baseline(buildInfo, sourcesBasline.Bookmarks)
         let baselineFile = serializeBaseline baseline
-        Env.GetTemporaryBaselineFile().FullName |> baselineFile.Save
+        Env.GetBaselineFile().FullName |> baselineFile.Save
 
      member this.FindMatchingBuildInfo () : BuildInfo option =
         let branch = Configuration.LoadBranch()
@@ -183,7 +176,7 @@ with
         
     member this.TagMasterRepository (comment : string) : unit =
         let wsDir = Env.GetFolder Env.Folder.Workspace
-        let baseline = this.GetPulledBaseline() |> Option.get
+        let baseline = this.GetBaseline() |> Option.get
         let tag = baseline.Info.Format()
         
         Tools.Vcs.Tag wsDir graph.MasterRepository tag comment |> Exec.CheckResponseCode

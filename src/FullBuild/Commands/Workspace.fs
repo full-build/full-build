@@ -110,7 +110,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     
     let graph = Graph.load()
     let baseline = Baselines.from graph
-    let pulledBaseline = baseline.GetPulledBaseline() |> Option.get
+    let pulledBaseline = baseline.GetBaseline() |> Option.get
 
     let checkoutRepo wsDir (version : string) (repo : Repository) = async {
         let res = Tools.Vcs.Checkout wsDir repo version
@@ -271,7 +271,7 @@ let History (historyInfo : CLI.Commands.History) =
     
     let diff = 
         let baseline = baselineRepository.GetSourcesBaseline() 
-        match baselineRepository.GetPulledBaseline () with 
+        match baselineRepository.GetBaseline () with 
         | Some previousBaseline -> previousBaseline - baseline
         | None -> baseline.Bookmarks
 
@@ -357,9 +357,7 @@ let Push (pushInfo : CLI.Commands.PushWorkspace) =
     
     // copy bin content
     graph.Anthology |> Configuration.SaveConsolidatedAnthology
-    File.Copy(Env.GetTemporaryBaselineFile().FullName, Env.GetBaselineFile().FullName, true)
-    File.Delete(Env.GetTemporaryBaselineFile().FullName)
-
+    
     // tag master repository
     let baselineFactory = Baselines.from graph
     baselineFactory.TagMasterRepository comment
