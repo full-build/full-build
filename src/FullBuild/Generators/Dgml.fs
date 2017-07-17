@@ -190,6 +190,7 @@ let GraphContent (projects : Project set) (all : bool) =
     let srcProjects = if all then projects
                       else projects |> Set.filter (fun x -> not x.HasTests)
     let allProjects = srcProjects |> Set.map (fun x -> x.References) |> Set.unionMany
+                      |> Set.union srcProjects
     let repos = allProjects |> Set.map (fun x -> x.Repository)
     let packages = srcProjects |> Set.map (fun x -> x.PackageReferences)
                                |> Set.unionMany
