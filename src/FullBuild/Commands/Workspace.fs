@@ -28,7 +28,7 @@ let pullMatchingBinaries () =
     let graph = Graph.load()
     let baselineFactory = Baselines.from graph
     let buildInfo = baselineFactory.FindMatchingBuildInfo() |> Option.get
-    Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir buildInfo.Branch (Some buildInfo.Version)
+    Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir buildInfo.BuildBranch (Some buildInfo.BuildNumber)
 
 let Restore () =
     Core.Package.RestorePackages ()
@@ -106,7 +106,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     
     // pull binaries
     let graph = Graph.load()
-    Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir tag.Branch (Some tag.Version)
+    Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir tag.BuildBranch (Some tag.BuildNumber)
     
     let graph = Graph.load()
     let baseline = Baselines.from graph
@@ -125,7 +125,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
         |> Threading.ParExec (fun b -> checkoutRepo wsDir b.Version b.Repository)
     branchResults |> Exec.CheckMultipleResponseCode
 
-    Configuration.SaveBranch tag.Branch
+    Configuration.SaveBranch tag.BuildBranch
     Restore()
     
 
@@ -360,8 +360,10 @@ let Push (pushInfo : CLI.Commands.PushWorkspace) =
     
     // tag master repository
     let baselineFactory = Baselines.from graph
-    baselineFactory.TagMasterRepository comment
-    Core.BuildArtifacts.Publish graph
+    baselineFactory.UpdateBaseline pushInfo.Version
+    baselineFactory.TagMasterRepository pushInfo.Version comment 
+    
+    Core.BuildArtifacts.Publish graph 
     
     
     // print tag information

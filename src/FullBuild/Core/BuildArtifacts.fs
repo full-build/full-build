@@ -27,7 +27,7 @@ let Publish (graph : Graph) =
     let appDir = Env.GetFolder Env.Folder.AppOutput
     let versionDir = DirectoryInfo(graph.ArtifactsDir) |> GetSubDirectory tag
     let tmpVersionDir = DirectoryInfo(versionDir.FullName + ".tmp")
-    let versionLine = sprintf "%s:%s:%s" baseline.Info.Version tag baseline.Info.Branch
+    let versionLine = sprintf "%s:%s:%s" baseline.Info.BuildNumber tag baseline.Info.BuildBranch
 
     try
         let doPublish = not versionDir.Exists

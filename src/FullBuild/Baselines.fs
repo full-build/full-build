@@ -20,18 +20,16 @@ open IoHelpers
 
 #nowarn "0346" // GetHashCode missing
 
-
 [<RequireQualifiedAccess>]
 type BuildInfo =
-    { BuildBranch : string
-      BuildNumber : string }
+    { Branch : string
+      Number : string }
 with
-    member this.Branch = this.BuildBranch
+    member this.BuildBranch = this.Branch
 
-    member this.Version = this.BuildNumber
-
-    member this.Format() =
-        sprintf "fullbuild/%s/%s" this.Branch this.BuildNumber
+    member this.BuildNumber = this.Number
+    
+    member this.Format () = sprintf "fullbuild/%s/%s" this.Branch this.BuildNumber
 
     static member Parse (tag : string) =
         if tag.StartsWith("fullbuild/") |> not then failwithf "Unknown tag"
@@ -40,9 +38,8 @@ with
         if(-1 = idx) then failwithf "Unknown tag"
 
         let branch = tag.Substring(0, idx)
-        let version = tag.Substring(idx+1)
-        { BuildInfo.BuildBranch = branch; BuildInfo.BuildNumber = version }
-
+        let buildNumber = tag.Substring(idx+1)
+        { BuildInfo.Branch = branch; Number = buildNumber}
 
 // =====================================================================================================
 
@@ -90,7 +87,7 @@ with
     let parseBaselineFile (filePath:string) =
         let baselineFile = BaselineFile()
         filePath |> baselineFile.Load
-        let buildInfo = { BuildInfo.BuildBranch = baselineFile.branch; BuildInfo.BuildNumber = baselineFile.buildnumber }
+        let buildInfo = { BuildInfo.Branch = baselineFile.branch; BuildInfo.Number = baselineFile.buildnumber }
         let repositories = 
             graph.Repositories 
             |> Set.add graph.MasterRepository 
@@ -153,12 +150,12 @@ with
             | None -> sourcesBookmarks
 
         let branch = Configuration.LoadBranch()
-        let buildInfo = { BuildInfo.BuildBranch = branch; BuildInfo.BuildNumber = "1.0.0" }
+        let buildInfo = { BuildInfo.Branch = branch; BuildInfo.Number = "0" }
         Baseline(buildInfo, resultBaseline) 
        
     member this.UpdateBaseline (buildNumber : string) : unit =
         let branch = Configuration.LoadBranch()
-        let buildInfo = { BuildInfo.BuildBranch = branch; BuildInfo.BuildNumber = buildNumber }
+        let buildInfo = { BuildInfo.Branch = branch; BuildInfo.Number = buildNumber }
 
         let wsDir = Env.GetFolder Env.Folder.Workspace
 
@@ -174,10 +171,11 @@ with
         | Some tag -> BuildInfo.Parse tag |> Some
         | _ -> None
         
-    member this.TagMasterRepository (comment : string) : unit =
+    member this.TagMasterRepository (buildNumber:string) (comment : string) : unit =
         let wsDir = Env.GetFolder Env.Folder.Workspace
-        let baseline = this.GetBaseline() |> Option.get
-        let tag = baseline.Info.Format()
+        let branch = Configuration.LoadBranch()
+        let buildTag = {BuildInfo.Branch = branch; BuildInfo.Number = buildNumber}
+        let tag = buildTag.Format()
         
         Tools.Vcs.Tag wsDir graph.MasterRepository tag comment |> Exec.CheckResponseCode
 // =====================================================================================================

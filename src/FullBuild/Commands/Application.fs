@@ -44,7 +44,7 @@ let private checkAppHasVersion (version : string) (graph : Graph.Graph) (app : G
 let private getLastVersionForApp (graph : Graph.Graph) (branch : string) (app : Graph.Application) =
     async {
         let versions = Core.BuildArtifacts.FetchVersionsForArtifact graph app
-                            |> List.filter (fun x -> x.Branch = branch)
+                            |> List.filter (fun x -> x.BuildBranch = branch)
         return match versions |> List.tryLast with
                | None -> None
                | Some version -> Some (app, version)

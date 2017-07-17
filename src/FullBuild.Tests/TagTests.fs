@@ -24,8 +24,8 @@ let ``parse tag`` () =
     let tag = "fullbuild/master/1.2.3"
     let tagInfo = tag |> BuildInfo.Parse
 
-    tagInfo.Branch |> should equal "master"
-    tagInfo.Version |> should equal "1.2.3"
+    tagInfo.BuildBranch |> should equal "master"
+    tagInfo.BuildNumber |> should equal "1.2.3"
 
 [<Test>]
 let ``parse failures`` () =

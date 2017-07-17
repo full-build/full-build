@@ -19,13 +19,10 @@ open Graph
 
 [<RequireQualifiedAccess; Sealed>]
 type BuildInfo =
-    member Branch: string
-
-    member Version: string
-
+    member BuildBranch: string
+    member BuildNumber: string
     member Format: unit
                 -> string
-
     static member Parse: string
                       -> BuildInfo
 
@@ -60,7 +57,8 @@ and [<Sealed>] Factory =
     member FindMatchingBuildInfo: unit
                                -> BuildInfo option
 
-    member TagMasterRepository: string
+    member TagMasterRepository: version : string
+                             -> comment : string
                              -> unit
 
 val from: graph : Graph
