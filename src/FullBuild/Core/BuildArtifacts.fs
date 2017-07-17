@@ -84,7 +84,7 @@ let PullReferenceBinaries (artifacts : string) branch version =
     let artifactDir = artifacts |> DirectoryInfo
     if artifactDir.Exists |> not then failwithf "Failure to access actifacts folder"
 
-    let branchDir = artifactDir |> GetSubDirectory branch
+    let branchDir = artifactDir |> GetSubDirectory "fullbuild" |> GetSubDirectory branch
     if branchDir.Exists then
         let versionDir = 
             match version with
