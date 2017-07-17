@@ -21,7 +21,7 @@ open Collections
 
 let Publish (graph : Graph) =
     let baselines = Baselines.from graph
-    let baseline = baselines.GetPulledBaseline() |> Option.get
+    let baseline = baselines.GetBaseline() |> Option.get
     
     let tag = baseline.Info.Format()
     let appDir = Env.GetFolder Env.Folder.AppOutput

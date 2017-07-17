@@ -45,17 +45,13 @@ with
 
 
 and [<Sealed>] Factory =
-    //The baseline of pulled binaries
-    member GetPulledBaseline: unit 
+    //The baseline of the current content of "bin" folder (pulled baseline += built)
+    member GetBaseline: unit 
                       -> Baseline option
     
-    //The baseline of the sources (pulled baseline += cloned)
+    //The baseline of the sources (pulled baseline += cloned repos)
     member GetSourcesBaseline: unit 
                       -> Baseline
-
-    //The baseline of the current content of "bin" folder (pulled baseline += built)
-    member GetBinariesBaseline: unit 
-                      -> Baseline option
 
     //Create temp baseline (pulled baseline += cloned), should take the repos list as param(or view)
     member UpdateBaseline: buildNumber: string
