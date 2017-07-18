@@ -27,8 +27,10 @@ open Graph
 let pullMatchingBinaries () =
     let graph = Graph.load()
     let baselineFactory = Baselines.from graph
-    let buildInfo = baselineFactory.FindMatchingBuildInfo() |> Option.get
-    Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir buildInfo.BuildBranch (Some buildInfo.BuildNumber)
+    match baselineFactory.FindMatchingBuildInfo() with 
+    | Some buildInfo -> Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir buildInfo.BuildBranch (Some buildInfo.BuildNumber)
+    | None -> printfn "No latest build found. The binaries were not pulled"
+    
 
 let Restore () =
     Core.Package.RestorePackages ()
