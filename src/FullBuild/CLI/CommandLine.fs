@@ -50,7 +50,7 @@ type private TokenOption =
     | Ref
     | Push
     | Status
-
+ 
 let private (|TokenOption|_|) (token : string) =
     match token with
     | "--debug" -> Some TokenOption.Debug
@@ -486,14 +486,18 @@ let rec private commandUpgrade (verStatus : string) (args : string list) =
     | [Param processId] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))
     | _ -> Command.Error MainCommand.Upgrade
 
-let rec private commandQuery (project : bool) (nuget : bool) (view : string option) (args : string list) =
+let rec private commandQuery (project : bool) (nuget : bool) (refs : bool) (view : string option) (src : RepositoryId option) (dst : RepositoryId option) (args : string list) =
     match args with
-    | TokenOption TokenOption.UnusedProjects :: tail -> tail |> commandQuery true nuget view
-    | TokenOption TokenOption.Packages :: tail -> tail |> commandQuery project true view
-    | TokenOption TokenOption.View :: ViewId viewName :: tail -> tail |> commandQuery project true (Some viewName)
-    | [] when project || nuget -> Command.Query { UnusedProjects = project
-                                                  UsedPackages = nuget
-                                                  View = view }
+    | TokenOption TokenOption.UnusedProjects :: tail -> tail |> commandQuery true nuget refs view None None
+    | TokenOption TokenOption.Packages :: tail -> tail |> commandQuery project true refs view None None
+    | TokenOption TokenOption.View :: ViewId viewName :: tail -> tail |> commandQuery project true refs (Some viewName) None None
+    | TokenOption TokenOption.Ref :: RepositoryId src :: RepositoryId dst :: tail -> tail |> commandQuery project nuget true view (Some src) (Some dst)
+    | [] when project || nuget || refs -> Command.Query { UnusedProjects = project
+                                                          UsedPackages = nuget
+                                                          References = refs
+                                                          View = view 
+                                                          Source = src
+                                                          Destination = dst }
     | _ -> Command.Error MainCommand.Query
 
 
@@ -577,7 +581,7 @@ let Parse (args : string list) : Command =
     | Token Token.App :: Token Token.Drop :: cmdArgs -> cmdArgs |> commandDropApp
     | Token Token.App :: Token Token.List :: cmdArgs -> cmdArgs |> commandListApp None
 
-    | Token Token.Query :: cmdArgs -> cmdArgs |> commandQuery false false None
+    | Token Token.Query :: cmdArgs -> cmdArgs |> commandQuery false false false None None None
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
     | [FullBuildView viewFile] -> Command.FullBuildView { FilePath = viewFile }
