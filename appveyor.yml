@@ -17,6 +17,11 @@
 
 os: Visual Studio 2015
 
+
+hosts:
+  api.nuget.org: 93.184.221.200
+
+
 environment:
   GITHUB_TOKEN:
     secure: SNU7aaT74dbTXWCsWeFxWvfwJ4BLItFdO2EY7MYoEg9vec2EGBloH8PNDpkJbBKg
