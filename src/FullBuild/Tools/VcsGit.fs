@@ -57,18 +57,6 @@ let GitClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallo
     let currDir = IoHelpers.CurrentFolder ()
     ExecGetOutput "git" args currDir Map.empty
 
-let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
-    let res = GitClone repo target url shallow
-
-    let installDir = Env.GetFolder Env.Folder.Installation
-    let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
-    let target = target |> IoHelpers.GetSubDirectory ".git"
-                        |> IoHelpers.GetSubDirectory "hooks"
-                        |> IoHelpers.EnsureExists
-                        |> IoHelpers.GetFile "commit-msg"
-    commitMsgFile.CopyTo (target.FullName) |> ignore
-    res
-
 let GitCheckout (repoDir : DirectoryInfo) (version : string) =
     let args = sprintf "checkout %A" version
     ExecGetOutput "git" args repoDir Map.empty
