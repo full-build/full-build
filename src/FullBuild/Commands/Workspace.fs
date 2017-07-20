@@ -356,17 +356,15 @@ let CheckMinVersion () =
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
     let graph = Graph.load()
     let comment = pushInfo.Incremental ? ("incremental", "full")
-    
-    // copy bin content
-    graph.Anthology |> Configuration.SaveConsolidatedAnthology
-    
-    // tag master repository
     let baselineFactory = Baselines.from graph
+
+    // copy bin content
+    graph.Anthology |> Configuration.SaveConsolidatedAnthology    
     baselineFactory.UpdateBaseline pushInfo.Version
-    baselineFactory.TagMasterRepository pushInfo.Version comment 
-    
     Core.BuildArtifacts.Publish graph 
-    
+
+    // tag master repository
+    baselineFactory.TagMasterRepository pushInfo.Version comment 
     
     // print tag information
     printfn "[pushed version] %s" pushInfo.Version
