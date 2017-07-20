@@ -32,8 +32,7 @@ let Unclone (wsDir : DirectoryInfo) (repo : Repository) =
     if repoDir.Exists then repoDir.Delete(true)
 
 let Clone (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) : Exec.ExecResult =
-    let gitCloneFunc = if repo.Vcs = VcsType.Gerrit then VcsGit.GerritClone repo
-                                                    else VcsGit.GitClone repo
+    let gitCloneFunc = VcsGit.GitClone repo
     let svnClone = VcsSvn.SvnClone
     let hgClone = VcsHg.HgClone
     (chooseVcs wsDir repo.Vcs repo gitCloneFunc svnClone hgClone) repo.Uri shallow
