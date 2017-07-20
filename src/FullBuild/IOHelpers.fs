@@ -105,6 +105,9 @@ let ComputeHops (file : string) : string =
 let CurrentFolder() : DirectoryInfo =
     Directory.GetCurrentDirectory () |> DirectoryInfo
 
+let EnsureExists (dir : DirectoryInfo) =
+    if not dir.Exists then dir.Create()
+    dir
 
 
 

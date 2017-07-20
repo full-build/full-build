@@ -64,6 +64,7 @@ let GerritClone (repo : Repository) (target : DirectoryInfo) (url : string) (sha
     let commitMsgFile = installDir |> IoHelpers.GetFile "commit-msg"
     let target = target |> IoHelpers.GetSubDirectory ".git"
                         |> IoHelpers.GetSubDirectory "hooks"
+                        |> IoHelpers.EnsureExists
                         |> IoHelpers.GetFile "commit-msg"
     commitMsgFile.CopyTo (target.FullName) |> ignore
     res
