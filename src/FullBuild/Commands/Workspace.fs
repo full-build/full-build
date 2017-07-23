@@ -321,7 +321,7 @@ let convert (convertInfo : CLI.Commands.ConvertRepositories) =
         let (builder, repos) = builder2repo
         for repo in repos do
             IoHelpers.DisplayInfo ("converting "+ repo.Name)
-            Core.Conversion.Convert builder (Set.singleton repo)
+            Core.Conversion.Convert builder (Set.singleton repo) graph.SideBySide
 
     // setup additional files for views to work correctly
     let confDir = Env.GetFolder Env.Folder.Config

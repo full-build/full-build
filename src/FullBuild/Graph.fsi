@@ -114,6 +114,7 @@ with
 
 
 and [<Sealed>] Graph =
+    member SideBySide : bool
     member MinVersion: string
     member MasterRepository : Repository
     member Repositories : Repository set

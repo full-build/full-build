@@ -365,6 +365,8 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
                                              |> dict
         projectMap
 
+    member this.SideBySide = globals.SideBySide
+
     member this.MinVersion = globals.MinVersion
 
     member this.MasterRepository = { Graph = this; Repository = globals.MasterRepository }

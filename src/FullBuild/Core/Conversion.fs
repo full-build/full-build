@@ -15,18 +15,30 @@
 module Core.Conversion
 open Collections
 open Graph
+open System.IO
+open System.Xml.Linq
 
 
-let private convertMsBuild (repos : Repository set) =
+
+let SxSXDocSaver (fileName : FileInfo) (xdoc : XDocument) =
+    let newFileName = sprintf "%s-full-build%s"
+                            (fileName.FullName |> System.IO.Path.GetFileNameWithoutExtension)
+                            fileName.Extension
+                      |> FileInfo
+    IoHelpers.XDocSaver newFileName xdoc
+
+let private convertMsBuild (repos : Repository set) (sxs : bool) =
     let projects = repos |> Set.map (fun x -> x.Projects)
                          |> Set.unionMany
-    Generators.MSBuild.GenerateProjects projects IoHelpers.XDocSaver
-    Generators.MSBuild.ConvertProjects projects IoHelpers.XDocLoader IoHelpers.XDocSaver
-    Generators.MSBuild.RemoveUselessStuff projects
+    let projSaver = sxs ? (SxSXDocSaver, IoHelpers.XDocSaver)
 
-let Convert builder (repos : Repository set) =
+    Generators.MSBuild.GenerateProjects projects IoHelpers.XDocSaver
+    Generators.MSBuild.ConvertProjects projects IoHelpers.XDocLoader projSaver
+    if sxs |> not then Generators.MSBuild.RemoveUselessStuff projects
+
+let Convert builder (repos : Repository set) (sxs : bool) =
     match builder with
-    | Graph.BuilderType.MSBuild -> convertMsBuild repos
+    | Graph.BuilderType.MSBuild -> convertMsBuild repos sxs
     | Graph.BuilderType.Skip -> ()
 
 let GenerateProjectArtifacts () =
