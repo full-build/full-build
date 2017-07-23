@@ -449,6 +449,7 @@ let create vcs (uri : string) (artifacts : string) =
 
     let globals = { Anthology.Globals.MinVersion = Env.FullBuildVersion().ToString()
                     Anthology.Globals.Binaries = artifacts
+                    Anthology.Globals.SideBySide = false
                     Anthology.Globals.NuGets = []
                     Anthology.Globals.MasterRepository = repo
                     Anthology.Globals.Repositories = Set.empty }
