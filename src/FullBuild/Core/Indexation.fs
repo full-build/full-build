@@ -21,16 +21,19 @@ open XmlHelpers
 open Anthology
 open Collections
 
-let private projectCanBeProcessed (fileName : FileInfo) =
-    let xdoc = XDocument.Load (fileName.FullName)
-    let fbIgnore = !> xdoc.Descendants(NsMsBuild + "FullBuildIgnore").FirstOrDefault() : string
-    match bool.TryParse(fbIgnore) with
-    | (true, x) -> not <| x
-    | _ -> true
+let private projectCanBeProcessed (sxs : bool) (fileName : FileInfo) =
+    if fileName.Name.Contains("-full-build.") && sxs then 
+        false
+    else
+        let xdoc = XDocument.Load (fileName.FullName)
+        let fbIgnore = !> xdoc.Descendants(NsMsBuild + "FullBuildIgnore").FirstOrDefault() : string
+        match bool.TryParse(fbIgnore) with
+        | (true, x) -> not <| x
+        | _ -> true
 
-let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) =
+let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) (sxs : bool) =
     repoDir |> IoHelpers.FindKnownProjects
-            |> Seq.filter projectCanBeProcessed
+            |> Seq.filter (projectCanBeProcessed sxs)
             |> Seq.map (parser repoDir repoRef)
 
 let private printParseStatus (repoDir : DirectoryInfo) =
@@ -38,11 +41,11 @@ let private printParseStatus (repoDir : DirectoryInfo) =
     IoHelpers.DisplayInfo ("indexing "+ repo.toString)
     repoDir
 
-let private parseWorkspaceProjects parser (wsDir : DirectoryInfo) (repos : Repository seq) =
+let private parseWorkspaceProjects parser (wsDir : DirectoryInfo) (repos : Repository seq) (sxs : bool) =
     repos |> Seq.map (fun x -> GetSubDirectory x.Name.toString wsDir)
           |> Seq.filter (fun x -> x.Exists)
           |> Seq.map printParseStatus
-          |> Seq.map (fun x -> parseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
+          |> Seq.map (fun x -> parseRepositoryProjects parser (RepositoryId.from(x.Name)) x sxs)
           |> Seq.concat
           |> List.ofSeq
 
@@ -139,7 +142,7 @@ let IndexWorkspace wsDir (globals : Globals) (antho : Anthology) (grepos : Graph
     let repos = globals.Repositories |> Set.filter (fun x -> grepos |> Set.exists (fun y -> y.Name = x.Repository.Name.toString))
                                      |> Set.filter (fun x -> x.Builder = BuilderType.MSBuild)
                                      |> Set.map (fun x -> x.Repository)
-    let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos
+    let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos globals.SideBySide
 
     let projects = parsedProjects |> List.map (fun x -> x.Project)
                                   |> Set
