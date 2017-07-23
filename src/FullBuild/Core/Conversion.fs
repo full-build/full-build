@@ -24,8 +24,8 @@ let SxSXDocSaver (fileName : FileInfo) (xdoc : XDocument) =
     let newFileName = sprintf "%s-full-build%s"
                             (fileName.FullName |> System.IO.Path.GetFileNameWithoutExtension)
                             fileName.Extension
-                      |> FileInfo
-    IoHelpers.XDocSaver newFileName xdoc
+    let newFile = fileName.Directory |> IoHelpers.GetFile newFileName
+    IoHelpers.XDocSaver newFile xdoc
 
 let private convertMsBuild (repos : Repository set) (sxs : bool) =
     let projects = repos |> Set.map (fun x -> x.Projects)
