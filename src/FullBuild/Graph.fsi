@@ -153,6 +153,7 @@ val from : Anthology.Globals
 val create: vcs : VcsType
          -> uri : string
          -> artifacts : string
+         -> sxs : bool
          -> Graph
 
 val init: uri : string

@@ -84,7 +84,7 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     let currDir = Environment.CurrentDirectory
     try
         Environment.CurrentDirectory <- wsDir.FullName
-        let graph = Graph.create createInfo.Type createInfo.MasterRepository createInfo.MasterArtifacts
+        let graph = Graph.create createInfo.Type createInfo.MasterRepository createInfo.MasterArtifacts createInfo.SxS
         Tools.Vcs.Clone wsDir graph.MasterRepository true |> IoHelpers.PrintOutput "Cloning master repository"
                                                           |> Exec.CheckResponseCode
         graph.Save()

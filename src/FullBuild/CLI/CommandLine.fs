@@ -50,6 +50,7 @@ type private TokenOption =
     | Ref
     | Push
     | Status
+    | SxS
  
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -81,6 +82,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--ref" -> Some TokenOption.Ref
     | "--push" -> Some TokenOption.Push
     | "--status" -> Some TokenOption.Status
+    | "--sxs" -> Some TokenOption.SxS
     | _ -> None
 
 type private Token =
@@ -236,13 +238,15 @@ let private (|PublisherType|_|) name =
     | Param _ -> Some (StringHelpers.fromString<Graph.PublisherType> name)
     | _ -> None
 
-let private commandSetup (args : string list) =
+let rec private commandSetup (sxs : bool) (args : string list) =
     match args with
+    | TokenOption TokenOption.SxS :: tail -> tail |> commandSetup true
     | Param vcs :: Param masterRepository :: Param masterArtifacts :: [Param path]
         -> Command.SetupWorkspace { MasterRepository = masterRepository
                                     MasterArtifacts = masterArtifacts
                                     Type = StringHelpers.fromString<Graph.VcsType> vcs
-                                    Path = path }
+                                    Path = path 
+                                    SxS = sxs }
     | _ -> Command.Error MainCommand.Setup
 
 let private commandInit (args : string list) =
@@ -539,7 +543,7 @@ let Parse (args : string list) : Command =
     | [Token Token.Version] -> Command.Version
     | Token Token.Help :: cmdArgs -> cmdArgs |> commandHelp
     | Token Token.Upgrade :: cmdArgs -> cmdArgs |> commandUpgrade "stable"
-    | Token Token.Setup :: cmdArgs -> cmdArgs |> commandSetup
+    | Token Token.Setup :: cmdArgs -> cmdArgs |> commandSetup false
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
     | Token Token.Test :: cmdArgs -> cmdArgs |> commandTest []

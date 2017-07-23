@@ -438,7 +438,7 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
 let from (globals : Anthology.Globals) (antho : Anthology.Anthology) : Graph =
     Graph (globals, antho)
 
-let create vcs (uri : string) (artifacts : string) =
+let create vcs (uri : string) (artifacts : string) (sxs : bool) =
     let repoVcs = match vcs with
                     | VcsType.Git -> Anthology.VcsType.Git
                     | VcsType.Gerrit -> Anthology.VcsType.Gerrit
@@ -451,7 +451,7 @@ let create vcs (uri : string) (artifacts : string) =
 
     let globals = { Anthology.Globals.MinVersion = Env.FullBuildVersion().ToString()
                     Anthology.Globals.Binaries = artifacts
-                    Anthology.Globals.SideBySide = false
+                    Anthology.Globals.SideBySide = sxs
                     Anthology.Globals.NuGets = []
                     Anthology.Globals.MasterRepository = repo
                     Anthology.Globals.Repositories = Set.empty }
@@ -462,7 +462,7 @@ let create vcs (uri : string) (artifacts : string) =
 
 
 let init uri vcs =
-    create vcs uri "dummy"
+    create vcs uri "dummy" false
 
 let load () =
     let globals = Configuration.LoadGlobals()

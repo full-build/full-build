@@ -21,7 +21,8 @@ type SetupWorkspace =
     { MasterRepository : string
       MasterArtifacts : string
       Type : Graph.VcsType
-      Path : string }
+      Path : string 
+      SxS : bool }
 
 type InitWorkspace =
     { MasterRepository : string
