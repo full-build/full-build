@@ -53,9 +53,15 @@ with
     member this.toString = (fun (PackageId x) -> x)this
     static member from (id : string) = PackageId (id.ToLowerInvariant())
 
+
+[<RequireQualifiedAccess>]
+type GroupId =
+    | Default 
+    | Named of string
+
 type Package =
     { Id : PackageId
-      Version : PackageVersion }
+      Group : GroupId }
 
 [<RequireQualifiedAccess>]
 type VcsType =
@@ -163,7 +169,7 @@ type Project =
       FxIdentifier : FxInfo
       HasTests : bool
       AssemblyReferences : AssemblyId set
-      PackageReferences : PackageId set
+      PackageReferences : Package set
       ProjectReferences : ProjectId set }
 
 type ApplicationId = private ApplicationId of string

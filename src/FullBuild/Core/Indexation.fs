@@ -97,7 +97,7 @@ let private detectNewDependencies (projects : Parsers.MSBuild.ProjectDescriptor 
     // add new packages (with correct version requirement)
     let existingPackages = Tools.Paket.ParsePaketDependencies ()
     projects |> Seq.collect (fun x -> x.Packages)
-             |> Seq.filter (fun x -> Set.contains x.Id existingPackages |> not)
+             |> Seq.filter (fun x -> Set.contains x existingPackages |> not)
              |> Seq.distinctBy (fun x -> x.Id)
              |> Set.ofSeq
 
