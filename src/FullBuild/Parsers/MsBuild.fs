@@ -141,12 +141,12 @@ let private getPaketPackages (prjDoc : XDocument)  =
 // NOTE: should be private
 let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryId) (sxs : bool) (file : FileInfo) =
     let tmpFile = IoHelpers.ComputeRelativeFilePath repoDir file
-    let relativeProjectFile = if sxs then 
-                                let toto = sprintf "%s-full-build%s" 
-                                                (tmpFile |> Path.GetFileNameWithoutExtension) 
-                                                (tmpFile |> Path.GetExtension)
-                                Path.Combine(Path.GetDirectoryName tmpFile, toto)
-                              else tmpFile
+    let relativeProjectFile, sxsRoundtrip = 
+        let fbExtProj = "-full-build" + file.Extension
+        if sxs then
+            if tmpFile.Contains(fbExtProj) then tmpFile, true
+            else tmpFile.Replace(file.Extension, fbExtProj), false
+        else tmpFile, false
 
     let xprj = match xdocLoader file with
                | Some x -> x
@@ -172,12 +172,13 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
 
     let assemblies = getAssemblies xprj
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
-    let nugetPackages = match xdocLoader pkgFile with
-                        | Some xnuget -> getNuGetPackages xnuget
-                        | _ -> Set.empty
+    let nugetPackages = if sxsRoundtrip then Set.empty
+                        else match xdocLoader pkgFile with
+                             | Some xnuget -> getNuGetPackages xnuget
+                             | _ -> Set.empty
     let fbPackages = getFullBuildPackages xprj
-    let pkgRefPackages = getPackageReferencePackages xprj
-    let paketPackages = getPaketPackages xprj
+    let pkgRefPackages = if sxsRoundtrip then Set.empty else getPackageReferencePackages xprj
+    let paketPackages = if sxsRoundtrip then Set.empty else getPaketPackages xprj
     let packages = nugetPackages + fbPackages + pkgRefPackages + paketPackages
     let pkgRefs = packages |> Set.map (fun x -> x.Id)
     let hasTests = assemblyRef.toString.EndsWith("tests")

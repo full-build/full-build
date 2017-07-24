@@ -21,9 +21,9 @@ open System.Xml.Linq
 
 
 let SxSXDocLoader (fileName : FileInfo) : XDocument option =
-    let orgFileName = fileName.FullName.Replace("-full-build.", ".") |> FileInfo
-    if orgFileName.Exists then Some (XDocument.Load (orgFileName.FullName))
-    else None
+    let fbExtProject = "-full-build" + fileName.Extension
+    let orgFileName = fileName.FullName.Replace(fbExtProject, fileName.Extension) |> FileInfo
+    IoHelpers.XDocLoader orgFileName
 
 let private convertMsBuild (repos : Repository set) (sxs : bool) =
     let projects = repos |> Set.map (fun x -> x.Projects)

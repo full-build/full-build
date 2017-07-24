@@ -22,14 +22,18 @@ open Anthology
 open Collections
 
 let private projectCanBeProcessed (sxs : bool) (fileName : FileInfo) =
-    if fileName.Name.Contains("-full-build.") && sxs then 
-        false
-    else
-        let xdoc = XDocument.Load (fileName.FullName)
-        let fbIgnore = !> xdoc.Descendants(NsMsBuild + "FullBuildIgnore").FirstOrDefault() : string
-        match bool.TryParse(fbIgnore) with
-        | (true, x) -> not <| x
-        | _ -> true
+    let fbExtProj = "-full-build" + fileName.Extension
+    if fileName.Name.Contains(fbExtProj) then
+        sxs
+    else 
+        let sxsProj = fileName.FullName.Replace(fileName.Extension, fbExtProj) |> FileInfo
+        if sxsProj.Exists then sxs |> not
+        else 
+            let xdoc = XDocument.Load (fileName.FullName)
+            let fbIgnore = !> xdoc.Descendants(NsMsBuild + "FullBuildIgnore").FirstOrDefault() : string
+            match bool.TryParse(fbIgnore) with
+            | (true, x) -> not <| x
+            | _ -> true
 
 let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) (sxs : bool) =
     repoDir |> IoHelpers.FindKnownProjects
@@ -207,13 +211,7 @@ let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Grap
         let repo = kvp.Key
         let projects = kvp.Value
         let currentProjects = previousAntho.Projects |> Set.filter (fun x -> x.Repository = kvp.Key)
-        if currentProjects <> projects then 
-            for currentProject in currentProjects do
-                printfn "%A" currentProject
-            printfn "====================="
-            for project in projects do
-                printfn "%A" project
-            
+        if currentProjects <> projects then
             failwithf "Repository %s must be indexed" repo.toString
 
 let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
