@@ -20,20 +20,18 @@ open System.Xml.Linq
 
 
 
-let SxSXDocSaver (fileName : FileInfo) (xdoc : XDocument) =
-    let newFileName = sprintf "%s-full-build%s"
-                            (fileName.FullName |> System.IO.Path.GetFileNameWithoutExtension)
-                            fileName.Extension
-    let newFile = fileName.Directory |> IoHelpers.GetFile newFileName
-    IoHelpers.XDocSaver newFile xdoc
+let SxSXDocLoader (fileName : FileInfo) : XDocument option =
+    let orgFileName = fileName.FullName.Replace("-full-build.", ".") |> FileInfo
+    if orgFileName.Exists then Some (XDocument.Load (orgFileName.FullName))
+    else None
 
 let private convertMsBuild (repos : Repository set) (sxs : bool) =
     let projects = repos |> Set.map (fun x -> x.Projects)
                          |> Set.unionMany
-    let projSaver = sxs ? (SxSXDocSaver, IoHelpers.XDocSaver)
-
+    let projLoader = sxs ? (SxSXDocLoader, IoHelpers.XDocLoader)
+  
     Generators.MSBuild.GenerateProjects projects IoHelpers.XDocSaver
-    Generators.MSBuild.ConvertProjects projects IoHelpers.XDocLoader projSaver
+    Generators.MSBuild.ConvertProjects projects projLoader IoHelpers.XDocSaver
     if sxs |> not then Generators.MSBuild.RemoveUselessStuff projects
 
 let Convert builder (repos : Repository set) (sxs : bool) =

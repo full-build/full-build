@@ -139,8 +139,15 @@ let private getPaketPackages (prjDoc : XDocument)  =
     paketPkgs
 
 // NOTE: should be private
-let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryId) (file : FileInfo) =
-    let relativeProjectFile = IoHelpers.ComputeRelativeFilePath repoDir file
+let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryId) (sxs : bool) (file : FileInfo) =
+    let tmpFile = IoHelpers.ComputeRelativeFilePath repoDir file
+    let relativeProjectFile = if sxs then 
+                                let toto = sprintf "%s-full-build%s" 
+                                                (tmpFile |> Path.GetFileNameWithoutExtension) 
+                                                (tmpFile |> Path.GetExtension)
+                                Path.Combine(Path.GetDirectoryName tmpFile, toto)
+                              else tmpFile
+
     let xprj = match xdocLoader file with
                | Some x -> x
                | _ -> failwithf "Failed to load project %A" file.FullName
@@ -190,8 +197,8 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                   PackageReferences = pkgRefs
                   ProjectReferences = prjRefs } }
 
-let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (file : FileInfo) : ProjectDescriptor =
+let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (sxs : bool) (file : FileInfo) : ProjectDescriptor =
     try
-        parseProjectContent IoHelpers.XDocLoader repoDir repoRef file
+        parseProjectContent IoHelpers.XDocLoader repoDir repoRef sxs file
     with
         e -> exn(sprintf "Failed to parse project %A" (file.FullName), e) |> raise

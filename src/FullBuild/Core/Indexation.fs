@@ -34,7 +34,7 @@ let private projectCanBeProcessed (sxs : bool) (fileName : FileInfo) =
 let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) (sxs : bool) =
     repoDir |> IoHelpers.FindKnownProjects
             |> Seq.filter (projectCanBeProcessed sxs)
-            |> Seq.map (parser repoDir repoRef)
+            |> Seq.map (parser repoDir repoRef sxs)
 
 let private printParseStatus (repoDir : DirectoryInfo) =
     let repo = RepositoryId.from(repoDir.Name)
@@ -207,7 +207,14 @@ let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Grap
         let repo = kvp.Key
         let projects = kvp.Value
         let currentProjects = previousAntho.Projects |> Set.filter (fun x -> x.Repository = kvp.Key)
-        if currentProjects <> projects then failwithf "Repository %s must be indexed" repo.toString
+        if currentProjects <> projects then 
+            for currentProject in currentProjects do
+                printfn "%A" currentProject
+            printfn "====================="
+            for project in projects do
+                printfn "%A" project
+            
+            failwithf "Repository %s must be indexed" repo.toString
 
 let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
     let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
