@@ -144,9 +144,12 @@ type ListApplications =
     { Version : string option }
 
 type Query =
-    { View : string  option
+    { View : string option
+      Source : RepositoryId option
+      Destination : RepositoryId option
       UnusedProjects : bool
-      UsedPackages : bool }
+      UsedPackages : bool 
+      References : bool }
 
 [<RequireQualifiedAccess>]
 type MainCommand =

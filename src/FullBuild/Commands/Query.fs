@@ -69,3 +69,16 @@ let Query (queryInfo : CLI.Commands.Query) =
                            queryPackages view.Projects
         | _ -> queryPackages graph.Projects
 
+    if queryInfo.References then
+        let (src, dst) = match (queryInfo.Source, queryInfo.Destination) with
+                         | (Some x, Some y) -> (x, y)
+                         | (_,_) -> failwithf "Expecting source and destination repositories"
+
+        let (srcName, dstName) = (src.toString, dst.toString)
+        let srcRepo = graph.Repositories |> Seq.find (fun x -> x.Name = srcName)
+        let dstRepo = graph.Repositories |> Seq.find (fun x -> x.Name = dstName)
+        for project in srcRepo.Projects do
+            for refProject in project.References do
+                if refProject.Repository = dstRepo then
+                    printfn "%s -> %s" project.ProjectId refProject.ProjectId
+

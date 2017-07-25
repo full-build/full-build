@@ -286,12 +286,12 @@ let private convertProject (xproj : XDocument) (project : Project) =
                         XAttribute (NsNone + "Project", importFile))
         cproj.Root.LastNode.AddAfterSelf(import)
 
-    // move all <Import /> before the first ItemGroup (ie: source code)
-    let allImports = cproj.Descendants(NsMsBuild + "Import").ToList()
-    let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
-    for import in allImports do
-        import.Remove()
-        firstItemGroup.AddBeforeSelf(import)
+//    // move all <Import /> before the first ItemGroup (ie: source code)
+//    let allImports = cproj.Descendants(NsMsBuild + "Import").ToList()
+//    let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
+//    for import in allImports do
+//        import.Remove()
+//        firstItemGroup.AddBeforeSelf(import)
     cproj
 
 

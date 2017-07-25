@@ -16,15 +16,14 @@ module Tools.Vcs
 
 open Graph
 open System.IO
-open VcsGit
 
-let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gitFun =
+let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gitFun svnFun hgFun =
     let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name
     let f = match vcsType with
             | VcsType.Git -> gitFun
             | VcsType.Gerrit -> gitFun
-            | VcsType.Hg -> failwith "Hg is not implemented"
-            | VcsType.Svn -> failwith "Svn is not implemented"
+            | VcsType.Hg -> hgFun
+            | VcsType.Svn -> svnFun
     f repoDir
 
 
@@ -33,41 +32,37 @@ let Unclone (wsDir : DirectoryInfo) (repo : Repository) =
     if repoDir.Exists then repoDir.Delete(true)
 
 let Clone (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) : Exec.ExecResult =
-    let gitCloneFunc = if repo.Vcs = VcsType.Gerrit then GerritClone repo
-                                                    else GitClone repo
-    (chooseVcs wsDir repo.Vcs repo gitCloneFunc) repo.Uri shallow
-
-let Tip (wsDir : DirectoryInfo) (repo : Repository) =
-    (chooseVcs wsDir repo.Vcs repo GitTip).[0]
+    let gitCloneFunc = if repo.Vcs = VcsType.Gerrit then VcsGit.GerritClone repo
+                                                    else VcsGit.GitClone repo
+    let svnClone = VcsSvn.SvnClone
+    let hgClone = VcsHg.HgClone
+    (chooseVcs wsDir repo.Vcs repo gitCloneFunc svnClone hgClone) repo.Uri shallow
 
 // version : None ==> master
 let Checkout (wsDir : DirectoryInfo) (repo : Repository) (version : string) =
-    (chooseVcs wsDir repo.Vcs repo GitCheckout) version
+    (chooseVcs wsDir repo.Vcs repo VcsGit.GitCheckout VcsSvn.SvnCheckout VcsHg.HgCheckout) version
 
 let Ignore (wsDir : DirectoryInfo) (repo : Repository) =
-    chooseVcs wsDir repo.Vcs repo  GitIgnore
+    chooseVcs wsDir repo.Vcs repo  VcsGit.GitIgnore VcsSvn.SvnIgnore VcsHg.HgIgnore
 
 let Pull (wsDir : DirectoryInfo) (repo : Repository) (rebase : bool) : Exec.ExecResult =
-    (chooseVcs wsDir repo.Vcs repo GitPull) rebase
+    (chooseVcs wsDir repo.Vcs repo VcsGit.GitPull VcsSvn.SvnPull VcsHg.HgPull) rebase
 
 let Clean (wsDir : DirectoryInfo) (repo : Repository) =
-    (chooseVcs wsDir repo.Vcs repo GitClean) repo
+    (chooseVcs wsDir repo.Vcs repo VcsGit.GitClean VcsSvn.SvnClean VcsHg.HgClean) repo
 
 // only used in Baselines
 let Log (wsDir : DirectoryInfo) (repo : Repository) (version : string) =
-    (chooseVcs wsDir repo.Vcs repo GitHistory) version
-
-let LastCommit (wsDir : DirectoryInfo) (repo : Repository) (relativeFile : string) =
-    (chooseVcs wsDir repo.Vcs repo GitLastCommit) relativeFile
+    (chooseVcs wsDir repo.Vcs repo VcsGit.GitHistory VcsSvn.SvnHistory VcsHg.HgHistory) version
 
 let FindLatestMatchingTag (wsDir : DirectoryInfo) (repo : Repository) (filter : string) : string option =
-    (chooseVcs wsDir repo.Vcs repo GitFindLatestMatchingTag) filter
+    (chooseVcs wsDir repo.Vcs repo VcsGit.GitFindLatestMatchingTag VcsSvn.SvnFindLatestMatchingTag VcsHg.HgFindLatestMatchingTag) filter
 
 let TagToHash (wsDir : DirectoryInfo) (repo : Repository) (tag : string) : string =
-    (chooseVcs wsDir repo.Vcs repo GitTagToHash) tag
+    (chooseVcs wsDir repo.Vcs repo VcsGit.GitTagToHash VcsSvn.SvnTagToHash VcsHg.HgTagToHash) tag
 
 let Head (wsDir : DirectoryInfo) (repo : Repository) : string =
-    (chooseVcs wsDir repo.Vcs repo GitHead) ()
+    (chooseVcs wsDir repo.Vcs repo VcsGit.GitHead VcsSvn.SvnHead VcsHg.HgHead) ()
    
 let Tag (wsDir : DirectoryInfo) (repo : Repository) (tag : string) (comment : string) : Exec.ExecResult =
-    (chooseVcs wsDir repo.Vcs repo GitTag) tag comment
+    (chooseVcs wsDir repo.Vcs repo VcsGit.GitTag VcsSvn.SvnTag VcsHg.HgTag) tag comment

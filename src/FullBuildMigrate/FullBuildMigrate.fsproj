@@ -54,8 +54,6 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Import Project="$(FSharpTargetsPath)" />
   <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
-  <Import Project="$(SolutionDir)\.full-build\packages\fsharp.configuration\package.targets" />
-  <Import Project="$(SolutionDir)\.full-build\packages\fsharp.core\package.targets" />
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
@@ -91,4 +89,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Import Project="$(SolutionDir)\.full-build\packages\fsharp.configuration\package.targets" />
+  <Import Project="$(SolutionDir)\.full-build\packages\fsharp.core\package.targets" />
 </Project>
