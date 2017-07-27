@@ -63,3 +63,6 @@ let HgHead (repoDir : DirectoryInfo) () =
 
 let HgTag (repoDir : DirectoryInfo) (tag : string) (comment : string) =
     failwithf "Tag is not supported for Mercurial repository"
+
+let HgLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
+    failwithf "Last Commit is not supported for Mercurial repository"
