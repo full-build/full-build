@@ -55,6 +55,9 @@ let Clean (wsDir : DirectoryInfo) (repo : Repository) =
 let Log (wsDir : DirectoryInfo) (repo : Repository) (version : string) =
     (chooseVcs wsDir repo.Vcs repo VcsGit.GitHistory VcsSvn.SvnHistory VcsHg.HgHistory) version
 
+let LastCommit (wsDir : DirectoryInfo) (repo : Repository) (relativeFile : string) =
+    (chooseVcs wsDir repo.Vcs repo VcsGit.GitLastCommit VcsSvn.SvnLastCommit VcsHg.HgLastCommit) relativeFile
+
 let FindLatestMatchingTag (wsDir : DirectoryInfo) (repo : Repository) (filter : string) : string option =
     (chooseVcs wsDir repo.Vcs repo VcsGit.GitFindLatestMatchingTag VcsSvn.SvnFindLatestMatchingTag VcsHg.HgFindLatestMatchingTag) filter
 

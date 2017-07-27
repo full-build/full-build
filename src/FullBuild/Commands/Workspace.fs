@@ -24,15 +24,13 @@ open Collections
 open System
 open Graph
 
-
 let pullMatchingBinaries () =
     let graph = Graph.load()
-    let baselineRepository = Baselines.from graph
-    let baseline = baselineRepository.FindBaseline ()
-    let tag = baseline.Info.Format()
-    Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir tag
-
-
+    let baselineFactory = Baselines.from graph
+    match baselineFactory.FindMatchingBuildInfo() with 
+    | Some buildInfo -> Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir buildInfo.BuildBranch (Some buildInfo.BuildNumber)
+    | None -> printfn "No latest build found. The binaries were not pulled"
+    
 
 let Restore () =
     Core.Package.RestorePackages ()
@@ -106,14 +104,15 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
         Environment.CurrentDirectory <- currDir
 
 let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
-    let tag = checkoutInfo.Version |> Baselines.TagInfo.Parse
-
-    // checkout repositories
-    DisplayInfo ".full-build"
+    let tag = checkoutInfo.Version |> Baselines.BuildInfo.Parse
+    
+    // pull binaries
     let graph = Graph.load()
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let mainRepo = graph.MasterRepository
-    Tools.Vcs.Checkout wsDir mainRepo checkoutInfo.Version |> Exec.CheckResponseCode
+    Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir tag.BuildBranch (Some tag.BuildNumber)
+    
+    let graph = Graph.load()
+    let baseline = Baselines.from graph
+    let pulledBaseline = baseline.GetBaseline() |> Option.get
 
     let checkoutRepo wsDir (version : string) (repo : Repository) = async {
         let res = Tools.Vcs.Checkout wsDir repo version
@@ -121,15 +120,16 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     }
 
     // checkout each repository now
-    let graph = Graph.load()
-    let repos = graph.Repositories
-    let branchResults = repos |> Seq.filter (fun x -> x.IsCloned)
-                              |> Threading.ParExec (checkoutRepo wsDir checkoutInfo.Version)
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let branchResults = 
+        pulledBaseline.Bookmarks
+        |> Seq.filter (fun b -> b.Repository.IsCloned)
+        |> Threading.ParExec (fun b -> checkoutRepo wsDir b.Version b.Repository)
     branchResults |> Exec.CheckMultipleResponseCode
 
-    Configuration.SaveBranch tag.Branch
+    Configuration.SaveBranch tag.BuildBranch
     Restore()
-    Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir checkoutInfo.Version
+    
 
 
 let Init (initInfo : CLI.Commands.InitWorkspace) =
@@ -270,10 +270,12 @@ let History (historyInfo : CLI.Commands.History) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Graph.load()
     let baselineRepository = Baselines.from graph
-    let previousBaseline = baselineRepository.FindBaseline ()
-    let baseline = baselineRepository.CreateBaseline "temp"
-
-    let diff = previousBaseline - baseline
+    
+    let diff = 
+        let baseline = baselineRepository.GetSourcesBaseline() 
+        match baselineRepository.GetBaseline () with 
+        | Some previousBaseline -> previousBaseline - baseline
+        | None -> baseline.Bookmarks
 
     let revisions = seq {
         // other repositories then
@@ -353,19 +355,20 @@ let CheckMinVersion () =
 
 let Push (pushInfo : CLI.Commands.PushWorkspace) =
     let graph = Graph.load()
-
-    let baselines = Baselines.from graph
     let comment = pushInfo.Incremental ? ("incremental", "full")
-    let baseline = baselines.CreateBaseline pushInfo.Version
+    let baselineFactory = Baselines.from graph
 
     // copy bin content
-    graph.Anthology |> Configuration.SaveConsolidatedAnthology
-    Core.BuildArtifacts.Publish graph baseline.Info
-    baseline.Save comment
+    graph.Anthology |> Configuration.SaveConsolidatedAnthology    
+    baselineFactory.UpdateBaseline pushInfo.Version
+    Core.BuildArtifacts.Publish graph 
 
+    // tag master repository
+    baselineFactory.TagMasterRepository pushInfo.Version comment 
+    
     // print tag information
-    let tag = baseline.Info.Format()
-    printfn "[version] %s" tag
+    printfn "[pushed version] %s" pushInfo.Version
+
 
 let Doctor () =
     if Doctor.Check() then failwith "Doctor found something wrong !"

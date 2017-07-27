@@ -88,3 +88,6 @@ let SvnHead (repoDir : DirectoryInfo) () =
 
 let SvnTag (repoDir : DirectoryInfo) (tag : string) (comment : string) =
     failwithf "Tag is not supported for Subversion repository"
+
+let SvnLastCommit (repoDir : DirectoryInfo) (relativeFile : string) =
+    failwithf "Last Commit is not supported for Subversion repository"
