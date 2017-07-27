@@ -189,6 +189,7 @@ type Application =
 type Globals =
     { MinVersion : string
       Binaries : string
+      SideBySide : bool
       NuGets : RepositoryUrl list
       MasterRepository : Repository
       Repositories : BuildableRepository set }

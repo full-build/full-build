@@ -27,6 +27,7 @@ let Serialize (artifacts : Globals) =
     let config = new GlobalsConfig()
     config.binaries <- artifacts.Binaries
     config.minversion <- artifacts.MinVersion
+    config.sxs <- artifacts.SideBySide
 
     config.nugets.Clear()
     for nuget in artifacts.NuGets do
@@ -88,6 +89,7 @@ let Deserialize (content) =
     let mainRepo = convertToRepository (config.mainrepository)
     { MinVersion = config.minversion
       Binaries = config.binaries
+      SideBySide = config.sxs
       NuGets = convertToNuGets (config.nugets |> List.ofSeq)
       MasterRepository = mainRepo
       Repositories = repos }

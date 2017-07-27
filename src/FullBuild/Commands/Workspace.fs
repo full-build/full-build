@@ -82,7 +82,7 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     let currDir = Environment.CurrentDirectory
     try
         Environment.CurrentDirectory <- wsDir.FullName
-        let graph = Graph.create createInfo.Type createInfo.MasterRepository createInfo.MasterArtifacts
+        let graph = Graph.create createInfo.Type createInfo.MasterRepository createInfo.MasterArtifacts createInfo.SxS
         Tools.Vcs.Clone wsDir graph.MasterRepository true |> IoHelpers.PrintOutput "Cloning master repository"
                                                           |> Exec.CheckResponseCode
         graph.Save()
@@ -323,7 +323,7 @@ let convert (convertInfo : CLI.Commands.ConvertRepositories) =
         let (builder, repos) = builder2repo
         for repo in repos do
             IoHelpers.DisplayInfo ("converting "+ repo.Name)
-            Core.Conversion.Convert builder (Set.singleton repo)
+            Core.Conversion.Convert builder (Set.singleton repo) graph.SideBySide
 
     // setup additional files for views to work correctly
     let confDir = Env.GetFolder Env.Folder.Config

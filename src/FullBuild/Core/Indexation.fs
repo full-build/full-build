@@ -21,28 +21,35 @@ open XmlHelpers
 open Anthology
 open Collections
 
-let private projectCanBeProcessed (fileName : FileInfo) =
-    let xdoc = XDocument.Load (fileName.FullName)
-    let fbIgnore = !> xdoc.Descendants(NsMsBuild + "FullBuildIgnore").FirstOrDefault() : string
-    match bool.TryParse(fbIgnore) with
-    | (true, x) -> not <| x
-    | _ -> true
+let private projectCanBeProcessed (sxs : bool) (fileName : FileInfo) =
+    let fbExtProj = "-full-build" + fileName.Extension
+    if fileName.Name.Contains(fbExtProj) then
+        sxs
+    else 
+        let sxsProj = fileName.FullName.Replace(fileName.Extension, fbExtProj) |> FileInfo
+        if sxsProj.Exists then sxs |> not
+        else 
+            let xdoc = XDocument.Load (fileName.FullName)
+            let fbIgnore = !> xdoc.Descendants(NsMsBuild + "FullBuildIgnore").FirstOrDefault() : string
+            match bool.TryParse(fbIgnore) with
+            | (true, x) -> not <| x
+            | _ -> true
 
-let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) =
+let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) (sxs : bool) =
     repoDir |> IoHelpers.FindKnownProjects
-            |> Seq.filter projectCanBeProcessed
-            |> Seq.map (parser repoDir repoRef)
+            |> Seq.filter (projectCanBeProcessed sxs)
+            |> Seq.map (parser repoDir repoRef sxs)
 
 let private printParseStatus (repoDir : DirectoryInfo) =
     let repo = RepositoryId.from(repoDir.Name)
     IoHelpers.DisplayInfo ("indexing "+ repo.toString)
     repoDir
 
-let private parseWorkspaceProjects parser (wsDir : DirectoryInfo) (repos : Repository seq) =
+let private parseWorkspaceProjects parser (wsDir : DirectoryInfo) (repos : Repository seq) (sxs : bool) =
     repos |> Seq.map (fun x -> GetSubDirectory x.Name.toString wsDir)
           |> Seq.filter (fun x -> x.Exists)
           |> Seq.map printParseStatus
-          |> Seq.map (fun x -> parseRepositoryProjects parser (RepositoryId.from(x.Name)) x)
+          |> Seq.map (fun x -> parseRepositoryProjects parser (RepositoryId.from(x.Name)) x sxs)
           |> Seq.concat
           |> List.ofSeq
 
@@ -139,7 +146,7 @@ let IndexWorkspace wsDir (globals : Globals) (antho : Anthology) (grepos : Graph
     let repos = globals.Repositories |> Set.filter (fun x -> grepos |> Set.exists (fun y -> y.Name = x.Repository.Name.toString))
                                      |> Set.filter (fun x -> x.Builder = BuilderType.MSBuild)
                                      |> Set.map (fun x -> x.Repository)
-    let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos
+    let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos globals.SideBySide
 
     let projects = parsedProjects |> List.map (fun x -> x.Project)
                                   |> Set
@@ -204,7 +211,8 @@ let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Grap
         let repo = kvp.Key
         let projects = kvp.Value
         let currentProjects = previousAntho.Projects |> Set.filter (fun x -> x.Repository = kvp.Key)
-        if currentProjects <> projects then failwithf "Repository %s must be indexed" repo.toString
+        if currentProjects <> projects then
+            failwithf "Repository %s must be indexed" repo.toString
 
 let SaveAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
     let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)

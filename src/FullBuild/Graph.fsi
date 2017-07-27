@@ -114,6 +114,7 @@ with
 
 
 and [<Sealed>] Graph =
+    member SideBySide : bool
     member MinVersion: string
     member MasterRepository : Repository
     member Repositories : Repository set
@@ -152,6 +153,7 @@ val from : Anthology.Globals
 val create: vcs : VcsType
          -> uri : string
          -> artifacts : string
+         -> sxs : bool
          -> Graph
 
 val init: uri : string

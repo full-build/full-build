@@ -22,7 +22,7 @@ let private generateProjectNode (project : Project) =
     let isTest = project.HasTests
     let cat = isTest ? ( "TestProject", "Project")
 
-    let label = System.IO.Path.GetFileNameWithoutExtension(project.ProjectFile)
+    let label = System.IO.Path.GetFileNameWithoutExtension(project.ProjectFile).Replace("-full-build", "")
     let output = project.Output.Name
     let outputType = project.OutputType |> StringHelpers.toString
  

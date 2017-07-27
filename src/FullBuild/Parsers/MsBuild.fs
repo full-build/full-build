@@ -139,8 +139,15 @@ let private getPaketPackages (prjDoc : XDocument)  =
     paketPkgs
 
 // NOTE: should be private
-let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryId) (file : FileInfo) =
-    let relativeProjectFile = IoHelpers.ComputeRelativeFilePath repoDir file
+let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryId) (sxs : bool) (file : FileInfo) =
+    let tmpFile = IoHelpers.ComputeRelativeFilePath repoDir file
+    let relativeProjectFile, sxsRoundtrip = 
+        let fbExtProj = "-full-build" + file.Extension
+        if sxs then
+            if tmpFile.Contains(fbExtProj) then tmpFile, true
+            else tmpFile.Replace(file.Extension, fbExtProj), false
+        else tmpFile, false
+
     let xprj = match xdocLoader file with
                | Some x -> x
                | _ -> failwithf "Failed to load project %A" file.FullName
@@ -165,12 +172,13 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
 
     let assemblies = getAssemblies xprj
     let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
-    let nugetPackages = match xdocLoader pkgFile with
-                        | Some xnuget -> getNuGetPackages xnuget
-                        | _ -> Set.empty
+    let nugetPackages = if sxsRoundtrip then Set.empty
+                        else match xdocLoader pkgFile with
+                             | Some xnuget -> getNuGetPackages xnuget
+                             | _ -> Set.empty
     let fbPackages = getFullBuildPackages xprj
-    let pkgRefPackages = getPackageReferencePackages xprj
-    let paketPackages = getPaketPackages xprj
+    let pkgRefPackages = if sxsRoundtrip then Set.empty else getPackageReferencePackages xprj
+    let paketPackages = if sxsRoundtrip then Set.empty else getPaketPackages xprj
     let packages = nugetPackages + fbPackages + pkgRefPackages + paketPackages
     let pkgRefs = packages |> Set.map (fun x -> x.Id)
     let hasTests = assemblyRef.toString.EndsWith("tests")
@@ -190,8 +198,8 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                   PackageReferences = pkgRefs
                   ProjectReferences = prjRefs } }
 
-let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (file : FileInfo) : ProjectDescriptor =
+let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (sxs : bool) (file : FileInfo) : ProjectDescriptor =
     try
-        parseProjectContent IoHelpers.XDocLoader repoDir repoRef file
+        parseProjectContent IoHelpers.XDocLoader repoDir repoRef sxs file
     with
         e -> exn(sprintf "Failed to parse project %A" (file.FullName), e) |> raise

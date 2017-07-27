@@ -156,7 +156,6 @@
     <None Include="Examples\Library.nuspec" />
     <None Include="Examples\ghreleasefeed.json" />
     <None Include="Examples\anthology.yaml" />
-    <None Include="Examples\baseline.yaml" />
     <None Include="Examples\globals.yaml" />
     <None Include="Examples\view.yaml" />
   </ItemGroup>
