@@ -8,6 +8,7 @@ setlocal
 
 set BUILD_VERSION=%1
 set BUILD_STATUS=%2
+set
 
 call install-tools.cmd || goto :ko
 call build-bootstrap.cmd || goto :ko
