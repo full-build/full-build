@@ -3,14 +3,13 @@ rem 1/ first time is to bootstrap the build
 rem 2/ second time is to build using new version (ie: self build)
 rem both build ensure compatibility on version update
 
-@echo off
+rem @echo off
 setlocal
 
 set BUILD_VERSION=%1
 set BUILD_STATUS=%2
 
-set
-where msbuild.exe
+if "%VSINSTALLDIR%" == "" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
 
 call install-tools.cmd || goto :ko
 call build-bootstrap.cmd || goto :ko

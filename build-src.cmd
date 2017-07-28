@@ -6,9 +6,6 @@ if [%VERSION%] == [] set VERSION=999.0.0
 echo building version %VERSION%
 set VERSION=%VERSION%
 
-if [%VSINSTALLDIR%] == [] set VSINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\
-if [%VisualStudioVersion%] == [] set VisualStudioVersion=15.0
-
 set HERE=%~dp0
 set PATH=%VSINSTALLDIR%\MSBuild\%VisualStudioVersion%\Bin;%HERE%\tools;%PATH%
 
