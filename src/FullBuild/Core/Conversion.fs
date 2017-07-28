@@ -22,7 +22,10 @@ open System.Xml.Linq
 
 let SxSXDocLoader (fileName : FileInfo) : XDocument option =
     let fbExtProject = "-full-build" + fileName.Extension
-    let orgFileName = fileName.FullName.Replace(fbExtProject, fileName.Extension) |> FileInfo
+    let orgFileName = if fileName.Exists |> not then 
+                          fileName.FullName.Replace(fbExtProject, fileName.Extension) |> FileInfo
+                      else 
+                          fileName
     IoHelpers.XDocLoader orgFileName
 
 let private convertMsBuild (repos : Repository set) (sxs : bool) =
