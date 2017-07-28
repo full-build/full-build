@@ -51,6 +51,7 @@ type private TokenOption =
     | Push
     | Status
     | SxS
+    | Cycle
  
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -83,6 +84,7 @@ let private (|TokenOption|_|) (token : string) =
     | "--push" -> Some TokenOption.Push
     | "--status" -> Some TokenOption.Status
     | "--sxs" -> Some TokenOption.SxS
+    | "--cycle" -> Some TokenOption.Cycle
     | _ -> None
 
 type private Token =
@@ -490,18 +492,20 @@ let rec private commandUpgrade (verStatus : string) (args : string list) =
     | [Param processId] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))
     | _ -> Command.Error MainCommand.Upgrade
 
-let rec private commandQuery (project : bool) (nuget : bool) (refs : bool) (view : string option) (src : RepositoryId option) (dst : RepositoryId option) (args : string list) =
+let rec private commandQuery (project : bool) (nuget : bool) (refs : bool) (cycle : bool) (view : string option) (src : RepositoryId option) (dst : RepositoryId option) (args : string list) =
     match args with
-    | TokenOption TokenOption.UnusedProjects :: tail -> tail |> commandQuery true nuget refs view None None
-    | TokenOption TokenOption.Packages :: tail -> tail |> commandQuery project true refs view None None
-    | TokenOption TokenOption.View :: ViewId viewName :: tail -> tail |> commandQuery project true refs (Some viewName) None None
-    | TokenOption TokenOption.Ref :: RepositoryId src :: RepositoryId dst :: tail -> tail |> commandQuery project nuget true view (Some src) (Some dst)
-    | [] when project || nuget || refs -> Command.Query { UnusedProjects = project
-                                                          UsedPackages = nuget
-                                                          References = refs
-                                                          View = view 
-                                                          Source = src
-                                                          Destination = dst }
+    | TokenOption TokenOption.UnusedProjects :: tail -> tail |> commandQuery true nuget refs cycle view None None
+    | TokenOption TokenOption.Packages :: tail -> tail |> commandQuery project true refs cycle view None None
+    | TokenOption TokenOption.View :: ViewId viewName :: tail -> tail |> commandQuery project true refs cycle (Some viewName) None None
+    | TokenOption TokenOption.Ref :: RepositoryId src :: RepositoryId dst :: tail -> tail |> commandQuery project nuget true cycle view (Some src) (Some dst)
+    | TokenOption TokenOption.Cycle :: tail -> tail |> commandQuery project nuget refs true view src dst
+    | [] when project || nuget || refs || cycle -> Command.Query { UnusedProjects = project
+                                                                   UsedPackages = nuget
+                                                                   References = refs
+                                                                   View = view 
+                                                                   Source = src
+                                                                   Destination = dst 
+                                                                   Cycle = cycle}
     | _ -> Command.Error MainCommand.Query
 
 
@@ -585,7 +589,7 @@ let Parse (args : string list) : Command =
     | Token Token.App :: Token Token.Drop :: cmdArgs -> cmdArgs |> commandDropApp
     | Token Token.App :: Token Token.List :: cmdArgs -> cmdArgs |> commandListApp None
 
-    | Token Token.Query :: cmdArgs -> cmdArgs |> commandQuery false false false None None None
+    | Token Token.Query :: cmdArgs -> cmdArgs |> commandQuery false false false false None None None
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
     | [FullBuildView viewFile] -> Command.FullBuildView { FilePath = viewFile }
@@ -648,7 +652,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
         [MainCommand.Workspace; MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
-        [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages> [--view <viewId>] : query items"
+        [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages|--ref|--cycle> [--view <viewId>] : query items"
         [MainCommand.Workspace; MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
         [MainCommand.Workspace; MainCommand.UpgradeGuids], "update-guids : DANGER! change guids of all projects in given repository (interactive command)"
         [MainCommand.Unknown], ""
@@ -669,7 +673,7 @@ let UsageContent() =
         [MainCommand.View; MainCommand.AlterView], "view alter [--default] [--src] [--ref] <viewId> : alter view"
         [MainCommand.Unknown], ""
         [MainCommand.App; MainCommand.Publish], "publish [--view <viewId>] [--version <version>] [--status <status>] <appId-wildcard> : publish artifacts"
-        [MainCommand.App; MainCommand.AddApp], "app add <appId> <copy|zip> <projectId>+ : create new application from given project ids"
+        [MainCommand.App; MainCommand.AddApp], "app add <appId> <copy|zip|docker> <projectId>+ : create new application from given project ids"
         [MainCommand.App; MainCommand.DropApp], "app drop <appId> : drop application"
         [MainCommand.App; MainCommand.ListApp], "app list [--version <buildNumber>] : list applications" ]
 

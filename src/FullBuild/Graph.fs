@@ -217,7 +217,7 @@ with
             _ -> failwithf "Failure to find referencedBy for repository %A" this.Name
 
     static member Closure (seeds : Repository set) =
-        Algorithm.Closure seeds (fun x -> x.Name) (fun x -> x.References) (fun x -> x.ReferencedBy)
+        Algorithm.Closure false seeds (fun x -> x.Name) (fun x -> x.References) (fun x -> x.ReferencedBy)
 
     member this.Delete () =
         let repositoryId = this.Repository.Name
@@ -312,7 +312,7 @@ with
         let getRefs (x : Project) = x.References |> Set.filter (fun x -> repositories |> Set.contains x.Repository)
         let getRefBy (x : Project) = x.ReferencedBy |> Set.filter (fun x -> repositories |> Set.contains x.Repository)
 
-        Algorithm.Closure seeds (fun x -> x.ProjectId) getRefs getRefBy
+        Algorithm.Closure false seeds (fun x -> x.ProjectId) getRefs getRefBy
 
 // =====================================================================================================
 

@@ -82,3 +82,12 @@ let Query (queryInfo : CLI.Commands.Query) =
                 if refProject.Repository = dstRepo then
                     printfn "%s -> %s" project.ProjectId refProject.ProjectId
 
+    if queryInfo.Cycle then
+        let repos = graph.Repositories |> Array.ofSeq
+        for repo in repos do
+            let seeds = repo |> Set.singleton
+            try
+                Algorithm.Closure true seeds (fun x -> x.Name) (fun x -> x.References) (fun x -> x.ReferencedBy)
+                    |> ignore
+            with
+                ex -> printfn "%s: %s" repo.Name ex.Message
