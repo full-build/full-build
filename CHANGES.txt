@@ -1,5 +1,8 @@
 v4.2
   * baseline is tagless on repositories
+  * add support for side-by-side
+  * query references between repositories
+  * query cycle between repositories
 
 v4.1
   * apps are supported in repositories
