@@ -44,7 +44,7 @@ Note that before using Visual Studio or Xamarin Studio, you have to compile firs
 # contribution
 Contributions are welcomed. Ensure you have read CONTRIBUTING.md and LICENSE.txt before sending PR. Ensure you discussed with the maintainers before submitting a PR please.
 
-# licence
+# license
    Copyright 2014-2017 Pierre Chalamet
 
    Licensed under the Apache License, Version 2.0 (the "License");
