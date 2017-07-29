@@ -68,7 +68,7 @@
     <Compile Include="EnvTests.fs" />
     <Compile Include="ExecTests.fs" />
     <Compile Include="TagTests.fs" />
-    <Compile Include="D:\src\full-build\src\FullBuild.Tests\AlgorithmTests.fs" />
+    <Compile Include="AlgorithmTests.fs" />
     <Compile Include="GraphFactoryTests.fs" />
     <Compile Include="MsBuildHelpersTests.fs" />
     <Compile Include="AnthologyTests.fs" />
