@@ -3,7 +3,7 @@ rem 1/ first time is to bootstrap the build
 rem 2/ second time is to build using new version (ie: self build)
 rem both build ensure compatibility on version update
 
-rem @echo off
+@echo off
 setlocal
 
 set BUILD_VERSION=%1
