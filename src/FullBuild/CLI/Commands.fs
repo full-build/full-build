@@ -150,7 +150,8 @@ type Query =
       Destination : RepositoryId option
       UnusedProjects : bool
       UsedPackages : bool 
-      References : bool }
+      References : bool 
+      Cycle : bool }
 
 [<RequireQualifiedAccess>]
 type MainCommand =
