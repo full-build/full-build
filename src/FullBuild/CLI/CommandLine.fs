@@ -652,7 +652,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
         [MainCommand.Workspace; MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
-        [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages|--ref|--cycle> [--view <viewId>] : query items"
+        [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages|--cycle> [--view <viewId>] : query items"
         [MainCommand.Workspace; MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
         [MainCommand.Workspace; MainCommand.UpgradeGuids], "update-guids : DANGER! change guids of all projects in given repository (interactive command)"
         [MainCommand.Unknown], ""
@@ -673,7 +673,7 @@ let UsageContent() =
         [MainCommand.View; MainCommand.AlterView], "view alter [--default] [--src] [--ref] <viewId> : alter view"
         [MainCommand.Unknown], ""
         [MainCommand.App; MainCommand.Publish], "publish [--view <viewId>] [--version <version>] [--status <status>] <appId-wildcard> : publish artifacts"
-        [MainCommand.App; MainCommand.AddApp], "app add <appId> <copy|zip|docker> <projectId>+ : create new application from given project ids"
+        [MainCommand.App; MainCommand.AddApp], "app add <appId> <copy|zip> <projectId>+ : create new application from given project ids"
         [MainCommand.App; MainCommand.DropApp], "app drop <appId> : drop application"
         [MainCommand.App; MainCommand.ListApp], "app list [--version <buildNumber>] : list applications" ]
 
