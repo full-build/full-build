@@ -64,7 +64,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
                 let res2 = graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
                                               |> Threading.ParExec (switchToBranch branch)
                 let res = res1 |> Seq.singleton |> Seq.append res2
-                if res |> Seq.exists (fun x -> x.ResultCode <> 0) then
+                if res |> Seq.exists (fun x -> x.Code <> 0) then
                     printfn "WARNING: failed to checkout some repositories"
 
                 Configuration.SaveBranch x

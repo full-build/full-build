@@ -14,14 +14,14 @@
 
 module IO
 
-type ExecResult =
-    { ResultCode: int
+type Result =
+    { Code: int
       Info : string
       Out: string list
       Error: string list }
 
 let private resultToError execResult =
-    if execResult.ResultCode <> 0 then (sprintf "Operation '%s' failed with error %d" execResult.Info execResult.ResultCode) |> Some
+    if execResult.Code <> 0 then (sprintf "Operation '%s' failed with error %d" execResult.Info execResult.Code) |> Some
     else None
 
 let GetOutput execResult =

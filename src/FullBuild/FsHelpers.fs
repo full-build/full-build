@@ -113,8 +113,8 @@ let EnsureExists (dir : DirectoryInfo) =
 
 let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) (readOnly : bool) =
     // http://ss64.com/nt/robocopy-exit.html
-    let checkRobocopyErrorCode (execResult : IO.ExecResult) =
-        if execResult.ResultCode > 7 then failwithf "Process failed with error %d" execResult.ResultCode
+    let checkRobocopyErrorCode (res : IO.Result) =
+        if res.Code > 7 then failwithf "Process failed with error %d" res.Code
 
     let currDir = CurrentFolder()
     let setRead = if readOnly then "/A+:R"

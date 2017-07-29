@@ -59,7 +59,7 @@ let private supervisedExec redirect (command : string) (args : string) (dir : Di
     let res = [ asyncCode ; asyncOut ; asyncErr ] |> Async.Parallel |> Async.RunSynchronously
     match res.[0], res.[1], res.[2] with
     | MonitorCommand.End code, MonitorCommand.Out out, MonitorCommand.Err err 
-            -> { IO.ResultCode=code
+            -> { IO.Code=code
                  IO.Out=out
                  IO.Error=err
                  IO.Info = sprintf "%s %s @ %s" command args dir.FullName }

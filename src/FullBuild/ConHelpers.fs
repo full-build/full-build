@@ -31,7 +31,7 @@ let ConsoleDisplay (c : ConsoleColor) (s : string) =
 let DisplayInfo msg = ConsoleDisplay ConsoleColor.Cyan ("- " + msg)
 let DisplayError msg = ConsoleDisplay ConsoleColor.Red msg
 
-let PrintOutput info (execResult : IO.ExecResult) =
+let PrintOutput info (execResult : IO.Result) =
     let rec printl lines =
         match lines with
         | line :: tail -> printfn "%s" line; printl tail
