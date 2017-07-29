@@ -52,7 +52,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
                      | Some x -> x
                      | None -> repo.Branch
             let res = Tools.Vcs.Checkout wsDir repo br
-            return res |> ConHelpers.PrintOutput repo.Name
+            return res |> ConsoleHelpers.PrintOutput repo.Name
         }
 
     match branchInfo.Branch with
@@ -83,7 +83,7 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     try
         Environment.CurrentDirectory <- wsDir.FullName
         let graph = Graph.create createInfo.Type createInfo.MasterRepository createInfo.MasterArtifacts createInfo.SxS
-        Tools.Vcs.Clone wsDir graph.MasterRepository true |> ConHelpers.PrintOutput "Cloning master repository"
+        Tools.Vcs.Clone wsDir graph.MasterRepository true |> ConsoleHelpers.PrintOutput "Cloning master repository"
                                                           |> IO.CheckResponseCode
         graph.Save()
 
@@ -116,7 +116,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
 
     let checkoutRepo wsDir (version : string) (repo : Repository) = async {
         let res = Tools.Vcs.Checkout wsDir repo version
-        return res |> ConHelpers.PrintOutput repo.Name
+        return res |> ConsoleHelpers.PrintOutput repo.Name
     }
 
     // checkout each repository now
@@ -139,7 +139,7 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         printf "[WARNING] Workspace already exists - skipping"
     else
         let graph = Graph.init initInfo.MasterRepository initInfo.Type
-        Tools.Vcs.Clone wsDir graph.MasterRepository false |> ConHelpers.PrintOutput "Cloning master repository"
+        Tools.Vcs.Clone wsDir graph.MasterRepository false |> ConsoleHelpers.PrintOutput "Cloning master repository"
                                                            |> IO.CheckResponseCode
 
         let currDir = Environment.CurrentDirectory
@@ -174,7 +174,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     if pullInfo.Sources then
         let cloneRepo wsDir rebase (repo : Repository) = async {
             let res = Tools.Vcs.Pull wsDir repo rebase
-            return res |> ConHelpers.PrintOutput repo.Name
+            return res |> ConsoleHelpers.PrintOutput repo.Name
         }
 
         graph.MasterRepository
@@ -217,7 +217,7 @@ let Exec (execInfo : CLI.Commands.Exec) =
             let args = sprintf @"/c ""%s""" execInfo.Command
 
             try
-                ConHelpers.DisplayInfo repo.Name
+                ConsoleHelpers.DisplayInfo repo.Name
 
                 if Env.IsMono () then Exec.Exec "sh" ("-c " + args) repoDir vars |> IO.CheckResponseCode
                 else Exec.Exec "cmd" args repoDir vars |> IO.CheckResponseCode
@@ -244,10 +244,10 @@ let Clean () =
         // clean existing repositories
         for repo in newGraph.Repositories do
             if repo.IsCloned then
-                ConHelpers.DisplayInfo repo.Name
+                ConsoleHelpers.DisplayInfo repo.Name
                 Tools.Vcs.Clean wsDir repo
 
-        ConHelpers.DisplayInfo newGraph.MasterRepository.Name
+        ConsoleHelpers.DisplayInfo newGraph.MasterRepository.Name
         Tools.Vcs.Clean wsDir newGraph.MasterRepository
 
 let UpdateGuid (updInfo : CLI.Commands.UpdateGuids) =
@@ -322,7 +322,7 @@ let convert (convertInfo : CLI.Commands.ConvertRepositories) =
     for builder2repo in builder2repos do
         let (builder, repos) = builder2repo
         for repo in repos do
-            ConHelpers.DisplayInfo ("converting "+ repo.Name)
+            ConsoleHelpers.DisplayInfo ("converting "+ repo.Name)
             Core.Conversion.Convert builder (Set.singleton repo) graph.SideBySide
 
     // setup additional files for views to work correctly

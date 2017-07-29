@@ -20,7 +20,7 @@ open Env
 let private asyncPublish (version : string) (app : Graph.Application) =
     async {
         try
-            ConHelpers.DisplayInfo app.Name
+            ConsoleHelpers.DisplayInfo app.Name
             Core.Publishers.PublishWithPublisher version app
         with
             exn -> raise (System.ApplicationException(sprintf "Failed to publish application %A" app.Name, exn))

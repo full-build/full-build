@@ -99,7 +99,7 @@
     <Compile Include="Threading.fs" />
     <Compile Include="IO.fs" />
     <Compile Include="Exec.fs" />
-    <Compile Include="ConHelpers.fs" />
+    <Compile Include="ConsoleHelpers.fs" />
     <Compile Include="FsHelpers.fs" />
     <Compile Include="Anthology.fs" />
     <Compile Include="Env.fs" />

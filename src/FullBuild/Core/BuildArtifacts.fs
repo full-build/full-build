@@ -95,9 +95,9 @@ let PullReferenceBinaries (artifacts : string) branch version =
                 branchDir.EnumerateDirectories() 
                 |> Seq.where(fun d -> d.Name |> System.Version.TryParse |> fun (success, version) -> success)
                 |> Seq.maxBy (fun d -> d.Name |> System.Version.Parse) 
-        ConHelpers.DisplayInfo (sprintf "Copying binaries %s" versionDir.Name)
+        ConsoleHelpers.DisplayInfo (sprintf "Copying binaries %s" versionDir.Name)
         let sourceBinDir = versionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
         let targetBinDir = Env.GetFolder Env.Folder.Bin
         FsHelpers.CopyFolder sourceBinDir targetBinDir false
     else
-        ConHelpers.DisplayInfo "[WARNING] No reference binaries found"
+        ConsoleHelpers.DisplayInfo "[WARNING] No reference binaries found"

@@ -50,5 +50,5 @@ let Save (histType : HistoryType) (revisions : (Graph.Repository*string list) se
 
     // print out changes
     for (repo, rev) in revisions do
-        ConHelpers.DisplayInfo repo.Name
+        ConsoleHelpers.DisplayInfo repo.Name
         rev |> List.iter (printfn "%s")

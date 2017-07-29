@@ -22,7 +22,7 @@ let private projectConsistencyCheck ((error,antho,globals) : bool * Anthology.An
     let hasErrors = unknowns <> Set.empty
     if hasErrors then
         let err = unknowns |> Seq.fold (fun s t -> sprintf "%s- %s\n" s t.toString) ""
-        ConHelpers.DisplayError "Invalid projects references:"
+        ConsoleHelpers.DisplayError "Invalid projects references:"
         printfn "%s" err
     (error || hasErrors, antho, globals)
 
@@ -33,7 +33,7 @@ let private repositoryConsistencyCheck ((error,antho,globals) : bool * Anthology
     let hasErrors = unknowns <> Set.empty
     if hasErrors then
         let err = unknowns |> Seq.fold (fun s t -> sprintf "%s- %s\n" s t.toString) ""
-        ConHelpers.DisplayError "Invalid repositories references:"
+        ConsoleHelpers.DisplayError "Invalid repositories references:"
         printfn "%s" err
     (error || unknowns <> Set.empty, antho, globals)
 
@@ -53,7 +53,7 @@ let checkFbProjectsInRepo ((error,antho,globals) : bool * Anthology.Anthology * 
     let hasErrors = repoWithoutProjects <> List.empty
     if hasErrors then
         let err = repoWithoutProjects |> Seq.fold (fun s t -> sprintf "%s- %s\n" s t.Repository.Name.toString) ""
-        ConHelpers.DisplayError "Found non indexed repositories:"
+        ConsoleHelpers.DisplayError "Found non indexed repositories:"
         printfn "%s" err
     (error || hasErrors, antho, globals)
 
@@ -65,7 +65,7 @@ let checkApps ((error,antho,globals) : bool * Anthology.Anthology * Anthology.Gl
     let hasErrors = unknowns <> Set.empty
     if hasErrors then
         let err = unknowns |> Seq.fold (fun s t -> sprintf "%s- %s\n" s t.toString) ""
-        ConHelpers.DisplayError "Found invalid application references:"
+        ConsoleHelpers.DisplayError "Found invalid application references:"
         printfn "%s" err
     (error || hasErrors, antho, globals)
 
@@ -76,7 +76,7 @@ let checkArtifactDir ((error,antho,globals) : bool * Anthology.Anthology * Antho
     let hasErrors = artifactDir.Exists |> not
     if hasErrors then
         let err = sprintf "- %s\n" globals.Binaries
-        ConHelpers.DisplayError "Artifacts folder is not available:"
+        ConsoleHelpers.DisplayError "Artifacts folder is not available:"
         printfn "%s" err
     (error || hasErrors, antho)
 

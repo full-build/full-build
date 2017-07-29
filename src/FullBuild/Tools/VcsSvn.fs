@@ -62,7 +62,7 @@ let SvnClone (target : DirectoryInfo) (url : string) (shallow : bool) =
     ExecGetOutput SVN_CMD args currDir Map.empty
 
 let SvnCheckout (repoDir : DirectoryInfo) (version : string) =
-    ConHelpers.DisplayError "WARNING: checkout is not supported on Subversion" 
+    ConsoleHelpers.DisplayError "WARNING: checkout is not supported on Subversion" 
     let args = sprintf "update -r:%A" version
     ExecGetOutput SVN_CMD args repoDir Map.empty
 

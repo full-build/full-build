@@ -94,7 +94,7 @@ let tryMain verbose argv =
                        else let sep = "---------------------------------------------------"
                             sprintf "%s\n%A\n%s" sep x sep
                
-             ConHelpers.DisplayError err
+             ConsoleHelpers.DisplayError err
              5
 
 [<EntryPoint>]
