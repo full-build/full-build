@@ -9,6 +9,8 @@ setlocal
 set BUILD_VERSION=%1
 set BUILD_STATUS=%2
 
+if "%VSINSTALLDIR%" == "" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
+
 call install-tools.cmd || goto :ko
 call build-bootstrap.cmd || goto :ko
 call build-src.cmd %BUILD_VERSION% || goto :ko
