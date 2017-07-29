@@ -18,7 +18,7 @@ open Graph
 open System.IO
 
 let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gitFun svnFun hgFun =
-    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name
+    let repoDir = wsDir |> FsHelpers.GetSubDirectory repo.Name
     let f = match vcsType with
             | VcsType.Git -> gitFun
             | VcsType.Gerrit -> gitFun
@@ -28,10 +28,10 @@ let chooseVcs (wsDir : DirectoryInfo) (vcsType : VcsType) (repo : Repository) gi
 
 
 let Unclone (wsDir : DirectoryInfo) (repo : Repository) =
-    let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.Name
+    let repoDir = wsDir |> FsHelpers.GetSubDirectory repo.Name
     if repoDir.Exists then repoDir.Delete(true)
 
-let Clone (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) : Exec.ExecResult =
+let Clone (wsDir : DirectoryInfo) (repo : Repository) (shallow : bool) : IO.ExecResult =
     let gitCloneFunc = if repo.Vcs = VcsType.Gerrit then VcsGit.GerritClone repo
                                                     else VcsGit.GitClone repo
     let svnClone = VcsSvn.SvnClone
@@ -45,7 +45,7 @@ let Checkout (wsDir : DirectoryInfo) (repo : Repository) (version : string) =
 let Ignore (wsDir : DirectoryInfo) (repo : Repository) =
     chooseVcs wsDir repo.Vcs repo  VcsGit.GitIgnore VcsSvn.SvnIgnore VcsHg.HgIgnore
 
-let Pull (wsDir : DirectoryInfo) (repo : Repository) (rebase : bool) : Exec.ExecResult =
+let Pull (wsDir : DirectoryInfo) (repo : Repository) (rebase : bool) : IO.ExecResult =
     (chooseVcs wsDir repo.Vcs repo VcsGit.GitPull VcsSvn.SvnPull VcsHg.HgPull) rebase
 
 let Clean (wsDir : DirectoryInfo) (repo : Repository) =
@@ -67,5 +67,5 @@ let TagToHash (wsDir : DirectoryInfo) (repo : Repository) (tag : string) : strin
 let Head (wsDir : DirectoryInfo) (repo : Repository) : string =
     (chooseVcs wsDir repo.Vcs repo VcsGit.GitHead VcsSvn.SvnHead VcsHg.HgHead) ()
    
-let Tag (wsDir : DirectoryInfo) (repo : Repository) (tag : string) (comment : string) : Exec.ExecResult =
+let Tag (wsDir : DirectoryInfo) (repo : Repository) (tag : string) (comment : string) : IO.ExecResult =
     (chooseVcs wsDir repo.Vcs repo VcsGit.GitTag VcsSvn.SvnTag VcsHg.HgTag) tag comment

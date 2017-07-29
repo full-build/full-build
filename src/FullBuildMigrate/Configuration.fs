@@ -65,7 +65,7 @@ let SaveAnthology (antho : Anthology) =
                                        |> dict
     for repo2project in repo2projects do
         let repo = repo2project.Key
-        let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
+        let repoDir = wsDir |> FsHelpers.GetSubDirectory repo.toString
         if repoDir.Exists then
             let localProjects = repo2project.Value |> set
             let localApps = match repo2apps.TryGetValue(repo2project.Key) with

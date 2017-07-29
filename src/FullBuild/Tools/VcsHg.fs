@@ -26,16 +26,16 @@ let HgPull (repoDir : DirectoryInfo) (rebase : bool) =
 
 let HgTip (repoDir : DirectoryInfo) =
     let args = @"id -i"
-    ExecGetOutput HG_CMD args repoDir Map.empty |> GetOutput |> Seq.head
+    ExecGetOutput HG_CMD args repoDir Map.empty |> IO.GetOutput |> Seq.head
 
 let HgClean (repoDir : DirectoryInfo) (repo : Repository) =
     let cleanArgs = "purge"
-    Exec HG_CMD cleanArgs repoDir Map.empty |> CheckResponseCode
+    Exec HG_CMD cleanArgs repoDir Map.empty |> IO.CheckResponseCode
     
 let HgClone (target : DirectoryInfo) (url : string) (shallow : bool) =
     let args = sprintf @"clone %s %s" url target.FullName
 
-    let currDir = IoHelpers.CurrentFolder ()
+    let currDir = FsHelpers.CurrentFolder ()
     ExecGetOutput HG_CMD args currDir Map.empty
 
 let HgCheckout (repoDir : DirectoryInfo) (version : string) =
@@ -45,7 +45,7 @@ let HgCheckout (repoDir : DirectoryInfo) (version : string) =
 let HgHistory (repoDir : DirectoryInfo) (version : string) =
     let args = sprintf @"log -r %s" version
     try
-        ExecGetOutput HG_CMD args repoDir Map.empty |> GetOutput
+        ExecGetOutput HG_CMD args repoDir Map.empty |> IO.GetOutput
     with
         _ -> [sprintf "Failed to get history from version %A - please pull !" version]
 

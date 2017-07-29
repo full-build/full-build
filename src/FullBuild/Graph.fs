@@ -75,7 +75,7 @@ with
                            |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
                            |> Seq.map Anthology.PackageId.from
                            |> Set.ofSeq
-                           |> Seq.filter (fun x -> let path = pkgsDir |> IoHelpers.GetSubDirectory (x.toString)
+                           |> Seq.filter (fun x -> let path = pkgsDir |> FsHelpers.GetSubDirectory (x.toString)
                                                    path.Exists)
                            |> set
         dependencies
@@ -90,16 +90,16 @@ with
 
     member this.Dependencies : Package set =
         let pkgsDir = Env.GetFolder Env.Folder.Package
-        let pkgDir = pkgsDir |> IoHelpers.GetSubDirectory (this.Package.toString)
-        let nuspecFile = pkgDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.NuSpec (this.Package.toString))
+        let pkgDir = pkgsDir |> FsHelpers.GetSubDirectory (this.Package.toString)
+        let nuspecFile = pkgDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.NuSpec (this.Package.toString))
         let xnuspec = System.Xml.Linq.XDocument.Load (nuspecFile.FullName)
         Package.GetPackageDependencies xnuspec |> Set.map (fun x -> { Graph = this.Graph
                                                                       Package = x })
 
     member this.FxAssemblies : Assembly set =
         let pkgsDir = Env.GetFolder Env.Folder.Package
-        let pkgDir = pkgsDir |> IoHelpers.GetSubDirectory (this.Package.toString)
-        let nuspecFile = pkgDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.NuSpec (this.Package.toString))
+        let pkgDir = pkgsDir |> FsHelpers.GetSubDirectory (this.Package.toString)
+        let nuspecFile = pkgDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.NuSpec (this.Package.toString))
         let xnuspec = System.Xml.Linq.XDocument.Load (nuspecFile.FullName)
         Package.GetFrameworkDependencies xnuspec |> Set.map (fun x -> { Graph = this.Graph; Assembly = x})
 
@@ -197,7 +197,7 @@ with
 
     member this.IsCloned =
         let wsDir = Env.GetFolder Env.Folder.Workspace
-        let repoDir = wsDir |> IoHelpers.GetSubDirectory this.Name
+        let repoDir = wsDir |> FsHelpers.GetSubDirectory this.Name
         repoDir.Exists
 
     member this.References =

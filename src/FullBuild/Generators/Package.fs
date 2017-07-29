@@ -13,7 +13,7 @@
 //   limitations under the License.
 
 module Generators.Package
-open IoHelpers
+open FsHelpers
 open System.IO
 open System.Xml.Linq
 open System.Linq
@@ -73,7 +73,7 @@ let private generateChooseRefContent (libDir : DirectoryInfo) =
             let allTargets = path2platforms |> Seq.map (fun x -> x.Value) |> List.ofSeq
 
             for path2pf in path2platforms do
-                let pathLib = libDir |> IoHelpers.GetSubDirectory path2pf.Key
+                let pathLib = libDir |> FsHelpers.GetSubDirectory path2pf.Key
                 let condition = Paket.PlatformMatching.getCondition None allTargets (List.ofSeq path2pf.Value)
                 let whenCondition = if condition = "$(TargetFrameworkIdentifier) == 'true'" then "True"
                                     else condition
@@ -96,7 +96,7 @@ let private generateChooseCopyContent (libDir : DirectoryInfo) =
             let allTargets = path2platforms |> Seq.map (fun x -> x.Value) |> List.ofSeq
 
             for path2pf in path2platforms do
-                let pathLib = libDir |> IoHelpers.GetSubDirectory path2pf.Key
+                let pathLib = libDir |> FsHelpers.GetSubDirectory path2pf.Key
                 let condition = Paket.PlatformMatching.getCondition None allTargets (List.ofSeq path2pf.Value)
                 let whenCondition = if condition = "$(TargetFrameworkIdentifier) == 'true'" then "True"
                                     else condition

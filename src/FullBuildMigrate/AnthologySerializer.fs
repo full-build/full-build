@@ -90,10 +90,10 @@ let Deserialize (content) =
     let rec convertToProjects (items : AnthologyConfig.projects_Item_Type list) =
         match items with
         | [] -> Set.empty
-        | x :: tail -> let ext = IoHelpers.GetExtension (FileInfo(x.out))
+        | x :: tail -> let ext = FsHelpers.GetExtension (FileInfo(x.out))
                        let out = Path.GetFileNameWithoutExtension(x.out)
-                       let repo = IoHelpers.GetRootDirectory (x.file)
-                       let file = IoHelpers.GetFilewithoutRootDirectory (x.file)
+                       let repo = FsHelpers.GetRootDirectory (x.file)
+                       let file = FsHelpers.GetFilewithoutRootDirectory (x.file)
                        let hastests = x.tests
                        convertToProjects tail |> Set.add  { Repository = RepositoryId.from repo
                                                             RelativeProjectFile = ProjectRelativeFile file

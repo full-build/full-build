@@ -105,12 +105,15 @@ let ComputeHops (file : string) : string =
 let CurrentFolder() : DirectoryInfo =
     Directory.GetCurrentDirectory () |> DirectoryInfo
 
+let EnsureExists (dir : DirectoryInfo) =
+    if not dir.Exists then dir.Create()
+    dir
 
 
 
 let CopyFolder (source : DirectoryInfo) (target : DirectoryInfo) (readOnly : bool) =
     // http://ss64.com/nt/robocopy-exit.html
-    let checkRobocopyErrorCode (execResult:Exec.ExecResult) =
+    let checkRobocopyErrorCode (execResult : IO.ExecResult) =
         if execResult.ResultCode > 7 then failwithf "Process failed with error %d" execResult.ResultCode
 
     let currDir = CurrentFolder()
@@ -130,20 +133,6 @@ let GetRootDirectory (file : string) =
 let GetFilewithoutRootDirectory (file : string) =
     let idx = (file |> ToWindows).IndexOf('\\')
     file.Substring(idx+1)
-
-let consoleLock = System.Object()
-
-let ConsoleDisplay (c : ConsoleColor) (s : string) =
-    let oldColor = Console.ForegroundColor
-    try
-        Console.ForegroundColor <- c
-        Console.WriteLine(s)
-    finally
-        Console.ForegroundColor <- oldColor
-
-let DisplayInfo msg = ConsoleDisplay ConsoleColor.Cyan ("- " + msg)
-let DisplayError msg = ConsoleDisplay ConsoleColor.Red msg
-
 
 let Try action =
     try
@@ -189,36 +178,3 @@ let rec EnsureForceDelete (dir : DirectoryInfo) (limit : int) =
                   EnsureForceDelete dir (limit - 1)
                else
                   reraise()
-
-
-let PrintOutput info (execResult : Exec.ExecResult) =
-    let rec printl lines =
-        match lines with
-        | line :: tail -> printfn "%s" line; printl tail
-        | [] -> ()
-
-    let display () =
-        info |> DisplayInfo
-        execResult.Out |> printl
-        execResult.Error |> printl
-        execResult
-
-    lock consoleLock display
-
-
-
-
-
-let rec ForceReadOnly (thisDir : DirectoryInfo) =
-    thisDir.Attributes <- thisDir.Attributes ||| FileAttributes.ReadOnly;
-    for file in thisDir.EnumerateFiles() do
-        file.Attributes <- file.Attributes ||| FileAttributes.ReadOnly;
-    for dir in thisDir.EnumerateDirectories() do
-        ForceReadOnly dir
-
-let rec ForceReadWriteOnly (thisDir : DirectoryInfo) =
-    thisDir.Attributes <- thisDir.Attributes &&& ~~~ FileAttributes.ReadOnly;
-    for file in thisDir.EnumerateFiles() do
-        file.Attributes <- file.Attributes &&& ~~~ FileAttributes.ReadOnly;
-    for dir in thisDir.EnumerateDirectories() do
-        ForceReadWriteOnly dir

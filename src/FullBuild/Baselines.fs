@@ -16,7 +16,7 @@ module Baselines
 
 open Graph
 open Collections
-open IoHelpers
+open FsHelpers
 
 #nowarn "0346" // GetHashCode missing
 
@@ -177,7 +177,7 @@ with
         let buildTag = {BuildInfo.Branch = branch; BuildInfo.Number = buildNumber}
         let tag = buildTag.Format()
         
-        Tools.Vcs.Tag wsDir graph.MasterRepository tag comment |> Exec.CheckResponseCode
+        Tools.Vcs.Tag wsDir graph.MasterRepository tag comment |> IO.CheckResponseCode
 // =====================================================================================================
 
 let from graph =

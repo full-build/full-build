@@ -21,11 +21,11 @@ open FsUnit
 [<Test>]
 let CheckExecOk () =
     if not <| Env.IsMono() then
-        let currDir = IoHelpers.CurrentFolder ()
-        Exec.Exec "cmd" "/c dir >nul" currDir Map.empty |> Exec.CheckResponseCode
+        let currDir = FsHelpers.CurrentFolder ()
+        Exec.Exec "cmd" "/c dir >nul" currDir Map.empty |> IO.CheckResponseCode
 
 [<Test>]
 let CheckExecFailure () =
-    let currDir = IoHelpers.CurrentFolder ()
-    (fun () -> Exec.Exec "gloubiboulga" "" currDir Map.empty |> Exec.CheckResponseCode |> ignore) |> should throw typeof<System.ComponentModel.Win32Exception>
+    let currDir = FsHelpers.CurrentFolder ()
+    (fun () -> Exec.Exec "gloubiboulga" "" currDir Map.empty |> IO.CheckResponseCode |> ignore) |> should throw typeof<System.ComponentModel.Win32Exception>
 

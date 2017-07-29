@@ -4,7 +4,7 @@ open Microsoft.Win32
 
 let RegisterSystemExtension (installFolder : System.IO.DirectoryInfo) =
     if Env.IsMono() |> not then
-        let extension = IoHelpers.Extension.View |> IoHelpers.GetExtensionString |> sprintf ".%s"
+        let extension = FsHelpers.Extension.View |> FsHelpers.GetExtensionString |> sprintf ".%s"
         let keyName = "fullbuild"
         let description = "Fullbuild view file"
         let openWith = System.IO.Path.Combine(installFolder.FullName, "fullbuild.exe")

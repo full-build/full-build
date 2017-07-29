@@ -13,7 +13,7 @@
 //   limitations under the License.
 
 module Core.Publishers
-open IoHelpers
+open FsHelpers
 open Env
 open System.IO
 open Graph
@@ -34,8 +34,8 @@ let private publishCopy (app : PublishApp) =
         let projFile = repoDir |> GetFile project.ProjectFile
         let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name projFile.FullName
 
-        if Env.IsMono () then Exec "xbuild" args wsDir Map.empty |> CheckResponseCode
-        else Exec "msbuild" args wsDir Map.empty |> CheckResponseCode
+        if Env.IsMono () then Exec "xbuild" args wsDir Map.empty |> IO.CheckResponseCode
+        else Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
 
         let appDir = GetFolder Env.Folder.AppOutput
         let artifactDir = appDir |> GetSubDirectory app.Name
@@ -66,11 +66,11 @@ let private publishDocker (app : PublishApp) =
     if targetFile.Exists then targetFile.Delete()
 
     let dockerArgs = sprintf "build -t %s ." app.Name
-    Exec "docker" dockerArgs sourceFolder Map.empty |> CheckResponseCode
+    Exec "docker" dockerArgs sourceFolder Map.empty |> IO.CheckResponseCode
 
     let imgFile = appDir |> GetSubDirectory app.Name
     let saveArgs = sprintf "save -o %s %s" imgFile.FullName app.Name
-    Exec "docker" saveArgs sourceFolder Map.empty |> CheckResponseCode
+    Exec "docker" saveArgs sourceFolder Map.empty |> IO.CheckResponseCode
     sourceFolder.Delete(true)
 
 let private publishNuget (app : PublishApp) =
@@ -87,7 +87,7 @@ let private publishNuget (app : PublishApp) =
     Generators.Packagers.UpdateDependencies nuspec
     let version = app.Version
     let nugetArgs = sprintf "pack -NoDefaultExcludes -NoPackageAnalysis -NonInteractive -OutputDirectory %s -version %s %s" tmp2Folder.FullName version nuspec.Name
-    Exec "nuget" nugetArgs tmpFolder Map.empty |> CheckResponseCode
+    Exec "nuget" nugetArgs tmpFolder Map.empty |> IO.CheckResponseCode
     let nugetFile = tmp2Folder.EnumerateFiles() |> Seq.exactlyOne
     let targetFile = appDir |> GetFile app.Name
     nugetFile.CopyTo(targetFile.FullName, true) |> ignore

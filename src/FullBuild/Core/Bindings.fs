@@ -13,7 +13,7 @@
 //   limitations under the License.
 
 module Core.Bindings
-open IoHelpers
+open FsHelpers
 open Env
 open System.IO
 open System.Linq
@@ -53,7 +53,7 @@ let private generateBinding (allAssemblies : string set) (file : FileInfo) =
         :? System.BadImageFormatException -> null
 
 let private getAssemblyConfig (file : FileInfo) =
-    file.FullName |> IoHelpers.AddExt IoHelpers.Extension.Config |> FileInfo
+    file.FullName |> FsHelpers.AddExt FsHelpers.Extension.Config |> FileInfo
 
 
 let private forceBindings (bindings : XElement) (appConfig : FileInfo) =
@@ -104,7 +104,7 @@ let UpdateArtifactBindingRedirects (artifactDir : DirectoryInfo) =
 
 let UpdateProjectBindingRedirects (project : Graph.Project) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let repoDir = wsDir |> IoHelpers.GetSubDirectory project.Repository.Name
+    let repoDir = wsDir |> FsHelpers.GetSubDirectory project.Repository.Name
     let prjFile = repoDir |> GetFile project.ProjectFile
     let projectDir = prjFile.Directory
 

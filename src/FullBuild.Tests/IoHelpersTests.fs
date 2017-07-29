@@ -16,13 +16,13 @@ module FileExtensionsTests
 
 open System
 open System.IO
-open IoHelpers
+open FsHelpers
 open NUnit.Framework
 open FsUnit
 
 [<Test>]
 let CheckGetSubDirectory () =
-    let currDir = IoHelpers.CurrentFolder ()
+    let currDir = FsHelpers.CurrentFolder ()
     let subdir = currDir |> GetSubDirectory "toto"
     subdir.FullName.Contains("toto") |> should equal true
 
@@ -35,7 +35,7 @@ let CheckCreateSubDirectory () =
 
 [<Test>]
 let CheckGetFile () =
-    let currDir = IoHelpers.CurrentFolder ()
+    let currDir = FsHelpers.CurrentFolder ()
     let file = currDir |> GetFile "toto" 
     file.FullName.Contains("toto") |> should equal true
 
@@ -46,5 +46,5 @@ let CheckAddExt () =
 
 [<Test>]
 let CheckRelativeHops () =
-    let res = IoHelpers.ComputeHops "toto/tutu/pouet.csproj"
+    let res = FsHelpers.ComputeHops "toto/tutu/pouet.csproj"
     res |> should equal "../../"

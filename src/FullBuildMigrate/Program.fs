@@ -1,6 +1,6 @@
 ﻿
 open System.IO
-open IoHelpers
+open FsHelpers
 
 
 [<EntryPoint>]

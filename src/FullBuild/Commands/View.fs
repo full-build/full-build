@@ -14,7 +14,7 @@
 
 module Commands.View
 open Env
-open IoHelpers
+open FsHelpers
 open Collections
 open Graph
 
@@ -89,7 +89,7 @@ let Build (cmd : CLI.Commands.BuildView) =
                   | None -> "0.0.0"
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
+    let slnFile = wsDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.Solution view.Name)
     Core.Builders.BuildWithBuilder BuilderType.MSBuild slnFile cmd.Config cmd.Clean cmd.Multithread version
 
 let Alter (cmd : CLI.Commands.AlterView) =
@@ -114,7 +114,7 @@ let Open (cmd : CLI.Commands.OpenView) =
     let viewRepository = Views.from graph
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let slnFile = wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution view.Name)
+    let slnFile = wsDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.Solution view.Name)
     Exec.Spawn slnFile.FullName "" "open"
 
 let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =

@@ -14,7 +14,7 @@
 
 module Commands.Upgrade
 
-open IoHelpers
+open FsHelpers
 open System.IO
 open System.Diagnostics
 open System.IO.Compression
@@ -56,7 +56,7 @@ let private waitProcessToExit processId =
         | _ -> reraise()
 
 let private getSameFiles (firstDir:DirectoryInfo) (secondDir:DirectoryInfo) =
-    firstDir.GetFiles() |> Array.where(fun x-> (secondDir |> IoHelpers.GetFile x.Name).Exists)
+    firstDir.GetFiles() |> Array.where(fun x-> (secondDir |> FsHelpers.GetFile x.Name).Exists)
 
 let Upgrade (tag : string) =
     let (zipUrl, ver) = getLatestReleaseUrl tag

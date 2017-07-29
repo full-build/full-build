@@ -28,7 +28,7 @@ let runFB (args : string) =
     try
         System.Environment.CurrentDirectory <- TestContext.CurrentContext.TestDirectory
         let wsDir = Env.GetFolder Env.Folder.Workspace
-        let fb = wsDir |> IoHelpers.GetFile  "src/FullBuild/bin/fullbuild.exe"
+        let fb = wsDir |> FsHelpers.GetFile  "src/FullBuild/bin/fullbuild.exe"
         let psi = ProcessStartInfo (FileName = fb.FullName, Arguments = args, UseShellExecute = false, WorkingDirectory = wsDir.FullName, LoadUserProfile = true, CreateNoWindow = true, RedirectStandardOutput = true)
         use proc = Process.Start (psi)
         use stdout = proc.StandardOutput

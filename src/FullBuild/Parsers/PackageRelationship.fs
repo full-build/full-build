@@ -15,7 +15,7 @@
 module Parsers.PackageRelationship
 
 open Anthology
-open IoHelpers
+open FsHelpers
 open System.Linq
 open System.Xml.Linq
 open Collections
@@ -36,7 +36,7 @@ let GetPackageDependencies (xnuspec : XDocument) =
         |> Seq.filter (fun x -> x.Name.LocalName = "dependency" && (!> x.Attribute(NsNone + "exclude") : string) <> "Compile")
         |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
         |> Seq.map PackageId.from
-        |> Seq.filter (fun x -> let path = pkgsDir |> IoHelpers.GetSubDirectory (x.toString)
+        |> Seq.filter (fun x -> let path = pkgsDir |> FsHelpers.GetSubDirectory (x.toString)
                                 path.Exists)
         |> set
 
@@ -46,7 +46,7 @@ let rec BuildPackageDependencies (packages : PackageId seq) =
     let rec buildDependencies (packages : PackageId seq) = seq {
         for package in packages do
             let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
-            let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))
+            let nuspecFile = pkgDir |> GetFile (FsHelpers.AddExt NuSpec (package.toString))
             let xnuspec = XDocument.Load (nuspecFile.FullName)
             let dependencies = GetPackageDependencies xnuspec
             yield (package, dependencies)

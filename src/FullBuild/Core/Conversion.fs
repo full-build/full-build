@@ -26,15 +26,15 @@ let SxSXDocLoader (fileName : FileInfo) : XDocument option =
                           fileName.FullName.Replace(fbExtProject, fileName.Extension) |> FileInfo
                       else 
                           fileName
-    IoHelpers.XDocLoader orgFileName
+    FsHelpers.XDocLoader orgFileName
 
 let private convertMsBuild (repos : Repository set) (sxs : bool) =
     let projects = repos |> Set.map (fun x -> x.Projects)
                          |> Set.unionMany
-    let projLoader = sxs ? (SxSXDocLoader, IoHelpers.XDocLoader)
+    let projLoader = sxs ? (SxSXDocLoader, FsHelpers.XDocLoader)
   
-    Generators.MSBuild.GenerateProjects projects IoHelpers.XDocSaver
-    Generators.MSBuild.ConvertProjects projects projLoader IoHelpers.XDocSaver
+    Generators.MSBuild.GenerateProjects projects FsHelpers.XDocSaver
+    Generators.MSBuild.ConvertProjects projects projLoader FsHelpers.XDocSaver
     if sxs |> not then Generators.MSBuild.RemoveUselessStuff projects
 
 let Convert builder (repos : Repository set) (sxs : bool) =
@@ -52,5 +52,5 @@ let GenerateProjectArtifacts () =
                              |> Set.unionMany
 
         match builder with
-        | BuilderType.MSBuild -> Generators.MSBuild.GenerateProjects projects IoHelpers.XDocSaver
+        | BuilderType.MSBuild -> Generators.MSBuild.GenerateProjects projects FsHelpers.XDocSaver
         | BuilderType.Skip -> ()
