@@ -15,12 +15,7 @@
 #  - package is alpha
 #
 
-os: Visual Studio 2015
-
-
-hosts:
-  api.nuget.org: 93.184.221.200
-
+os: Visual Studio 2017
 
 environment:
   GITHUB_TOKEN:

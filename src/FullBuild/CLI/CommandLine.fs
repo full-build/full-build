@@ -632,8 +632,8 @@ let UsageContent() =
     let content = [
         [MainCommand.Usage], "help [<command|wks|repo|view|app>]: display help on command or area"
         [MainCommand.Version], "version : display full-build version"
-        [MainCommand.Workspace; MainCommand.Setup], "setup <git|gerrit> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
-        [MainCommand.Workspace; MainCommand.Init], "init <git|gerrit> <master-repository> <local-path> : initialize a new workspace in given path"
+        [MainCommand.Workspace; MainCommand.Setup], "setup <git|gerrit|svn> <master-repository> <master-artifacts> <local-path> : setup a new environment in given path"
+        [MainCommand.Workspace; MainCommand.Init], "init <git|gerrit|svn> <master-repository> <local-path> : initialize a new workspace in given path"
         [MainCommand.Repository; MainCommand.Clone], "clone [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
         [MainCommand.Workspace; MainCommand.Checkout], "checkout [version] : checkout workspace or reset to default version"
         [MainCommand.Workspace; MainCommand.Branch], "branch [branch] : switch to branch"
@@ -652,7 +652,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
         [MainCommand.Workspace; MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
-        [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages|--cycle> [--view <viewId>] : query items"
+        [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages|--ref|--cycle> [--view <viewId>] : query items"
         [MainCommand.Workspace; MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
         [MainCommand.Workspace; MainCommand.UpgradeGuids], "update-guids : DANGER! change guids of all projects in given repository (interactive command)"
         [MainCommand.Unknown], ""
@@ -660,7 +660,7 @@ let UsageContent() =
         [MainCommand.Package; MainCommand.OutdatedPackage], "package outdated : display outdated packages"
         [MainCommand.Package; MainCommand.ListPackage], "package list : list packages"
         [MainCommand.Unknown], ""
-        [MainCommand.Repository; MainCommand.AddRepository], "repo add [--branch <branch>] <repoId> <repo-vcs> <repo-uri> <repo-tester> <repo-builder> : declare a new repository"
+        [MainCommand.Repository; MainCommand.AddRepository], "repo add [--branch <branch>] <repoId> <git|gerrit|svn> <repo-uri> <nunit|skip> <msbuild|skip> : declare a new repository"
         [MainCommand.Repository; MainCommand.DropRepository], "repo drop <repoId> : drop repository"
         [MainCommand.Repository; MainCommand.ListRepository], "repo list : list repositories"
         [MainCommand.Unknown], ""
@@ -673,7 +673,7 @@ let UsageContent() =
         [MainCommand.View; MainCommand.AlterView], "view alter [--default] [--src] [--ref] <viewId> : alter view"
         [MainCommand.Unknown], ""
         [MainCommand.App; MainCommand.Publish], "publish [--view <viewId>] [--version <version>] [--status <status>] <appId-wildcard> : publish artifacts"
-        [MainCommand.App; MainCommand.AddApp], "app add <appId> <copy|zip> <projectId>+ : create new application from given project ids"
+        [MainCommand.App; MainCommand.AddApp], "app add <appId> <copy|zip|docker> <projectId>+ : create new application from given project ids"
         [MainCommand.App; MainCommand.DropApp], "app drop <appId> : drop application"
         [MainCommand.App; MainCommand.ListApp], "app list [--version <buildNumber>] : list applications" ]
 
