@@ -65,7 +65,7 @@ let SaveAnthology (antho : Anthology) =
                                        |> dict
     for repo2project in repo2projects do
         let repo = repo2project.Key
-        let repoDir = wsDir |> IoHelpers.GetSubDirectory repo.toString
+        let repoDir = wsDir |> FsHelpers.GetSubDirectory repo.toString
         if repoDir.Exists then
             let localProjects = repo2project.Value |> set
             let localApps = match repo2apps.TryGetValue(repo2project.Key) with
@@ -83,7 +83,7 @@ let LoadView (viewId :ViewId) : View =
 
 let DefaultView () : ViewId option =
     let vwFolder = Env.GetFolder Env.Folder.View
-    let defaultFile = vwFolder |> IoHelpers.GetFile "default"
+    let defaultFile = vwFolder |> FsHelpers.GetFile "default"
     if defaultFile.Exists then
         let viewName = System.IO.File.ReadAllText(defaultFile.FullName)
         Some (Anthology.ViewId viewName)
@@ -92,17 +92,17 @@ let DefaultView () : ViewId option =
 
 let DeleteDefaultView() =
     let vwFolder = Env.GetFolder Env.Folder.View
-    let defaultFile = vwFolder |> IoHelpers.GetFile "default"
+    let defaultFile = vwFolder |> FsHelpers.GetFile "default"
     if defaultFile.Exists then
         defaultFile.Delete()
 
 let DeleteView (viewId : ViewId) =
     let vwDir = Env.GetFolder Env.Folder.View
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let viewFile = vwDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.View viewId.toString)
-    let targetFile = vwDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Targets viewId.toString)
-    let slnFile =  wsDir |> IoHelpers.GetFile (IoHelpers.AddExt IoHelpers.Extension.Solution viewId.toString)
-    let defaultFile = vwDir |> IoHelpers.GetFile "default"
+    let viewFile = vwDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.View viewId.toString)
+    let targetFile = vwDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.Targets viewId.toString)
+    let slnFile =  wsDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.Solution viewId.toString)
+    let defaultFile = vwDir |> FsHelpers.GetFile "default"
     if viewFile.Exists then viewFile.Delete()
     if targetFile.Exists then targetFile.Delete()
     if slnFile.Exists then slnFile.Delete()
@@ -111,7 +111,7 @@ let DeleteView (viewId : ViewId) =
 
 let private setDefaultView (viewId : ViewId) =
     let vwFolder = Env.GetFolder Env.Folder.View
-    let defaultFile = vwFolder |> IoHelpers.GetFile "default"
+    let defaultFile = vwFolder |> FsHelpers.GetFile "default"
     System.IO.File.WriteAllText (defaultFile.FullName, viewId.toString)
 
 let ViewExistsAndNotCorrupted viewName =

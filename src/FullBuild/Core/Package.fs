@@ -14,7 +14,7 @@
 
 module Core.Package
 open Anthology
-open IoHelpers
+open FsHelpers
 open System.IO
 open System.Xml.Linq
 open Env
@@ -45,7 +45,7 @@ let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
     let pkgsDir = Env.GetFolder Env.Folder.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
 
-    let nuspecFile = pkgDir |> GetFile (IoHelpers.AddExt NuSpec (package.toString))
+    let nuspecFile = pkgDir |> GetFile (FsHelpers.AddExt NuSpec (package.toString))
     let xnuspec = XDocument.Load (nuspecFile.FullName)
     let fxDependencies = Parsers.PackageRelationship.GetFrameworkDependencies xnuspec
 

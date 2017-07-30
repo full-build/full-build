@@ -16,7 +16,7 @@ module Tools.Paket
 open System
 open Anthology
 open System.IO
-open IoHelpers
+open FsHelpers
 open Collections
 open Exec
 
@@ -68,7 +68,7 @@ let private removeDependenciesContent (lines : string seq) (packages : PackageId
 
 let private executePaketCommand cmd =
     let confDir = Env.GetFolder Env.Folder.Config
-    Exec "paket.exe" cmd confDir Map.empty |> CheckResponseCode
+    Exec "paket.exe" cmd confDir Map.empty |> IO.CheckResponseCode
 
 let UpdateSources (sources : RepositoryUrl list) =
     let confDir = Env.GetFolder Env.Folder.Config

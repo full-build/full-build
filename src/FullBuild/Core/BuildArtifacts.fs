@@ -14,7 +14,7 @@
 
 module Core.BuildArtifacts
 open System.IO
-open IoHelpers
+open FsHelpers
 open Graph
 open Collections
 
@@ -37,10 +37,10 @@ let Publish (graph : Graph) =
 
             let sourceBinDir = Env.GetFolder Env.Folder.Bin
             let targetBinDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
-            IoHelpers.CopyFolder sourceBinDir targetBinDir true
+            FsHelpers.CopyFolder sourceBinDir targetBinDir true
 
             let appTargetDir = tmpVersionDir |> GetSubDirectory Env.PUBLISH_APPS_FOLDER
-            IoHelpers.CopyFolder appDir appTargetDir true
+            FsHelpers.CopyFolder appDir appTargetDir true
 
             tmpVersionDir.MoveTo(versionDir.FullName)
         else
@@ -95,9 +95,9 @@ let PullReferenceBinaries (artifacts : string) branch version =
                 branchDir.EnumerateDirectories() 
                 |> Seq.where(fun d -> d.Name |> System.Version.TryParse |> fun (success, version) -> success)
                 |> Seq.maxBy (fun d -> d.Name |> System.Version.Parse) 
-        DisplayInfo (sprintf "Copying binaries %s" versionDir.Name)
+        ConsoleHelpers.DisplayInfo (sprintf "Copying binaries %s" versionDir.Name)
         let sourceBinDir = versionDir |> GetSubDirectory Env.PUBLISH_BIN_FOLDER
         let targetBinDir = Env.GetFolder Env.Folder.Bin
-        IoHelpers.CopyFolder sourceBinDir targetBinDir false
+        FsHelpers.CopyFolder sourceBinDir targetBinDir false
     else
-        DisplayInfo "[WARNING] No reference binaries found"
+        ConsoleHelpers.DisplayInfo "[WARNING] No reference binaries found"

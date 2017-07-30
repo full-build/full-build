@@ -133,7 +133,7 @@ type private Token =
     | Doctor
 
 let (|FullBuildView|_|) (viewFile : string) =
-    if viewFile.EndsWith(IoHelpers.Extension.View |> IoHelpers.GetExtensionString |> sprintf ".%s") && System.IO.File.Exists(viewFile) then
+    if viewFile.EndsWith(FsHelpers.Extension.View |> FsHelpers.GetExtensionString |> sprintf ".%s") && System.IO.File.Exists(viewFile) then
         Some viewFile
     else
         None

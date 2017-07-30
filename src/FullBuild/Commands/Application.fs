@@ -14,13 +14,13 @@
 
 module Commands.Application
 open Collections
-open IoHelpers
+open FsHelpers
 open Env
 
 let private asyncPublish (version : string) (app : Graph.Application) =
     async {
         try
-            DisplayInfo app.Name
+            ConsoleHelpers.DisplayInfo app.Name
             Core.Publishers.PublishWithPublisher version app
         with
             exn -> raise (System.ApplicationException(sprintf "Failed to publish application %A" app.Name, exn))
@@ -74,7 +74,7 @@ let Publish (pubInfo : CLI.Commands.PublishApplications) =
          |> ignore
 
     let appFolder = Env.GetFolder Env.Folder.AppOutput
-    appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter IoHelpers.ForceDelete
+    appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter FsHelpers.ForceDelete
 
 let List (appInfo : CLI.Commands.ListApplications) =
     let graph = Graph.load()

@@ -43,12 +43,12 @@ let writeHtml (revisions : (Graph.Repository * string list) seq) =
 let Save (histType : HistoryType) (revisions : (Graph.Repository*string list) seq) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let lines, ext = match histType with
-                     | HistoryType.Text -> writeText revisions, IoHelpers.Extension.Text
-                     | HistoryType.Html -> writeHtml revisions, IoHelpers.Extension.Html
-    let historyFile = wsDir |> IoHelpers.GetFile ("history" |> IoHelpers.AddExt ext)
+                     | HistoryType.Text -> writeText revisions, FsHelpers.Extension.Text
+                     | HistoryType.Html -> writeHtml revisions, FsHelpers.Extension.Html
+    let historyFile = wsDir |> FsHelpers.GetFile ("history" |> FsHelpers.AddExt ext)
     System.IO.File.WriteAllLines(historyFile.FullName, lines)
 
     // print out changes
     for (repo, rev) in revisions do
-        IoHelpers.DisplayInfo repo.Name
+        ConsoleHelpers.DisplayInfo repo.Name
         rev |> List.iter (printfn "%s")

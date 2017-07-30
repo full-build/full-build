@@ -14,7 +14,7 @@
 
 module Core.Builders
 open System.IO
-open IoHelpers
+open FsHelpers
 open Env
 open Graph
 open Exec
@@ -59,8 +59,8 @@ let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multith
     let argConfig = sprintf "/p:Configuration=%s" config
     let args = sprintf "/nologo %s %s %s %A" argTarget argMt argConfig viewFile.Name
 
-    if Env.IsMono () then Exec "xbuild" args wsDir Map.empty |> CheckResponseCode
-    else Exec "msbuild" args wsDir Map.empty |> CheckResponseCode
+    if Env.IsMono () then Exec "xbuild" args wsDir Map.empty |> IO.CheckResponseCode
+    else Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
 
 let chooseBuilder (builderType : BuilderType) msbuildBuilder skipBuilder =
     let builder = match builderType with

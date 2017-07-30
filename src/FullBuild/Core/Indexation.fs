@@ -14,7 +14,7 @@
 
 module Core.Indexation
 open System.IO
-open IoHelpers
+open FsHelpers
 open System.Linq
 open System.Xml.Linq
 open XmlHelpers
@@ -36,13 +36,13 @@ let private projectCanBeProcessed (sxs : bool) (fileName : FileInfo) =
             | _ -> true
 
 let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) (sxs : bool) =
-    repoDir |> IoHelpers.FindKnownProjects
+    repoDir |> FsHelpers.FindKnownProjects
             |> Seq.filter (projectCanBeProcessed sxs)
             |> Seq.map (parser repoDir repoRef sxs)
 
 let private printParseStatus (repoDir : DirectoryInfo) =
     let repo = RepositoryId.from(repoDir.Name)
-    IoHelpers.DisplayInfo ("indexing "+ repo.toString)
+    ConsoleHelpers.DisplayInfo ("indexing "+ repo.toString)
     repoDir
 
 let private parseWorkspaceProjects parser (wsDir : DirectoryInfo) (repos : Repository seq) (sxs : bool) =
@@ -87,8 +87,8 @@ let rec findConflicts (projects : Project list) =
 let rec private displayConflicts (conflicts : ConflictType list) =
     let displayConflict (p1 : Project) (p2 : Project) (msg : string) =
         printfn "Conflict detected between projects (%s) : " msg
-        printfn " - %s/%s" p1.Repository.toString (p1.RelativeProjectFile.toString |> IoHelpers.ToPlatformPath)
-        printfn " - %s/%s" p2.Repository.toString (p2.RelativeProjectFile.toString |> IoHelpers.ToPlatformPath)
+        printfn " - %s/%s" p1.Repository.toString (p1.RelativeProjectFile.toString |> FsHelpers.ToPlatformPath)
+        printfn " - %s/%s" p2.Repository.toString (p2.RelativeProjectFile.toString |> FsHelpers.ToPlatformPath)
 
     match conflicts with
     | SameGuid (p1, p2) :: tail -> displayConflict p1 p2 "same guid"

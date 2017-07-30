@@ -97,8 +97,10 @@
     <Compile Include="StringHelpers.fs" />
     <Compile Include="PatternMatching.fs" />
     <Compile Include="Threading.fs" />
+    <Compile Include="IO.fs" />
     <Compile Include="Exec.fs" />
-    <Compile Include="IoHelpers.fs" />
+    <Compile Include="ConsoleHelpers.fs" />
+    <Compile Include="FsHelpers.fs" />
     <Compile Include="Anthology.fs" />
     <Compile Include="Env.fs" />
     <Compile Include="GlobalsSerializer.fs" />

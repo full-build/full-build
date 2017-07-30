@@ -17,7 +17,7 @@ open System.IO
 open System.Xml.Linq
 open System
 open System.Linq
-open IoHelpers
+open FsHelpers
 open XmlHelpers
 open MSBuildHelpers
 open Env
@@ -231,7 +231,7 @@ let private convertProject (xproj : XDocument) (project : Project) =
     let patchAssemblyInfo (xel : XElement) =
         let fileName = !> xel.Attribute(XNamespace.None + "Include") : string
         let repoDir = Env.GetFolder Folder.Workspace |> GetSubDirectory project.Repository.Name
-        let prjFile = repoDir |> GetFile (project.ProjectFile |> IoHelpers.ToPlatformPath)
+        let prjFile = repoDir |> GetFile (project.ProjectFile |> FsHelpers.ToPlatformPath)
         let prjDir = Path.GetDirectoryName (prjFile.FullName) |> DirectoryInfo
         let infoFile = prjDir |> GetFile fileName
         if infoFile.Exists then
@@ -306,8 +306,8 @@ let ConvertProjects (projects : Project seq) xdocLoader xdocSaver =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     for project in projects do
         if project.Repository.IsCloned then
-            let repoDir = wsDir |> IoHelpers.GetSubDirectory project.Repository.Name
-            let projFile = repoDir |> GetFile (project.ProjectFile |> IoHelpers.ToPlatformPath)
+            let repoDir = wsDir |> FsHelpers.GetSubDirectory project.Repository.Name
+            let projFile = repoDir |> GetFile (project.ProjectFile |> FsHelpers.ToPlatformPath)
             let maybexproj = xdocLoader projFile
             match maybexproj with
             | Some xproj -> let convxproj = convertProjectContent xproj project
@@ -327,7 +327,7 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
 
 
 let isFileIncluded (excludes : string set) (file : string) (rootDir : string) =
-    let relativeFile = file.Replace(rootDir, "") |> IoHelpers.ToUnix |> Set.singleton
+    let relativeFile = file.Replace(rootDir, "") |> FsHelpers.ToUnix |> Set.singleton
     let res = PatternMatching.FilterMatch relativeFile id excludes
     res = Set.empty
 

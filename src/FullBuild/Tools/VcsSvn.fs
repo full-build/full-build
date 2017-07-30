@@ -17,7 +17,7 @@ module Tools.VcsSvn
 open System.IO
 open Graph
 open Exec
-open IoHelpers
+open FsHelpers
 
 
 let SVN_CMD = "svn" 
@@ -38,14 +38,14 @@ let SvnPull (repoDir : DirectoryInfo) (rebase : bool) =
 
 let SvnTip (repoDir : DirectoryInfo) =
     let brDir = repoDir |> GetBranchDirectory
-    ExecGetOutput "svnversion" "" brDir Map.empty |> GetOutput |> Seq.head
+    ExecGetOutput "svnversion" "" brDir Map.empty |> IO.GetOutput |> Seq.head
 
 let SvnClean (repoDir : DirectoryInfo) (repo : Repository) =
     let brDir = repoDir |> GetBranchDirectory
     let cleanArgs = "cleanup"
-    Exec SVN_CMD cleanArgs brDir Map.empty |> CheckResponseCode
+    Exec SVN_CMD cleanArgs brDir Map.empty |> IO.CheckResponseCode
 
-    SvnPull brDir false |> CheckResponseCode
+    SvnPull brDir false |> IO.CheckResponseCode
     
 let SvnClone (target : DirectoryInfo) (url : string) (shallow : bool) =
     let fbBranch = Configuration.LoadBranch()
@@ -58,11 +58,11 @@ let SvnClone (target : DirectoryInfo) (url : string) (shallow : bool) =
 
     let args = sprintf @"checkout %s %s" urlBranch brDir.FullName
 
-    let currDir = IoHelpers.CurrentFolder ()
+    let currDir = FsHelpers.CurrentFolder ()
     ExecGetOutput SVN_CMD args currDir Map.empty
 
 let SvnCheckout (repoDir : DirectoryInfo) (version : string) =
-    IoHelpers.DisplayError "WARNING: checkout is not supported on Subversion" 
+    ConsoleHelpers.DisplayError "WARNING: checkout is not supported on Subversion" 
     let args = sprintf "update -r:%A" version
     ExecGetOutput SVN_CMD args repoDir Map.empty
 
@@ -70,7 +70,7 @@ let SvnHistory (repoDir : DirectoryInfo) (version : string) =
     let brDir = repoDir |> GetBranchDirectory
     let args = sprintf @"log -r%s:HEAD" version
     try
-        ExecGetOutput SVN_CMD args brDir Map.empty |> GetOutput
+        ExecGetOutput SVN_CMD args brDir Map.empty |> IO.GetOutput
     with
         _ -> [sprintf "Failed to get history from version %A - please pull !" version]
 

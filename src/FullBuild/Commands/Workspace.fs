@@ -15,7 +15,7 @@
 module Commands.Workspace
 
 open System.IO
-open IoHelpers
+open FsHelpers
 open Env
 open XmlHelpers
 open System.Linq
@@ -52,7 +52,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
                      | Some x -> x
                      | None -> repo.Branch
             let res = Tools.Vcs.Checkout wsDir repo br
-            return res |> IoHelpers.PrintOutput repo.Name
+            return res |> ConsoleHelpers.PrintOutput repo.Name
         }
 
     match branchInfo.Branch with
@@ -64,7 +64,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
                 let res2 = graph.Repositories |> Seq.filter (fun x -> x.IsCloned)
                                               |> Threading.ParExec (switchToBranch branch)
                 let res = res1 |> Seq.singleton |> Seq.append res2
-                if res |> Seq.exists (fun x -> x.ResultCode <> 0) then
+                if res |> Seq.exists (fun x -> x.Code <> 0) then
                     printfn "WARNING: failed to checkout some repositories"
 
                 Configuration.SaveBranch x
@@ -83,8 +83,8 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
     try
         Environment.CurrentDirectory <- wsDir.FullName
         let graph = Graph.create createInfo.Type createInfo.MasterRepository createInfo.MasterArtifacts createInfo.SxS
-        Tools.Vcs.Clone wsDir graph.MasterRepository true |> IoHelpers.PrintOutput "Cloning master repository"
-                                                          |> Exec.CheckResponseCode
+        Tools.Vcs.Clone wsDir graph.MasterRepository true |> ConsoleHelpers.PrintOutput "Cloning master repository"
+                                                          |> IO.CheckResponseCode
         graph.Save()
 
         Tools.Vcs.Ignore wsDir graph.MasterRepository
@@ -116,7 +116,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
 
     let checkoutRepo wsDir (version : string) (repo : Repository) = async {
         let res = Tools.Vcs.Checkout wsDir repo version
-        return res |> IoHelpers.PrintOutput repo.Name
+        return res |> ConsoleHelpers.PrintOutput repo.Name
     }
 
     // checkout each repository now
@@ -125,7 +125,7 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
         pulledBaseline.Bookmarks
         |> Seq.filter (fun b -> b.Repository.IsCloned)
         |> Threading.ParExec (fun b -> checkoutRepo wsDir b.Version b.Repository)
-    branchResults |> Exec.CheckMultipleResponseCode
+    branchResults |> IO.CheckMultipleResponseCode
 
     Configuration.SaveBranch tag.BuildBranch
     Restore()
@@ -139,8 +139,8 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         printf "[WARNING] Workspace already exists - skipping"
     else
         let graph = Graph.init initInfo.MasterRepository initInfo.Type
-        Tools.Vcs.Clone wsDir graph.MasterRepository false |> IoHelpers.PrintOutput "Cloning master repository"
-                                                           |> Exec.CheckResponseCode
+        Tools.Vcs.Clone wsDir graph.MasterRepository false |> ConsoleHelpers.PrintOutput "Cloning master repository"
+                                                           |> IO.CheckResponseCode
 
         let currDir = Environment.CurrentDirectory
         try
@@ -174,13 +174,13 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
     if pullInfo.Sources then
         let cloneRepo wsDir rebase (repo : Repository) = async {
             let res = Tools.Vcs.Pull wsDir repo rebase
-            return res |> IoHelpers.PrintOutput repo.Name
+            return res |> ConsoleHelpers.PrintOutput repo.Name
         }
 
         graph.MasterRepository
             |> cloneRepo wsDir pullInfo.Rebase
             |> Async.RunSynchronously
-            |> Exec.CheckResponseCode
+            |> IO.CheckResponseCode
 
         let selectedRepos = match pullInfo.View with
                              | None -> graph.Repositories
@@ -190,7 +190,7 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
 
         selectedRepos |> Seq.filter (fun x -> x.IsCloned)
                       |> Threading.ParExec (cloneRepo wsDir pullInfo.Rebase)
-                      |> Exec.CheckMultipleResponseCode
+                      |> IO.CheckMultipleResponseCode
         Restore()
 
     if pullInfo.Bin then
@@ -217,10 +217,10 @@ let Exec (execInfo : CLI.Commands.Exec) =
             let args = sprintf @"/c ""%s""" execInfo.Command
 
             try
-                DisplayInfo repo.Name
+                ConsoleHelpers.DisplayInfo repo.Name
 
-                if Env.IsMono () then Exec.Exec "sh" ("-c " + args) repoDir vars |> Exec.CheckResponseCode
-                else Exec.Exec "cmd" args repoDir vars |> Exec.CheckResponseCode
+                if Env.IsMono () then Exec.Exec "sh" ("-c " + args) repoDir vars |> IO.CheckResponseCode
+                else Exec.Exec "cmd" args repoDir vars |> IO.CheckResponseCode
             with e -> printfn "*** %s" e.Message
 
 let Clean () =
@@ -244,10 +244,10 @@ let Clean () =
         // clean existing repositories
         for repo in newGraph.Repositories do
             if repo.IsCloned then
-                DisplayInfo repo.Name
+                ConsoleHelpers.DisplayInfo repo.Name
                 Tools.Vcs.Clean wsDir repo
 
-        DisplayInfo newGraph.MasterRepository.Name
+        ConsoleHelpers.DisplayInfo newGraph.MasterRepository.Name
         Tools.Vcs.Clean wsDir newGraph.MasterRepository
 
 let UpdateGuid (updInfo : CLI.Commands.UpdateGuids) =
@@ -322,7 +322,7 @@ let convert (convertInfo : CLI.Commands.ConvertRepositories) =
     for builder2repo in builder2repos do
         let (builder, repos) = builder2repo
         for repo in repos do
-            IoHelpers.DisplayInfo ("converting "+ repo.Name)
+            ConsoleHelpers.DisplayInfo ("converting "+ repo.Name)
             Core.Conversion.Convert builder (Set.singleton repo) graph.SideBySide
 
     // setup additional files for views to work correctly

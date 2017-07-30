@@ -35,7 +35,7 @@ let private extractOutput(xdoc : XDocument) =
     soutput
 
 let private getProjectOutput (dir : DirectoryInfo) (relFile : string) =
-    let file = dir |> IoHelpers.GetFile relFile
+    let file = dir |> FsHelpers.GetFile relFile
     let xdoc = XDocument.Load(file.FullName)
     extractOutput xdoc
 
@@ -43,16 +43,16 @@ let private getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     // VS project references
     let prjRefs = xdoc.Descendants(NsMsBuild + "ProjectReference")
                   |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
-                  |> Seq.map IoHelpers.ToWindows
+                  |> Seq.map FsHelpers.ToWindows
                   |> Seq.map (fun x -> getProjectOutput prjDir x |> ProjectId.from)
                   |> Set.ofSeq
 
     // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
-                 |> Seq.map (IoHelpers.MigratePath << IoHelpers.ToWindows)
+                 |> Seq.map (FsHelpers.MigratePath << FsHelpers.ToWindows)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER))
-                 |> Seq.map IoHelpers.ToPlatformPath
+                 |> Seq.map FsHelpers.ToPlatformPath
                  |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectId.from)
                  |> Set.ofSeq
 
@@ -118,9 +118,9 @@ let private getPackageFromPaketReference (xel : XElement) =
 let private getFullBuildPackages (prjDoc : XDocument)  =
     let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
-                 |> Seq.map (IoHelpers.MigratePath << IoHelpers.ToWindows)
+                 |> Seq.map (FsHelpers.MigratePath << FsHelpers.ToWindows)
                  |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER))
-                 |> Seq.map IoHelpers.ToPlatformPath
+                 |> Seq.map FsHelpers.ToPlatformPath
                  |> Seq.map parseFullBuildPackage
                  |> Set.ofSeq
     fbPkgs
@@ -140,7 +140,7 @@ let private getPaketPackages (prjDoc : XDocument)  =
 
 // NOTE: should be private
 let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryId) (sxs : bool) (file : FileInfo) =
-    let tmpFile = IoHelpers.ComputeRelativeFilePath repoDir file
+    let tmpFile = FsHelpers.ComputeRelativeFilePath repoDir file
     let relativeProjectFile, sxsRoundtrip = 
         let fbExtProj = "-full-build" + file.Extension
         if sxs then
@@ -171,7 +171,7 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let prjRefs = getProjectReferences file.Directory xprj
 
     let assemblies = getAssemblies xprj
-    let pkgFile = file.Directory |> IoHelpers.GetFile "packages.config"
+    let pkgFile = file.Directory |> FsHelpers.GetFile "packages.config"
     let nugetPackages = if sxsRoundtrip then Set.empty
                         else match xdocLoader pkgFile with
                              | Some xnuget -> getNuGetPackages xnuget
@@ -200,6 +200,6 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
 
 let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (sxs : bool) (file : FileInfo) : ProjectDescriptor =
     try
-        parseProjectContent IoHelpers.XDocLoader repoDir repoRef sxs file
+        parseProjectContent FsHelpers.XDocLoader repoDir repoRef sxs file
     with
         e -> exn(sprintf "Failed to parse project %A" (file.FullName), e) |> raise

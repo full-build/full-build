@@ -27,11 +27,11 @@ let List() =
 let Clone (cmd : CLI.Commands.CloneRepositories) =
     let cloneRepoAndInit wsDir shallow (branch : string option) (repo : Repository) =
         async {
-            let res = Tools.Vcs.Clone wsDir repo shallow |> IoHelpers.PrintOutput (sprintf "Cloning %s" repo.Name)
-            res |> Exec.CheckResponseCode
+            let res = Tools.Vcs.Clone wsDir repo shallow |> ConsoleHelpers.PrintOutput (sprintf "Cloning %s" repo.Name)
+            res |> IO.CheckResponseCode
 
             if branch.IsSome then
-                Tools.Vcs.Checkout wsDir repo branch.Value |> IoHelpers.PrintOutput (sprintf "Checkouting %s" repo.Name)
+                Tools.Vcs.Checkout wsDir repo branch.Value |> ConsoleHelpers.PrintOutput (sprintf "Checkouting %s" repo.Name)
                                                            |> ignore
 
             return res
@@ -45,7 +45,7 @@ let Clone (cmd : CLI.Commands.CloneRepositories) =
              else Some branch
     selectedRepos |> Set.filter (fun x -> not x.IsCloned)
                   |> Threading.ParExec (cloneRepoAndInit wsDir cmd.Shallow br)
-                  |> Exec.CheckMultipleResponseCode
+                  |> IO.CheckMultipleResponseCode
     Workspace.Restore()
 
 let Add (cmd : CLI.Commands.AddRepository) =
