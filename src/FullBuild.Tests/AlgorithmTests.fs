@@ -34,7 +34,7 @@ let CheckCreateClosure () =
     let links = [ (1, [2]); (2, [3]); (3, []) ] |> Map
     let seeds = [1; 3] |> Set
     let nullIterUp _ = Set.empty
-    let closure = Algorithm.Closure false seeds getName (iterDown links) nullIterUp
+    let closure = Algorithm.Closure seeds getName (iterDown links) nullIterUp
     closure |> should equal ([1; 2; 3] |> Set)
 
 [<Test>]
@@ -46,7 +46,7 @@ let CheckCreateClosureHole () =
 
     let links = [ (1, [2]); (2, [3]); (3, []); (4, []) ] |> Map
     let seeds = [1; 3] |> Set
-    let closure = Algorithm.Closure false seeds getName (iterDown links) (iterUp links)
+    let closure = Algorithm.Closure seeds getName (iterDown links) (iterUp links)
     closure |> should equal ([1; 2; 3] |> Set)
 
 [<Test>]
@@ -59,8 +59,8 @@ let CheckNoCycle () =
     let links = [ (1, [2]); (2, [3]); (3, []) ] |> Map
     let seeds = [1; 3] |> Set
     let nullIterUp _ = Set.empty
-    let closure = Algorithm.Closure true seeds getName (iterDown links) nullIterUp
-    closure |> should equal ([1; 2; 3] |> Set)
+    Algorithm.FindCycle seeds getName (iterDown links) nullIterUp
+        |> should equal None
 
 [<Test>]
 let CheckCycle () =
@@ -75,6 +75,6 @@ let CheckCycle () =
     let links = [ (1, [2]); (2, [3]); (3, [1]) ] |> Map
     let seeds = [1] |> Set
     let nullIterUp _ = Set.empty
-    (fun () -> Algorithm.Closure true seeds getName (iterDown links) nullIterUp |> ignore)
-            |> should throw typeof<System.Exception>
+    Algorithm.FindCycle seeds getName (iterDown links) nullIterUp
+        |> should equal (Some "Node 1 -> Node 2 -> Node 3 -> Node 1")
             

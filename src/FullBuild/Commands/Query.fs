@@ -85,8 +85,7 @@ let Query (queryInfo : CLI.Commands.Query) =
         let repos = graph.Repositories |> Array.ofSeq
         for repo in repos do
             let seeds = repo |> Set.singleton
-            try
-                Algorithm.Closure true seeds (fun x -> x.Name) (fun x -> x.References) (fun x -> x.ReferencedBy)
-                    |> ignore
-            with
-                ex -> printfn "%s: %s" repo.Name ex.Message
+            match Algorithm.FindCycle seeds (fun x -> x.Name) (fun x -> x.References) (fun x -> x.ReferencedBy) with
+            | Some path -> printfn "%s: %s" repo.Name path
+            | None -> ()
+      
