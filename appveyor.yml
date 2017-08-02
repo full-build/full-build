@@ -3,7 +3,7 @@
 # branch convention:
 # master : stable package
 # beta/* : beta package
-# alpha/* : alpha package
+# * : alpha package
 #
 # this build does not push to NuGet - go to appveyor deployment interface and perform manual deployment
 #
@@ -20,10 +20,6 @@ skip_tags: true
 
 init:
   - ps: |
-      If ($env:APPVEYOR_REPO_BRANCH -like "alpha/*") {
-          $version = "$env:APPVEYOR_BUILD_VERSION"
-          $verStatus = "-alpha"
-      }
       If ($env:APPVEYOR_REPO_BRANCH -like "beta/*") {
           $version = "$env:APPVEYOR_BUILD_VERSION"
           $verStatus = "-beta"
@@ -33,7 +29,10 @@ init:
           $env:BUILD_VERSION_STATUS = $verStatus
           Update-AppveyorBuild -Version "$version"
           Set-AppveyorBuildVariable -Name BUILD_VERSION_STATUS -Value $env:BUILD_VERSION_STATUS
-      }
+      } Else {
+          $version = "$env:APPVEYOR_BUILD_VERSION"
+          $verStatus = "-alpha"
+	  }
       Write-Host "Building version $env:APPVEYOR_BUILD_VERSION $env:BUILD_VERSION_STATUS"
 
 shallow_clone: false
