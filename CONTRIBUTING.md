@@ -6,12 +6,11 @@
 
 # Development workflow
   * Master is protected (no direct push)
-  * Work and PR must be based from 'develop' branch (full-build use git flow)
+  * Work and PR must be based from 'master' branch
   * Commit references issue number (eg: 'blah blah #42')
   * Patch is developed in branch or cloned repository and requires appveyor + ff merge
   * Merge will be squashed
-  * Official release come only from master branch
-  * Manual step to disable prerelease flag (ie: publish latest version).
+  * Official release come only from master branch or beta branches
 
 # Before you submit a PR...
   * Did you ensure this is an [accepted up-for-grabs issue]? (If not, open one to start the discussion)
