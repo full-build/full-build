@@ -32,7 +32,7 @@ init:
       } Else {
           $version = "$env:APPVEYOR_BUILD_VERSION"
           $verStatus = "-alpha"
-	  }
+      }
       Write-Host "Building version $env:APPVEYOR_BUILD_VERSION $env:BUILD_VERSION_STATUS"
 
 shallow_clone: false
