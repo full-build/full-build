@@ -1,18 +1,11 @@
+
 #
-# master
-# ------
-#  - push release to GitHub as stable
-#  - package is stable and pushed to NuGet
+# branch convention:
+# master : stable package
+# beta/* : beta package
+# * : alpha package
 #
-# release/*
-# ---------
-#  - push to GitHub as draft/pre-release (beta)
-#  - package is beta and pushed to NuGet
-#
-# develop
-# -------
-#  - push to GitHub as draft/pre-release (alpha)
-#  - package is alpha
+# this build does not push to NuGet - go to appveyor deployment interface and perform manual deployment
 #
 
 os: Visual Studio 2017
@@ -27,16 +20,8 @@ skip_tags: true
 
 init:
   - ps: |
-      If ($env:APPVEYOR_REPO_BRANCH -like "develop") {
+      If ($env:APPVEYOR_REPO_BRANCH -like "beta/*") {
           $version = "$env:APPVEYOR_BUILD_VERSION"
-          $verStatus = "-alpha"
-      }
-      If ($env:APPVEYOR_REPO_BRANCH -like "release/*") {
-          $version = $env:APPVEYOR_REPO_BRANCH
-          $posAfterVchar = $version.LastIndexOf("v") + 1
-          $versionLength = $version.Length - $posAfterVchar
-          $version = $version.substring($posAfterVchar, $versionLength)
-          $version = "$version.$env:APPVEYOR_BUILD_NUMBER"
           $verStatus = "-beta"
       }
       If ($version) {
@@ -44,6 +29,9 @@ init:
           $env:BUILD_VERSION_STATUS = $verStatus
           Update-AppveyorBuild -Version "$version"
           Set-AppveyorBuildVariable -Name BUILD_VERSION_STATUS -Value $env:BUILD_VERSION_STATUS
+      } Else {
+          $version = "$env:APPVEYOR_BUILD_VERSION"
+          $verStatus = "-alpha"
       }
       Write-Host "Building version $env:APPVEYOR_BUILD_VERSION $env:BUILD_VERSION_STATUS"
 
@@ -62,78 +50,6 @@ artifacts:
 
   - path: apps/*.nupkg
     name: nuget
-
-deploy:
-  - provider: GitHub
-    release: 'full-build v$(appveyor_build_version) stable'
-    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
-    auth_token:
-      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
-    artifact: apps/full-build.zip
-    draft: false
-    prerelease: false
-    force_update: true
-    on:
-      branch: master
-      appveyor_repo_tag: false
-
-  - provider: GitHub
-    release: 'full-build v$(appveyor_build_version) beta'
-    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
-    auth_token:
-      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
-    artifact: apps/full-build.zip
-    draft: false
-    prerelease: true
-    force_update: true
-    on:
-      branch: /release\/.*/
-      appveyor_repo_tag: false
-      
-  - provider: GitHub
-    release: 'full-build v$(appveyor_build_version) alpha'
-    description: '$(appveyor_repo_commit) $(appveyor_repo_commit_message)'
-    auth_token:
-      secure: jFxLxYAyEMeg/TrfZ4oelM/HvdNR4ZtpiZYAqRrljzFdwiWBktkzh3N/UWLkFxpo
-    artifact: apps/full-build.zip
-    draft: true
-    prerelease: true
-    force_update: true
-    on:
-      branch: develop
-      appveyor_repo_tag: false
-
-  - provider: NuGet
-    api_key:
-      secure: Fa/KRLSPeo1w78xW6Yb6FJv3amW/BRcLKpy7DW7e0/mdsiug7GBA36twg2HOUCSS
-    skip_symbols: true
-    symbol_server:
-    artifacts: apps/*.nupkg
-    on:
-      branch: master
-      appveyor_repo_tag: false  
-
-  - provider: NuGet
-    api_key:
-      secure: Fa/KRLSPeo1w78xW6Yb6FJv3amW/BRcLKpy7DW7e0/mdsiug7GBA36twg2HOUCSS
-    skip_symbols: true
-    symbol_server:
-    artifacts: apps/*.nupkg
-    on:
-      branch: /release\/.*/
-      appveyor_repo_tag: false  
-
-  - provider: NuGet
-    api_key:
-      secure: Fa/KRLSPeo1w78xW6Yb6FJv3amW/BRcLKpy7DW7e0/mdsiug7GBA36twg2HOUCSS
-    skip_symbols: true
-    symbol_server:
-    artifacts: apps/*.nupkg
-    on:
-      branch: develop
-      appveyor_repo_tag: false  
-
-      
       
 notifications:
   - provider: GitHubPullRequest
