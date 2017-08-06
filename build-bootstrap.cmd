@@ -11,6 +11,7 @@ copy bootstrap\bootstrap.sln %HERE%
 
 msbuild /t:Rebuild bootstrap.sln || goto :ko
 
+echo publishing with built version
 %HERE%\src\fullbuild\bin\fullbuild publish --version 0.0.0 full-build || goto :ko
 robocopy %HERE%\apps\full-build %HERE%\refbin /MIR
 rmdir /s /q %HERE%\apps

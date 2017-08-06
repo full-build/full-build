@@ -1,7 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(SolutionDir)\.full-build\views\$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <ItemGroup>
-    <ProjectReference Include="$(SolutionDir)\tests\MainProject/MainProject.csproj" Condition="'$(FullBuild_mainproject)' != ''">
+    <ProjectReference Include="$(SolutionDir)\tests\MainProject\MainProject.csproj" Condition="'$(FullBuild_mainproject)' != ''">
       <Project>{A65F7DBF-3C8C-4D5D-B38F-752E9FD7B265}</Project>
       <Name>mainproject</Name>
     </ProjectReference>
