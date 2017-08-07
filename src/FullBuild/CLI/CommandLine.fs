@@ -91,7 +91,6 @@ type private Token =
     | Version
     | Workspace
     | Help
-    | Upgrade
     | Setup
     | Init
     | Clone
@@ -144,7 +143,6 @@ let private (|Token|_|) (token : string) =
     | "wks" -> Some Workspace
 
     | "help" -> Some Help
-    | "upgrade" -> Some Upgrade
     | "setup" -> Some Setup
     | "init" -> Some Init
     | "clone" -> Some Clone
@@ -484,14 +482,6 @@ let rec private commandHistory (html : bool) (args : string list) =
     | [] -> Command.History { Html = html }
     | _ -> Command.Error MainCommand.History
 
-let rec private commandUpgrade (verStatus : string) (args : string list) =
-    match args with
-    | [] -> Command.Upgrade "stable"
-    | [TokenOption TokenOption.Alpha] -> Command.Upgrade "alpha"
-    | [TokenOption TokenOption.Beta] -> Command.Upgrade "beta"
-    | [Param processId] -> Command.FinalizeUpgrade (System.Int32.Parse(processId))
-    | _ -> Command.Error MainCommand.Upgrade
-
 let rec private commandQuery (project : bool) (nuget : bool) (refs : bool) (cycle : bool) (view : string option) (src : RepositoryId option) (dst : RepositoryId option) (args : string list) =
     match args with
     | TokenOption TokenOption.UnusedProjects :: tail -> tail |> commandQuery true nuget refs cycle view None None
@@ -514,7 +504,6 @@ let private commandHelp (args : string list) =
               | Token Token.Workspace :: _ -> MainCommand.Workspace
               | Token Token.Version :: _ -> MainCommand.Version
               | Token Token.Help :: _ -> MainCommand.Usage
-              | Token Token.Update :: _ -> MainCommand.Upgrade
               | Token Token.Setup :: _ -> MainCommand.Setup
               | Token Token.Init :: _ -> MainCommand.Init
               | Token Token.Exec :: _ -> MainCommand.Usage
@@ -546,7 +535,6 @@ let Parse (args : string list) : Command =
     match args with
     | [Token Token.Version] -> Command.Version
     | Token Token.Help :: cmdArgs -> cmdArgs |> commandHelp
-    | Token Token.Upgrade :: cmdArgs -> cmdArgs |> commandUpgrade "stable"
     | Token Token.Setup :: cmdArgs -> cmdArgs |> commandSetup false
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
@@ -651,7 +639,6 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Push], "push [--full] <version> : push artifacts and tag repositories"
         [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
-        [MainCommand.Workspace; MainCommand.Upgrade], "upgrade [--alpha|--beta]: upgrade full-build to latest available version"
         [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages|--ref|--cycle> [--view <viewId>] : query items"
         [MainCommand.Workspace; MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
         [MainCommand.Workspace; MainCommand.UpgradeGuids], "update-guids : DANGER! change guids of all projects in given repository (interactive command)"
