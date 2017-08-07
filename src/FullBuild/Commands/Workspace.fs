@@ -51,8 +51,9 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
             let br = match branch with
                      | Some x -> x
                      | None -> repo.Branch
-            let res = Tools.Vcs.Checkout wsDir repo br
-            return res |> ConsoleHelpers.PrintOutput repo.Name
+            return Tools.Vcs.Checkout wsDir repo br
+                       |> IO.AndThen (fun () -> Tools.Vcs.Pull wsDir repo false) 
+                       |> ConsoleHelpers.PrintOutput repo.Name
         }
 
     match branchInfo.Branch with
