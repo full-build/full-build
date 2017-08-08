@@ -145,7 +145,8 @@ let FindKnownProjects (repoDir : DirectoryInfo) =
     [ "*.pssproj"
       "*.csproj"
       "*.vbproj"
-      "*.fsproj" ]
+      "*.fsproj" 
+      "*.sqlproj" ]
         |> Seq.collect (fun x -> repoDir.EnumerateFiles (x, SearchOption.AllDirectories))
 
 let EnumerateChildren (dir : DirectoryInfo) =

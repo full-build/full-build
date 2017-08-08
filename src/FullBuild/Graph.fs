@@ -28,6 +28,7 @@ type PackageVersion =
 type OutputType =
     | Exe
     | Dll
+    | Database
 
 [<RequireQualifiedAccess>]
 type PublisherType =
@@ -267,6 +268,7 @@ with
         let ext = match this.OutputType with
                   | OutputType.Dll -> "dll"
                   | OutputType.Exe -> "exe"
+                  | OutputType.Database -> "dacpac"
         sprintf "%s/%s/bin/%s.%s" repo path ass ext
 
     member this.UniqueProjectId = this.Project.UniqueProjectId.toString
@@ -276,6 +278,7 @@ with
     member this.OutputType = match this.Project.OutputType with
                              | Anthology.OutputType.Dll -> OutputType.Dll
                              | Anthology.OutputType.Exe -> OutputType.Exe
+                             | Anthology.OutputType.Database -> OutputType.Database
 
     member this.FxVersion = match this.Project.FxVersion.toString with
                             | null -> None

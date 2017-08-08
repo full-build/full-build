@@ -26,6 +26,7 @@ type PackageVersion =
 type OutputType =
     | Exe
     | Dll
+    | Database
 
 [<RequireQualifiedAccess>]
 type PublisherType =

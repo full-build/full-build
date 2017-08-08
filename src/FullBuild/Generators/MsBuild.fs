@@ -52,9 +52,10 @@ let private generateProjectTarget (project : Project) =
     let cpyCondition = sprintf "'$(%sCopy)' == ''" projectProperty
     let projectFile = sprintf @"%s\%s\%s" MSBUILD_SOLUTION_DIR (project.Repository.Name) project.ProjectFile
     let output = (project.Output.Name)
-    let ext = match project.OutputType with
-              | OutputType.Dll -> "dll"
-              | OutputType.Exe -> "exe"
+    let ext, refType = match project.OutputType with
+                       | OutputType.Dll -> "dll", "Reference"
+                       | OutputType.Exe -> "exe", "Reference"
+                       | OutputType.Database -> "dacpac", "ArtifactReference"
     let binFile = sprintf @"%s\%s.%s" MSBUILD_BIN_FOLDER output ext
     let refFile = sprintf @"%s\.full-build\projects\%s-copy.targets" MSBUILD_SOLUTION_DIR project.Output.Name
 
@@ -72,7 +73,7 @@ let private generateProjectTarget (project : Project) =
                     XAttribute (NsNone + "Condition", srcCondition),
                     XElement (NsMsBuild + "Project", sprintf "{%s}" project.UniqueProjectId),
                     XElement (NsMsBuild + "Name", project.Output.Name)),
-                XElement (NsMsBuild + "Reference",
+                XElement (NsMsBuild + refType,
                     XAttribute (NsNone + "Include", binFile),
                     XAttribute (NsNone + "Condition", binCondition),
                     XElement (NsMsBuild + "Private", "true"))),
@@ -92,10 +93,14 @@ let private generateProjectCopyTarget (project : Project) =
     let ext = match project.OutputType with
                 | OutputType.Dll -> "dll"
                 | OutputType.Exe -> "exe"
+                | OutputType.Database -> "dacpac"
     let binFile = sprintf @"%s\%s.%s" MSBUILD_BIN_FOLDER output ext
     let pdbFile = sprintf @"%s\%s.pdb" MSBUILD_BIN_FOLDER output
     let mdbFile = sprintf @"%s\%s.%s.mdb" MSBUILD_BIN_FOLDER output ext
-    let incFile = sprintf "%s;%s;%s" binFile pdbFile mdbFile
+    let clrFile = sprintf @"%s\%s.%s.dll" MSBUILD_BIN_FOLDER output ext
+    let incFile = match project.OutputType with
+                  | OutputType.Database -> sprintf "%s;%s;%s;%s" binFile pdbFile mdbFile clrFile
+                  | _ -> sprintf "%s;%s;%s" binFile pdbFile mdbFile
 
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -250,6 +255,7 @@ let private convertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "OutputPath") |> Seq.iter setOutputPath
     cproj.Descendants(NsMsBuild + "DocumentationFile") |> Seq.iter setDocumentation
     cproj.Descendants(NsMsBuild + "AssemblyName") |> Seq.iter (fun x -> x.Value <- project.Output.Name)
+    cproj.Descendants(NsMsBuild + "SqlTargetName") |> Seq.iter (fun x -> x.Value <- project.Output.Name)
     cproj.Descendants(NsMsBuild + "AutoGenerateBindingRedirects") |> Seq.iter (fun x -> x.Value <- "false")
 
     // TODO: both 3 fields are optional - must discard everything and reset everything if not null or empty
