@@ -25,8 +25,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>publish --view gen *</StartArguments>
-    <StartWorkingDirectory>C:\Development\fullbuild\</StartWorkingDirectory>
+    <StartArguments>view adgestion-ref adgestion-ref</StartArguments>
+    <StartWorkingDirectory>D:\src\test-dacpac\</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>

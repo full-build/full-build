@@ -159,6 +159,7 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
 
     let extension =  match !> xprj.Descendants(NsMsBuild + "OutputType").Single() : string with
                      | "Library" -> OutputType.Dll
+                     | "Database" -> OutputType.Database
                      | _ -> OutputType.Exe
 
     let sfxVersion = !> xprj.Descendants(NsMsBuild + "TargetFrameworkVersion").SingleOrDefault() : string
