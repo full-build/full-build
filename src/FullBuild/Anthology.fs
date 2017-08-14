@@ -24,6 +24,7 @@ open StringHelpers
 type OutputType =
     | Exe
     | Dll
+    | Database
 with
      member this.toString = toString this
      static member from s = fromString<OutputType> s
