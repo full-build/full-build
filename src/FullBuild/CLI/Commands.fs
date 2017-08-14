@@ -157,7 +157,6 @@ type Query =
 type MainCommand =
     | Version
     | Usage
-    | Upgrade
     | Setup
     | Init
     | Index
@@ -212,8 +211,6 @@ type Command =
 
     | Version
     | Usage of MainCommand
-    | Upgrade of string
-    | FinalizeUpgrade of int
 
     // workspace
     | SetupWorkspace of SetupWorkspace

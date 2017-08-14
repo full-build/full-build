@@ -74,8 +74,6 @@ let processMain argv =
 
     // misc
     | Command.Query queryInfo -> Commands.Query.Query queryInfo
-    | Command.Upgrade verStatus -> Commands.Upgrade.Upgrade verStatus
-    | Command.FinalizeUpgrade processId -> Commands.Upgrade.FinalizeUpgrade processId
     | Command.Version -> CLI.CommandLine.PrintVersion ()
     | Command.Usage mainCmd -> CLI.CommandLine.PrintUsage mainCmd
     | Command.Error errInfo -> CLI.CommandLine.PrintUsage errInfo
