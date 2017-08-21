@@ -86,7 +86,8 @@ type CheckoutVersion =
     { Version : string }
 
 type BranchWorkspace =
-    { Branch : string option }
+    { Branch : string option
+      Bin : bool }
 
 type AddApplication =
     { Name : string

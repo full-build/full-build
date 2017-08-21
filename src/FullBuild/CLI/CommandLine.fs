@@ -332,10 +332,11 @@ let private commandCheckout (args : string list) =
     | [version] -> Command.CheckoutWorkspace {Version = version}
     | _ -> Command.Error MainCommand.Checkout
 
-let private commandBranch (args : string list) =
+let rec private commandBranch (bin : bool) (args : string list) =
     match args with
-    | [name] -> Command.BranchWorkspace {Branch = Some name}
-    | [] -> Command.BranchWorkspace {Branch = None}
+    | TokenOption TokenOption.Src :: tail -> tail |> commandBranch false
+    | [name] -> Command.BranchWorkspace {Branch = Some name; Bin = bin}
+    | [] -> Command.BranchWorkspace {Branch = None; Bin = bin}
     | _ -> Command.Error MainCommand.Branch
 
 let rec private commandPull (src : bool) (bin : bool) (rebase : bool) (view : string option) (args : string list) =
@@ -548,7 +549,7 @@ let Parse (args : string list) : Command =
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
-    | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch
+    | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch true
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
     | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
@@ -624,7 +625,7 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Init], "init <git|gerrit|svn> <master-repository> <local-path> : initialize a new workspace in given path"
         [MainCommand.Repository; MainCommand.Clone], "clone [--shallow] [--all] <repoId-wildcard>+ : clone repositories using provided wildcards"
         [MainCommand.Workspace; MainCommand.Checkout], "checkout [version] : checkout workspace or reset to default version"
-        [MainCommand.Workspace; MainCommand.Branch], "branch [branch] : switch to branch"
+        [MainCommand.Workspace; MainCommand.Branch], "branch [--src] [branch] : switch to branch and pull binaires of the branch. If --src token is provided then switch only"
         [MainCommand.Workspace; MainCommand.InstallPackage], "install : install packages"
         [MainCommand.View; MainCommand.AddView], "view [--src] [--ref] [--modified] [--app <app-wildcard>] [--static] [--test] <viewId> <viewId-wildcard>+ : create view with projects"
         [MainCommand.View; MainCommand.OpenView], "open <viewId> : open view with your favorite ide"
