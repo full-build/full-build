@@ -70,7 +70,7 @@ let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
 
                 Configuration.SaveBranch x
                 Restore()
-                pullMatchingBinaries ()
+                if branchInfo.Bin then pullMatchingBinaries ()
     | None -> let name = Configuration.LoadBranch()
               printfn "%s" name
 
