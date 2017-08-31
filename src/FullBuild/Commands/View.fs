@@ -139,5 +139,5 @@ let Graph (cmd : CLI.Commands.GraphView) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graphFile = wsDir |> GetSubDirectory (AddExt Dgml cmd.Name)
 
-    let xgraph = Generators.Dgml.GraphContent projects cmd.All
+    let xgraph = Generators.Dgml.GraphContent projects cmd.Src cmd.Bin
     xgraph.Save graphFile.FullName

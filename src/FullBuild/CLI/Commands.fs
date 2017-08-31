@@ -115,7 +115,8 @@ type FullBuildView =
 
 type GraphView =
     { Name : string
-      All : bool }
+      Src : bool 
+      Bin : bool }
 
 type Exec =
     { Command : string

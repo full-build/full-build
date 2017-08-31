@@ -42,7 +42,7 @@ let CheckGenerateDgmlNoDependency () =
         let goal = projects |> selectProjects ["g"]
 
         let view = viewRepository.CreateView "test" (set ["*/g"]) false false false None false
-        let res = Generators.Dgml.GraphContent view.Projects true
+        let res = Generators.Dgml.GraphContent view.Projects false true
 
         res.ToString() |> printfn "%s" 
         expectedDgml.ToString() |> printfn "%s" 
@@ -70,7 +70,7 @@ let CheckGenerateDgmlWithDependencies () =
         let goal = projects |> selectProjects ["g"]
 
         let view = viewRepository.CreateView "test" (set ["*/g"]) true false false None false
-        let res = Generators.Dgml.GraphContent view.Projects true
+        let res = Generators.Dgml.GraphContent view.Projects false true
 
         res.ToString() |> should equal (expectedDgml.ToString())
     finally

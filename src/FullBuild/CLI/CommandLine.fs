@@ -295,10 +295,11 @@ let rec private commandClone (shallow : bool) (all : bool) (args : string list) 
 
 
 
-let rec private commandGraph (all : bool) (args : string list) =
+let rec private commandGraph (src : bool) (bin : bool) (args : string list) =
     match args with
-    | TokenOption TokenOption.All :: tail -> tail |> commandGraph true
-    | [ViewId name] -> Command.Graph { Name = name ; All = all }
+    | TokenOption TokenOption.Src :: tail -> tail |> commandGraph false bin
+    | TokenOption TokenOption.Bin :: tail -> tail |> commandGraph src true
+    | [ViewId name] -> Command.Graph { Name = name; Src = src; Bin = bin }
     | _ -> Command.Error MainCommand.Graph
 
 let rec private commandPublish view version status (args : string list) =
@@ -543,7 +544,7 @@ let Parse (args : string list) : Command =
     | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert false false
     | Token Token.Doctor :: cmdArgs -> cmdArgs |> commandDoctor
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false
-    | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph false
+    | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph true false
     | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish None None None
     | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush false
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
@@ -632,7 +633,7 @@ let UsageContent() =
         [MainCommand.View; MainCommand.BuildView], "build [--mt] [--debug] [--version <version>] [<viewId>] : build view"
         [MainCommand.View; MainCommand.RebuildView], "rebuild [--mt] [--debug] [--version <version>] [<viewId>] : rebuild view (clean & build)"
         [MainCommand.View; MainCommand.Test], "test [--exclude <category>]* <viewId-wildcard>+ : test assemblies (match repository/project)"
-        [MainCommand.View; MainCommand.Graph], "graph [--all] <viewId> : graph view content (project, packages, assemblies)"
+        [MainCommand.View; MainCommand.Graph], "graph [--src] [--bin] <viewId> : graph view content (project, packages, assemblies)"
         [MainCommand.Workspace; MainCommand.Exec], "exec [--all] <cmd> : execute command for each repository (variables: FB_NAME, FB_PATH, FB_URL, FB_WKS)"
         [MainCommand.Workspace; MainCommand.Convert], "convert [--check] <repoId-wildcard> : convert projects in repositories"
         [MainCommand.Workspace; MainCommand.Doctor], "doctor : check workspace consistency"
