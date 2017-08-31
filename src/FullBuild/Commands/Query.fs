@@ -74,11 +74,18 @@ let Query (queryInfo : CLI.Commands.Query) =
                          | (_,_) -> failwithf "Expecting source and destination repositories"
 
         let (srcName, dstName) = (src.toString, dst.toString)
-        let srcRepo = graph.Repositories |> Seq.find (fun x -> x.Name = srcName)
-        let dstRepo = graph.Repositories |> Seq.find (fun x -> x.Name = dstName)
-        for project in srcRepo.Projects do
+
+        let srcFilter = srcName |> Set.singleton
+        let srcProjects = PatternMatching.FilterMatch graph.Repositories (fun x -> x.Name) srcFilter
+                            |> Set.map (fun x -> x.Projects)
+                            |> Set.unionMany
+
+        let dstFilter = dstName |> Set.singleton
+        let dstRepos = PatternMatching.FilterMatch graph.Repositories (fun x -> x.Name) dstFilter
+        for project in srcProjects do
             for refProject in project.References do
-                if refProject.Repository = dstRepo then
+                if dstRepos |> Set.contains refProject.Repository then
+//                    project.ProjectFile |> System.IO.Path.GetFileName |> printfn "%s" 
                     printfn "%s -> %s" project.ProjectId refProject.ProjectId
 
     if queryInfo.Cycle then
