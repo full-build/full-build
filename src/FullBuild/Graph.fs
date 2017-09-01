@@ -184,7 +184,7 @@ with
                          | None -> match this.Vcs with
                                    | VcsType.Gerrit | VcsType.Git -> "master"
                                    | VcsType.Hg -> "main" 
-                                   | VcsType.Svn -> "trunk"
+                                   | VcsType.Svn -> "unspecified"
 
     member this.Uri = this.Repository.Url.toString
 

@@ -47,13 +47,17 @@ let SvnClean (repoDir : DirectoryInfo) (repo : Repository) =
 
     SvnPull brDir false |> IO.CheckResponseCode
     
-let SvnClone (target : DirectoryInfo) (url : string) (shallow : bool) =
+let SvnClone (repo : Repository) (target : DirectoryInfo) (url : string) (shallow : bool) =
     let fbBranch = Configuration.LoadBranch()
     let svnBranch = match fbBranch with
-                    | "master" -> "trunk" 
-                    | x -> x
+                    | "master" -> match repo.Branch with
+                                  | "unspecified" -> None
+                                  | _ -> Some repo.Branch
+                    | x -> Some x
 
-    let urlBranch = sprintf "%s/%s" url svnBranch
+    let urlBranch = match svnBranch with
+                    | Some x -> sprintf "%s/%s" url x
+                    | None -> url
     let brDir = target |> GetBranchDirectory
 
     let args = sprintf @"checkout %s %s" urlBranch brDir.FullName
