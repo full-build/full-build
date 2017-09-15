@@ -48,7 +48,6 @@ let private generateProjectCopy (projectRef : Project) =
 let private generateProjectTarget (project : Project) =
     let projectProperty = MsBuildProjectPropertyName project
     let srcCondition = sprintf "'$(%s)' != ''" projectProperty
-    let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let cpyCondition = sprintf "'$(%sCopy)' == ''" projectProperty
     let projectFile = sprintf @"%s\%s\%s" MSBUILD_SOLUTION_DIR (project.Repository.Name) project.ProjectFile
     let output = (project.Output.Name)
@@ -67,16 +66,20 @@ let private generateProjectTarget (project : Project) =
             XElement (NsMsBuild + "Import",
                 XAttribute (NsNone + "Project", @"$(SolutionDir)\.full-build\views\$(SolutionName).targets"),
                 XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
-            XElement (NsMsBuild + "ItemGroup",
-                XElement(NsMsBuild + "ProjectReference",
-                    XAttribute (NsNone + "Include", projectFile),
-                    XAttribute (NsNone + "Condition", srcCondition),
-                    XElement (NsMsBuild + "Project", sprintf "{%s}" project.UniqueProjectId),
-                    XElement (NsMsBuild + "Name", project.Output.Name)),
-                XElement (NsMsBuild + refType,
-                    XAttribute (NsNone + "Include", binFile),
-                    XAttribute (NsNone + "Condition", binCondition),
-                    XElement (NsMsBuild + "Private", "true"))),
+            XElement(NsMsBuild + "Choose",
+                XElement(NsMsBuild + "When", 
+                    XAttribute(NsNone + "Condition", srcCondition),
+                    XElement (NsMsBuild + "ItemGroup",
+                        XElement(NsMsBuild + "ProjectReference",
+                            XAttribute (NsNone + "Include", projectFile),
+                            XElement (NsMsBuild + "Project", sprintf "{%s}" project.UniqueProjectId),
+                            XElement (NsMsBuild + "Name", project.Output.Name)))),
+                XElement(NsMsBuild + "Otherwise",    
+                    XElement(NsMsBuild + "ItemGroup",
+                        XElement (NsMsBuild + refType,
+                            XAttribute (NsNone + "Include", project.Output.Name),
+                            XElement(NsMsBuild + "HintPath", binFile),
+                            XElement (NsMsBuild + "Private", "true"))))),
                 XElement(NsMsBuild + "Import",
                     XAttribute(NsNone + "Project", refFile),
                     XAttribute(NsNone + "Condition", cpyCondition))))

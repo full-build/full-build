@@ -1,3 +1,6 @@
+v4.3
+  * Use HintPath instead of direct reference for clearer reference display in VS
+
 v4.2
   * baseline is tagless on repositories
   * add support for side-by-side
