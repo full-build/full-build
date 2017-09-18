@@ -14,6 +14,8 @@
 
 module IO
 
+open System
+
 type Result =
     { Code: int
       Info : string
@@ -21,7 +23,13 @@ type Result =
       Error: string list }
 
 let private resultToError execResult =
-    if execResult.Code <> 0 then (sprintf "Operation '%s' failed with error %d" execResult.Info execResult.Code) |> Some
+    if execResult.Code <> 0 then 
+
+        sprintf "Operation '%s' failed with error %d" execResult.Info execResult.Code 
+        :: execResult.Out
+        @ execResult.Error
+        |> String.concat Environment.NewLine
+        |> Some    
     else None
 
 let GetOutput execResult =
