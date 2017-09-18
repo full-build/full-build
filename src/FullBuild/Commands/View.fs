@@ -120,16 +120,15 @@ let Open (cmd : CLI.Commands.OpenView) =
 let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
     let view = System.IO.FileInfo(cmd.FilePath) |> ViewSerializer.Load
     if view.Name |> Configuration.ViewExistsAndNotCorrupted |> not then
-        {   CLI.Commands.AddView.Name = view.Name
-            CLI.Commands.AddView.Filters = view.Filters |> Set.toList
-            CLI.Commands.AddView.DownReferences = view.DownReferences
-            CLI.Commands.AddView.UpReferences = view.UpReferences
-            CLI.Commands.AddView.Modified = view.Modified
-            CLI.Commands.AddView.AppFilter = view.AppFilter
-            CLI.Commands.AddView.Static = false 
-            CLI.Commands.AddView.Tests = false } |> Add
-    {   CLI.Commands.OpenView.Name = view.Name }  
-        |> Open
+        { CLI.Commands.AddView.Name = view.Name
+          CLI.Commands.AddView.Filters = view.Filters |> Set.toList
+          CLI.Commands.AddView.DownReferences = view.DownReferences
+          CLI.Commands.AddView.UpReferences = view.UpReferences
+          CLI.Commands.AddView.Modified = view.Modified
+          CLI.Commands.AddView.AppFilter = view.AppFilter
+          CLI.Commands.AddView.Static = false 
+          CLI.Commands.AddView.Tests = false } |> Add
+    { CLI.Commands.OpenView.Name = view.Name } |> Open
 
 let Graph (cmd : CLI.Commands.GraphView) =
     let graph = Graph.load()

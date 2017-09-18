@@ -24,9 +24,9 @@ type Result =
 
 let private resultToError execResult =
     if execResult.Code <> 0 then 
-        sprintf "Operation '%s' failed with error %d" execResult.Info execResult.Code 
-            :: execResult.Out 
-            @ execResult.Error
+        [sprintf "Operation '%s' failed with error %d" execResult.Info execResult.Code]
+            @ ("Out:" :: execResult.Out) 
+            @ ("Error:" :: execResult.Error)
             |> String.concat Environment.NewLine
             |> Some
     else None

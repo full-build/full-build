@@ -25,9 +25,7 @@ let private throttle n fs =
                       n.Release() |> ignore
                       return match result with
                              | Choice1Of2 rslt -> rslt
-                             | Choice2Of2 exn  -> raise exn
-                    }
-        }
+                             | Choice2Of2 exn  -> raise exn } }
 
 
 let ParExec fn from =

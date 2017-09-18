@@ -23,8 +23,8 @@ let TestAssemblies (filters : string set) (excludes : string set) =
     // first set binding redirects on output only
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let projects = selectedViews |> Set.map (fun x -> x.Projects)
-                                   |> Set.unionMany
-                                   |> Set.filter (fun x -> x.HasTests)
+                                 |> Set.unionMany
+                                 |> Set.filter (fun x -> x.HasTests)
     projects |> Set.map (fun x -> sprintf "%s/%s" x.Repository.Name x.ProjectFile)
              |> Seq.map (fun x -> wsDir |> FsHelpers.GetFile x)
              |> Seq.map (fun x -> x.Directory)

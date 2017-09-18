@@ -85,7 +85,6 @@ let Query (queryInfo : CLI.Commands.Query) =
         for project in srcProjects do
             for refProject in project.References do
                 if dstRepos |> Set.contains refProject.Repository then
-//                    project.ProjectFile |> System.IO.Path.GetFileName |> printfn "%s" 
                     printfn "%s -> %s" project.ProjectId refProject.ProjectId
 
     if queryInfo.Cycle then

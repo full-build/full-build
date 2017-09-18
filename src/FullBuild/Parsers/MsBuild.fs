@@ -42,19 +42,19 @@ let private getProjectOutput (dir : DirectoryInfo) (relFile : string) =
 let private getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     // VS project references
     let prjRefs = xdoc.Descendants(NsMsBuild + "ProjectReference")
-                  |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
-                  |> Seq.map FsHelpers.ToWindows
-                  |> Seq.map (fun x -> getProjectOutput prjDir x |> ProjectId.from)
-                  |> Set.ofSeq
+                      |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
+                      |> Seq.map FsHelpers.ToWindows
+                      |> Seq.map (fun x -> getProjectOutput prjDir x |> ProjectId.from)
+                      |> Set.ofSeq
 
     // full-build project references (once converted)
     let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
-                 |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
-                 |> Seq.map (FsHelpers.MigratePath << FsHelpers.ToWindows)
-                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER))
-                 |> Seq.map FsHelpers.ToPlatformPath
-                 |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectId.from)
-                 |> Set.ofSeq
+                     |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
+                     |> Seq.map (FsHelpers.MigratePath << FsHelpers.ToWindows)
+                     |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER))
+                     |> Seq.map FsHelpers.ToPlatformPath
+                     |> Seq.map (fun x -> Path.GetFileNameWithoutExtension x |> ProjectId.from)
+                     |> Set.ofSeq
 
     prjRefs |> Set.union fbRefs
 
@@ -117,25 +117,25 @@ let private getPackageFromPaketReference (xel : XElement) =
 
 let private getFullBuildPackages (prjDoc : XDocument)  =
     let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
-                 |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
-                 |> Seq.map (FsHelpers.MigratePath << FsHelpers.ToWindows)
-                 |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER))
-                 |> Seq.map FsHelpers.ToPlatformPath
-                 |> Seq.map parseFullBuildPackage
-                 |> Set.ofSeq
+                     |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
+                     |> Seq.map (FsHelpers.MigratePath << FsHelpers.ToWindows)
+                     |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER))
+                     |> Seq.map FsHelpers.ToPlatformPath
+                     |> Seq.map parseFullBuildPackage
+                     |> Set.ofSeq
     fbPkgs
 
 let private getPackageReferencePackages (prjDoc : XDocument)  =
     let fbPkgs = prjDoc.Descendants(NsMsBuild + "PackageReference")
-                 |> Seq.map parsePackageReferencePackage
-                 |> Set.ofSeq
+                     |> Seq.map parsePackageReferencePackage
+                     |> Set.ofSeq
     fbPkgs
 
 let private getPaketPackages (prjDoc : XDocument)  =
     let paketPkgs = prjDoc.Descendants(NsMsBuild + "Reference")
-                    |> Seq.filter isPaketReference
-                    |> Seq.map getPackageFromPaketReference
-                    |> Set.ofSeq
+                        |> Seq.filter isPaketReference
+                        |> Seq.map getPackageFromPaketReference
+                        |> Set.ofSeq
     paketPkgs
 
 // NOTE: should be private

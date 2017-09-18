@@ -123,9 +123,8 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
     // checkout each repository now
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let branchResults = 
-        pulledBaseline.Bookmarks
-        |> Seq.filter (fun b -> b.Repository.IsCloned)
-        |> Threading.ParExec (fun b -> checkoutRepo wsDir b.Version b.Repository)
+        pulledBaseline.Bookmarks |> Seq.filter (fun b -> b.Repository.IsCloned)
+                                 |> Threading.ParExec (fun b -> checkoutRepo wsDir b.Version b.Repository)
     branchResults |> IO.CheckMultipleResponseCode
 
     Configuration.SaveBranch tag.BuildBranch
@@ -153,15 +152,14 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
 
 
 let consoleProgressBar max =
-    MailboxProcessor.Start(fun inbox ->
-        new String(' ', max) |> printf "[%s]\r["
-        let rec loop n = async {
-                let! msg = inbox.Receive()
-                do printf "="
-                if n = max then return printfn "]"
-                return! n + 1 |> loop
-            }
-        loop 1)
+    MailboxProcessor.Start(fun inbox -> new String(' ', max) |> printf "[%s]\r["
+                                        let rec loop n = async {
+                                                             let! msg = inbox.Receive()
+                                                             do printf "="
+                                                             if n = max then return printfn "]"
+                                                             return! n + 1 |> loop
+                                                         }
+                                        loop 1)
 
 
 let Pull (pullInfo : CLI.Commands.PullWorkspace) =
