@@ -24,11 +24,10 @@ type Result =
 
 let private resultToError execResult =
     if execResult.Code <> 0 then 
-        let prefix p = function [] -> [] | l -> p :: l
 
         sprintf "Operation '%s' failed with error %d" execResult.Info execResult.Code 
-        :: prefix "Out:" execResult.Out
-        @ prefix "Error:" execResult.Error
+        :: execResult.Out
+        @ execResult.Error
         |> String.concat Environment.NewLine
         |> Some    
     else None
