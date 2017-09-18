@@ -412,9 +412,9 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
                          | None -> None
         let repoVcs = match vcs with
                       | VcsType.Gerrit -> Anthology.VcsType.Gerrit
-                       | VcsType.Git -> Anthology.VcsType.Git
-                       | VcsType.Hg -> Anthology.VcsType.Hg
-                       | VcsType.Svn -> Anthology.VcsType.Svn        
+                      | VcsType.Git -> Anthology.VcsType.Git
+                      | VcsType.Hg -> Anthology.VcsType.Hg
+                      | VcsType.Svn -> Anthology.VcsType.Svn        
         let repo = { Anthology.Name = Anthology.RepositoryId.from name
                      Anthology.Url = Anthology.RepositoryUrl.from url
                      Anthology.Branch = repoBranch
@@ -443,10 +443,10 @@ let from (globals : Anthology.Globals) (antho : Anthology.Anthology) : Graph =
 
 let create vcs (uri : string) (artifacts : string) (sxs : bool) =
     let repoVcs = match vcs with
-                    | VcsType.Git -> Anthology.VcsType.Git
-                    | VcsType.Gerrit -> Anthology.VcsType.Gerrit
-                    | VcsType.Hg -> Anthology.VcsType.Hg
-                    | VcsType.Svn -> Anthology.VcsType.Svn
+                  | VcsType.Git -> Anthology.VcsType.Git
+                  | VcsType.Gerrit -> Anthology.VcsType.Gerrit
+                  | VcsType.Hg -> Anthology.VcsType.Hg
+                  | VcsType.Svn -> Anthology.VcsType.Svn
     let repo = { Anthology.Name = Anthology.RepositoryId.from Env.MASTER_REPO
                  Anthology.Url = Anthology.RepositoryUrl.from uri
                  Anthology.Branch = None

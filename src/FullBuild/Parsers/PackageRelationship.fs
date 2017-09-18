@@ -66,7 +66,7 @@ let ComputePackagesRoots (package2packages : Map<PackageId, PackageId set>) =
 
 let GetDependencyNuspec packageName = 
     Env.GetFolder Folder.Package
-    |> GetSubDirectory packageName
-    |> GetFile(sprintf "%s.nuspec" packageName)
-    |> fun x -> x.FullName
+        |> GetSubDirectory packageName
+        |> GetFile(sprintf "%s.nuspec" packageName)
+        |> fun x -> x.FullName
       

@@ -89,24 +89,21 @@ with
         filePath |> baselineFile.Load
         let buildInfo = { BuildInfo.Branch = baselineFile.branch; BuildInfo.Number = baselineFile.buildnumber }
         let repositories = 
-            graph.Repositories 
-            |> Set.add graph.MasterRepository 
-            |> Seq.map(fun r -> r.Name, r) 
-            |> Map.ofSeq
-        let bookmarks = 
-                baselineFile.repositories 
-                    |> Seq.map (fun x -> Bookmark(repositories |> Map.find x.name, x.version))
-                    |> Set.ofSeq
+            graph.Repositories |> Set.add graph.MasterRepository 
+                               |> Seq.map(fun r -> r.Name, r) 
+                               |> Map.ofSeq
+        let bookmarks = baselineFile.repositories 
+                            |> Seq.map (fun x -> Bookmark(repositories |> Map.find x.name, x.version))
+                            |> Set.ofSeq
         Baseline(buildInfo, bookmarks)    
         
     let serializeBaseline (baseline:Baseline) =
         let repositories = 
-            baseline.Bookmarks 
-            |> Seq.map(fun b -> let r = BaselineFile.repositories_Item_Type()
-                                r.name <- b.Repository.Name
-                                r.version <- b.Version
-                                r)
-            |> Array.ofSeq
+            baseline.Bookmarks |> Seq.map(fun b -> let r = BaselineFile.repositories_Item_Type()
+                                                   r.name <- b.Repository.Name
+                                                   r.version <- b.Version
+                                                   r)
+                               |> Array.ofSeq
         let baselineFile = BaselineFile()
         baselineFile.branch <- baseline.Info.Branch
         baselineFile.buildnumber <- baseline.Info.BuildNumber
@@ -118,19 +115,16 @@ with
             let changesetId = Tools.Vcs.LastCommit wsDir repo ""
             return Bookmark(repo, changesetId)
         }
-        graph.Repositories 
-        |> Set.add graph.MasterRepository
-        |> Seq.filter (fun x -> x.IsCloned)
-        |> Threading.ParExec (getRepoHash wsDir)
-        |> Set.ofSeq
+        graph.Repositories |> Set.add graph.MasterRepository
+                           |> Seq.filter (fun x -> x.IsCloned)
+                           |> Threading.ParExec (getRepoHash wsDir)
+                           |> Set.ofSeq
     
     let updateBookmarks (source:Bookmark set) (overrideWith:Bookmark set) =
         let dif = 
-            source 
-            |> Seq.where(fun b -> overrideWith 
-                                    |> Seq.exists (fun b1 -> b1.Repository.Name = b.Repository.Name) 
-                                    |> not) 
-            |> Set.ofSeq
+            source |> Seq.where(fun b -> overrideWith |> Seq.exists (fun b1 -> b1.Repository.Name = b.Repository.Name) 
+                                                      |> not) 
+                   |> Set.ofSeq
         Set.union dif overrideWith
 
     member this.GetBaseline () : Baseline option =

@@ -116,10 +116,12 @@ and [<Sealed>] Factory(graph : Graph) =
     member this.ViewMap : System.Collections.Generic.IDictionary<Anthology.ViewId, View> =
         if viewMap |> isNull then
             let vwDir = Env.GetFolder Env.Folder.View
-            viewMap <- vwDir.EnumerateFiles(FsHelpers.Extension.View |> FsHelpers.GetExtensionString |> sprintf "*.%s") |> Seq.map (fun x -> System.IO.Path.GetFileNameWithoutExtension(x.Name) |> Anthology.ViewId)
-                                                      |> Seq.map Configuration.LoadView
-                                                      |> Seq.map (fun x -> x.Name |> Anthology.ViewId, { Graph = graph; View = x })
-                                                      |> dict
+            viewMap <- vwDir.EnumerateFiles(FsHelpers.Extension.View |> FsHelpers.GetExtensionString 
+                                                                     |> sprintf "*.%s") 
+                           |> Seq.map (fun x -> System.IO.Path.GetFileNameWithoutExtension(x.Name) |> Anthology.ViewId)
+                           |> Seq.map Configuration.LoadView
+                           |> Seq.map (fun x -> x.Name |> Anthology.ViewId, { Graph = graph; View = x })
+                           |> dict
         viewMap
 
     member this.Views = this.ViewMap.Values |> set
