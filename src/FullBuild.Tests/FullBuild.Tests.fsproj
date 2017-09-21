@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net452</TargetFramework>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
   <ItemGroup>
@@ -94,5 +95,8 @@
   <Import Project="$(SolutionDir)\.full-build\projects\fullbuild.targets" />
   <ItemGroup>
     <PackageReference Include="FsUnit" Version="3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.2.3" />
   </ItemGroup>
 </Project>

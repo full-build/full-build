@@ -5,7 +5,4 @@
   <ItemGroup>
     <FBCopyFiles Include="$(SolutionDir)\.full-build\bin\fullbuild.exe;$(SolutionDir)\.full-build\bin\fullbuild.pdb;$(SolutionDir)\.full-build\bin\fullbuild.exe.mdb" />
   </ItemGroup>
-  <Import Project="$(SolutionDir)\.full-build\packages\fsharp.configuration\package-copy.targets" Condition="'$(FullBuild_fsharp_configuration_PkgCopy)' == ''" />
-  <Import Project="$(SolutionDir)\.full-build\packages\fsharp.core\package-copy.targets" Condition="'$(FullBuild_fsharp_core_PkgCopy)' == ''" />
-  <Import Project="$(SolutionDir)\.full-build\packages\fsharp.data\package-copy.targets" Condition="'$(FullBuild_fsharp_data_PkgCopy)' == ''" />
 </Project>
