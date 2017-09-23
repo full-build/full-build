@@ -43,24 +43,28 @@ let writeVersionMsbuild version =
 let buildSkip (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
     ()
 
+
 let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let viewName = Path.GetFileNameWithoutExtension(viewFile.Name)
+
+    // restore first
+    let restoreArgs = sprintf "/nologo /t:Restore /p:SolutionDir=%s /p:SolutionName=%A %A" wsDir.FullName viewName viewFile.Name
+    Exec "msbuild" restoreArgs wsDir Map.empty |> IO.CheckResponseCode
+
     writeVersionMsbuild version
 
     let target = if clean then "Rebuild"
                  else "Build"
 
-
-    let viewName = Path.GetFileNameWithoutExtension(viewFile.Name)
-    let wsDir = Env.GetFolder Env.Folder.Workspace
     let argTarget = sprintf "/t:%s /p:SolutionDir=%A /p:SolutionName=%A" target wsDir.FullName viewName
-    let argMt = if multithread && not <| Env.IsMono () then "/m"
+    let argMt = if multithread then "/m"
                 else ""
 
     let argConfig = sprintf "/p:Configuration=%s" config
     let args = sprintf "/nologo %s %s %s %A" argTarget argMt argConfig viewFile.Name
 
-    if Env.IsMono () then Exec "xbuild" args wsDir Map.empty |> IO.CheckResponseCode
-    else Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
+    Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
 
 let chooseBuilder (builderType : BuilderType) msbuildBuilder skipBuilder =
     let builder = match builderType with
