@@ -26,23 +26,10 @@ let private generateProjectNode (project : Project) =
     let output = project.Output.Name
     let outputType = project.OutputType |> StringHelpers.toString
  
-    let fxVersion = match project.FxVersion with
-                    | Some x -> XAttribute(NsNone + "FxVersion", x)
-                    | None -> null
-
-    let fxProfile = match project.FxProfile with
-                    | Some x -> XAttribute(NsNone + "FxProfile", x)
-                    | None -> null
-
-    let fxId = match project.FxIdentifier with
-               | Some x -> XAttribute(NsNone + "FxIdentifier", x)
-               | None -> null
-
     XElement(NsDgml + "Node",
         XAttribute(NsNone + "Id", project.UniqueProjectId),
         XAttribute(NsNone + "Label", label),
         XAttribute(NsNone + "Category", cat),
-        fxVersion, fxProfile, fxId,
         XAttribute(NsNone + "Guid", project.UniqueProjectId),
         XAttribute(NsNone + "IsTest", project.HasTests),
         XAttribute(NsNone + "Output", output),

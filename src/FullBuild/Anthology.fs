@@ -144,14 +144,6 @@ with
     member this.toString = (fun (ProjectType x) -> x |> StringHelpers.toVSGuid) this
     static member from (guid : Guid) = ProjectType guid
 
-type FxInfo = private FxInfo of string option
-with
-    member this.toString = (fun (FxInfo x) -> match x with
-                                              | None -> null
-                                              | Some v -> v) this
-    static member from (info : string) = String.IsNullOrEmpty(info) ? (None, Some info) |> FxInfo
-
-
 type Project =
     { Repository : RepositoryId
       RelativeProjectFile : ProjectRelativeFile
@@ -159,9 +151,6 @@ type Project =
       Output : AssemblyId
       ProjectId : ProjectId
       OutputType : OutputType
-      FxVersion : FxInfo
-      FxProfile : FxInfo
-      FxIdentifier : FxInfo
       HasTests : bool
       AssemblyReferences : AssemblyId set
       PackageReferences : PackageId set

@@ -96,9 +96,6 @@ with
     member Output : Assembly
     member ProjectId : string
     member OutputType : OutputType
-    member FxVersion : string option
-    member FxProfile : string option
-    member FxIdentifier : string option
     member HasTests : bool
     member Repository:  Repository
     member Applications: Application set

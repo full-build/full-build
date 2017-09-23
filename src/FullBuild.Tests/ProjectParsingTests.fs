@@ -111,9 +111,6 @@ let CheckParseConvertedProject () =
                             UniqueProjectId = ProjectUniqueId.from (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d") 
                             Output = AssemblyId.from "CassandraSharp"
                             OutputType = OutputType.Dll
-                            FxVersion = FxInfo.from "v4.5"
-                            FxProfile = FxInfo.from null
-                            FxIdentifier = FxInfo.from null
                             HasTests = false
                             AssemblyReferences = Set [ AssemblyId.from "System"
                                                        AssemblyId.from "System.Numerics"
@@ -152,9 +149,6 @@ let CheckParseConvertedProjectWithoutPackagesConfig () =
                             UniqueProjectId = ProjectUniqueId.from (ParseGuid "c1d252b7-d766-4c28-9c46-0696f896846d") 
                             Output = AssemblyId.from "CassandraSharp"
                             OutputType = OutputType.Dll
-                            FxVersion = FxInfo.from "v4.5"
-                            FxProfile = FxInfo.from null
-                            FxIdentifier = FxInfo.from null
                             HasTests = false
                             AssemblyReferences = Set [ AssemblyId.from "System"
                                                        AssemblyId.from "System.Numerics"

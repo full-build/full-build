@@ -6,10 +6,6 @@ projects:
     - guid: guid
       file: src/Project.csproj
       out: fullbuild.tests
-      fx:
-        version: v7.1
-        profile: Profile3
-        identifier: WindowsPhone
       tests: true
       assemblies:
           - assembly: id1

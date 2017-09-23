@@ -261,19 +261,6 @@ let private convertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsMsBuild + "SqlTargetName") |> Seq.iter (fun x -> x.Value <- project.Output.Name)
     cproj.Descendants(NsMsBuild + "AutoGenerateBindingRedirects") |> Seq.iter (fun x -> x.Value <- "false")
 
-    // TODO: both 3 fields are optional - must discard everything and reset everything if not null or empty
-    match project.FxVersion with
-    | Some fxVersion -> cproj.Descendants(NsMsBuild + "TargetFrameworkVersion") |> Seq.iter (fun x -> x.Value <- fxVersion)
-    | None -> ()
-
-    match project.FxProfile with
-    | Some fxProfile -> cproj.Descendants(NsMsBuild + "TargetFrameworkProfile") |> Seq.iter (fun x -> x.Value <- fxProfile)
-    | None -> ()
-
-    match project.FxIdentifier with
-    | Some fxIdentifier -> cproj.Descendants(NsMsBuild + "TargetFrameworkIdentifier") |> Seq.iter (fun x -> x.Value <- fxIdentifier)
-    | None -> ()
-
     // import fb target
     let lastImport = upcast cproj.Descendants(NsMsBuild + "Import").LastOrDefault() : XNode
     let importFB = XElement (NsMsBuild + "Import",

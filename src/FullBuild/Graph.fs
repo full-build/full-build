@@ -280,18 +280,6 @@ with
                              | Anthology.OutputType.Exe -> OutputType.Exe
                              | Anthology.OutputType.Database -> OutputType.Database
 
-    member this.FxVersion = match this.Project.FxVersion.toString with
-                            | null -> None
-                            | x -> Some x
-
-    member this.FxProfile = match this.Project.FxProfile.toString with
-                            | null -> None
-                            | x -> Some x
-
-    member this.FxIdentifier = match this.Project.FxIdentifier.toString with
-                               | null -> None
-                               | x -> Some x
-
     member this.HasTests = this.Project.HasTests
 
     member this.AssemblyReferences =

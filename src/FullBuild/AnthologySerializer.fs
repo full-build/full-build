@@ -38,9 +38,6 @@ let Serialize (anthology : Anthology) =
     for project in anthology.Projects do
         let cproject = AnthologyConfig.projects_Item_Type()
         cproject.guid <- project.UniqueProjectId.toString
-        cproject.fx.version <- project.FxVersion.toString
-        cproject.fx.profile <- project.FxProfile.toString
-        cproject.fx.identifier <- project.FxIdentifier.toString
         cproject.out <- sprintf "%s.%s" project.Output.toString project.OutputType.toString
         cproject.file <- sprintf @"%s\%s" project.Repository.toString project.RelativeProjectFile.toString
         cproject.tests <- project.HasTests
@@ -101,9 +98,6 @@ let Deserialize (content) =
                                                             ProjectId = ProjectId.from out
                                                             Output = AssemblyId.from out
                                                             OutputType = OutputType.from ext
-                                                            FxVersion = FxInfo.from x.fx.version
-                                                            FxProfile = FxInfo.from x.fx.profile
-                                                            FxIdentifier = FxInfo.from x.fx.identifier
                                                             HasTests = hastests
                                                             AssemblyReferences = convertToAssemblies (x.assemblies |> List.ofSeq)
                                                             PackageReferences = convertToPackages (x.packages |> List.ofSeq)
