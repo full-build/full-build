@@ -1,10 +1,6 @@
 apps: []
 projects:
-  - fx:
-      version: v4.5.2
-      profile: null
-      identifier: null
-    guid: 4198A8AD-AA7A-45B2-8086-646B8715BEC6
+  - guid: 4198A8AD-AA7A-45B2-8086-646B8715BEC6
     file: tests\LibProject\LibProject.csproj
     out: libproject.dll
     tests: false
@@ -20,11 +16,7 @@ projects:
     packages:
       - package: zlib.portable
     projects: []
-  - fx:
-      version: v4.5.2
-      profile: null
-      identifier: null
-    guid: A65F7DBF-3C8C-4D5D-B38F-752E9FD7B265
+  - guid: A65F7DBF-3C8C-4D5D-B38F-752E9FD7B265
     file: tests\MainProject\MainProject.csproj
     out: mainproject.exe
     tests: false
