@@ -1,13 +1,14 @@
-@echo off
+rem @echo off
 setlocal
 
-set HERE=%~dp0
+set HERE=%~dp0.
 
 robocopy bootstrap\bin %HERE%\.full-build\bin /E
 robocopy bootstrap\views .full-build\views /E
 robocopy bootstrap\projects .full-build\projects /E
 copy bootstrap\bootstrap.sln %HERE%
 
+msbuild /t:Restore /p:SolutionDir="%HERE%" /p:SolutionName="bootstrap" bootstrap.sln || goto :ko
 msbuild /t:Rebuild bootstrap.sln || goto :ko
 
 echo publishing with built version
