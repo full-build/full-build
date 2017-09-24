@@ -15,6 +15,26 @@
     <FBBinFolder Condition="$(FBIsWebProject)">$(FBContentFolder)\bin\</FBBinFolder>
   </PropertyGroup>
 
+  <!-- BEGIN WORKAROUND: see https://github.com/Microsoft/visualfsharp/issues/3303 -->
+    <PropertyGroup>
+    <IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
+    <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
+    <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(IsWindows)' == 'true'">
+    <FscToolPath>C:\Program Files (x86)\Microsoft SDKs\F#\4.1\Framework\v4.0</FscToolPath>
+    <FscToolExe>fsc.exe</FscToolExe>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(IsOSX)' == 'true'">
+    <FscToolPath>/Library/Frameworks/Mono.framework/Versions/Current/Commands</FscToolPath>
+    <FscToolExe>fsharpc</FscToolExe>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(IsLinux)' == 'true'">
+    <FscToolPath>/usr/bin</FscToolPath>
+    <FscToolExe>fsharpc</FscToolExe>
+  </PropertyGroup>
+  <!-- END WORKAROUND -->
+   
   <ItemGroup>
     <Compile Include="$(SolutionDir)\.full-build\bin\BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)"
              Condition="Exists('$(SolutionDir)\.full-build\bin\BuildVersionAssemblyInfo$(DefaultLanguageSourceExtension)')" />

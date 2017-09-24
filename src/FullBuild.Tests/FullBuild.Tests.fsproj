@@ -3,6 +3,7 @@
     <TargetFramework>net452</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
   <ItemGroup>
     <Compile Include="TestHelpers.fs" />
     <Compile Include="CollectionsTests.fs" />
@@ -91,7 +92,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <Import Project="..\..\.full-build\projects\fullbuild.targets" />
+  <Import Project="$(SolutionDir)\.full-build\projects\fullbuild.targets" />
   <ItemGroup>
     <PackageReference Include="FsUnit" Version="3.0" />
   </ItemGroup>
