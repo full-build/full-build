@@ -5,5 +5,5 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
-  <Import Project="$(SolutionDir)\.full-build\projects\libproject.targets" />
+  <Import Project="$(SolutionDir)\.projects\libproject.targets" />
 </Project>
