@@ -3,8 +3,7 @@
     <FullBuild_fullbuild_testsCopy>Y</FullBuild_fullbuild_testsCopy>
   </PropertyGroup>
   <ItemGroup>
-    <FBCopyFiles Include="$(SolutionDir)\.full-build\bin\fullbuild.tests.dll;$(SolutionDir)\.full-build\bin\fullbuild.tests.pdb;$(SolutionDir)\.full-build\bin\fullbuild.tests.dll.mdb" />
+    <FBCopyFiles Include="$(SolutionDir)\.bin\fullbuild.tests.dll;$(SolutionDir)\.bin\fullbuild.tests.pdb;$(SolutionDir)\.bin\fullbuild.tests.dll.mdb" />
   </ItemGroup>
-  <Import Project="$(SolutionDir)\.full-build\projects\fullbuild-copy.targets" Condition="'$(FullBuild_fullbuildCopy)' == ''" />
-  <Import Project="$(SolutionDir)\.full-build\packages\fsunit\package-copy.targets" Condition="'$(FullBuild_fsunit_PkgCopy)' == ''" />
+  <Import Project="$(SolutionDir)\.projects\fullbuild-copy.targets" Condition="'$(FullBuild_fullbuildCopy)' == ''" />
 </Project>
