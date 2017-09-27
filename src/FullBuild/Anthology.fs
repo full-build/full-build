@@ -152,7 +152,6 @@ type Project =
       ProjectId : ProjectId
       OutputType : OutputType
       HasTests : bool
-      AssemblyReferences : AssemblyId set
       PackageReferences : PackageId set
       ProjectReferences : ProjectId set }
 
@@ -166,7 +165,6 @@ type PublisherType =
     | Copy
     | Zip
     | Docker
-    | NuGet
 with
      member this.toString = toString this
      static member from s = fromString<PublisherType> s

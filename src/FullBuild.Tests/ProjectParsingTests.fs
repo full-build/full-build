@@ -34,13 +34,6 @@ let XDocumentLoader (loadPackagesConfig : bool) (fi : FileInfo) : XDocument opti
            else None
 
 [<Test>]
-let CheckMatchPaketReference () =
-    let ref = @"..\..\packages\FSharp.Core\lib\portable-net45+netcore45+wpa81+wp8\FSharp.Core.dll"
-    match ref with
-    | MatchPackage x -> x |> should equal "FSharp.Core"
-    | _ -> failwith "Parsing error"
-
-[<Test>]
 let CheckCastString () =
     let x = XElement (XNamespace.None + "Test", "42")
     let xs : string = !> x
@@ -112,10 +105,6 @@ let CheckParseConvertedProject () =
                             Output = AssemblyId.from "CassandraSharp"
                             OutputType = OutputType.Dll
                             HasTests = false
-                            AssemblyReferences = Set [ AssemblyId.from "System"
-                                                       AssemblyId.from "System.Numerics"
-                                                       AssemblyId.from "System.Xml"
-                                                       AssemblyId.from "System.Configuration" ]
                             PackageReferences = Set [ PackageId.from "Rx-Core"
                                                       PackageId.from "Rx-Interfaces"
                                                       PackageId.from "Rx-Linq"
@@ -150,10 +139,6 @@ let CheckParseConvertedProjectWithoutPackagesConfig () =
                             Output = AssemblyId.from "CassandraSharp"
                             OutputType = OutputType.Dll
                             HasTests = false
-                            AssemblyReferences = Set [ AssemblyId.from "System"
-                                                       AssemblyId.from "System.Numerics"
-                                                       AssemblyId.from "System.Xml"
-                                                       AssemblyId.from "System.Configuration" ]
                             PackageReferences = Set [ PackageId.from "Rx-Core"
                                                       PackageId.from "Rx-Interfaces"
                                                       PackageId.from "Rx-Linq"

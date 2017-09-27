@@ -73,35 +73,12 @@ let private publishDocker (app : PublishApp) =
     Exec "docker" saveArgs sourceFolder Map.empty |> IO.CheckResponseCode
     sourceFolder.Delete(true)
 
-let private publishNuget (app : PublishApp) =
-    let tmpApp = { app
-                   with Name = ".tmp-nuget-" + app.Name }
-    publishCopy tmpApp
-
-    let appDir = GetFolder Env.Folder.AppOutput
-    let tmpFolder = appDir |> GetSubDirectory tmpApp.Name
-    let tmp2Folder = appDir |> GetSubDirectory (".tmp-nuget2-" + app.Name)
-    tmp2Folder.Create()
-
-    let nuspec = tmpFolder.EnumerateFiles("*.nuspec")  |> Seq.head
-    Generators.Packagers.UpdateDependencies nuspec
-    let version = app.Version
-    let nugetArgs = sprintf "pack -NoDefaultExcludes -NoPackageAnalysis -NonInteractive -OutputDirectory %s -version %s %s" tmp2Folder.FullName version nuspec.Name
-    Exec "nuget" nugetArgs tmpFolder Map.empty |> IO.CheckResponseCode
-    let nugetFile = tmp2Folder.EnumerateFiles() |> Seq.exactlyOne
-    let targetFile = appDir |> GetFile app.Name
-    nugetFile.CopyTo(targetFile.FullName, true) |> ignore
-
-    tmp2Folder.Delete(true)
-    tmpFolder.Delete(true)
-
 let PublishWithPublisher (version : string) (app : Application) =
     let publisher =
         match app.Publisher with
         | PublisherType.Copy -> publishCopy
         | PublisherType.Zip -> publishZip
         | PublisherType.Docker -> publishDocker
-        | PublisherType.NuGet -> publishNuget
     { Name = app.Name; App = app; Version = version }
         |> publisher
 

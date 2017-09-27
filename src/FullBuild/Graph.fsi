@@ -33,7 +33,6 @@ type PublisherType =
     | Copy
     | Zip
     | Docker
-    | NuGet
 
 [<RequireQualifiedAccess>]
 type BuilderType =
@@ -56,8 +55,6 @@ type TestRunnerType =
 type Package  = interface System.IComparable
 with
     member Name : string
-    member Dependencies: Package set
-    member FxAssemblies: Assembly set
 
 and [<Sealed>] Assembly = interface System.IComparable
 with
@@ -101,7 +98,6 @@ with
     member Applications: Application set
     member References: Project set
     member ReferencedBy: Project set
-    member AssemblyReferences: Assembly set
     member PackageReferences: Package set
     static member Closure: Project set
                         -> Project set
@@ -116,7 +112,6 @@ and [<Sealed>] Graph =
     member MinVersion: string
     member MasterRepository : Repository
     member Repositories : Repository set
-    member Assemblies : Assembly set
     member Applications : Application set
     member Projects : Project set
     member ArtifactsDir : string

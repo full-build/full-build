@@ -58,24 +58,6 @@ let private getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
 
     prjRefs |> Set.union fbRefs
 
-let private getAssemblies(xdoc : XDocument) : AssemblyId set =
-    let res = seq {
-        for binRef in xdoc.Descendants(NsMsBuild + "Reference") do
-            let inc = !> binRef.Attribute(XNamespace.None + "Include") : string
-            let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
-            let assRef = AssemblyId.from (System.Reflection.AssemblyName(assName))
-            yield assRef
-    }
-    res |> Set
-
-let private parseNuGetPackage (pkgRef : XElement) : Package =
-    let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "id")
-    let pkgVer = !> pkgRef.Attribute(XNamespace.None + "version") : string
-    let ver = if pkgVer |> isNull then PackageVersion.Unspecified
-              else PackageVersion.PackageVersion pkgVer
-    { Id = PackageId.from pkgId
-      Version = ver }
-
 let private parsePackageReferencePackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "Include")
     let pkgVer = !> pkgRef.Descendants(XmlHelpers.NsMsBuild + "Version").SingleOrDefault() : string
@@ -84,59 +66,14 @@ let private parsePackageReferencePackage (pkgRef : XElement) : Package =
     { Id = PackageId.from pkgId
       Version = ver }
 
-let private parseFullBuildPackage (fileName : string) : Package =
-    let fi = FileInfo (fileName)
-    let fo = fi.Directory.Name
-
-    { Id = PackageId.from fo
-      Version = PackageVersion.Unspecified }
-
-let private getNuGetPackages (nugetDoc : XDocument) =
-    let nugetPkgs = nugetDoc.Descendants(XNamespace.None + "package") |> Seq.map parseNuGetPackage
-                                                                      |> Set
-    nugetPkgs
-
-let private isPaketReference (xel : XElement) =
-    let hasPaket = xel.Descendants(NsMsBuild + "Paket").Any()
-    let hasHintPath = xel.Descendants(NsMsBuild + "HintPath").Any()
-    hasPaket && hasHintPath
-
-// NOTE: should be private
-let (|MatchPackage|_|) hintpath =
-    let m = Regex.Match (hintpath, @".*\\packages\\(?<Package>[^\\]*).*")
-    if m.Success then Some (m.Groups.["Package"].Value)
-    else None
-
-let private getPackageFromPaketReference (xel : XElement) =
-    let xhintPath = xel.Descendants(NsMsBuild + "HintPath") |> Seq.head
-    let hintPath = !> xhintPath : string
-    match hintPath with
-    | MatchPackage pkg -> { Id = PackageId.from pkg
-                            Version = PackageVersion.Unspecified }
-    | _ -> failwith "Failed to find package"
-
-let private getFullBuildPackages (prjDoc : XDocument)  =
-    let fbPkgs = prjDoc.Descendants(NsMsBuild + "Import")
-                     |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
-                     |> Seq.map (FsHelpers.MigratePath << FsHelpers.ToWindows)
-                     |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PACKAGE_FOLDER))
-                     |> Seq.map FsHelpers.ToPlatformPath
-                     |> Seq.map parseFullBuildPackage
-                     |> Set.ofSeq
-    fbPkgs
-
 let private getPackageReferencePackages (prjDoc : XDocument)  =
     let fbPkgs = prjDoc.Descendants(NsMsBuild + "PackageReference")
                      |> Seq.map parsePackageReferencePackage
                      |> Set.ofSeq
     fbPkgs
 
-let private getPaketPackages (prjDoc : XDocument)  =
-    let paketPkgs = prjDoc.Descendants(NsMsBuild + "Reference")
-                        |> Seq.filter isPaketReference
-                        |> Seq.map getPackageFromPaketReference
-                        |> Set.ofSeq
-    paketPkgs
+let private getPaketPackages (prjDoc : XDocument) =
+    Set.empty
 
 // NOTE: should be private
 let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : DirectoryInfo) (repoRef : RepositoryId) (sxs : bool) (file : FileInfo) =
@@ -164,16 +101,9 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
 
     let prjRefs = getProjectReferences file.Directory xprj
 
-    let assemblies = getAssemblies xprj
-    let pkgFile = file.Directory |> FsHelpers.GetFile "packages.config"
-    let nugetPackages = if sxsRoundtrip then Set.empty
-                        else match xdocLoader pkgFile with
-                             | Some xnuget -> getNuGetPackages xnuget
-                             | _ -> Set.empty
-    let fbPackages = getFullBuildPackages xprj
     let pkgRefPackages = if sxsRoundtrip then Set.empty else getPackageReferencePackages xprj
     let paketPackages = if sxsRoundtrip then Set.empty else getPaketPackages xprj
-    let packages = nugetPackages + fbPackages + pkgRefPackages + paketPackages
+    let packages = pkgRefPackages + paketPackages
     let pkgRefs = packages |> Set.map (fun x -> x.Id)
     let hasTests = assemblyRef.toString.EndsWith("tests")
 
@@ -185,7 +115,6 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                   Output = assemblyRef
                   OutputType = extension
                   HasTests = hasTests
-                  AssemblyReferences = assemblies
                   PackageReferences = pkgRefs
                   ProjectReferences = prjRefs } }
 

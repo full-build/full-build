@@ -306,7 +306,6 @@ let private index (convertInfo : CLI.Commands.ConvertRepositories) =
         indexation |> fst |> Core.Indexation.CheckAnthologyProjectsInRepository antho selectedRepos
     else
         indexation |> Core.Indexation.UpdatePackages globals
-                   |> Core.Package.Simplify
                    |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
                    |> Configuration.SaveAnthology
         Install graph.NuGets

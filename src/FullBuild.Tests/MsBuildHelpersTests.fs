@@ -38,7 +38,6 @@ let CheckProjectPropertyName () =
                     HasTests = false
                     ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set
                     PackageReferences = Set.empty
-                    AssemblyReferences = [ AssemblyId.from("System") ; AssemblyId.from("System.Xml") ] |> set
                     Repository = RepositoryId.from "cassandra-sharp" }
 
     let propName = ProjectPropertyName project.ProjectId

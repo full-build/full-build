@@ -158,8 +158,7 @@ let IndexWorkspace wsDir (globals : Globals) (antho : Anthology) (grepos : Graph
 
     let anthoWithNewProjects = { antho
                                  with Projects = allProjects |> Set.ofList }
-    let newAntho = Core.Simplify.SimplifyAnthologyWithoutPackage anthoWithNewProjects
-    (newAntho, parsedProjects)
+    (anthoWithNewProjects, parsedProjects)
 
 // WARNING: paket.dependencies modified
 let UpdatePackages globals (antho, parsedProjects) =

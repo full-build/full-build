@@ -35,7 +35,6 @@ type PublisherType =
     | Copy
     | Zip
     | Docker
-    | NuGet
 
 [<RequireQualifiedAccess>]
 type BuilderType =
@@ -69,41 +68,6 @@ with
 
     member this.Name = this.Package.toString
 
-    static member GetPackageDependencies (xnuspec : System.Xml.Linq.XDocument) =
-        let pkgsDir = Env.GetFolder Env.Folder.Package
-        let dependencies = xnuspec.Descendants()
-                           |> Seq.filter (fun x -> x.Name.LocalName = "dependency" && (!> x.Attribute(NsNone + "exclude") : string) <> "Compile")
-                           |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
-                           |> Seq.map Anthology.PackageId.from
-                           |> Set.ofSeq
-                           |> Seq.filter (fun x -> let path = pkgsDir |> FsHelpers.GetSubDirectory (x.toString)
-                                                   path.Exists)
-                           |> set
-        dependencies
-
-    static member GetFrameworkDependencies (xnuspec : System.Xml.Linq.XDocument) =
-        xnuspec.Descendants()
-            |> Seq.filter (fun x -> x.Name.LocalName = "frameworkAssembly")
-            |> Seq.map (fun x -> !> x.Attribute(NsNone + "assemblyName") : string)
-            |> Seq.map Anthology.AssemblyId.from
-            |> Set.ofSeq
-
-
-    member this.Dependencies : Package set =
-        let pkgsDir = Env.GetFolder Env.Folder.Package
-        let pkgDir = pkgsDir |> FsHelpers.GetSubDirectory (this.Package.toString)
-        let nuspecFile = pkgDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.NuSpec (this.Package.toString))
-        let xnuspec = System.Xml.Linq.XDocument.Load (nuspecFile.FullName)
-        Package.GetPackageDependencies xnuspec |> Set.map (fun x -> { Graph = this.Graph
-                                                                      Package = x })
-
-    member this.FxAssemblies : Assembly set =
-        let pkgsDir = Env.GetFolder Env.Folder.Package
-        let pkgDir = pkgsDir |> FsHelpers.GetSubDirectory (this.Package.toString)
-        let nuspecFile = pkgDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.NuSpec (this.Package.toString))
-        let xnuspec = System.Xml.Linq.XDocument.Load (nuspecFile.FullName)
-        Package.GetFrameworkDependencies xnuspec |> Set.map (fun x -> { Graph = this.Graph; Assembly = x})
-
 // =====================================================================================================
 
 and [<CustomEquality; CustomComparison>] Assembly =
@@ -134,7 +98,6 @@ with
                             | Anthology.PublisherType.Copy -> PublisherType.Copy
                             | Anthology.PublisherType.Zip -> PublisherType.Zip
                             | Anthology.PublisherType.Docker -> PublisherType.Docker
-                            | Anthology.PublisherType.NuGet -> PublisherType.NuGet
 
     member this.Project =
         this.Graph.ProjectMap.[this.Application.Project]
@@ -282,9 +245,6 @@ with
 
     member this.HasTests = this.Project.HasTests
 
-    member this.AssemblyReferences =
-        this.Project.AssemblyReferences |> Set.map (fun x -> this.Graph.AssemblyMap.[x])
-
     member this.PackageReferences =
         this.Project.PackageReferences |> Set.map (fun x -> this.Graph.PackageMap.[x])
 
@@ -320,20 +280,16 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
 
     member this.PackageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> =
         if packageMap |> isNull then
-            let pkgDir = Env.GetFolder Env.Folder.Package
-            packageMap <- pkgDir.EnumerateDirectories() |> Seq.map (fun x -> x.Name |> Anthology.PackageId.from)
-                                                        |> Set.ofSeq
-                                                        |> Seq.map (fun x -> x, { Graph = this; Package = x})
-                                                        |> dict
+            packageMap <- this.Anthology.Projects 
+                                    |> Seq.map (fun x -> x.PackageReferences 
+                                                                |> Seq.map (fun y -> y, { Graph = this; Package = y}))
+                                    |> Seq.collect id
+                                    |> dict
         packageMap
 
     member this.AssemblyMap : System.Collections.Generic.IDictionary<Anthology.AssemblyId, Assembly> =
         if assemblyMap |> isNull then
-            let outputAss = anthology.Projects |> Seq.map (fun x -> x.Output)
-                                               |> Set
-            assemblyMap <- anthology.Projects |> Set.map (fun x -> x.AssemblyReferences)
-                                              |> Set.unionMany
-                                              |> Set.union outputAss
+            assemblyMap <- anthology.Projects |> Seq.map (fun x -> x.Output)
                                               |> Seq.map (fun x -> x, { Graph = this; Assembly = x})
                                               |> dict
         assemblyMap
@@ -381,7 +337,6 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
                   | PublisherType.Zip -> Anthology.PublisherType.Zip
                   | PublisherType.Copy -> Anthology.PublisherType.Copy
                   | PublisherType.Docker -> Anthology.PublisherType.Docker
-                  | PublisherType.NuGet -> Anthology.PublisherType.NuGet
         let app = { Anthology.Application.Name = Anthology.ApplicationId.from name
                     Anthology.Application.Publisher = pub
                     Anthology.Application.Project = Anthology.ProjectId.from project.ProjectId }

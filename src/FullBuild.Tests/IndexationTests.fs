@@ -29,7 +29,6 @@ let CheckNoReplace () =
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
-               AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp" } 
 
@@ -40,7 +39,6 @@ let CheckNoReplace () =
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
-               AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp2" }
 
@@ -51,7 +49,6 @@ let CheckNoReplace () =
                RelativeProjectFile = ProjectRelativeFile "toto/toto-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
-               AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp-contrib" }
 
@@ -72,7 +69,6 @@ let CheckReplace () =
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
-               AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp" } 
 
@@ -83,7 +79,6 @@ let CheckReplace () =
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
-               AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp" }
 
@@ -94,7 +89,6 @@ let CheckReplace () =
                RelativeProjectFile = ProjectRelativeFile "toto/toto-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
-               AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "cassandra-sharp-contrib" }
 
@@ -114,7 +108,6 @@ let CheckStillReferenced () =
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ] |> set
-               AssemblyReferences = [ ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "repo-a" } 
 
@@ -125,7 +118,6 @@ let CheckStillReferenced () =
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ] |> set
-               AssemblyReferences = [ ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "repo-a" }
 
@@ -136,7 +128,6 @@ let CheckStillReferenced () =
                RelativeProjectFile = ProjectRelativeFile "toto/toto-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "a" ] |> set
-               AssemblyReferences = [ ] |> set
                PackageReferences = Set.empty
                Repository = RepositoryId.from "repo-b" }
 
