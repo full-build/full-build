@@ -92,11 +92,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <Import Project="$(SolutionDir)\.full-build\projects\fullbuild.targets" />
   <ItemGroup>
     <PackageReference Include="FsUnit" Version="3.0" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.2.3" />
   </ItemGroup>
+  <Import Project="$(SolutionDir)\.projects\fullbuild.targets" />
 </Project>
