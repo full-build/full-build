@@ -3,9 +3,9 @@ setlocal
 
 set HERE=%~dp0.
 
-robocopy bootstrap\bin %HERE%\.bin /E
-robocopy bootstrap\views .views /E
-robocopy bootstrap\projects .projects /E
+robocopy bootstrap\bin %HERE%\.full-build\bin /E
+robocopy bootstrap\views .full-build\views /E
+robocopy bootstrap\projects .full-build\projects /E
 copy bootstrap\bootstrap.sln %HERE%
 
 msbuild /t:Restore /p:SolutionDir="%HERE%" /p:SolutionName="bootstrap" bootstrap.sln || goto :ko

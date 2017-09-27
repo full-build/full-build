@@ -25,6 +25,11 @@ let TestAssemblies (filters : string set) (excludes : string set) =
     let projects = selectedViews |> Set.map (fun x -> x.Projects)
                                  |> Set.unionMany
                                  |> Set.filter (fun x -> x.HasTests)
+    projects |> Set.map (fun x -> sprintf "%s/%s" x.Repository.Name x.ProjectFile)
+             |> Seq.map (fun x -> wsDir |> FsHelpers.GetFile x)
+             |> Seq.map (fun x -> x.Directory)
+             |> Seq.map (fun x -> x |> FsHelpers.GetSubDirectory "bin")
+             |> Seq.iter Core.Bindings.UpdateArtifactBindingRedirects
 
     // then test assemblies
     let runner2assemblies = projects |> Seq.groupBy (fun x -> x.Repository.Tester)

@@ -37,7 +37,15 @@ let CheckProjectPropertyName () =
                     RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                     HasTests = false
                     ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set
+                    PackageReferences = Set.empty
+                    AssemblyReferences = [ AssemblyId.from("System") ; AssemblyId.from("System.Xml") ] |> set
                     Repository = RepositoryId.from "cassandra-sharp" }
 
     let propName = ProjectPropertyName project.ProjectId
     propName |> should equal "FullBuild_cqlplus"
+
+[<Test>]
+let CheckPackagePropertyName () =
+    let package = "Rx-Core" |> PackageId.from
+    let propName = PackagePropertyName package
+    propName |> should equal "FullBuild_rx_core_Pkg"

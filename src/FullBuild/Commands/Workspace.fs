@@ -90,6 +90,9 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
 
         Tools.Vcs.Ignore wsDir graph.MasterRepository
 
+        Tools.Paket.UpdateSources List.empty
+        Tools.Paket.PaketUpdate()
+
         // setup additional files for views to work correctly
         let installDir = Env.GetFolder Env.Folder.Installation
         let confDir = Env.GetFolder Env.Folder.Config
@@ -299,10 +302,12 @@ let private index (convertInfo : CLI.Commands.ConvertRepositories) =
 
     let indexation = selectedRepos |> Core.Indexation.IndexWorkspace wsDir globals antho
     if convertInfo.Check then
-        indexation |> Graph.from globals |> ignore
-        indexation |> Core.Indexation.CheckAnthologyProjectsInRepository antho selectedRepos
+        indexation |> fst |> Graph.from globals |> ignore
+        indexation |> fst |> Core.Indexation.CheckAnthologyProjectsInRepository antho selectedRepos
     else
-        indexation |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
+        indexation |> Core.Indexation.UpdatePackages globals
+                   |> Core.Package.Simplify
+                   |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
                    |> Configuration.SaveAnthology
         Install graph.NuGets
 

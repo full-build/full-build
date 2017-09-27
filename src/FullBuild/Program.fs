@@ -70,6 +70,7 @@ let processMain argv =
     | Command.AddApplication appInfo -> Commands.Application.Add appInfo
     | Command.DropApplication name -> Commands.Application.Drop name.toString
     | Command.PublishApplications pubInfo -> Commands.Application.Publish pubInfo
+    | Command.BindProject bindInfo -> Commands.Application.BindProject bindInfo
 
     // misc
     | Command.Query queryInfo -> Commands.Query.Query queryInfo

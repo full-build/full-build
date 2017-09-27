@@ -110,6 +110,7 @@ type private Token =
     | Test
     | Alter
     | Open
+    | Bind
     | History
 
     | Add
@@ -162,6 +163,7 @@ let private (|Token|_|) (token : string) =
     | "test" -> Some Test
     | "alter" -> Some Alter
     | "open" -> Some Open
+    | "bind" -> Some Bind
     | "history" -> Some History
 
     | "add" -> Some Add
@@ -471,24 +473,31 @@ let private commandUpdateGuids (args : string list) =
     | Params filters -> Command.UpdateGuids { Filters = set filters }
     | _ -> Command.Error MainCommand.UpgradeGuids
 
+let private commandBind (args : string list) =
+    match args with
+    | Params filters -> Command.BindProject { Filters = set filters }
+    | _ -> Command.Error MainCommand.Bind
+
 let rec private commandHistory (html : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Html :: tail -> tail |> commandHistory true
     | [] -> Command.History { Html = html }
     | _ -> Command.Error MainCommand.History
 
-let rec private commandQuery (project : bool) (refs : bool) (cycle : bool) (view : string option) (src : RepositoryId option) (dst : RepositoryId option) (args : string list) =
+let rec private commandQuery (project : bool) (nuget : bool) (refs : bool) (cycle : bool) (view : string option) (src : RepositoryId option) (dst : RepositoryId option) (args : string list) =
     match args with
-    | TokenOption TokenOption.UnusedProjects :: tail -> tail |> commandQuery true refs cycle view None None
-    | TokenOption TokenOption.View :: ViewId viewName :: tail -> tail |> commandQuery project refs cycle (Some viewName) None None
-    | TokenOption TokenOption.Ref :: RepositoryId src :: RepositoryId dst :: tail -> tail |> commandQuery project true cycle view (Some src) (Some dst)
-    | TokenOption TokenOption.Cycle :: tail -> tail |> commandQuery project refs true view src dst
-    | [] when project || refs || cycle -> Command.Query { UnusedProjects = project
-                                                          References = refs
-                                                          View = view 
-                                                          Source = src
-                                                          Destination = dst 
-                                                          Cycle = cycle}
+    | TokenOption TokenOption.UnusedProjects :: tail -> tail |> commandQuery true nuget refs cycle view None None
+    | TokenOption TokenOption.Packages :: tail -> tail |> commandQuery project true refs cycle view None None
+    | TokenOption TokenOption.View :: ViewId viewName :: tail -> tail |> commandQuery project true refs cycle (Some viewName) None None
+    | TokenOption TokenOption.Ref :: RepositoryId src :: RepositoryId dst :: tail -> tail |> commandQuery project nuget true cycle view (Some src) (Some dst)
+    | TokenOption TokenOption.Cycle :: tail -> tail |> commandQuery project nuget refs true view src dst
+    | [] when project || nuget || refs || cycle -> Command.Query { UnusedProjects = project
+                                                                   UsedPackages = nuget
+                                                                   References = refs
+                                                                   View = view 
+                                                                   Source = src
+                                                                   Destination = dst 
+                                                                   Cycle = cycle}
     | _ -> Command.Error MainCommand.Query
 
 
@@ -511,6 +520,7 @@ let private commandHelp (args : string list) =
               | Token Token.Branch :: _ -> MainCommand.Branch
               | Token Token.Pull :: _ -> MainCommand.Pull
               | Token Token.Clean :: _ -> MainCommand.Clean
+              | Token Token.Bind :: _ -> MainCommand.Bind
               | Token Token.History :: _ -> MainCommand.History
               | Token Token.Install :: _ -> MainCommand.InstallPackage
               | Token Token.Query :: _ -> MainCommand.Query
@@ -543,6 +553,7 @@ let Parse (args : string list) : Command =
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch true
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
+    | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
     | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory false
 
     | Token Token.Install :: cmdArgs -> cmdArgs |> commandInstall
@@ -568,7 +579,7 @@ let Parse (args : string list) : Command =
     | Token Token.App :: Token Token.Drop :: cmdArgs -> cmdArgs |> commandDropApp
     | Token Token.App :: Token Token.List :: cmdArgs -> cmdArgs |> commandListApp None
 
-    | Token Token.Query :: cmdArgs -> cmdArgs |> commandQuery false false false None None None
+    | Token Token.Query :: cmdArgs -> cmdArgs |> commandQuery false false false false None None None
 
     | Token Token.UpdateGuids :: cmdArgs -> cmdArgs |> commandUpdateGuids
     | [FullBuildView viewFile] -> Command.FullBuildView { FilePath = viewFile }
@@ -628,8 +639,9 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Doctor], "doctor : check workspace consistency"
         [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--rebase] [--view <viewId>]: update sources & binaries - rebase if requested (ff is default)"
         [MainCommand.Workspace; MainCommand.Push], "push [--full] <version> : push artifacts and tag repositories"
+        [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
-        [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--ref|--cycle> [--view <viewId>] : query items"
+        [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages|--ref|--cycle> [--view <viewId>] : query items"
         [MainCommand.Workspace; MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
         [MainCommand.Workspace; MainCommand.UpgradeGuids], "update-guids : DANGER! change guids of all projects in given repository (interactive command)"
         [MainCommand.Unknown], ""

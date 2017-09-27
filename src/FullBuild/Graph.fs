@@ -20,6 +20,11 @@ open XmlHelpers
 #nowarn "0346" // GetHashCode missing
 
 [<RequireQualifiedAccess>]
+type PackageVersion =
+    | PackageVersion of string
+    | Unspecified
+
+[<RequireQualifiedAccess>]
 type OutputType =
     | Exe
     | Dll
@@ -50,10 +55,60 @@ type TestRunnerType =
     | Skip
 
 
+// =====================================================================================================
 
-[<CustomEquality; CustomComparison>] 
-type Assembly = { Graph : Graph
-                  Assembly : Anthology.AssemblyId }
+[<CustomEquality; CustomComparison>]
+type Package =
+    { Graph : Graph
+      Package : Anthology.PackageId }
+with
+    override this.Equals(other : System.Object) = refEquals this other
+
+    interface System.IComparable with
+        member this.CompareTo(other) = compareTo this other (fun x -> x.Package)
+
+    member this.Name = this.Package.toString
+
+    static member GetPackageDependencies (xnuspec : System.Xml.Linq.XDocument) =
+        let pkgsDir = Env.GetFolder Env.Folder.Package
+        let dependencies = xnuspec.Descendants()
+                           |> Seq.filter (fun x -> x.Name.LocalName = "dependency" && (!> x.Attribute(NsNone + "exclude") : string) <> "Compile")
+                           |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
+                           |> Seq.map Anthology.PackageId.from
+                           |> Set.ofSeq
+                           |> Seq.filter (fun x -> let path = pkgsDir |> FsHelpers.GetSubDirectory (x.toString)
+                                                   path.Exists)
+                           |> set
+        dependencies
+
+    static member GetFrameworkDependencies (xnuspec : System.Xml.Linq.XDocument) =
+        xnuspec.Descendants()
+            |> Seq.filter (fun x -> x.Name.LocalName = "frameworkAssembly")
+            |> Seq.map (fun x -> !> x.Attribute(NsNone + "assemblyName") : string)
+            |> Seq.map Anthology.AssemblyId.from
+            |> Set.ofSeq
+
+
+    member this.Dependencies : Package set =
+        let pkgsDir = Env.GetFolder Env.Folder.Package
+        let pkgDir = pkgsDir |> FsHelpers.GetSubDirectory (this.Package.toString)
+        let nuspecFile = pkgDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.NuSpec (this.Package.toString))
+        let xnuspec = System.Xml.Linq.XDocument.Load (nuspecFile.FullName)
+        Package.GetPackageDependencies xnuspec |> Set.map (fun x -> { Graph = this.Graph
+                                                                      Package = x })
+
+    member this.FxAssemblies : Assembly set =
+        let pkgsDir = Env.GetFolder Env.Folder.Package
+        let pkgDir = pkgsDir |> FsHelpers.GetSubDirectory (this.Package.toString)
+        let nuspecFile = pkgDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.NuSpec (this.Package.toString))
+        let xnuspec = System.Xml.Linq.XDocument.Load (nuspecFile.FullName)
+        Package.GetFrameworkDependencies xnuspec |> Set.map (fun x -> { Graph = this.Graph; Assembly = x})
+
+// =====================================================================================================
+
+and [<CustomEquality; CustomComparison>] Assembly =
+    { Graph : Graph
+      Assembly : Anthology.AssemblyId }
 with
     override this.Equals(other : System.Object) = refEquals this other
 
@@ -227,6 +282,12 @@ with
 
     member this.HasTests = this.Project.HasTests
 
+    member this.AssemblyReferences =
+        this.Project.AssemblyReferences |> Set.map (fun x -> this.Graph.AssemblyMap.[x])
+
+    member this.PackageReferences =
+        this.Project.PackageReferences |> Set.map (fun x -> this.Graph.PackageMap.[x])
+
     static member CollectProjects (collector : Project -> Project set) (projects : Project set) =
         Set.fold (fun s t -> collector t |> Project.CollectProjects collector |> Set.union s) projects projects
 
@@ -248,19 +309,33 @@ with
 
 and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Anthology) =
     let mutable assemblyMap : System.Collections.Generic.IDictionary<Anthology.AssemblyId, Assembly> = null
+    let mutable packageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> = null
     let mutable repositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> = null
     let mutable applicationMap : System.Collections.Generic.IDictionary<Anthology.ApplicationId, Application> = null
     let mutable projectMap : System.Collections.Generic.IDictionary<Anthology.ProjectId, Project> = null
+    let mutable packageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> = null
 
     member this.Anthology : Anthology.Anthology = anthology
     member this.Globals : Anthology.Globals = globals
+
+    member this.PackageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> =
+        if packageMap |> isNull then
+            let pkgDir = Env.GetFolder Env.Folder.Package
+            packageMap <- pkgDir.EnumerateDirectories() |> Seq.map (fun x -> x.Name |> Anthology.PackageId.from)
+                                                        |> Set.ofSeq
+                                                        |> Seq.map (fun x -> x, { Graph = this; Package = x})
+                                                        |> dict
+        packageMap
 
     member this.AssemblyMap : System.Collections.Generic.IDictionary<Anthology.AssemblyId, Assembly> =
         if assemblyMap |> isNull then
             let outputAss = anthology.Projects |> Seq.map (fun x -> x.Output)
                                                |> Set
-            assemblyMap <- outputAss |> Seq.map (fun x -> x, { Graph = this; Assembly = x})
-                                     |> dict
+            assemblyMap <- anthology.Projects |> Set.map (fun x -> x.AssemblyReferences)
+                                              |> Set.unionMany
+                                              |> Set.union outputAss
+                                              |> Seq.map (fun x -> x, { Graph = this; Assembly = x})
+                                              |> dict
         assemblyMap
 
     member this.RepositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> =
@@ -288,6 +363,10 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
     member this.MasterRepository = { Graph = this; Repository = globals.MasterRepository }
 
     member this.Repositories = this.RepositoryMap.Values |> set
+
+    member this.Assemblies = this.AssemblyMap.Values |> set
+
+    member this.Packages = this.PackageMap.Values |> set
 
     member this.Applications = this.ApplicationMap.Values |> set
 

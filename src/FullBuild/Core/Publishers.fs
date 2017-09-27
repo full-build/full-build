@@ -36,6 +36,10 @@ let private publishCopy (app : PublishApp) =
 
         if Env.IsMono () then Exec "xbuild" args wsDir Map.empty |> IO.CheckResponseCode
         else Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
+
+        let appDir = GetFolder Env.Folder.AppOutput
+        let artifactDir = appDir |> GetSubDirectory app.Name
+        Bindings.UpdateArtifactBindingRedirects artifactDir
     else
         printfn "[WARNING] Can't publish application %A without repository" app.Name
 
@@ -70,27 +74,26 @@ let private publishDocker (app : PublishApp) =
     sourceFolder.Delete(true)
 
 let private publishNuget (app : PublishApp) =
-    ()
-    //let tmpApp = { app
-    //               with Name = ".tmp-nuget-" + app.Name }
-    //publishCopy tmpApp
+    let tmpApp = { app
+                   with Name = ".tmp-nuget-" + app.Name }
+    publishCopy tmpApp
 
-    //let appDir = GetFolder Env.Folder.AppOutput
-    //let tmpFolder = appDir |> GetSubDirectory tmpApp.Name
-    //let tmp2Folder = appDir |> GetSubDirectory (".tmp-nuget2-" + app.Name)
-    //tmp2Folder.Create()
+    let appDir = GetFolder Env.Folder.AppOutput
+    let tmpFolder = appDir |> GetSubDirectory tmpApp.Name
+    let tmp2Folder = appDir |> GetSubDirectory (".tmp-nuget2-" + app.Name)
+    tmp2Folder.Create()
 
-    //let nuspec = tmpFolder.EnumerateFiles("*.nuspec")  |> Seq.head
-    //Generators.Packagers.UpdateDependencies nuspec
-    //let version = app.Version
-    //let nugetArgs = sprintf "pack -NoDefaultExcludes -NoPackageAnalysis -NonInteractive -OutputDirectory %s -version %s %s" tmp2Folder.FullName version nuspec.Name
-    //Exec "nuget" nugetArgs tmpFolder Map.empty |> IO.CheckResponseCode
-    //let nugetFile = tmp2Folder.EnumerateFiles() |> Seq.exactlyOne
-    //let targetFile = appDir |> GetFile app.Name
-    //nugetFile.CopyTo(targetFile.FullName, true) |> ignore
+    let nuspec = tmpFolder.EnumerateFiles("*.nuspec")  |> Seq.head
+    Generators.Packagers.UpdateDependencies nuspec
+    let version = app.Version
+    let nugetArgs = sprintf "pack -NoDefaultExcludes -NoPackageAnalysis -NonInteractive -OutputDirectory %s -version %s %s" tmp2Folder.FullName version nuspec.Name
+    Exec "nuget" nugetArgs tmpFolder Map.empty |> IO.CheckResponseCode
+    let nugetFile = tmp2Folder.EnumerateFiles() |> Seq.exactlyOne
+    let targetFile = appDir |> GetFile app.Name
+    nugetFile.CopyTo(targetFile.FullName, true) |> ignore
 
-    //tmp2Folder.Delete(true)
-    //tmpFolder.Delete(true)
+    tmp2Folder.Delete(true)
+    tmpFolder.Delete(true)
 
 let PublishWithPublisher (version : string) (app : Application) =
     let publisher =

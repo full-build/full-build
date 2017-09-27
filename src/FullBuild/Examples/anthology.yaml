@@ -7,5 +7,9 @@ projects:
       file: src/Project.csproj
       out: fullbuild.tests
       tests: true
+      assemblies:
+          - assembly: id1
+      packages:
+          - package: id1
       projects:
           - project: fullbuild

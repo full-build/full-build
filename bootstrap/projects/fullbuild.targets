@@ -1,13 +1,13 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(SolutionDir)\.views\$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
+  <Import Project="$(SolutionDir)\.full-build\views\$(SolutionName).targets" Condition="'$(FullBuild_Config)' == ''" />
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)\src\FullBuild\FullBuild.fsproj" Condition="'$(FullBuild_fullbuild)' != ''">
       <Project>{5FDE3939-C144-4287-BC57-A96EC2D1A9DA}</Project>
       <Name>fullbuild</Name>
     </ProjectReference>
-    <Reference Include="$(SolutionDir)\.bin\fullbuild.exe" Condition="'$(FullBuild_fullbuild)' == ''">
+    <Reference Include="$(SolutionDir)\.full-build\bin\fullbuild.exe" Condition="'$(FullBuild_fullbuild)' == ''">
       <Private>true</Private>
     </Reference>
   </ItemGroup>
-  <Import Project="$(SolutionDir)\.projects\fullbuild-copy.targets" Condition="'$(FullBuild_fullbuildCopy)' == ''" />
+  <Import Project="$(SolutionDir)\.full-build\projects\fullbuild-copy.targets" Condition="'$(FullBuild_fullbuildCopy)' == ''" />
 </Project>

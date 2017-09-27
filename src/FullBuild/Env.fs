@@ -18,9 +18,10 @@ open System.IO
 open FsHelpers
 open System.Reflection
 
-let private VIEW_FOLDER = ".views"
-let private PROJECT_FOLDER = ".projects"
-let BIN_FOLDER = @".bin"
+let private VIEW_FOLDER = "views"
+let private PROJECT_FOLDER = "projects"
+let private PACKAGE_FOLDER = "packages"
+let BIN_FOLDER = @"bin"
 let GLOBALS_FILENAME = "globals"
 let ANTHOLOGY_FILENAME = ".anthology"
 let BASELINE_FILENAME = ".baseline"
@@ -33,8 +34,10 @@ let MSBUILD_SOLUTION_DIR2 = "$(FBWorkspaceDir)"
 let MSBUILD_SOLUTION_DIR = "$(SolutionDir)"
 let MSBUILD_TARGETFX_DIR = "$(TargetFrameworkVersion)"
 let MSBUILD_APP_OUTPUT = "apps"
-let MSBUILD_PROJECT_FOLDER = sprintf @"%s\%s\" MSBUILD_SOLUTION_DIR PROJECT_FOLDER
-let MSBUILD_BIN_FOLDER = sprintf @"%s\%s" MSBUILD_SOLUTION_DIR BIN_FOLDER
+let MSBUILD_PROJECT_FOLDER = sprintf @"%s\%s\%s\" MSBUILD_SOLUTION_DIR MASTER_REPO PROJECT_FOLDER
+let MSBUILD_PACKAGE_FOLDER = sprintf @"%s\%s\%s\" MSBUILD_SOLUTION_DIR MASTER_REPO PACKAGE_FOLDER
+let MSBUILD_BIN_FOLDER = sprintf @"%s\%s\%s" MSBUILD_SOLUTION_DIR MASTER_REPO BIN_FOLDER
+let MSBUILD_NUGET_FOLDER = sprintf @"..\%s\" PACKAGE_FOLDER
 let MSBUILD_FULLBUILD_TARGETS = sprintf @"%s\%s\%s" MSBUILD_SOLUTION_DIR MASTER_REPO FULLBUILD_TARGETS
 let PUBLISH_BIN_FOLDER = BIN_FOLDER
 let PUBLISH_APPS_FOLDER = MSBUILD_APP_OUTPUT
@@ -67,6 +70,7 @@ type Folder =
        | Config
        | View
        | Project
+       | Package
        | Bin
        | Installation
 
@@ -79,6 +83,7 @@ let rec GetFolder folder =
     | Folder.Config -> GetFolder Folder.Workspace |> CreateSubDirectory MASTER_REPO
     | Folder.View -> GetFolder Folder.Config |> CreateSubDirectory VIEW_FOLDER
     | Folder.Project -> GetFolder Folder.Config |> CreateSubDirectory PROJECT_FOLDER
+    | Folder.Package -> GetFolder Folder.Config |> CreateSubDirectory PACKAGE_FOLDER
     | Folder.Bin -> GetFolder Folder.Config |> CreateSubDirectory BIN_FOLDER
     | Folder.Installation -> getInstallationFolder()
 

@@ -45,6 +45,20 @@ with
     static member from (file : FileInfo) =  AssemblyId.from (Path.GetFileNameWithoutExtension(file.Name))
 
 [<RequireQualifiedAccess>]
+type PackageVersion =
+    | PackageVersion of string
+    | Unspecified
+
+type PackageId = private PackageId of string
+with
+    member this.toString = (fun (PackageId x) -> x)this
+    static member from (id : string) = PackageId (id.ToLowerInvariant())
+
+type Package =
+    { Id : PackageId
+      Version : PackageVersion }
+
+[<RequireQualifiedAccess>]
 type VcsType =
     | Gerrit
     | Git
@@ -138,6 +152,8 @@ type Project =
       ProjectId : ProjectId
       OutputType : OutputType
       HasTests : bool
+      AssemblyReferences : AssemblyId set
+      PackageReferences : PackageId set
       ProjectReferences : ProjectId set }
 
 type ApplicationId = private ApplicationId of string

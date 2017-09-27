@@ -102,4 +102,16 @@ let Drop (appName : string) =
     let app = graph.Applications |> Seq.find (fun x -> x.Name = appName)
     let newGraph = app.Delete()
     newGraph.Save()
- 
+
+let BindProject (bindInfo : CLI.Commands.BindProject) =
+    let graph = Graph.load()
+    let wsDir = Env.GetFolder Folder.Workspace
+
+    // select only available repositories
+    let availableProjects = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
+                                               |> Set.map (fun x -> x.Projects)
+                                               |> Set.unionMany
+
+    let projects = PatternMatching.FilterMatch availableProjects (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) bindInfo.Filters
+    projects |> Set.iter(fun project -> printfn "Binding %s/%s" project.Repository.Name project.ProjectId
+                                        project |> Core.Bindings.UpdateProjectBindingRedirects)

@@ -41,6 +41,16 @@ let Serialize (anthology : Anthology) =
         cproject.out <- sprintf "%s.%s" project.Output.toString project.OutputType.toString
         cproject.file <- sprintf @"%s\%s" project.Repository.toString project.RelativeProjectFile.toString
         cproject.tests <- project.HasTests
+        cproject.assemblies.Clear ()
+        for assembly in project.AssemblyReferences do
+            let cass = AnthologyConfig.projects_Item_Type.assemblies_Item_Type()
+            cass.assembly <- assembly.toString
+            cproject.assemblies.Add (cass)
+        cproject.packages.Clear ()
+        for package in project.PackageReferences do
+            let cpackage = AnthologyConfig.projects_Item_Type.packages_Item_Type()
+            cpackage.package <- package.toString
+            cproject.packages.Add (cpackage)
         cproject.projects.Clear ()
         for project in project.ProjectReferences do
             let cprojectref = AnthologyConfig.projects_Item_Type.projects_Item_Type()
@@ -58,6 +68,16 @@ let Deserialize (content) =
                        let project = ProjectId.from x.project
                        let app = { Name = appName ; Publisher = publishType; Project = project }
                        convertToApplications tail |> Set.add app
+
+    let rec convertToAssemblies (items : AnthologyConfig.projects_Item_Type.assemblies_Item_Type list) =
+        match items with
+        | [] -> Set.empty
+        | x :: tail -> convertToAssemblies tail |> Set.add (AssemblyId.from x.assembly)
+
+    let rec convertToPackages (items : AnthologyConfig.projects_Item_Type.packages_Item_Type list) =
+        match items with
+        | [] -> Set.empty
+        | x :: tail -> convertToPackages tail |> Set.add (PackageId.from x.package)
 
     let rec convertToProjectRefs (items : AnthologyConfig.projects_Item_Type.projects_Item_Type list) =
         match items with
@@ -79,6 +99,8 @@ let Deserialize (content) =
                                                             Output = AssemblyId.from out
                                                             OutputType = OutputType.from ext
                                                             HasTests = hastests
+                                                            AssemblyReferences = convertToAssemblies (x.assemblies |> List.ofSeq)
+                                                            PackageReferences = convertToPackages (x.packages |> List.ofSeq)
                                                             ProjectReferences = convertToProjectRefs (x.projects |> List.ofSeq) }
 
     let convertToTestRunner (item : string) =
