@@ -3,6 +3,6 @@
     <FullBuild_fullbuildCopy>Y</FullBuild_fullbuildCopy>
   </PropertyGroup>
   <ItemGroup>
-    <FBCopyFiles Include="$(SolutionDir)\.full-build\bin\fullbuild.exe;$(SolutionDir)\.full-build\bin\fullbuild.pdb;$(SolutionDir)\.full-build\bin\fullbuild.exe.mdb" />
+    <FBCopyFiles Include="$(SolutionDir)\.bin\fullbuild.exe;$(SolutionDir)\.bin\fullbuild.pdb;$(SolutionDir)\.bin\fullbuild.exe.mdb" />
   </ItemGroup>
 </Project>

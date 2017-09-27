@@ -3,7 +3,8 @@ setlocal
 
 set HERE=%~dp0
 
-robocopy .full-build\projects bootstrap\projects *.targets /S
+robocopy .projects bootstrap\projects *.targets /S
+robocopy .views bootstrap\views *.targets /S
 
 :ok
 exit /b 0

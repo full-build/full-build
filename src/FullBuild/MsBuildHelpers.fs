@@ -24,19 +24,8 @@ let ProjectPropertyName (projectId : Anthology.ProjectId) =
     let prjProp = sprintf "FullBuild_%s" prjId
     prjProp
 
-let PackagePropertyName (packageId : Anthology.PackageId) =
-    let pkgId = packageId.toString |> replaceInvalidChars
-    let pkgProp = sprintf "FullBuild_%s_Pkg" pkgId
-    pkgProp
-
-
-
 let MsBuildProjectPropertyName (project : Project) =
     let prjId = project.ProjectId |> replaceInvalidChars
     let prjProp = sprintf "FullBuild_%s" prjId
     prjProp
 
-let MsBuildPackagePropertyName (package : Package) =
-    let pkgId = package.Name |> replaceInvalidChars
-    let pkgProp = sprintf "FullBuild_%s_Pkg" pkgId
-    pkgProp

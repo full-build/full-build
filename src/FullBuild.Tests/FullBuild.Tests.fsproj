@@ -2,7 +2,8 @@
   <PropertyGroup>
     <TargetFramework>net452</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-  </PropertyGroup>
+    <IsPackable>false</IsPackable>
+ </PropertyGroup>
   <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
   <ItemGroup>
     <Compile Include="TestHelpers.fs" />
@@ -23,7 +24,6 @@
     <Compile Include="RepoTests.fs" />
     <Compile Include="DgmlTests.fs" />
     <Compile Include="ViewTests.fs" />
-    <Compile Include="PackageRelationshipTests.fs" />
     <Compile Include="SimplifyTests.fs" />
     <Compile Include="IndexationTests.fs" />
     <Compile Include="Integration.fs" />
@@ -92,11 +92,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <Import Project="$(SolutionDir)\.full-build\projects\fullbuild.targets" />
+  <Import Project="$(SolutionDir)\.projects\fullbuild.targets" />
   <ItemGroup>
     <PackageReference Include="FsUnit" Version="3.0" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.2.3" />
   </ItemGroup>
 </Project>

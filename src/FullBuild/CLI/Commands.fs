@@ -137,9 +137,6 @@ type PullWorkspace =
       Multithread : bool
       View : string option }
 
-type BindProject =
-    { Filters : string set }
-
 type History =
     { Html : bool }
 
@@ -151,7 +148,6 @@ type Query =
       Source : RepositoryId option
       Destination : RepositoryId option
       UnusedProjects : bool
-      UsedPackages : bool 
       References : bool 
       Cycle : bool }
 
@@ -201,7 +197,6 @@ type MainCommand =
     | Publish
     | Push
     | Query
-    | Bind
     | Workspace
     | Doctor
     | Unknown
@@ -261,7 +256,6 @@ type Command =
     | AddApplication of AddApplication
     | DropApplication of ApplicationId
     | PublishApplications of PublishApplications
-    | BindProject of BindProject
 
     // query
     | Query of Query

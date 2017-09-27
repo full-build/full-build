@@ -21,11 +21,6 @@ open StringHelpers
 
 [<Test>]
 let CheckReferences () =
-    AssemblyId.from "badaboum" |> should equal <| AssemblyId.from "BADABOUM"
-
-    PackageId.from "badaboum" |> should equal <| PackageId.from "BADABOUM"
-    PackageId.from "badaboum" |> should equal <| PackageId.from "badaboum"
-
     RepositoryId.from "badaboum" |> should equal <| RepositoryId.from "BADABOUM"
 
 let CheckToRepository () =
@@ -57,8 +52,6 @@ let CheckEqualityWithPermutation () =
                        RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                        HasTests = false
                        ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set
-                       AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Data"; AssemblyId.from "System.Xml"] |> set
-                       PackageReferences = Set.empty
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set
         Applications = Set.empty }
 
@@ -70,8 +63,6 @@ let CheckEqualityWithPermutation () =
                        RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                        HasTests = false
                        ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set
-                       AssemblyReferences = [ AssemblyId.from "System" ; AssemblyId.from "System.Xml"; AssemblyId.from "System.Data" ] |> set
-                       PackageReferences = Set.empty
                        Repository = RepositoryId.from "cassandra-sharp" } ] |> set
         Applications = Set.empty }
 

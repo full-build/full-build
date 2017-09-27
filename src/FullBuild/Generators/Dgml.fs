@@ -47,26 +47,10 @@ let private generateLink (source : string) (target : string) (category : string)
         XAttribute(NsNone + "Target", target),
         XAttribute(NsNone + "Category", category))
 
-let private graphNodes (projects : Project set) (allProjects : Project set) (packages : Package set) (assemblies : Assembly set) (repos : Repository set) =
+let private graphNodes (projects : Project set) (allProjects : Project set) (repos : Repository set) =
     let importedProjects = allProjects - projects
 
     seq {
-        if packages.Count > 0 then
-            yield XElement(NsDgml + "Node",
-                XAttribute(NsNone + "Id", "Packages"),
-                XAttribute(NsNone + "Label", "Packages"),
-                XAttribute(NsNone + "Group", "Expanded"))
-            for package in packages do
-                yield generateNode (package.Name) (package.Name) "Package"
-
-        if assemblies.Count > 0 then
-            yield XElement(NsDgml + "Node",
-                XAttribute(NsNone + "Id", "Assemblies"),
-                XAttribute(NsNone + "Label", "Assemblies"),
-                XAttribute(NsNone + "Group", "Expanded"))
-            for assembly in assemblies do
-                yield generateNode (assembly.Name) (assembly.Name) "Assembly"
-
         for project in projects do
             yield generateProjectNode project
 
@@ -93,34 +77,13 @@ let private graphLinks (projects : Project set) (allProjects : Project set) (bin
         for project in projects do
             for reference in project.References do
                 yield generateLink (project.UniqueProjectId) (reference.UniqueProjectId) "ProjectRef"
-
-        if bin then
-            for project in projects do
-                for package in project.PackageReferences do
-                    yield generateLink (project.UniqueProjectId) (package.Name) "PackageRef"
-
-            for project in projects do
-                for assembly in project.AssemblyReferences do
-                    yield generateLink (project.UniqueProjectId) (assembly.Name) "AssemblyRef"
-
-            for project in projects do
-                for package in project.PackageReferences do
-                    yield generateLink "Packages" (package.Name) "Contains"
-
-            for project in projects do
-                for assembly in project.AssemblyReferences do
-                    yield generateLink "Assemblies" (assembly.Name) "Contains"
     }
 
 let private graphCategories (repos : Repository set) =
     let allCategories = [ ("Project", "Green")
                           ("TestProject", "Purple")
                           ("ProjectImport", "Navy")
-                          ("Package", "Orange")
-                          ("Assembly", "Red")
-                          ("ProjectRef", "Green")
-                          ("PackageRef", "Orange")
-                          ("AssemblyRef", "Red") ]
+                          ("ProjectRef", "Green") ]
 
     let generateCategory (cat) =
         let (key, value) = cat
@@ -178,13 +141,7 @@ let GraphContent (projects : Project set) (src : bool) (bin : bool) =
     let allProjects = srcProjects |> Set.map (fun x -> x.References) |> Set.unionMany
                       |> Set.union srcProjects
     let repos = allProjects |> Set.map (fun x -> x.Repository)
-    let packages = if bin then srcProjects |> Set.map (fun x -> x.PackageReferences)
-                                           |> Set.unionMany
-                   else Set.empty
-    let assemblies = if bin then srcProjects |> Seq.map (fun x -> x.AssemblyReferences)
-                                             |> Set.unionMany
-                     else Set.empty
-    let xNodes = XElement(NsDgml + "Nodes", graphNodes srcProjects allProjects packages assemblies repos)
+    let xNodes = XElement(NsDgml + "Nodes", graphNodes srcProjects allProjects repos)
     let xLinks = XElement(NsDgml+"Links", graphLinks srcProjects allProjects bin)
     let xCategories = XElement(NsDgml + "Categories", graphCategories repos)
     let xProperties = XElement(NsDgml + "Properties", graphProperties ())

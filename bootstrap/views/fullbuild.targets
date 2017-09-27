@@ -1,0 +1,7 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FullBuild_Config>Y</FullBuild_Config>
+    <FullBuild_fullbuild_tests>Y</FullBuild_fullbuild_tests>
+    <FullBuild_fullbuild>Y</FullBuild_fullbuild>
+  </PropertyGroup>
+</Project>

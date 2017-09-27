@@ -25,16 +25,6 @@ open Collections
 open Graph
 
 
-let private generatePackageCopy (packageRef : Package) =
-    let propName = MsBuildPackagePropertyName packageRef
-    let condition = sprintf "'$(%sCopy)' == ''" propName
-    let project = sprintf @"$(SolutionDir)\.full-build\packages\%s\package-copy.targets" packageRef.Name
-    let import = XElement(NsMsBuild + "Import",
-                       XAttribute(NsNone + "Project", project),
-                       XAttribute(NsNone + "Condition", condition))
-    import
-
-
 let private generateProjectCopy (projectRef : Project) =
     let propName = MsBuildProjectPropertyName projectRef
     let condition = sprintf "'$(%sCopy)' == ''" propName
@@ -90,7 +80,6 @@ let private generateProjectCopyTarget (project : Project) =
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let copyCondition = sprintf "'$(%s)' == ''" projectCopyProperty
     let prjFiles = project.References |> Seq.map generateProjectCopy
-    let pkgFiles = project.PackageReferences |> Seq.map generatePackageCopy
 
     let output = (project.Output.Name)
     let ext = match project.OutputType with
@@ -116,8 +105,7 @@ let private generateProjectCopyTarget (project : Project) =
                 XElement (NsMsBuild + "ItemGroup",
                     XElement(NsMsBuild + "FBCopyFiles",
                         XAttribute(NsNone + "Include", incFile))),
-                prjFiles,
-                pkgFiles))
+                prjFiles))
 
 
 
@@ -127,44 +115,9 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
         let file = attr |> ToWindows |> MigratePath
         file.StartsWith(MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
 
-    let filterFullBuildPackage (xel : XElement) =
-        let attr = !> (xel.Attribute (NsNone + "Project")) : string
-        let file = attr |> ToWindows |> MigratePath
-        file.StartsWith(MSBUILD_PACKAGE_FOLDER, StringComparison.CurrentCultureIgnoreCase)
-
     let filterFullBuildTargets (xel : XElement) =
         let attr = (!> (xel.Attribute (NsNone + "Project")) : string) |> ToWindows |> MigratePath
         attr.EndsWith(@".full-build\full-build.targets", StringComparison.CurrentCultureIgnoreCase)
-
-    let filterNuget (xel : XElement) =
-        let attr = (!> (xel.Attribute (NsNone + "Project")) : string) |> ToWindows
-        attr.StartsWith("$(SolutionDir)\.nuget\NuGet.targets", StringComparison.CurrentCultureIgnoreCase)
-
-    let filterNugetTarget (xel : XElement) =
-        let attr = !> (xel.Attribute (NsNone + "Name")) : string
-        String.Equals(attr, "EnsureNuGetPackageBuildImports", StringComparison.CurrentCultureIgnoreCase)
-
-    let filterNugetPackage (xel : XElement) =
-        let attr = !> (xel.Attribute (NsNone + "Include")) : string
-        String.Equals(attr, "packages.config", StringComparison.CurrentCultureIgnoreCase)
-
-    let filterPaketReference (xel : XElement) =
-        let attr = !> (xel.Attribute (NsNone + "Include")) : string
-        attr.StartsWith("paket.references", StringComparison.CurrentCultureIgnoreCase)
-
-    let filterPaketTarget (xel : XElement) =
-        let attr = (!> (xel.Attribute (NsNone + "Project")) : string) |> ToWindows
-        attr.StartsWith("$(SolutionDir)\.paket\paket.targets", StringComparison.CurrentCultureIgnoreCase)
-
-    let filterPaket (xel : XElement) =
-        xel.Descendants(NsMsBuild + "Paket").Any ()
-
-    let filterAssemblies (assFiles : Assembly set) (xel : XElement) =
-        let inc = !> xel.Attribute(XNamespace.None + "Include") : string
-        let assName = inc.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries).[0]
-        let assRef = Anthology.AssemblyId.from (System.Reflection.AssemblyName(assName))
-        let exists = assFiles |> Set.exists (fun x -> x.Name = assRef.toString)
-        not exists
 
     let hasNoChild (xel : XElement) =
         not <| xel.DescendantNodes().Any()
@@ -179,34 +132,17 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
             // package reference
             "PackageReference", always
 
-            // paket
-            "None", filterPaketReference
-            "Import", filterPaketTarget
-            "Choose", filterPaket
-
             // project references
             "ProjectReference", always
 
-            // unknown assembly references
-            "Reference", filterAssemblies project.AssemblyReferences
-
             // full-build imports
             "Import", filterFullBuildProject
-            "Import", filterFullBuildPackage
             "Import", filterFullBuildTargets
             "FBWorkspaceDir", always
-
-            // nuget stuff
-            "Import", filterNuget
-            "Target", filterNugetTarget
-            "None", filterNugetPackage
-            "Content", filterNugetPackage
 
             // cleanup project
             "BaseIntermediateOutputPath", always
             "SolutionDir", always
-            "RestorePackages", always
-            "NuGetPackageImportStamp", always
             "ItemGroup", hasNoChild
             "PropertyGroup", hasNoChild
         ]
@@ -275,19 +211,6 @@ let private convertProject (xproj : XDocument) (project : Project) =
                         XAttribute (NsNone + "Project", importFile))
         cproj.Root.LastNode.AddAfterSelf(import)
 
-    // add nuget references
-    for packageReference in project.PackageReferences do
-        let importFile = sprintf @"%s%s\package.targets" MSBUILD_PACKAGE_FOLDER packageReference.Name
-        let import = XElement (NsMsBuild + "Import",
-                        XAttribute (NsNone + "Project", importFile))
-        cproj.Root.LastNode.AddAfterSelf(import)
-
-//    // move all <Import /> before the first ItemGroup (ie: source code)
-//    let allImports = cproj.Descendants(NsMsBuild + "Import").ToList()
-//    let firstItemGroup = cproj.Descendants(NsMsBuild + "ItemGroup").First()
-//    for import in allImports do
-//        import.Remove()
-//        firstItemGroup.AddBeforeSelf(import)
     cproj
 
 
@@ -329,20 +252,8 @@ let isFileIncluded (excludes : string set) (file : string) (rootDir : string) =
 
 
 let rec removeUselessFiles (excludes : string set) (dir : DirectoryInfo) (rootDir : string) =
-    for subdir in dir.GetDirectories() do
-        let delDir = subdir.Name.Equals("packages", StringComparison.CurrentCultureIgnoreCase)
-                     || subdir.Name.Equals(".paket", StringComparison.CurrentCultureIgnoreCase)
-                     || subdir.Name.Equals(".nuget", StringComparison.CurrentCultureIgnoreCase)
-        if delDir then 
-            let canDelete = isFileIncluded excludes subdir.FullName rootDir
-            if canDelete then subdir.Delete(true)
-        else removeUselessFiles excludes subdir rootDir
-
     for file in dir.GetFiles() do        
         let delFile = file.Extension.Equals(".sln", StringComparison.CurrentCultureIgnoreCase)
-                      || file.Name.Equals("packages.config", StringComparison.CurrentCultureIgnoreCase)
-                      || file.Name.Equals("paket.dependencies", StringComparison.CurrentCultureIgnoreCase)
-                      || file.Name.Equals("paket.references", StringComparison.CurrentCultureIgnoreCase)
         if delFile then
             let canDelete = isFileIncluded excludes file.FullName rootDir
             if canDelete then file.Delete()

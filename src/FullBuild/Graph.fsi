@@ -18,11 +18,6 @@ module Graph
 open Collections
 
 [<RequireQualifiedAccess>]
-type PackageVersion =
-    | PackageVersion of string
-    | Unspecified
-
-[<RequireQualifiedAccess>]
 type OutputType =
     | Exe
     | Dll
@@ -51,13 +46,6 @@ type VcsType =
 type TestRunnerType =
     | NUnit
     | Skip
-
-[<Sealed>]
-type Package  = interface System.IComparable
-with
-    member Name : string
-    member Dependencies: Package set
-    member FxAssemblies: Assembly set
 
 and [<Sealed>] Assembly = interface System.IComparable
 with
@@ -101,8 +89,6 @@ with
     member Applications: Application set
     member References: Project set
     member ReferencedBy: Project set
-    member AssemblyReferences: Assembly set
-    member PackageReferences: Package set
     static member Closure: Project set
                         -> Project set
     static member TransitiveReferences: Project set
@@ -116,12 +102,10 @@ and [<Sealed>] Graph =
     member MinVersion: string
     member MasterRepository : Repository
     member Repositories : Repository set
-    member Assemblies : Assembly set
     member Applications : Application set
     member Projects : Project set
     member ArtifactsDir : string
     member NuGets : string list
-    member Packages: Package set
     member Anthology : Anthology.Anthology
     member Globals : Anthology.Globals
 
