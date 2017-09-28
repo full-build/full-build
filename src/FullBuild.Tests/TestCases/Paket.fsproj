@@ -14,7 +14,6 @@
     <Name>Paket</Name>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
     <Win32Resource>paket.res</Win32Resource>
     <FullBuildIgnore>true</FullBuildIgnore>
   </PropertyGroup>
@@ -105,7 +104,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="$(SolutionDir)\.paket\paket.targets" />
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v3.0' Or $(TargetFrameworkVersion) == 'v3.5')">
       <ItemGroup>
@@ -182,4 +180,5 @@
       </ItemGroup>
     </When>
   </Choose>
+  <Import Project="..\..\..\.paket\paket.targets" />
 </Project>

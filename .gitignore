@@ -9,6 +9,8 @@
 /.bin
 /.views
 /.projects
+/.paket
+/paket-files
 /history.txt
 !/bootstrap/packages
 !/bootstrap/bin

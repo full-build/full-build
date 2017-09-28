@@ -26,68 +26,48 @@
     <Compile Include="SimplifyTests.fs" />
     <Compile Include="IndexationTests.fs" />
     <Compile Include="Integration.fs" />
+    <Content Include="TestCases\packages.xml" />
     <None Include="app.config" />
-    <None Include="view-globals.yaml">
+    <None Include="TestCases\ConvertedProject.csproj" />
+    <None Include="TestCases\CSharpProjectSample1.csproj" />
+    <None Include="TestCases\CSharpProjectSample1.Tests.csproj" />
+    <None Include="TestCases\FSharpProjectSample1.fsproj" />
+    <None Include="TestCases\paket.dependencies" />
+    <None Include="TestCases\Paket.fsproj" />
+    <None Include="TestCases\paket.references" />
+    <None Include="TestCases\ProjectWithInvalidRefs.fsproj" />
+    <None Include="TestCases\VirginProject.csproj" />
+    <None Include="TestCases\view-globals.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="view-anthology.yaml">
+    <None Include="TestCases\view-anthology.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="graph-globals.yaml">
+    <None Include="TestCases\graph-globals.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="graph-anthology.yaml">
+    <None Include="TestCases\graph-anthology.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="indexed-globals.yaml">
+    <None Include="TestCases\indexed-globals.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="indexed-anthology.yaml">
+    <None Include="TestCases\indexed-anthology.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="simplified-globals.yaml">
+    <None Include="TestCases\simplified-globals.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="simplified-anthology.yaml">
+    <None Include="TestCases\simplified-anthology.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="single-node-dependencies.dgml">
+    <None Include="TestCases\single-node-dependencies.dgml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="CSharpProjectSample1.Tests.csproj">
+    <None Include="TestCases\anthology-solution.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="ProjectWithInvalidRefs.fsproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="paket-simplified.dependencies">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="paket-indexed.dependencies">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="packages.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="ConvertedProject.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="VirginProject.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="FSharpProjectSample1.fsproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Paket.fsproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="anthology-solution.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="single-node.dgml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="CSharpProjectSample1.csproj">
+    <None Include="TestCases\single-node.dgml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

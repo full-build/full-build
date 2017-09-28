@@ -1,6 +1,11 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{C65A600D-DC17-411E-8492-A33396156598}"
+	ProjectSection(SolutionItems) = preProject
+		..\paket.dependencies = ..\paket.dependencies
+	EndProjectSection
+EndProject
 Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "FullBuild.Tests", "src/FullBuild.Tests/FullBuild.Tests.fsproj", "{faaf3b40-ea78-4eaf-9859-863ff16f6058}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5fde3939-c144-4287-bc57-a96ec2d1a9da} = {5fde3939-c144-4287-bc57-a96ec2d1a9da}
