@@ -43,15 +43,15 @@ let CheckCastString () =
 
 [<Test>]
 let CheckBasicParsingCSharp () =
-    let expectedPackages = Set [ { Id=PackageId.from "FSharp.Data"; Version=PackageVersion.PackageVersion "2.2.5" }
-                                 { Id=PackageId.from "FsUnit"; Version=PackageVersion.PackageVersion "1.3.0.1" }
-                                 { Id=PackageId.from "Mini"; Version=PackageVersion.PackageVersion "0.4.2.0" }
-                                 { Id=PackageId.from "Newtonsoft.Json"; Version=PackageVersion.PackageVersion "7.0.1" }
-                                 { Id=PackageId.from "NLog"; Version=PackageVersion.PackageVersion "4.0.1" }
-                                 { Id=PackageId.from "NUnit"; Version=PackageVersion.PackageVersion "2.6.3" }
-                                 { Id=PackageId.from "xunit"; Version=PackageVersion.PackageVersion "1.9.1" } 
-                                 { Id=PackageId.from "Microsoft.NETCore.App"; Version=PackageVersion.PackageVersion "1.0.0" } 
-                                 { Id=PackageId.from "Microsoft.NET.SDK"; Version=PackageVersion.Unspecified } ]
+    let expectedPackages = Set [ { Package.Id=PackageId.from "FSharp.Data"; Package.Version=PackageVersion.Constraint "2.2.5" }
+                                 { Package.Id=PackageId.from "FsUnit"; Package.Version=PackageVersion.Constraint "1.3.0.1" }
+                                 { Package.Id=PackageId.from "Mini"; Package.Version=PackageVersion.Constraint "0.4.2.0" }
+                                 { Package.Id=PackageId.from "Newtonsoft.Json"; Package.Version=PackageVersion.Constraint "7.0.1" }
+                                 { Package.Id=PackageId.from "NLog"; Package.Version=PackageVersion.Constraint "4.0.1" }
+                                 { Package.Id=PackageId.from "NUnit"; Package.Version=PackageVersion.Constraint "2.6.3" }
+                                 { Package.Id=PackageId.from "xunit"; Package.Version=PackageVersion.Constraint "1.9.1" } 
+                                 { Package.Id=PackageId.from "Microsoft.NETCore.App"; Package.Version=PackageVersion.Constraint "1.0.0" } 
+                                 { Package.Id=PackageId.from "Microsoft.NET.SDK"; Package.Version=PackageVersion.Free } ]
 
     let file = FileInfo (testFile "./CSharpProjectSample1.csproj")
     let prjDescriptor = Parsers.MSBuild.parseProjectContent (XDocumentLoader true) file.Directory (RepositoryId.from "Test") false file
@@ -86,17 +86,17 @@ let CheckParsePaketizedProject () =
 
 [<Test>]
 let CheckParseConvertedProject () =
-    let expectedPackages = Set [ { Id=PackageId.from "Rx-Core"; Version=PackageVersion.Unspecified }
-                                 { Id=PackageId.from "Rx-Interfaces"; Version=PackageVersion.Unspecified }
-                                 { Id=PackageId.from "Rx-Linq"; Version=PackageVersion.Unspecified }
-                                 { Id=PackageId.from "Rx-PlatformServices"; Version=PackageVersion.Unspecified }
-                                 { Id=PackageId.from "FSharp.Data"; Version=PackageVersion.PackageVersion "2.2.5" }
-                                 { Id=PackageId.from "FsUnit"; Version=PackageVersion.PackageVersion "1.3.0.1" }
-                                 { Id=PackageId.from "Mini"; Version=PackageVersion.PackageVersion "0.4.2.0" }
-                                 { Id=PackageId.from "Newtonsoft.Json"; Version=PackageVersion.PackageVersion "7.0.1" }
-                                 { Id=PackageId.from "NLog"; Version=PackageVersion.PackageVersion "4.0.1" }
-                                 { Id=PackageId.from "NUnit"; Version=PackageVersion.PackageVersion "2.6.3" }
-                                 { Id=PackageId.from "xunit"; Version=PackageVersion.PackageVersion "1.9.1" } ]
+    let expectedPackages = Set [ { Package.Id=PackageId.from "Rx-Core"; Package.Version=PackageVersion.Free }
+                                 { Package.Id=PackageId.from "Rx-Interfaces"; Package.Version=PackageVersion.Free }
+                                 { Package.Id=PackageId.from "Rx-Linq"; Package.Version=PackageVersion.Free }
+                                 { Package.Id=PackageId.from "Rx-PlatformServices"; Package.Version=PackageVersion.Free }
+                                 { Package.Id=PackageId.from "FSharp.Data"; Package.Version=PackageVersion.Constraint "2.2.5" }
+                                 { Package.Id=PackageId.from "FsUnit"; Package.Version=PackageVersion.Constraint "1.3.0.1" }
+                                 { Package.Id=PackageId.from "Mini"; Package.Version=PackageVersion.Constraint "0.4.2.0" }
+                                 { Package.Id=PackageId.from "Newtonsoft.Json"; Package.Version=PackageVersion.Constraint "7.0.1" }
+                                 { Package.Id=PackageId.from "NLog"; Package.Version=PackageVersion.Constraint "4.0.1" }
+                                 { Package.Id=PackageId.from "NUnit"; Package.Version=PackageVersion.Constraint "2.6.3" }
+                                 { Package.Id=PackageId.from "xunit"; Package.Version=PackageVersion.Constraint "1.9.1" } ]
 
     let expectedProject = { Repository = RepositoryId.from "Test"
                             ProjectId = ProjectId.from "CassandraSharp"
@@ -105,17 +105,17 @@ let CheckParseConvertedProject () =
                             Output = AssemblyId.from "CassandraSharp"
                             OutputType = OutputType.Dll
                             HasTests = false
-                            PackageReferences = Set [ PackageId.from "Rx-Core"
-                                                      PackageId.from "Rx-Interfaces"
-                                                      PackageId.from "Rx-Linq"
-                                                      PackageId.from "Rx-PlatformServices"
-                                                      PackageId.from "FSharp.Data"
-                                                      PackageId.from "FsUnit"
-                                                      PackageId.from "Mini"
-                                                      PackageId.from "Newtonsoft.Json"
-                                                      PackageId.from "NLog"
-                                                      PackageId.from "NUnit"
-                                                      PackageId.from "xunit" ]
+                            PackageReferences = Set [ { Package.Id=PackageId.from "Rx-Core"; Package.Version=PackageVersion.Free }
+                                                      { Package.Id=PackageId.from "Rx-Interfaces"; Package.Version=PackageVersion.Free }
+                                                      { Package.Id=PackageId.from "Rx-Linq"; Package.Version=PackageVersion.Free }
+                                                      { Package.Id=PackageId.from "Rx-PlatformServices"; Package.Version=PackageVersion.Free }
+                                                      { Package.Id=PackageId.from "FSharp.Data"; Package.Version=PackageVersion.Constraint "2.2.5" }
+                                                      { Package.Id=PackageId.from "FsUnit"; Package.Version=PackageVersion.Constraint "1.3.0.1" }
+                                                      { Package.Id=PackageId.from "Mini"; Package.Version=PackageVersion.Constraint "0.4.2.0" }
+                                                      { Package.Id=PackageId.from "Newtonsoft.Json"; Package.Version=PackageVersion.Constraint "7.0.1" }
+                                                      { Package.Id=PackageId.from "NLog"; Package.Version=PackageVersion.Constraint "4.0.1" }
+                                                      { Package.Id=PackageId.from "NUnit"; Package.Version=PackageVersion.Constraint "2.6.3" }
+                                                      { Package.Id=PackageId.from "xunit"; Package.Version=PackageVersion.Constraint "1.9.1" } ]
                             ProjectReferences = Set [ ProjectId.from "cassandrasharp.interfaces" ] }
 
     let projectFile = FileInfo (testFile "./ConvertedProject.csproj")
@@ -127,10 +127,10 @@ let CheckParseConvertedProject () =
 
 [<Test>]
 let CheckParseConvertedProjectWithoutPackagesConfig () =
-    let expectedPackages = Set [ { Id=PackageId.from "Rx-Core"; Version=PackageVersion.Unspecified }
-                                 { Id=PackageId.from "Rx-Interfaces"; Version=PackageVersion.Unspecified }
-                                 { Id=PackageId.from "Rx-Linq"; Version=PackageVersion.Unspecified }
-                                 { Id=PackageId.from "Rx-PlatformServices"; Version=PackageVersion.Unspecified } ]
+    let expectedPackages = Set [ { Package.Id=PackageId.from "Rx-Core"; Package.Version=PackageVersion.Free }
+                                 { Package.Id=PackageId.from "Rx-Interfaces"; Package.Version=PackageVersion.Free }
+                                 { Package.Id=PackageId.from "Rx-Linq"; Package.Version=PackageVersion.Free }
+                                 { Package.Id=PackageId.from "Rx-PlatformServices"; Package.Version=PackageVersion.Free } ]
 
     let expectedProject = { Repository = RepositoryId.from "Test"
                             ProjectId = ProjectId.from "CassandraSharp"
@@ -139,10 +139,10 @@ let CheckParseConvertedProjectWithoutPackagesConfig () =
                             Output = AssemblyId.from "CassandraSharp"
                             OutputType = OutputType.Dll
                             HasTests = false
-                            PackageReferences = Set [ PackageId.from "Rx-Core"
-                                                      PackageId.from "Rx-Interfaces"
-                                                      PackageId.from "Rx-Linq"
-                                                      PackageId.from "Rx-PlatformServices" ]
+                            PackageReferences = Set [ { Package.Id=PackageId.from "Rx-Core"; Package.Version=PackageVersion.Free }
+                                                      { Package.Id=PackageId.from "Rx-Interfaces"; Package.Version=PackageVersion.Free }
+                                                      { Package.Id=PackageId.from "Rx-Linq"; Package.Version=PackageVersion.Free }
+                                                      { Package.Id=PackageId.from "Rx-PlatformServices"; Package.Version=PackageVersion.Free } ]
                             ProjectReferences = Set [ ProjectId.from "cassandrasharp.interfaces" ] }
 
     let projectFile = FileInfo (testFile "./ConvertedProject.csproj")

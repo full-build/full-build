@@ -34,7 +34,7 @@ let processMain argv =
     | Command.CleanWorkspace -> Commands.Workspace.Clean ()
     | Command.UpdateGuids updInfo -> Commands.Workspace.UpdateGuid updInfo
     | Command.History histInfo -> Commands.Workspace.History histInfo
-    | Command.InstallPackages -> Commands.Workspace.Restore ()
+    | Command.InstallPackages -> ()
     | Command.PushWorkspace pushInfo -> Commands.Workspace.Push pushInfo
 
     | Command.TestAssemblies testInfo -> Commands.Test.TestAssemblies testInfo.Filters testInfo.Excludes
@@ -59,11 +59,6 @@ let processMain argv =
     // nuget
     | Command.AddNuGet url -> Commands.NuGet.Add url.toString
     | Command.ListNuGets -> Commands.NuGet.List ()
-
-    // package
-    | Command.UpdatePackages -> Commands.Package.Update ()
-    | Command.OutdatedPackages -> Commands.Package.Outdated ()
-    | Command.ListPackages -> Commands.Package.List ()
 
     // applications
     | Command.ListApplications appInfo -> Commands.Application.List appInfo

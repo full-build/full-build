@@ -24,6 +24,9 @@ open Collections
 open System
 open Graph
 
+let Restore () =
+    Core.Conversion.GenerateProjectArtifacts()
+
 let pullMatchingBinaries () =
     let graph = Graph.load()
     let baselineFactory = Baselines.from graph
@@ -31,17 +34,6 @@ let pullMatchingBinaries () =
     | Some buildInfo -> Core.BuildArtifacts.PullReferenceBinaries graph.ArtifactsDir buildInfo.BuildBranch (Some buildInfo.BuildNumber)
     | None -> printfn "No latest build found. The binaries were not pulled"
     
-
-let Restore () =
-    Core.Package.RestorePackages ()
-    Core.Conversion.GenerateProjectArtifacts()
-
-
-let private Install (nugets : string list) =
-    nugets |> List.map Anthology.RepositoryUrl.from
-           |> Core.Package.InstallPackages
-    Core.Conversion.GenerateProjectArtifacts()
-
 
 let Branch (branchInfo : CLI.Commands.BranchWorkspace) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
@@ -90,9 +82,6 @@ let Create (createInfo : CLI.Commands.SetupWorkspace) =
 
         Tools.Vcs.Ignore wsDir graph.MasterRepository
 
-        Tools.Paket.UpdateSources List.empty
-        Tools.Paket.PaketUpdate()
-
         // setup additional files for views to work correctly
         let installDir = Env.GetFolder Env.Folder.Installation
         let confDir = Env.GetFolder Env.Folder.Config
@@ -129,8 +118,6 @@ let Checkout (checkoutInfo : CLI.Commands.CheckoutVersion) =
 
     Configuration.SaveBranch tag.BuildBranch
     Restore()
-    
-
 
 let Init (initInfo : CLI.Commands.InitWorkspace) =
     let wsDir = DirectoryInfo(initInfo.Path)
@@ -141,7 +128,8 @@ let Init (initInfo : CLI.Commands.InitWorkspace) =
         let graph = Graph.init initInfo.MasterRepository initInfo.Type
         Tools.Vcs.Clone wsDir graph.MasterRepository false |> ConsoleHelpers.PrintOutput "Cloning master repository"
                                                            |> IO.CheckResponseCode
-
+        Restore()
+        
         let currDir = Environment.CurrentDirectory
         try
             Environment.CurrentDirectory <- wsDir.FullName
@@ -190,7 +178,6 @@ let Pull (pullInfo : CLI.Commands.PullWorkspace) =
         selectedRepos |> Seq.filter (fun x -> x.IsCloned)
                       |> Threading.ParExec (cloneRepo wsDir pullInfo.Rebase)
                       |> IO.CheckMultipleResponseCode
-        Restore()
 
     if pullInfo.Bin then
         pullMatchingBinaries ()
@@ -302,13 +289,11 @@ let private index (convertInfo : CLI.Commands.ConvertRepositories) =
 
     let indexation = selectedRepos |> Core.Indexation.IndexWorkspace wsDir globals antho
     if convertInfo.Check then
-        indexation |> fst |> Graph.from globals |> ignore
-        indexation |> fst |> Core.Indexation.CheckAnthologyProjectsInRepository antho selectedRepos
+        indexation |> Graph.from globals |> ignore
+        indexation |> Core.Indexation.CheckAnthologyProjectsInRepository antho selectedRepos
     else
-        indexation |> Core.Indexation.UpdatePackages globals
-                   |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
+        indexation |> Core.Indexation.SaveAnthologyProjectsInRepository antho selectedRepos
                    |> Configuration.SaveAnthology
-        Install graph.NuGets
 
 let convert (convertInfo : CLI.Commands.ConvertRepositories) =
     let graph = Graph.load()

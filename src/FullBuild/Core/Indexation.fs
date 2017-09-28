@@ -99,17 +99,6 @@ let rec private displayConflicts (conflicts : ConflictType list) =
     | [] -> ()
 
 
-
-let private detectNewDependencies (projects : Parsers.MSBuild.ProjectDescriptor seq) =
-    // add new packages (with correct version requirement)
-    let existingPackages = Tools.Paket.ParsePaketDependencies ()
-    projects |> Seq.collect (fun x -> x.Packages)
-             |> Seq.filter (fun x -> Set.contains x.Id existingPackages |> not)
-             |> Seq.distinctBy (fun x -> x.Id)
-             |> Set.ofSeq
-
-
-
 let MergeProjects (newProjects : Project set) (existingProjects : Project set) =
     // this is the repositories we are dealing with
     let foundRepos = newProjects |> Seq.map (fun x -> x.Repository)
@@ -156,9 +145,8 @@ let IndexWorkspace wsDir (globals : Globals) (antho : Anthology) (grepos : Graph
         displayConflicts conflicts
         failwith "Conflict(s) detected"
 
-    let anthoWithNewProjects = { antho
-                                 with Projects = allProjects |> Set.ofList }
-    (anthoWithNewProjects, parsedProjects)
+    { antho
+      with Projects = allProjects |> Set.ofList }
 
 let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
     let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)

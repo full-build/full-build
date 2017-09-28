@@ -6,7 +6,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
-  <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
+  <Import Project="..\..\.full-build\full-build.targets" />
   
   <ItemGroup>
     <Content Include="..\..\LICENSE.txt">
@@ -87,7 +87,6 @@
     <Compile Include="Commands\Test.fs" />
     <Compile Include="Commands\Application.fs" />
     <Compile Include="Commands\NuGet.fs" />
-    <Compile Include="Commands\Package.fs" />
     <Compile Include="Commands\Query.fs" />
     <Compile Include="Program.fs" />
     <None Include="Examples\ghreleasefeed.json" />

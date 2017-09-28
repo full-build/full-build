@@ -3,7 +3,7 @@
     <TargetFramework>net452</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
+  <Import Project="..\..\.full-build\full-build.targets" />
   <ItemGroup>
     <Compile Include="TestHelpers.fs" />
     <Compile Include="CollectionsTests.fs" />
@@ -75,5 +75,5 @@
     <PackageReference Include="FsUnit" Version="3.0" />
     <PackageReference Update="FSharp.Core" Version="4.2.3" />
   </ItemGroup>
-  <Import Project="$(SolutionDir)\.projects\fullbuild.targets" />
+  <Import Project="..\..\.projects\fullbuild.targets" />
 </Project>

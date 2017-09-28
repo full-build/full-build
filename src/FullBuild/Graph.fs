@@ -70,7 +70,7 @@ with
 
     member this.Name = this.Package.Id.toString
 
-    member this.Constaint =
+    member this.Version =
         match this.Package.Version with
         | Anthology.PackageVersion.Constraint version -> Some version
         | Anthology.PackageVersion.Free -> None
@@ -280,7 +280,6 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
     let mutable repositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> = null
     let mutable applicationMap : System.Collections.Generic.IDictionary<Anthology.ApplicationId, Application> = null
     let mutable projectMap : System.Collections.Generic.IDictionary<Anthology.ProjectId, Project> = null
-    let mutable packageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> = null
 
     member this.Anthology : Anthology.Anthology = anthology
     member this.Globals : Anthology.Globals = globals

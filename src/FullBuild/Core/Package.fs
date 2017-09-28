@@ -20,12 +20,12 @@ open System.Xml.Linq
 open Env
 open Collections
 
-let InstallPackages (nugets : RepositoryUrl list) =
-    Tools.Paket.UpdateSources nugets
-    Tools.Paket.PaketInstall ()
+// let InstallPackages (nugets : RepositoryUrl list) =
+//     Tools.Paket.UpdateSources nugets
+//     Tools.Paket.PaketInstall ()
 
-let RestorePackages () =
-    Tools.Paket.PaketRestore ()
+// let RestorePackages () =
+//     Tools.Paket.PaketRestore ()
 
-let UpdatePackages () =
-    Tools.Paket.PaketUpdate ()
+// let UpdatePackages () =
+//     Tools.Paket.PaketUpdate ()

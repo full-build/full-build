@@ -359,16 +359,6 @@ let private commandInstall (args : string list) =
     | [] -> Command.InstallPackages
     | _ -> Command.Error MainCommand.InstallPackage
 
-let private commandUpdate (args : string list) =
-    match args with
-    | [] -> Command.UpdatePackages
-    | _ -> Command.Error MainCommand.UpdatePackage
-
-let private commandOutdated (args : string list) =
-    match args with
-    | [] -> Command.OutdatedPackages
-    | _ -> Command.Error MainCommand.OutdatedPackage
-
 let rec private commandAddRepo (branch : string option) (builder : Graph.BuilderType) (args : string list) =
     match args with
     | TokenOption TokenOption.Branch :: Param branch :: tail -> tail |> commandAddRepo (Some branch) builder
@@ -463,11 +453,6 @@ let rec private commandListApp (version : string option) (args : string list) =
     | [] -> Command.ListApplications { Version = version }
     | _ -> Command.Error MainCommand.ListApp
 
-let private commandListPackage (args : string list) =
-    match args with
-    | [] -> Command.ListPackages
-    | _ -> Command.Error MainCommand.ListPackage
-
 let private commandUpdateGuids (args : string list) =
     match args with
     | Params filters -> Command.UpdateGuids { Filters = set filters }
@@ -557,10 +542,7 @@ let Parse (args : string list) : Command =
     | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory false
 
     | Token Token.Install :: cmdArgs -> cmdArgs |> commandInstall
-    | Token Token.Package :: Token Token.Update :: cmdArgs -> cmdArgs |> commandUpdate
-    | Token Token.Package :: Token Token.Outdated :: cmdArgs -> cmdArgs |> commandOutdated
-    | Token Token.Package :: Token Token.List :: cmdArgs -> cmdArgs |> commandListPackage
-
+ 
     | Token Token.Repo :: Token Token.Add :: cmdArgs -> cmdArgs |> commandAddRepo None Graph.BuilderType.MSBuild
     | Token Token.Repo :: Token Token.Drop :: cmdArgs -> cmdArgs |> commandDropRepo
     | Token Token.Repo :: Token Token.List :: cmdArgs -> cmdArgs |> commandListRepo
@@ -644,10 +626,6 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages|--ref|--cycle> [--view <viewId>] : query items"
         [MainCommand.Workspace; MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
         [MainCommand.Workspace; MainCommand.UpgradeGuids], "update-guids : DANGER! change guids of all projects in given repository (interactive command)"
-        [MainCommand.Unknown], ""
-        [MainCommand.Package; MainCommand.UpdatePackage], "package update: update packages"
-        [MainCommand.Package; MainCommand.OutdatedPackage], "package outdated : display outdated packages"
-        [MainCommand.Package; MainCommand.ListPackage], "package list : list packages"
         [MainCommand.Unknown], ""
         [MainCommand.Repository; MainCommand.AddRepository], "repo add [--branch <branch>] <repoId> <git|gerrit|svn> <repo-uri> <nunit|skip> <msbuild|skip> : declare a new repository"
         [MainCommand.Repository; MainCommand.DropRepository], "repo drop <repoId> : drop repository"

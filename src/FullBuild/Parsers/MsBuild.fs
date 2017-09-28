@@ -61,8 +61,8 @@ let private getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
 let private parsePackageReferencePackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "Include")
     let pkgVer = !> pkgRef.Descendants(XmlHelpers.NsMsBuild + "Version").SingleOrDefault() : string
-    let ver = if pkgVer |> isNull then PackageVersion.Unspecified
-              else PackageVersion.PackageVersion pkgVer
+    let ver = if pkgVer |> isNull then PackageVersion.Free
+              else PackageVersion.Constraint pkgVer
     { Id = PackageId.from pkgId
       Version = ver }
 
@@ -104,7 +104,7 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let pkgRefPackages = if sxsRoundtrip then Set.empty else getPackageReferencePackages xprj
     let paketPackages = if sxsRoundtrip then Set.empty else getPaketPackages xprj
     let packages = pkgRefPackages + paketPackages
-    let pkgRefs = packages |> Set.map (fun x -> x.Id)
+    let pkgRefs = packages
     let hasTests = assemblyRef.toString.EndsWith("tests")
 
     { Packages = packages

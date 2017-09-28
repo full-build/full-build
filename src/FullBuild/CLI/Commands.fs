@@ -190,10 +190,7 @@ type MainCommand =
     | AddNuGet
     | ListNuget
     | Package
-    | ListPackage
     | InstallPackage
-    | UpdatePackage
-    | OutdatedPackage
     | App
     | ListApp
     | AddApp
@@ -251,10 +248,7 @@ type Command =
     | ListNuGets
 
     // package
-    | ListPackages
     | InstallPackages
-    | UpdatePackages
-    | OutdatedPackages
 
     // applications
     | ListApplications of ListApplications

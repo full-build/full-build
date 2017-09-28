@@ -54,6 +54,7 @@ with
     member this.toString = (fun (PackageId x) -> x)this
     static member from (id : string) = PackageId (id.ToLowerInvariant())
 
+[<RequireQualifiedAccess>]
 type Package =
     { Id : PackageId
       Version : PackageVersion }
