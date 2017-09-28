@@ -46,8 +46,8 @@ with
 
 [<RequireQualifiedAccess>]
 type PackageVersion =
-    | PackageVersion of string
-    | Unspecified
+    | Constraint of string
+    | Free
 
 type PackageId = private PackageId of string
 with
@@ -152,7 +152,7 @@ type Project =
       ProjectId : ProjectId
       OutputType : OutputType
       HasTests : bool
-      PackageReferences : PackageId set
+      PackageReferences : Package set
       ProjectReferences : ProjectId set }
 
 type ApplicationId = private ApplicationId of string

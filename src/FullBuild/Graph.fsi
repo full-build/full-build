@@ -55,6 +55,7 @@ type TestRunnerType =
 type Package  = interface System.IComparable
 with
     member Name : string
+    member Version : string option
 
 and [<Sealed>] Assembly = interface System.IComparable
 with

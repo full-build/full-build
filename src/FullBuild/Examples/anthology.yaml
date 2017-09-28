@@ -8,6 +8,7 @@ projects:
       out: fullbuild.tests
       tests: true
       packages:
-          - package: id1
+          - id: id1
+            version: 1.2.3
       projects:
           - project: fullbuild

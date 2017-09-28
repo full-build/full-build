@@ -20,103 +20,103 @@ open FsHelpers
 open Collections
 open Exec
 
-let private parseContent (lines : string seq) =
-    seq {
-        for line in lines do
-            let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
-            if 0 < items.Length then
-                match items.[0] with
-                | "nuget" -> yield (PackageId.from items.[1])
-                | _ -> ()
-    }
+//let private parseContent (lines : string seq) =
+//    seq {
+//        for line in lines do
+//            let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
+//            if 0 < items.Length then
+//                match items.[0] with
+//                | "nuget" -> yield (PackageId.from items.[1])
+//                | _ -> ()
+//    }
 
-let private updateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
-    seq {
-        for source in sources do
-            let sourceUri = source.toString
-            yield sprintf "source %s" sourceUri
+//let private updateSourceContent (lines : string seq) (sources : RepositoryUrl seq) =
+//    seq {
+//        for source in sources do
+//            let sourceUri = source.toString
+//            yield sprintf "source %s" sourceUri
 
-        for line in lines do
-            let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
-            if 0 < items.Length then
-                match items.[0] with
-                | "source" -> ()
-                | _ -> yield line
-            else yield line
-    }
+//        for line in lines do
+//            let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
+//            if 0 < items.Length then
+//                match items.[0] with
+//                | "source" -> ()
+//                | _ -> yield line
+//            else yield line
+//    }
 
-let private generateDependenciesContent (packages : Package seq) =
-    seq {
-        for package in packages do
-            match package.Version with
-            | PackageVersion.PackageVersion x -> yield sprintf "nuget %s" (package.Id.toString)
-            | PackageVersion.Unspecified -> yield sprintf "nuget %s" (package.Id.toString)
-    }
+//let private generateDependenciesContent (packages : Package seq) =
+//    seq {
+//        for package in packages do
+//            match package.Version with
+//            | PackageVersion.PackageVersion x -> yield sprintf "nuget %s" (package.Id.toString)
+//            | PackageVersion.Unspecified -> yield sprintf "nuget %s" (package.Id.toString)
+//    }
 
-let private removeDependenciesContent (lines : string seq) (packages : PackageId set) =
-    seq {
-        for line in lines do
-            let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
-            if 0 < items.Length then
-                match items.[0] with
-                | "nuget" -> if Set.contains (PackageId.from items.[1]) packages then ()
-                             else yield line
-                | _ -> yield line
-            else
-                yield line
-    }
+//let private removeDependenciesContent (lines : string seq) (packages : PackageId set) =
+//    seq {
+//        for line in lines do
+//            let items = line.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
+//            if 0 < items.Length then
+//                match items.[0] with
+//                | "nuget" -> if Set.contains (PackageId.from items.[1]) packages then ()
+//                             else yield line
+//                | _ -> yield line
+//            else
+//                yield line
+//    }
 
-let private executePaketCommand cmd =
-    let confDir = Env.GetFolder Env.Folder.Config
-    Exec "paket.exe" cmd confDir Map.empty |> IO.CheckResponseCode
+//let private executePaketCommand cmd =
+//    let confDir = Env.GetFolder Env.Folder.Config
+//    Exec "paket.exe" cmd confDir Map.empty |> IO.CheckResponseCode
 
-let UpdateSources (sources : RepositoryUrl list) =
-    let confDir = Env.GetFolder Env.Folder.Config
-    let paketDep = confDir |> GetFile "paket.dependencies"
-    let oldContent = if paketDep.Exists then File.ReadAllLines (paketDep.FullName) |> Array.toSeq
-                     else Seq.empty
-    let content = updateSourceContent oldContent sources
-    File.WriteAllLines (paketDep.FullName, content)
+//let UpdateSources (sources : RepositoryUrl list) =
+//    let confDir = Env.GetFolder Env.Folder.Config
+//    let paketDep = confDir |> GetFile "paket.dependencies"
+//    let oldContent = if paketDep.Exists then File.ReadAllLines (paketDep.FullName) |> Array.toSeq
+//                     else Seq.empty
+//    let content = updateSourceContent oldContent sources
+//    File.WriteAllLines (paketDep.FullName, content)
 
-let ParsePaketDependencies () =
-    let confDir = Env.GetFolder Env.Folder.Config
-    let paketDep = confDir |> GetFile "paket.dependencies"
-    if paketDep.Exists then
-        let lines = File.ReadAllLines (paketDep.FullName)
-        let packageRefs =  parseContent lines
-        packageRefs |> Set
-    else
-        Set.empty
+//let ParsePaketDependencies () =
+//    let confDir = Env.GetFolder Env.Folder.Config
+//    let paketDep = confDir |> GetFile "paket.dependencies"
+//    if paketDep.Exists then
+//        let lines = File.ReadAllLines (paketDep.FullName)
+//        let packageRefs =  parseContent lines
+//        packageRefs |> Set
+//    else
+//        Set.empty
 
-let AppendDependencies (packages : Package set) =
-    if packages <> Set.empty then
-        let confDir = Env.GetFolder Env.Folder.Config
-        let paketDep = confDir |> GetFile "paket.dependencies"
-        let content = generateDependenciesContent packages
-        let oldContent = File.ReadAllLines(paketDep.FullName)
+//let AppendDependencies (packages : Package set) =
+//    if packages <> Set.empty then
+//        let confDir = Env.GetFolder Env.Folder.Config
+//        let paketDep = confDir |> GetFile "paket.dependencies"
+//        let content = generateDependenciesContent packages
+//        let oldContent = File.ReadAllLines(paketDep.FullName)
 
-        File.WriteAllLines (paketDep.FullName, content |> Seq.append oldContent)
+//        File.WriteAllLines (paketDep.FullName, content |> Seq.append oldContent)
 
-let RemoveDependencies (packages : PackageId set) =
-    if packages <> Set.empty then
-        let confDir = Env.GetFolder Env.Folder.Config
-        let paketDep = confDir |> GetFile "paket.dependencies"
-        let content = File.ReadAllLines (paketDep.FullName)
-        let newContent = removeDependenciesContent content packages
-        File.WriteAllLines (paketDep.FullName, newContent)
+//let RemoveDependencies (packages : PackageId set) =
+//    if packages <> Set.empty then
+//        let confDir = Env.GetFolder Env.Folder.Config
+//        let paketDep = confDir |> GetFile "paket.dependencies"
+//        let content = File.ReadAllLines (paketDep.FullName)
+//        let newContent = removeDependenciesContent content packages
+//        File.WriteAllLines (paketDep.FullName, newContent)
 
 
-let PaketInstall () =
-    executePaketCommand "install"
+//let PaketInstall () =
+//    executePaketCommand "install"
 
-let PaketRestore () =
-    executePaketCommand "restore"
+//let PaketRestore () =
+//    executePaketCommand "restore"
 
-let PaketUpdate () =
-    executePaketCommand "update"
+//let PaketUpdate () =
+//    executePaketCommand "update"
 
-let PaketOutdated () =
-    executePaketCommand "outdated"
+//let PaketOutdated () =
+//    executePaketCommand "outdated"
 
-let PaketInstalled () =
-    executePaketCommand "show-installed-packages"
+//let PaketInstalled () =
+//    executePaketCommand "show-installed-packages"

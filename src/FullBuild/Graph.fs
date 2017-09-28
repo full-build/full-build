@@ -19,6 +19,8 @@ open XmlHelpers
 
 #nowarn "0346" // GetHashCode missing
 
+open System
+
 [<RequireQualifiedAccess>]
 type PackageVersion =
     | PackageVersion of string
@@ -59,14 +61,19 @@ type TestRunnerType =
 [<CustomEquality; CustomComparison>]
 type Package =
     { Graph : Graph
-      Package : Anthology.PackageId }
+      Package : Anthology.Package }
 with
     override this.Equals(other : System.Object) = refEquals this other
 
     interface System.IComparable with
         member this.CompareTo(other) = compareTo this other (fun x -> x.Package)
 
-    member this.Name = this.Package.toString
+    member this.Name = this.Package.Id.toString
+
+    member this.Constaint =
+        match this.Package.Version with
+        | Anthology.PackageVersion.Constraint version -> Some version
+        | Anthology.PackageVersion.Free -> None
 
 // =====================================================================================================
 
@@ -269,7 +276,7 @@ with
 
 and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Anthology) =
     let mutable assemblyMap : System.Collections.Generic.IDictionary<Anthology.AssemblyId, Assembly> = null
-    let mutable packageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> = null
+    let mutable packageMap : System.Collections.Generic.IDictionary<Anthology.Package, Package> = null
     let mutable repositoryMap : System.Collections.Generic.IDictionary<Anthology.RepositoryId, Repository> = null
     let mutable applicationMap : System.Collections.Generic.IDictionary<Anthology.ApplicationId, Application> = null
     let mutable projectMap : System.Collections.Generic.IDictionary<Anthology.ProjectId, Project> = null
@@ -278,7 +285,7 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
     member this.Anthology : Anthology.Anthology = anthology
     member this.Globals : Anthology.Globals = globals
 
-    member this.PackageMap : System.Collections.Generic.IDictionary<Anthology.PackageId, Package> =
+    member this.PackageMap : System.Collections.Generic.IDictionary<Anthology.Package, Package> =
         if packageMap |> isNull then
             packageMap <- this.Anthology.Projects 
                                     |> Seq.map (fun x -> x.PackageReferences 

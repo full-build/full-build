@@ -44,7 +44,10 @@ let Serialize (anthology : Anthology) =
         cproject.packages.Clear ()
         for package in project.PackageReferences do
             let cpackage = AnthologyConfig.projects_Item_Type.packages_Item_Type()
-            cpackage.package <- package.toString
+            cpackage.id <- package.Id.toString
+            match package.Version with
+            | PackageVersion.Constraint version -> cpackage.version <- version
+            | PackageVersion.Free -> cpackage.version <- null
             cproject.packages.Add (cpackage)
         cproject.projects.Clear ()
         for project in project.ProjectReferences do
@@ -63,11 +66,16 @@ let Deserialize (content) =
                        let project = ProjectId.from x.project
                        let app = { Name = appName ; Publisher = publishType; Project = project }
                        convertToApplications tail |> Set.add app
+                       
+    let convertToPackage (item : AnthologyConfig.projects_Item_Type.packages_Item_Type) =
+        { Anthology.Package.Id = Anthology.PackageId.from item.id
+          Anthology.Package.Version = if item.version |> isNull then Anthology.PackageVersion.Free
+                                      else Anthology.PackageVersion.Constraint item.version }
 
     let rec convertToPackages (items : AnthologyConfig.projects_Item_Type.packages_Item_Type list) =
         match items with
         | [] -> Set.empty
-        | x :: tail -> convertToPackages tail |> Set.add (PackageId.from x.package)
+        | x :: tail -> convertToPackages tail |> Set.add (x |> convertToPackage)
 
     let rec convertToProjectRefs (items : AnthologyConfig.projects_Item_Type.projects_Item_Type list) =
         match items with

@@ -160,27 +160,6 @@ let IndexWorkspace wsDir (globals : Globals) (antho : Anthology) (grepos : Graph
                                  with Projects = allProjects |> Set.ofList }
     (anthoWithNewProjects, parsedProjects)
 
-// WARNING: paket.dependencies modified
-let UpdatePackages globals (antho, parsedProjects) =
-    /// here we optimize anthology and dependencies in order to speed up package retrieval after conversion
-    /// warning: big side effect (paket.dependencies is modified)
-    // automaticaly migrate packages to project - this will avoid retrieving them
-    // remove unused packages  - this will avoid downloading them for nothing
-    let packagesToAdd = detectNewDependencies parsedProjects
-    Tools.Paket.AppendDependencies packagesToAdd
-
-    let currentPackages = Tools.Paket.ParsePaketDependencies ()
-    let usedPackages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
-                                      |> Set.unionMany
-    let unusedPackages = currentPackages - usedPackages
-    Tools.Paket.RemoveDependencies unusedPackages
-
-    // if changes then install packages
-    if packagesToAdd <> Set.empty || unusedPackages <> Set.empty then
-        Core.Package.InstallPackages globals.NuGets
-
-    antho
-
 let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Graph.Repository set) (antho : Anthology) =
     let untouchedPreviousProjects = previousAntho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
     let untouchedProjects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
