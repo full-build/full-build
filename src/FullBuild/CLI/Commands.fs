@@ -54,9 +54,6 @@ type TestAssemblies =
     { Filters : string set
       Excludes : string set }
 
-type NuGetUrl =
-    { Url : string }
-
 type AddView =
     { Name : string
       Filters : string list
@@ -187,8 +184,6 @@ type MainCommand =
     | AlterView
     | OpenView
     | NuGet
-    | AddNuGet
-    | ListNuget
     | Package
     | InstallPackage
     | App
@@ -242,10 +237,6 @@ type Command =
     | AlterView of AlterView
     | OpenView of OpenView
     | FullBuildView of FullBuildView
-
-    // nuget
-    | AddNuGet of RepositoryUrl
-    | ListNuGets
 
     // package
     | InstallPackages

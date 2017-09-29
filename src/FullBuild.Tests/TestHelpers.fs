@@ -16,7 +16,10 @@ module TestHelpers
 open Collections
 open Graph
 
-let testFile file = NUnit.Framework.TestContext.CurrentContext.TestDirectory + "/" + file
+let testFile file = 
+    let testCases = System.IO.Path.Combine(NUnit.Framework.TestContext.CurrentContext.TestDirectory, "TestCases")
+    System.IO.Path.Combine(testCases, file)
+    
 
 let selectProjects (selection : string list) (projects : Project set) =
     let mapProjects = projects |> Seq.map (fun x -> x.Output.Name, x) |> Map

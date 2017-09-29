@@ -30,10 +30,10 @@ let CheckGenerateDgmlNoDependency () =
     try
         System.Environment.CurrentDirectory <- TestContext.CurrentContext.TestDirectory
 
-        let expectedDgml = XDocument.Load(testFile "./TestCases/single-node.dgml")
+        let expectedDgml = XDocument.Load(testFile "single-node.dgml")
 
-        let globalsFile = FileInfo(testFile "./TestCases/view-globals.yaml")
-        let anthologyFile = FileInfo(testFile "./TestCases/view-anthology.yaml")
+        let globalsFile = FileInfo(testFile "view-globals.yaml")
+        let anthologyFile = FileInfo(testFile "view-anthology.yaml")
         let globals = GlobalsSerializer.Load globalsFile
         let anthology = AnthologySerializer.Load anthologyFile
         let graph = Graph.from globals anthology
@@ -57,10 +57,10 @@ let CheckGenerateDgmlWithDependencies () =
     let currFolder = TestContext.CurrentContext.TestDirectory
     try
         System.Environment.CurrentDirectory <- TestContext.CurrentContext.TestDirectory
-        let expectedDgml = XDocument.Load(testFile "./TestCases/single-node-dependencies.dgml")
+        let expectedDgml = XDocument.Load(testFile "single-node-dependencies.dgml")
 
-        let globalsFile = FileInfo(testFile "./TestCases/view-globals.yaml")
-        let anthologyFile = FileInfo(testFile "./TestCases/view-anthology.yaml")
+        let globalsFile = FileInfo(testFile "view-globals.yaml")
+        let anthologyFile = FileInfo(testFile "view-anthology.yaml")
         let globals = GlobalsSerializer.Load globalsFile
         let anthology = AnthologySerializer.Load anthologyFile
         let graph = Graph.from globals anthology

@@ -77,9 +77,9 @@ let rec GetFolder folder =
     | Folder.Workspace -> CurrentFolder() |> workspaceFolderSearch
     | Folder.AppOutput -> GetFolder Folder.Workspace |> CreateSubDirectory MSBUILD_APP_OUTPUT
     | Folder.Config -> GetFolder Folder.Workspace |> CreateSubDirectory MASTER_REPO
-    | Folder.View -> GetFolder Folder.Config |> CreateSubDirectory VIEW_FOLDER
-    | Folder.Project -> GetFolder Folder.Config |> CreateSubDirectory PROJECT_FOLDER
-    | Folder.Bin -> GetFolder Folder.Config |> CreateSubDirectory BIN_FOLDER
+    | Folder.View -> GetFolder Folder.Workspace |> CreateSubDirectory VIEW_FOLDER
+    | Folder.Project -> GetFolder Folder.Workspace |> CreateSubDirectory PROJECT_FOLDER
+    | Folder.Bin -> GetFolder Folder.Workspace |> CreateSubDirectory BIN_FOLDER
     | Folder.Installation -> getInstallationFolder()
 
 let GetFsGlobalAssemblyInfoFileName() =

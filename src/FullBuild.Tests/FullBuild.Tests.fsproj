@@ -27,17 +27,19 @@
     <Compile Include="SimplifyTests.fs" />
     <Compile Include="IndexationTests.fs" />
     <Compile Include="Integration.fs" />
-    <Content Include="TestCases\packages.xml" />
     <None Include="app.config" />
-    <None Include="TestCases\ConvertedProject.csproj" />
-    <None Include="TestCases\CSharpProjectSample1.csproj" />
-    <None Include="TestCases\CSharpProjectSample1.Tests.csproj" />
-    <None Include="TestCases\FSharpProjectSample1.fsproj" />
-    <None Include="TestCases\paket.dependencies" />
-    <None Include="TestCases\Paket.fsproj" />
-    <None Include="TestCases\paket.references" />
-    <None Include="TestCases\ProjectWithInvalidRefs.fsproj" />
-    <None Include="TestCases\VirginProject.csproj" />
+    <None Include="TestCases\FSharpProjectSample1.fsproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestCases\paket.dependencies">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestCases\paket.references">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestCases\ProjectWithInvalidRefs.fsproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="TestCases\view-globals.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

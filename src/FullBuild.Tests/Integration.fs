@@ -28,7 +28,7 @@ let runFB (args : string) =
     try
         System.Environment.CurrentDirectory <- TestContext.CurrentContext.TestDirectory
         let wsDir = Env.GetFolder Env.Folder.Workspace
-        let fb = wsDir |> FsHelpers.GetFile  "src/FullBuild/bin/fullbuild.exe"
+        let fb = wsDir |> FsHelpers.GetFile  "src/FullBuild/bin/Debug/net452/fullbuild.exe"
         let psi = ProcessStartInfo (FileName = fb.FullName, Arguments = args, UseShellExecute = false, WorkingDirectory = wsDir.FullName, LoadUserProfile = true, CreateNoWindow = true, RedirectStandardOutput = true)
         use proc = Process.Start (psi)
         use stdout = proc.StandardOutput
@@ -62,14 +62,14 @@ let CheckSourceBuildIsSameAsBinaryBuild () =
 
     let expectedFiles = Env.IsMono() ? (expectedFilesMono, expectedFilesWindows)
                          
-    runFB "view testsrc tests/*"
-    runFB "rebuild testsrc"    
+    runFB "--verbose view testsrc tests/*"
+    runFB "--verbose rebuild testsrc"    
 
-    let outputDir = TestContext.CurrentContext.TestDirectory + "/../../../tests/MainProject/bin" |> DirectoryInfo
+    let outputDir = Path.Combine(TestContext.CurrentContext.TestDirectory, "../../../../../tests/MainProject/bin/Release/net452") |> DirectoryInfo
     let outputFileSrc = outputDir.EnumerateFiles () |> Seq.map (fun x -> x.Name) |> set
     outputFileSrc |> should equal expectedFiles
 
-    runFB "view testbin tests/mainproject"
-    runFB "rebuild testbin"
+    runFB "--verbose view testbin tests/mainproject"
+    runFB "--verbose rebuild testbin"
     let outputFileBin = outputDir.EnumerateFiles () |> Seq.map (fun x -> x.Name) |> set
     outputFileBin |> should equal expectedFiles
