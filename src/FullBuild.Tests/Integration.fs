@@ -24,22 +24,21 @@ open Collections
 
 let runFB (args : string) =
     printfn "==== running fullbuild %s" args
-    let currFolder = TestContext.CurrentContext.TestDirectory
-    try
-        System.Environment.CurrentDirectory <- TestContext.CurrentContext.TestDirectory
-        let wsDir = Env.GetFolder Env.Folder.Workspace
-        let fb = wsDir |> FsHelpers.GetFile  "src/FullBuild/bin/Debug/net452/fullbuild.exe"
-        let psi = ProcessStartInfo (FileName = fb.FullName, Arguments = args, UseShellExecute = false, WorkingDirectory = wsDir.FullName, LoadUserProfile = true, CreateNoWindow = true, RedirectStandardOutput = true)
-        use proc = Process.Start (psi)
-        use stdout = proc.StandardOutput
-        while stdout.EndOfStream |> not do
-            let line = stdout.ReadLine()
-            printfn "> %s" line
+    System.Environment.CurrentDirectory <- TestContext.CurrentContext.TestDirectory
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let graph = Graph.load()
+    let fbProject = graph.Projects |> Seq.find (fun x -> x.ProjectId = "fullbuild")
+    let bin = fbProject.BinFile "net452" "Debug"
+    let fb = wsDir |> FsHelpers.GetFile bin
+    let psi = ProcessStartInfo (FileName = fb.FullName, Arguments = args, UseShellExecute = false, WorkingDirectory = wsDir.FullName, LoadUserProfile = true, CreateNoWindow = true, RedirectStandardOutput = true)
+    use proc = Process.Start (psi)
+    use stdout = proc.StandardOutput
+    while stdout.EndOfStream |> not do
+        let line = stdout.ReadLine()
+        printfn "> %s" line
 
-        proc.WaitForExit()
-        if proc.ExitCode <> 0 then failwithf "Process failed with error %d" proc.ExitCode
-    finally
-        System.Environment.CurrentDirectory <- currFolder
+    proc.WaitForExit()
+    if proc.ExitCode <> 0 then failwithf "Process failed with error %d" proc.ExitCode
 
 
 [<Test>]
@@ -49,27 +48,31 @@ let CheckSourceBuildIsSameAsBinaryBuild () =
                               "mainproject.exe"
                               "mainproject.exe.config"
                               "mainproject.exe.mdb"
-                              "Zlib.Portable.dll" 
-                              "Zlib.Portable.xml" ] |> set
+                              "Zlib.Portable.dll" ] |> Seq.map (fun x -> x.ToLower()) |> Set
 
     let expectedFilesWindows = [ "libproject.dll"
                                  "libproject.pdb"
                                  "mainproject.exe"
                                  "mainproject.exe.config"
                                  "mainproject.pdb"
-                                 "Zlib.Portable.dll" 
-                                 "Zlib.Portable.xml" ] |> set
+                                 "Zlib.Portable.dll" ] |> Seq.map (fun x -> x.ToLower()) |> Set
 
     let expectedFiles = Env.IsMono() ? (expectedFilesMono, expectedFilesWindows)
                          
+    printfn "******************* BUILDING SOURCES ***********************"
     runFB "--verbose view testsrc tests/*"
     runFB "--verbose rebuild testsrc"    
 
-    let outputDir = Path.Combine(TestContext.CurrentContext.TestDirectory, "../../../../../tests/MainProject/bin/Release/net452") |> DirectoryInfo
-    let outputFileSrc = outputDir.EnumerateFiles () |> Seq.map (fun x -> x.Name) |> set
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let graph = Graph.load()
+    let fbProject = graph.Projects |> Seq.find (fun x -> x.ProjectId = "mainproject")
+    let bin = fbProject.BinFile "net452" "Release"
+    let outputBin = wsDir |> FsHelpers.GetFile bin
+    let outputFileSrc = outputBin.Directory.EnumerateFiles () |> Seq.map (fun x -> x.Name.ToLower()) |> set
     outputFileSrc |> should equal expectedFiles
 
+    printfn "******************* BUILDING BINARIES ***********************"
     runFB "--verbose view testbin tests/mainproject"
     runFB "--verbose rebuild testbin"
-    let outputFileBin = outputDir.EnumerateFiles () |> Seq.map (fun x -> x.Name) |> set
+    let outputFileBin = outputBin.Directory.EnumerateFiles () |> Seq.map (fun x -> x.Name.ToLower()) |> set
     outputFileBin |> should equal expectedFiles

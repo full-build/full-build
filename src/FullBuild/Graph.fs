@@ -239,7 +239,7 @@ with
                   | OutputType.Dll -> "dll"
                   | OutputType.Exe -> "exe"
                   | OutputType.Database -> "dacpac"
-        sprintf "%s/%s/bin/%s/%s/%s.%s" repo path platform configuration ass ext
+        sprintf "%s/%s/bin/%s/%s/%s.%s" repo path configuration platform ass ext
 
     member this.ProjectId = this.Project.ProjectId.toString
 
