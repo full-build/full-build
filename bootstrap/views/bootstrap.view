@@ -1,5 +1,0 @@
-view:
-  filters:
-    - filter: '*'
-  parameters: []
-  sourceonly: false

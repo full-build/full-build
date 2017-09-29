@@ -67,11 +67,8 @@ type ViewName =
     { Name : string }
 
 type PublishApplications =
-    { View: string option
-      Filters : string list
-      Multithread : bool
-      Version : string option
-      Status : string option }
+    { View : string
+      Multithread : bool }
 
 type PushWorkspace =
     { Version : string
@@ -133,9 +130,6 @@ type PullWorkspace =
       Rebase : bool
       Multithread : bool
       View : string option }
-
-type BindProject =
-    { Filters : string set }
 
 type History =
     { Html : bool }
@@ -246,7 +240,6 @@ type Command =
     | AddApplication of AddApplication
     | DropApplication of ApplicationId
     | PublishApplications of PublishApplications
-    | BindProject of BindProject
 
     // query
     | Query of Query

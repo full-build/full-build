@@ -7,7 +7,7 @@ echo building version %VERSION%
 set VERSION=%VERSION%
 
 set HERE=%~dp0
-set PATH=%VSINSTALLDIR%\MSBuild\%VisualStudioVersion%\Bin;%HERE%\tools;%PATH%
+set PATH=%VSINSTALLDIR%\MSBuild\%VisualStudioVersion%\Bin;%PATH%
 
 call :dobuild || goto :ko
 goto :ok

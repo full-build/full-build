@@ -1,0 +1,10 @@
+name: bootstrap
+filters:
+  - filter: src/*
+references: false
+referencedBy: false
+modified: false
+appfilter: null
+tests: false
+platform: null
+config: null

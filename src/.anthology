@@ -7,7 +7,7 @@ apps:
     project: fullbuild
 projects:
   - file: src\FullBuild.Tests\FullBuild.Tests.fsproj
-    out: fullbuild.tests.dll
+    out: fullbuild.tests.exe
     tests: true
     platform: net452
     packages:

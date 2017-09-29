@@ -66,7 +66,7 @@ let CheckSourceBuildIsSameAsBinaryBuild () =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Graph.load()
     let fbProject = graph.Projects |> Seq.find (fun x -> x.ProjectId = "mainproject")
-    let bin = fbProject.BinFile "net452" "Release"
+    let bin = fbProject.BinFile "net452" "Debug"
     let outputBin = wsDir |> FsHelpers.GetFile bin
     let outputFileSrc = outputBin.Directory.EnumerateFiles () |> Seq.map (fun x -> x.Name.ToLower()) |> set
     outputFileSrc |> should equal expectedFiles

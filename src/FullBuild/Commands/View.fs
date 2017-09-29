@@ -158,7 +158,7 @@ let Test (cmd : CLI.Commands.TestView) =
     let projects = view.Projects |> Set.filter (fun x -> x.HasTests)
     let config = match view.Configuration with
                  | Some conf -> conf
-                 | None -> "Release"
+                 | None -> "Debug"
  
     // then test assemblies
     let runner2assemblies = projects |> Seq.groupBy (fun x -> x.Repository.Tester)

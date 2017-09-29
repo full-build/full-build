@@ -1,9 +1,0 @@
-<Project Condition="'$(FullBuild_mainprojecttestsCopy)' == ''" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <FullBuild_mainprojecttestsCopy>Y</FullBuild_mainprojecttestsCopy>
-  </PropertyGroup>
-  <ItemGroup>
-    <FBCopyFiles Include="$(FBWorkspaceDir)/.full-build/bin/mainprojecttests.dll;$(FBWorkspaceDir)/.full-build/bin/mainprojecttests.pdb" />
-  </ItemGroup>
-  <Import Project="$(FBWorkspaceDir)/.full-build/packages/NUnit/package-copy.targets" Condition="'$(FullBuild_NUnit_PkgCopy)' == ''" />
-</Project>

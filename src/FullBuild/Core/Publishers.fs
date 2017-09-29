@@ -18,68 +18,60 @@ open Env
 open System.IO
 open Graph
 open Exec
+open Views
 
 
-type private PublishApp =
-    { Name : string
-      App : Application
-      Version : string }
+type App =
+    { App : Application
+      PublishAs : string
+      View : View }
 
 
-let private publishCopy (app : PublishApp) =
+let private publishCopy (app : App) =
     let wsDir = GetFolder Env.Folder.Workspace
+    let appDir = GetFolder Env.Folder.AppOutput |> GetSubDirectory (app.PublishAs)
     let project = app.App.Project
     let repoDir = wsDir |> GetSubDirectory (project.Repository.Name)
-    if repoDir.Exists then
-        let projFile = repoDir |> GetFile project.ProjectFile
-        let args = sprintf "/nologo /t:FBPublish /p:SolutionDir=%A /p:FBApp=%A %A" wsDir.FullName app.Name projFile.FullName
+    let projFile = repoDir |> GetFile project.ProjectFile
+    let args = sprintf "/nologo /t:Publish /p:PublishDir=%A /p:SolutionDir=%A /p:SolutionName=%A %A" 
+                    appDir.FullName wsDir.FullName app.View.Name projFile.FullName
 
-        if Env.IsMono () then Exec "xbuild" args wsDir Map.empty |> IO.CheckResponseCode
-        else Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
+    Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
 
-        let appDir = GetFolder Env.Folder.AppOutput
-        let artifactDir = appDir |> GetSubDirectory app.Name
-        Bindings.UpdateArtifactBindingRedirects artifactDir
-    else
-        printfn "[WARNING] Can't publish application %A without repository" app.Name
-
-let private publishZip (app : PublishApp) =
+let private publishZip (app : App) =
     let tmpApp = { app
-                   with Name = ".tmp-" + app.Name }
+                   with PublishAs = ".tmp-" + app.PublishAs }
     publishCopy tmpApp
 
     let appDir = GetFolder Env.Folder.AppOutput
-    let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name)
-    let targetFile = appDir |> GetFile app.Name
+    let sourceFolder = appDir |> GetSubDirectory (tmpApp.PublishAs)
+    let targetFile = appDir |> GetFile (app.App.Name + ".zip")
     if targetFile.Exists then targetFile.Delete()
 
     System.IO.Compression.ZipFile.CreateFromDirectory(sourceFolder.FullName, targetFile.FullName, Compression.CompressionLevel.Fastest, false)
 
-let private publishDocker (app : PublishApp) =
+let private publishDocker (app : App) =
     let tmpApp = { app
-                   with Name = ".tmp-docker" }
+                   with PublishAs = ".tmp-docker" }
     publishCopy tmpApp
 
     let appDir = GetFolder Env.Folder.AppOutput
-    let sourceFolder = appDir |> GetSubDirectory (tmpApp.Name)
-    let targetFile = appDir |> GetFile app.Name
+    let sourceFolder = appDir |> GetSubDirectory (tmpApp.PublishAs)
+    let targetFile = appDir |> GetFile app.App.Name
     if targetFile.Exists then targetFile.Delete()
 
-    let dockerArgs = sprintf "build -t %s ." app.Name
+    let dockerArgs = sprintf "build -t %s ." app.App.Name
     Exec "docker" dockerArgs sourceFolder Map.empty |> IO.CheckResponseCode
 
-    let imgFile = appDir |> GetSubDirectory app.Name
-    let saveArgs = sprintf "save -o %s %s" imgFile.FullName app.Name
+    let imgFile = appDir |> GetSubDirectory app.App.Name
+    let saveArgs = sprintf "save -o %s %s" imgFile.FullName app.App.Name
     Exec "docker" saveArgs sourceFolder Map.empty |> IO.CheckResponseCode
     sourceFolder.Delete(true)
 
-let PublishWithPublisher (version : string) (app : Application) =
-    let publisher =
-        match app.Publisher with
-        | PublisherType.Copy -> publishCopy
-        | PublisherType.Zip -> publishZip
-        | PublisherType.Docker -> publishDocker
-    { Name = app.Name; App = app; Version = version }
-        |> publisher
+let PublishWithPublisher (view : View) (app : Application) =
+    let publisher = match app.Publisher with
+                    | PublisherType.Copy -> publishCopy
+                    | PublisherType.Zip -> publishZip
+                    | PublisherType.Docker -> publishDocker
 
-
+    { App = app; PublishAs = app.Name; View = view } |> publisher 

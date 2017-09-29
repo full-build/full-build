@@ -16,12 +16,13 @@ module Commands.Application
 open Collections
 open FsHelpers
 open Env
+open Views
 
-let private asyncPublish (version : string) (app : Graph.Application) =
+let private asyncPublish (view : View) (app : Graph.Application) =
     async {
         try
             ConsoleHelpers.DisplayInfo app.Name
-            Core.Publishers.PublishWithPublisher version app
+            Core.Publishers.PublishWithPublisher view app
         with
             exn -> raise (System.ApplicationException(sprintf "Failed to publish application %A" app.Name, exn))
     }
@@ -52,26 +53,13 @@ let private getLastVersionForApp (graph : Graph.Graph) (branch : string) (app : 
 
 let Publish (pubInfo : CLI.Commands.PublishApplications) =
     let graph = Graph.load()
-
-    // build a semver version
-    let buildNumber = match pubInfo.Version with
-                      | Some x -> x
-                      | None -> "0.0.0"
-    let status = match pubInfo.Status with
-                 | None -> ""
-                 | Some x -> sprintf "-%s" x
-    let version = sprintf "%s%s" buildNumber status
-
     let viewRepository = Views.from graph
-    let applications = match pubInfo.View with
-                       | None -> graph.Applications
-                       | Some viewId -> let view = viewRepository.Views |> Seq.find (fun x -> x.Name = viewId)
-                                        view.Projects |> Set.map (fun x -> x.Applications)
-                                                      |> Set.unionMany
+    let view = viewRepository.Views |> Seq.find (fun x -> x.Name = pubInfo.View)
+    let applications = view.Projects |> Set.map (fun x -> x.Applications)
+                                     |> Set.unionMany
 
-    let apps = PatternMatching.FilterMatch applications (fun x -> x.Name) (set pubInfo.Filters)
-    apps |> Threading.ParExec (asyncPublish version)
-         |> ignore
+    applications |> Threading.ParExec (asyncPublish view)
+                 |> ignore
 
     let appFolder = Env.GetFolder Env.Folder.AppOutput
     appFolder.EnumerateDirectories(".tmp-*") |> Seq.iter FsHelpers.ForceDelete
@@ -102,16 +90,3 @@ let Drop (appName : string) =
     let app = graph.Applications |> Seq.find (fun x -> x.Name = appName)
     let newGraph = app.Delete()
     newGraph.Save()
-
-let BindProject (bindInfo : CLI.Commands.BindProject) =
-    let graph = Graph.load()
-    let wsDir = Env.GetFolder Folder.Workspace
-
-    // select only available repositories
-    let availableProjects = graph.Repositories |> Set.filter (fun x -> x.IsCloned)
-                                               |> Set.map (fun x -> x.Projects)
-                                               |> Set.unionMany
-
-    let projects = PatternMatching.FilterMatch availableProjects (fun x -> sprintf "%s/%s" x.Repository.Name x.Output.Name) bindInfo.Filters
-    projects |> Set.iter(fun project -> printfn "Binding %s/%s" project.Repository.Name project.ProjectId
-                                        project |> Core.Bindings.UpdateProjectBindingRedirects)

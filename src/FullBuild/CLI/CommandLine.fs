@@ -305,13 +305,9 @@ let rec private commandGraph (src : bool) (bin : bool) (args : string list) =
     | [ViewId name] -> Command.Graph { Name = name; Src = src; Bin = bin }
     | _ -> Command.Error MainCommand.Graph
 
-let rec private commandPublish view version status (args : string list) =
+let rec private commandPublish  (args : string list) =
     match args with
-    | [] -> Command.Error MainCommand.Publish
-    | TokenOption TokenOption.View :: ViewId name :: tail -> tail |> commandPublish (Some name) version status
-    | TokenOption TokenOption.Version :: version :: tail -> tail |> commandPublish view (Some version) status
-    | TokenOption TokenOption.Status :: status :: tail -> tail |> commandPublish view version (Some status)
-    | Params filters -> Command.PublishApplications {View = view; Filters = filters; Multithread = true; Version = version; Status = status }
+    | [ViewId name] -> Command.PublishApplications { View = name; Multithread = true }
     | _ -> Command.Error MainCommand.Publish
 
 let rec private commandPush inc (args : string list) =
@@ -465,11 +461,6 @@ let private commandUpdateGuids (args : string list) =
     | Params filters -> Command.UpdateGuids { Filters = set filters }
     | _ -> Command.Error MainCommand.UpgradeGuids
 
-let private commandBind (args : string list) =
-    match args with
-    | Params filters -> Command.BindProject { Filters = set filters }
-    | _ -> Command.Error MainCommand.Bind
-
 let rec private commandHistory (html : bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Html :: tail -> tail |> commandHistory true
@@ -535,7 +526,7 @@ let Parse (args : string list) : Command =
     | Token Token.Doctor :: cmdArgs -> cmdArgs |> commandDoctor
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph true false
-    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish None None None
+    | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish
     | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush false
     | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild None None false false None
     | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild None None true false None
@@ -543,7 +534,6 @@ let Parse (args : string list) : Command =
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch true
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false None
     | Token Token.Clean :: cmdArgs -> cmdArgs |> commandClean
-    | Token Token.Bind :: cmdArgs -> cmdArgs |> commandBind
     | Token Token.History :: cmdArgs -> cmdArgs |> commandHistory false
 
     | Token Token.Install :: cmdArgs -> cmdArgs |> commandInstall
@@ -623,7 +613,6 @@ let UsageContent() =
         [MainCommand.Workspace; MainCommand.Doctor], "doctor : check workspace consistency"
         [MainCommand.Workspace; MainCommand.Pull], "pull [--src|--bin] [--rebase] [--view <viewId>]: update sources & binaries - rebase if requested (ff is default)"
         [MainCommand.Workspace; MainCommand.Push], "push [--full] <version> : push artifacts and tag repositories"
-        [MainCommand.Workspace; MainCommand.Bind], "bind <projectId-wildcard>+ : update bindings"
         [MainCommand.Workspace; MainCommand.History], "history [--html] : display history since last baseline"
         [MainCommand.Workspace; MainCommand.Query], "query <--unused-projects|--packages|--ref|--cycle> [--view <viewId>] : query items"
         [MainCommand.Workspace; MainCommand.Clean], "clean : DANGER! reset and clean workspace (interactive command)"
