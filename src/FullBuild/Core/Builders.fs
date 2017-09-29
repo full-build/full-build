@@ -40,11 +40,11 @@ let writeVersionMsbuild version =
     let csFile = Env.GetCsGlobalAssemblyInfoFileName()
     File.WriteAllLines(csFile.FullName, generateVersionCs version)
 
-let buildSkip (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
+let buildSkip (viewFile : FileInfo) (platform : string option) (config : string option) (clean : bool) (multithread : bool) (version : string) =
     ()
 
 
-let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
+let buildMsbuild (viewFile : FileInfo) (platform : string option) (config : string option) (clean : bool) (multithread : bool) (version : string) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let viewName = Path.GetFileNameWithoutExtension(viewFile.Name)
 
@@ -61,8 +61,15 @@ let buildMsbuild (viewFile : FileInfo) (config : string) (clean : bool) (multith
     let argMt = if multithread then "/m"
                 else ""
 
-    let argConfig = sprintf "/p:Configuration=%s" config
-    let args = sprintf "/nologo %s %s %s %A" argTarget argMt argConfig viewFile.Name
+    let argConfig = match config with
+                    | Some conf -> sprintf "/p:Configuration=%s" conf
+                    | _ -> ""
+
+    let argPlatform = match platform with
+                      | Some plat -> sprintf "/p:Platform=%s" plat
+                      | _ -> "" 
+
+    let args = sprintf "/nologo %s %s %s %s %A" argTarget argMt argPlatform argConfig viewFile.Name
 
     Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
 
@@ -72,6 +79,6 @@ let chooseBuilder (builderType : BuilderType) msbuildBuilder skipBuilder =
                   | BuilderType.Skip -> skipBuilder
     builder
 
-let BuildWithBuilder (builder : BuilderType) (viewFile : FileInfo) (config : string) (clean : bool) (multithread : bool) (version : string) =
-    (chooseBuilder builder buildMsbuild buildSkip) viewFile config clean multithread version
+let BuildWithBuilder (builder : BuilderType) (viewFile : FileInfo) (platform : string option) (config : string option) (clean : bool) (multithread : bool) (version : string) =
+    (chooseBuilder builder buildMsbuild buildSkip) viewFile platform config clean multithread version
 

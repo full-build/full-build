@@ -93,7 +93,8 @@ type AddApplication =
 
 type BuildView =
     { Name : string option
-      Config : string
+      Platform : string option
+      Configuration : string option
       Clean : bool
       Multithread : bool
       Version : string option }

@@ -17,6 +17,7 @@ module CLI.CommandLine
 open Commands
 open Collections
 open Anthology
+open System
 
 
 
@@ -52,6 +53,8 @@ type private TokenOption =
     | Status
     | SxS
     | Cycle
+    | Platform
+    | Configuration
  
 let private (|TokenOption|_|) (token : string) =
     match token with
@@ -85,6 +88,8 @@ let private (|TokenOption|_|) (token : string) =
     | "--status" -> Some TokenOption.Status
     | "--sxs" -> Some TokenOption.SxS
     | "--cycle" -> Some TokenOption.Cycle
+    | "--platform" -> Some TokenOption.Platform
+    | "--config" -> Some TokenOption.Configuration
     | _ -> None
 
 type private Token =
@@ -319,13 +324,24 @@ let rec private commandPush inc (args : string list) =
     | _ -> Command.Error MainCommand.Publish
 
 
-let rec private commandBuild (config : string) (clean : bool) (multithread : bool) (version : string option) (args : string list) =
+let rec private commandBuild (platform : string option) (configuration : string option) (clean : bool) (multithread : bool) (version : string option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Version :: Param ver :: tail -> tail |> commandBuild config clean multithread (Some ver)
-    | TokenOption TokenOption.Debug :: tail -> tail |> commandBuild "Debug" clean multithread version
-    | TokenOption TokenOption.Multithread :: tail -> tail |> commandBuild config clean true version
-    | [] -> Command.BuildView { Name = None ; Config = config; Clean = clean; Multithread = multithread; Version = version }
-    | [ViewId name] -> Command.BuildView { Name = Some name ; Config = config; Clean = clean; Multithread = multithread; Version = version }
+    | TokenOption TokenOption.Platform :: Param plat :: tail -> tail |> commandBuild (Some plat) configuration clean multithread version
+    | TokenOption TokenOption.Configuration :: Param config :: tail -> tail |> commandBuild platform (Some config) clean multithread version
+    | TokenOption TokenOption.Version :: Param ver :: tail -> tail |> commandBuild platform configuration clean multithread (Some ver)
+    | TokenOption TokenOption.Multithread :: tail -> tail |> commandBuild platform configuration clean true version
+    | [] -> Command.BuildView { Name = None
+                                Platform = platform 
+                                Configuration = configuration
+                                Clean = clean
+                                Multithread = multithread
+                                Version = version }
+    | [ViewId name] -> Command.BuildView { Name = Some name
+                                           Platform = platform 
+                                           Configuration = configuration
+                                           Clean = clean
+                                           Multithread = multithread
+                                           Version = version }
     | _ -> Command.Error MainCommand.BuildView
 
 let private commandCheckout (args : string list) =
@@ -387,7 +403,7 @@ let rec private commandAddView (upReferences : bool) (downReferences : bool) (mo
     | TokenOption TokenOption.Modified :: tail -> tail |> commandAddView upReferences downReferences true app staticView test
     | TokenOption TokenOption.App :: appFilter :: tail -> tail |> commandAddView upReferences downReferences modified (Some appFilter) staticView test
     | TokenOption TokenOption.Static :: tail -> tail |> commandAddView upReferences downReferences modified app true test
-    | TokenOption TokenOption.Test :: tail -> tail |> commandAddView upReferences downReferences modified app staticView test
+    | TokenOption TokenOption.Test :: tail -> tail |> commandAddView upReferences downReferences modified app staticView true
     | ViewId name :: Params filters -> Command.AddView { Name = name
                                                          Filters = filters
                                                          UpReferences = upReferences
@@ -419,7 +435,10 @@ let rec private commandAlterView (forceDefault : bool option) (forceUpReferences
     | TokenOption TokenOption.Ref :: tail -> tail |> commandAlterView forceDefault (Some true) forceDownReferences
     | TokenOption TokenOption.Src :: tail -> tail |> commandAlterView forceDefault forceUpReferences (Some true)
     | TokenOption TokenOption.Bin :: tail -> tail |> commandAlterView forceDefault (Some false) (Some false)
-    | [ViewId name] -> Command.AlterView { Name = name ; Default = forceDefault; UpReferences = forceUpReferences; DownReferences = forceDownReferences }
+    | [ViewId name] -> Command.AlterView { Name = name
+                                           Default = forceDefault
+                                           UpReferences = forceUpReferences
+                                           DownReferences = forceDownReferences }
     | _ -> Command.Error MainCommand.AlterView
 
 let private commandOpenView (args : string list) =
@@ -520,8 +539,8 @@ let Parse (args : string list) : Command =
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph true false
     | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish None None None
     | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush false
-    | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild "Release" false false None
-    | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild "Release" true false None
+    | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild None None false false None
+    | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild None None true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch true
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false None

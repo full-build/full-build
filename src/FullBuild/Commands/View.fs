@@ -31,6 +31,8 @@ let Add (cmd : CLI.Commands.AddView) =
                                          cmd.Modified
                                          cmd.AppFilter
                                          cmd.Tests
+                                         None
+                                         None
 
     let projects = view.Projects
     if projects = Set.empty then printfn "WARNING: Empty project selection"
@@ -78,19 +80,33 @@ let Describe name =
 let Build (cmd : CLI.Commands.BuildView) =
     let graph = Graph.load()
     let viewRepository = Views.from graph
-    let view = match cmd.Name with
-               | Some x -> viewRepository.Views |> Seq.find (fun y -> y.Name = x)
-               | None -> match viewRepository.DefaultView with
-                         | None -> failwith "Can't determine view name"
-                         | Some x -> x
+    let mutable view = match cmd.Name with
+                       | Some x -> viewRepository.Views |> Seq.find (fun y -> y.Name = x)
+                       | None -> match viewRepository.DefaultView with
+                                 | None -> failwith "Can't determine view name"
+                                 | Some x -> x
 
     let version = match cmd.Version with
                   | Some x -> x
                   | None -> "0.0.0"
 
+    // store build info
+    let platform = (cmd.Platform <> None) ? (cmd.Platform, view.Platform)
+    let configuration = (cmd.Configuration <> None) ? (cmd.Configuration, view.Configuration)
+    if cmd.Platform <> None || cmd.Configuration <> None then
+        view <- viewRepository.CreateView view.Name
+                                          view.Filters
+                                          view.DownReferences
+                                          view.UpReferences
+                                          view.Modified
+                                          view.AppFilter
+                                          view.Tests
+                                          platform
+                                          configuration
+
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.Solution view.Name)
-    Core.Builders.BuildWithBuilder BuilderType.MSBuild slnFile cmd.Config cmd.Clean cmd.Multithread version
+    Core.Builders.BuildWithBuilder BuilderType.MSBuild slnFile cmd.Platform cmd.Configuration cmd.Clean cmd.Multithread version
 
 let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Graph.load()
@@ -103,6 +119,8 @@ let Alter (cmd : CLI.Commands.AlterView) =
                                             view.Modified
                                             view.AppFilter
                                             view.Tests
+                                            None
+                                            None
 
     let projects = depView.Projects
     if projects = Set.empty then printfn "WARNING: Empty project selection"

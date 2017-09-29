@@ -38,7 +38,12 @@ let SerializeView (view : View) =
     config.appfilter <- match view.AppFilter with
                         | None -> null
                         | Some appFilter -> appFilter
-
+    config.platform <- match view.Platform with
+                       | None -> null
+                       | Some plat -> plat
+    config.config <- match view.Configuration with
+                     | None -> null
+                     | Some conf -> conf
     config.ToString()
 
 
@@ -53,7 +58,9 @@ let DeserializeView content =
       DownReferences = config.references
       Modified = config.modified 
       Tests = config.tests
-      AppFilter = (config.appfilter |> isNull) ? (None, Some config.appfilter) }
+      AppFilter = (config.appfilter |> isNull) ? (None, Some config.appfilter) 
+      Platform = (config.platform |> isNull) ? (None, Some config.platform)
+      Configuration = (config.config |> isNull) ? (None, Some config.config) }
 
 
 let Save (filename : FileInfo) (view : View) =

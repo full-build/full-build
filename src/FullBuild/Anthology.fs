@@ -198,4 +198,6 @@ type View =
       DownReferences : bool
       Modified : bool
       AppFilter : string option
-      Tests : bool }
+      Tests : bool 
+      Platform : string option
+      Configuration: string option }
