@@ -352,7 +352,6 @@ let Push (pushInfo : CLI.Commands.PushWorkspace) =
     // print tag information
     printfn "[pushed version] %s" pushInfo.Version
 
-
 let Doctor () =
     if Doctor.Check() then failwith "Doctor found something wrong !"
     else printfn "Doctor says everything is alright !"

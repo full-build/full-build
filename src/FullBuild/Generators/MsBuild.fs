@@ -25,20 +25,20 @@ open Collections
 open Graph
 
 
-//let private generatePackageCopy (packageRef : Package) =
-//    let propName = MsBuildPackagePropertyName packageRef
-//    let condition = sprintf "'$(%sCopy)' == ''" propName
-//    let project = sprintf @"$(SolutionDir)\.full-build\packages\%s\package-copy.targets" packageRef.Name
-//    let import = XElement(NsNone + "Import",
-//                       XAttribute(NsNone + "Project", project),
-//                       XAttribute(NsNone + "Condition", condition))
-//    import
+let private generatePackageCopy (packageRef : Package) =
+    let version = match packageRef.Version with
+                  | Some ver -> XAttribute(NsNone + "Version", ver)
+                  | _ -> null
+    let packageReference = XElement(NsNone + "PackageReference",
+                                XAttribute(NsNone + "Include", packageRef.Name),
+                                version)
+    packageReference
 
 
 let private generateProjectCopy (projectRef : Project) =
     let propName = MsBuildProjectPropertyName projectRef
     let condition = sprintf "'$(%sCopy)' == ''" propName
-    let project = sprintf @"$(SolutionDir)\.full-build\projects\%s-copy.targets" projectRef.Output.Name
+    let project = sprintf @"$(SolutionDir)\.projects\%s-copy.targets" projectRef.Output.Name
     let import = XElement(NsNone + "Import",
                        XAttribute(NsNone + "Project", project),
                        XAttribute(NsNone + "Condition", condition))
@@ -56,7 +56,7 @@ let private generateProjectTarget (project : Project) =
                        | OutputType.Exe -> "exe", "Reference"
                        | OutputType.Database -> "dacpac", "ArtifactReference"
     let binFile = sprintf @"%s\%s.%s" MSBUILD_BIN_FOLDER output ext
-    let refFile = sprintf @"%s\.full-build\projects\%s-copy.targets" MSBUILD_SOLUTION_DIR project.Output.Name
+    let refFile = sprintf @"%s\.projects\%s-copy.targets" MSBUILD_SOLUTION_DIR project.Output.Name
 
     // This is the import targets that will be Import'ed inside a proj file.
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
@@ -64,7 +64,7 @@ let private generateProjectTarget (project : Project) =
     XDocument (
         XElement(NsNone + "Project",
             XElement (NsNone + "Import",
-                XAttribute (NsNone + "Project", @"$(SolutionDir)\.full-build\views\$(SolutionName).targets"),
+                XAttribute (NsNone + "Project", @"$(SolutionDir)\.views\$(SolutionName).targets"),
                 XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
             XElement(NsNone + "Choose",
                 XElement(NsNone + "When", 
@@ -88,7 +88,7 @@ let private generateProjectCopyTarget (project : Project) =
     let binCondition = sprintf "'$(%s)' == ''" projectProperty
     let copyCondition = sprintf "'$(%s)' == ''" projectCopyProperty
     let prjFiles = project.References |> Seq.map generateProjectCopy
-    let pkgFiles = Seq.empty // FIXME
+    let pkgFiles =  project.PackageReferences |> Seq.map generatePackageCopy
 
     let output = (project.Output.Name)
     let ext = match project.OutputType with
@@ -115,7 +115,7 @@ let private generateProjectCopyTarget (project : Project) =
                     XElement(NsNone + "FBCopyFiles",
                         XAttribute(NsNone + "Include", incFile))),
                 prjFiles,
-                pkgFiles))
+                XElement(NsNone + "ItemGroup", pkgFiles)))
 
 
 
