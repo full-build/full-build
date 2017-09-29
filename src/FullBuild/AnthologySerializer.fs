@@ -37,7 +37,6 @@ let Serialize (anthology : Anthology) =
     config.projects.Clear()
     for project in anthology.Projects do
         let cproject = AnthologyConfig.projects_Item_Type()
-        cproject.guid <- project.UniqueProjectId.toString
         cproject.out <- sprintf "%s.%s" project.Output.toString project.OutputType.toString
         cproject.file <- sprintf @"%s\%s" project.Repository.toString project.RelativeProjectFile.toString
         cproject.tests <- project.HasTests
@@ -92,7 +91,6 @@ let Deserialize (content) =
                        let hastests = x.tests
                        convertToProjects tail |> Set.add  { Repository = RepositoryId.from repo
                                                             RelativeProjectFile = ProjectRelativeFile file
-                                                            UniqueProjectId = ProjectUniqueId.from (ParseGuid x.guid)
                                                             ProjectId = ProjectId.from out
                                                             Output = AssemblyId.from out
                                                             OutputType = OutputType.from ext

@@ -27,10 +27,9 @@ let private generateProjectNode (project : Project) =
     let outputType = project.OutputType |> StringHelpers.toString
  
     XElement(NsDgml + "Node",
-        XAttribute(NsNone + "Id", project.UniqueProjectId),
+        XAttribute(NsNone + "Id", project.Output.Name),
         XAttribute(NsNone + "Label", label),
         XAttribute(NsNone + "Category", cat),
-        XAttribute(NsNone + "Guid", project.UniqueProjectId),
         XAttribute(NsNone + "IsTest", project.HasTests),
         XAttribute(NsNone + "Output", output),
         XAttribute(NsNone + "OutputType", outputType))
@@ -63,7 +62,7 @@ let private graphNodes (projects : Project set) (allProjects : Project set) (pac
             yield generateProjectNode project
 
         for project in importedProjects do
-            yield generateNode (project.UniqueProjectId) (project.Output.Name) "ProjectImport"
+            yield generateNode (project.Output.Name) (project.Output.Name) "ProjectImport"
 
         for repo in repos do
             yield XElement(NsDgml + "Node",
@@ -77,19 +76,19 @@ let private graphLinks (projects : Project set) (allProjects : Project set) (bin
 
     seq {
         for project in projects do
-            yield generateLink (project.Repository.Name) (project.UniqueProjectId) "Contains"
+            yield generateLink (project.Repository.Name) (project.Output.Name) "Contains"
 
         for project in importedProjects do
-            yield generateLink (project.Repository.Name) (project.UniqueProjectId) "Contains"
+            yield generateLink (project.Repository.Name) (project.Output.Name) "Contains"
 
         for project in projects do
             for reference in project.References do
-                yield generateLink (project.UniqueProjectId) (reference.UniqueProjectId) "ProjectRef"
+                yield generateLink (project.Output.Name) (reference.Output.Name) "ProjectRef"
 
         if bin then
             for project in projects do
                 for package in project.PackageReferences do
-                    yield generateLink (project.UniqueProjectId) (package.Name) "PackageRef"
+                    yield generateLink (project.Output.Name) (package.Name) "PackageRef"
 
             for project in projects do
                 for package in project.PackageReferences do
@@ -125,11 +124,7 @@ let private graphCategories (repos : Repository set) =
     }
 
 let private graphProperties () =
-    let allProperties = [ ("FxVersion", "Target Framework Version", "System.String")
-                          ("FxProfile", "Target Framework Profile", "System.String")
-                          ("FxIdentifier", "Target Framework Identifier", "System.String")
-                          ("Guid", "Project Guid", "System.Guid")
-                          ("IsTest", "Test Project", "System.Boolean")
+    let allProperties = [ ("IsTest", "Test Project", "System.Boolean")
                           ("Output", "Project Output", "System.String")
                           ("OutputType", "Project Output Type", "System.String") ]
 

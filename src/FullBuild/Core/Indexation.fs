@@ -63,11 +63,8 @@ type ConflictType =
 let private findConflictsForProject (project1 : Project) (otherProjects : Project list) =
     seq {
         for project2 in otherProjects do
-            if project1 <> project2 then
-                if project1.UniqueProjectId = project2.UniqueProjectId && (project1.Repository <> project2.Repository || project1.RelativeProjectFile <> project2.RelativeProjectFile) then
-                    yield SameGuid (project1, project2)
-                else if project1.UniqueProjectId <> project2.UniqueProjectId && project1.Output = project2.Output then
-                    yield SameOutput (project1, project2)
+            if project1 <> project2 && project1.Output = project2.Output then
+                yield SameOutput (project1, project2)
     }
 
 // NOTE: should be private

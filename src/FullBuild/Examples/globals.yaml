@@ -1,8 +1,6 @@
 ﻿minversion: 2.5.0
 binaries: C:\Binaries
 sxs: false
-nugets:
-    - nuget: this should be a uri
 mainrepository:
     uri: this should be a uri
     vcs: git

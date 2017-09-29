@@ -42,12 +42,12 @@ let GenerateSolutionContent (projects : Project set) =
                   (projectToProjectType (project.ProjectFile))
                   (Path.GetFileNameWithoutExtension (project.ProjectFile))
                   (sprintf "%s/%s" (project.Repository.Name) project.ProjectFile)
-                  (project.UniqueProjectId)
+                  (project.Output.Name |> StringHelpers.GenerateGuidFromString |> StringHelpers.toVSGuid)
 
             yield "\tProjectSection(ProjectDependencies) = postProject"
             for reference in project.References do
                 if projects |> Set.contains reference then
-                    let dependencyName = sprintf "{%s}" reference.UniqueProjectId
+                    let dependencyName = sprintf "{%s}" (reference.Output.Name |> StringHelpers.GenerateGuidFromString |> StringHelpers.toVSGuid)
                     yield sprintf "\t\t%s = %s" dependencyName dependencyName
             yield "\tEndProjectSection"
             yield "EndProject"
@@ -70,7 +70,7 @@ let GenerateSolutionContent (projects : Project set) =
         yield "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution"
 
         for project in projects do
-            let guid = project.UniqueProjectId
+            let guid = project.Output.Name |> StringHelpers.GenerateGuidFromString |> StringHelpers.toVSGuid
             yield sprintf "\t\t{%s}.Debug|Any CPU.ActiveCfg = Debug|Any CPU" guid
             yield sprintf "\t\t{%s}.Debug|Any CPU.Build.0 = Debug|Any CPU" guid
             yield sprintf "\t\t{%s}.Release|Any CPU.ActiveCfg = Release|Any CPU" guid
@@ -80,7 +80,7 @@ let GenerateSolutionContent (projects : Project set) =
 
         yield "\tGlobalSection(NestedProjects) = preSolution"
         for project in projects do
-            let guid = project.UniqueProjectId
+            let guid = project.Output.Name |> StringHelpers.GenerateGuidFromString |> StringHelpers.toVSGuid
             yield sprintf "\t\t{%s} = {%s}" guid repositories.[project.Repository]
         yield "\tEndGlobalSection"
 

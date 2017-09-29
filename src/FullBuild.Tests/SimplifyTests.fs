@@ -26,7 +26,6 @@ let CheckConflictsWithSameOutput () =
     let p1 = { Output = AssemblyId.from "cqlplus"
                ProjectId = ProjectId.from "cqlplus"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
@@ -36,7 +35,6 @@ let CheckConflictsWithSameOutput () =
     let p2 = { Output = AssemblyId.from "cqlplus"
                ProjectId = ProjectId.from "cqlplus"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "39787692-f8f8-408d-9557-0c40547c1563")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
@@ -51,7 +49,6 @@ let CheckNoConflictsSameProjectName () =
     let p1 = { Output = AssemblyId.from "cqlplus"
                ProjectId = ProjectId.from "cqlplus"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
@@ -61,7 +58,6 @@ let CheckNoConflictsSameProjectName () =
     let p2 = { Output = AssemblyId.from "cqlplus2"
                ProjectId = ProjectId.from "cqlplus"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "39787692-f8f8-408d-9557-0c40547c1563")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set

@@ -3,8 +3,7 @@
       type: copy
       project: fullbuild1
 projects:
-    - guid: guid
-      file: src/Project.csproj
+    - file: src/Project.csproj
       out: fullbuild.tests
       tests: true
       packages:

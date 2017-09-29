@@ -90,7 +90,6 @@ and [<Sealed>] Project = interface System.IComparable
 with
     member BinFile : string
     member ProjectFile : string
-    member UniqueProjectId : string
     member Output : Assembly
     member ProjectId : string
     member OutputType : OutputType
@@ -116,7 +115,6 @@ and [<Sealed>] Graph =
     member Applications : Application set
     member Projects : Project set
     member ArtifactsDir : string
-    member NuGets : string list
     member Packages: Package set
     member Anthology : Anthology.Anthology
     member Globals : Anthology.Globals
@@ -125,9 +123,6 @@ and [<Sealed>] Graph =
                    -> publisher : PublisherType
                    -> project : Project
                    -> Graph
-
-    member CreateNuGet: url : string
-                     -> Graph
 
     member CreateRepo: name : string
                     -> vcs : VcsType

@@ -29,12 +29,6 @@ let Serialize (artifacts : Globals) =
     config.minversion <- artifacts.MinVersion
     config.sxs <- artifacts.SideBySide
 
-    config.nugets.Clear()
-    for nuget in artifacts.NuGets do
-        let cnuget = GlobalsConfig.nugets_Item_Type()
-        cnuget.nuget <- nuget.toString
-        config.nugets.Add (cnuget)
-
     config.repositories.Clear()
     let repos = artifacts.Repositories
     for repo in repos do
@@ -56,11 +50,6 @@ let Serialize (artifacts : Globals) =
     config.ToString()
 
 let Deserialize (content) =
-    let rec convertToNuGets (items : GlobalsConfig.nugets_Item_Type list) =
-        match items with
-        | [] -> []
-        | x :: tail -> (RepositoryUrl.from (x.nuget)) :: convertToNuGets tail
-
     let convertToRepository (item : GlobalsConfig.mainrepository_Type) : Repository =
         { Url = RepositoryUrl.from (item.uri)
           Branch = None
@@ -90,7 +79,6 @@ let Deserialize (content) =
     { MinVersion = config.minversion
       Binaries = config.binaries
       SideBySide = config.sxs
-      NuGets = convertToNuGets (config.nugets |> List.ofSeq)
       MasterRepository = mainRepo
       Repositories = repos }
 

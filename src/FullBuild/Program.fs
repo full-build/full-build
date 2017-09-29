@@ -56,10 +56,6 @@ let processMain argv =
     | Command.OpenView viewInfo -> Commands.View.Open viewInfo
     | Command.FullBuildView viewInfo -> Commands.View.OpenFullBuildView viewInfo
 
-    // nuget
-    | Command.AddNuGet url -> Commands.NuGet.Add url.toString
-    | Command.ListNuGets -> Commands.NuGet.List ()
-
     // applications
     | Command.ListApplications appInfo -> Commands.Application.List appInfo
     | Command.AddApplication appInfo -> Commands.Application.Add appInfo

@@ -27,8 +27,8 @@ open TestHelpers
 
 [<Test>]
 let ConvertToGraph () =
-    let globalsFile = FileInfo(testFile "graph-globals.yaml")
-    let anthologyFile = FileInfo(testFile "graph-anthology.yaml")
+    let globalsFile = FileInfo(testFile "./TestCases/graph-globals.yaml")
+    let anthologyFile = FileInfo(testFile "./TestCases/graph-anthology.yaml")
     let globals = GlobalsSerializer.Load globalsFile
     let anthology = AnthologySerializer.Load anthologyFile
     let graph = Graph.from globals anthology

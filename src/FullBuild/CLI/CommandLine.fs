@@ -380,16 +380,6 @@ let private commandListRepo (args : string list) =
     | [] -> Command.ListRepositories
     | _ -> Command.Error MainCommand.ListRepository
 
-let private commandAddNuGet (args : string list) =
-    match args with
-    | [Param uri] -> Command.AddNuGet (RepositoryUrl.from uri)
-    | _ -> Command.Error MainCommand.AddNuGet
-
-let private commandListNuGet (args : string list) =
-    match args with
-    | [] -> Command.ListNuGets
-    | _ -> Command.Error MainCommand.ListNuget
-
 let rec private commandAddView (upReferences : bool) (downReferences : bool) (modified : bool) (app : string option) (staticView : bool) (test: bool) (args : string list) =
     match args with
     | TokenOption TokenOption.Ref :: tail -> tail |> commandAddView true downReferences modified app staticView test
@@ -510,9 +500,7 @@ let private commandHelp (args : string list) =
               | Token Token.Install :: _ -> MainCommand.InstallPackage
               | Token Token.Query :: _ -> MainCommand.Query
               | Token Token.UpdateGuids :: _ -> MainCommand.UpgradeGuids
-              | Token Token.Package :: _ -> MainCommand.Package
               | Token Token.Repo :: _ -> MainCommand.Repository
-              | Token Token.NuGet :: _ -> MainCommand.NuGet
               | Token Token.View :: _ -> MainCommand.View
               | Token Token.App :: _ -> MainCommand.App
               | _ -> MainCommand.Unknown
@@ -546,9 +534,6 @@ let Parse (args : string list) : Command =
     | Token Token.Repo :: Token Token.Add :: cmdArgs -> cmdArgs |> commandAddRepo None Graph.BuilderType.MSBuild
     | Token Token.Repo :: Token Token.Drop :: cmdArgs -> cmdArgs |> commandDropRepo
     | Token Token.Repo :: Token Token.List :: cmdArgs -> cmdArgs |> commandListRepo
-
-    | Token Token.NuGet :: Token Token.Add :: cmdArgs -> cmdArgs |> commandAddNuGet
-    | Token Token.NuGet :: Token Token.List :: cmdArgs -> cmdArgs |> commandListNuGet
 
     | Token Token.View :: Token Token.Drop :: cmdArgs -> cmdArgs |> commandDropView
     | Token Token.View :: Token Token.List :: cmdArgs -> cmdArgs |> commandListView
@@ -630,9 +615,6 @@ let UsageContent() =
         [MainCommand.Repository; MainCommand.AddRepository], "repo add [--branch <branch>] <repoId> <git|gerrit|svn> <repo-uri> <nunit|skip> <msbuild|skip> : declare a new repository"
         [MainCommand.Repository; MainCommand.DropRepository], "repo drop <repoId> : drop repository"
         [MainCommand.Repository; MainCommand.ListRepository], "repo list : list repositories"
-        [MainCommand.Unknown], ""
-        [MainCommand.NuGet; MainCommand.AddNuGet], "nuget add <nuget-uri> : add nuget uri"
-        [MainCommand.NuGet; MainCommand.ListNuget], "nuget list : list NuGet feeds"
         [MainCommand.Unknown], ""
         [MainCommand.View; MainCommand.DropView], "view drop <viewId> : drop view"
         [MainCommand.View; MainCommand.ListView], "view list : list views"

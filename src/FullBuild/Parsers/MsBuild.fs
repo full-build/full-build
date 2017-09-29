@@ -110,7 +110,6 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     { Packages = packages
       Project = { Repository = repoRef
                   RelativeProjectFile = ProjectRelativeFile relativeProjectFile
-                  UniqueProjectId = ProjectUniqueId.from guid
                   ProjectId = projectRef
                   Output = assemblyRef
                   OutputType = extension

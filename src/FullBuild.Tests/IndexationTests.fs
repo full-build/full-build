@@ -25,7 +25,6 @@ let CheckNoReplace () =
     let p1 = { Output = AssemblyId.from "cqlplus"
                ProjectId = ProjectId.from "cqlplus"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
@@ -35,7 +34,6 @@ let CheckNoReplace () =
     let p2 = { Output = AssemblyId.from "cqlplus2"
                ProjectId = ProjectId.from "cqlplus2"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "7e56adfe-612f-45ae-834f-4b8175d44513")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
@@ -45,7 +43,6 @@ let CheckNoReplace () =
     let p3 = { Output = AssemblyId.from "cqlplus3"
                ProjectId = ProjectId.from "toto"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "4be955ab-1db4-493a-b13f-69fbaf30c31f")
                RelativeProjectFile = ProjectRelativeFile "toto/toto-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
@@ -65,7 +62,6 @@ let CheckReplace () =
     let p1 = { Output = AssemblyId.from "cqlplus"
                ProjectId = ProjectId.from "cqlplus"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
@@ -75,7 +71,6 @@ let CheckReplace () =
     let p2 = { Output = AssemblyId.from "cqlplus2"
                ProjectId = ProjectId.from "cqlplus"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
@@ -85,7 +80,6 @@ let CheckReplace () =
     let p3 = { Output = AssemblyId.from "cqlplus3"
                ProjectId = ProjectId.from "toto"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "4be955ab-1db4-493a-b13f-69fbaf30c31f")
                RelativeProjectFile = ProjectRelativeFile "toto/toto-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "cassandrasharp"; ProjectId.from "cassandrasharp.interfaces" ] |> set
@@ -104,7 +98,6 @@ let CheckStillReferenced () =
     let p1 = { Output = AssemblyId.from "a"
                ProjectId = ProjectId.from "a"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ] |> set
@@ -114,7 +107,6 @@ let CheckStillReferenced () =
     let p2 = { Output = AssemblyId.from "b"
                ProjectId = ProjectId.from "b"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                HasTests = false
                ProjectReferences = [ ] |> set
@@ -124,7 +116,6 @@ let CheckStillReferenced () =
     let p3 = { Output = AssemblyId.from "cqlplus3"
                ProjectId = ProjectId.from "toto"
                OutputType = OutputType.Exe
-               UniqueProjectId = ProjectUniqueId.from (ParseGuid "4be955ab-1db4-493a-b13f-69fbaf30c31f")
                RelativeProjectFile = ProjectRelativeFile "toto/toto-net45.csproj"
                HasTests = false
                ProjectReferences = [ ProjectId.from "a" ] |> set

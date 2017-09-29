@@ -33,7 +33,6 @@ let CheckProjectPropertyName () =
     let project = { Output = AssemblyId.from "cqlplus"
                     ProjectId = ProjectId.from "CqlPlus"
                     OutputType = OutputType.Exe
-                    UniqueProjectId = ProjectUniqueId.from (ParseGuid "0a06398e-69be-487b-a011-4c0be6619b59")
                     RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                     HasTests = false
                     ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set

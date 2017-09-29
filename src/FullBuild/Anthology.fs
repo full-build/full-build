@@ -148,7 +148,6 @@ with
 type Project =
     { Repository : RepositoryId
       RelativeProjectFile : ProjectRelativeFile
-      UniqueProjectId : ProjectUniqueId
       Output : AssemblyId
       ProjectId : ProjectId
       OutputType : OutputType
@@ -179,7 +178,6 @@ type Globals =
     { MinVersion : string
       Binaries : string
       SideBySide : bool
-      NuGets : RepositoryUrl list
       MasterRepository : Repository
       Repositories : BuildableRepository set }
 

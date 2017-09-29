@@ -241,8 +241,6 @@ with
                   | OutputType.Database -> "dacpac"
         sprintf "%s/%s/bin/%s.%s" repo path ass ext
 
-    member this.UniqueProjectId = this.Project.UniqueProjectId.toString
-
     member this.ProjectId = this.Project.ProjectId.toString
 
     member this.OutputType = match this.Project.OutputType with
@@ -334,8 +332,6 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
 
     member this.Projects = this.ProjectMap.Values |> set
 
-    member this.NuGets = globals.NuGets |> List.map (fun x -> x.toString)
-
     member this.ArtifactsDir = globals.Binaries
 
     member this.CreateApp name publisher (project : Project) =
@@ -349,11 +345,6 @@ and [<Sealed>] Graph(globals : Anthology.Globals, anthology : Anthology.Antholog
         let newAntho = { anthology
                          with Applications = anthology.Applications |> Set.add app }
         Graph(globals, newAntho)
-
-    member this.CreateNuGet (url : string) =
-        let newGlobals = { globals
-                           with NuGets = globals.NuGets @ [Anthology.RepositoryUrl.from url] |> List.distinct }
-        Graph(newGlobals, anthology)
 
     member this.CreateRepo name vcs (url : string) builder tester (branch : string option) =
         let repoBranch = match branch with
@@ -404,7 +395,6 @@ let create vcs (uri : string) (artifacts : string) (sxs : bool) =
     let globals = { Anthology.Globals.MinVersion = Env.FullBuildVersion().ToString()
                     Anthology.Globals.Binaries = artifacts
                     Anthology.Globals.SideBySide = sxs
-                    Anthology.Globals.NuGets = []
                     Anthology.Globals.MasterRepository = repo
                     Anthology.Globals.Repositories = Set.empty }
 
