@@ -88,7 +88,9 @@ with
 
 and [<Sealed>] Project = interface System.IComparable
 with
-    member BinFile : string
+    member BinFile: platform : string
+                 -> configuration : string
+                 -> string
     member ProjectFile : string
     member Output : Assembly
     member ProjectId : string
@@ -99,6 +101,7 @@ with
     member References: Project set
     member ReferencedBy: Project set
     member PackageReferences: Package set
+    member Platform : string
     static member Closure: Project set
                         -> Project set
     static member TransitiveReferences: Project set

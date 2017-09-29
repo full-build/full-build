@@ -16,7 +16,6 @@ module Commands.View
 open Env
 open FsHelpers
 open Collections
-open Graph
 
 let Add (cmd : CLI.Commands.AddView) =
     if cmd.Filters.Length = 0 && not cmd.Modified && cmd.AppFilter.IsNone then
@@ -106,7 +105,7 @@ let Build (cmd : CLI.Commands.BuildView) =
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.Solution view.Name)
-    Core.Builders.BuildWithBuilder BuilderType.MSBuild slnFile cmd.Platform cmd.Configuration cmd.Clean cmd.Multithread version
+    Core.Builders.BuildWithBuilder Graph.BuilderType.MSBuild slnFile cmd.Platform cmd.Configuration cmd.Clean cmd.Multithread version
 
 let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Graph.load()
@@ -148,6 +147,28 @@ let OpenFullBuildView (cmd : CLI.Commands.FullBuildView) =
           CLI.Commands.AddView.Tests = false } |> Add
     { CLI.Commands.OpenView.Name = view.Name } |> Open
 
+let Test (cmd : CLI.Commands.TestView) =
+    let graph = Graph.load()
+    let viewRepository = Views.from graph
+
+    let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
+
+    // first set binding redirects on output only
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let projects = view.Projects |> Set.filter (fun x -> x.HasTests)
+    let config = match view.Configuration with
+                 | Some conf -> conf
+                 | None -> "Release"
+ 
+    // then test assemblies
+    let runner2assemblies = projects |> Seq.groupBy (fun x -> x.Repository.Tester)
+    for runner, assemblies in runner2assemblies do
+        let bins = assemblies |> Seq.map (fun x -> let platform = match view.Platform with
+                                                                  | Some plat -> plat
+                                                                  | None -> x.Platform
+                                                   x.BinFile platform config) |> set
+        (Core.TestRunners.TestWithTestRunner runner) bins
+
 let Graph (cmd : CLI.Commands.GraphView) =
     let graph = Graph.load()
     let viewRepository = Views.from graph
@@ -158,3 +179,4 @@ let Graph (cmd : CLI.Commands.GraphView) =
 
     let xgraph = Generators.Dgml.GraphContent projects cmd.Src cmd.Bin
     xgraph.Save graphFile.FullName
+

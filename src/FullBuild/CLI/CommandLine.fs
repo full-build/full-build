@@ -269,11 +269,9 @@ let rec private commandExec (all : bool) (args : string list) =
     | [Param cmd] -> Command.Exec { Command = cmd; All = all }
     | _ -> Command.Error MainCommand.Exec
 
-let rec private commandTest (excludes : string list) (args : string list) =
+let private commandTestView (args : string list) =
     match args with
-    | TokenOption TokenOption.Exclude :: Param category :: tail -> tail |> commandTest (category :: excludes)
-    | [] -> Command.Error MainCommand.Test
-    | Params filters -> Command.TestAssemblies { Filters = set filters; Excludes = set excludes }
+    | [Param viewName] -> Command.TestView { Name = viewName }
     | _ -> Command.Error MainCommand.Test
 
 
@@ -532,7 +530,7 @@ let Parse (args : string list) : Command =
     | Token Token.Setup :: cmdArgs -> cmdArgs |> commandSetup false
     | Token Token.Init :: cmdArgs -> cmdArgs |> commandInit
     | Token Token.Exec :: cmdArgs -> cmdArgs |> commandExec false
-    | Token Token.Test :: cmdArgs -> cmdArgs |> commandTest []
+    | Token Token.Test :: cmdArgs -> cmdArgs |> commandTestView
     | Token Token.Convert :: cmdArgs -> cmdArgs |> commandConvert false false
     | Token Token.Doctor :: cmdArgs -> cmdArgs |> commandDoctor
     | Token Token.Clone :: cmdArgs -> cmdArgs |> commandClone false false

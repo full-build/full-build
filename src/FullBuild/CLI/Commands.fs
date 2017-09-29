@@ -50,9 +50,8 @@ type ConvertRepositories =
       Check : bool
       Reset : bool }
 
-type TestAssemblies =
-    { Filters : string set
-      Excludes : string set }
+type TestView =
+    { Name : string }
 
 type AddView =
     { Name : string
@@ -217,7 +216,7 @@ type Command =
     | Exec of Exec
     | CleanWorkspace
     | UpdateGuids of UpdateGuids
-    | TestAssemblies of TestAssemblies
+    | TestView of TestView
     | History of History
     | PushWorkspace of PushWorkspace
     | Doctor

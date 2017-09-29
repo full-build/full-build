@@ -89,8 +89,8 @@ let GenerateSolutionContent (projects : Project set) =
 
 let GenerateSolutionDefines (projects : Project set) =
     XDocument (
-        XElement(NsMsBuild + "Project",
+        XElement(NsNone + "Project",
             XAttribute(NsNone + "Condition", "'$(FullBuild_Config)' == ''"),
-                XElement (NsMsBuild + "PropertyGroup",
-                    XElement(NsMsBuild + "FullBuild_Config", "Y"),
-                        projects |> Seq.map (fun x -> XElement (NsMsBuild + (MsBuildProjectPropertyName x), "Y") ) ) ) )
+                XElement (NsNone + "PropertyGroup",
+                    XElement(NsNone + "FullBuild_Config", "Y"),
+                        projects |> Seq.map (fun x -> XElement (NsNone + (MsBuildProjectPropertyName x), "Y") ) ) ) )

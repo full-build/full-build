@@ -29,7 +29,7 @@ open Graph
 //    let propName = MsBuildPackagePropertyName packageRef
 //    let condition = sprintf "'$(%sCopy)' == ''" propName
 //    let project = sprintf @"$(SolutionDir)\.full-build\packages\%s\package-copy.targets" packageRef.Name
-//    let import = XElement(NsMsBuild + "Import",
+//    let import = XElement(NsNone + "Import",
 //                       XAttribute(NsNone + "Project", project),
 //                       XAttribute(NsNone + "Condition", condition))
 //    import
@@ -39,7 +39,7 @@ let private generateProjectCopy (projectRef : Project) =
     let propName = MsBuildProjectPropertyName projectRef
     let condition = sprintf "'$(%sCopy)' == ''" propName
     let project = sprintf @"$(SolutionDir)\.full-build\projects\%s-copy.targets" projectRef.Output.Name
-    let import = XElement(NsMsBuild + "Import",
+    let import = XElement(NsNone + "Import",
                        XAttribute(NsNone + "Project", project),
                        XAttribute(NsNone + "Condition", condition))
     import
@@ -62,23 +62,23 @@ let private generateProjectTarget (project : Project) =
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
     // Then we end up either importing output assembly or project depending on view configuration
     XDocument (
-        XElement(NsMsBuild + "Project",
-            XElement (NsMsBuild + "Import",
+        XElement(NsNone + "Project",
+            XElement (NsNone + "Import",
                 XAttribute (NsNone + "Project", @"$(SolutionDir)\.full-build\views\$(SolutionName).targets"),
                 XAttribute (NsNone + "Condition", "'$(FullBuild_Config)' == ''")),
-            XElement(NsMsBuild + "Choose",
-                XElement(NsMsBuild + "When", 
+            XElement(NsNone + "Choose",
+                XElement(NsNone + "When", 
                     XAttribute(NsNone + "Condition", srcCondition),
-                    XElement (NsMsBuild + "ItemGroup",
-                        XElement(NsMsBuild + "ProjectReference",
+                    XElement (NsNone + "ItemGroup",
+                        XElement(NsNone + "ProjectReference",
                             XAttribute (NsNone + "Include", projectFile)))),
-                XElement(NsMsBuild + "Otherwise",    
-                    XElement(NsMsBuild + "ItemGroup",
-                        XElement (NsMsBuild + refType,
+                XElement(NsNone + "Otherwise",    
+                    XElement(NsNone + "ItemGroup",
+                        XElement (NsNone + refType,
                             XAttribute (NsNone + "Include", project.Output.Name),
-                            XElement(NsMsBuild + "HintPath", binFile),
-                            XElement (NsMsBuild + "Private", "true"))))),
-                XElement(NsMsBuild + "Import",
+                            XElement(NsNone + "HintPath", binFile),
+                            XElement (NsNone + "Private", "true"))))),
+                XElement(NsNone + "Import",
                     XAttribute(NsNone + "Project", refFile),
                     XAttribute(NsNone + "Condition", cpyCondition))))
 
@@ -107,12 +107,12 @@ let private generateProjectCopyTarget (project : Project) =
     // First we include full-build view configuration (this is done to avoid adding an extra import inside proj)
     // Then we end up either importing output assembly or project depending on view configuration
     XDocument (
-        XElement(NsMsBuild + "Project",
+        XElement(NsNone + "Project",
                 XAttribute (NsNone + "Condition", copyCondition),
-                XElement(NsMsBuild + "PropertyGroup",
-                    XElement(NsMsBuild + projectCopyProperty, "Y")),
-                XElement (NsMsBuild + "ItemGroup",
-                    XElement(NsMsBuild + "FBCopyFiles",
+                XElement(NsNone + "PropertyGroup",
+                    XElement(NsNone + projectCopyProperty, "Y")),
+                XElement (NsNone + "ItemGroup",
+                    XElement(NsNone + "FBCopyFiles",
                         XAttribute(NsNone + "Include", incFile))),
                 prjFiles,
                 pkgFiles))
@@ -152,7 +152,7 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
             "PropertyGroup", hasNoChild
         ]
 
-    seekAndDestroy |> List.iter (fun (x, y) -> cproj.Descendants(NsMsBuild + x).Where(y).Remove())
+    seekAndDestroy |> List.iter (fun (x, y) -> cproj.Descendants(NsNone + x).Where(y).Remove())
     cproj
 
 
@@ -187,17 +187,17 @@ let private convertProject (xproj : XDocument) (project : Project) =
     let cproj = cleanupProject xproj project
 
     // set assembly info
-    cproj.Descendants(NsMsBuild + "Compile")
+    cproj.Descendants(NsNone + "Compile")
         |> Seq.filter filterAssemblyInfo
         |> Seq.iter patchAssemblyInfo
 
     // set OutputPath
-    cproj.Descendants(NsMsBuild + "AssemblyName") |> Seq.iter (fun x -> x.Value <- project.Output.Name)
-    cproj.Descendants(NsMsBuild + "SqlTargetName") |> Seq.iter (fun x -> x.Value <- project.Output.Name)
+    cproj.Descendants(NsNone + "AssemblyName") |> Seq.iter (fun x -> x.Value <- project.Output.Name)
+    cproj.Descendants(NsNone + "SqlTargetName") |> Seq.iter (fun x -> x.Value <- project.Output.Name)
 
     // import fb target
-    let lastImport = upcast cproj.Descendants(NsMsBuild + "Import").LastOrDefault() : XNode
-    let importFB = XElement (NsMsBuild + "Import",
+    let lastImport = upcast cproj.Descendants(NsNone + "Import").LastOrDefault() : XNode
+    let importFB = XElement (NsNone + "Import",
                        XAttribute (NsNone + "Project",
                                    @"$(SolutionDir)\.full-build\full-build.targets"))
     lastImport.AddAfterSelf (importFB)
@@ -205,7 +205,7 @@ let private convertProject (xproj : XDocument) (project : Project) =
     // add project references
     for projectReference in project.References do
         let importFile = sprintf "%s%s.targets" MSBUILD_PROJECT_FOLDER projectReference.Output.Name
-        let import = XElement (NsMsBuild + "Import",
+        let import = XElement (NsNone + "Import",
                         XAttribute (NsNone + "Project", importFile))
         cproj.Root.LastNode.AddAfterSelf(import)
     cproj

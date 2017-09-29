@@ -84,7 +84,6 @@
     <Compile Include="Commands\View.fs" />
     <Compile Include="Commands\Workspace.fs" />
     <Compile Include="Commands\Repo.fs" />
-    <Compile Include="Commands\Test.fs" />
     <Compile Include="Commands\Application.fs" />
     <Compile Include="Commands\Query.fs" />
     <Compile Include="Program.fs" />

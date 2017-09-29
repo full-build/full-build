@@ -8,4 +8,4 @@ modified: true
 appfilter : blah*
 tests: false
 platform: netcore2
-config: debug
+config: release

@@ -37,8 +37,6 @@ let processMain argv =
     | Command.InstallPackages -> ()
     | Command.PushWorkspace pushInfo -> Commands.Workspace.Push pushInfo
 
-    | Command.TestAssemblies testInfo -> Commands.Test.TestAssemblies testInfo.Filters testInfo.Excludes
-
     // repository
     | Command.AddRepository addInfo -> Commands.Repo.Add addInfo
     | Command.CloneRepositories cloneInfo -> Commands.Repo.Clone cloneInfo
@@ -55,6 +53,7 @@ let processMain argv =
     | Command.AlterView viewInfo -> Commands.View.Alter viewInfo
     | Command.OpenView viewInfo -> Commands.View.Open viewInfo
     | Command.FullBuildView viewInfo -> Commands.View.OpenFullBuildView viewInfo
+    | Command.TestView testInfo -> Commands.View.Test testInfo
 
     // applications
     | Command.ListApplications appInfo -> Commands.Application.List appInfo

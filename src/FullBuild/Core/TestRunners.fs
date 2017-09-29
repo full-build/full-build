@@ -29,14 +29,13 @@ let excludeListToArgs (excludes : string list) =
 
 
 
-let runnerNUnit (includes : string set) (excludes : string set) =
+let runnerNUnit (includes : string set) =
     let wsDir = GetFolder Env.Folder.Workspace
     let files = includes |> Set.fold (fun s t -> sprintf @"%s %A" s t) ""
-    let excludeArgs = excludeListToArgs (excludes |> List.ofSeq)
-    let args = sprintf @"%s %s --noheader ""--result=TestResult.xml;format=nunit2""" files excludeArgs
+    let args = sprintf @"%s --noheader ""--result=TestResult.xml;format=nunit2""" files
     Exec "nunit3-console.exe" args wsDir Map.empty |> IO.CheckResponseCode
 
-let runnerSkip (includes : string set) (excludes : string set) =
+let runnerSkip (includes : string set) =
     ()
 
 let chooseTestRunner (runnerType : TestRunnerType) nunitRunner skipRunner =
@@ -45,5 +44,5 @@ let chooseTestRunner (runnerType : TestRunnerType) nunitRunner skipRunner =
                  | TestRunnerType.Skip -> skipRunner
     runner
 
-let TestWithTestRunner (runnerType : TestRunnerType) (includes : string set) (excludes : string set) =
-    (chooseTestRunner runnerType runnerNUnit runnerSkip) includes excludes
+let TestWithTestRunner (runnerType : TestRunnerType) (includes : string set) =
+    (chooseTestRunner runnerType runnerNUnit runnerSkip) includes

@@ -9,6 +9,7 @@ projects:
   - file: src\FullBuild.Tests\FullBuild.Tests.fsproj
     out: fullbuild.tests.dll
     tests: true
+    platform: net452
     packages:
       - id: fsunit
         version: 3.0
@@ -19,6 +20,7 @@ projects:
   - file: src\FullBuild\FullBuild.fsproj
     out: fullbuild.exe
     tests: false
+    platform: net452
     packages:
       - id: fsharp.configuration
         version: 1.3.1

@@ -30,7 +30,7 @@ type ProjectDescriptor =
       Project : Project }
 
 let private extractOutput(xdoc : XDocument) =
-    let xoutput = xdoc.Descendants(NsMsBuild + "AssemblyName").Single()
+    let xoutput = xdoc.Descendants(NsNone + "AssemblyName").Single()
     let soutput = !> xoutput : string
     soutput
 
@@ -41,14 +41,14 @@ let private getProjectOutput (dir : DirectoryInfo) (relFile : string) =
 
 let private getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
     // VS project references
-    let prjRefs = xdoc.Descendants(NsMsBuild + "ProjectReference")
+    let prjRefs = xdoc.Descendants(NsNone + "ProjectReference")
                       |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Include") : string)
                       |> Seq.map FsHelpers.ToWindows
                       |> Seq.map (fun x -> getProjectOutput prjDir x |> ProjectId.from)
                       |> Set.ofSeq
 
     // full-build project references (once converted)
-    let fbRefs = xdoc.Descendants(NsMsBuild + "Import")
+    let fbRefs = xdoc.Descendants(NsNone + "Import")
                      |> Seq.map (fun x -> !> x.Attribute(XNamespace.None + "Project") : string)
                      |> Seq.map (FsHelpers.MigratePath << FsHelpers.ToWindows)
                      |> Seq.filter (fun x -> x.StartsWith(MSBUILD_PROJECT_FOLDER))
@@ -60,14 +60,14 @@ let private getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
 
 let private parsePackageReferencePackage (pkgRef : XElement) : Package =
     let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "Include")
-    let pkgVer = !> pkgRef.Descendants(XmlHelpers.NsMsBuild + "Version").SingleOrDefault() : string
+    let pkgVer = !> pkgRef.Descendants(XmlHelpers.NsNone + "Version").SingleOrDefault() : string
     let ver = if pkgVer |> isNull then PackageVersion.Free
               else PackageVersion.Constraint pkgVer
     { Id = PackageId.from pkgId
       Version = ver }
 
 let private getPackageReferencePackages (prjDoc : XDocument)  =
-    let fbPkgs = prjDoc.Descendants(NsMsBuild + "PackageReference")
+    let fbPkgs = prjDoc.Descendants(NsNone + "PackageReference")
                      |> Seq.map parsePackageReferencePackage
                      |> Set.ofSeq
     fbPkgs
@@ -88,13 +88,12 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let xprj = match xdocLoader file with
                | Some x -> x
                | _ -> failwithf "Failed to load project %A" file.FullName
-    let xguid = !> xprj.Descendants(NsMsBuild + "ProjectGuid").Single() : string
-    let guid = ParseGuid xguid
-    let assemblyName = !> xprj.Descendants(NsMsBuild + "AssemblyName").Single() : string
+    let assemblyName = file.Name
     let assemblyRef = AssemblyId.from assemblyName
     let projectRef = ProjectId.from assemblyName
+    let platform = !> xprj.Descendants(NsNone + "TargetFramework").Single() : string
 
-    let extension =  match !> xprj.Descendants(NsMsBuild + "OutputType").Single() : string with
+    let extension =  match !> xprj.Descendants(NsNone + "OutputType").Single() : string with
                      | "Library" -> OutputType.Dll
                      | "Database" -> OutputType.Database
                      | _ -> OutputType.Exe
@@ -115,7 +114,8 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
                   OutputType = extension
                   HasTests = hasTests
                   PackageReferences = pkgRefs
-                  ProjectReferences = prjRefs } }
+                  ProjectReferences = prjRefs 
+                  Platform = platform } }
 
 let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (sxs : bool) (file : FileInfo) : ProjectDescriptor =
     try

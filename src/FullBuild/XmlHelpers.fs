@@ -18,9 +18,6 @@ open System.Xml.Linq
 
 #nowarn "0077" // op_Explicit
 
-
-let NsMsBuild = XNamespace.Get("http://schemas.microsoft.com/developer/msbuild/2003")
-
 let NsDgml = XNamespace.Get("http://schemas.microsoft.com/vs/2009/dgml")
 
 let NsRuntime = XNamespace.Get("urn:schemas-microsoft-com:asm.v1")

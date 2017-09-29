@@ -30,7 +30,7 @@ let private projectCanBeProcessed (sxs : bool) (fileName : FileInfo) =
         if sxsProj.Exists then sxs |> not
         else 
             let xdoc = XDocument.Load (fileName.FullName)
-            let fbIgnore = !> xdoc.Descendants(NsMsBuild + "FullBuildIgnore").FirstOrDefault() : string
+            let fbIgnore = !> xdoc.Descendants(NsNone + "FullBuildIgnore").FirstOrDefault() : string
             match bool.TryParse(fbIgnore) with
             | (true, x) -> not <| x
             | _ -> true

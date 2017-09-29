@@ -40,6 +40,7 @@ let Serialize (anthology : Anthology) =
         cproject.out <- sprintf "%s.%s" project.Output.toString project.OutputType.toString
         cproject.file <- sprintf @"%s\%s" project.Repository.toString project.RelativeProjectFile.toString
         cproject.tests <- project.HasTests
+        cproject.platform <- project.Platform
         cproject.packages.Clear ()
         for package in project.PackageReferences do
             let cpackage = AnthologyConfig.projects_Item_Type.packages_Item_Type()
@@ -89,12 +90,14 @@ let Deserialize (content) =
                        let repo = FsHelpers.GetRootDirectory (x.file)
                        let file = FsHelpers.GetFilewithoutRootDirectory (x.file)
                        let hastests = x.tests
+                       let platform = x.platform
                        convertToProjects tail |> Set.add  { Repository = RepositoryId.from repo
                                                             RelativeProjectFile = ProjectRelativeFile file
                                                             ProjectId = ProjectId.from out
                                                             Output = AssemblyId.from out
                                                             OutputType = OutputType.from ext
                                                             HasTests = hastests
+                                                            Platform = platform
                                                             PackageReferences = convertToPackages (x.packages |> List.ofSeq)
                                                             ProjectReferences = convertToProjectRefs (x.projects |> List.ofSeq) }
 
