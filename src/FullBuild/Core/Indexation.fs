@@ -129,10 +129,7 @@ let IndexWorkspace wsDir (globals : Globals) (antho : Anthology) (grepos : Graph
     let repos = globals.Repositories |> Set.filter (fun x -> grepos |> Set.exists (fun y -> y.Name = x.Repository.Name.toString))
                                      |> Set.filter (fun x -> x.Builder = BuilderType.MSBuild)
                                      |> Set.map (fun x -> x.Repository)
-    let parsedProjects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos globals.SideBySide
-
-    let projects = parsedProjects |> List.map (fun x -> x.Project)
-                                  |> Set
+    let projects = parseWorkspaceProjects Parsers.MSBuild.ParseProject wsDir repos globals.SideBySide |> Set
     let allProjects = MergeProjects projects antho.Projects |> Set.toList
     let conflicts = findConflicts allProjects |> List.ofSeq
     if conflicts <> [] then

@@ -25,10 +25,6 @@ open Env
 open Collections
 open System.Text.RegularExpressions
 
-type ProjectDescriptor =
-    { Packages : Package set
-      Project : Project }
-
 let private extractOutput(xdoc : XDocument) =
     let xoutput = xdoc.Descendants(NsNone + "AssemblyName").Single()
     let soutput = !> xoutput : string
@@ -63,7 +59,7 @@ let private parsePackageReferencePackage (pkgRef : XElement) =
     if pkgId |> isNull then 
         pkgId <- (!> pkgRef.Attribute(XNamespace.None + "Update") : string)
     if pkgId |> isNull |> not then
-        let pkgVer = !> pkgRef.Descendants(XmlHelpers.NsNone + "Version").SingleOrDefault() : string
+        let pkgVer = !> pkgRef.Attribute(XmlHelpers.NsNone + "Version") : string
         let ver = if pkgVer |> isNull then PackageVersion.Free
                   else PackageVersion.Constraint pkgVer
         Some { Package.Id = PackageId.from pkgId
@@ -112,18 +108,17 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let pkgRefs = packages
     let hasTests = assemblyRef.toString.EndsWith("tests")
 
-    { Packages = packages
-      Project = { Repository = repoRef
-                  RelativeProjectFile = ProjectRelativeFile relativeProjectFile
-                  ProjectId = projectRef
-                  Output = assemblyRef
-                  OutputType = extension
-                  HasTests = hasTests
-                  PackageReferences = pkgRefs
-                  ProjectReferences = prjRefs 
-                  Platform = platform } }
+    { Repository = repoRef
+      RelativeProjectFile = ProjectRelativeFile relativeProjectFile
+      ProjectId = projectRef
+      Output = assemblyRef
+      OutputType = extension
+      HasTests = hasTests
+      PackageReferences = pkgRefs
+      ProjectReferences = prjRefs 
+      Platform = platform }
 
-let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (sxs : bool) (file : FileInfo) : ProjectDescriptor =
+let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (sxs : bool) (file : FileInfo) =
     try
         parseProjectContent FsHelpers.XDocLoader repoDir repoRef sxs file
     with
