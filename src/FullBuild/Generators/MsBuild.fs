@@ -129,27 +129,14 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
         let attr = (!> (xel.Attribute (NsNone + "Project")) : string) |> ToWindows |> MigratePath
         attr.EndsWith(@".full-build\full-build.targets", StringComparison.CurrentCultureIgnoreCase)
 
-    let hasNoChild (xel : XElement) =
-        not <| xel.DescendantNodes().Any()
-
-    let always _ = true
-
     // cleanup everything that will be modified
     let cproj = XDocument (xproj)
 
     let seekAndDestroy =
         [
-            // project references
-            "ProjectReference", always
-
             // full-build imports
             "Import", filterFullBuildProject
             "Import", filterFullBuildTargets
-            "FBWorkspaceDir", always
-
-            // cleanup project
-            "ItemGroup", hasNoChild
-            "PropertyGroup", hasNoChild
         ]
 
     seekAndDestroy |> List.iter (fun (x, y) -> cproj.Descendants(NsNone + x).Where(y).Remove())
@@ -191,12 +178,8 @@ let private convertProject (xproj : XDocument) (project : Project) =
         |> Seq.filter filterAssemblyInfo
         |> Seq.iter patchAssemblyInfo
 
-    // set OutputPath
-    cproj.Descendants(NsNone + "AssemblyName") |> Seq.iter (fun x -> x.Value <- project.Output.Name)
-    cproj.Descendants(NsNone + "SqlTargetName") |> Seq.iter (fun x -> x.Value <- project.Output.Name)
-
     // import fb target
-    let lastImport = upcast cproj.Descendants(NsNone + "Import").LastOrDefault() : XNode
+    let lastImport = upcast cproj.Descendants(NsNone + "PropertyGroup").First() : XNode
     let importFB = XElement (NsNone + "Import",
                        XAttribute (NsNone + "Project",
                                    @"$(SolutionDir)\.full-build\full-build.targets"))
