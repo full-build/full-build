@@ -257,15 +257,16 @@ let rec removeUselessFiles (excludes : string set) (dir : DirectoryInfo) (rootDi
 
 let private loadFbIgnore (repoDir : DirectoryInfo) : string set =
     let excludeFile = repoDir |> GetFile ".fbignore"
-    let excludes = if excludeFile.Exists then System.IO.File.ReadAllLines(excludeFile.FullName)
-                                              |> Seq.map (fun x -> let idx = x.IndexOf('#')
-                                                                   let s = if idx <> -1  then x.Substring(0, idx)
-                                                                                         else x
-                                                                   s.Trim())
-                                              |> Seq.filter (fun x -> String.IsNullOrWhiteSpace(x) |> not)
-                                              |> Seq.map (fun x -> "*" + x)
-                                              |> Set
-                    else Set.empty
+    let excludes = if excludeFile.Exists then 
+                       System.IO.File.ReadAllLines(excludeFile.FullName)
+                       |> Seq.map (fun x -> let idx = x.IndexOf('#')
+                                            let s = if idx <> -1  then x.Substring(0, idx)
+                                                                  else x
+                                            s.Trim())
+                       |> Seq.filter (fun x -> String.IsNullOrWhiteSpace(x) |> not)
+                       |> Seq.map (fun x -> "*" + x)
+                       |> Set
+                   else Set.empty
     excludes
 
 let RemoveUselessStuff (projects : Project set) =
