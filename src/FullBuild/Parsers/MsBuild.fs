@@ -99,8 +99,8 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let projectRef = ProjectId.from assemblyName
     let platform = !> xprj.Descendants(NsNone + "TargetFramework").Single() : string
 
-    let extension =  match !> xprj.Descendants(NsNone + "OutputType").Single() : string with
-                     | "Library" -> OutputType.Dll
+    let extension =  match !> xprj.Descendants(NsNone + "OutputType").SingleOrDefault() : string with
+                     | null | "Library" -> OutputType.Dll
                      | "Database" -> OutputType.Database
                      | _ -> OutputType.Exe
 
