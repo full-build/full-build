@@ -241,38 +241,20 @@ let GenerateProjects (projects : Project seq) (xdocSaver : FileInfo -> XDocument
         let projectCopyFile = prjDir |> GetFile (AddExt Targets (project.Output.Name + "-copy"))
         xdocSaver projectCopyFile refProjectCopyContent
 
+let rec removeUselessFiles (excludes : string set) (currentDir : DirectoryInfo) (rootDir : DirectoryInfo) =
+    for subdir in currentDir.GetDirectories() do
+        removeUselessFiles excludes subdir rootDir
 
-let isFileIncluded (excludes : string set) (file : string) (rootDir : string) =
-    let relativeFile = file.Replace(rootDir, "") |> FsHelpers.ToUnix |> Set.singleton
-    let res = PatternMatching.FilterMatch relativeFile id excludes
-    res = Set.empty
-
-
-let rec removeUselessFiles (excludes : string set) (dir : DirectoryInfo) (rootDir : string) =
-    for file in dir.GetFiles() do        
+    for file in currentDir.GetFiles() do        
         let delFile = file.Extension.Equals(".sln", StringComparison.CurrentCultureIgnoreCase)
         if delFile then
-            let canDelete = isFileIncluded excludes file.FullName rootDir
+            let canDelete = Ignore.IsFileIncluded excludes rootDir file
             if canDelete then file.Delete()
-
-let private loadFbIgnore (repoDir : DirectoryInfo) : string set =
-    let excludeFile = repoDir |> GetFile ".fbignore"
-    let excludes = if excludeFile.Exists then 
-                       System.IO.File.ReadAllLines(excludeFile.FullName)
-                       |> Seq.map (fun x -> let idx = x.IndexOf('#')
-                                            let s = if idx <> -1  then x.Substring(0, idx)
-                                                                  else x
-                                            s.Trim())
-                       |> Seq.filter (fun x -> String.IsNullOrWhiteSpace(x) |> not)
-                       |> Seq.map (fun x -> "*" + x)
-                       |> Set
-                   else Set.empty
-    excludes
 
 let RemoveUselessStuff (projects : Project set) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let repos = projects |> Set.map (fun x -> x.Repository)
     for repo in repos do
         let repoDir = wsDir |> GetSubDirectory repo.Name
-        let excludes = loadFbIgnore repoDir
-        removeUselessFiles excludes repoDir repoDir.FullName
+        let excludes = Ignore.LoadFbIgnore repoDir
+        removeUselessFiles excludes repoDir repoDir

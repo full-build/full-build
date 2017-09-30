@@ -60,6 +60,7 @@
     <Compile Include="Baselines.fs" />
     <Compile Include="Views.fsi" />
     <Compile Include="Views.fs" />
+    <Compile Include="Ignore.fs" />
     <Compile Include="MSBuildHelpers.fs" />
     <Compile Include="OsHelpers.fs" />
     <Compile Include="CLI\Commands.fs" />

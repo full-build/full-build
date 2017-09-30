@@ -31,8 +31,10 @@ let private projectCanBeProcessed (sxs : bool) (fileName : FileInfo) =
         else true
 
 let private parseRepositoryProjects (parser) (repoRef : RepositoryId) (repoDir : DirectoryInfo) (sxs : bool) =
+    let excludes = Ignore.LoadFbIgnore repoDir
     repoDir |> FsHelpers.FindKnownProjects
             |> Seq.filter (projectCanBeProcessed sxs)
+            |> Seq.filter (Ignore.IsFileIncluded excludes repoDir)
             |> Seq.map (parser repoDir repoRef sxs)
 
 let private printParseStatus (repoDir : DirectoryInfo) =
