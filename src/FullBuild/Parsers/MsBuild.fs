@@ -94,7 +94,7 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
     let xprj = match xdocLoader file with
                | Some x -> x
                | _ -> failwithf "Failed to load project %A" file.FullName
-    let assemblyName = file.Name
+    let assemblyName = file.Name |> Path.GetFileNameWithoutExtension
     let assemblyRef = AssemblyId.from assemblyName
     let projectRef = ProjectId.from assemblyName
     let platform = !> xprj.Descendants(NsNone + "TargetFramework").Single() : string
