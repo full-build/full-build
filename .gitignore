@@ -30,3 +30,4 @@ obj
 Settings.FSharpLint
 *.userprefs
 *.mdb
+launchSettings.json
