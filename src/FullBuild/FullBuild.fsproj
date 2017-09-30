@@ -1,13 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net452</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
-
-  <Import Project="..\..\.full-build\full-build.targets" />
-  
+  <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
   <ItemGroup>
     <Content Include="..\..\LICENSE.txt">
       <Link>LICENSE.txt</Link>
@@ -98,4 +95,4 @@
     <PackageReference Include="FSharp.Data" Version="2.3.3" />
     <PackageReference Update="FSharp.Core" Version="4.2.3" />
   </ItemGroup>
- </Project>
+</Project>

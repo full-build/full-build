@@ -11,12 +11,11 @@ projects:
     tests: true
     platform: net452
     packages:
-      - id: fsunit
-        version: 3.0
       - id: fsharp.core
         version: 4.2.3
-    projects:
-      - project: fullbuild
+      - id: fsunit
+        version: 3.0
+    projects: []
   - file: src\FullBuild\FullBuild.fsproj
     out: fullbuild.exe
     tests: false

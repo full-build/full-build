@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net452</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
-  <Import Project="..\..\.full-build\full-build.targets" />
+  <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
   <ItemGroup>
     <Compile Include="TestHelpers.fs" />
     <Compile Include="CollectionsTests.fs" />
