@@ -58,17 +58,23 @@ let private getProjectReferences (prjDir : DirectoryInfo) (xdoc : XDocument) =
 
     prjRefs |> Set.union fbRefs
 
-let private parsePackageReferencePackage (pkgRef : XElement) : Package =
-    let pkgId : string = !> pkgRef.Attribute(XNamespace.None + "Include")
-    let pkgVer = !> pkgRef.Descendants(XmlHelpers.NsNone + "Version").SingleOrDefault() : string
-    let ver = if pkgVer |> isNull then PackageVersion.Free
-              else PackageVersion.Constraint pkgVer
-    { Id = PackageId.from pkgId
-      Version = ver }
+let private parsePackageReferencePackage (pkgRef : XElement) =
+    let mutable pkgId = !> pkgRef.Attribute(XNamespace.None + "Include") : string
+    if pkgId |> isNull then 
+        pkgId <- (!> pkgRef.Attribute(XNamespace.None + "Update") : string)
+    if pkgId |> isNull |> not then
+        let pkgVer = !> pkgRef.Descendants(XmlHelpers.NsNone + "Version").SingleOrDefault() : string
+        let ver = if pkgVer |> isNull then PackageVersion.Free
+                  else PackageVersion.Constraint pkgVer
+        Some { Package.Id = PackageId.from pkgId
+               Package.Version = ver }
+    else
+        None
 
 let private getPackageReferencePackages (prjDoc : XDocument)  =
     let fbPkgs = prjDoc.Descendants(NsNone + "PackageReference")
                      |> Seq.map parsePackageReferencePackage
+                     |> Seq.choose id
                      |> Set.ofSeq
     fbPkgs
 
