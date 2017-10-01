@@ -115,8 +115,7 @@ let parseProjectContent (xdocLoader : FileInfo -> XDocument option) (repoDir : D
       OutputType = extension
       HasTests = hasTests
       PackageReferences = pkgRefs
-      ProjectReferences = prjRefs 
-      Platform = platform }
+      ProjectReferences = prjRefs }
 
 let ParseProject (repoDir : DirectoryInfo) (repoRef : RepositoryId) (sxs : bool) (file : FileInfo) =
     try

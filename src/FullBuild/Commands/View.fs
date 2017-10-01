@@ -31,7 +31,6 @@ let Add (cmd : CLI.Commands.AddView) =
                                          cmd.AppFilter
                                          cmd.Tests
                                          None
-                                         None
 
     let projects = view.Projects
     if projects = Set.empty then printfn "WARNING: Empty project selection"
@@ -90,9 +89,8 @@ let Build (cmd : CLI.Commands.BuildView) =
                   | None -> "0.0.0"
 
     // store build info
-    let platform = (cmd.Platform <> None) ? (cmd.Platform, view.Platform)
     let configuration = (cmd.Configuration <> None) ? (cmd.Configuration, view.Configuration)
-    if cmd.Platform <> None || cmd.Configuration <> None then
+    if cmd.Configuration <> None then
         view <- viewRepository.CreateView view.Name
                                           view.Filters
                                           view.DownReferences
@@ -100,12 +98,11 @@ let Build (cmd : CLI.Commands.BuildView) =
                                           view.Modified
                                           view.AppFilter
                                           view.Tests
-                                          platform
                                           configuration
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.Solution view.Name)
-    Core.Builders.BuildWithBuilder Graph.BuilderType.MSBuild slnFile cmd.Platform cmd.Configuration cmd.Clean cmd.Multithread version
+    Core.Builders.BuildWithBuilder Graph.BuilderType.MSBuild slnFile cmd.Configuration cmd.Clean cmd.Multithread version
 
 let Alter (cmd : CLI.Commands.AlterView) =
     let graph = Graph.load()
@@ -118,7 +115,6 @@ let Alter (cmd : CLI.Commands.AlterView) =
                                             view.Modified
                                             view.AppFilter
                                             view.Tests
-                                            None
                                             None
 
     let projects = depView.Projects
@@ -163,10 +159,7 @@ let Test (cmd : CLI.Commands.TestView) =
     // then test assemblies
     let runner2assemblies = projects |> Seq.groupBy (fun x -> x.Repository.Tester)
     for runner, assemblies in runner2assemblies do
-        let bins = assemblies |> Seq.map (fun x -> let platform = match view.Platform with
-                                                                  | Some plat -> plat
-                                                                  | None -> x.Platform
-                                                   x.BinFile platform config) |> set
+        let bins = assemblies |> Seq.map (fun x -> x.BinFile config) |> set
         (Core.TestRunners.TestWithTestRunner runner) bins
 
 let Graph (cmd : CLI.Commands.GraphView) =

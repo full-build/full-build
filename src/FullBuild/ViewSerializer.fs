@@ -38,9 +38,6 @@ let SerializeView (view : View) =
     config.appfilter <- match view.AppFilter with
                         | None -> null
                         | Some appFilter -> appFilter
-    config.platform <- match view.Platform with
-                       | Some plat -> plat
-                       | None -> null
     config.config <- match view.Configuration with
                      | Some conf -> conf
                      | None -> null
@@ -59,7 +56,6 @@ let DeserializeView content =
       Modified = config.modified 
       Tests = config.tests
       AppFilter = (config.appfilter = "") ? (None, Some config.appfilter) 
-      Platform = (config.platform = "" ) ? (None, Some config.platform)
       Configuration = (config.config = "") ? (None, Some config.config) }
 
 

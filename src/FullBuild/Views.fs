@@ -36,7 +36,6 @@ with
     member this.Modified = this.View.Modified
     member this.AppFilter = this.View.AppFilter
     member this.Tests = this.View.Tests
-    member this.Platform = this.View.Platform
     member this.Configuration = this.View.Configuration
 
     member this.Projects : Project set =
@@ -134,7 +133,7 @@ and [<Sealed>] Factory(graph : Graph) =
         | None -> None
         | Some x -> Some this.ViewMap.[x]
 
-    member this.CreateView name filters downReferences upReferences modified appFilter tests platform configuration =
+    member this.CreateView name filters downReferences upReferences modified appFilter tests configuration =
         let view = { Anthology.View.Name = name
                      Anthology.View.Filters = filters
                      Anthology.View.DownReferences = downReferences
@@ -142,7 +141,6 @@ and [<Sealed>] Factory(graph : Graph) =
                      Anthology.View.Modified = modified
                      Anthology.View.AppFilter = appFilter
                      Anthology.View.Tests = tests 
-                     Anthology.View.Platform = platform
                      Anthology.View.Configuration = configuration }
 
         { Graph = graph

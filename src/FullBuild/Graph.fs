@@ -231,15 +231,17 @@ with
 
     member this.Output = this.Graph.AssemblyMap.[this.Project.Output]
 
-    member this.BinFile platform configuration =
-        let repo = this.Repository.Name
-        let path = System.IO.Path.GetDirectoryName(this.ProjectFile)
-        let ass = this.Output.Name
-        let ext = match this.OutputType with
-                  | OutputType.Dll -> "dll"
-                  | OutputType.Exe -> "exe"
-                  | OutputType.Database -> "dacpac"
-        sprintf "%s/%s/bin/%s/%s/%s.%s" repo path configuration platform ass ext
+    member this.BinFile (configuration : string) =
+        // FIXME
+        "*** NOT IMPLEMENTED ***"
+        //let repo = this.Repository.Name
+        //let path = System.IO.Path.GetDirectoryName(this.ProjectFile)
+        //let ass = this.Output.Name
+        //let ext = match this.OutputType with
+        //          | OutputType.Dll -> "dll"
+        //          | OutputType.Exe -> "exe"
+        //          | OutputType.Database -> "dacpac"
+        //sprintf "%s/%s/bin/%s/%s/%s.%s" repo path configuration platform ass ext
 
     member this.ProjectId = this.Project.ProjectId.toString
 
@@ -249,8 +251,6 @@ with
                              | Anthology.OutputType.Database -> OutputType.Database
 
     member this.HasTests = this.Project.HasTests
-
-    member this.Platform = this.Project.Platform
 
     member this.PackageReferences =
         this.Project.PackageReferences |> Set.map (fun x -> this.Graph.PackageMap.[x])

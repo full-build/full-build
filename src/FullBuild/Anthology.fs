@@ -152,7 +152,6 @@ type Project =
       ProjectId : ProjectId
       OutputType : OutputType
       HasTests : bool
-      Platform : string
       PackageReferences : Package set
       ProjectReferences : ProjectId set }
 
@@ -200,5 +199,4 @@ type View =
       Modified : bool
       AppFilter : string option
       Tests : bool 
-      Platform : string option
       Configuration: string option }
