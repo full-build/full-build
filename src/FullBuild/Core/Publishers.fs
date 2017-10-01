@@ -33,14 +33,10 @@ let private publishCopy (app : App) =
     let project = app.App.Project
     let repoDir = wsDir |> GetSubDirectory (project.Repository.Name)
     let projFile = repoDir |> GetFile project.ProjectFile
+    let args = sprintf "/nologo /t:Publish /p:PublishDir=%A /p:SolutionDir=%A /p:SolutionName=%A %A" 
+                    appDir.FullName wsDir.FullName app.View.Name projFile.FullName
 
-    let args = sprintf "publish %A /p:SolutionDir=%A /p:SolutionName=%A" projFile.FullName wsDir.FullName app.View.Name
-    Exec "dotnet" args wsDir Map.empty |> IO.CheckResponseCode
-
-    //let args = sprintf "/nologo /t:Publish /p:PublishDir=%A /p:SolutionDir=%A /p:SolutionName=%A %A" 
-    //                appDir.FullName wsDir.FullName app.View.Name projFile.FullName
-
-    //Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
+    Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
 
 let private publishZip (app : App) =
     let tmpApp = { app

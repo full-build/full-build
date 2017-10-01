@@ -47,32 +47,27 @@ let buildSkip (viewFile : FileInfo) (config : string option) (clean : bool) (mul
 let buildMsbuild (viewFile : FileInfo) (config : string option) (clean : bool) (multithread : bool) (version : string) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let viewName = Path.GetFileNameWithoutExtension(viewFile.Name)
-    let slnName = viewName + ".sln"
 
     writeVersionMsbuild version
 
-    // restore first
-    let rebuildArg = if clean then "--no-incremental" else ""
-    let args = sprintf "build %s %A /p:SolutionDir=%A /p:SolutionName=%A" rebuildArg slnName wsDir.FullName viewFile.Name
-    Exec "dotnet" args wsDir Map.empty |> IO.CheckResponseCode
+     // restore first
+    let restoreArgs = sprintf "/nologo /t:Restore /p:SolutionDir=%s /p:SolutionName=%A %A" wsDir.FullName viewName viewFile.Name
+    Exec "msbuild" restoreArgs wsDir Map.empty |> IO.CheckResponseCode
 
-    //let restoreArgs = sprintf "/nologo /t:Restore /p:SolutionDir=%s /p:SolutionName=%A %A" wsDir.FullName viewName viewFile.Name
-    //Exec "msbuild" restoreArgs wsDir Map.empty |> IO.CheckResponseCode
+    let target = if clean then "Rebuild"
+                 else "Build"
 
-    //let target = if clean then "Rebuild"
-    //             else "Build"
+    let argTarget = sprintf "/t:%s /p:SolutionDir=%A /p:SolutionName=%A" target wsDir.FullName viewName
+    let argMt = if multithread then "/m"
+                else ""
 
-    //let argTarget = sprintf "/t:%s /p:SolutionDir=%A /p:SolutionName=%A" target wsDir.FullName viewName
-    //let argMt = if multithread then "/m"
-    //            else ""
+    let argConfig = match config with
+                    | Some conf -> sprintf "/p:Configuration=%s" conf
+                    | _ -> ""
 
-    //let argConfig = match config with
-    //                | Some conf -> sprintf "/p:Configuration=%s" conf
-    //                | _ -> ""
+    let args = sprintf "/nologo %s %s %s %A" argTarget argMt argConfig viewFile.Name
 
-    //let args = sprintf "/nologo %s %s %s %A" argTarget argMt argConfig viewFile.Name
-
-    //Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
+    Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
 
 let chooseBuilder (builderType : BuilderType) msbuildBuilder skipBuilder =
     let builder = match builderType with
