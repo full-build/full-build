@@ -6,5 +6,4 @@ referencedBy: false
 modified: false
 appfilter: null
 tests: false
-platform: null
-config: null
+config: Debug

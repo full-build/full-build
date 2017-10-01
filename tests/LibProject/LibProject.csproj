@@ -3,7 +3,6 @@
     <TargetFramework>net452</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
   <ItemGroup>
     <PackageReference Include="ZLib.Portable" Version="1.11" />
   </ItemGroup>

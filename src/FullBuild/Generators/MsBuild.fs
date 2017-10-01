@@ -125,10 +125,6 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
         let file = attr |> ToWindows |> MigratePath
         file.StartsWith(MSBUILD_PROJECT_FOLDER, StringComparison.CurrentCultureIgnoreCase)
 
-    let filterFullBuildTargets (xel : XElement) =
-        let attr = (!> (xel.Attribute (NsNone + "Project")) : string) |> ToWindows |> MigratePath
-        attr.EndsWith(@".full-build\full-build.targets", StringComparison.CurrentCultureIgnoreCase)
-
     // cleanup everything that will be modified
     let cproj = XDocument (xproj)
 
@@ -136,7 +132,6 @@ let private cleanupProject (xproj : XDocument) (project : Project) : XDocument =
         [
             // full-build imports
             "Import", filterFullBuildProject
-            "Import", filterFullBuildTargets
         ]
 
     seekAndDestroy |> List.iter (fun (x, y) -> cproj.Descendants(NsNone + x).Where(y).Remove())
@@ -177,13 +172,6 @@ let private convertProject (xproj : XDocument) (project : Project) =
     cproj.Descendants(NsNone + "Compile")
         |> Seq.filter filterAssemblyInfo
         |> Seq.iter patchAssemblyInfo
-
-    // import fb target
-    let lastImport = upcast cproj.Descendants(NsNone + "PropertyGroup").First() : XNode
-    let importFB = XElement (NsNone + "Import",
-                       XAttribute (NsNone + "Project",
-                                   @"$(SolutionDir)\.full-build\full-build.targets"))
-    lastImport.AddAfterSelf (importFB)
 
     // add project references
     for projectReference in project.References do

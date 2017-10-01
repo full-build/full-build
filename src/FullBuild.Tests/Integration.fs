@@ -20,29 +20,33 @@ open StringHelpers
 open System.IO
 open System.Diagnostics
 open Collections
+open FsHelpers
 
+
+let getBinFile viewName projectName platform =
+    let wsDir = Env.GetFolder Env.Folder.Workspace
+    let graph = Graph.load()
+    let views = graph |> Views.from
+    let view = views.Views |> Seq.find (fun x -> x.Name = viewName)
+    let project = graph.Projects |> Seq.find (fun x -> x.ProjectId = projectName)
+    let prjFile =  wsDir |> GetSubDirectory project.Repository.Name
+                         |> GetFile project.ProjectFile
+    let prjDir = prjFile.Directory |> GetSubDirectory "bin" 
+                                   |> GetSubDirectory view.Configuration 
+                                   |> GetSubDirectory platform
+    let exe = prjDir |> GetFile (project.Output.Name |> AddExt Extension.Exe)
+    exe
 
 let runFB (args : string) =
     printfn "==== running fullbuild %s" args
-    System.Environment.CurrentDirectory <- TestContext.CurrentContext.TestDirectory
+    let exe = getBinFile "fullbuild" "fullbuild" "net452"
     let wsDir = Env.GetFolder Env.Folder.Workspace
-    let graph = Graph.load()
-    let fbProject = graph.Projects |> Seq.find (fun x -> x.ProjectId = "fullbuild")
-    let bin = fbProject.BinFile "Debug"
-    let fb = wsDir |> FsHelpers.GetFile bin
-    let psi = ProcessStartInfo (FileName = fb.FullName, Arguments = args, UseShellExecute = false, WorkingDirectory = wsDir.FullName, LoadUserProfile = true, CreateNoWindow = true, RedirectStandardOutput = true)
-    use proc = Process.Start (psi)
-    use stdout = proc.StandardOutput
-    while stdout.EndOfStream |> not do
-        let line = stdout.ReadLine()
-        printfn "> %s" line
-
-    proc.WaitForExit()
-    if proc.ExitCode <> 0 then failwithf "Process failed with error %d" proc.ExitCode
-
+    Exec.Exec exe.FullName args wsDir Map.empty |> IO.CheckResponseCode
 
 [<Test>]
 let CheckSourceBuildIsSameAsBinaryBuild () = 
+    System.Environment.CurrentDirectory <- NUnit.Framework.TestContext.CurrentContext.TestDirectory
+    
     let expectedFilesMono = [ "libproject.dll"
                               "libproject.dll.mdb"
                               "mainproject.exe"
@@ -62,17 +66,15 @@ let CheckSourceBuildIsSameAsBinaryBuild () =
     printfn "******************* BUILDING SOURCES ***********************"
     runFB "--verbose view testsrc tests/*"
     runFB "--verbose rebuild testsrc"    
+    printfn "******************* DONE BUILDING SOURCES ***********************"
 
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let graph = Graph.load()
-    let fbProject = graph.Projects |> Seq.find (fun x -> x.ProjectId = "mainproject")
-    let bin = fbProject.BinFile "Debug"
-    let outputBin = wsDir |> FsHelpers.GetFile bin
+    let outputBin = getBinFile "testsrc" "mainproject" "net452"
     let outputFileSrc = outputBin.Directory.EnumerateFiles () |> Seq.map (fun x -> x.Name.ToLower()) |> set
     outputFileSrc |> should equal expectedFiles
 
     printfn "******************* BUILDING BINARIES ***********************"
     runFB "--verbose view testbin tests/mainproject"
     runFB "--verbose rebuild testbin"
+    printfn "******************* DONE BUILDING BINARIES ***********************"
     let outputFileBin = outputBin.Directory.EnumerateFiles () |> Seq.map (fun x -> x.Name.ToLower()) |> set
     outputFileBin |> should equal expectedFiles

@@ -134,6 +134,9 @@ and [<Sealed>] Factory(graph : Graph) =
         | Some x -> Some this.ViewMap.[x]
 
     member this.CreateView name filters downReferences upReferences modified appFilter tests configuration =
+        let config = match configuration with
+                     | Some cfg -> cfg
+                     | _ -> "Debug"
         let view = { Anthology.View.Name = name
                      Anthology.View.Filters = filters
                      Anthology.View.DownReferences = downReferences
@@ -141,7 +144,7 @@ and [<Sealed>] Factory(graph : Graph) =
                      Anthology.View.Modified = modified
                      Anthology.View.AppFilter = appFilter
                      Anthology.View.Tests = tests 
-                     Anthology.View.Configuration = configuration }
+                     Anthology.View.Configuration = config }
 
         { Graph = graph
           View = view }

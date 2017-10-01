@@ -26,7 +26,7 @@ with
     member Modified : bool
     member AppFilter : string option
     member Tests : bool
-    member Configuration : string option
+    member Configuration : string
     member Projects: Project set
     member Save: isDefault : bool option
                           -> unit

@@ -3,7 +3,6 @@ projects:
   - file: tests\LibProject\LibProject.csproj
     out: libproject.dll
     tests: false
-    platform: net452
     packages:
       - id: zlib.portable
         version: 1.11
@@ -11,7 +10,6 @@ projects:
   - file: tests\MainProject\MainProject.csproj
     out: mainproject.exe
     tests: false
-    platform: net452
     packages: []
     projects:
       - project: libproject

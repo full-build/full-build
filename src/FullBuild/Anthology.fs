@@ -199,4 +199,4 @@ type View =
       Modified : bool
       AppFilter : string option
       Tests : bool 
-      Configuration: string option }
+      Configuration: string }

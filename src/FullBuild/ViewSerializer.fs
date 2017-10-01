@@ -38,9 +38,7 @@ let SerializeView (view : View) =
     config.appfilter <- match view.AppFilter with
                         | None -> null
                         | Some appFilter -> appFilter
-    config.config <- match view.Configuration with
-                     | Some conf -> conf
-                     | None -> null
+    config.config <- view.Configuration
     config.ToString()
 
 
@@ -56,7 +54,7 @@ let DeserializeView content =
       Modified = config.modified 
       Tests = config.tests
       AppFilter = (config.appfilter = "") ? (None, Some config.appfilter) 
-      Configuration = (config.config = "") ? (None, Some config.config) }
+      Configuration = config.config }
 
 
 let Save (filename : FileInfo) (view : View) =

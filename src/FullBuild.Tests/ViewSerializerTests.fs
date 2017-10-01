@@ -27,7 +27,7 @@ let CheckSaveLoadView () =
                   Modified = false 
                   AppFilter = Some "tagada*" 
                   Tests = false 
-                  Configuration = None }
+                  Configuration = "Debug" }
 
     let res = ViewSerializer.SerializeView view1
     printfn "%s" res

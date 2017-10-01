@@ -17,32 +17,12 @@ open Env
 open Collections
 open Graph
 open Exec
+open FsHelpers
 
 
-let excludeListToArgs (excludes : string list) =
-    match excludes with
-    | [] -> ""
-    | [x] -> let excludeArgs = sprintf "cat != %s" x
-             sprintf "--where %A" excludeArgs
-    | x :: tail -> let excludeArgs = excludes |> List.fold (fun s t -> sprintf "%s && cat != %s" s t) ("")
-                   sprintf "--where %A" excludeArgs
-
-
-
-let runnerNUnit (includes : string set) =
+let TestSolution (view : Views.View) =
     let wsDir = GetFolder Env.Folder.Workspace
-    let files = includes |> Set.fold (fun s t -> sprintf @"%s %A" s t) ""
-    let args = sprintf @"%s --noheader ""--result=TestResult.xml;format=nunit2""" files
-    Exec "nunit3-console.exe" args wsDir Map.empty |> IO.CheckResponseCode
-
-let runnerSkip (includes : string set) =
-    ()
-
-let chooseTestRunner (runnerType : TestRunnerType) nunitRunner skipRunner =
-    let runner = match runnerType with
-                 | TestRunnerType.NUnit -> nunitRunner
-                 | TestRunnerType.Skip -> skipRunner
-    runner
-
-let TestWithTestRunner (runnerType : TestRunnerType) (includes : string set) =
-    (chooseTestRunner runnerType runnerNUnit runnerSkip) includes
+    let viewFile = wsDir |> GetFile (view.Name |> AddExt Extension.Solution)
+    let args = sprintf "test %A --configuration %s --no-build --no-restore /p:SolutionDir=%A /p:SolutionName=%A" 
+                       viewFile.FullName view.Configuration wsDir.FullName view.Name
+    Exec "dotnet" args wsDir Map.empty |> IO.CheckResponseCode

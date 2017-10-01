@@ -89,8 +89,7 @@ let Build (cmd : CLI.Commands.BuildView) =
                   | None -> "0.0.0"
 
     // store build info
-    let configuration = (cmd.Configuration <> None) ? (cmd.Configuration, view.Configuration)
-    if cmd.Configuration <> None then
+    if cmd.Configuration.IsSome && cmd.Configuration.Value <> view.Configuration then
         view <- viewRepository.CreateView view.Name
                                           view.Filters
                                           view.DownReferences
@@ -98,7 +97,8 @@ let Build (cmd : CLI.Commands.BuildView) =
                                           view.Modified
                                           view.AppFilter
                                           view.Tests
-                                          configuration
+                                          cmd.Configuration
+        view.Save None
 
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let slnFile = wsDir |> FsHelpers.GetFile (FsHelpers.AddExt FsHelpers.Extension.Solution view.Name)
@@ -148,19 +148,7 @@ let Test (cmd : CLI.Commands.TestView) =
     let viewRepository = Views.from graph
 
     let view = viewRepository.Views |> Seq.find (fun x -> x.Name = cmd.Name)
-
-    // first set binding redirects on output only
-    let wsDir = Env.GetFolder Env.Folder.Workspace
-    let projects = view.Projects |> Set.filter (fun x -> x.HasTests)
-    let config = match view.Configuration with
-                 | Some conf -> conf
-                 | None -> "Debug"
- 
-    // then test assemblies
-    let runner2assemblies = projects |> Seq.groupBy (fun x -> x.Repository.Tester)
-    for runner, assemblies in runner2assemblies do
-        let bins = assemblies |> Seq.map (fun x -> x.BinFile config) |> set
-        (Core.TestRunners.TestWithTestRunner runner) bins
+    Core.TestRunners.TestSolution view
 
 let Graph (cmd : CLI.Commands.GraphView) =
     let graph = Graph.load()

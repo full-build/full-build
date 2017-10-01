@@ -4,6 +4,5 @@
     <TargetFramework>net452</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\.full-build\full-build.targets" />
   <Import Project="$(SolutionDir)\.projects\libproject.targets" />
 </Project>

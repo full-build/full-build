@@ -4,7 +4,6 @@
     <TargetFramework>net452</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
-  
   <!-- BEGIN WORKAROUND: see https://github.com/Microsoft/visualfsharp/issues/3303 -->
   <PropertyGroup>
     <IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
@@ -24,7 +23,6 @@
     <FscToolExe>fsharpc</FscToolExe>
   </PropertyGroup>
   <!-- END WORKAROUND -->
-
   <ItemGroup>
     <Content Include="..\..\LICENSE.txt">
       <Link>LICENSE.txt</Link>
