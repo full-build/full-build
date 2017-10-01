@@ -28,7 +28,7 @@ let runFB (args : string) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Graph.load()
     let fbProject = graph.Projects |> Seq.find (fun x -> x.ProjectId = "fullbuild")
-    let bin = fbProject.BinFile "net452" "Debug"
+    let bin = fbProject.BinFile "Debug"
     let fb = wsDir |> FsHelpers.GetFile bin
     let psi = ProcessStartInfo (FileName = fb.FullName, Arguments = args, UseShellExecute = false, WorkingDirectory = wsDir.FullName, LoadUserProfile = true, CreateNoWindow = true, RedirectStandardOutput = true)
     use proc = Process.Start (psi)
@@ -66,7 +66,7 @@ let CheckSourceBuildIsSameAsBinaryBuild () =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let graph = Graph.load()
     let fbProject = graph.Projects |> Seq.find (fun x -> x.ProjectId = "mainproject")
-    let bin = fbProject.BinFile "net452" "Debug"
+    let bin = fbProject.BinFile "Debug"
     let outputBin = wsDir |> FsHelpers.GetFile bin
     let outputFileSrc = outputBin.Directory.EnumerateFiles () |> Seq.map (fun x -> x.Name.ToLower()) |> set
     outputFileSrc |> should equal expectedFiles

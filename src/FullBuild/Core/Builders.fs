@@ -40,19 +40,19 @@ let writeVersionMsbuild version =
     let csFile = Env.GetCsGlobalAssemblyInfoFileName()
     File.WriteAllLines(csFile.FullName, generateVersionCs version)
 
-let buildSkip (viewFile : FileInfo) (platform : string option) (config : string option) (clean : bool) (multithread : bool) (version : string) =
+let buildSkip (viewFile : FileInfo) (config : string option) (clean : bool) (multithread : bool) (version : string) =
     ()
 
 
-let buildMsbuild (viewFile : FileInfo) (platform : string option) (config : string option) (clean : bool) (multithread : bool) (version : string) =
+let buildMsbuild (viewFile : FileInfo) (config : string option) (clean : bool) (multithread : bool) (version : string) =
     let wsDir = Env.GetFolder Env.Folder.Workspace
     let viewName = Path.GetFileNameWithoutExtension(viewFile.Name)
 
-    // restore first
+    writeVersionMsbuild version
+
+     // restore first
     let restoreArgs = sprintf "/nologo /t:Restore /p:SolutionDir=%s /p:SolutionName=%A %A" wsDir.FullName viewName viewFile.Name
     Exec "msbuild" restoreArgs wsDir Map.empty |> IO.CheckResponseCode
-
-    writeVersionMsbuild version
 
     let target = if clean then "Rebuild"
                  else "Build"
@@ -65,11 +65,7 @@ let buildMsbuild (viewFile : FileInfo) (platform : string option) (config : stri
                     | Some conf -> sprintf "/p:Configuration=%s" conf
                     | _ -> ""
 
-    let argPlatform = match platform with
-                      | Some plat -> sprintf "/p:Platform=%s" plat
-                      | _ -> "" 
-
-    let args = sprintf "/nologo %s %s %s %s %A" argTarget argMt argPlatform argConfig viewFile.Name
+    let args = sprintf "/nologo %s %s %s %A" argTarget argMt argConfig viewFile.Name
 
     Exec "msbuild" args wsDir Map.empty |> IO.CheckResponseCode
 
@@ -79,6 +75,6 @@ let chooseBuilder (builderType : BuilderType) msbuildBuilder skipBuilder =
                   | BuilderType.Skip -> skipBuilder
     builder
 
-let BuildWithBuilder (builder : BuilderType) (viewFile : FileInfo) (platform : string option) (config : string option) (clean : bool) (multithread : bool) (version : string) =
-    (chooseBuilder builder buildMsbuild buildSkip) viewFile platform config clean multithread version
+let BuildWithBuilder (builder : BuilderType) (viewFile : FileInfo) (config : string option) (clean : bool) (multithread : bool) (version : string) =
+    (chooseBuilder builder buildMsbuild buildSkip) viewFile config clean multithread version
 

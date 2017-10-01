@@ -6,7 +6,6 @@ projects:
     - file: src/Project.csproj
       out: fullbuild.tests
       tests: true
-      platform: net452
       packages:
           - id: id1
             version: 1.2.3

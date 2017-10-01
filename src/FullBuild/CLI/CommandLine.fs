@@ -53,7 +53,6 @@ type private TokenOption =
     | Status
     | SxS
     | Cycle
-    | Platform
     | Configuration
  
 let private (|TokenOption|_|) (token : string) =
@@ -88,7 +87,6 @@ let private (|TokenOption|_|) (token : string) =
     | "--status" -> Some TokenOption.Status
     | "--sxs" -> Some TokenOption.SxS
     | "--cycle" -> Some TokenOption.Cycle
-    | "--platform" -> Some TokenOption.Platform
     | "--config" -> Some TokenOption.Configuration
     | _ -> None
 
@@ -318,20 +316,17 @@ let rec private commandPush inc (args : string list) =
     | _ -> Command.Error MainCommand.Publish
 
 
-let rec private commandBuild (platform : string option) (configuration : string option) (clean : bool) (multithread : bool) (version : string option) (args : string list) =
+let rec private commandBuild (configuration : string option) (clean : bool) (multithread : bool) (version : string option) (args : string list) =
     match args with
-    | TokenOption TokenOption.Platform :: Param plat :: tail -> tail |> commandBuild (Some plat) configuration clean multithread version
-    | TokenOption TokenOption.Configuration :: Param config :: tail -> tail |> commandBuild platform (Some config) clean multithread version
-    | TokenOption TokenOption.Version :: Param ver :: tail -> tail |> commandBuild platform configuration clean multithread (Some ver)
-    | TokenOption TokenOption.Multithread :: tail -> tail |> commandBuild platform configuration clean true version
+    | TokenOption TokenOption.Configuration :: Param config :: tail -> tail |> commandBuild (Some config) clean multithread version
+    | TokenOption TokenOption.Version :: Param ver :: tail -> tail |> commandBuild configuration clean multithread (Some ver)
+    | TokenOption TokenOption.Multithread :: tail -> tail |> commandBuild configuration clean true version
     | [] -> Command.BuildView { Name = None
-                                Platform = platform 
                                 Configuration = configuration
                                 Clean = clean
                                 Multithread = multithread
                                 Version = version }
     | [ViewId name] -> Command.BuildView { Name = Some name
-                                           Platform = platform 
                                            Configuration = configuration
                                            Clean = clean
                                            Multithread = multithread
@@ -528,8 +523,8 @@ let Parse (args : string list) : Command =
     | Token Token.Graph :: cmdArgs -> cmdArgs |> commandGraph true false
     | Token Token.Publish :: cmdArgs -> cmdArgs |> commandPublish
     | Token Token.Push :: cmdArgs -> cmdArgs |> commandPush false
-    | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild None None false false None
-    | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild None None true false None
+    | Token Token.Build :: cmdArgs -> cmdArgs |> commandBuild None false false None
+    | Token Token.Rebuild :: cmdArgs -> cmdArgs |> commandBuild None true false None
     | Token Token.Checkout :: cmdArgs -> cmdArgs |> commandCheckout
     | Token Token.Branch :: cmdArgs -> cmdArgs |> commandBranch true
     | Token Token.Pull :: cmdArgs -> cmdArgs |> commandPull true true false None

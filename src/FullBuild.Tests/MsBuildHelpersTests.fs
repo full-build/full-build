@@ -35,7 +35,6 @@ let CheckProjectPropertyName () =
                     OutputType = OutputType.Exe
                     RelativeProjectFile = ProjectRelativeFile "cqlplus/cqlplus-net45.csproj"
                     HasTests = false
-                    Platform = "net452"
                     ProjectReferences = [ ProjectId.from "cassandrasharp.interfaces"; ProjectId.from "cassandrasharp" ] |> set
                     PackageReferences = Set.empty
                     Repository = RepositoryId.from "cassandra-sharp" }

@@ -27,7 +27,6 @@ let CheckSaveLoadView () =
                   Modified = false 
                   AppFilter = Some "tagada*" 
                   Tests = false 
-                  Platform = Some "netcore2"
                   Configuration = None }
 
     let res = ViewSerializer.SerializeView view1
