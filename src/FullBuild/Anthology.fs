@@ -58,6 +58,14 @@ type Package =
     { Id : PackageId
       Version : PackageVersion }
 
+type PackageDependencies = 
+    { Framework: Paket.FrameworkIdentifier option
+      Dependencies: PackageId set }
+
+type PackageWithDependencies = 
+    { Package: PackageId
+      Dependencies: PackageDependencies set }
+
 [<RequireQualifiedAccess>]
 type VcsType =
     | Gerrit
@@ -144,7 +152,7 @@ with
     member this.toString = (fun (ProjectType x) -> x |> StringHelpers.toVSGuid) this
     static member from (guid : Guid) = ProjectType guid
 
-type FxInfo = private FxInfo of string option
+type FxInfo = FxInfo of string option
 with
     member this.toString = (fun (FxInfo x) -> match x with
                                               | None -> null

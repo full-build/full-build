@@ -15,6 +15,7 @@
 module Parsers.PackageRelationship
 
 open Anthology
+open Paket
 open FsHelpers
 open System.Linq
 open System.Xml.Linq
@@ -32,13 +33,30 @@ let GetFrameworkDependencies (xnuspec : XDocument) =
 let GetPackageDependencies (xnuspec : XDocument) =
     let pkgsDir = Env.GetFolder Env.Folder.Package
 
-    xnuspec.Descendants()
-        |> Seq.filter (fun x -> x.Name.LocalName = "dependency" && (!> x.Attribute(NsNone + "exclude") : string) <> "Compile")
-        |> Seq.map (fun x -> !> x.Attribute(NsNone + "id") : string)
-        |> Seq.map PackageId.from
-        |> Seq.filter (fun x -> let path = pkgsDir |> FsHelpers.GetSubDirectory (x.toString)
-                                path.Exists)
+    let parseDependency (xelement:XElement) = 
+        if xelement.Name.LocalName = "dependency" && (!> xelement.Attribute(NsNone + "exclude") : string) <> "Compile" then 
+            let packageId = xelement.Attribute(NsNone + "id").Value |> PackageId.from
+            if (pkgsDir |> FsHelpers.GetSubDirectory (packageId.toString) |> fun path -> path.Exists) then
+                Some packageId
+            else 
+                None
+        else
+            None
+
+    let dep = 
+        xnuspec.Elements()
+        |> Seq.choose parseDependency
         |> set
+        |> fun d -> {PackageDependencies.Framework=None; Dependencies=d}
+
+    let depByTarget = 
+        xnuspec.Descendants(NsNone + "group")
+        |> Seq.map(fun x -> x.Attribute(NsNone + "targetFramework").Value |> Paket.FrameworkDetection.Extract, x.Elements() |> Seq.choose parseDependency |> set)
+        |> Seq.choose(fun (framework, dependencies) -> framework |> Option.map(fun framework -> {PackageDependencies.Framework=Some framework; Dependencies=dependencies}))
+        |> List.ofSeq
+        
+    dep :: depByTarget
+    |> set
 
 let rec BuildPackageDependencies (packages : PackageId seq) =
     let pkgsDir = Env.GetFolder Env.Folder.Package
@@ -49,13 +67,13 @@ let rec BuildPackageDependencies (packages : PackageId seq) =
             let nuspecFile = pkgDir |> GetFile (FsHelpers.AddExt NuSpec (package.toString))
             let xnuspec = XDocument.Load (nuspecFile.FullName)
             let dependencies = GetPackageDependencies xnuspec
-            yield (package, dependencies)
-            yield! buildDependencies dependencies
+            let dependenciesProjects = dependencies |> Set.toSeq |> Seq.collect (fun d -> d.Dependencies |> Set.toSeq) |> Seq.distinct
+            yield {PackageWithDependencies.Package = package; Dependencies = dependencies}
+            yield! buildDependencies dependenciesProjects
     }
 
     packages
         |> buildDependencies
-        |> Map
 
 
 let ComputePackagesRoots (package2packages : Map<PackageId, PackageId set>) =

@@ -16,6 +16,7 @@ module SimplifyTests
 
 open FsUnit
 open NUnit.Framework
+open Paket
 open Anthology
 open StringHelpers
 open System.IO
@@ -70,20 +71,27 @@ let CheckSimplifyAnthology () =
                               (PackageId.from "cassandra-sharp-core", Set [AssemblyId.from "CassandraSharp"])
                               (PackageId.from "cassandra-sharp-interfaces", Set [AssemblyId.from "CassandraSharp.Interfaces"]) ]
 
-    let package2packages = Map [ (PackageId.from "log4net", Set.empty)
-                                 (PackageId.from "Moq", Set.empty)
-                                 (PackageId.from "Nunit", Set.empty)
-                                 (PackageId.from "Rx-Core", Set [PackageId.from "Rx-Interfaces"])
-                                 (PackageId.from "Rx-Interfaces", Set.empty)
-                                 (PackageId.from "Rx-Linq", Set [PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"])
-                                 (PackageId.from "Rx-Main", Set [PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"; 
-                                                                 PackageId.from "Rx-Linq"; PackageId.from "Rx-PlatformServices"])
-                                 (PackageId.from "Rx-PlatformServices", Set [PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"])
-                                 (PackageId.from "cassandra-sharp", Set [PackageId.from "cassandra-sharp-core"; PackageId.from "cassandra-sharp-interfaces"])
-                                 (PackageId.from "cassandra-sharp-core", Set [PackageId.from "Rx-Main"])
-                                 (PackageId.from "cassandra-sharp-interfaces", Set.empty) ]
+    let package2packages = [ {PackageWithDependencies.Package = PackageId.from "log4net"; Dependencies = Set.empty }
+                             {PackageWithDependencies.Package = PackageId.from "Moq"; Dependencies = Set.empty }
+                             {PackageWithDependencies.Package = PackageId.from "Nunit"; Dependencies = Set.empty }
+                             {PackageWithDependencies.Package = PackageId.from "Rx-Core"; Dependencies =  Set [ { PackageDependencies.Framework = None; Dependencies = Set[PackageId.from "Rx-Interfaces"] } ] }
+                             {PackageWithDependencies.Package = PackageId.from "Rx-Interfaces"; Dependencies = Set.empty }
+                             {PackageWithDependencies.Package = PackageId.from "Rx-Linq"; Dependencies = Set [ { PackageDependencies.Framework = None; Dependencies = Set[PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"] } ] }
+                             {PackageWithDependencies.Package = PackageId.from "Rx-Main"; Dependencies = Set [ { 
+                                                                                                                PackageDependencies.Framework = None; 
+                                                                                                                Dependencies = Set[ PackageId.from "Rx-Core"; 
+                                                                                                                                    PackageId.from "Rx-Interfaces";
+                                                                                                                                    PackageId.from "Rx-Linq";
+                                                                                                                                    PackageId.from "Rx-PlatformServices";] } 
+                                                                                                             ] 
+                             }
+                             {PackageWithDependencies.Package = PackageId.from "Rx-PlatformServices"; Dependencies = Set [ { PackageDependencies.Framework = None; Dependencies = Set[PackageId.from "Rx-Core"; PackageId.from "Rx-Interfaces"] } ] }
+                             {PackageWithDependencies.Package = PackageId.from "cassandra-sharp"; Dependencies =  Set [ { PackageDependencies.Framework = None; Dependencies = Set[PackageId.from "cassandra-sharp-core";PackageId.from "cassandra-sharp-interfaces"] } ] }
+                             {PackageWithDependencies.Package = PackageId.from "cassandra-sharp-core"; Dependencies =  Set [ { PackageDependencies.Framework = None; Dependencies = Set[PackageId.from "Rx-Main"] } ] }
+                             {PackageWithDependencies.Package = PackageId.from "cassandra-sharp-interfaces"; Dependencies =  Set.empty } ]
 
-    let newAnthology = Core.Simplify.SimplifyAnthologyWithPackages anthology package2files package2packages
+
+    let newAnthology = Core.Simplify.SimplifyAnthologyWithPackages anthology package2files (package2packages |> List.map(fun p -> p.Package, p) |> Map.ofSeq)
     newAnthology |> should equal expectedAnthology
 
 [<Test>]
