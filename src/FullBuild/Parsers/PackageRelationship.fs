@@ -44,7 +44,7 @@ let GetPackageDependencies (xnuspec : XDocument) =
             None
 
     let dep = 
-        xnuspec.Elements()
+        xnuspec.Descendants()
         |> Seq.choose parseDependency
         |> set
         |> fun d -> {PackageDependencies.Framework=None; Dependencies=d}
