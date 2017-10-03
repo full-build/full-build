@@ -11,18 +11,13 @@ function failure
   exit 5
 }
 
-
-mkdir .full-build/bin
-mkdir .full-build/views
-pushd .full-build
-mono ../tools/paket.bootstrapper.exe
-mono ../tools/paket.exe install
-popd
-cp -r bootstrap/bin .full-build/
-cp -r bootstrap/views .full-build/
-cp -r bootstrap/projects .full-build/
-cp -r bootstrap/packages .full-build/
+rm -rf .bin
+rm -rf .views
+rm -rf .projects
+cp -r bootstrap/bin .bin
+cp -r bootstrap/views .views
+cp -r bootstrap/projects .projects
 cp bootstrap/bootstrap.sln .
 
-xbuild /t:Rebuild /p:SolutionDir=`pwd` /p:SolutionName=bootstrap bootstrap.sln
+msbuild /t:Build /p:SolutionDir=`pwd` /p:SolutionName=bootstrap bootstrap.sln
 ./publish.sh
