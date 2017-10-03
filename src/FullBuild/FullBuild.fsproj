@@ -25,8 +25,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments></StartArguments>
-    <StartWorkingDirectory>C:\Development\fb3</StartWorkingDirectory>
+    <StartArguments>convert *</StartArguments>
+    <StartWorkingDirectory>C:\src\full-build\qa\qa-setup\</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>
