@@ -26,3 +26,5 @@ Settings.FSharpLint
 all.userprefs
 *.mdb
 /refbin
+paket-files
+qa/qa-frameworks
