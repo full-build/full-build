@@ -49,8 +49,9 @@ let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
     let xnuspec = XDocument.Load (nuspecFile.FullName)
     let fxDependencies = Parsers.PackageRelationship.GetFrameworkDependencies xnuspec
 
-    let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
-    let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
+    let libDir = pkgDir |> GetSubDirectory "lib"
+    let dlls = libDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
+    let exes = libDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
     let files = Seq.append dlls exes |> Seq.map AssemblyId.from
                                      |> Set.ofSeq
     Set.difference files fxDependencies
