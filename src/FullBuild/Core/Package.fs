@@ -41,27 +41,44 @@ let private removeUnusedPackages (antho : Anthology) =
     let packagesToRemove = packages |> Set.filter (fun x -> (not << Set.contains x) usedPackages)
     Tools.Paket.RemoveDependencies packagesToRemove
 
-let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
+
+let private gatherAndTagPackageAssemblies (package : PackageId) : Map<Paket.TargetProfile, AssemblyId set> =
     let pkgsDir = Env.GetFolder Env.Folder.Package
     let pkgDir = pkgsDir |> GetSubDirectory (package.toString)
+    let libDir = pkgDir |> GetSubDirectory "lib"
+    if libDir.Exists |> not then Map.empty
+    else
+        let foundDirs = libDir.EnumerateDirectories() |> Seq.map (fun x -> x.Name) |> List.ofSeq
+        // for very old nugets we do not have folder per platform
+        let dirs = if foundDirs.Length = 0 then [""]
+                    else foundDirs
+        let path2platforms = Paket.PlatformMatching.getSupportedTargetProfiles dirs
 
-    let nuspecFile = pkgDir |> GetFile (FsHelpers.AddExt NuSpec (package.toString))
-    let xnuspec = XDocument.Load (nuspecFile.FullName)
-    let fxDependencies = Parsers.PackageRelationship.GetFrameworkDependencies xnuspec
+        // scan folders now and associate profile to assemblies
+        let scanFiles dirName =
+            let pathLib = libDir |> FsHelpers.GetSubDirectory dirName
+            let dlls = pathLib.EnumerateFiles("*.dll", SearchOption.AllDirectories)
+            let exes = pathLib.EnumerateFiles("*.exes", SearchOption.AllDirectories)
+            let files = Seq.append dlls exes |> Seq.map AssemblyId.from
+                                             |> Set.ofSeq
+            files  
 
-    let dlls = pkgDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
-    let exes = pkgDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
-    let files = Seq.append dlls exes |> Seq.map AssemblyId.from
-                                     |> Set.ofSeq
-    Set.difference files fxDependencies
+        let profile2assemblies = path2platforms |> Seq.map (fun t -> let files = scanFiles t.Key
+                                                                     seq {
+                                                                         for profile in t.Value do
+                                                                         yield profile, files
+                                                                     })
+                                                |> Seq.collect id
+                                                |> Map
+        profile2assemblies        
 
 
 let Simplify (antho : Anthology) =
     let packages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
                                   |> Set.unionMany
     let package2packages = Parsers.PackageRelationship.BuildPackageDependencies packages
-    let package2files = package2packages |> Seq.map (fun kvp -> (kvp.Key, gatherAllAssemblies kvp.Key))
-                                         |> Map
-    let newAntho = SimplifyAnthologyWithPackages antho package2files package2packages
+    let profile2assemblies = package2packages |> Seq.map (fun kvp -> (kvp.Key, gatherAndTagPackageAssemblies kvp.Key))
+                                              |> Map
+    let newAntho = SimplifyAnthologyWithPackages antho profile2assemblies package2packages
     removeUnusedPackages newAntho
     newAntho
