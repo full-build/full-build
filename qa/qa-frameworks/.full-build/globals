@@ -1,0 +1,15 @@
+minversion: 999.0.0.0
+binaries: c:\src\full-build\qa\local\bin
+sxs: false
+nugets:
+  - nuget: https://www.nuget.org/api/v2/
+mainrepository:
+  uri: file:///c:/src/full-build/qa/local/frameworks
+  vcs: git
+repositories:
+  - repo: framework
+    branch: null
+    build: msbuild
+    uri: file:///c:/src/full-build/qa/local/framework
+    vcs: git
+    test: nunit

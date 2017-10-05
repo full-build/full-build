@@ -1,0 +1,21 @@
+apps: []
+projects:
+  - guid: 27204C53-EDE8-45E2-873C-BC707B8BB90D
+    file: framework\framework.csproj
+    out: framework.exe
+    fx:
+      version: v4.6.1
+      profile: null
+      identifier: null
+    tests: false
+    assemblies:
+      - assembly: system
+      - assembly: system.core
+      - assembly: system.data
+      - assembly: system.data.datasetextensions
+      - assembly: system.xml
+      - assembly: system.xml.linq
+    packages:
+      - package: csvhelper
+      - package: system.net.http
+    projects: []
