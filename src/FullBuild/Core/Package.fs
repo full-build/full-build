@@ -50,11 +50,13 @@ let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
     let fxDependencies = Parsers.PackageRelationship.GetFrameworkDependencies xnuspec
 
     let libDir = pkgDir |> GetSubDirectory "lib"
-    let dlls = libDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
-    let exes = libDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
-    let files = Seq.append dlls exes |> Seq.map AssemblyId.from
-                                     |> Set.ofSeq
-    Set.difference files fxDependencies
+    if libDir.Exists |> not then Set.empty
+    else
+        let dlls = libDir.EnumerateFiles("*.dll", SearchOption.AllDirectories)
+        let exes = libDir.EnumerateFiles("*.exes", SearchOption.AllDirectories)
+        let files = Seq.append dlls exes |> Seq.map AssemblyId.from
+                                         |> Set.ofSeq
+        Set.difference files fxDependencies
 
 
 let Simplify (antho : Anthology) =
