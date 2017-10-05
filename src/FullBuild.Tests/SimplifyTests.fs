@@ -58,17 +58,21 @@ let CheckSimplifyAnthology () =
     let anthology = loadAnthology "indexed-anthology.yaml"
     let expectedAnthology = loadAnthology "simplified-anthology.yaml"
 
-    let package2files = Map [ (PackageId.from "log4net", Set [AssemblyId.from "log4net"])
-                              (PackageId.from "Moq", Set [AssemblyId.from "moq"; AssemblyId.from "Moq.Silverlight" ])
-                              (PackageId.from "Nunit", Set [AssemblyId.from "nunit.framework"])
-                              (PackageId.from "Rx-Core", Set [AssemblyId.from "System.Reactive.Core"])
-                              (PackageId.from "Rx-Interfaces", Set [AssemblyId.from "System.Reactive.Interfaces"])
-                              (PackageId.from "Rx-Linq", Set [AssemblyId.from "System.Reactive.Linq"])
-                              (PackageId.from "Rx-Main", Set.empty)
-                              (PackageId.from "Rx-PlatformServices", Set [AssemblyId.from "System.Reactive.PlatformServices"])
-                              (PackageId.from "cassandra-sharp", Set.empty)
-                              (PackageId.from "cassandra-sharp-core", Set [AssemblyId.from "CassandraSharp"])
-                              (PackageId.from "cassandra-sharp-interfaces", Set [AssemblyId.from "CassandraSharp.Interfaces"]) ]
+    let wrap s =
+        let profile = Paket.TargetProfile.SinglePlatform (Paket.FrameworkIdentifier.XamarinMac)
+        Map.empty |> Map.add profile s
+
+    let package2files = Map [ (PackageId.from "log4net", Set [AssemblyId.from "log4net"] |> wrap)
+                              (PackageId.from "Moq", Set [AssemblyId.from "moq"; AssemblyId.from "Moq.Silverlight" ] |> wrap)
+                              (PackageId.from "Nunit", Set [AssemblyId.from "nunit.framework"] |> wrap)
+                              (PackageId.from "Rx-Core", Set [AssemblyId.from "System.Reactive.Core"] |> wrap)
+                              (PackageId.from "Rx-Interfaces", Set [AssemblyId.from "System.Reactive.Interfaces"] |> wrap)
+                              (PackageId.from "Rx-Linq", Set [AssemblyId.from "System.Reactive.Linq"] |> wrap)
+                              (PackageId.from "Rx-Main", Set.empty |> wrap)
+                              (PackageId.from "Rx-PlatformServices", Set [AssemblyId.from "System.Reactive.PlatformServices"] |> wrap)
+                              (PackageId.from "cassandra-sharp", Set.empty |> wrap)
+                              (PackageId.from "cassandra-sharp-core", Set [AssemblyId.from "CassandraSharp"] |> wrap)
+                              (PackageId.from "cassandra-sharp-interfaces", Set [AssemblyId.from "CassandraSharp.Interfaces"] |> wrap) ]
 
     let package2packages = Map [ (PackageId.from "log4net", Set.empty)
                                  (PackageId.from "Moq", Set.empty)

@@ -41,6 +41,7 @@ let RemoveAssembliesFromPackagesOrProjects (package2files : Map<PackageId, Assem
 
 
 let TransformSingleAssemblyToProjectOrPackage (package2files : Map<PackageId, AssemblyId set>) (projects : Project set) : Project set =
+    // match packages with single assembly
     let file2package = package2files |> Map.filter (fun _ nugetFiles -> nugetFiles |> Set.count = 1)
                                      |> Map.toSeq
                                      |> Seq.map (fun (id, nugetFiles) -> (nugetFiles |> Seq.head, id))
@@ -160,8 +161,11 @@ let SimplifyAnthologyWithoutPackage (antho : Anthology) =
                      with Projects = newProjects }
     newAntho
 
-let SimplifyAnthologyWithPackages (antho : Anthology) (package2files : Map<PackageId, AssemblyId set>) (package2packages : Map<PackageId, PackageId set>) =
-    let newProjects = antho.Projects |> TransformSingleAssemblyToProjectOrPackage  package2files
+let SimplifyAnthologyWithPackages (antho : Anthology) (profile2files : Map<PackageId, Map<Paket.TargetProfile, AssemblyId set>>) (package2packages : Map<PackageId, PackageId set>) =
+    // merge all assemblies from a packages
+    let package2files = profile2files |> Map.map (fun k v -> v |> Map.fold (fun s k v -> s + v) Set.empty)
+
+    let newProjects = antho.Projects |> TransformSingleAssemblyToProjectOrPackage package2files
                                      |> TransformPackageToProject
                                      |> TransformPackagesToProjectsAndPackages package2packages package2files
                                      |> RemoveAssembliesFromPackagesOrProjects package2files
