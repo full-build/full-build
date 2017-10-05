@@ -25,8 +25,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\fullbuild.xml</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments></StartArguments>
-    <StartWorkingDirectory></StartWorkingDirectory>
+    <StartArguments>convert *</StartArguments>
+    <StartWorkingDirectory>C:\src\full-build\qa\qa-setup\</StartWorkingDirectory>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <NoWarn>
@@ -101,6 +101,8 @@
     <Compile Include="Exec.fs" />
     <Compile Include="ConsoleHelpers.fs" />
     <Compile Include="FsHelpers.fs" />
+    <Compile Include="FrameworkHandling.fs" />
+    <Compile Include="FrameworkDetection.fs" />
     <Compile Include="Anthology.fs" />
     <Compile Include="Env.fs" />
     <Compile Include="GlobalsSerializer.fs" />
@@ -128,7 +130,6 @@
     <Compile Include="Parsers\PackageRelationship.fs" />
     <Compile Include="Generators\Solution.fs" />
     <Compile Include="Generators\Dgml.fs" />
-    <Compile Include="Generators\FrameworkHandling.fs" />
     <Compile Include="Generators\PlatformMatching.fs" />
     <Compile Include="Generators\Package.fs" />
     <Compile Include="Generators\MSBuild.fs" />

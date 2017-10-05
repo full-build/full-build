@@ -14,6 +14,7 @@
 
 module Core.Simplify
 open Anthology
+open Paket
 open Collections
 
 let (|MatchProject|_|) (projects : Project set) (assName : AssemblyId) =
@@ -26,17 +27,38 @@ let (|MatchPackage|_|) (file2package : Map<AssemblyId, PackageId>) (assName : As
     let replacementPackage = file2package.TryFind assName
     replacementPackage
 
-let RemoveAssembliesFromPackagesOrProjects (package2files : Map<PackageId, AssemblyId set>) (projects : Project set) : Project set =
+let RemoveAssembliesFromPackagesOrProjects (package2packages : Map<PackageId, PackageWithDependencies>) (package2files : Map<PackageId, AssemblyId set>) (projects : Project set) : Project set =
     let projectOutputs = projects |> Set.map (fun x -> x.Output)
-    let allAssembliesFromPackages = package2files |> Seq.map (fun x -> x.Value)
-                                                  |> Set.unionMany
-    let assembliesToRemove = Set.union allAssembliesFromPackages projectOutputs
 
-    let removeAssembliesFromPackages (assembliesToRemove : AssemblyId set) (project : Project) =
+    let getAllUsedPackages (project : Project) = 
+        let rec getPackageDependencies targetFramework package = seq { 
+            let dependencyProjects = 
+                package2packages.[package].Dependencies 
+                |> Set.filter (fun d -> d.Framework = None || d.Framework = targetFramework) 
+                |> Seq.collect(fun d -> d.Dependencies)
+            yield! dependencyProjects
+            yield! dependencyProjects |> Seq.collect (getPackageDependencies targetFramework)
+        }
+        let (FxInfo version) = project.FxVersion
+        let target = FrameworkDetection.FromFx project.FxProfile version project.FxIdentifier
+        let dependencyPackages =
+            project.PackageReferences 
+            |> Seq.collect (getPackageDependencies target)
+            |> Seq.distinct
+            |> set
+        project.PackageReferences |> Set.union dependencyPackages
+
+    let removeAssembliesFromPackages (project : Project) =
+        let allAssembliesFromPackages = 
+            project 
+            |> getAllUsedPackages 
+            |> Set.map(fun p -> package2files.[p]) 
+            |> Set.unionMany
+        let assembliesToRemove = Set.union allAssembliesFromPackages projectOutputs    
         { project
           with AssemblyReferences = Set.difference project.AssemblyReferences assembliesToRemove }
 
-    let newProjects = projects |> Set.map (removeAssembliesFromPackages assembliesToRemove)
+    let newProjects = projects |> Set.map removeAssembliesFromPackages
     newProjects
 
 
@@ -160,11 +182,12 @@ let SimplifyAnthologyWithoutPackage (antho : Anthology) =
                      with Projects = newProjects }
     newAntho
 
-let SimplifyAnthologyWithPackages (antho : Anthology) (package2files : Map<PackageId, AssemblyId set>) (package2packages : Map<PackageId, PackageId set>) =
+let SimplifyAnthologyWithPackages (antho : Anthology) (package2files : Map<PackageId, AssemblyId set>) (package2packages : Map<PackageId, PackageWithDependencies>) =
+    let package2packagesIgnoreFramework = package2packages |> Map.map (fun projectId dependencies -> dependencies.Dependencies |> Seq.collect(fun d-> d.Dependencies) |> Set.ofSeq)
     let newProjects = antho.Projects |> TransformSingleAssemblyToProjectOrPackage  package2files
                                      |> TransformPackageToProject
-                                     |> TransformPackagesToProjectsAndPackages package2packages package2files
-                                     |> RemoveAssembliesFromPackagesOrProjects package2files
+                                     |> TransformPackagesToProjectsAndPackages package2packagesIgnoreFramework package2files
+                                     |> RemoveAssembliesFromPackagesOrProjects package2packages package2files
 
     let newAntho = { antho
                      with Projects = newProjects }

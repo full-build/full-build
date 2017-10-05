@@ -60,9 +60,12 @@ let private gatherAllAssemblies (package : PackageId) : AssemblyId set =
 let Simplify (antho : Anthology) =
     let packages = antho.Projects |> Set.map (fun x -> x.PackageReferences)
                                   |> Set.unionMany
-    let package2packages = Parsers.PackageRelationship.BuildPackageDependencies packages
-    let package2files = package2packages |> Seq.map (fun kvp -> (kvp.Key, gatherAllAssemblies kvp.Key))
+    let packages = 
+        Parsers.PackageRelationship.BuildPackageDependencies packages 
+        |> Seq.map(fun p -> p.Package , p) 
+        |> Map.ofSeq
+    let package2files = packages |> Seq.map (fun kvp -> (kvp.Key, gatherAllAssemblies kvp.Key))
                                          |> Map
-    let newAntho = SimplifyAnthologyWithPackages antho package2files package2packages
+    let newAntho = SimplifyAnthologyWithPackages antho package2files packages
     removeUnusedPackages newAntho
     newAntho
