@@ -41,6 +41,7 @@ let MSBUILD_NUGET_FOLDER = sprintf @"..\%s\" PACKAGE_FOLDER
 let MSBUILD_FULLBUILD_TARGETS = sprintf @"%s\%s\%s" MSBUILD_SOLUTION_DIR MASTER_REPO FULLBUILD_TARGETS
 let PUBLISH_BIN_FOLDER = BIN_FOLDER
 let PUBLISH_APPS_FOLDER = MSBUILD_APP_OUTPUT
+let LOGS_FOLDER = ".logs"
 
 let IsWorkspaceFolder(wsDir : DirectoryInfo) =
     let subDir = wsDir |> GetSubDirectory MASTER_REPO
@@ -73,6 +74,7 @@ type Folder =
        | Package
        | Bin
        | Installation
+       | Logs
 
 
 let rec GetFolder folder =
@@ -86,6 +88,7 @@ let rec GetFolder folder =
     | Folder.Package -> GetFolder Folder.Config |> CreateSubDirectory PACKAGE_FOLDER
     | Folder.Bin -> GetFolder Folder.Config |> CreateSubDirectory BIN_FOLDER
     | Folder.Installation -> getInstallationFolder()
+    | Folder.Logs -> GetFolder Folder.Workspace |> CreateSubDirectory LOGS_FOLDER
 
 let GetFsGlobalAssemblyInfoFileName() =
     GetFolder Folder.Bin |> GetFile FS_GLOBAL_ASSEMBLYINFO_FILENAME
