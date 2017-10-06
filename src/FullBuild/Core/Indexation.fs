@@ -187,6 +187,18 @@ let CheckAnthologyProjectsInRepository (previousAntho : Anthology) (repos : Grap
     let untouchedProjects = antho.Projects |> Set.filter (fun x -> repos |> Set.exists (fun y -> y.Name = x.Repository.toString) |> not)
 
     if untouchedPreviousProjects <> untouchedProjects then
+        let previousMissing = { Anthology.Applications = Set.empty
+                                Projects = untouchedPreviousProjects }
+        let currentMissing = { Anthology.Applications = Set.empty
+                               Projects = untouchedProjects }
+
+        let wsDir = Env.GetFolder Env.Folder.Workspace
+        let previousMissingFile = wsDir |> GetFile ".anthology-missing-previous"
+        AnthologySerializer.Save previousMissingFile previousMissing
+
+        let currentMissingFile = wsDir |> GetFile ".anthology-missing-current"
+        AnthologySerializer.Save currentMissingFile currentMissing
+
         printfn "Missing repositories for indexation"
         let prevGroups = untouchedPreviousProjects |> Seq.groupBy (fun x -> x.Repository)
                                                    |> Seq.map (fun (repo, prjs) -> repo, prjs |> set)
