@@ -90,11 +90,9 @@
     <Compile Include="Generators\History.fs" />
     <Compile Include="Core\Builders.fs" />
     <Compile Include="Core\TestRunners.fs" />
-    <Compile Include="Core\Bindings.fs" />
     <Compile Include="Core\Publishers.fs" />
     <Compile Include="Core\BuildArtifacts.fs" />
     <Compile Include="Core\Conversion.fs" />
-    <Compile Include="Core\Package.fs" />
     <Compile Include="Core\Indexation.fs" />
     <Compile Include="Core\Doctor.fs" />
     <Compile Include="Commands\View.fs" />
