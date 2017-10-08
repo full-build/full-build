@@ -21,6 +21,7 @@ open FsHelpers
 
 
 let TestSolution (view : Views.View) =
+    // http://codito.in/how-dotnet-test-works/
     let wsDir = GetFolder Env.Folder.Workspace
     let viewFile = wsDir |> GetFile (view.Name |> AddExt Extension.Solution)
     let args = sprintf "test %A --configuration %s --no-build --no-restore /p:SolutionDir=%A /p:SolutionName=%A" 
