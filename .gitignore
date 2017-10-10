@@ -22,7 +22,7 @@
 *.cache
 *.sln
 *.ncrunchsolution
-*.dgml
+/*.dgml
 bin
 obj
 .vs

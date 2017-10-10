@@ -1,0 +1,45 @@
+﻿<DirectedGraph Layout="Sugiyama" GraphDirection="TopToBottom" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+    <Node Id="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" Label="g" Category="TestProject" FxVersion="v4.5" FxProfile="Profile3" FxIdentifier="WindowsPhone" Guid="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" IsTest="true" Output="g" OutputType="dll" />
+    <Node Id="D7B81C18-45DF-44DC-853D-8CAB07E1AD97" Label="e" Category="ProjectImport" />
+    <Node Id="78C2E0D4-B410-4702-AF93-71DB7DB228D0" Label="f" Category="ProjectImport" />
+    <Node Id="src" Label="src" Group="Expanded" />
+  </Nodes>
+  <Links>
+    <Link Source="src" Target="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" Category="Contains" />
+    <Link Source="src" Target="D7B81C18-45DF-44DC-853D-8CAB07E1AD97" Category="Contains" />
+    <Link Source="src" Target="78C2E0D4-B410-4702-AF93-71DB7DB228D0" Category="Contains" />
+    <Link Source="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" Target="D7B81C18-45DF-44DC-853D-8CAB07E1AD97" Category="ProjectRef" />
+    <Link Source="EB5C2F2B-D117-47B0-8067-305B4BAE9AA2" Target="78C2E0D4-B410-4702-AF93-71DB7DB228D0" Category="ProjectRef" />
+  </Links>
+  <Categories>
+    <Category Id="Project" Background="Green" />
+    <Category Id="TestProject" Background="Purple" />
+    <Category Id="ProjectImport" Background="Navy" />
+    <Category Id="Package" Background="Orange" />
+    <Category Id="Assembly" Background="Red" />
+    <Category Id="ProjectRef" Background="Green" />
+    <Category Id="PackageRef" Background="Orange" />
+    <Category Id="AssemblyRef" Background="Red" />
+    <Category Id="src" Label="src" IsContainment="True" CanBeDataDriven="False" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Contained By" OutgoingActionLabel="Contains" />
+  </Categories>
+  <Properties>
+    <Property Id="FxVersion" Label="Target Framework Version" DataType="System.String" />
+    <Property Id="FxProfile" Label="Target Framework Profile" DataType="System.String" />
+    <Property Id="FxIdentifier" Label="Target Framework Identifier" DataType="System.String" />
+    <Property Id="Guid" Label="Project Guid" DataType="System.Guid" />
+    <Property Id="IsTest" Label="Test Project" DataType="System.Boolean" />
+    <Property Id="Output" Label="Project Output" DataType="System.String" />
+    <Property Id="OutputType" Label="Project Output Type" DataType="System.String" />
+  </Properties>
+  <Styles>
+    <Style TargetType="Node" GroupLabel="Test Project" ValueLabel="True">
+      <Condition Expression="IsTest = 'True'" />
+      <Setter Property="Icon" Value="CodeSchema_Event" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Test Project" ValueLabel="False">
+      <Condition Expression="IsTest = 'False'" />
+      <Setter Property="Icon" Value="CodeSchema_Method" />
+    </Style>
+  </Styles>
+</DirectedGraph>
