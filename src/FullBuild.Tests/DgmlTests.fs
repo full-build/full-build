@@ -47,7 +47,6 @@ let CheckGenerateDgmlNoDependency () =
         res.ToString() |> printfn "%s" 
         expectedDgml.ToString() |> printfn "%s" 
         
-
         res.ToString() |> should equal (expectedDgml.ToString())
     finally
         System.Environment.CurrentDirectory <- currFolder

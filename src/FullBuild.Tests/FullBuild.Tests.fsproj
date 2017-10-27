@@ -45,7 +45,7 @@
     <Compile Include="ViewTests.fs" />
     <Compile Include="SimplifyTests.fs" />
     <Compile Include="IndexationTests.fs" />
-    <Compile Include="Integration.fs" />
+    <Compile Include="IntegrationTests.fs" />
     <None Include="app.config" />
     <None Include="TestCases\FSharpProjectSample1.fsproj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
