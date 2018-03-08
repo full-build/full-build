@@ -34,7 +34,7 @@ let CheckCreateClosure () =
     let links = [ (1, [2]); (2, [3]); (3, []) ] |> Map
     let seeds = [1; 3] |> Set
     let nullIterUp _ = Set.empty
-    let closure = Algorithm.Closure seeds getName (iterDown links) nullIterUp
+    let closure = Algorithm.Closure seeds (iterDown links) nullIterUp
     closure |> should equal ([1; 2; 3] |> Set)
 
 [<Test>]
@@ -46,7 +46,7 @@ let CheckCreateClosureHole () =
 
     let links = [ (1, [2]); (2, [3]); (3, []); (4, []) ] |> Map
     let seeds = [1; 3] |> Set
-    let closure = Algorithm.Closure seeds getName (iterDown links) (iterUp links)
+    let closure = Algorithm.Closure seeds (iterDown links) (iterUp links)
     closure |> should equal ([1; 2; 3] |> Set)
 
 [<Test>]
