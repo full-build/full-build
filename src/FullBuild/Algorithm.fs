@@ -9,7 +9,7 @@ let private computeClosure<'T when 'T : comparison> (checkCycle : bool) (seeds :
     and explore (node : 'T) (next : 'T -> 'T set) (path : 'T list) (boundaries : 'T set) =
         let currPath = node :: path
 
-        // detect cycle first - eventually break there
+        // detect cycle first - and break there if any
         let hasCycle = path |> List.contains node
         if hasCycle then 
             if checkCycle then currPath |> Seq.rev
