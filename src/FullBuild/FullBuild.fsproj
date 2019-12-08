@@ -89,6 +89,5 @@
   <ItemGroup>
     <PackageReference Include="FSharp.Configuration" Version="2.0.0-alpha2" />
     <PackageReference Include="FSharp.Data" Version="3.3.2" />
-    <!-- <PackageReference Update="FSharp.Core" Version="4.2.3" /> -->
   </ItemGroup>
 </Project>

@@ -19,5 +19,6 @@ cp -r bootstrap/views .views
 cp -r bootstrap/projects .projects
 cp bootstrap/bootstrap.sln .
 
-msbuild /t:Build /p:SolutionDir=`pwd` /p:SolutionName=bootstrap bootstrap.sln
-./publish.sh
+# msbuild /t:Build /p:SolutionDir=`pwd` /p:SolutionName=bootstrap bootstrap.sln
+dotnet build --force bootstrap.sln
+dotnet publish -o `pwd`/apps/refbin src/FullBuild || failure

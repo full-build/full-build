@@ -5,6 +5,5 @@ function failure
   exit 5
 }
 
-mono src/fullbuild/bin/fullbuild.exe publish "*" || failure
-cp -r apps/full-build/ ./refbin
+dotnet publish -o `pwd`/apps/refbin src/FullBuild || failure
 
